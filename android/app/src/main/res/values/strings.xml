@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rowtine</string>
+    <string name="title_activity_main">Rowtine</string>
+    <string name="package_name">com.rowtine.app</string>
+    <string name="custom_url_scheme">com.rowtine.app</string>
+</resources>

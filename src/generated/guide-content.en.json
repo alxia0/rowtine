@@ -1,0 +1,4492 @@
+{
+  "sections": [
+    {
+      "id": "section-0",
+      "title": [
+        {
+          "text": "The spirit of {app}",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "00-bienvenue",
+          "alt": "Welcome to {app}, and under it Your knitting and crochet projects over time: English, Knitting, System, Imperial (yd, oz) and USD already picked, with Ready? Start knitting! pinned to the bottom",
+          "caption": [
+            {
+              "text": "The very first launch: first name, craft, language and theme.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "{app} helps you keep all your knitting and crochet projects in one place: your yarn, your patterns adjusted to your size, and your progress. It's ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "free, open-source and works offline",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": your data stays on your device, not on a server. Nothing is ever lost by mistake: everything you delete ends up in a trash bin.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-1",
+      "title": [
+        {
+          "text": "1. Home — your dashboard",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "01-accueil",
+          "alt": "{app}'s home screen: \"Hello Camille!\", the Resume tile holding the Winter Beanie project at 0 %, then the dashboard (1 in progress, this week's time, the latest session dated today, the money spent) and the Counter, Calculator and Needles tools",
+          "caption": [
+            {
+              "text": "Home: the \"Resume\" tile jumps back to the last piece you worked on, the dashboard sums up the essentials, recent sessions included, and the three tools are within thumb's reach.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Opening the app, you'll find:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Your last project",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", with a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Resume",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button to pick up exactly where you left off. It really is the last project you ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "actually knitted or crocheted on",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (your last session), not just the last one you edited, and it shows you the current row.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "summary",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": how many projects you have in progress, the time you've spent knitting or crocheting this week (with details in ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Statistics",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), and your ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "money spent",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the total of everything you've paid for yarn since you started using the app, in the currency you chose. This figure never goes down by itself: using up a skein or finishing a project doesn't lower it (only a new purchase raises it); it can only go down if you delete or correct a purchase line yourself in the \"Purchases and gifts\" block of a yarn's page (point 5). (If you've used more than one currency, each keeps its own total: the app never mixes them, since it has no exchange rate to rely on.) Tapping this figure opens the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Expenses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen, described in point 5. This tile doesn't appear until you've recorded at least one purchase (for example on a brand-new install); the screen stays reachable from the menu at any time.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "This figure is different from your ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "stash value",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", shown in the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Yarn stash",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen (point 5): that one tracks what's currently on your shelves and drops when you use a skein. The two figures live side by side on purpose: one tells you what you've spent, the other what you have left.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Recent sessions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": as soon as you've knitted or crocheted at least once, a tile lists your two most recent sessions: the project's name, the day (\"Yesterday\", \"3 days ago\"…) and the duration. Tapping it opens the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sessions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen (point 2), which brings together your whole history.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "All your projects, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "grouped by status",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (in progress, to do, on hold, finished, abandoned), with a button to show them all or collapse the list.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "On a project card, a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "vegan icon",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " marks the projects whose yarns are all vegan (it stays shown on finished projects). It only appears if the project has at least one yarn and they all carry the Vegan label.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "On a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Finished",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " project, the card shows its ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "end date",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " right after the craft and size (« Knitting · M · Finished 07/15/2026 ») as soon as a date has been entered. It fills in on its own when you mark the project Finished (see point 2), and never appears on an Abandoned project.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Quick access to the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (stitch calculator, free counter, needle/hook helper) and the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "+ Create a project",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Finally, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "the menu at the top right",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " takes you at any time to your yarn stash, your pattern library, the statistics, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "your sessions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the expenses, this guide, the settings and the About screen. It is on every screen: wherever you are in the app, you can head somewhere else without going back to the home screen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-2",
+      "title": [
+        {
+          "text": "2. Your projects — the heart of the app",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "02-fiche-projet",
+          "alt": "The Winter Beanie project, marked To do, open on its Sections tab: 0 % and 0 / 12 at the top, the full-width Follow the pattern button, then Ribbed brim, Body and cable, Crown decreases and Finishing, every one of them still at 0 %; the timer pill floats at the bottom, at rest",
+          "caption": [
+            {
+              "text": "A project's page: overall progress, the \"Follow the pattern\" button, then one tile per section with its own progress and its \"done\" checkbox. The timer floats at the bottom of every tab.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Create, edit, delete",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Creating a project takes a few seconds: name, craft (knitting or crochet), linked pattern (or \"Free-form pattern\" if you're not using one). Choose an existing pattern and the app ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "pre-fills",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " sizes, needles or hook, gauge and type for you: you just need to adjust from there. A deleted project is ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "never lost right away",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": you can still undo it immediately after, or restore it later from the trash (Settings).",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "You can also note the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "pattern's price",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " if you bought it, or tap ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Free",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " if you downloaded it without paying. This price belongs to the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "pattern",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", not the project: if you knit the same design three times, it only counts once in your expenses. Leaving the field empty simply means not declaring anything. If your project uses the \"Free-form pattern\", this field doesn't even show up: it's shared by all your patternless projects, so it can never have a price of its own.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02b-projet-prix-patron",
+          "alt": "The New project form on Winter Beanie: under the Cable Beanie pattern, Pattern price ($) reads 12 next to the Free button, Purchase date holds 12/08/2026, and Status sits on To do",
+          "caption": [
+            {
+              "text": "Below the pattern choice: its price, a \"Free\" button and the purchase date, pre-filled to today.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "The project page, in tabs",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Sections",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the stages of your piece (front, back, sleeve…), each with a status badge (to do / started / in progress / finished) and, when the pattern has a chart, a preview of the matching diagram.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Details",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": all the project's information (craft, sizes, needles or hook, gauge, start/end dates, your star rating and a personal note). The end date fills itself in as soon as you set the project to Finished; and if you'd rather type it yourself, entering an end date finishes the project for you. The two always agree, neither ever overwrites the other. You also see the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "project cost",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the price of the yarns you reserved for it or already knitted, and in brackets the pattern price, which you only pay once, even if you knit it three times. If a yarn has no price recorded, the app says so instead of pretending it was free.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Gallery",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": your project photos, plus the pattern's original photos below them. You choose which one to use as the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cover photo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (by default, the pattern's first photo). Tap a photo to open it full screen: you can then zoom (pinch with two fingers or double-tap) to study a stitch detail, pan around the zoomed image, then close it with the × button.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Sessions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the history of your knitting/crochet sessions, with the length of each one, and the option to add a session manually (for time you spent without the app open). A session in progress shows up there live, too.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Working live — a session",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Anywhere in the project, a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "timer",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " floats at the bottom of the screen: the same pill on the project sheet, whichever tab you're on, and in the reader. A chevron on the pill opens a small menu whose \"Hide timer\" entry tucks it away; the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Actions",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " menu (vertical three-dot icon) on the project sheet or the \"Timer\" checkbox in the edit form brings it back.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "One timer per project, and it ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "never starts on its own",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": you tap it to start it, and tap it again to pause for an interruption (the button then shows ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Resume",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " with the time already counted).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "No ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stop",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button: pausing is the only gesture along the way. The timer follows everything you do inside the project (sheet, reader, editing, correcting), and its time is written down as you go: every pause (the button, a trip into correcting, leaving the project) adds what has elapsed since the last write. Leaving the project or hiding the timer closes the session, with a \"Time saved\" note showing the total.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Once started, it survives everything: screen off, another app opened, device restarted. It always picks the thread back up for you.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "In the reader, you ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "check off rows",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " one by one, with the instructions shown (up to 8 lines visible, automatically resuming right where you left off).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Several ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "counters",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " per project (stitches, rows, repeats…), each with a + and − button and a way to correct a mistaken tap.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The session lives in the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sessions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " tab of the project sheet: its line appears as soon as the timer starts, its time ticking along, frozen under a \"paused\" badge during an interruption. Resuming within two hours of the last write picks the same line back up, where time keeps adding up; any later, a new session begins.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "All your sessions, in one place",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "A project sheet's Sessions tab tells the story of that project, and that project only. To go back over your whole history, every project together, the app's menu opens the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Sessions",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " screen, between Statistics and Expenses. Each session shows up there, from the most recent to the oldest: the project's name, then the date and the duration. Tapping a line opens the page of the project it belongs to.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This screen is for viewing only: it's on the project sheet, in its Sessions tab, that a session gets corrected or erased. No filters, no grouping: it's a first version, deliberately simple.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "title": [
+        {
+          "text": "3. The pattern that adapts to you — the interactive reader",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "03a-lecteur-haut",
+          "alt": "The Cable Beanie pattern opened inside the Winter Beanie project: \"Back to my step\", then the reader's contents (one dot per section), \"1. Choose your size\" offering S 50-52, M 54-56 already picked and L 58-60, and the timer at the bottom",
+          "caption": [
+            {
+              "text": "Top of the reader: the contents of the sections, then the size choice, made once for the whole pattern, and the cheat sheet (materials, size table, techniques, abbreviations) within reach.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03b-lecteur-diagramme",
+          "alt": "The Chart row counter sits at 1 / 24, above the button that adds a repeat counter, the st. 8, st. 1 (start) and row 24 (end) markers, and the grid of dots and cable crossings",
+          "caption": [
+            {
+              "text": "Further down: you follow the chart row by row, with its own \"Chart row\" counter, its reading direction, and the timer at the bottom of the screen.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This is {app}'s flagship feature. Once a pattern has been put into \"guided reading\" format (the 3 sample patterns already are, as is any imported and checked pattern), it gives you:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "The size picker",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": pick your size once, and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "every number in the pattern filters itself automatically",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " for you (stitches, rows, lengths). Every line shows the figures for your size, with no \"104 (108) 112…\" to decode.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Step-by-step tracking",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": check off each step, with an overall and per-section progress bar, and built-in repeat counters (\"− 3/12 +\") that disappear on their own if they don't apply to your chosen size.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The interactive chart",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the pattern's diagram (lifted straight from the original PDF) with a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "band that follows your current row",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", rows already done shown greyed out, and a \"Row X of 52\" counter. Reachable directly on the page or through a floating button, with its state shared across every section using the same chart.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The cheat sheet",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the pattern's abbreviations pop up as a tooltip as soon as you tap them, without leaving your current row; a full panel also groups the techniques (with video tutorials), materials and gauge, the size table, the list of abbreviations, and the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "tips and tricks",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " given by the pattern.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The contents",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a row of dots, one per section, stays visible at the top of the reader's flow. Tapping one takes you straight to that section, and the dot of your active section marks itself: you always know where you are. A single-section pattern doesn't show it: there would be nothing to summarise.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "You can read a pattern (previewed from the library) ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "or",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " follow your real progress from a project. Both paths exist, and your progress is always saved.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "The full-screen chart, and how to align it well",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This is the most technical operation in the app, so here's the detail.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Tap a chart (or the \"expand\" button next to it) and it opens full screen: you can then zoom (pinch with two fingers, double-tap, or +/− buttons) and pan around to read every stitch, with the same row-tracking buttons as on the page.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The problem alignment solves: the original PDF often has margins (text, white space) around the chart's grid. Without a setting, the app doesn't know where the grid starts and ends on the image, and the band showing you \"here's where you are\" could land in the wrong spot.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03c-diagramme-calage",
+          "alt": "The full-screen view where you line the chart up: the top bar reads Chart · 8 sts × 24 rows beside the align, zoom and close icons, two lines carry the labels Top of the grid and Bottom of the grid a few rows apart, and Reset, Cancel and Save sit at the bottom",
+          "caption": [
+            {
+              "text": "Alignment mode: the two arrow handles you drag onto the edges of the grid, the instruction, and the three buttons Reset / Cancel / Save.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "How to align a chart, the first time you open it:",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Full screen, in the top bar, tap the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Align",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " icon (two horizontal bars linked by a vertical arrow). It's the first icon after the title, right before the zoom and close buttons; this button carries no text, only that pictogram.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Two arrow handles appear on the image, each with a small label (\"Top of the grid\" / \"Bottom of the grid\"). Drag each one onto ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "exactly the edge of the grid",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the \"Bottom of the grid\" line onto the very ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "first row",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " of the chart, the \"Top of the grid\" one onto the very ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "last",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". (Not onto the surrounding text or margins, nor onto the edge of the photo itself: onto the grid alone.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "While you adjust, a guide band stays visible on your current row: use it to check live that things line up, before you confirm.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tap ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Save",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " to finish. (\"Cancel\" abandons the adjustment in progress; \"Reset\" removes any existing alignment and you start over from the full image.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Once aligned, row tracking stays accurate for the rest of your piece on that chart, within ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "that project",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". Worth noting: the alignment is saved together with your progress on the project, not with the pattern itself. If you start a second project from the same pattern, you'll need to do it again once for the new project (the operation only takes a few seconds).",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "And round or square charts?",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Granny grids, round or square, don't get aligned with two lines: the same ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Align",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button opens a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "guided assistant",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " there, because the chart's shape (its type, chosen during correcting, section 4) is what decides. It has you place, one after the other, the motif's two boundaries: the first, which marks the bottom of the first row, then the outside of the last row. Each one is declared ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Round",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " or ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Square",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", moved and adjusted (",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Move",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Resize",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " buttons) while the picture scrolls and grows under a fixed loupe. When the two boundaries don't share the same shape, one extra step asks from which row the motif changes; a last screen lets you touch everything up before you ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Save",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". The result is remembered just like linear alignment: with the project's progress, chart by chart. And as long as a radial chart isn't aligned, a button in the reader's flow, \"Set the motif's center and radii\", offers to take you there.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03h-calage-granny-rond",
+          "alt": "The same granny alignment assistant, the boundary declared round this time: the round loupe, marked with the same cross, circling the same central flower of the blurred-stitch square, the Round and Square buttons (Round active), then Move, active as well, Resize, and at the bottom Reset, Cancel and Confirm",
+          "caption": [
+            {
+              "text": "The boundary declared round: the loupe follows the chosen shape, and the Round and Square buttons set it at every step.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Once ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "saved",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", the granny chart carries the progression like the linear grids: the rounds already done are circled from the centre out, the current round stands out in a thicker ring, and the bar at the bottom moves along round by round.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03i-granny-cale",
+          "alt": "The calibrated granny chart, full screen, with deliberately blurred stitches: the first two finished rounds are circled by a discreet ring from the central flower, the third round, the current one, stands out in a thicker ring, the outer boundary of the calibration frames it all in dashes, and the bottom bar reads 3 of 5 between a minus and a plus button, followed by the curtain flip",
+          "caption": [
+            {
+              "text": "The result once calibrated: the progression reads straight off the chart, round after round.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Keeping track of your position on a long row.",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03d-diagramme-rideau",
+          "alt": "The current row ringed, the round double-arrow handle sitting mid-row, the finished rows tinted below it, and 7 / 24 along the bottom with the button that flips the tinted side",
+          "caption": [
+            {
+              "text": "The round handle, sitting on the current row: to its right, the part of the row already done is tinted. It only exists on that one row.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "On a very wide chart, once you've zoomed in, it's easy to lose track of which stitch you're on. Full screen, a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "small round handle",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " appears on the current row, and on that row alone. Drag it left to right (or the other way) following your stitches: the portion of the row it leaves behind gets tinted, standing for what you've already knitted.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "A button next to the row counter flips the tinted side (useful when the next row reads in the other direction). The handle returns to its own place at each new row, and its position is kept even after you leave the app. The first time you open a chart, a small message points out that it's there, so you don't miss it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Correcting a line without leaving your tracking",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "You're following your pattern and a line is wrong: the import cut it badly, or you want to reword it. You don't have to leave the project to repair it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Tap the card",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " carrying the line. A veil settles over it, with two buttons: ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Fix",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Close",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". The correction screen then opens straight ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "on that line",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": you don't have to hunt for it through the whole pattern.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The veil doesn't get in the way of your knitting: it withdraws on its own after three seconds, and a tap anywhere else sends it away. Tapping another card moves it there. And no tap on a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "control",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " of the card puts it up: ticking a row or touching an abbreviation triggers the expected action.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Your timer doesn't count the time spent correcting.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " If it's running when you leave to correct, it ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "pauses",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". On your return it ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "starts again",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " by itself. Time spent in the editor doesn't enter your knitting statistics.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "On your return, the reader brings you back to the section you were correcting. The correction happens in the same screen as the one described in section 4 below, with all its tools.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "On tablets",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "A tablet held sideways gives you far more width than a phone, and {app} puts it to use in two places: in the pattern reader, and on the statistics screen.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The reader, in two panes.",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03e-tablette-lecteur",
+          "alt": "The two-pane reader on a tablet: on the left the Cable Beanie, its Ribbed brim section at 0/3 and Cast on 96 sts on 4mm circular needles; on the right Chart · 8 sts × 24 rows, sitting at row 7 / 24",
+          "caption": [
+            {
+              "text": "On a tablet held sideways: your instructions on the left, the chart permanently on the right, with no more scrolling between the two.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Knit on a tablet held sideways and the reader switches on its own to ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "two columns",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", your instructions on the left and a chart displayed permanently on the right: no more scrolling back and forth between the two. You keep control:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "On any other chart in the pattern, the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Show on the right",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button moves it into the side panel (handy when a pattern contains several).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Move back into the text",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button closes the panel and puts the chart back in its place in the flow, if you'd rather read everything in a single column.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "At the spot in the text where the chart used to sit, a note reminds you that it's ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "shown on the right",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": nothing disappears without telling you.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This setting only lasts for your current session: reopening the pattern brings back the panel with the first chart. On a phone (or a tablet held upright), the reader stays in a single column, as before. A pattern with no chart has no side panel at all. The reader's contents stay, for their part, at the top of the instructions column, same dots, same gesture.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Statistics, with room to breathe.",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03f-tablette-stats",
+          "alt": "Statistics with room to breathe on a tablet: the calendar grid runs Mar to Sep in one piece, and the tiles line up two by two below it: Total time 119:40:06, Active days 127 of 181, Current streak 6 days",
+          "caption": [
+            {
+              "text": "Statistics on a tablet held sideways, in the Half-year window: the calendar grid shows the last six months at a glance, where a phone makes you swipe sideways to see them, and the number tiles line up two by two below it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Statistics",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " screen (point 7) makes use of the space too: its calendar grid and its number tiles spread out instead of squeezing together, and on the longest windows, Half-year or Year, you see far more weeks before you have to drag the grid sideways. There is nothing extra to set: it's the same screen, just more comfortable.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-4",
+      "title": [
+        {
+          "text": "4. Your pattern library",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "04-bibliotheque",
+          "alt": "The All (3), Clothing (0) and Accessories (3) chips with a fourth one cut off by the right edge, the full-width Add pattern button, then Granny Bag in crochet, Cloud Scarf in knitting and Cable Beanie, the only one carrying its S, M, L sizes",
+          "caption": [
+            {
+              "text": "The library, with the three sample patterns provided on first launch.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04b-fiche-patron",
+          "alt": "Cable Beanie, subtitled Knitting · Accessories · S, M, L, then the line Bought for $12 on 8/12/2026 and a photo of the cable hat resting on a wooden board, an edit pencil in the top corner, and the two buttons Create a project from this pattern and Preview the pattern",
+          "caption": [
+            {
+              "text": "A pattern's page, deliberately spare: create a project, or preview. (Correcting the import is reached from the preview, or from the menu of an in-progress project that uses this pattern.)",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Import a PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": drop your pattern's PDF, and the app reads it and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "automatically rebuilds",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " the sizes, rows and sections for you, without an internet connection: nothing leaves your device. The pattern ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "joins your library",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", and that's where your work begins: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "plan on spending real time on it",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". An import almost never comes out perfect the first time. That's normal: pattern PDFs are all laid out differently. You read it over, check it and fix it ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "from the pattern's preview",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", as many times as you like, and that pass is what makes the difference between a roughly-right pattern and a project that shows the right figures and the right explanations. (The reading also recognises the round and square grids of granny patterns, never perfectly: the read-through remains essential.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Find a pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": category buttons at the top of the library show you ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "how many patterns",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " each one holds, for an instant sense of where to look.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Correct a pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a full-screen editor lets you touch up an imported pattern (text, sizes, images). This is a step ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "to plan for",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", not an exceptional rescue: automatic reading never understands everything perfectly, and an imported pattern needs working over in the app before it is really pleasant to follow. You can come back to it as often as you like, including long after the import. This is the app's other technical operation, detailed below.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The pattern's price",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a pattern's page also carries its ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "price",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", which you can fill in without waiting to start a project: as soon as it is there, it shows on the pattern's own page (\"Bought for £18.90 on 8/7/2026\", or simply \"Free\") and it counts in the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Expenses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Pattern view",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": simple reading for patterns without special formatting, or patterns you've typed in entirely by hand.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "3 sample patterns",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ship with the app from the very first launch, so you can explore every feature without importing anything.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "The correction editor, in detail",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This is the most technical operation in the app alongside chart alignment (above): here's how it really works.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04c-correction-editeur",
+          "alt": "Under the Fix the pattern title, the Gauge block reads 20 sts × 26 rounds in stockinette, 4.5mm needles = 10 × 10 cm, then the Yarn block, the Needles/Hook heading and the Cancel and Save bar",
+          "caption": [
+            {
+              "text": "The cursor sits on a reference line: the \"Reference…\" button is filled in, and \"Gauge\", its sub-category, shows in italics right beside it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Pattern sizes, at the top of the screen.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " The first field of the correction screen is called ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Pattern sizes",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". It tells the app how many sizes your pattern offers: write them separated by commas, \"S, M, L\". That number sets the width of the size table. Without this field, a table the import cut badly stayed beyond repair. One consequence to know about: if you ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "add",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " a size, the app does not fill in that size's stitch counts. It does not invent them: the pattern doesn't carry them. A line with three sizes that you take to four therefore shows as \"10 (12) 14 ()\", the empty bracket being the size still waiting for its figures. Typing them in is up to you.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The principle.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " A pattern is made of lines of text, and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "each line carries a category",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " that tells the app what it's for: a checkbox during knitting, a section title, or a plain reference note? Automatic import already assigns a category to every line as it comes in. The editor lets you correct the ones it guessed wrong, and fix the text if a sentence got cut awkwardly.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The possible categories:",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "terms",
+          "header": [
+            [
+              {
+                "text": "Category",
+                "bold": false,
+                "italic": false
+              }
+            ],
+            [
+              {
+                "text": "What it becomes in your project",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "Step",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "A checkbox during knitting or crochet — the heart of step-by-step tracking.",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Counter",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "A repeated step, with its own counter. Two variants: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Repeat",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (redo the line N times) and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Cadence",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (redo the line every X rows, N times).",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Note",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "Informative text shown at that spot, with no checkbox.",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Section",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "A section title (Front, Sleeve, Collar…), with its automatic icon — this is what splits your pattern into the Sections tab.",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Reference",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "Information from the pattern's page (yarn, needles, sizes…) — ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "not",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " step-by-step tracking. Eight sub-categories: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Yarn",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (brand, fibre, yardage, quantities), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Needles/Hook",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (size and type), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Gauge",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the reference measurement, e.g. \"10 × 10 cm = 22 stitches\"), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Materials",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (everything else: buttons, markers…), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Tips",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the designer's recommendations), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Abbreviations",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (one per line), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sizes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the table of finished measurements — not the per-size instructions, which are Sections), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Techniques",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (a technique explained). These are the blocks that fill the interactive reader's cheat sheet (section 3 above).",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Text",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "A plain paragraph, with no particular role — usually the pattern's introduction or closing text.",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "Image",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "A photo or a chart.",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The built-in help.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " The correction screen carries its own help, folded away at the top of the screen under the heading \"How to correct the pattern\": three steps, then the same information as the table above (the categories, and the eight reference sub-categories). You can unfold it at any moment without leaving your work, without having to come back to this guide in the middle of a correction. (This guide, for its part, is meant to be read ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "before",
+              "bold": false,
+              "italic": true
+            },
+            {
+              "text": " you open the screen, to decide whether you want to take it on.)",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04d-correction-aide",
+          "alt": "Below the 3 steps, the Category / What it becomes in your project table lines up Step (a checkbox to tick as you knit), then Note, Reference, Counter and Section, each with its own definition",
+          "caption": [
+            {
+              "text": "The \"How to correct the pattern\" help unfolded: its 3 steps, then the start of the \"What each category does\" table.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Changing a line's category:",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Put your cursor on the line (or select several lines at once). The toolbar just above the editor highlights the category already applied. If it's a reference, its ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "sub-category",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " shows as well, in italics right beside the toolbar (\"Yarn\", \"Gauge\"…): that's what tells you which block of the pattern's page the line will land in.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Three compact buttons apply Step (a ticked box), Note (a sheet of paper) or Text (a \"T\") directly; each shows a short label under the icon. Three other buttons, wider, open a menu of sub-categories, their ellipsis says as much: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Counter…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Section…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Reference…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Tap the one matching what you want the line to become.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The line's colour and rendering change right away to confirm.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Sending text into the cheat sheet.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Reference…",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " menu does more than label the line: it ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "moves",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " the selected text into the chosen sub-category, and you find it again in the matching tab of the reader's cheat sheet. That is how you tidy away what the import left scattered through the pattern: a glossary, a list of materials, a table of measurements. The gesture moves only the selection you made, never the neighbouring lines; and you are the one who judges the sub-category: the app files things where you tell it to.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Categorising in several passes.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " If you send a second selection to a sub-category that already exists, it is ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "added",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " to the existing block instead of creating a second one. A glossary scattered over three pages of the pattern is categorised in three passes, with nothing to reorganise by hand.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "What the app can split up on its own.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " As it lands in the sub-category, the text is laid out whenever its shape is recognisable. \"st - stitch(es)\" becomes a glossary entry, its abbreviation on one side and its definition on the other. \"Bust 90 (100) 110\" becomes a row of the size table, one column per size. When the app cannot split a line, it never throws it away: it lays down an empty ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "template",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " with the right columns, for you to fill in by hand.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Two ways to view the text.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " By default, the editor shows you a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "rich view",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": images appear as thumbnails, counters as pills, rows with their checkbox, a preview close to how it will actually look. The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Edit text",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button switches to raw text (the markup becomes visible) and opens the keyboard: useful for fixing a wording, a typo, or a sentence that the import cut awkwardly in two lines.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Reordering without cut and paste.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Two arrows (up/down) move the line where your cursor is, handy if the import placed a step or a section title in the wrong spot.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Turning a photo into a followable chart (or back again).",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Two ways to get there: tap an image in the text, or unfold the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Diagrams",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " banner at the bottom of the editor. That banner lists every section of the pattern that carries an image, charts already being followed as well as photos not converted yet. The number in brackets, for example \"Diagrams (2)\", counts all of those sections, photos included: it doesn't tell you how many charts are already being followed. For an image not converted yet, a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Follow as a chart",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button opens a choice of type, each explained in plain language: standard rows, radial square, radial round, or path, to match the real shape of your motif (a granny square doesn't read like standard rows). For an image already followed as a chart, an ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Interactive chart",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " tag states where it currently stands, next to a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Change type",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button (the same choice, to fix a wrongly guessed type) and a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Just an image",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button to go back to a plain photo, handy if the import missed a chart or if you'd rather a plain photo stayed a plain photo.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Adding images: three doors.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " In a pattern's gallery, from its page or from the correction editor, the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Add an image",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button offers three sources: ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Camera or gallery",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (a sheet lets you choose between taking a photo and picking one from your own images), ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Browse files",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (your device's picker, for an image stored elsewhere), and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "From the pattern's PDF",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " when it exists: you pick the page there and the app has you crop it, the only source that goes through that cropping. Every image joins the pattern's gallery, ready to be inserted or followed.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "An image's menu.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " In the editor's text, tapping an image opens a small immediate menu: ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "follow it as a chart",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " if it isn't one yet, or ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "change its type",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " otherwise, bring it back down to a mere illustration (",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Just an image",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "), or ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "send it to the pattern's gallery",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". In the \"Pattern gallery\" band, every image can be deleted, inserted into the text, or followed as a chart: the three gestures in the same place.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04e-correction-diagrammes",
+          "alt": "Under the category bar, a clipped tick line and then Weave in ends on the wrong side, followed by the note line Tip: block the damp beanie over a bowl to round out the crown, above Cancel and Save",
+          "caption": [
+            {
+              "text": "The \"Diagrams (1)\" banner unfolded: the \"Body and cable\" section, where it currently stands (\"Interactive chart\") and the \"Change type\" and \"Just an image\" buttons.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Saving.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Cancel",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " / ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Save",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " buttons are fixed at the bottom of the screen. Try to leave with unsaved changes and the app stops you and asks for confirmation: nothing gets lost by mistake here either.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-5",
+      "title": [
+        {
+          "text": "5. Your yarn stash",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "05-stock",
+          "alt": "10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent across the top, the Search yarn… field and the Filter and Sort buttons, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf below it, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free",
+          "caption": [
+            {
+              "text": "The stash: totals up top (skeins, length, weight, value), then one card per yarn with its status, free or reserved by a project.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Add a skein",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": brand, weight (with help understanding the weight categories), fibre content (picked from a list; if your fibre isn't listed, \"Other\" lets you type it in, and it's then offered like any other), colour (picked from a palette, with a custom shade picker if you need one), quantity, price, length and weight per skein, plus the purchase date and dye lot number. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "As soon as you save it, the app immediately records the matching purchase",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", and your money spent (point 1) goes up by the amount you entered. The date it suggests is today's: if you bought the yarn earlier, you can correct it directly in the form. (These two fields only appear when you create the entry. On an already-saved yarn page, the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Purchases and gifts",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " block takes over, with one line per acquisition.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Yarn that isn't a single colour",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Colour type",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " field (solid, gradient, self-striping, speckled, hand-dyed) and a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Colourway description",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " field (\"blue, green, yellow speckled with black\") complete the colour swatch: a single shade isn't enough to describe a multicoloured yarn. Colour type shows up in search and in the spreadsheet export.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Your yarn's characteristics",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": eight labels to tick, in two groups that don't mean the same thing. A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "commitment",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " is what you know about your yarn yourself; a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "certification",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " is a label awarded by an outside body.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Commitments",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": Vegan · Recycled · Ethical · Mulesing-free.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Certifications",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": No harmful substances (OEKO-TEX) · Organic fibres (GOTS) · Sheep welfare (RWS) · Certified recycled (GRS).",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "The origin works itself out",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " from the fibre content, with nothing to tick: \"Animal fibre\", \"Plant fibre\", \"Synthetic fibre\", \"Animal and plant blend\". When the app can't conclude for every fibre you entered, it says so (\"Incomplete origin\") instead of guessing: that's deliberate.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "The vegan warning",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": tick Vegan on a yarn that contains an animal fibre and the app points it out (\"This yarn contains … (animal fibre). The vegan label looks contradictory — check the composition.\") without stopping you from saving: it warns you, it doesn't decide for you.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Finding your yarn again",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": these labels turn up again in the stash filter (the \"Label\" criterion) and in the text search.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "These characteristics also come out in the ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "spreadsheet export",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ".",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "05b-fiche-laine",
+          "alt": "The page opens over the stash totals 10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent: a yellow dot for Moutarde, brand Drops, 165 yd, 50 oz a skein, quantity 4, price per skein 3,20, last purchase 2026-08-12",
+          "caption": [
+            {
+              "text": "A yarn's page: its fibre content, the \"Plant fibre\" note, and its two labels \"Vegan\" and \"Organic fibres (GOTS)\".",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "The summary",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " at the top of the screen: number of skeins, total length and weight (switching on their own to km and kg once your totals get large), and your stash's total value.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Search, filter, sort",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a search field and the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Filter",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sort",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " buttons at the top of the stash. Filter opens a two-level window: the list of six criteria (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Brand",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Label",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Weight",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Skein weight",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Colour",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Composition",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), then, for the criterion you tapped, its values. One choice per criterion, but criteria combine; a badge on the Filter button counts the active filters, and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Reset",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " clears them in one gesture. Sort offers ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Brand",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the default), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Weight",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " or ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Purchase date",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". None of this is remembered: every return to the stash starts again with no filter, sorted by brand. List or visual grid, your choice.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Edit, duplicate or delete",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " an entry from its card's ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Actions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " menu (vertical three-dot icon). \"Duplicate\" is handy for the same yarn in a different colourway: everything carries over, you just need to change the colour.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The skein pool",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": for each yarn, you can see at a glance how many skeins are ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "reserved",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " for a project and how many are ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "free",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". You can't lower the quantity below what's already reserved (the app tells you how many skeins are held back); and it warns you if restoring a project from the trash puts your yarn reservations at risk. The project comes back regardless, with a reduced reservation and a message explaining it to you.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A yarn's detail page",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a full summary (skeins, metres, projects using it), and a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Purchases and gifts",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " block that keeps a record of every acquisition of that yarn for you:",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Each line carries a quantity, a price, a date and a dye lot, and states whether it was a ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "purchase",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " or a ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "gift",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " (a gift never counts towards your money spent). The three most recent lines are visible right away, the rest unfolds with a tap.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "You can ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "add, edit or delete",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " a line at any time.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Increase the quantity",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " of a yarn from its page and the app offers to record the matching purchase, dated today: you can accept it, mark it as a gift, or ignore it if you don't want to keep it. ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Decreasing a quantity, however, never touches your money spent",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": only an increase can create a purchase.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "If the number of skeins on the page doesn't match what the history recorded (for example after you manually corrected the stash), an alert points it out and a ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Fix",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " button offers you two solutions: add the missing purchase, or adjust the displayed quantity.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "A purchase keeps its label even after you permanently delete the yarn's page: no yarn purchase disappears, it stays visible in the ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Expenses",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " screen.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "The Expenses screen",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "05c-depenses",
+          "alt": "Under the large $43 spent, split into Yarn $30.50 and Patterns $12, and the Since the start line, 2026 totals $42.50, and so does August: ×6 Hobbii · Sauge at $17.70 and ×4 Drops · Moutarde at $12.80, both tagged Yarn and each with a cross to delete it, then Cloud Scarf tagged Pattern and Free, and Cable Beanie tagged Pattern at $12",
+          "caption": [
+            {
+              "text": "The Year and Type menus at the top, the total with its yarn / pattern breakdown, then the detail by month.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Reached by tapping the money spent on Home (point 1), this screen summarises everything you've paid for your knitting, ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "yarn",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "patterns",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " alike:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "The ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "total spent",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", by currency if you've used more than one. As long as you haven't noted any pattern price, this total stays exactly as you know it; as soon as a pattern shows up in it, it breaks down into two sub-lines: what went to yarn, what went to patterns.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Two menus at the top: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Year",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " shows only the year you choose (or \"All years\"), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Type",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " shows only one category (or all). Totals recalculate accordingly. Purchases you haven't dated end up under \"Unknown date\", which is added to the Year menu whenever there are any.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "breakdown by year then by month",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", yarn and patterns mixed in calendar order: you see at a glance what a given month cost you.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "As soon as a pattern shows up in the list, each line also carries its label, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Yarn",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " or ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". A pattern you've declared free shows up with the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Free",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " tag: that's proof you checked, not an oversight.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "full list",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " of every purchase and gift, including those whose yarn page you've since deleted (marked \"Deleted yarn\").",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The option to ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "delete",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " a yarn line directly from this screen, with a chance to ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "undo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " right after in case of a mistake. A pattern line, on the other hand, is edited from the pattern's page: tapping it takes you there.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "> ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Good to know",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": a yarn purchase survives the deletion of its page and > stays visible here. A pattern's price, though, belongs to the > pattern: if you delete the pattern, its expense goes with it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-6",
+      "title": [
+        {
+          "text": "6. Standalone tools",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "06a-compteurs",
+          "alt": "The Counter name field still empty, both boxes unticked beside their examples (a sleeve, or repeat rows 1 to 8, 5 times), then the + Counter button and the line No counters yet. Add one.",
+          "caption": [
+            {
+              "text": "The free counter, usable without a project: name it, and choose whether it tracks increases/decreases or repeats.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "06b-calculateur",
+          "alt": "Increases, Flat and Distribution picked out, then the empty Current stitches, Target stitches, Increases each time and Over how many rows fields, hinting 60, 80, 1 and 40",
+          "caption": [
+            {
+              "text": "The stitch calculator: spreading increases or decreases over a number of rows, or working out how many rows you need at a given rate, flat or in the round.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "06c-aiguilles",
+          "alt": "Find my needle size with the fields filled in: inches is the unit picked, Yarn label gauge holds 4 mm, 22 stitches and 30 rows per 4×4 in, Target gauge 20 and 28, and the answer Try a size up: 4.5 mm",
+          "caption": [
+            {
+              "text": "Find my needle size, with the fields filled in: what your ball band says, the gauge your pattern asks for, then the app's answer just below. In crochet, the same screen talks about hooks.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "These tools work without being tied to a specific project, reachable from Home:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Stitch calculator",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": it answers both ways round. Either you give it a number of rows and it tells you how to spread your increases or decreases over them; or you give it your rate (\"every 4 rows\") and it tells you how many rows you need to reach your target stitch count, and which row the last change falls on. One field says how many stitches you add or remove each time: usually 1, or 2 for a sleeve where you increase one stitch on each side. When your target can't be reached exactly, it offers the two options either side of it rather than rounding silently. Flat it talks in rows, in the round in rounds.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Free counter",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": one or more independent counters (+/−, a target to reach, reset), for anything that isn't part of a saved project.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Find my needle (or hook) size",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": enter what's written on your skein label (recommended needle size and stitch count for 10 × 10 cm, or 4 × 4 inches) then the gauge your pattern asks for, and the app tells you which size to start with: one size up, one down, or the same. It also warns you when the gap is too large to make up (this yarn won't work with this pattern), and always reminds you that a swatch still needs knitting to check: it's a starting point, not a guarantee. The rows field is optional.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. Statistics",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "07-statistiques",
+          "alt": "The Quarter tab selected among Month, Half-year and Year, 6/15/2026 – 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards",
+          "caption": [
+            {
+              "text": "The selector at the top picks an observation window (Month, Quarter, Half-year or Year), and the whole screen follows it; here, the Quarter window. The \"Calendar\" tab, shown by default, shows the grid and the nine number tiles.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The selector at the top of the screen no longer just picks a display span: it picks an ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "observation window",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (Month, Quarter, Half-year or Year). Everything below follows it, from the total time to the nine number tiles. Just below it, an ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "All / Knitting / Crochet",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " filter restricts the whole screen to a single technique; it isn't remembered and goes back to \"All\" every time you come back to this screen, just like the reader's side panel. This filter only shows up if your projects cover ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "both techniques",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": if they're all knitting (or all crochet), it wouldn't add anything, so it doesn't take up space.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "One subtlety while a filter is on: the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Average per active day",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " tile shows a dash. The days being counted may include days when you moved forward in the other technique (the log only keeps the date, not what you did that day), and dividing a time by those days would give a figure that is exact but misleading.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The rest of the screen splits into ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "two tabs",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", switched by ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "tapping",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (never by swiping: the grid itself scrolls horizontally in Half-year and Year, so the two gestures don't get confused):",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Calendar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (shown by default, the one in the screenshot above): the grid and the nine number tiles.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Rhythm",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the bars by period, then seven bars, one per day of the week, and a sentence naming your most consistent day across your whole history.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "07b-stats-rythme",
+          "alt": "Statistics, Rhythm view: the weeks from 18/05 to 27/07 as bars, from 1:10:00 to 12:10:00, then By day of the week from Mon to Sun, and at the bottom Across all time, your most active day is Wednesday",
+          "caption": [
+            {
+              "text": "The \"Rhythm\" tab: the bars of time spent per period, the seven bars per day of the week, and the sentence naming your most consistent day.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "grid",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " shows one square per day, from the first day of your week (top) to the last (bottom), across the whole window you picked; that first day is Monday by default, or Sunday if you picked it in Settings (§8). Its colour follows the accent shade chosen in Settings (§8), and its intensity depends on how long you knitted or crocheted that day, on five levels: nothing, less than 30 minutes, 30 minutes to 1 hour, 1 to 2 hours, 2 hours or more. The thresholds are ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "fixed",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": a dark square always means the same thing, month after month, even in a quieter quarter than usual. A bolder outline frames the columns that belong to the same month, so you can spot them at a glance.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "07c-stats-annee",
+          "alt": "A whole year of the calendar grid, Aug to Aug: one column per week, one square per day, the M T W T F S S initials down the left margin, a heavier frame around each month, and a five-step less-to-more legend",
+          "caption": [
+            {
+              "text": "The grid in the Year window: a complete year at a single glance, one column per week and one square per day, with the outlines separating the months. Tap the image to enlarge it and read the detail.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Tapping a square ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "marks",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " it (it stays visibly selected) and shows, below the grid, its date, its duration and, when more than one project moved forward that day, a list of each one with the time it got. Tapping the same square again clears it.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "What the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "streak",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " counts is the days on which you logged ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "at least one action",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": a session, timed or added by hand, a row checked off, a project counter moved forward. And opening the app without doing anything in it doesn't count: it takes a ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "logged",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " action.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-8",
+      "title": [
+        {
+          "text": "8. Settings",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "08-reglages",
+          "alt": "Camille typed into \"Your first name (optional)\", Knitting picked out as the default craft and a Save button closing off the Profile card, then Appearance on System, the Ambience color block with its ten dots and its hue slider, First day of the week on Monday, and the Language heading alone at the bottom edge",
+          "caption": [
+            {
+              "text": "Top of Settings: first name, default craft, theme, ambience color, first day of the week, language, units and currency. Further down are the backup folder and the trash.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Profile",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": your first name (used for the Home greeting) and your default craft (knitting or crochet).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Appearance",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": light theme, dark theme, or matching your device's own setting.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Ambience color",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": ten shades offered in one tap, or any at all on the continuous slider. As long as you haven't chosen anything, the colour ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "follows your theme",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " and changes on its own with light or dark mode; as soon as you choose, your choice wins out and stays the same in both modes. That shade colours the buttons, the selections, the progress bars and the statistics grid (§7).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "First day of the week",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Monday (default) or Sunday. This choice governs the calendar grid and the seven weekday bars on the Statistics screen, as well as the weekly reset of the \"this week\" total on Home.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Language",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": French, English, German or Spanish. Each language is written in its own language in the list (\"Deutsch\", \"Español\"), so you find your own language easily.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Units and currency",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ":",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Metric",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " (metres, grams) or ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "imperial",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " (yards, ounces, pounds); everything follows: entering your skeins, stash totals, gauge (10 × 10 cm or 4 × 4 inches). Switching systems doesn't change any of your saved numbers, it just redisplays them in the other unit.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Currency",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " among five (€, $, £, CHF, CA$). Note that it's a plain label: prices you've already entered ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "aren't converted",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " and appear with the other symbol; the app warns you about this before confirming.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Both settings are offered to you ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "right from the first screen",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " when you open the app, pre-filled from your device's language; you can change them here at any time.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Data",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ":",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Export your stash, projects or patterns to a spreadsheet (CSV), to view or back them up elsewhere. Columns follow your current settings: lengths and weights in your chosen unit system, prices with your chosen currency symbol.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "A universal ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Trash",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": any project, yarn or pattern you delete ends up there and can be restored at any time (until you empty it on purpose).",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "{app} folder",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": everything you knit or crochet only exists inside this app, on your device, nowhere else. The backup folder keeps a copy of it, written ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "continuously",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (there is never anything for you to trigger or think about), so you can get it back if you lose your device, if it breaks, or if you reinstall the app. You designate it once, at the very first launch; it can be changed later in Settings, with the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Change folder",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "A backup folder serves one device only.",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " Putting it in a synced folder so you have a copy elsewhere is a good idea; using it from a phone ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "and",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " a tablet is not: each would wipe out the other's work. A second device needs a folder of its own.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Contribute",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a link to the source code (the app is open source), and two other links in the same settings block:",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Support {app}",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " leads to a donations page, ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "freely",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": nothing is unlocked in exchange, no feature is reserved for those who give.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Suggest an improvement",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " opens a way for you to send a remark.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "What happens at the very first launch",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "In order, the first time you open {app}: the welcome screen asks for your first name, your craft, your language, your theme, your units and your currency; then the backup folder screen, described just above. After that, three small messages greet you, ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "once each",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ": you won't see them again.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "word of welcome",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", set in the middle of the Home screen as soon as your backup folder is in place: it tells you everything is ready and invites you to open the sample projects and patterns to get your bearings. Its button closes it, and it doesn't come back.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "warning about imported patterns",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the first time you open your pattern library: it reminds you that the app reads your PDF on its own and gets things wrong sometimes (a skipped row, two sizes mixed up, a badly split table), and that an imported pattern needs a read-through before you follow it. Its \"Got it\" button closes it; \"How to fix it\" opens the section of this guide about your pattern library.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "navigation tip",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the first time you open a project, visit your pattern library, or visit your yarn stash, whichever of the three comes first: it explains that you can swipe right to go back, and drag a row of tabs or categories that is too wide for the screen. It appears ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "only once in total",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", not once per screen; the \"Got it\" button closes it.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-9",
+      "title": [
+        {
+          "text": "9. Under the hood — what {app} guarantees you",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Offline by default",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": none of your data ever leaves your device, except the backup folder ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "you choose yourself",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "No account, no paywall",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": every feature above is free, with no core feature locked away.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Nothing is lost by mistake",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": every deletion can be undone instantly, and ends up in the trash regardless.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Designed to be readable by everyone",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": sufficient contrast, buttons large enough to tap easily, compatible with screen readers.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Comfortable on every screen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": on a small phone, nothing overflows or gets cut off; on a tablet, the app makes use of the extra space: your lists of projects and patterns spread across several columns instead of one long stack, and the reader can keep the chart next to the text. The app accounts for your screen's reserved areas (status bar, notch, navigation bar): content no longer slides underneath them.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A privacy policy in plain words",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": from the About screen, it tells you where your data lives, what may leave your phone and in which cases, what happens if you uninstall the app, and who answers for it: the person responsible and the contact address are named there. It is written in your language.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "In four languages",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": French, English, German and Spanish.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}

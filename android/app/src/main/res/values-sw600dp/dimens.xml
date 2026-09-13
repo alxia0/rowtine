@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      sw600dp se lit « plus petite largeur d'au moins 600 dp ». La Nexus 7 fait
+      1200 px a la densite 320, soit exactement 600 dp : elle prend cette valeur.
+      Le Huawei fait 1080 px a 640, soit 270 dp : il garde les 170dp de values/.
+      Calcul verifie, a reprouver sur les deux appareils a la tache 3.
+    -->
+    <dimen name="splash_tuile">370dp</dimen>
+</resources>

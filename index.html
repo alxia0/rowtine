@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <!-- `user-scalable=no` (10/08/2026) : le pincement ne doit plus agrandir l'APPLICATION.
+         Il ne l'a jamais été interdit depuis le premier jour du projet, mais personne ne s'en
+         apercevait avant que le zoom des photos n'apprenne le geste à l'utilisatrice — depuis,
+         on tombe dessus par accident et l'app reste agrandie sans qu'on sache pourquoi.
+         Les DEUX écrans qui zooment vraiment (visionneuse photo, plein écran des diagrammes)
+         gèrent le geste eux-mêmes, en JavaScript : ils ne dépendent pas de ce réglage.
+         ⚠️ Ce que ça retire : agrandir le texte au pincement, pour qui voit mal. Le réglage
+         système « Taille de police » d'Android continue de s'appliquer — c'est le bon endroit
+         pour ce besoin, il vaut pour toutes les apps et il est mémorisé. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Pré-paint = défaut dynamique clair T2 (teinte 230) : bgHex(230, 'light'). apply.js
+         la resynchronise dès que le thème réel (sombre, ou teinte choisie) est connu. -->
+    <meta name="theme-color" content="#f3f6fe">
+    <meta name="description" content="Rowtine — suivez vos projets de tricot et crochet : compteurs de rangs, sessions, stock de laine et patrons. Hors ligne." />
+    <title>Rowtine</title>
+    <script>
+      // Pré-paint : pose data-theme si un choix EXPLICITE est mémorisé, pour éviter le
+      // flash clair→sombre au démarrage à froid (main.js monte avant le chargement Dexie).
+      // 'system'/absent : on ne touche à rien, la media query CSS décide (zéro flash).
+      (function () {
+        try {
+          var t = localStorage.getItem('rowtine.theme')
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t)
+        } catch (e) {}
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

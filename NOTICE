@@ -1,0 +1,23 @@
+Rowtine
+Copyright 2026 Alexia O.
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full terms.
+
+"Rowtine" and the Rowtine hedgehog logo are trade names of the copyright
+holder. As stated in section 6 of the License, they are not licensed with
+the code. Derivative works must use a different name and a different icon.
+
+--------------------------------------------------------------------------------
+Bundled fonts
+--------------------------------------------------------------------------------
+
+Literata — Copyright The Literata Project Authors
+(https://github.com/googlefonts/literata)
+Licensed under the SIL Open Font License, Version 1.1.
+Full text: public/fonts/OFL-Literata.txt
+
+Source Sans 3 — Copyright The Source Sans Project Authors
+(https://github.com/adobe-fonts/source-sans)
+Licensed under the SIL Open Font License, Version 1.1.
+Full text: public/fonts/OFL-SourceSans3.txt

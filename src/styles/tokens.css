@@ -1,0 +1,544 @@
+/* Rowtine — tokens de marque « Chaleur & Artisanat »
+   Polices Literata (display) + Source Sans 3 (UI) embarquées en .woff2 variables locales
+   (public/fonts/, pas de @import Google — l'app marche hors ligne).
+
+   Le contraste serif/sans est la signature de l'app : ne pas le diluer. Le COUPLE, lui,
+   a changé le 17/08/2026 (avant : Fraunces + DM Sans), l'ancien couple étant jugé
+   caractéristique des applications générées par une IA.
+
+   ⚠️ Fichiers pris TELS QUELS dans @fontsource-variable/{literata,source-sans-3}@5.3.0,
+   sous-ensemble `latin` — surtout PAS `latin-ext`, qui ne contient QUE ce qui déborde de
+   U+0000–U+00FF et à qui il manque donc les 24 lettres accentuées des 4 langues. Mesuré au
+   fontTools le 17/08 : le sous-ensemble `latin` couvre U+0000–U+00FF PLUS U+0152–U+0153
+   (Œ œ), soit tout ce que l'app affiche. Un mauvais fichier ne produirait AUCUNE erreur,
+   juste des glyphes de repli sur une app hors ligne qui ne peut rien retélécharger.
+   ⚠️ Source Sans 3 porte un « Reserved Font Name » (Source) : l'OFL interdit de rediffuser
+   une version MODIFIÉE sous ce nom — d'où le refus de re-sous-ensembler nous-mêmes.
+   Textes de licence obligatoires : public/fonts/OFL-*.txt, embarqués avec les fontes. */
+
+/* Source Sans 3 — UI (graisse variable 200→900 : la plage RÉELLE du fichier, mesurée.
+   Déclarer 100 comme avant ferait CLAMPER les graisses en silence.)
+   Chiffres tabulaires par construction (les dix font 472/1000) : c'est ce qui rend enfin
+   effectif le `font-variant-numeric: tabular-nums` déclaré 15 fois dans les vues — aucune
+   des trois polices précédentes ne pouvait l'honorer. */
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('/fonts/source-sans-3-wght.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: italic;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('/fonts/source-sans-3-wght-italic.woff2') format('woff2-variations');
+}
+/* Literata — titres et chiffres (graisse variable 200→900).
+   Dessinée pour Google Books : tient à 44 px (.ccard__val, le plus gros chiffre de l'app)
+   comme en petit corps. Elle porte la feature `tnum`, que Fraunces n'avait pas.
+   Pas d'italique embarquée : Fraunces n'en avait pas non plus — parité, et 42 Ko épargnés. */
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('/fonts/literata-wght.woff2') format('woff2-variations');
+}
+
+:root {
+  /* Valeurs de pré-paint = DÉFAUT DYNAMIQUE T2 (31/08) : teinte 230 en clair, 320 en
+     sombre (theme/palette.js::DEFAULT_HUES). Avant, ces littéraux restaient ancrés à
+     l'ancienne teinte unique 44 : le premier paint CSS montrait un fond crème alors que
+     applyTheme() appliquait aussitôt le bleu #f3f6fe — écart de fond visible au
+     rechargement (les gardes e2e assertReallyDark/Light le lisaient). Ces littéraux
+     reproduisent EXACTEMENT generatePalette(230, 'light') / (320, 'dark') : plus aucun
+     écart entre le CSS statique et la première application JS. */
+  --brand: #0e7397;
+  /* Triplet nu "r, g, b" (pas rgb(...)) — rgba(var(--brand-rgb), α) permet un remplissage
+     translucide qui suit --brand ; rgba(var(--brand), α) est invalide en CSS. Repli
+     pré-peinture JS uniquement (cf. --brand ci-dessus) : applyAccent() (theme/apply.js)
+     écrase les deux ensemble au premier rendu, depuis la même valeur retouchée AA que
+     --brand (theme/palette.js) — pas la peine qu'ils correspondent au pixel ici. */
+  --brand-rgb: 14, 115, 151;
+  --brand-deep: #006586;
+  --sage: #5a7a5e;
+  --mustard: #e8b23a;
+  /* Variante ASSOMBRIE de --mustard pour le SEUL texte posé sur --bg : le badge
+     « En pause » (STATUS_META.pause) mesurait 1,79:1 en --mustard, illisible.
+     #8a5a00 = ambre chaud de la même famille (déjà retenu pour --warning et
+     la note Markdown du lecteur pour la même raison) : 5,48:1 sur --bg clair, pire cas
+     5,45:1 sur les 360° de teinte d'accent (--bg tourne avec applyAccent, mesuré par
+     balayage). NE PAS élargir --mustard lui-même : la .snack le pose sur son fond
+     espresso (6,78:1 en clair) et y perdrait à l'assombrir ; les autres textes moutarde
+     sur fond clair (.tag--reserved des cartes laine) sont HORS
+     de ce périmètre — à corriger à part. Le point du badge suit la même
+     couleur que son texte (unité du badge, même traitement que --ink-55 pour
+     « abandonné »). */
+  --mustard-deep: #8a5a00;
+  /* statut « En attente » : bleu-gris doux, seule teinte froide (distinct des 5 dots
+     chauds/neutres). Valeur de départ ~5:1 sur --bg — vérifier au gate device. */
+  --slate: #55647a;
+  /* neutres (espresso + crème lin, sans blanc pur) */
+  --ink: #3a2e28;
+  --ink-70: rgba(58, 46, 40, 0.72);
+  --ink-55: #845535;
+  --ink-40: rgba(58, 46, 40, 0.42);
+  --ink-25: rgba(58, 46, 40, 0.25);
+  --line: rgba(58, 46, 40, 0.12);
+  --line-soft: rgba(58, 46, 40, 0.07);
+  --surface: #dfe5f4;
+  --surface-lin: #cce0f5;
+  --bg: #f3f6fe;
+  --page: #dee5f5;
+  /* sémantiques */
+  --success: var(--sage);
+  /* Écarté de --brand (#0e7397) : à 10° de teinte, une suppression se lisait comme une
+     action ordinaire (écart RGB 16,6 -> 52,6). Corrige aussi le contraste sur --surface
+     (4,22 -> 5,79, sous le seuil AA auparavant). Cf. audit UX 16/07. */
+  --danger: #a02c1e;
+  /* avertissement (confiance moyenne import IA, etc.) : ambre assombri pour l'AA sur
+     fond crème (même littéral que .warn/.conf--medium des vues import, unifié ici
+     lors de l'audit couleurs, 18/07). */
+  --warning: #8a5a00;
+  /* espacement */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  /* rayons */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-pill: 999px;
+  /* élévation */
+  --e-1: 0 1px 4px rgba(58, 46, 40, 0.06);
+  /* Ombre portée chaude SUIVIE DE LA MARQUE : rgba(var(--brand-rgb), α) au lieu du
+     littéral rgba(194, 112, 74, 0.16) — famille éclaircie de l'ancien --brand clair
+     teinte 44 (#ad5a34 = rgb(173, 90, 52)), restée ambrée après la dynamisation des
+     teintes (T2, 31/08). Même géométrie, même alpha ; la teinte suit --brand. */
+  --e-2: 0 6px 20px rgba(var(--brand-rgb), 0.16);
+  --e-3: 0 26px 70px rgba(58, 46, 40, 0.32);
+  /* reliefs « clay » doux : lumière interne en haut + ombre portée chaude (tactile,
+     artisanal). La composante chaude passe par rgba(var(--brand-rgb), α) — même recalage
+     que --e-2 (avant : rgba(156, 74, 40, 0.05), famille teinte 44) ; la lumière blanche
+     et les neutres espresso ne bougent pas, et le sombre redéfinit --clay en entier. */
+  --clay: 0 1px 1px rgba(255, 255, 255, 0.7) inset, 0 -2px 6px rgba(var(--brand-rgb), 0.05) inset,
+    0 10px 22px -8px rgba(58, 46, 40, 0.18), 0 2px 6px -2px rgba(58, 46, 40, 0.1);
+  --clay-sm: 0 1px 1px rgba(255, 255, 255, 0.6) inset, 0 6px 14px -8px rgba(58, 46, 40, 0.18);
+  --clay-press: 0 1px 2px rgba(58, 46, 40, 0.12) inset, 0 -1px 1px rgba(255, 255, 255, 0.4) inset;
+  /* surface « tuile » claire (fond plus clair que --surface, pour le bento) */
+  --tile: #f4f9ff;
+  /* accent vert tendre (métrique positive / statut terminé) — dérivé de --sage */
+  --sage-tile-bg: linear-gradient(165deg, #e7ecdd, #dde6d2);
+  --sage-tile-line: #cdd9c1;
+  --sage-deep: #5f7358;
+  /* Variante RENFORCÉE de --sage-deep, pour le SEUL texte 13px/600 sur --sage-tile-bg
+     (le chip « Diagramme interactif ») : --sage-deep sur ce dégradé descend à 4.00:1 sur
+     l'arrêt le plus sombre — sous le seuil AA (4.5:1, texte < 14px donc pas « grand
+     texte »). NE PAS élargir --sage-deep lui-même : treize usages ailleurs, déjà
+     conformes. Ce nouveau token n'a qu'un seul site d'usage (.corr-chip--on,
+     CorrectionView.vue) — voir tests/e2e/theme-contrast-clair.spec.js pour la mesure
+     (≥ 4.5:1 contre les DEUX arrêts du dégradé, pas seulement le pire). */
+  --sage-deep-strong: #4e6047;
+  /* dégradé bombé du bouton primaire (clay) */
+  --brand-grad: linear-gradient(180deg, #1f789f, #0e7397);
+  /* texte posé sur un fond accent (bouton primaire, pill sélectionnée) */
+  --on-accent: #fff;
+  /* texte posé sur un fond solide NE SUIVANT PAS la teinte (--sage, --danger, pastilles
+     --mdc-* de l'éditeur Markdown, :actif du bouton primaire sur --brand-deep) : STATIQUE
+     par thème — contrairement à --on-accent, qui devient sombre dans la bande chaude
+     claire (accent « sombre-adapté », spec 08/09) alors que ces fonds restent inchangés.
+     Même valeur que --on-accent en sombre et hors bande : zéro changement visible là. */
+  --on-solid: #fff;
+  /* motion */
+  --motion-fast: 150ms ease;
+  --motion-base: 220ms ease;
+  /* typo */
+  --font-display: 'Literata', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+  /* ── Insets d'écran sûrs ────────────────────────────────────────────────
+     Point d'entrée UNIQUE : plus aucun composant n'appelle env() en direct.
+     Mesuré sur device le 27/07 (CDP dans la vraie WebView, Nexus 7 / Android 11) :
+     WebView Android remonte l'ENCOCHE via env() (48px vérifiés, portrait et
+     paysage) mais renvoie 0 pour les BARRES SYSTÈME, alors que la WebView
+     occupe tout l'écran — d'où l'en-tête sous la barre d'état.
+     SafeAreaPlugin (Android) écrase donc ces 4 variables en inline sur
+     <html> avec les insets natifs réels. env() reste la valeur de repli :
+     sans la couche native (web, PWA, aperçu Vite), le rendu est identique
+     à ce qu'il était avant l'introduction de ces variables. */
+  --sa-top: env(safe-area-inset-top, 0px);
+  --sa-right: env(safe-area-inset-right, 0px);
+  --sa-bottom: env(safe-area-inset-bottom, 0px);
+  --sa-left: env(safe-area-inset-left, 0px);
+}
+
+/* ── THÈME SOMBRE « Nuit + Ambre miel » ────────────────────────────────────
+   Défini DEUX fois : media query (état « Système », zéro JS, zéro flash) et
+   attribut data-theme (choix explicite). Valeurs strictement identiques — un
+   test de non-dérive les compare (tests/e2e/theme.spec.js). Valeurs de départ,
+   re-vérifiées au gate device (contraste AA).
+   T2 (31/08) : rôles de palette ré-ancrés à la teinte dynamique par défaut 320
+   (reproduisent generatePalette(320, 'dark'), cf. bloc :root ci-dessus). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --brand: #fa94c0;
+    --brand-rgb: 250, 148, 192;
+    --brand-deep: #dc7baa;
+    --sage: #93b587;
+    --mustard: #eab94f;
+    /* sombre : --mustard passe déjà en texte sur --bg (10,23:1), pas de variante
+       distincte — même traitement que --sage-deep-strong ci-dessous. */
+    --mustard-deep: #eab94f;
+    --slate: #8b99ae;
+    --ink: #f2e9dc;
+    --ink-70: rgba(242, 233, 220, 0.72);
+    --ink-55: rgba(242, 233, 220, 0.62);
+    --ink-40: rgba(242, 233, 220, 0.42);
+    --ink-25: rgba(242, 233, 220, 0.25);
+    --line: rgba(242, 233, 220, 0.14);
+    --line-soft: rgba(242, 233, 220, 0.08);
+    --surface: #211a1f;
+    --surface-lin: #2c2128;
+    --bg: #151215;
+    --page: #0e0c0e;
+    --danger: #e0715f;
+    --warning: #d1a24d;
+    --e-1: 0 1px 4px rgba(0, 0, 0, 0.4);
+    --e-2: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --e-3: 0 26px 70px rgba(0, 0, 0, 0.7);
+    --clay: inset 0 1px 0 rgba(255, 244, 230, 0.05), 0 10px 22px -8px rgba(0, 0, 0, 0.6),
+      0 2px 6px -2px rgba(0, 0, 0, 0.4);
+    --clay-sm: inset 0 1px 0 rgba(255, 244, 230, 0.05), 0 6px 14px -8px rgba(0, 0, 0, 0.5);
+    --clay-press: inset 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 244, 230, 0.03);
+    --tile: #292027;
+    --sage-tile-bg: linear-gradient(165deg, #26302a, #222b26);
+    --sage-tile-line: #3a4a36;
+    --sage-deep: #93b587;
+    --sage-deep-strong: #93b587; /* sombre : deja conforme (5.98:1), pas de variante distincte necessaire */
+  --brand-grad: linear-gradient(180deg, #ffa6ca, #fa94c0);
+  --on-accent: #2a1e08;
+  --on-solid: #2a1e08; /* = --on-accent en sombre : aucun fond non-accent ne bascule ici */
+  }
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --brand: #fa94c0;
+  --brand-rgb: 250, 148, 192;
+  --brand-deep: #dc7baa;
+  --sage: #93b587;
+  --mustard: #eab94f;
+  /* sombre : --mustard passe déjà en texte sur --bg (10,23:1), pas de variante
+     distincte — même traitement que --sage-deep-strong ci-dessous. */
+  --mustard-deep: #eab94f;
+  --slate: #8b99ae;
+  --ink: #f2e9dc;
+  --ink-70: rgba(242, 233, 220, 0.72);
+  --ink-55: rgba(242, 233, 220, 0.62);
+  --ink-40: rgba(242, 233, 220, 0.42);
+  --ink-25: rgba(242, 233, 220, 0.25);
+  --line: rgba(242, 233, 220, 0.14);
+  --line-soft: rgba(242, 233, 220, 0.08);
+  --surface: #211a1f;
+  --surface-lin: #2c2128;
+  --bg: #151215;
+  --page: #0e0c0e;
+  --danger: #e0715f;
+  --warning: #d1a24d;
+  --e-1: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --e-2: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --e-3: 0 26px 70px rgba(0, 0, 0, 0.7);
+  --clay: inset 0 1px 0 rgba(255, 244, 230, 0.05), 0 10px 22px -8px rgba(0, 0, 0, 0.6),
+    0 2px 6px -2px rgba(0, 0, 0, 0.4);
+  --clay-sm: inset 0 1px 0 rgba(255, 244, 230, 0.05), 0 6px 14px -8px rgba(0, 0, 0, 0.5);
+  --clay-press: inset 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 244, 230, 0.03);
+  --tile: #292027;
+  --sage-tile-bg: linear-gradient(165deg, #26302a, #222b26);
+  --sage-tile-line: #3a4a36;
+  --sage-deep: #93b587;
+  --sage-deep-strong: #93b587; /* sombre : deja conforme (5.98:1), pas de variante distincte necessaire */
+  --brand-grad: linear-gradient(180deg, #ffa6ca, #fa94c0);
+  --on-accent: #2a1e08;
+  --on-solid: #2a1e08; /* = --on-accent en sombre : aucun fond non-accent ne bascule ici */
+}
+
+* {
+  box-sizing: border-box;
+  /* Supprime le flash/halo bleu au tap dans la WebView Android. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Pas d'outline de focus persistant après un tap/clic (c'est lui, le « bord bleu »).
+   On garde un anneau net pour la navigation clavier (a11y) via :focus-visible. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--brand-deep);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  /* Fallback 100vh pour les WebView anciennes (Huawei sans GMS, < Chromium 108)
+     qui ignorent `dvh` : sans lui, pas de hauteur mini → le fond du body ne
+     couvre que le contenu et le reste de la WebView apparaît en blanc (case
+     blanche au-dessus du clavier). Les WebView modernes gardent `dvh`. */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+}
+
+/* Zéro sélection de texte à l'appui long : l'app ne
+   s'imprime pas et n'expose aucun texte à copier-coller — un appui long sur un
+   titre ne doit RIEN déclencher, ni la sélection web (surlignage bleu), ni le
+   menu contextuel de la WebView (« Copier le texte »), qui donnent une
+   impression de page web plutôt que d'app native. Précédents ponctuels du même
+   goût : les images de ChartStage et RadialCalibrationWizard portaient déjà
+   user-select:none. La sélection reste un OUTIL d'édition : elle est rétablie
+   pour les champs de saisie et les éditeurs contenteditable (CodeMirror et
+   l'éditeur de texte du lecteur posent contenteditable="true", l'attribut nu
+   est couvert par [contenteditable='']). */
+html {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+[contenteditable='true'],
+[contenteditable=''] {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+}
+
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+/* briques réutilisables */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  /* bordure pour distinguer le bouton secondaire d'une carte (même fond --surface) */
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--clay-sm);
+  transition: background var(--motion-fast), transform var(--motion-fast), box-shadow var(--motion-fast);
+}
+.btn:active {
+  transform: scale(0.97);
+  box-shadow: var(--clay-press);
+}
+.btn--primary {
+  background: var(--brand-grad);
+  color: var(--on-accent);
+  border-color: transparent;
+  box-shadow: 0 12px 22px -10px rgba(var(--brand-rgb), 0.6), 0 1px 1px rgba(255, 255, 255, 0.3) inset;
+}
+.btn--primary:active {
+  background: var(--brand-deep);
+  /* fond brand-deep SOMBRE en clair (même dans la bande chaude, où --on-accent bascule
+     sur sombre pour l'accent clair) : le texte presse reste clair via --on-solid. */
+  color: var(--on-solid);
+  box-shadow: var(--clay-press);
+}
+.btn--block {
+  width: 100%;
+}
+
+.btn:disabled,
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.card {
+  background: var(--tile);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  box-shadow: var(--clay-sm);
+}
+
+.field-label {
+  display: block;
+  font-weight: 600;
+  color: var(--ink-55);
+  margin-bottom: var(--sp-2);
+}
+
+/* astérisque « champ requis » */
+/* L'astérisque est un TEXTE : dans la bande chaude claire (H 40,5-110, spec 08/09) --brand
+   devient pâle (rendu « sombre-adapté », pensé pour du texte SOMBRE posé dessus) — il doit
+   rester sombre sur fond clair, donc il passe sur --brand-deep, inchangé (sombre) sur
+   toute la roue. */
+.req {
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+/* message d'erreur de champ (sous l'input concerné) */
+.field-err {
+  margin: var(--sp-2) 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--danger);
+}
+.input--err {
+  border-color: var(--danger);
+}
+
+.input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+.input::placeholder {
+  color: var(--ink-40);
+}
+
+/* Déroulant natif (<select class="input">) : seul reste visible du navigateur au
+   repos est sa flèche — remplacée ici par une flèche maison (trait rond, langage
+   du design system). La LISTE OUVERTE, elle,
+   reste un dialogue rendu par l'OS (Android) : hors de portée du CSS, volontairement
+   pas traitée ici.
+   ⚠️ Règle ciblée sur `select.input` UNIQUEMENT, jamais sur `.input` seul : cette
+   dernière est aussi portée par 5 <input type="date"> ; `appearance: none` dessus
+   ferait disparaître leur icône calendrier native et les rendrait inutilisables.
+   Exception documentée : `currentColor` ne s'applique pas dans un SVG data-URI de
+   background-image (document séparé) — le trait est donc codé en dur à la valeur
+   hex du token --ink-55 (#845535) plutôt qu'en `var(--ink-55)`. */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: var(--sp-8);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5L7 9.5L11 5.5' fill='none' stroke='%23845535' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--sp-3) center;
+  background-size: 14px;
+}
+/* Flèche du <select> en sombre : le data-URI ne suit pas currentColor → flèche crème codée. */
+:root[data-theme='dark'] select.input,
+html[data-theme='dark'] select.input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5L7 9.5L11 5.5' fill='none' stroke='%23f2e9dc' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) select.input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5L7 9.5L11 5.5' fill='none' stroke='%23f2e9dc' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
+/* Échelle de largeurs de contenu — définie ICI et nulle part ailleurs.
+   Téléphone : le plafond n'est jamais atteint, le contenu est pleine largeur.
+   Tablette portrait (600px+) : 720px. Tablette paysage (900px+) : 840px.
+   Au-delà, on n'élargit plus : une ligne de texte trop longue se lit MOINS bien, on perd
+   sa ligne en revenant à la marge.
+   Les fenêtres superposées (dialogues, feuilles) ne suivent PAS cette échelle : une boîte
+   de confirmation étalée sur 900px éloigne ses boutons des pouces. Elles utilisent
+   --w-dialog, volontairement figé. */
+:root {
+  --w-content: 480px;
+  --w-dialog: 480px;
+}
+@media (min-width: 600px) {
+  :root {
+    --w-content: 720px;
+  }
+}
+@media (min-width: 900px) {
+  :root {
+    --w-content: 840px;
+  }
+}
+
+.screen {
+  max-width: var(--w-content);
+  margin: 0 auto;
+  /* Safe-areas (encoche / barre gestuelle / paysage) — nécessite viewport-fit=cover (index.html). */
+  padding: var(--sp-4) max(var(--sp-4), var(--sa-right)) calc(var(--sp-8) + var(--sa-bottom))
+    max(var(--sp-4), var(--sa-left));
+}
+
+/* Transitions d'écran (changement de route) : réactivées. Fondu
+   court À L'ENTRÉE d'une vue, posé sur la vue ENTIÈRE montée par <RouterView>
+   (App.vue, mode « out-in »), rendu possible par la racine unique désormais posée sur
+   chaque vue de src/views/ — sans elle, <Transition> reçoit un fragment (AppHeader +
+   main) et l'écran sort vide.
+   PAS d'animation de SORTIE — décision mesurée, pas un oubli : en « out-in », un écran
+   sortant animé resterait monté ~150 ms APRÈS que l'URL a changé, donc encore présent et
+   CLIQUABLE — un tap rapide destiné au nouvel écran retombe sur l'ancien (même pastille
+   chrono au même endroit sur la fiche et dans le lecteur : constaté en e2e, la tapette
+   démarrait le chrono de l'écran QUITTÉ, jamais celui de l'écran affiché). Sans durée de
+   sortie, « out-in » démonte l'écran quitté à la frame suivante : le calendrier
+   d'interactivité redevient exactement celui d'avant la réactivation, et le fondu
+   d'entrée seul porte l'animation.
+   Durée : --motion-fast (150 ms), le token le plus court de l'échelle — un changement
+   d'écran ne doit jamais se voir, juste se sentir. Opacité seule : aucune translation,
+   pour ne pas entrer en conflit avec le retour tactile ni déplacer la lecture. */
+.route-fade-enter-active {
+  transition: opacity var(--motion-fast);
+}
+.route-fade-enter-from {
+  opacity: 0;
+}
+/* Respect du réglage système « réduire les animations » (accessibilité) : garde
+   explicite sur le fondu de route. La règle globale ci-dessous (0.001ms !important)
+   couvre déjà ce cas — ce bloc pose la décision ICI, lisible, si cette règle globale
+   venait à être revisitée. */
+@media (prefers-reduced-motion: reduce) {
+  .route-fade-enter-active {
+    transition: none;
+  }
+}
+
+/* Respect du réglage système « réduire les animations » (accessibilité). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

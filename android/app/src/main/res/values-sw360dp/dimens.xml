@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      sw360dp se lit « plus petite largeur d'au moins 360 dp ». Le Huawei
+      LYA-L29, quand il rend en xxhdpi (480 dpi), fait 1080 px de large a
+      cette densite, soit exactement 360 dp : il prend cette valeur-ci.
+      62 % de 360 dp font 223 dp ; arrondi a 225dp, comme 170 et 370 le sont
+      deja plus haut dans le meme calcul (62 % de la plus petite dimension).
+      Le meme Huawei peut aussi rendre en 640 dpi, ou il ne mesure plus que
+      270 dp de large : il retombe alors sur les 170dp de values/, qui restent
+      justes pour cet etat-la. Les deux configurations doivent rester exactes.
+    -->
+    <dimen name="splash_tuile">225dp</dimen>
+</resources>

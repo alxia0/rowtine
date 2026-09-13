@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Taille de la tuile du demarrage. Elle reproduit ce que les appareils
+      affichent DEJA : le generateur la dimensionnait a 62 % de la plus petite
+      dimension de la fenetre, soit 167 dp sur le Huawei et 372 dp sur la Nexus 7.
+      Corriger la deformation ne doit rien changer d'autre a l'oeil.
+      Cette valeur-ci est celle des telephones.
+    -->
+    <dimen name="splash_tuile">170dp</dimen>
+</resources>

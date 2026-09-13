@@ -1,0 +1,8 @@
+{
+  "appId": "com.rowtine.app",
+  "appName": "Rowtine",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#A7BA9A"
+  }
+}

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+    </style>
+
+
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+        <!--
+          L'ECLAIR BLANC PLEIN ECRAN au demarrage (vu sur le Huawei, jamais sur le
+          Pixel 7). Sa cause, lue dans core-splashscreen 1.2.0 le 21/08/2026 :
+            Theme.SplashScreen.Common pose android:windowBackground =
+              @drawable/compat_splash_screen_no_icon_background,
+            qui n'est qu'un <color android:color="?attr/windowSplashScreenBackground" />,
+            et Theme.SplashScreen laisse cet attribut a ?android:colorBackground — donc BLANC
+            sur une base claire.
+          A partir d'Android 12, values-v31/styles.xml l'ecrase deja en vert : ces appareils ne
+          voient jamais ce blanc. Android 11 et avant l'ont toujours — ce qui explique
+          exactement pourquoi le Huawei le montre et le Pixel 7 non.
+          L'attribut ci-dessous est celui de la BIBLIOTHEQUE (sans prefixe android:), a ne pas
+          confondre avec android:windowSplashScreenBackground de values-v31, qui est celui du
+          systeme et n'existe qu'a partir de l'API 31.
+          @drawable/splash reste le dessin de la fenetre de lancement ; cette couleur est le
+          fond de fenetre PLEIN ECRAN qui l'entoure — les deux se completent.
+          MESURE SUR LE HUAWEI LE 21/08/2026, ET LE RESULTAT DEMENT L'ATTENTE : l'eclair
+          blanc est toujours la. Captures d'ecran en rafale pendant le lancement, mesurees une
+          par une : l'ecran de lancement est vert et propre (0 % de blanc), puis des captures
+          blanches a 100 %, puis l'app s'affiche. Le blanc arrive donc APRES l'ecran de
+          lancement, pas pendant.
+          ET IL EST INTERMITTENT : sur QUATRE demarrages a froid mesures le meme jour, DEUX
+          le montrent et DEUX ne le montrent pas du tout (20 captures couvrant 2,85 s, zero
+          pixel blanc). Il n'a jamais ete signale en usage reel, ce que cette mesure
+          corrobore. Ne pas conclure d'un seul lancement propre que le defaut est parti.
+          Une deuxieme hypothese a ete testee le meme jour et REFUTEE elle aussi : un APK
+          d'essai posant android:windowBackground en MAGENTA sur AppTheme.NoActionBar (le
+          theme d'APRES le splash) a laisse l'eclair BLANC, jamais magenta.
+          CE QUE CETTE LIGNE FAIT DONC, ET RIEN DE PLUS : elle aligne le fond de fenetre du
+          theme de lancement d'Android 11 et avant sur ce que values-v31 fait deja depuis
+          Android 12. Elle ne nuit pas. Elle ne corrige PAS l'eclair blanc : ne pas la
+          compter comme le correctif de ce defaut connu, qui reste OUVERT.
+        -->
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+    </style>
+</resources>

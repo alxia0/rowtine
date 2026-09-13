@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      A partir d'Android 12 (API 31) le systeme dessine lui-meme l'ecran de
+      lancement : il ignore le « android:background » du theme, donc
+      @drawable/splash (le degrade XML et sa tuile) n'est jamais affiche sur
+      ces appareils. On lui donne au moins le meme fond vert que l'icone ;
+      l'icone de l'app, qu'il pose au centre, porte deja le herisson sur ce
+      meme vert, si bien que le disque se fond dans le fond.
+
+      A garder ici et NON dans values/styles.xml : sous Android 12 le theme
+      compat basculerait sur ce meme rendu et jetterait @drawable/splash, qui
+      est le seul ecran de lancement des appareils plus anciens.
+    -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground">@color/ic_launcher_background</item>
+    </style>
+
+</resources>

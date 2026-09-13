@@ -1,0 +1,105 @@
+apply plugin: 'com.android.application'
+
+import groovy.json.JsonSlurper
+
+// Source UNIQUE du numéro de version : package.json à la racine du dépôt (tâche 1.1, lot 1
+// « À propos »). Avant ce fichier, package.json disait 0.0.0 et ce build.gradle portait ses
+// propres versionCode et versionName EN DUR (respectivement 1 et le millésime 1 point 0),
+// SANS lien entre les deux — deux valeurs de gabarit jamais mises à jour, chacune pouvant
+// diverger de l'autre sans qu'aucun outil ne le remarque. `versionName` (le numéro affiché)
+// ET `versionCode` (le numéro de build, entier croissant exigé par Google Play/App Store)
+// sont désormais LUS depuis ce même fichier — il ne peut plus y avoir deux sources à
+// synchroniser à la main.
+def packageJson = new JsonSlurper().parse(file('../../package.json'))
+
+// Clé de release (dépôt privé : android/keystore.properties, gitignoré — voir
+// keystore.properties.example ; CI : décodée depuis le secret ANDROID_KEYSTORE_BASE64
+// par .github/workflows/release.yml). Absent en local sans ce fichier : le build
+// debug n'en a pas besoin, seul `assembleRelease` le requiert.
+def keystorePropertiesFile = file('../keystore.properties')
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    // Lecture UTF-8 explicite : Properties.load(InputStream) lit en ISO-8859-1 par
+    // défaut, ce qui corrompt un storeFile contenant des accents (kDrive
+    // « clés-apk-android »).
+    keystoreProperties.load(new InputStreamReader(new FileInputStream(keystorePropertiesFile), 'UTF-8'))
+}
+
+android {
+    namespace = "com.rowtine.app"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.rowtine.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode packageJson.buildNumber
+        versionName packageJson.version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+        // Allègement APK sans R8 (intent « alléger l'APK sans R8 », mesuré le
+        // 17/08/2026, exécuté le 06/09) : ne garder que les ressources des 4
+        // langues de l'app (−0,45 Mo mesurés) — les autres locales embarquées
+        // par les bibliothèques AndroidX quittent l'APK sans toucher aux
+        // traductions de l'app, qui vivent dans src/i18n/*.json (pas de
+        // ressources Android). ⛔ R8/minify reste interdit (tranché le 17/08) ;
+        // shrinkResources est impossible sans R8 (échec à la configuration,
+        // vérifié le 17/08).
+        resourceConfigurations += ['fr', 'en', 'de', 'es']
+    }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Clé de release dédiée depuis la 1.0 (17/09/2026, décision assumée) :
+            // rupture de continuité avec les APK debug diffusés jusqu'ici (Android
+            // exige la même clé pour une mise à jour en place — désinstallation
+            // requise une fois pour qui avait déjà l'APK debug, avec sauvegarde/
+            // restauration manuelle des données locales).
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation "androidx.documentfile:documentfile:1.0.1"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

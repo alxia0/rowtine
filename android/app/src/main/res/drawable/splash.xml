@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ecran de demarrage des appareils sous Android 11 et avant. A partir d'Android 12
+  le systeme dessine le sien et ignore ce fichier (voir values-v31/styles.xml).
+
+  Pourquoi un dessin XML et non un bitmap : Android etire un fond de FENETRE pour
+  le remplir, sans conserver les proportions. Les onze splash.webp d'avant en
+  sortaient deformes — mesure sur appareil le 18/08/2026, motif a 0,788 sur le
+  Huawei et 1,151 sur la Nexus 7 pour 0,99 a la source. Un degrade decrit en XML
+  n'a pas de proportions : il n'y a plus rien a deformer. Seule la tuile reste un
+  bitmap, et elle est posee a taille fixe en dp.
+
+  Les trois couleurs sont recalculees par tools/icones/generer.py sur ses propres
+  constantes COINS, aux points que le montage atteint (clamp = 0.10). Elles ne
+  sont pas relevees a l'oeil. #A7BA9A est aussi ic_launcher_background : les deux
+  ecrans de demarrage, l'ancien et celui d'Android 12+, partagent leur milieu.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="315"
+                android:startColor="#F0EDCB"
+                android:centerColor="#A7BA9A"
+                android:endColor="#759273" />
+        </shape>
+    </item>
+
+    <item
+        android:width="@dimen/splash_tuile"
+        android:height="@dimen/splash_tuile"
+        android:gravity="center"
+        android:drawable="@drawable/splash_herisson" />
+
+</layer-list>
