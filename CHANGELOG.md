@@ -2,6 +2,12 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.1]
+
+- Build: removed an unused Google Play Services reference from the Android
+  build configuration. No functional change — the app has never used any
+  Google service.
+
 ## [1.0]
 
 First public release.
