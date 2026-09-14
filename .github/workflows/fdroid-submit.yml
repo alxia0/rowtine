@@ -31,14 +31,22 @@ jobs:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
           FORK_ENC=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$GITLAB_USER/fdroiddata', safe=''))")
-          EXISTING=$(curl -fsS -H "PRIVATE-TOKEN: $TOKEN" "$GITLAB_API/projects/$FORK_ENC" || true)
-          if [ -n "$EXISTING" ] && echo "$EXISTING" | jq -e .id >/dev/null 2>&1; then
+          EXISTING=$(curl -sS -H "PRIVATE-TOKEN: $TOKEN" -w '\n%{http_code}' "$GITLAB_API/projects/$FORK_ENC")
+          EXISTING_CODE=$(echo "$EXISTING" | tail -n1)
+          EXISTING_BODY=$(echo "$EXISTING" | sed '$d')
+          if [ "$EXISTING_CODE" = "200" ]; then
             echo "Fork already exists."
-            echo "id=$(echo "$EXISTING" | jq -r .id)" >> "$GITHUB_OUTPUT"
+            echo "id=$(echo "$EXISTING_BODY" | jq -r .id)" >> "$GITHUB_OUTPUT"
           else
-            CREATED=$(curl -fsS -X POST -H "PRIVATE-TOKEN: $TOKEN" \
+            CREATED=$(curl -sS -X POST -H "PRIVATE-TOKEN: $TOKEN" -w '\n%{http_code}' \
               "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/fork")
-            echo "id=$(echo "$CREATED" | jq -r .id)" >> "$GITHUB_OUTPUT"
+            CREATED_CODE=$(echo "$CREATED" | tail -n1)
+            CREATED_BODY=$(echo "$CREATED" | sed '$d')
+            if [ "$CREATED_CODE" != "200" ] && [ "$CREATED_CODE" != "201" ]; then
+              echo "Fork creation failed (HTTP $CREATED_CODE): $CREATED_BODY" >&2
+              exit 1
+            fi
+            echo "id=$(echo "$CREATED_BODY" | jq -r .id)" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Wait for fork import to finish
