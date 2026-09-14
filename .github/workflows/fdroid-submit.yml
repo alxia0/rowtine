@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Prepare the fork and the commit but do not push or open the merge request'
+        description: 'Prepare the fork and the commit but do not push or update the merge request'
         type: boolean
         default: true
+      commit_hash:
+        description: 'Full commit hash for the Build entry (git rev-parse of the release tag)'
+        required: true
+        type: string
 
 env:
   GITLAB_API: https://gitlab.com/api/v4
@@ -76,6 +80,7 @@ jobs:
             - Time Tracker
           License: Apache-2.0
           AuthorName: alxia0
+          AuthorEmail: contact@rowtine.app
           WebSite: https://github.com/alxia0/rowtine
           SourceCode: https://github.com/alxia0/rowtine
           IssueTracker: https://github.com/alxia0/rowtine/issues
@@ -83,41 +88,43 @@ jobs:
 
           RepoType: git
           Repo: https://github.com/alxia0/rowtine.git
+          Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
 
           Builds:
-            - versionName: '1.2'
-              versionCode: 3
-              commit: v1.2.0
-              subdir: android
+            - versionName: '1.2.1'
+              versionCode: 4
+              commit: ${{ inputs.commit_hash }}
+              subdir: android/app
               sudo:
-                - curl -Lo node.tar.gz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.gz
-                - echo "6e1db87ef58b8819e5d5402eff1536491b18edd8eb7bee5ef7897876e88dc5ff node.tar.gz"
-                  | sha256sum -c -
-                - tar xzf node.tar.gz --strip-components=1 -C /usr/local/
+                - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+                - apt-get update
+                - apt-get install -y -t forky nodejs npm
+                - npm install -g corepack
                 - corepack enable
-              gradle:
-                - yes
-              output: app/build/outputs/apk/release/app-release.apk
-              prebuild:
-                - cd ..
+              init:
+                - cd ../..
                 - yarn install --immutable
                 - yarn build
                 - yarn cap sync android
-              scanignore:
+              gradle:
+                - yes
+              scandelete:
+                - node_modules
+                - .yarn
                 - tests/e2e/fixtures/mini-patron.zip
                 - tests/e2e/fixtures/captures/grand-diagramme-es.zip
                 - tests/e2e/fixtures/captures/granny-carre.zip
                 - tests/e2e/fixtures/captures/grand-diagramme-fr.zip
                 - tests/e2e/fixtures/captures/grand-diagramme-de.zip
                 - tests/e2e/fixtures/captures/grand-diagramme-en.zip
-              scandelete:
-                - node_modules
-                - .yarn
 
-          AutoUpdateMode: None
-          UpdateCheckMode: None
-          CurrentVersion: '1.2'
-          CurrentVersionCode: 3
+          AllowedAPKSigningKeys: 4a85cad2642267b1fa54675b34b3f7c07f21937b0c22ac9cd2aa0a7c9391faa5
+
+          AutoUpdateMode: Version %v
+          UpdateCheckMode: HTTP
+          UpdateCheckData: https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
+          CurrentVersion: '1.2.1'
+          CurrentVersionCode: 4
           YAML
 
           git add metadata/com.rowtine.app.yml
@@ -145,14 +152,41 @@ jobs:
             --data-urlencode "target_branch=${{ steps.upstream.outputs.default_branch }}" \
             --data-urlencode "target_project_id=${{ steps.upstream.outputs.id }}" \
             --data-urlencode "title=New app: Rowtine" \
+            --data-urlencode "description=Adds com.rowtine.app (Rowtine), a knitting/crochet companion." \
+            "$GITLAB_API/projects/${{ steps.fork.outputs.id }}/merge_requests"
+
+      - name: Update merge request description
+        if: ${{ !inputs.dry_run }}
+        env:
+          TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
+        run: |
+          curl -fsS -X PUT -H "PRIVATE-TOKEN: $TOKEN" \
             --data-urlencode "description=Adds com.rowtine.app (Rowtine), a knitting/crochet companion.
 
-          - License: Apache-2.0
-          - Source: https://github.com/alxia0/rowtine
-          - Build recipe tested end to end with \`fdroid build --server\` on the official buildserver image (SDK/NDK/Gradle Debian)." \
-            "$GITLAB_API/projects/${{ steps.fork.outputs.id }}/merge_requests"
+          ## Required
+
+          - [x] The app complies with the inclusion criteria
+          - [x] The original app author has been notified (and does not oppose the inclusion) \`self-submission by the app author\`
+          - [x] All related fdroiddata and RFP issues have been referenced in this merge request \`none exist\`
+          - [x] Builds with \`fdroid build\` and all pipelines pass
+          - [x] There is an issue tracker and contact info of the author so that we can report bugs and contact the author.
+
+          ## Strongly Recommended
+
+          - [ ] The upstream app source code repo contains the app metadata (summary/description/images/changelog/etc) in a Fastlane or Triple-T folder structure
+          - [x] Releases are tagged and auto update is enabled
+
+          ## Suggested
+
+          - [ ] External repos are added as git submodules instead of srclibs
+          - [x] Enable Reproducible Builds
+          - [ ] Multiple apks for native code
+
+          /label ~\"New App\"" \
+            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests/48896" \
+          || echo "Could not update the MR description via the API (token scope?) — update it manually in the GitLab UI." >&2
 
       - name: Dry-run summary
         if: ${{ inputs.dry_run }}
         run: |
-          echo "Dry run: fork prepared and commit created locally, nothing pushed. Re-run with dry_run=false to push and open the MR."
+          echo "Dry run: fork prepared and commit created locally, nothing pushed. Re-run with dry_run=false to push and update the MR."

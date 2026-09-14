@@ -2,6 +2,11 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.2.1]
+
+- No code change from 1.2 — switches to a 3-part version scheme (required
+  for F-Droid reproducible-build verification).
+
 ## [1.2]
 
 - Build: excluded the dependency metadata block from the release APK/AAB.
