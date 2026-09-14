@@ -86,12 +86,14 @@ jobs:
           IssueTracker: https://github.com/alxia0/rowtine/issues
           Changelog: https://github.com/alxia0/rowtine/blob/main/CHANGELOG.md
 
+          AutoName: Rowtine
+
           RepoType: git
           Repo: https://github.com/alxia0/rowtine.git
           Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
 
           Builds:
-            - versionName: '1.2.1'
+            - versionName: 1.2.1
               versionCode: 4
               commit: ${{ inputs.commit_hash }}
               subdir: android/app
@@ -122,8 +124,9 @@ jobs:
 
           AutoUpdateMode: Version %v
           UpdateCheckMode: HTTP
-          UpdateCheckData: https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
-          CurrentVersion: '1.2.1'
+          UpdateCheckData:
+            https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
+          CurrentVersion: 1.2.1
           CurrentVersionCode: 4
           YAML
 
