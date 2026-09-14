@@ -25,7 +25,7 @@ jobs:
           echo "id=$(echo "$INFO" | jq -r .id)" >> "$GITHUB_OUTPUT"
           echo "default_branch=$(echo "$INFO" | jq -r .default_branch)" >> "$GITHUB_OUTPUT"
 
-      - name: Fork fdroiddata (or reuse existing fork)
+      - name: Check that the fork exists
         id: fork
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
@@ -34,20 +34,12 @@ jobs:
           EXISTING=$(curl -sS -H "PRIVATE-TOKEN: $TOKEN" -w '\n%{http_code}' "$GITLAB_API/projects/$FORK_ENC")
           EXISTING_CODE=$(echo "$EXISTING" | tail -n1)
           EXISTING_BODY=$(echo "$EXISTING" | sed '$d')
-          if [ "$EXISTING_CODE" = "200" ]; then
-            echo "Fork already exists."
-            echo "id=$(echo "$EXISTING_BODY" | jq -r .id)" >> "$GITHUB_OUTPUT"
-          else
-            CREATED=$(curl -sS -X POST -H "PRIVATE-TOKEN: $TOKEN" -w '\n%{http_code}' \
-              "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/fork")
-            CREATED_CODE=$(echo "$CREATED" | tail -n1)
-            CREATED_BODY=$(echo "$CREATED" | sed '$d')
-            if [ "$CREATED_CODE" != "200" ] && [ "$CREATED_CODE" != "201" ]; then
-              echo "Fork creation failed (HTTP $CREATED_CODE): $CREATED_BODY" >&2
-              exit 1
-            fi
-            echo "id=$(echo "$CREATED_BODY" | jq -r .id)" >> "$GITHUB_OUTPUT"
+          if [ "$EXISTING_CODE" != "200" ]; then
+            echo "No fork found at gitlab.com/$GITLAB_USER/fdroiddata (HTTP $EXISTING_CODE)." >&2
+            echo "Fork https://gitlab.com/fdroid/fdroiddata manually first (Fork button in the GitLab UI), then re-run this workflow." >&2
+            exit 1
           fi
+          echo "id=$(echo "$EXISTING_BODY" | jq -r .id)" >> "$GITHUB_OUTPUT"
 
       - name: Wait for fork import to finish
         env:
