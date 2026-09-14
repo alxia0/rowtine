@@ -142,7 +142,7 @@ jobs:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
           EXISTING_MRS=$(curl -fsS -H "PRIVATE-TOKEN: $TOKEN" \
-            "$GITLAB_API/projects/${{ steps.fork.outputs.id }}/merge_requests?source_branch=add-com-rowtine-app&state=opened")
+            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests?source_branch=add-com-rowtine-app&source_project_id=${{ steps.fork.outputs.id }}&state=opened")
           if [ "$(echo "$EXISTING_MRS" | jq 'length')" -gt 0 ]; then
             echo "MR already open: $(echo "$EXISTING_MRS" | jq -r '.[0].web_url')"
             exit 0
