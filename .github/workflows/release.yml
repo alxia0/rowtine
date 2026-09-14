@@ -18,17 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '24'
 
       - name: Setup JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -64,12 +64,18 @@ jobs:
         working-directory: android
         run: ./gradlew assembleRelease
 
-      - name: Attach APK to the GitHub Release
+      - name: Build signed release AAB (Google Play)
+        working-directory: android
+        run: ./gradlew bundleRelease
+
+      - name: Attach APK and AAB to the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ inputs.tag || github.ref_name }}"
           APK="android/app/build/outputs/apk/release/app-release.apk"
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
           mv "$APK" "rowtine-$TAG.apk"
+          mv "$AAB" "rowtine-$TAG.aab"
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "Rowtine ${TAG#v}" --generate-notes
-          gh release upload "$TAG" "rowtine-$TAG.apk" --clobber
+          gh release upload "$TAG" "rowtine-$TAG.apk" "rowtine-$TAG.aab" --clobber
