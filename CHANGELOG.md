@@ -2,6 +2,12 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.2]
+
+- Build: excluded the dependency metadata block from the release APK/AAB.
+  No functional change — required for F-Droid inclusion, whose scanner
+  rejects it.
+
 ## [1.1]
 
 - Build: removed an unused Google Play Services reference from the Android

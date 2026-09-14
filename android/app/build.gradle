@@ -72,6 +72,13 @@ android {
             signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
         }
     }
+    // Bloc de signature « Dependency metadata » AGP (métadonnées de dépendances
+    // pour Google Play) retiré de l'APK/AAB : le scanner F-Droid le rejette
+    // (« extra signing block », soumission com.rowtine.app du 14/09/2026).
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
 }
 
 repositories {
