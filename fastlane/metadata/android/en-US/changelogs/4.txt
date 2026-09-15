@@ -1,0 +1,6 @@
+First F-Droid release.
+
+Knitting and crochet project tracking: row and stitch counters, timed
+sessions. Pattern library with PDF import, step-by-step reader and charts.
+Yarn stash, purchases and per-project cost. Offline, local data, backup to
+a folder of your choice. French, English, Spanish and German interface.

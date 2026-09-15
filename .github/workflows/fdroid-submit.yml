@@ -113,12 +113,7 @@ jobs:
               scandelete:
                 - node_modules
                 - .yarn
-                - tests/e2e/fixtures/mini-patron.zip
-                - tests/e2e/fixtures/captures/grand-diagramme-es.zip
-                - tests/e2e/fixtures/captures/granny-carre.zip
-                - tests/e2e/fixtures/captures/grand-diagramme-fr.zip
-                - tests/e2e/fixtures/captures/grand-diagramme-de.zip
-                - tests/e2e/fixtures/captures/grand-diagramme-en.zip
+                - tests/e2e/fixtures
 
           AllowedAPKSigningKeys: 4a85cad2642267b1fa54675b34b3f7c07f21937b0c22ac9cd2aa0a7c9391faa5
 

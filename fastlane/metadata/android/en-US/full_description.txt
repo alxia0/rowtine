@@ -1,0 +1,32 @@
+Rowtine is a knitting and crochet companion. It keeps in one place what is
+usually scattered across a project: yarn stash, PDF patterns, row counters
+and project notes.
+
+Features:
+
+* Track every project from cast-on to finished piece, with a timer that
+  remembers where you left off.
+* Import a PDF pattern: sections, rows and sizes are rebuilt automatically,
+  entirely on the device. Patterns in English, French, German and Spanish
+  are supported.
+* Read a pattern with a size selector: every number in the text is
+  filtered down to the chosen size.
+* Follow a chart row by row, with a movable marker and an abbreviations
+  sheet always at hand. On a tablet, the chart and the text can be shown
+  side by side.
+* Manage a yarn stash: what is reserved for a project, what is still free,
+  with a warning when there isn't enough left to finish a piece, including
+  multicoloured yarns (gradient, self-striping, speckled, hand-dyed).
+* Track the cost of every project; purchases and gifts are recorded
+  separately.
+* Look up a needle or hook size from a yarn's ball band and a pattern's
+  gauge.
+* Two standalone tools: an increase/decrease distribution calculator and a
+  free-standing counter.
+* Metric or imperial units, five currencies.
+* Interface, in-app guide and pattern import in English, French, German
+  and Spanish.
+
+The app works offline and keeps all data on the device: no account, no
+data collection, no server. A backup folder is opt-in and chosen by the
+user. Every deletion goes through a bin and can be undone.
