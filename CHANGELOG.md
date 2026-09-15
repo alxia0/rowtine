@@ -2,6 +2,11 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.2.2]
+
+- No code change — adds the Fastlane store listing (description,
+  screenshots) requested during F-Droid review.
+
 ## [1.2.1]
 
 - No code change from 1.2 — switches to a 3-part version scheme (required
