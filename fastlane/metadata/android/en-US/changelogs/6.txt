@@ -1,0 +1,2 @@
+Fixes the app failing to start on Android devices with an outdated system
+WebView (no functional change otherwise).

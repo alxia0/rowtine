@@ -93,8 +93,8 @@ jobs:
           Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
 
           Builds:
-            - versionName: 1.2.1
-              versionCode: 4
+            - versionName: 1.2.3
+              versionCode: 6
               commit: ${{ inputs.commit_hash }}
               subdir: android/app
               sudo:
@@ -121,8 +121,8 @@ jobs:
           UpdateCheckMode: HTTP
           UpdateCheckData: 
             https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
-          CurrentVersion: 1.2.1
-          CurrentVersionCode: 4
+          CurrentVersion: 1.2.3
+          CurrentVersionCode: 6
           YAML
 
           git add metadata/com.rowtine.app.yml
