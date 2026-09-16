@@ -2681,6 +2681,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js-bundle@npm:^3.50.0":
+  version: 3.50.0
+  resolution: "core-js-bundle@npm:3.50.0"
+  checksum: 10c0/7945b2fb470c1b706933871fa7635b051903f2016ae3c8a278626690ed3e1c58a75e997867976b19b65d0f02c24f260b6d6dfbe16bcf49943b6dcc3b74ef76cf
+  languageName: node
+  linkType: hard
+
 "crelt@npm:^1.0.6":
   version: 1.0.7
   resolution: "crelt@npm:1.0.7"
@@ -5122,6 +5129,7 @@ __metadata:
     "@vue/devtools-api": "npm:^8.1.5"
     "@vue/test-utils": "npm:^2.4.11"
     axe-core: "npm:^4.13.0"
+    core-js-bundle: "npm:^3.50.0"
     dexie: "npm:^4.4.5"
     eslint: "npm:^10.8.1"
     eslint-config-prettier: "npm:^10.1.8"

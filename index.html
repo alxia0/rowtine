@@ -18,6 +18,19 @@
     <meta name="theme-color" content="#f3f6fe">
     <meta name="description" content="Rowtine — suivez vos projets de tricot et crochet : compteurs de rangs, sessions, stock de laine et patrons. Hors ligne." />
     <title>Rowtine</title>
+    <!-- Polyfills runtime (globalThis, Object.fromEntries, .flatMap, .replaceAll, .at,
+         Object.hasOwn, structuredClone…) pour le WebView système d'un Android jamais mis
+         à jour côté Play Store (WebView 66 constaté sur un retour F-Droid Android 9) :
+         plusieurs dépendances du bundle y plantent au chargement, avant même que Vue ne
+         monte quoi que ce soit. `build.target` (vite.config.js) abaisse la SYNTAXE
+         transpilée mais ne fournit pas les méthodes manquantes de l'environnement.
+         Chargé en script CLASSIQUE (pas `import` dans main.js) : sur ce WebView, l'ordre
+         d'exécution d'un graphe de ~70 modules ES n'a pas garanti que le premier import
+         de main.js s'exécute avant les autres chunks — un script classique, lui, s'exécute
+         toujours avant le `type="module"` qui le suit dans le DOM, sur tout navigateur.
+         Copie statique de node_modules/core-js-bundle/minified.js (voir package.json) :
+         à recopier dans public/vendor/ si la dépendance change de version. -->
+    <script src="/vendor/core-js-bundle.min.js"></script>
     <script>
       // Pré-paint : pose data-theme si un choix EXPLICITE est mémorisé, pour éviter le
       // flash clair→sombre au démarrage à froid (main.js monte avant le chargement Dexie).
