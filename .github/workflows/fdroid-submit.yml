@@ -171,7 +171,7 @@ jobs:
 
           ## Strongly Recommended
 
-          - [ ] The upstream app source code repo contains the app metadata (summary/description/images/changelog/etc) in a Fastlane or Triple-T folder structure
+          - [x] The upstream app source code repo contains the app metadata (summary/description/images/changelog/etc) in a Fastlane or Triple-T folder structure
           - [x] Releases are tagged and auto update is enabled
 
           ## Suggested
