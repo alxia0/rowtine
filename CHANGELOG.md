@@ -2,6 +2,17 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.3.0]
+
+- Stats tab on every project: total time, sessions, skeins used, timespan,
+  longest daily streak, and a calendar view.
+- Share button: compose a badge of your project (photo, numbers, colors,
+  four layouts, free text, choice of language) and send it anywhere.
+- Share a project photo from the gallery.
+- Yarn stash: the price field now accepts a comma.
+- Removed the unused READ_MEDIA_IMAGES permission (the photo picker doesn't
+  need it).
+
 ## [1.2.2]
 
 - No code change — adds the Fastlane store listing (description,
