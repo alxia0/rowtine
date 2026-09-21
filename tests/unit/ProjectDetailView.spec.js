@@ -5,6 +5,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import i18n from '@/i18n'
+import { SESSION_NO_SECTION } from '@/constants/session'
 
 const nav = vi.hoisted(() => ({
   route: { params: {}, query: {} },
@@ -21,6 +22,7 @@ import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useSnackbarStore } from '@/stores/snackbar'
+import { useCropperStore } from '@/stores/cropper'
 
 async function seedProject(extra = {}) {
   const pid = await db.projects.add({
@@ -52,20 +54,281 @@ beforeEach(async () => {
   nav.router.replace.mockClear()
   nav.router.back.mockClear()
   openPdfExternally.mockClear()
+  // Explicite plutôt qu'implicite : `nav.route.query` est un mock hoisté PARTAGÉ entre tous
+  // les tests du fichier. Jusqu'ici remis à `{}` uniquement par `seedProject()`, ce qui
+  // tenait par convention (chaque `mountDetail()` du fichier est précédé d'un `seedProject()`
+  // ou équivalent) et pas par garantie — un futur test qui omettrait ce préalable hériterait
+  // silencieusement du `{ tab: 'stats' }` posé par le repro Julien ci-dessous.
+  nav.route.query = {}
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
 })
 
 describe('ProjectDetailView', () => {
-  it('affiche le titre du projet et les 4 onglets', async () => {
+  it('affiche le titre du projet et les 5 onglets', async () => {
     await seedProject()
     const w = mountDetail()
     await flushPromises()
 
     expect(w.find('.phdr__title').text()).toBe('Pull torsadé')
-    expect(w.findAll('[role="tab"]')).toHaveLength(4)
+    expect(w.findAll('[role="tab"]')).toHaveLength(5)
     // L'onglet Sections est désormais le premier (ouvert par défaut).
     expect(w.find('#panel-sections').exists()).toBe(true)
+  })
+
+  it('handleBackPressed() : retour progressif, un appel ramène sur Sections, le suivant laisse passer', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+
+    // Onglet par défaut ('sections') : le retour n'est PAS avalé, smartBack() doit s'exécuter.
+    expect(w.vm.handleBackPressed()).toBe(false)
+    // Bascule sur un autre onglet (ex. 'stats') : le premier retour ramène sur l'onglet par
+    // défaut (feedback visible) et avale ce geste-là, la fiche reste affichée.
+    await w.vm.changeTab('stats')
+    expect(w.vm.handleBackPressed()).toBe(true)
+    expect(w.vm.tab).toBe('sections')
+    // Le changement d'onglet EST le retour visible pour l'utilisatrice : vérifié aussi côté
+    // rendu (bouton d'onglet actif), pas seulement sur l'état interne `tab`.
+    await w.vm.$nextTick()
+    expect(w.find('#tab-sections').attributes('aria-selected')).toBe('true')
+    // Un second retour, maintenant sur l'onglet par défaut, n'est plus avalé.
+    expect(w.vm.handleBackPressed()).toBe(false)
+  })
+
+  // Retour Julien, 20/09 : un geste de retour depuis le composeur de badge ouvert quittait la
+  // fiche (composeur local, jamais gardé par App.vue) au lieu de le refermer. Ouvre le composeur
+  // par le VRAI bouton (comme les autres tests du composeur dans ce fichier), depuis l'onglet
+  // Stats — délibérément pas l'onglet d'entrée — pour prouver que la garde composeur est
+  // vérifiée EN PREMIER : si la logique d'onglet passait avant, ce premier retour changerait
+  // d'onglet au lieu de fermer le composeur.
+  it('handleBackPressed() : ferme le composeur de badge en premier, avant la logique d’onglet', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.vm.changeTab('stats')
+    await w.vm.$nextTick()
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+    expect(w.vm.showBadgeComposer).toBe(true)
+
+    expect(w.vm.handleBackPressed()).toBe(true) // avalé
+    expect(w.vm.showBadgeComposer).toBe(false) // composeur refermé
+    expect(w.vm.tab).toBe('stats') // pas de changement d'onglet : la garde composeur a joué en premier
+  })
+
+  // Reproduit le scénario LITTÉRAL signalé par Julien (20/09) : composeur ouvert alors qu'on est
+  // DÉJÀ sur l'onglet d'entrée. Avant le correctif, `handleBackPressed()` ne connaissait que la
+  // logique d'onglet — `tab.value === entryTab` étant déjà vrai dans ce cas, elle renvoyait
+  // `false` sans rien faire, laissant le geste retomber sur `smartBack()` (sortie vers
+  // l'Accueil), composeur toujours ouvert par-dessus l'écran disparu. `entryTab` est capturé une
+  // seule fois à l'ouverture depuis `route.query.tab` (cf. sa déclaration plus haut) : on force
+  // ici une entrée directe sur l'onglet Stats pour que `tab.value === entryTab` soit vrai DÈS le
+  // montage, sans passer par un `changeTab()` — ce qui rendrait la scène indiscernable du test
+  // `tab='stats'` précédent (qui, lui, couvre le cas où l'onglet d'entrée diffère).
+  it('handleBackPressed() : ferme le composeur ouvert alors qu’on est déjà sur l’onglet d’entrée (repro Julien)', async () => {
+    await seedProject()
+    nav.route.query = { tab: 'stats' }
+    const w = mountDetail()
+    await flushPromises()
+
+    expect(w.vm.tab).toBe('stats') // onglet d'entrée dès le montage, aucun changeTab() ici
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+    expect(w.vm.showBadgeComposer).toBe(true)
+
+    // Sans le correctif : tab.value === entryTab ⇒ `false` ici, composeur resté ouvert, geste
+    // tombant sur smartBack().
+    expect(w.vm.handleBackPressed()).toBe(true) // avalé
+    expect(w.vm.showBadgeComposer).toBe(false) // composeur refermé, pas de sortie vers smartBack()
+  })
+
+  // Revue finale du lot (20/09) : le recadreur (PhotoCropper, instance unique montée dans
+  // App.vue) s'ouvre PAR-DESSUS le composeur de badge depuis BadgePhotoPicker, rendu à
+  // l'intérieur du composeur. Même garde que le gestionnaire Échap du composeur lui-même
+  // (`if (cropper.open) return`, BadgeComposer.vue) : sans elle, ce geste de retour fermait le
+  // composeur SOUS le recadreur encore ouvert, perdant en silence la configuration en cours
+  // (gabarit, couleur, stats) et laissant le recadreur orphelin à l'écran.
+  it('handleBackPressed() : avale le geste sans fermer le composeur tant que le recadreur est ouvert par-dessus', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+
+    // Le bouton d'ouverture du composeur vit dans l'onglet Stats (cf. autres tests du composeur
+    // ci-dessus) : y basculer d'abord, ce test ne porte pas sur la logique d'onglet.
+    await w.vm.changeTab('stats')
+    await w.vm.$nextTick()
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+    expect(w.vm.showBadgeComposer).toBe(true)
+
+    const cropper = useCropperStore()
+    cropper.open = true
+
+    // Sans la garde : le composeur se fermerait ici (même comportement que le test précédent),
+    // recadreur orphelin par-dessus un composeur démonté.
+    expect(w.vm.handleBackPressed()).toBe(true) // geste avalé
+    expect(w.vm.showBadgeComposer).toBe(true) // composeur préservé, configuration intacte
+
+    cropper.open = false
+    expect(w.vm.handleBackPressed()).toBe(true) // avalé
+    expect(w.vm.showBadgeComposer).toBe(false) // recadreur refermé : le composeur se ferme normalement
+  })
+
+  it('onglet Stats : agrège les séances du projet, les pelotes utilisées et affiche la mini-heatmap', async () => {
+    const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '' })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-05T10:00:00.000Z',
+      durationSec: 1800, manual: true,
+    })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-06T10:00:00.000Z',
+      durationSec: 3600, manual: true,
+    })
+    // Couvre le câblage réel de aggregateProjectStats(project, sessions, yarnsStore.yarns) —
+    // sans laine seedée, ballsUsed vaudrait 0 par construction et ne prouverait rien.
+    // `lengthM` renseigné : couvre aussi la branche « métrage affiché » du template
+    // (`v-if="projectStats.metersUsed"`), invisible avec une laine sans métrage — 3 pelotes
+    // réservées × 100 m = 300 m attendus dans la tuile, à côté du compte de pelotes.
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, lengthM: 100, reservations: { [pid]: 3 } })
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+
+    const panel = w.find('#panel-stats')
+    expect(panel.exists()).toBe(true)
+    expect(panel.text()).toContain('2 sessions')
+    expect(panel.text()).toContain('3 pelotes')
+    expect(panel.text()).toContain('300 mètres')
+    // Projet EN COURS : phrase dédiée, pas « 05/01/2026 au en cours » ; dates localisées,
+    // jamais l'ISO brut (mêmes règles que la ligne « période » du badge).
+    expect(panel.text()).toContain('Depuis le 05/01/2026')
+    expect(panel.text()).not.toContain('2026-01-05')
+    expect(w.findComponent({ name: 'StatsHeatmap' }).exists()).toBe(true)
+  })
+
+  it('onglet Stats : projet terminé, période bornée avec deux dates localisées', async () => {
+    const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '2026-01-06' })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-05T10:00:00.000Z',
+      durationSec: 1800, rowsDone: 4, manual: true,
+    })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+
+    expect(w.find('#panel-stats').text()).toContain('05/01/2026 au 06/01/2026')
+  })
+
+  it('onglet Stats : état vide sans exception pour un projet sans séance', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+
+    expect(w.find('#panel-stats').exists()).toBe(true)
+  })
+
+  it('onglet Stats : le bouton Partager reste accessible même sans aucune séance', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+
+    expect(w.find('#panel-stats').text()).toContain('Aucune session enregistrée')
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+
+    expect(w.findComponent({ name: 'BadgeComposer' }).exists()).toBe(true)
+  })
+
+  it('ouvre le composeur de badge depuis l’onglet Stats', async () => {
+    const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '' })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-05T10:00:00.000Z',
+      durationSec: 1800, rowsDone: 4, manual: true,
+    })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+
+    expect(w.findComponent({ name: 'BadgeComposer' }).exists()).toBe(true)
+  })
+
+  // Câblage réel ProjectDetailView.vue → aggregateProjectStats (revue finale du lot « badge
+  // motif d'avancement ») : le bug corrigé par ce lot passait `sectionsStore.sections` (table
+  // `sections`, toujours vide ici : aucune section déclarée à la main) au lieu de
+  // `linkedPattern.value` en 4e argument — `rowsProgress` retombait alors systématiquement à
+  // `null`, sans qu'aucun test hors de ce fichier ne puisse le voir (les tests de
+  // project-stats.spec.js appellent `aggregateProjectStats` directement avec un `pattern`
+  // construit à la main, ils ne passent jamais par ce point d'appel). Ce test seed un patron
+  // AVEC lecteur structuré (même forme que `seedWithSections` ci-dessus) et un `readerState`
+  // partiel, puis lit `rowsProgress` là où l'appli le consomme réellement : la prop `stats`
+  // reçue par `BadgeComposer` (`:stats="projectStats"`).
+  it('le badge reçoit un rowsProgress calculé depuis le lecteur du patron RÉELLEMENT lié (câblage projectStats → BadgeComposer)', async () => {
+    const patId = await db.patterns.add({
+      name: 'SABAI',
+      reader: {
+        sizeLabels: [],
+        sections: [
+          { id: 's1', kind: 'pelote', title: 'Encolure', steps: [{ t: 'Rg 1' }, { t: 'Rg 2' }, { t: 'Rg 3' }] },
+          { id: 's2', kind: 'pelote', title: 'Corps', steps: [{ t: 'Rg 1' }, { t: 'Rg 2' }] },
+        ],
+      },
+    })
+    // 2 rangs faits sur les 3 de la section « Encolure », rien coché dans « Corps » :
+    // 2 faits / 5 au total, connu à l'avance — pas un stub, le calcul passe par readerProgress.
+    await seedProject({ patternId: patId, readerState: { done: { 's1#0': true, 's1#1': true } } })
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+
+    const composer = w.findComponent({ name: 'BadgeComposer' })
+    expect(composer.props('stats').rowsProgress).toEqual({ done: 2, total: 5 })
+  })
+
+  // Spec §141 : après génération, la feuille RESTE ouverte pour montrer l'aperçu du badge.
+  // Elle se refermait sur `saved`, ce qui rendait cet aperçu inatteignable.
+  it('la feuille de badge reste ouverte après génération, et se ferme sur Fermer', async () => {
+    const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '' })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-05T10:00:00.000Z',
+      durationSec: 1800, rowsDone: 4, manual: true,
+    })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await flushPromises()
+    await w.find('[data-test="open-badge-composer"]').trigger('click')
+    await flushPromises()
+
+    const composer = w.findComponent({ name: 'BadgeComposer' })
+    composer.vm.$emit('saved')
+    await flushPromises()
+    expect(w.findComponent({ name: 'BadgeComposer' }).exists()).toBe(true)
+    // Aucun snackbar de confirmation : il serait rendu SOUS la feuille opaque (z-index 100
+    // contre 1050), donc invisible. C'est l'aperçu affiché dans la feuille qui confirme.
+    expect(useSnackbarStore().message).toBeFalsy()
+
+    composer.vm.$emit('close')
+    await flushPromises()
+    expect(w.findComponent({ name: 'BadgeComposer' }).exists()).toBe(false)
   })
 
   it("l'onglet Infos liste les tailles et la taille active est marquée", async () => {
@@ -171,6 +434,27 @@ describe('ProjectDetailView', () => {
   // l'œil lui-même a disparu au profit du chevron de la pastille ; le kebab est redevenu
   // une porte de retour durable). Le détail des gestes est couvert par
   // project-detail-chrono.spec.js ; ici : la présence et la DYNAMIQUE du libellé.
+  // Demande Julien (21/09) : « Partager » dans le kebab, second chemin vers le composeur de
+  // badge, disponible depuis n'importe quel onglet (pas seulement Stats).
+  it('le menu porte « Partager », qui ouvre le composeur de badge sans changer d’onglet', async () => {
+    await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+    const avant = w.vm.tab
+
+    await w.find('.phdr__kebab').trigger('click')
+    await flushPromises()
+    const item = w.find('[data-test="menu-share-badge"]')
+    expect(item.exists()).toBe(true)
+    expect(item.text()).toBe(i18n.global.t('project.stats.badge.create'))
+
+    await item.trigger('click')
+    await flushPromises()
+    expect(w.vm.showBadgeComposer).toBe(true)
+    expect(w.vm.menuOpen).toBe(false)
+    expect(w.vm.tab).toBe(avant)
+  })
+
   it('le menu porte la bascule chrono, dynamique selon project.showTimer', async () => {
     const pid = await seedProject()
     const w = mountDetail()

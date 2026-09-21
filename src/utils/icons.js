@@ -101,6 +101,13 @@ export const ICONS = {
       '<path d="M9 5H6.8A1.8 1.8 0 0 0 5 6.8v10.4A1.8 1.8 0 0 0 6.8 19h10.4a1.8 1.8 0 0 0 1.8-1.8V15"/>' +
       '<path d="M13.5 4.5h6v6"/><path d="M19.2 4.8 10.5 13.5"/>',
   },
+  // Partage vers une appli du système (mail, messagerie…) : trois nœuds reliés, motif
+  // standard du web (« share »), distinct d'`externalLink` (ouvrir ailleurs, pas diffuser).
+  share: {
+    body:
+      '<circle cx="18" cy="5.5" r="2.2"/><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="18.5" r="2.2"/>' +
+      '<path d="M8 10.6l8-4.4M8 13.4l8 4.4"/>',
+  },
   // ─── Barre de l'éditeur de patrons (P4) ──────────────────────────────────
   // Étape = case à cocher (rang à suivre).
   checkbox: { body: '<rect x="4" y="4" width="16" height="16" rx="3.2"/><path d="M8 12.2 11 15.2 16.4 9"/>' },
@@ -287,6 +294,17 @@ export const ICONS = {
     // côté + deux pattes espacées : silhouette « animal à 4 pattes » qui tient à 16 px.
     body: '<ellipse cx="9.5" cy="12.5" rx="6" ry="4.3"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M7 16.5v3M12.5 16.5v3"/>',
   },
+
+  // ─── Gabarits du badge de partage (onglet Stats du projet, 2026-09-16) ───
+  badgeVertical: { body: '<rect x="6" y="3" width="12" height="18" rx="2"/><line x1="8" y1="14" x2="16" y2="14"/>' },
+  badgeHorizontal: { body: '<rect x="3" y="6" width="18" height="12" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/>' },
+  badgeMinimal: { body: '<rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/>' },
+  badgeDouble: { body: '<rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/>' },
+
+  // ─── Ratios de recadrage (pop-up « Choisir une photo » du badge, 2026-09-17) ───
+  ratioSquare: { body: '<rect x="4" y="4" width="16" height="16" rx="1.5"/>' },
+  ratioHorizontal: { body: '<rect x="2" y="6" width="20" height="12" rx="1.5"/>' },
+  ratioVertical: { body: '<rect x="6" y="2" width="12" height="20" rx="1.5"/>' },
 }
 
 // Nom d'icône présent au registre ? (fallback géré par AppIcon → 'pelote').

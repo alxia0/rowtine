@@ -138,6 +138,11 @@ function openAddMissing() {
 }
 function openEdit(line) {
   Object.assign(form, emptyPurchase(), line)
+  // Même parade que StashView.vue `openEdit` (prix laine) : `line.unitPrice` peut être un
+  // nombre JS (ligne créée depuis un prix déjà normalisé, StashView.vue:save()) — le
+  // réafficher tel quel montrerait « 9.5 » au lieu de « 9,5 » dans un champ qui n'accepte
+  // que la virgule française.
+  form.unitPrice = line.unitPrice === '' || line.unitPrice == null ? '' : String(line.unitPrice).replace('.', ',')
   formMode.value = 'edit'
   editingId.value = line.id
 }

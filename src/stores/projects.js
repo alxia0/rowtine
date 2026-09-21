@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db, plain } from '@/db/db'
 import { reservationsOf, consumedOf, setProjectReservation } from '@/utils/yarn-usage'
-import { useYarnsStore } from '@/stores/yarns'
+import { refreshYarnsIfLoaded } from '@/stores/yarns'
 import { finishedAtPatch } from '@/utils/project-finished-at'
 import { startedAtPatch } from '@/utils/project-started-at'
 import { ymdLocal } from '@/utils/time-periods'
@@ -49,6 +49,46 @@ export function emptyProject() {
     lastWorkedAt: '',
     showTimer: true, // chrono affiché par défaut ; bascule via le chevron de la pastille/le kebab/le formulaire (spec 08/09)
   }
+}
+
+// Réinjecte l'allocation d'UN projet dans chaque laine mémorisée par `remove()` ci-dessous,
+// sans jamais toucher celles des autres projets (setProjectReservation) — partagée par
+// `restore()` ci-dessous et par `trash.js` (restauration d'un projet depuis la corbeille,
+// même cascade). ATTENTION : entre la suppression et la restauration, un autre projet a pu
+// prendre la place laissée libre — setProjectReservation borne alors au disponible
+// (possiblement 0) plutôt que d'inventer des pelotes.
+// `collectShortfalls` (trash.js seul) : signale, sans corriger (setProjectReservation a déjà
+// borné correctement), les liens où l'allocation obtenue est inférieure à celle demandée.
+export async function reinjectYarnLinks(yarnLinks, projectId, { collectShortfalls = false } = {}) {
+  const shortfalls = []
+  for (const l of yarnLinks || []) {
+    let y = await db.yarns.get(l.id)
+    if (!y) continue
+    // Trace de consommation (K3) : indépendante de la réservation ci-dessous — une
+    // laine consommée n'a PLUS de réservation active (`consumeProjectReservation`
+    // l'a retirée avant), donc ce lien peut porter `consumedQty` SEUL, sans `qty`.
+    // Réinjectée avant tout, sinon le `continue` du garde `!qty` la sauterait pour
+    // ces liens-là.
+    if (l.consumedQty != null) {
+      const nextConsumed = { ...consumedOf(y), [projectId]: l.consumedQty }
+      await db.yarns.update(l.id, { consumed: nextConsumed })
+      y = await db.yarns.get(l.id)
+    }
+    if (l.qty == null) continue
+    const key = projectId
+    const qty = l.qty
+    if (!qty || !key) continue
+    const next = setProjectReservation(y, key, qty)
+    if (collectShortfalls) {
+      const got = next[key] ?? 0
+      if (got < qty) shortfalls.push({ yarnId: l.id, requested: qty, got })
+    }
+    // L'effacement des scalaires hérités reservedFor/reservedQty (ancien modèle
+    // « 1 laine = 1 projet ») a été retiré le 07/09/2026 (ménage pré-1.0) :
+    // cette écriture ne pose plus que la map `reservations` du modèle courant.
+    await db.yarns.update(l.id, { reservations: next })
+  }
+  return shortfalls
 }
 
 export const useProjectsStore = defineStore('projects', () => {
@@ -226,8 +266,7 @@ export const useProjectsStore = defineStore('projects', () => {
     // La cascade vient de modifier des laines en base : si le stock est déjà chargé en
     // mémoire, il faut le rafraîchir, sinon le badge du stock reste périmé (il ne se
     // recharge pas tout seul : StashView ne charge que si `loaded` est faux).
-    const yarnsStore = useYarnsStore()
-    if (yarnsStore.loaded) await yarnsStore.load()
+    await refreshYarnsIfLoaded()
     return { project, sections, diagrams, counters, sessions, yarnLinks, instancePattern }
   }
 
@@ -242,41 +281,15 @@ export const useProjectsStore = defineStore('projects', () => {
     if (bundle.diagrams?.length) await db.diagrams.bulkPut(bundle.diagrams)
     if (bundle.counters?.length) await db.counters.bulkPut(bundle.counters)
     if (bundle.sessions?.length) await db.sessions.bulkPut(bundle.sessions)
-    // Pool : réinjecte l'allocation de CE projet dans chaque laine mémorisée, sans
-    // jamais toucher celles des autres (setProjectReservation).
-    // ATTENTION : entre la suppression et la restauration, un autre projet a pu
-    // prendre la place laissée libre — setProjectReservation borne alors au
-    // disponible (possiblement 0) plutôt que d'inventer des pelotes.
-    for (const l of bundle.yarnLinks || []) {
-      let y = await db.yarns.get(l.id)
-      if (!y) continue
-      // Trace de consommation (K3) : indépendante de la réservation ci-dessous — une
-      // laine consommée n'a PLUS de réservation active (`consumeProjectReservation`
-      // l'a retirée avant), donc ce lien peut porter `consumedQty` SEUL, sans `qty`.
-      // Réinjectée avant tout, sinon le `continue` du garde `!qty` la sauterait pour
-      // ces liens-là.
-      if (l.consumedQty != null) {
-        const nextConsumed = { ...consumedOf(y), [bundle.project.id]: l.consumedQty }
-        await db.yarns.update(l.id, { consumed: nextConsumed })
-        y = await db.yarns.get(l.id)
-      }
-      if (l.qty == null) continue
-      const key = bundle.project.id
-      const qty = l.qty
-      if (!qty || !key) continue
-      const next = setProjectReservation(y, key, qty)
-      // L'effacement des scalaires hérités reservedFor/reservedQty (ancien modèle
-      // « 1 laine = 1 projet ») a été retiré le 07/09/2026 (ménage pré-1.0) :
-      // cette écriture ne pose plus que la map `reservations` du modèle courant.
-      await db.yarns.update(l.id, { reservations: next })
-    }
+    // Pool : réinjecte l'allocation de CE projet dans chaque laine mémorisée (cf.
+    // `reinjectYarnLinks` ci-dessus pour le détail et la réserve sur la restauration).
+    await reinjectYarnLinks(bundle.yarnLinks, bundle.project.id)
     if (bundle.instancePattern) await db.patterns.put(bundle.instancePattern)
     await load()
     // La cascade vient de modifier des laines en base : si le stock est déjà chargé en
     // mémoire, il faut le rafraîchir, sinon le badge du stock reste périmé (il ne se
     // recharge pas tout seul : StashView ne charge que si `loaded` est faux).
-    const yarnsStore = useYarnsStore()
-    if (yarnsStore.loaded) await yarnsStore.load()
+    await refreshYarnsIfLoaded()
   }
 
   // Projets exemples au 1er lancement (PRD §7.1), seulement si la base est vide.

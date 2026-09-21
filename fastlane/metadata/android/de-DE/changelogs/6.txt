@@ -1,0 +1,2 @@
+Behebt, dass die App auf Android-Geräten mit veralteter System-WebView
+nicht startete (ansonsten keine funktionale Änderung).

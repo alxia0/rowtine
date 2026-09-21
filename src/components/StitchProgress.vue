@@ -40,7 +40,7 @@ const model = computed(() => {
 
 <template>
   <span class="stitch" :class="[`stitch--${technique}`, `stitch--${tone}`]" aria-hidden="true">
-    <svg :viewBox="`0 0 ${model.width} 13`" preserveAspectRatio="none">
+    <svg :viewBox="`0 0 ${model.width} ${H}`" preserveAspectRatio="none">
       <path v-for="(s, i) in model.paths" :key="i" class="st" :class="{ on: s.on }" :d="s.d" />
     </svg>
   </span>

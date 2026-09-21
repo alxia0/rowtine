@@ -1,0 +1,32 @@
+Rowtine ist eine App fürs Stricken und Häkeln. Sie bündelt an einem
+Ort, was sich sonst über ein Projekt verteilt: Garnvorrat, PDF-Anleitungen,
+Reihenzähler und Projektnotizen.
+
+Funktionen:
+
+* Jedes Projekt von der Anschlagreihe bis zum fertigen Stück verfolgen.
+  Zwischen den Sitzungen merkt sich die App, wo zuletzt aufgehört wurde.
+* Eine PDF-Anleitung importieren: Abschnitte, Reihen und Größen werden
+  automatisch rekonstruiert, vollständig auf dem Gerät. Anleitungen auf
+  Englisch, Französisch, Deutsch und Spanisch werden unterstützt.
+* Eine Anleitung mit Größenauswahl lesen: jede Zahl im Text wird auf die
+  gewählte Größe gefiltert.
+* Einem Diagramm Reihe für Reihe folgen, mit verschiebbarer Markierung und
+  einer Abkürzungsliste immer griffbereit. Auf einem Tablet lassen sich
+  Diagramm und Text nebeneinander anzeigen.
+* Einen Garnvorrat verwalten: was für ein Projekt reserviert ist, was noch
+  frei ist, mit einer Warnung, wenn nicht mehr genug für ein fertiges
+  Stück übrig bleibt, auch bei mehrfarbigem Garn (Verlauf, selbststreifend,
+  gesprenkelt, handgefärbt).
+* Die Kosten jedes Projekts verfolgen; Käufe und Geschenke werden getrennt
+  erfasst.
+* Eine Nadel- oder Häkelnadelstärke anhand der Banderole eines Knäuels und
+  der Maschenprobe einer Anleitung nachschlagen.
+* Zwei eigenständige Werkzeuge: ein Rechner für die Verteilung von Zu- und
+  Abnahmen sowie ein freistehender Zähler.
+* Metrische oder imperiale Einheiten, fünf Währungen.
+* Oberfläche, integrierter Leitfaden und Anleitungsimport auf Englisch,
+  Französisch, Deutsch und Spanisch.
+
+Die App funktioniert offline und behält alle Daten auf dem Gerät: kein
+Konto, keine Datensammlung, kein Server.

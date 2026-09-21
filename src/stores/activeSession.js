@@ -185,13 +185,13 @@ export const useActiveSessionStore = defineStore('activeSession', () => {
           // temps s'évapore sans erreur.
           targetId = await db.sessions.add({
             projectId: pid, sectionId: sid, date: nowIso, lastWriteAt: nowIso,
-            durationSec: chunk, rowsDone: 0,
+            durationSec: chunk,
           })
         }
       } else {
         targetId = await db.sessions.add({
           projectId: pid, sectionId: sid, date: nowIso, lastWriteAt: nowIso,
-          durationSec: chunk, rowsDone: 0,
+          durationSec: chunk,
         })
       }
       // Persist explicite (voir le bloc-commentaire ci-dessus) : les refs vivantes sont

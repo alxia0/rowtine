@@ -1644,12 +1644,22 @@ function numpromptId() {
 // les 2 appels ci-dessous passant la carte en conteneur explicite (le listener
 // est document-level, `event.currentTarget` n'y est pas la carte).
 
+// Injection CSS « une fois », partagée par les popovers maison de ce fichier
+// (mini-dialogue numérique ci-dessous, menu popover plus bas) : garde par id dans
+// `document.head`, `<style>` créé une seule fois. ⚠️ Le gabarit CSS passé en `css`
+// est un template JS : un accent grave non échappé dedans casse silencieusement
+// tout le bloc (déjà arrivé une fois à ces deux popovers avant leur fusion ici).
+function injectStyleOnce(id, css) {
+  if (document.getElementById(id)) return
+  const style = document.createElement('style')
+  style.id = id
+  style.textContent = css
+  document.head.appendChild(style)
+}
+
 const NUMPROMPT_STYLE_ID = 'cm-numprompt-style'
 function ensureNumPromptStyles() {
-  if (document.getElementById(NUMPROMPT_STYLE_ID)) return
-  const style = document.createElement('style')
-  style.id = NUMPROMPT_STYLE_ID
-  style.textContent = `
+  injectStyleOnce(NUMPROMPT_STYLE_ID, `
 .cm-numprompt {
   position: fixed;
   inset: 0;
@@ -1714,8 +1724,7 @@ function ensureNumPromptStyles() {
   color: var(--on-accent, #fff);
   border-color: var(--brand, #b5651d);
 }
-`
-  document.head.appendChild(style)
+`)
 }
 
 // Remplace l'ex-promptInt (window.prompt, clavier AZERTY complet imposé par le
@@ -2011,10 +2020,7 @@ const MENU_POPOVER_MARGIN = 8
 // conservés à l'identique.
 const MENU_POPOVER_STYLE_ID = 'cm-menu-popover-style'
 function ensureMenuPopoverStyles() {
-  if (document.getElementById(MENU_POPOVER_STYLE_ID)) return
-  const style = document.createElement('style')
-  style.id = MENU_POPOVER_STYLE_ID
-  style.textContent = `
+  injectStyleOnce(MENU_POPOVER_STYLE_ID, `
 .cm-menu-popover {
   z-index: 2000;
   display: flex;
@@ -2152,8 +2158,7 @@ function ensureMenuPopoverStyles() {
      fonction, qui documente le bogue que cela a causé avant ce correctif). */
   background: rgba(0, 0, 0, .5);
 }
-`
-  document.head.appendChild(style)
+`)
 }
 
 /**

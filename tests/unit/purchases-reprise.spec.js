@@ -37,6 +37,13 @@ describe('ligne reconstruite', () => {
   it('fiche sans date d’achat : date vide, jamais inventée', () => {
     expect(buildReconstructedPurchase({ id: 3, quantity: 1 }, 'EUR').date).toBe('')
   })
+  // `price` est un nombre JS depuis que StashView.vue le normalise à la saisie — un point
+  // décimal repris tel quel dans `unitPrice` casserait la virgule française attendue partout
+  // ailleurs dans ce champ (revue finale).
+  it('fiche à prix numérique : la virgule française, pas le point JS', () => {
+    const l = buildReconstructedPurchase({ id: 5, brand: 'Y', quantity: 1, price: 9.5 }, 'EUR')
+    expect(l.unitPrice).toBe('9,5')
+  })
 })
 
 describe('exécution de la reprise', () => {

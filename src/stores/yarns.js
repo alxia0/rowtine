@@ -90,3 +90,13 @@ export const useYarnsStore = defineStore('yarns', () => {
   }
   return { yarns, loaded, load, add, update, remove, restore }
 })
+
+// Recharge le stock SEULEMENT s'il est déjà chargé en mémoire — sinon aucun écran n'attend
+// une mise à jour immédiate, un prochain montage de StashView le chargera lui-même. Centralise
+// le motif répété après toute cascade qui modifie des laines en base sans passer par
+// `useYarnsStore().update()` (projects.js remove()/restore(), trash.js restore()) : sans lui,
+// le stock affiché resterait périmé (badge, quantités) jusqu'au prochain rechargement complet.
+export async function refreshYarnsIfLoaded() {
+  const yarnsStore = useYarnsStore()
+  if (yarnsStore.loaded) await yarnsStore.load()
+}

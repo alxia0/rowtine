@@ -48,7 +48,7 @@
       "id": "section-1",
       "title": [
         {
-          "text": "1. L'accueil — ton tableau de bord",
+          "text": "1. L'accueil : ton tableau de bord",
           "bold": false,
           "italic": false
         }
@@ -363,7 +363,7 @@
       "id": "section-2",
       "title": [
         {
-          "text": "2. Tes projets — le cœur de l'app",
+          "text": "2. Tes projets, le cœur de l'app",
           "bold": false,
           "italic": false
         }
@@ -566,6 +566,31 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Stats",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : les chiffres de ce projet-là (temps total, nombre de sessions, pelotes utilisées, période, meilleure série de jours actifs) et sa grille calendaire, puis le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Partager",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", qui ouvre le composeur de badge décrit un peu plus bas.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         },
@@ -573,7 +598,7 @@
           "type": "subsection",
           "title": [
             {
-              "text": "Travailler en direct — la session",
+              "text": "Travailler en direct : la session",
               "bold": false,
               "italic": false
             }
@@ -749,7 +774,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "L'onglet Sessions d'une fiche projet raconte ce projet-là, et lui seul. Pour revoir tout ton historique, tous projets confondus, le menu de l'app ouvre l'écran ",
+              "text": "L'onglet Sessions d'une fiche projet trace tout le temps passé sur ce projet. Pour revoir tout ton historique, tous projets confondus, le menu de l'app ouvre l'écran ",
               "bold": false,
               "italic": false
             },
@@ -774,6 +799,249 @@
               "italic": false
             }
           ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Partager un badge de ton projet",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02c-badge-partage",
+          "alt": "Écran de partage du badge pour le projet \"Sweater for me\" : la photo du pull, Temps total 32 h 07 min, Avancement 67 %, 30 sessions et la carte calendaire.",
+          "caption": [
+            {
+              "text": "L'écran de partage, ouvert depuis l'onglet Stats ou le menu de la fiche projet.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Depuis l'onglet ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Stats",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " d'un projet, le bouton ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Partager",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (ou l'entrée ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Partager",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " du menu de la fiche, en haut à droite, depuis n'importe quel onglet) compose une image à envoyer à qui tu veux : ton ouvrage, ses chiffres, aux couleurs de ton choix. L'écran montre par défaut l'image de couverture du projet et un tiroir de réglages en bas.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Le tiroir de réglages a trois onglets :",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Format",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : quatre gabarits. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vertical",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (la photo en haut, les chiffres dessous), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Horizontal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (la photo à gauche, les chiffres à droite), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Texte seul",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (sans photo, utile pour un projet qui n'en a pas encore) et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Deux images",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (deux photos côte à côte, par exemple un avant et un après). Si ton projet a une photo de couverture, le badge s'ouvre en Vertical avec elle ; sinon en Texte seul.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Couleur",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : une palette de teintes, un bouton + pour en choisir une autre librement, et, au-dessus, les dernières couleurs que tu as réellement utilisées pour un badge.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Infos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : ce que le badge doit contenir. Chaque pastille montre la valeur réelle du projet (temps total, dates de début et de fin, laines utilisées avec leurs pelotes, avancement tant que le projet est en cours, meilleure série, nombre de sessions, technique crochet ou tricot) : appuie dessus pour l'inclure ou la retirer. La pastille ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Carte calendaire",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ajoute la grille des jours travaillés. Tu y choisis aussi la ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "langue",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " du texte du badge, indépendante de celle de l'app (pratique pour l'envoyer à quelqu'un qui ne parle pas la tienne), et une ligne de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "texte libre",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", 80 caractères au plus.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Pour changer une photo, appuie dessus sur l'aperçu : un bouton ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Modifier",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " apparaît, qui propose une photo du projet ou une image de ta galerie, le format (carré, horizontal ou vertical), puis le recadrage.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Le bouton ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Partager",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", en haut de l'écran, génère l'image, l'enregistre dans la ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Galerie",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le refermer sans rien envoyer : le badge reste dans la galerie. Et si tu changes un réglage puis partages à nouveau, le badge précédent de cette même ouverture est remplacé, pas dupliqué.",
+              "bold": false,
+              "italic": false
+            }
+          ]
         }
       ]
     },
@@ -781,7 +1049,7 @@
       "id": "section-3",
       "title": [
         {
-          "text": "3. Le patron qui s'adapte à toi — le lecteur interactif",
+          "text": "3. Le patron qui s'adapte à toi : le lecteur interactif",
           "bold": false,
           "italic": false
         }
@@ -1964,7 +2232,7 @@
               ],
               [
                 {
-                  "text": "Une case à cocher pendant le tricot ou le crochet — le cœur du suivi pas à pas.",
+                  "text": "Une case à cocher pendant le tricot ou le crochet, le cœur du suivi pas à pas.",
                   "bold": false,
                   "italic": false
                 }
@@ -2032,7 +2300,7 @@
               ],
               [
                 {
-                  "text": "Un titre de partie (Devant, Manche, Col…), avec son icône automatique — c'est ce qui découpe ton patron dans l'onglet Sections.",
+                  "text": "Un titre de partie (Devant, Manche, Col…), avec son icône automatique : c'est ce qui découpe ton patron dans l'onglet Sections.",
                   "bold": false,
                   "italic": false
                 }
@@ -2048,7 +2316,7 @@
               ],
               [
                 {
-                  "text": "Une information de la fiche du patron (fil, aiguilles, tailles…) — ",
+                  "text": "Une information de la fiche du patron (fil, aiguilles, tailles…), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2128,7 +2396,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (le tableau des mesures finales — pas les instructions par taille, qui sont des Sections), ",
+                  "text": " (le tableau des mesures finales, pas les instructions par taille, qui sont des Sections), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2154,7 +2422,7 @@
               ],
               [
                 {
-                  "text": "Un paragraphe simple, sans rôle particulier — généralement le texte d'introduction ou de conclusion du patron.",
+                  "text": "Un paragraphe simple, sans rôle particulier, généralement le texte d'introduction ou de conclusion du patron.",
                   "bold": false,
                   "italic": false
                 }
@@ -2845,7 +3113,7 @@
                         "italic": false
                       },
                       {
-                        "text": " : si tu coches Vegan sur une laine qui contient une fibre animale, l'app te le signale (« Cette laine contient une fibre animale : … Le label vegan paraît contradictoire — vérifie la composition. ») sans t'empêcher d'enregistrer : elle te prévient, elle ne décide pas à ta place.",
+                        "text": " : si tu coches Vegan sur une laine qui contient une fibre animale, l'app te le signale (« Cette laine contient une fibre animale : … Le label vegan paraît contradictoire : vérifie la composition. ») sans t'empêcher d'enregistrer : elle te prévient, elle ne décide pas à ta place.",
                         "bold": false,
                         "italic": false
                       }
@@ -4358,7 +4626,7 @@
       "id": "section-9",
       "title": [
         {
-          "text": "9. Sous le capot — ce que {app} te garantit",
+          "text": "9. Sous le capot : ce que {app} te garantit",
           "bold": false,
           "italic": false
         }

@@ -12,7 +12,7 @@ progress. It's **free, open-source and works offline**: your data
 stays on your device, not on a server. Nothing is ever lost by mistake:
 everything you delete ends up in a trash bin.
 
-## 1. Home — your dashboard
+## 1. Home: your dashboard
 
 ![{app}'s home screen: "Hello Camille!", the Resume tile holding the Winter Beanie project at 0 %, then the dashboard (1 in progress, this week's time, the latest session dated today, the money spent) and the Counter, Calculator and Needles tools](images/en/01-accueil.webp)
 
@@ -64,7 +64,7 @@ Opening the app, you'll find:
   wherever you are in the app, you can head somewhere else without going back
   to the home screen.
 
-## 2. Your projects — the heart of the app
+## 2. Your projects, the heart of the app
 
 ![The Winter Beanie project, marked To do, open on its Sections tab: 0 % and 0 / 12 at the top, the full-width Follow the pattern button, then Ribbed brim, Body and cable, Crown decreases and Finishing, every one of them still at 0 %; the timer pill floats at the bottom, at rest](images/en/02-fiche-projet.webp)
 
@@ -117,8 +117,12 @@ patternless projects, so it can never have a price of its own.
   length of each one, and the option to add a
   session manually (for time you spent without the app open). A session in
   progress shows up there live, too.
+- **Stats**: this project's own numbers (total time, number of sessions, skeins
+  used, period, best streak of active days) and its calendar grid, then the
+  **Share** button, which opens the badge composer described a little further
+  down.
 
-### Working live — a session
+### Working live: a session
 
 Anywhere in the project, a **timer** floats at the bottom of the screen: the same
 pill on the project sheet, whichever tab you're on, and in the reader. A chevron
@@ -148,9 +152,9 @@ checkbox in the edit form brings it back.
 
 ### All your sessions, in one place
 
-A project sheet's Sessions tab tells the story of that project, and that
-project only. To go back over your whole history, every project together, the
-app's menu opens the **Sessions** screen, between Statistics and Expenses.
+A project sheet's Sessions tab tracks all the time spent on that project. To go
+back over your whole history, every project together, the app's menu opens the
+**Sessions** screen, between Statistics and Expenses.
 Each session shows up there, from the most recent to the oldest: the project's
 name, then the date and the duration. Tapping a line opens the page of the
 project it belongs to.
@@ -159,7 +163,45 @@ This screen is for viewing only: it's on the project sheet, in its Sessions
 tab, that a session gets corrected or erased. No filters, no grouping: it's a
 first version, deliberately simple.
 
-## 3. The pattern that adapts to you — the interactive reader
+### Share a badge of your project
+
+![The badge sharing screen for the project "Sweater for me": the sweater photo, Total time 32 h 07 min, Progress 67%, 30 sessions and the calendar map.](images/en/02c-badge-partage.webp)
+
+*The sharing screen, opened from the Stats tab or the project sheet's menu.*
+
+From a project's **Stats** tab, the **Share** button (or the **Share** entry in the
+sheet's menu, at the top right, from any tab) composes an image to send to whoever
+you like: your piece, its numbers, in the colours of your choice. By default the
+screen shows the project's cover image and a settings drawer at the bottom.
+
+The settings drawer has three tabs:
+- **Format**: four templates. **Vertical** (the photo on top, the numbers below),
+  **Horizontal** (the photo on the left, the numbers on the right), **Text only** (no
+  photo, handy for a project that doesn't have one yet) and **Two images** (two photos
+  side by side, a before and an after for instance). If your project has a cover
+  photo, the badge opens in Vertical with it; otherwise in Text only.
+- **Color**: a palette of hues, a + button to pick any other colour freely, and,
+  above it, the last colours you actually used for a badge.
+- **Info**: what the badge should contain. Each chip shows the project's real value
+  (total time, start and end dates, yarns used with their skeins, progress while the
+  project is still ongoing, best streak, number of sessions, crochet or knitting
+  technique): tap it to include it or take it out. The **Calendar map** chip adds the
+  grid of the days you worked. This is also where you choose the **Language** of the
+  badge's text, independent of the app's (handy for sending it to someone who doesn't
+  speak yours), and a line of your own under **Free text (optional)**, 80 characters
+  at most.
+
+To change a photo, tap it on the preview: an **Edit** button appears, offering a
+project photo or an image from your gallery, then the shape (square, horizontal or
+vertical), then the crop.
+
+The **Share** button, at the top of the screen, generates the image, saves it in the
+project's **Gallery**, then opens your phone's share menu. You can close that menu
+without sending anything: the badge stays in the gallery. And if you change a setting
+then share again, the previous badge from that same visit to the composer is
+replaced, not duplicated.
+
+## 3. The pattern that adapts to you: the interactive reader
 
 ![The Cable Beanie pattern opened inside the Winter Beanie project: "Back to my step", then the reader's contents (one dot per section), "1. Choose your size" offering S 50-52, M 54-56 already picked and L 58-60, and the timer at the bottom](images/en/03a-lecteur-haut.webp)
 
@@ -429,12 +471,12 @@ a sentence got cut awkwardly.
 
 | Category | What it becomes in your project |
 |---|---|
-| **Step** | A checkbox during knitting or crochet — the heart of step-by-step tracking. |
+| **Step** | A checkbox during knitting or crochet, the heart of step-by-step tracking. |
 | **Counter** | A repeated step, with its own counter. Two variants: **Repeat** (redo the line N times) and **Cadence** (redo the line every X rows, N times). |
 | **Note** | Informative text shown at that spot, with no checkbox. |
-| **Section** | A section title (Front, Sleeve, Collar…), with its automatic icon — this is what splits your pattern into the Sections tab. |
-| **Reference** | Information from the pattern's page (yarn, needles, sizes…) — **not** step-by-step tracking. Eight sub-categories: **Yarn** (brand, fibre, yardage, quantities), **Needles/Hook** (size and type), **Gauge** (the reference measurement, e.g. "10 × 10 cm = 22 stitches"), **Materials** (everything else: buttons, markers…), **Tips** (the designer's recommendations), **Abbreviations** (one per line), **Sizes** (the table of finished measurements — not the per-size instructions, which are Sections), **Techniques** (a technique explained). These are the blocks that fill the interactive reader's cheat sheet (section 3 above). |
-| **Text** | A plain paragraph, with no particular role — usually the pattern's introduction or closing text. |
+| **Section** | A section title (Front, Sleeve, Collar…), with its automatic icon: this is what splits your pattern into the Sections tab. |
+| **Reference** | Information from the pattern's page (yarn, needles, sizes…), **not** step-by-step tracking. Eight sub-categories: **Yarn** (brand, fibre, yardage, quantities), **Needles/Hook** (size and type), **Gauge** (the reference measurement, e.g. "10 × 10 cm = 22 stitches"), **Materials** (everything else: buttons, markers…), **Tips** (the designer's recommendations), **Abbreviations** (one per line), **Sizes** (the table of finished measurements, not the per-size instructions, which are Sections), **Techniques** (a technique explained). These are the blocks that fill the interactive reader's cheat sheet (section 3 above). |
+| **Text** | A plain paragraph, with no particular role, usually the pattern's introduction or closing text. |
 | **Image** | A photo or a chart. |
 
 **The built-in help.** The correction screen carries its own help, folded away
@@ -574,7 +616,7 @@ and asks for confirmation: nothing gets lost by mistake here either.
     deliberate.
   - **The vegan warning**: tick Vegan on a yarn that contains an animal
     fibre and the app points it out ("This yarn contains … (animal fibre).
-    The vegan label looks contradictory — check the composition.") without
+    The vegan label looks contradictory: check the composition.") without
     stopping you from saving: it warns you, it doesn't decide for you.
   - **Finding your yarn again**: these labels turn up again in the stash
     filter (the "Label" criterion) and in the text search.
@@ -703,7 +745,7 @@ from Home:
 
 ## 7. Statistics
 
-![The Quarter tab selected among Month, Half-year and Year, 6/15/2026 – 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards](images/en/07-statistiques.webp)
+![The Quarter tab selected among Month, Half-year and Year, 6/15/2026 to 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards](images/en/07-statistiques.webp)
 
 *The selector at the top picks an observation window (Month, Quarter, Half-year or Year), and the whole screen follows it; here, the Quarter window. The "Calendar" tab, shown by default, shows the grid and the nine number tiles.*
 
@@ -843,7 +885,7 @@ three small messages greet you, **once each**: you won't see them again.
   categories that is too wide for the screen. It appears **only once in
   total**, not once per screen; the "Got it" button closes it.
 
-## 9. Under the hood — what {app} guarantees you
+## 9. Under the hood: what {app} guarantees you
 
 - **Offline by default**: none of your data ever leaves your device,
   except the backup folder **you choose yourself**.

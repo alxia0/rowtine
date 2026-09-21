@@ -25,8 +25,10 @@ const current = computed(() => tabs.value.find((x) => x.id === props.activeTab) 
 // de clé et ressort donc tel quel, dans la langue source).
 const lbl = (o, keyField, fallbackField) => (o && o[keyField] ? t(o[keyField]) : o?.[fallbackField])
 
-const perSizeText = (row) =>
-  props.sizeIndex == null ? formatSizes(row.values) + ' ' + (row.unit || '') : row.values[props.sizeIndex] + ' ' + (row.unit || '')
+const perSizeText = (row) => {
+  const v = props.sizeIndex == null ? formatSizes(row.values) : row.values[props.sizeIndex]
+  return v + ' ' + (row.unit || '')
+}
 
 // Piège au Tab + restitution au déclencheur à la fermeture (dette audit UX 16/07,
 // composable partagé). Le keydown est posé sur la CARTE (`<aside role="dialog">`),
@@ -67,8 +69,7 @@ useDialogFocusReturn(() => props.open)
           <template v-for="(row, j) in b.perSize || []" :key="'ps' + j">
             <p v-if="!isBlankCount(row.values)" class="rs__persize">
               <strong v-if="row.label">{{ row.label }} :</strong>
-              <span v-if="sizeIndex != null" class="rs__psval">{{ perSizeText(row) }}</span>
-              <span v-else class="rs__muted"> {{ perSizeText(row) }}</span>
+              <span :class="sizeIndex != null ? 'rs__psval' : 'rs__muted'">{{ perSizeText(row) }}</span>
             </p>
           </template>
 

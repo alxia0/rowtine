@@ -12,7 +12,7 @@ solo sitio: tu lana, tus patrones adaptados a tu talla y tu progreso. Es
 quedan en tu dispositivo, no en un servidor. Nada se pierde nunca por
 error: todo lo que borras acaba en una papelera.
 
-## 1. Inicio — tu panel de control
+## 1. Inicio: tu panel de control
 
 ![El inicio de {app}: «¡Hola, Camille!», la ficha Continuar muestra el proyecto Gorro de invierno al 0 por ciento, y debajo el panel (1 en curso, el tiempo de la semana, la última sesión con fecha de hoy, el presupuesto gastado) y las herramientas Contador, Calculadora y Agujas](images/es/01-accueil.webp)
 
@@ -67,7 +67,7 @@ Al abrir la app encuentras:
   pantallas: estés donde estés en la app, puedes ir a otro sitio sin volver al
   inicio.
 
-## 2. Tus proyectos — el corazón de la app
+## 2. Tus proyectos, el corazón de la app
 
 ![El proyecto Gorro de invierno, etiquetado Pendiente, abierto en su pestaña Secciones: 0 % y 0 de 12 arriba, el botón Seguir el patrón a todo lo ancho, y luego Borde en punto elástico, Cuerpo y trenza, Menguados de la copa y Acabados, todas aún al 0 %; la pastilla del cronómetro flota abajo, en reposo](images/es/02-fiche-projet.webp)
 
@@ -122,8 +122,12 @@ nunca puede tener un precio propio.
   la duración de cada una, y la posibilidad de
   añadir una sesión manualmente (si tejiste sin la app abierta). La sesión en
   curso también se ve ahí, en directo.
+- **Estadísticas**: las cifras de este proyecto en concreto (tiempo total, número de
+  sesiones, ovillos usados, periodo, mejor racha de días activos) y su cuadrícula de
+  calendario, y luego el botón **Compartir**, que abre el creador de insignias descrito
+  un poco más abajo.
 
-### Trabajar en directo — la sesión
+### Trabajar en directo: la sesión
 
 En cualquier rincón del proyecto, un **cronómetro** flota en la parte de abajo de
 la pantalla: la misma pastilla en la ficha, en cualquiera de sus pestañas, y en el
@@ -155,8 +159,8 @@ casilla «Cronómetro» del formulario de edición.
 
 ### Todas tus sesiones, en un mismo lugar
 
-La pestaña Sesiones de la ficha de un proyecto cuenta la historia de ese
-proyecto, y solo de ese. Para repasar todo tu historial, con todos los
+La pestaña Sesiones de la ficha de un proyecto registra todo el tiempo
+dedicado a ese proyecto. Para repasar todo tu historial, con todos los
 proyectos juntos, el menú de la app abre la pantalla **Sesiones**, entre
 Estadísticas y Gastos.
 Cada sesión aparece allí, de la más reciente a la más antigua: el nombre del
@@ -167,7 +171,44 @@ Esta pantalla solo sirve para consultar: es en la ficha del proyecto, en su
 pestaña Sesiones, donde se corrige o se borra una sesión. Sin filtros, sin
 agrupaciones: es una primera versión, deliberadamente sencilla.
 
-## 3. El patrón que se adapta a ti — el lector interactivo
+### Compartir una insignia de tu proyecto
+
+![Pantalla para compartir la insignia del proyecto «Sweater for me»: la foto del jersey, Tiempo total 32 h 07 min, Avance 67 %, 30 sesiones y el mapa de calendario.](images/es/02c-badge-partage.webp)
+
+*La pantalla para compartir, abierta desde la pestaña Estadísticas o el menú de la ficha del proyecto.*
+
+Desde la pestaña **Estadísticas** de un proyecto, el botón **Compartir** (o la entrada
+**Compartir** del menú de la ficha, arriba a la derecha, desde cualquier pestaña) compone
+una imagen para enviar a quien quieras: tu labor, sus cifras, con los colores que elijas.
+La pantalla muestra por defecto la imagen de portada del proyecto y, abajo, un cajón de
+ajustes.
+
+El cajón de ajustes tiene tres pestañas:
+- **Formato**: cuatro plantillas. **Vertical** (la foto arriba y las cifras debajo),
+  **Horizontal** (la foto a la izquierda y las cifras a la derecha), **Solo texto** (sin
+  foto, útil para un proyecto que todavía no tiene ninguna) y **Dos imágenes** (dos fotos
+  una junto a otra, por ejemplo un antes y un después). Si tu proyecto tiene foto de
+  portada, la insignia se abre en Vertical con ella; si no, en Solo texto.
+- **Color**: una paleta de tonos, un botón + para elegir otro libremente y, encima, los
+  últimos colores que has usado de verdad en una insignia.
+- **Info**: lo que la insignia debe contener. Cada pastilla muestra el valor real del
+  proyecto (tiempo total, fechas de inicio y de fin, lanas usadas con sus ovillos, avance
+  mientras el proyecto está en curso, mejor racha, número de sesiones, técnica punto o
+  ganchillo): tócala para incluirla o quitarla. La pastilla **Mapa de calendario** añade la
+  cuadrícula de los días trabajados. Ahí eliges también el **Idioma** del texto de la
+  insignia, independiente del de la app (práctico para enviársela a alguien que no habla
+  el tuyo), y una línea de **Texto libre (opcional)**, de 80 caracteres como máximo.
+
+Para cambiar una foto, tócala en la vista previa: aparece un botón **Editar**, que te
+propone una foto del proyecto o una imagen de tu galería, el formato (cuadrado, horizontal
+o vertical) y luego el recorte.
+
+El botón **Compartir**, arriba de la pantalla, genera la imagen, la guarda en la
+**Galería** del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo
+sin enviar nada: la insignia se queda en la galería. Y si cambias un ajuste y vuelves a
+compartir, la insignia anterior de esa misma apertura se sustituye, no se duplica.
+
+## 3. El patrón que se adapta a ti: el lector interactivo
 
 ![El patrón Gorro de Trenzas abierto dentro del proyecto Gorro de invierno: «Volver a mi paso», luego el índice del lector (un punto por sección), «1. Elige tu talla» con S 50-52, M 54-56 ya marcada y L 58-60, y el cronómetro abajo](images/es/03a-lecteur-haut.webp)
 
@@ -442,12 +483,12 @@ cortado mal.
 
 | Categoría | Qué da en tu proyecto |
 |---|---|
-| **Paso** | Una casilla que marcar al tejer o ganchillar — el corazón del seguimiento paso a paso. |
+| **Paso** | Una casilla que marcar al tejer o ganchillar, el corazón del seguimiento paso a paso. |
 | **Contador** | Un paso repetido, con su propio contador. Dos variantes: **Repetición** (repetir la línea N veces) y **Cadencia** (repetir la línea cada X filas, N veces). |
 | **Nota** | Un texto informativo mostrado en ese punto, sin casilla. |
-| **Sección** | Un título de parte (Delantero, Manga, Cuello…), con su icono automático — es lo que divide tu patrón en la pestaña Secciones. |
-| **Referencia** | Información de la ficha del patrón (hilo, agujas, tallas…) — **no** forma parte del seguimiento paso a paso. Ocho subcategorías: **Hilo** (marca, material, metraje, cantidades), **Agujas/Ganchillo** (talla y tipo), **Muestra** (la medida de referencia, ej. «10 × 10 cm = 22 puntos»), **Material** (el resto: botones, marcadores…), **Consejos** (las recomendaciones del creador), **Abreviaturas** (una por línea), **Tallas** (la tabla de medidas finales — no las instrucciones por talla, que son Secciones), **Técnicas** (una técnica explicada). Estos bloques son los que rellenan la guía rápida del lector interactivo (sección 3 arriba). |
-| **Texto** | Un párrafo simple, sin ningún rol particular — generalmente el texto de introducción o de cierre del patrón. |
+| **Sección** | Un título de parte (Delantero, Manga, Cuello…), con su icono automático: es lo que divide tu patrón en la pestaña Secciones. |
+| **Referencia** | Información de la ficha del patrón (hilo, agujas, tallas…), **no** forma parte del seguimiento paso a paso. Ocho subcategorías: **Hilo** (marca, material, metraje, cantidades), **Agujas/Ganchillo** (talla y tipo), **Muestra** (la medida de referencia, ej. «10 × 10 cm = 22 puntos»), **Material** (el resto: botones, marcadores…), **Consejos** (las recomendaciones del creador), **Abreviaturas** (una por línea), **Tallas** (la tabla de medidas finales, no las instrucciones por talla, que son Secciones), **Técnicas** (una técnica explicada). Estos bloques son los que rellenan la guía rápida del lector interactivo (sección 3 arriba). |
+| **Texto** | Un párrafo simple, sin ningún rol particular, generalmente el texto de introducción o de cierre del patrón. |
 | **Imagen** | Una foto o un diagrama. |
 
 **La ayuda integrada.** La pantalla de corrección lleva su propia ayuda,
@@ -592,7 +633,7 @@ nada por error.
     dice («Origen incompleto») en vez de adivinar: es intencionado.
   - **El aviso vegano**: si marcas Vegano en una lana que contiene una fibra
     animal, la app te lo señala («Esta lana contiene … (fibra animal). La
-    etiqueta vegana parece contradictoria — revisa la composición.») sin
+    etiqueta vegana parece contradictoria: revisa la composición.») sin
     impedirte guardar: te avisa, no decide por ti.
   - **Encontrar tus lanas**: estas etiquetas se encuentran en el filtro del
     stock (el criterio «Etiqueta») y en la búsqueda por texto.
@@ -874,7 +915,7 @@ volverás a verlos.
   pantalla. Aparece **una sola vez en total**, no una vez por pantalla; el
   botón «Entendido» la cierra.
 
-## 9. Bajo el capó — lo que {app} te garantiza
+## 9. Bajo el capó: lo que {app} te garantiza
 
 - **Sin conexión por defecto**: ningún dato tuyo sale nunca del
   dispositivo, salvo la carpeta de copia de seguridad que **tú eliges**.

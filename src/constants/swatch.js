@@ -72,10 +72,16 @@ function swatchHsl(kind, seed) {
 const clampL = (l) => Math.max(6, Math.min(94, l))
 const hsl = ([h, s, l]) => `hsl(${h} ${s}% ${clampL(l)}%)`
 
+// Les 3 tons (fond, creux, relief) dérivés d'un [h,s,l] — même formule pour swatchTones
+// (teinte calculée) et tonesFromColor (teinte explicite) : un seul endroit qui décide des
+// écarts de luminosité ±11/12.
+function tonesOf([h, s, l]) {
+  return { base: hsl([h, s, l]), lo: hsl([h, s, l - 11]), hi: hsl([h, s, l + 12]) }
+}
+
 // Renvoie les 3 tons d'une vignette générée : fond, creux (ombre), relief (lumière).
 export function swatchTones(kind, seed) {
-  const [h, s, l] = swatchHsl(kind, seed)
-  return { base: hsl([h, s, l]), lo: hsl([h, s, l - 11]), hi: hsl([h, s, l + 12]) }
+  return tonesOf(swatchHsl(kind, seed))
 }
 
 // Palette de couleurs proposée à l'utilisateur pour une laine (choix visuel).
@@ -96,9 +102,7 @@ function parseHsl(str) {
 // Tons d'une vignette à partir d'une couleur explicite (chaîne « hsl(h s% l%) »).
 export function tonesFromColor(color) {
   const parsed = parseHsl(color)
-  if (!parsed) return null
-  const [h, s, l] = parsed
-  return { base: hsl([h, s, l]), lo: hsl([h, s, l - 11]), hi: hsl([h, s, l + 12]) }
+  return parsed ? tonesOf(parsed) : null
 }
 
 // Convertit un hex « #rrggbb » (ou « rrggbb ») en chaîne « hsl(h s% l%) » (entiers),

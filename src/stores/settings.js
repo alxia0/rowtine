@@ -24,6 +24,11 @@ export const useSettingsStore = defineStore('settings', () => {
   // est un choix d'avant le marqueur → traitée comme explicite, aucune bascule surprise.
   const accentHue = ref(DEFAULT_HUES.light) // 0-360 (lu uniquement si accentHueChosen)
   const accentHueChosen = ref(false)
+  // Couleurs `hsl(h s% l%)` complètes (refonte 16/09, badge couleur réelle) — la plus
+  // récente en tête, plafond 8. Clé de stockage distincte de l'ancienne `badgeHueHistory`
+  // (teintes seules, format incompatible) : repart volontairement à vide plutôt que migrer,
+  // historique de confort sans valeur à préserver.
+  const badgeColorHistory = ref([])
   const loaded = ref(false)
   // Astuce « balaie pour revenir en arrière » (onboarding.swipeHint) : montrée en pop-up au
   // 1er passage sur l'accueil, puis plus jamais (P3). Doit être PERSISTÉE — un simple
@@ -92,6 +97,7 @@ export const useSettingsStore = defineStore('settings', () => {
       storedUnitSystem,
       storedCurrency,
       storedWeekStart,
+      storedBadgeColorHistory,
     ] = await Promise.all([
       getSetting('firstName'),
       getSetting('defaultTechnique'),
@@ -107,6 +113,7 @@ export const useSettingsStore = defineStore('settings', () => {
       getSetting('unitSystem'),
       getSetting('currency'),
       getSetting('weekStart'),
+      getSetting('badgeColorHistory'),
     ])
     firstName.value = storedFirstName ?? ''
     defaultTechnique.value = storedTechnique ?? 'knitting'
@@ -132,6 +139,7 @@ export const useSettingsStore = defineStore('settings', () => {
     unitSystem.value = storedUnitSystem ?? 'metric'
     currency.value = storedCurrency ?? DEFAULT_CURRENCY
     weekStart.value = storedWeekStart ?? 1
+    badgeColorHistory.value = storedBadgeColorHistory ?? []
     loaded.value = true
   }
 
@@ -251,6 +259,19 @@ export const useSettingsStore = defineStore('settings', () => {
     await setSetting('weekStart', value)
   }
 
+  // Historique des couleurs retenues dans le composeur de badge (spec 2026-09-16 wizard ;
+  // couleur RÉELLE depuis le 16/09, plus seulement la teinte — cf. commentaire de
+  // déclaration ci-dessus) : global à l'app (pas par projet), pour retrouver la même
+  // identité visuelle d'un projet à l'autre. Ajoute en tête, déduplique, plafonne à 8
+  // entrées. Appelée seulement APRÈS génération réussie (pas à chaque clic sur une
+  // pastille) : sinon un simple survol de la palette polluait l'historique de couleurs
+  // jamais réellement utilisées.
+  async function rememberBadgeColor(color) {
+    const next = [color, ...badgeColorHistory.value.filter((c) => c !== color)].slice(0, 8)
+    badgeColorHistory.value = next
+    await setSetting('badgeColorHistory', next)
+  }
+
   // Chaque clé est enregistrée indépendamment (on peut changer la devise sans toucher aux
   // unités). Une valeur hors liste est ignorée : un réglage corrompu afficherait un symbole
   // vide sur tous les écrans.
@@ -295,6 +316,7 @@ export const useSettingsStore = defineStore('settings', () => {
     theme,
     accentHue,
     accentHueChosen,
+    badgeColorHistory,
     effectiveAccentHue,
     swipeHintSeen,
     welcomeDue,
@@ -317,6 +339,7 @@ export const useSettingsStore = defineStore('settings', () => {
     saveAccentHue,
     e2eSetAccentHue,
     saveWeekStart,
+    rememberBadgeColor,
     saveProfile,
     saveUnits,
   }

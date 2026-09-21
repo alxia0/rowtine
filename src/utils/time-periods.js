@@ -67,6 +67,16 @@ export function ymdLocal(d) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
 }
 
+// Décale une Date de `n` jours (`n` négatif = en arrière), en LOCAL — `setDate` traverse les
+// changements d'heure d'été sans erreur tant que l'heure de `date` n'est pas minuit pile.
+// Exportée : `stats-grid.js` et `project-stats.js` la réimplémentaient chacun de leur côté à
+// l'identique ; centralisée ici pour la même raison que `ymdLocal` ci-dessus.
+export function addDays(date, n) {
+  const d = new Date(date)
+  d.setDate(d.getDate() + n)
+  return d
+}
+
 // Clé de période triable lexicographiquement = triable chronologiquement.
 // week : date du DÉBUT DE SEMAINE (YYYY-MM-DD, lundi par défaut — `firstDay`, ÉVO E) — PAS un
 // numéro de semaine ISO, pour éviter les bugs de semaine 52/53 aux frontières d'année.

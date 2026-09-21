@@ -1,0 +1,3 @@
+Sin cambios funcionales desde la 1.2.1, esta versión solo añade la ficha
+de Fastlane (esta descripción, las capturas de pantalla) solicitada
+durante la revisión de F-Droid.

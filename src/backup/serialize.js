@@ -2,7 +2,7 @@
 // de fichiers. Chaque fonction décrit les fichiers à écrire ;
 // l'écriture réelle (via BackupStorage) est faite par l'orchestrateur.
 
-import { entryFolderName, parseDataUrl, photoFileName } from './naming'
+import { entryFolderName, parseDataUrl, assetFileName } from './naming'
 import { buildPatternMdFiles } from './pattern-md-file'
 
 // Clés de reglages.json à ne JAMAIS sauvegarder : état volatil, propre à cet
@@ -65,10 +65,9 @@ function buildPhotoFiles(photos, dir, { prefix = 'photo-' } = {}) {
       names.push(dataUrl)
       return
     }
-    // photoFileName renvoie toujours "photo-<suffixe>" (hash ou index de repli) :
-    // on substitue juste le préfixe pour distinguer les photos de patron embarqué.
-    const baseName = photoFileName(dataUrl, index)
-    const name = prefix + baseName.slice('photo-'.length)
+    // assetFileName (naming.js) substitue juste le préfixe de photoFileName, pour
+    // distinguer les photos de patron embarqué.
+    const name = assetFileName(dataUrl, index, prefix)
     names.push(name)
     if (seen.has(name)) return
     const parsed = parseDataUrl(dataUrl)
@@ -93,8 +92,7 @@ function buildGalleryFiles(gallery, dir) {
       items.push({ src: g.src, page: g.page || 0, w: g.w || 0, h: g.h || 0 })
       return
     }
-    const baseName = photoFileName(g.src, index)
-    const name = 'gallery-' + baseName.slice('photo-'.length)
+    const name = assetFileName(g.src, index, 'gallery-')
     items.push({ name, page: g.page || 0, w: g.w || 0, h: g.h || 0 })
     if (seen.has(name)) return
     const parsed = parseDataUrl(g.src)
@@ -290,8 +288,7 @@ export function serializeYarns(yarns) {
     // Pas de photo, ou data URL non analysable (cf. isInlineDataUrl) : champ inchangé,
     // aucun fichier écrit — même garde que buildPhotoFiles pour patrons/projets.
     if (!yarn.photo || isInlineDataUrl(yarn.photo)) return yarn
-    const baseName = photoFileName(yarn.photo, index)
-    const name = 'laine-photo-' + baseName.slice('photo-'.length)
+    const name = assetFileName(yarn.photo, index, 'laine-photo-')
     if (!seen.has(name)) {
       const parsed = parseDataUrl(yarn.photo)
       const file = {

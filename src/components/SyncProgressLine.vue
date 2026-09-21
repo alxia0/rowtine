@@ -24,10 +24,12 @@ const props = defineProps({
 const visible = computed(() => syncProgress.active && syncProgress.owner === props.owner)
 
 // `total` vaut 0 pendant la phase d'écriture et au tout premier événement : la barre
-// reste alors à 0 % plutôt que de produire un NaN dans le style.
-const pct = computed(() =>
-  syncProgress.total > 0 ? Math.round((syncProgress.done / syncProgress.total) * 100) : 0,
-)
+// reste alors à 0 % plutôt que de produire un NaN dans le style. Helper partagé avec
+// `subPct` ci-dessous, même formule.
+function pctOf(done, total) {
+  return total > 0 ? Math.round((done / total) * 100) : 0
+}
+const pct = computed(() => pctOf(syncProgress.done, syncProgress.total))
 
 const label = computed(() => {
   if (syncProgress.phase === 'backup') {
@@ -74,17 +76,19 @@ const sub = computed(() =>
   syncProgress.sub && syncProgress.sub.total > 0 ? syncProgress.sub : null,
 )
 
-const subPct = computed(() =>
-  sub.value ? Math.round((sub.value.done / sub.value.total) * 100) : 0,
-)
+const subPct = computed(() => (sub.value ? pctOf(sub.value.done, sub.value.total) : 0))
 
 // Mo arrondis à 0,1, formatés À LA LOCALE (virgule française, point anglais) — les
 // « 0,0 » des petits fichiers sont assumés (simple > joli). L'UNITÉ, elle, vit dans
 // la clé i18n (Mo/MB par langue), jamais ici.
-const fmtMo = (octets) =>
-  new Intl.NumberFormat(locale.value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(
-    octets / (1024 * 1024),
-  )
+// Formateur mémoïsé (même patron que `monthFormatter`, StatsHeatmap.vue) : `label` en
+// dépend et change des CENTAINES de fois pendant une restauration (un événement par
+// fichier écrit, cf. commentaire de `label` plus bas) — `fmtMo` était jusqu'ici rappelé
+// à chaque fois, recréant un `Intl.NumberFormat` à chaque appel sur ce même chemin chaud.
+const moFormatter = computed(() =>
+  new Intl.NumberFormat(locale.value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+)
+const fmtMo = (octets) => moFormatter.value.format(octets / (1024 * 1024))
 
 // Annonce de NIVEAU PHASE pour les lecteurs d'écran (première revue).
 // `report?.()` (orchestrator.js) est appelé PAR FICHIER ÉCRIT, pas par entrée : sur

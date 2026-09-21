@@ -8,17 +8,19 @@ import AppIcon from '@/components/AppIcon.vue'
 defineProps({
   modelValue: { type: Boolean, default: false },
   ariaLabel: { type: String, default: undefined },
+  disabled: { type: Boolean, default: false },
 })
 defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <label class="chk">
+  <label class="chk" :class="{ 'chk--disabled': disabled }">
     <input
       type="checkbox"
       class="chk__input"
       :checked="modelValue"
       :aria-label="ariaLabel"
+      :disabled="disabled"
       @change="$emit('update:modelValue', $event.target.checked)"
     />
     <span class="chk__box" :class="{ 'chk__box--on': modelValue }">
@@ -36,6 +38,8 @@ defineEmits(['update:modelValue'])
   min-height: 44px;
   cursor: pointer;
 }
+.chk--disabled { cursor: not-allowed; }
+.chk--disabled .chk__box { opacity: 0.5; }
 /* Masqué visuellement mais gardé dans l'ordre de tabulation et l'arbre d'accessibilité
    (WCAG 2.1.1) : le contrôle réel reçoit toujours le focus clavier — à l'inverse de
    [hidden]/display:none. Motif repris à l'identique de LibraryView `.lib-import__input`

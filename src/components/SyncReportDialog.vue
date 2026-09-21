@@ -49,22 +49,26 @@ const flaggedMerged = computed(() => (displayedReport.value?.merged || []).filte
 const skippedWithReason = computed(() => (displayedReport.value?.skipped || []).filter((s) => s && s.reason))
 const errors = computed(() => displayedReport.value?.errors || [])
 
-function keptCount(m) {
+// Somme d'un sous-ensemble de champs de `m.reconcile` — factorise les trois lectures
+// ci-dessous, qui ne différaient que par la liste de clés additionnées.
+function sumReconcile(m, keys) {
   const r = m.reconcile || {}
-  return (r.doneKept || 0) + (r.countersKept || 0)
+  return keys.reduce((total, key) => total + (r[key] || 0), 0)
+}
+
+function keptCount(m) {
+  return sumReconcile(m, ['doneKept', 'countersKept'])
 }
 
 function lostCount(m) {
-  const r = m.reconcile || {}
-  return (r.doneLost || 0) + (r.countersLost || 0)
+  return sumReconcile(m, ['doneLost', 'countersLost'])
 }
 
 // Somme des pertes d'état par grille (rang/répétition/calage/rideau) — l'affichage est
 // GÉNÉRIQUE (peu importe quelle grille) : ce qui compte, c'est que la tricoteuse sache
 // qu'un réglage de grille est à refaire. Remplace l'ancien indicateur `chartRowReset`.
 function chartStateLost(m) {
-  const r = m.reconcile || {}
-  return (r.chartRowsLost || 0) + (r.chartRepsLost || 0) + (r.chartFramesLost || 0) + (r.chartCurtainsLost || 0)
+  return sumReconcile(m, ['chartRowsLost', 'chartRepsLost', 'chartFramesLost', 'chartCurtainsLost'])
 }
 
 // `missingAssets` peut contenir des doublons (même image référencée par plusieurs

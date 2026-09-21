@@ -140,6 +140,12 @@ function search() {
 .muted { color: var(--ink-55); }
 .section-title { font-size: 17px; }
 .row { display: flex; gap: var(--sp-3); }
+.row .field-label,
+.row :deep(.fh__label) {
+  min-height: 3em; /* 2 lignes (line-height global 1.5, cf. tokens.css) : les champs Mailles/
+                       Rangs d'une même rangée démarrent à la même hauteur, que le libellé
+                       tienne sur 1 ou 2 lignes (ex. « Rangs … (optionnel) » sur petit écran). */
+}
 .col { flex: 1; }
 .resultbox { background: var(--surface-lin); }
 .result__lead { font-weight: 600; color: var(--ink); margin: 0 0 var(--sp-2); font-family: var(--font-display); font-size: 17px; }

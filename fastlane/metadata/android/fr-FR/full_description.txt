@@ -1,0 +1,32 @@
+Rowtine est une application de tricot et de crochet. Elle rassemble en un seul
+endroit ce qui se disperse habituellement autour d'un projet : stock de
+laines, patrons PDF, compteurs de rangs et notes de projet.
+
+Fonctionnalités :
+
+* Suivre chaque projet du montage à la pièce terminée. Entre chaque session l'application se souvient où l'ouvrage a été laissé.
+* Importer un patron PDF : sections, rangs et tailles sont reconstruits
+  automatiquement, entièrement sur l'appareil. Les patrons en anglais,
+  français, allemand et espagnol sont pris en charge.
+* Lire un patron avec un sélecteur de taille : chaque nombre du texte est
+  filtré selon la taille choisie.
+* Suivre un diagramme rang par rang, avec un repère déplaçable et une
+  feuille d'abréviations toujours à portée de main. Sur tablette,
+  diagramme et texte peuvent s'afficher côte à côte.
+* Gérer un stock de laines : ce qui est réservé à un projet, ce qui reste
+  libre, avec une alerte quand il n'en reste pas assez pour terminer une
+  pièce, y compris pour les laines multicolores (dégradé, auto-rayant,
+  moucheté, teint main).
+* Suivre le coût de chaque projet ; achats et cadeaux sont comptabilisés
+  séparément.
+* Retrouver une taille d'aiguille ou de crochet à partir de l'étiquette
+  d'une pelote et de l'échantillon d'un patron.
+* Deux outils indépendants : un calculateur de répartition
+  d'augmentations/diminutions et un compteur autonome.
+* Unités métriques ou impériales, cinq devises.
+* Interface, guide intégré et import de patrons en anglais, français,
+  allemand et espagnol.
+
+L'application fonctionne hors ligne et garde toutes les données sur
+l'appareil : pas de compte, pas de collecte de données, pas de serveur.
+

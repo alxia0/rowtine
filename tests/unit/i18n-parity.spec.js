@@ -66,6 +66,7 @@ const IDENTICAL_VALUE_ALLOWED = {
     'yarn.unit.km', // symbole SI, universel
     'yarn.unit.kg', // symbole SI, universel
     'calc.everyTimes', // "{every} × {count}" — pur gabarit (deux marqueurs + ×), rien de linguistique : {every} porte déjà la traduction (calc.everyN/everyOne)
+    'project.stats.progressValue', // "{pct} %" — pur gabarit (chiffre + symbole %), rien de linguistique ; en.json seul s'en écarte (pas d'espace avant %, convention anglophone)
     'stats.heatmap.cell', // "{date} — {duration}, {count}" — pur gabarit (tiret cadratin + virgule), rien de linguistique : {duration} et {count} portent déjà la traduction (fmtDuration + stats.heatmap.sessions)
     'stats.heatmap.projectLine', // "{name} — {duration}" — MÊME motif que stats.heatmap.cell juste au-dessus : {name} et {duration} portent déjà toute la traduction (11/08)
   ],
@@ -114,6 +115,7 @@ const IDENTICAL_VALUE_ALLOWED = {
     'project.notes', // "Notes"
     'project.tab.sections', // "Sections"
     'project.tab.sessions', // "Sessions"
+    'project.tab.stats', // "Stats" — même cognat fr/en que les deux ci-dessus (allemand "Statistik", espagnol "Estadísticas")
     // Vocabulaire unifié « session » (T5, 31/08) : le français dit désormais
     // « Sessions », exactement comme l'anglais — cognats légitimes, alors
     // que l'allemand dit "Sitzungen" et l'espagnol "Sesiones" (donc PAS le
@@ -121,6 +123,8 @@ const IDENTICAL_VALUE_ALLOWED = {
     'nav.sessions', // "Sessions"
     'session.recapCount', // "Sessions"
     'sessions.title', // "Sessions"
+    'project.stats.sessionsCount', // "Sessions"
+    'project.stats.sessionsValue', // "{count} session | {count} sessions"
     'session.pause', // "Pause"
     'session.count', // "session(s)"
     'session.date', // "Date"
@@ -162,6 +166,27 @@ const IDENTICAL_VALUE_ALLOWED = {
     'settings.export.pattern.type', // "Type"
     'settings.export.pattern.source', // "Source"
     'settings.export.pattern.sections', // "Sections"
+
+    // Étapes du wizard badge : "Photo" est un cognat fr/en seulement — "Foto" en allemand,
+    // "Foto" en espagnol aussi, donc PAS reconduit dans le compartiment '*'. "Format", en
+    // revanche, est identique en français, anglais ET allemand (voir le compartiment 'de'
+    // ci-dessous, où il est aussi reconduit) — seul l'espagnol le traduit ("Formato").
+    'project.stats.badge.step.format', // "Format"
+    // Gabarits du badge (refonte 16/09) : "Vertical" est un cognat fr/en, identique aussi
+    // en espagnol (reconduit dans le compartiment 'es'), mais "Vertikal" diffère en
+    // allemand — PAS dans '*'. "Horizontal" est identique dans les 4 langues actuelles
+    // (terme géométrique international) mais reconduit explicitement dans 'de' et 'es'
+    // ci-dessous plutôt que déplacé en '*', par prudence pour une langue future.
+    'project.stats.badge.templateVertical', // "Vertical"
+    'project.stats.badge.templateHorizontal', // "Horizontal"
+    // Ratios de recadrage (pop-up photo, 17/09) : mêmes mots, mêmes raisons que les gabarits
+    // ci-dessus.
+    'project.stats.badge.ratioVertical', // "Vertical"
+    'project.stats.badge.ratioHorizontal', // "Horizontal"
+    // Idem : "Technique" est identique en français et en anglais
+    // ("Technik" en allemand, "Técnica" en espagnol), donc PAS reconduit
+    // dans le compartiment '*'.
+    'project.stats.technique', // "Technique"
   ],
 
   // Allemand — mesuré le 29/07 en lançant la règle 4 contre de.json. Chaque
@@ -206,10 +231,19 @@ const IDENTICAL_VALUE_ALLOWED = {
     'yarn.weightGuide.bulky.needles',
     'yarn.weightGuide.superbulky.needles',
 
+    // Étapes du wizard badge : cognats fr/de — "Format" et "Infos"
+    // sont identiques en français et allemand (mais "Formato"/"Foto"/"Info"
+    // diffèrent en anglais et espagnol, donc PAS reconduits dans le
+    // compartiment '*').
+    'project.stats.badge.step.format', // "Format"
+    'project.stats.badge.step.infos', // "Infos"
+
     // Caractéristiques de la laine (05/08) : "Vegan" est un
     // emprunt identique par coïncidence en allemand ET en anglais (mais pas
     // en espagnol, "Vegano").
     'yarn.labels.vegan', // "Vegan"
+    'project.stats.badge.templateHorizontal', // "Horizontal" — idem compartiment 'en' ci-dessus, reconduit ici
+    'project.stats.badge.ratioHorizontal', // "Horizontal" — même mot, même raison
   ],
 
   // Espagnol — mesuré le 29/07 en lançant la règle 4 contre es.json. Même
@@ -261,6 +295,13 @@ const IDENTICAL_VALUE_ALLOWED = {
     'yarn.weightGuide.worsted.needles',
     'yarn.weightGuide.bulky.needles',
     'yarn.weightGuide.superbulky.needles',
+
+    // Gabarits du badge (refonte 16/09) : "Vertical"/"Horizontal" idem compartiment 'en'.
+    'project.stats.badge.templateVertical',
+    'project.stats.badge.templateHorizontal',
+    // Ratios de recadrage (pop-up photo, 17/09) : mêmes mots, mêmes raisons.
+    'project.stats.badge.ratioVertical',
+    'project.stats.badge.ratioHorizontal',
   ],
 }
 

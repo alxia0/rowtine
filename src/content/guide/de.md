@@ -13,7 +13,7 @@ offline**: Deine Daten bleiben auf deinem Gerät, nicht auf einem
 Server. Nichts geht aus Versehen verloren: Alles, was du löschst, landet
 im Papierkorb.
 
-## 1. Start — deine Übersicht
+## 1. Start: deine Übersicht
 
 ![Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt das Projekt Wintermütze bei 0 Prozent, dann die Übersicht (1 in Arbeit, die Zeit dieser Woche, die letzte Sitzung mit dem heutigen Datum, das ausgegebene Budget) und die Werkzeuge Zähler, Rechner und Nadeln](images/de/01-accueil.webp)
 
@@ -70,7 +70,7 @@ Beim Öffnen der App findest du:
   „Info“. Es ist auf jedem Bildschirm da: Wo du dich in der App auch
   befindest, du kommst überallhin, ohne erst zur Startseite zurückzugehen.
 
-## 2. Deine Projekte — das Herzstück der App
+## 2. Deine Projekte, das Herzstück der App
 
 ![Das Projekt Wintermütze, markiert als Offen, auf dem Reiter Abschnitte geöffnet: 0 % und 0 von 12 oben, die Schaltfläche Anleitung folgen über die ganze Breite, dann Bündchen, Rumpf und Zopf, Abnahmen am Oberteil und Fertigstellung, alle noch bei 0 %; der Timer schwebt unten, im Ruhezustand](images/de/02-fiche-projet.webp)
 
@@ -125,8 +125,12 @@ einen eigenen Preis haben.
   jeder einzelnen und der Möglichkeit, eine Sitzung
   manuell hinzuzufügen (falls du ohne geöffnete App gestrickt hast). Auch die
   laufende Sitzung ist dort live zu sehen.
+- **Statistik**: die Zahlen dieses einen Projekts (Gesamtzeit, Anzahl der
+  Sitzungen, verwendete Knäuel, Zeitraum, beste Serie aktiver Tage) und seine
+  Kalenderkarte, dann die Schaltfläche **Teilen**, die den Bildschirm
+  **Abzeichen erstellen** öffnet, beschrieben etwas weiter unten.
 
-### Live arbeiten — die Sitzung
+### Live arbeiten: die Sitzung
 
 Überall im Projekt schwebt ein **Timer** am unteren Bildschirmrand: dieselbe
 Schaltfläche auf der Projektseite, in welchem Reiter auch immer, und im Lesemodus.
@@ -160,18 +164,60 @@ das Kontrollkästchen „Timer“ im Bearbeitungsformular.
 
 ### Alle deine Sitzungen an einem Ort
 
-Der Reiter Sitzungen einer Projektseite erzählt von diesem Projekt, und
-nur von ihm. Um deine ganze Historie zu sehen, alle Projekte zusammen,
-öffnet das Menü der App den Bildschirm **Sitzungen**, zwischen Statistik
-und Ausgaben. Jede Sitzung erscheint dort, von der jüngsten bis zur
-ältesten: der Name des Projekts, dann Datum und Dauer. Ein Antippen auf
-eine Zeile öffnet die Seite des betroffenen Projekts.
+Der Reiter Sitzungen einer Projektseite verzeichnet die gesamte Zeit, die du
+an diesem Projekt verbracht hast. Um deine ganze Historie zu sehen, alle
+Projekte zusammen, öffnet das Menü der App den Bildschirm **Sitzungen**,
+zwischen Statistik und Ausgaben. Jede Sitzung erscheint dort, von der
+jüngsten bis zur ältesten: der Name des Projekts, dann Datum und Dauer. Ein
+Antippen auf eine Zeile öffnet die Seite des betroffenen Projekts.
 
 Dieser Bildschirm dient nur dem Nachlesen: Auf der Projektseite, in ihrem
 Reiter Sitzungen, wird eine Sitzung berichtigt oder gelöscht. Kein Filter,
 keine Gruppierung: Das ist eine erste Version, bewusst einfach gehalten.
 
-## 3. Die Anleitung, die sich dir anpasst — der interaktive Lesemodus
+### Ein Abzeichen deines Projekts teilen
+
+![Bildschirm zum Teilen des Abzeichens für das Projekt „Sweater for me“: das Foto des Pullovers, Gesamtzeit 32 h 07 min, Fortschritt 67 %, 30 Sitzungen und die Kalenderkarte.](images/de/02c-badge-partage.webp)
+
+*Der Bildschirm zum Teilen, geöffnet über den Reiter Statistik oder das Menü der Projektseite.*
+
+Im Reiter **Statistik** eines Projekts stellt die Schaltfläche **Teilen** (oder der
+Eintrag **Teilen** im Menü der Projektseite, oben rechts, aus jedem Reiter heraus) ein
+Bild zusammen, das du verschicken kannst, an wen du willst: dein Werkstück, seine
+Zahlen, in den Farben deiner Wahl. Der Bildschirm zeigt standardmäßig das Coverfoto
+des Projekts und unten einen Einstellungsbereich.
+
+Der Einstellungsbereich hat drei Reiter:
+- **Format**: vier Vorlagen. **Vertikal** (das Foto oben, die Zahlen darunter),
+  **Horizontal** (das Foto links, die Zahlen rechts), **Nur Text** (ohne Foto,
+  praktisch für ein Projekt, das noch keines hat) und **Zwei Bilder** (zwei Fotos
+  nebeneinander, zum Beispiel ein Vorher und ein Nachher). Hat dein Projekt ein
+  Coverfoto, öffnet sich das Abzeichen in Vertikal mit diesem Foto; sonst in Nur Text.
+- **Farbe**: eine Palette von Farbtönen, eine Schaltfläche + für eine frei gewählte
+  andere Farbe und darüber, unter **Zuletzt verwendet**, die letzten Farben, die du
+  tatsächlich für ein Abzeichen benutzt hast.
+- **Infos**: was das Abzeichen enthalten soll. Jede Angabe zeigt den echten Wert des
+  Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihren Knäueln,
+  Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der Sitzungen, Technik
+  Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder wieder
+  herauszunehmen. Die Angabe **Kalenderkarte**
+  fügt das Raster der gearbeiteten Tage hinzu. Hier wählst du auch die **Sprache**
+  des Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem
+  zu schicken, der deine nicht spricht), und eine Zeile **Freitext (optional)**,
+  höchstens 80 Zeichen.
+
+Um ein Foto zu wechseln, tippst du es in der Vorschau an: Eine Schaltfläche
+**Bearbeiten** erscheint, die dir ein Foto des Projekts oder ein Bild aus deiner
+Galerie anbietet, dann das Format (**Quadratisch**, **Horizontal** oder **Vertikal**)
+und schließlich den Zuschnitt.
+
+Die Schaltfläche **Teilen** oben am Bildschirm erzeugt das Bild, speichert es unter
+den **Fotos** des Projekts und öffnet dann das Teilen-Menü deines Telefons. Du kannst
+es schließen, ohne etwas zu verschicken: Das Abzeichen bleibt bei den Fotos. Und wenn
+du eine Einstellung änderst und erneut teilst, ohne den Bildschirm verlassen zu haben,
+wird das vorige Abzeichen ersetzt, nicht verdoppelt.
+
+## 3. Die Anleitung, die sich dir anpasst: der interaktive Lesemodus
 
 ![Die Anleitung Zopfmütze, im Projekt Wintermütze geöffnet: „Zu meinem Schritt“, dann das Inhaltsverzeichnis des Lesemodus (ein Punkt pro Abschnitt), „1. Wähle deine Größe“ mit S 50-52, M 54-56 bereits gewählt und L 58-60, und unten der Timer](images/de/03a-lecteur-haut.webp)
 
@@ -463,12 +509,12 @@ ein Satz schlecht getrennt wurde.
 
 | Kategorie | Was daraus in deinem Projekt wird |
 |---|---|
-| **Schritt** | Ein Kästchen zum Abhaken beim Stricken oder Häkeln — das Herzstück der Schritt-für-Schritt-Verfolgung. |
+| **Schritt** | Ein Kästchen zum Abhaken beim Stricken oder Häkeln, das Herzstück der Schritt-für-Schritt-Verfolgung. |
 | **Zähler** | Ein wiederholter Schritt, mit eigenem Zähler. Zwei Varianten: **Wiederholung** (die Zeile N-mal wiederholen) und **Kadenz** (die Zeile alle X Reihen wiederholen, N-mal). |
 | **Notiz** | Ein informativer Text an dieser Stelle, ohne Kästchen. |
-| **Abschnitt** | Ein Abschnittstitel (Vorderteil, Ärmel, Kragen…), mit automatischem Symbol — er unterteilt deine Anleitung im Reiter Abschnitte. |
-| **Referenz** | Eine Information von der Anleitungskarte (Garn, Nadeln, Größen…) — **kein** Bestandteil der Schritt-für-Schritt-Verfolgung. Acht Unterkategorien: **Garn** (Marke, Material, Lauflänge, Mengen), **Nadeln/Haken** (Größe und Art), **Maschenprobe** (das Referenzmaß, z. B. „10 × 10 cm = 22 Maschen“), **Material** (der Rest: Knöpfe, Markierer…), **Tipps** (die Empfehlungen des Entwurfs), **Abkürzungen** (eine pro Zeile), **Maße** (die Tabelle der Endmaße — nicht die Anleitungen je Größe, das sind Abschnitte), **Techniken** (eine erklärte Technik). Diese Blöcke füllen das Merkblatt des interaktiven Readers (Abschnitt 3 oben). |
-| **Text** | Ein einfacher Absatz, ohne besondere Rolle — meist der Einleitungs- oder Schlusstext der Anleitung. |
+| **Abschnitt** | Ein Abschnittstitel (Vorderteil, Ärmel, Kragen…), mit automatischem Symbol. Er unterteilt deine Anleitung im Reiter Abschnitte. |
+| **Referenz** | Eine Information von der Anleitungskarte (Garn, Nadeln, Größen…), **kein** Bestandteil der Schritt-für-Schritt-Verfolgung. Acht Unterkategorien: **Garn** (Marke, Material, Lauflänge, Mengen), **Nadeln/Haken** (Größe und Art), **Maschenprobe** (das Referenzmaß, z. B. „10 × 10 cm = 22 Maschen“), **Material** (der Rest: Knöpfe, Markierer…), **Tipps** (die Empfehlungen des Entwurfs), **Abkürzungen** (eine pro Zeile), **Maße** (die Tabelle der Endmaße, nicht die Anleitungen je Größe, das sind Abschnitte), **Techniken** (eine erklärte Technik). Diese Blöcke füllen das Merkblatt des interaktiven Readers (Abschnitt 3 oben). |
+| **Text** | Ein einfacher Absatz, ohne besondere Rolle, meist der Einleitungs- oder Schlusstext der Anleitung. |
 | **Bild** | Ein Foto oder ein Diagramm. |
 
 **Die eingebaute Hilfe.** Der Korrekturbildschirm bringt seine eigene Hilfe
@@ -622,8 +668,8 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
     („Unvollständige Herkunft“), statt zu raten: Das ist Absicht.
   - **Die Vegan-Warnung**: Kreuzt du Vegan bei einem Garn an, das eine
     tierische Faser enthält, weist dich die App darauf hin („Dieses Garn
-    enthält … (tierische Faser). Das Vegan-Label wirkt widersprüchlich —
-    prüfe die Zusammensetzung.“), ohne dich am Speichern zu hindern: Sie
+    enthält … (tierische Faser). Das Vegan-Label wirkt widersprüchlich:
+    Prüfe die Zusammensetzung.“), ohne dich am Speichern zu hindern: Sie
     warnt dich, sie entscheidet nicht an deiner Stelle.
   - **Deine Garne wiederfinden**: Diese Kennzeichnungen findest du im Filter
     des Vorrats (das Kriterium „Label“) und in der Textsuche wieder.
@@ -923,7 +969,7 @@ siehst sie danach nicht wieder.
   **nur ein einziges Mal insgesamt**, nicht einmal pro Bildschirm; die
   Schaltfläche „Verstanden“ schließt ihn.
 
-## 9. Unter der Haube — was {app} dir garantiert
+## 9. Unter der Haube: was {app} dir garantiert
 
 - **Standardmäßig offline**: Keine deiner Daten verlässt jemals dein
   Gerät, außer dem Sicherungsordner, den **du selbst wählst**.

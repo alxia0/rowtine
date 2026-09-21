@@ -78,7 +78,12 @@ function textKey(step) {
 
 // Construit, pour un reader donné, une map sectionId → Map(cléTexte → [index...]).
 // Une clé associée à plusieurs index dans la même section est AMBIGUË.
-function buildIndex(reader) {
+// EXPORTÉ : permet à un appelant qui réconcilie le MÊME couple (oldReader, newReader)
+// contre plusieurs `oldState` (fan-out patron de bibliothèque → projets liés, cf.
+// patron-md-sync.js) de construire l'index une seule fois au lieu de le refaire à
+// chaque appel de reconcileReaderState — les deux readers ne changent pas entre les
+// itérations, seul oldState varie.
+export function buildIndex(reader) {
   const bySection = new Map()
   for (const sec of reader?.sections || []) {
     const byKey = new Map()
@@ -127,7 +132,7 @@ function isRepeatStep(step) {
   return !!(step?.repeat || step?.total != null)
 }
 
-export function reconcileReaderState(oldReader, oldState, newReader) {
+export function reconcileReaderState(oldReader, oldState, newReader, precomputedIndex) {
   const state = freshState()
   const report = freshReport()
 
@@ -163,8 +168,11 @@ export function reconcileReaderState(oldReader, oldState, newReader) {
   }
 
   // --- 2) index des deux readers pour la résolution par contenu. -----------
-  const oldIndex = buildIndex(safeOldReader)
-  const newIndex = buildIndex(safeNewReader)
+  // Réutilise l'index précalculé par l'appelant s'il est fourni (fan-out sur
+  // plusieurs oldState pour un même couple de readers) — sinon le construit ici,
+  // comme avant.
+  const oldIndex = precomputedIndex?.oldIndex || buildIndex(safeOldReader)
+  const newIndex = precomputedIndex?.newIndex || buildIndex(safeNewReader)
 
   // --- 3) done -------------------------------------------------------------
   const oldDone = safeOldState.done && typeof safeOldState.done === 'object' ? safeOldState.done : {}

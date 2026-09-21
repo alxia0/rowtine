@@ -119,6 +119,12 @@ const goBack = useSmartBack(ctx === 'project' ? { name: 'project', params: { id:
 const lsKey = computed(() => `rowtine.reader.pat.${pattern.value?.id}`)
 // Chrono masquable par projet (project.showTimer ; défaut affiché pour les projets existants).
 const showTimer = computed(() => project.value?.showTimer ?? true)
+// Même garde que ProjectDetailView.vue : un projet Terminé ou Abandonné n'a plus de raison
+// d'avoir un chrono actif. `project.value` est absent en contexte patron libre (ctx==='pattern',
+// sans projet) : `?.status` y vaut alors undefined, jamais dans la liste -> non masqué, correct.
+const chronoVisible = computed(
+  () => showTimer.value && !['done', 'abandoned'].includes(project.value?.status),
+)
 
 // Synchro MD ciblée à l'ouverture : si le `patron.md` de ce patron/projet a
 // été édité côté PC, on veut que le Lecteur affiche IMMÉDIATEMENT le contenu à jour —
@@ -1105,7 +1111,7 @@ function onKey(e) {
            vivent dans le composant ; seules les règles de disposition DANS cette barre
            restent ci-dessous (.actionbar :deep(.chrono-fab) / :deep(.chrono-fab__body)). -->
       <ChronoPill
-        v-if="showTimer"
+        v-if="chronoVisible"
         :can-hide="ctx === 'project'"
         @toggle="toggleChrono"
         @hide="toggleTimerFromReader"

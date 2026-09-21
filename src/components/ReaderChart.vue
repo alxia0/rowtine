@@ -40,6 +40,15 @@ const bothSteps = computed(() => !props.readOnly && !props.frame && !hasRows.val
 // affiche le libellé fourni verbatim, ou le reconstruit à partir de cols/rows dans la
 // langue courante quand il est absent, sans jamais rien fabriquer en français en dur.
 const motifLabel = computed(() => chartMotifLabel(props.chart, t))
+// Même logique que `isLinear` (ligne 31) : nommée une seule fois plutôt que répétée en
+// ternaire en chaîne au site d'affichage.
+const calibrateInviteKey = computed(() =>
+  isRadial.value
+    ? 'reader.chart.calibrateInviteRadial'
+    : isPath.value
+      ? 'reader.chart.calibrateInvitePath'
+      : 'reader.chart.calibrateInvite',
+)
 
 // Voir le commentaire jumeau dans ChartStage.vue (même contrat, même raison) — le ratio
 // largeur/hauteur réel du canvas, nécessaire pour qu'une ellipse radial-circle reste ronde
@@ -109,7 +118,7 @@ watch(
     <button v-if="!readOnly && !frame" class="chart__calinvite" @click="emit('zoom')">
       <span v-if="bothSteps" class="chart__stepnum">2</span>
       <AppIcon name="calibrate" :size="16" aria-hidden="true" />
-      {{ isRadial ? $t('reader.chart.calibrateInviteRadial') : isPath ? $t('reader.chart.calibrateInvitePath') : $t('reader.chart.calibrateInvite') }}
+      {{ $t(calibrateInviteKey) }}
     </button>
     <p v-if="!readOnly && !frame && isLinear" class="chart__curtainhint">{{ $t('reader.chart.curtainDiscover') }}</p>
     <div v-if="!readOnly && hasRows" class="chart__rowbar">
@@ -228,35 +237,28 @@ watch(
   color: var(--ink-55);
   margin: 0 0 var(--sp-3);
 }
-.chart__calinvite {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  width: 100%;
-  margin-bottom: var(--sp-3);
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  background: var(--surface);
-  color: var(--brand-deep);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-align: left;
-}
+.chart__calinvite,
 .chart__setrows {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   width: 100%;
   margin-bottom: var(--sp-3);
-  padding: var(--sp-3);
-  border: 1px dashed var(--brand);
   border-radius: var(--r-md);
   background: var(--surface);
   color: var(--brand-deep);
-  font-size: 13px;
   font-weight: 700;
   text-align: left;
+}
+.chart__calinvite {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.chart__setrows {
+  padding: var(--sp-3);
+  border: 1px dashed var(--brand);
+  font-size: 13px;
 }
 .chart__stepnum {
   flex: none;

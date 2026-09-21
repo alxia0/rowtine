@@ -1,0 +1,3 @@
+Aucun changement fonctionnel depuis la 1.2.1, cette version ajoute
+uniquement la fiche Fastlane (cette description, les captures d'écran)
+demandée lors de la revue F-Droid.

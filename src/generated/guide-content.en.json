@@ -48,7 +48,7 @@
       "id": "section-1",
       "title": [
         {
-          "text": "1. Home — your dashboard",
+          "text": "1. Home: your dashboard",
           "bold": false,
           "italic": false
         }
@@ -358,7 +358,7 @@
       "id": "section-2",
       "title": [
         {
-          "text": "2. Your projects — the heart of the app",
+          "text": "2. Your projects, the heart of the app",
           "bold": false,
           "italic": false
         }
@@ -561,6 +561,31 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Stats",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": this project's own numbers (total time, number of sessions, skeins used, period, best streak of active days) and its calendar grid, then the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Share",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button, which opens the badge composer described a little further down.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         },
@@ -568,7 +593,7 @@
           "type": "subsection",
           "title": [
             {
-              "text": "Working live — a session",
+              "text": "Working live: a session",
               "bold": false,
               "italic": false
             }
@@ -744,7 +769,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "A project sheet's Sessions tab tells the story of that project, and that project only. To go back over your whole history, every project together, the app's menu opens the ",
+              "text": "A project sheet's Sessions tab tracks all the time spent on that project. To go back over your whole history, every project together, the app's menu opens the ",
               "bold": false,
               "italic": false
             },
@@ -769,6 +794,249 @@
               "italic": false
             }
           ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Share a badge of your project",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02c-badge-partage",
+          "alt": "The badge sharing screen for the project \"Sweater for me\": the sweater photo, Total time 32 h 07 min, Progress 67%, 30 sessions and the calendar map.",
+          "caption": [
+            {
+              "text": "The sharing screen, opened from the Stats tab or the project sheet's menu.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "From a project's ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Stats",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " tab, the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Share",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button (or the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Share",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " entry in the sheet's menu, at the top right, from any tab) composes an image to send to whoever you like: your piece, its numbers, in the colours of your choice. By default the screen shows the project's cover image and a settings drawer at the bottom.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The settings drawer has three tabs:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Format",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": four templates. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vertical",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the photo on top, the numbers below), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Horizontal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (the photo on the left, the numbers on the right), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Text only",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (no photo, handy for a project that doesn't have one yet) and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Two images",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (two photos side by side, a before and an after for instance). If your project has a cover photo, the badge opens in Vertical with it; otherwise in Text only.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Color",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": a palette of hues, a + button to pick any other colour freely, and, above it, the last colours you actually used for a badge.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Info",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": what the badge should contain. Each chip shows the project's real value (total time, start and end dates, yarns used with their skeins, progress while the project is still ongoing, best streak, number of sessions, crochet or knitting technique): tap it to include it or take it out. The ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Calendar map",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " chip adds the grid of the days you worked. This is also where you choose the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Language",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " of the badge's text, independent of the app's (handy for sending it to someone who doesn't speak yours), and a line of your own under ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Free text (optional)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", 80 characters at most.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "To change a photo, tap it on the preview: an ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Edit",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button appears, offering a project photo or an image from your gallery, then the shape (square, horizontal or vertical), then the crop.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Share",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button, at the top of the screen, generates the image, saves it in the project's ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Gallery",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", then opens your phone's share menu. You can close that menu without sending anything: the badge stays in the gallery. And if you change a setting then share again, the previous badge from that same visit to the composer is replaced, not duplicated.",
+              "bold": false,
+              "italic": false
+            }
+          ]
         }
       ]
     },
@@ -776,7 +1044,7 @@
       "id": "section-3",
       "title": [
         {
-          "text": "3. The pattern that adapts to you — the interactive reader",
+          "text": "3. The pattern that adapts to you: the interactive reader",
           "bold": false,
           "italic": false
         }
@@ -1959,7 +2227,7 @@
               ],
               [
                 {
-                  "text": "A checkbox during knitting or crochet — the heart of step-by-step tracking.",
+                  "text": "A checkbox during knitting or crochet, the heart of step-by-step tracking.",
                   "bold": false,
                   "italic": false
                 }
@@ -2027,7 +2295,7 @@
               ],
               [
                 {
-                  "text": "A section title (Front, Sleeve, Collar…), with its automatic icon — this is what splits your pattern into the Sections tab.",
+                  "text": "A section title (Front, Sleeve, Collar…), with its automatic icon: this is what splits your pattern into the Sections tab.",
                   "bold": false,
                   "italic": false
                 }
@@ -2043,7 +2311,7 @@
               ],
               [
                 {
-                  "text": "Information from the pattern's page (yarn, needles, sizes…) — ",
+                  "text": "Information from the pattern's page (yarn, needles, sizes…), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2123,7 +2391,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (the table of finished measurements — not the per-size instructions, which are Sections), ",
+                  "text": " (the table of finished measurements, not the per-size instructions, which are Sections), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2149,7 +2417,7 @@
               ],
               [
                 {
-                  "text": "A plain paragraph, with no particular role — usually the pattern's introduction or closing text.",
+                  "text": "A plain paragraph, with no particular role, usually the pattern's introduction or closing text.",
                   "bold": false,
                   "italic": false
                 }
@@ -2840,7 +3108,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": tick Vegan on a yarn that contains an animal fibre and the app points it out (\"This yarn contains … (animal fibre). The vegan label looks contradictory — check the composition.\") without stopping you from saving: it warns you, it doesn't decide for you.",
+                        "text": ": tick Vegan on a yarn that contains an animal fibre and the app points it out (\"This yarn contains … (animal fibre). The vegan label looks contradictory: check the composition.\") without stopping you from saving: it warns you, it doesn't decide for you.",
                         "bold": false,
                         "italic": false
                       }
@@ -3621,7 +3889,7 @@
         {
           "type": "image",
           "src": "07-statistiques",
-          "alt": "The Quarter tab selected among Month, Half-year and Year, 6/15/2026 – 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards",
+          "alt": "The Quarter tab selected among Month, Half-year and Year, 6/15/2026 to 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards",
           "caption": [
             {
               "text": "The selector at the top picks an observation window (Month, Quarter, Half-year or Year), and the whole screen follows it; here, the Quarter window. The \"Calendar\" tab, shown by default, shows the grid and the nine number tiles.",
@@ -4358,7 +4626,7 @@
       "id": "section-9",
       "title": [
         {
-          "text": "9. Under the hood — what {app} guarantees you",
+          "text": "9. Under the hood: what {app} guarantees you",
           "bold": false,
           "italic": false
         }

@@ -23,6 +23,9 @@ import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { useDismissMenu } from '@/composables/useDismissMenu'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { pickAndCropImage } from '@/utils/photo'
+import { Capacitor } from '@capacitor/core'
+import { Filesystem, Directory } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 import { formatLocalDate, localDayToDate } from '@/utils/date-format'
 import { ymdLocal } from '@/utils/time-periods'
 import { startedAtPatch } from '@/utils/project-started-at'
@@ -35,10 +38,14 @@ import { useCropperStore } from '@/stores/cropper'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
 import { resolveCover } from '@/utils/project-cover'
 import { reservationsOf, consumedOf } from '@/utils/yarn-usage'
-import { formatMoney } from '@/utils/units'
+import { formatMoney, formatLength } from '@/utils/units'
 import { patternPriceState } from '@/utils/pattern-price'
 import { projectYarnCost } from '@/utils/purchases'
 import { useSettingsStore } from '@/stores/settings'
+import StatsHeatmap from '@/components/StatsHeatmap.vue'
+import { aggregateProjectStats, formatDuration } from '@/utils/project-stats'
+import { generateHeatColors } from '@/theme/palette'
+import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import AppIcon from '@/components/AppIcon.vue'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import ProjectPdfGallery from '@/components/ProjectPdfGallery.vue'
@@ -46,6 +53,7 @@ import StitchProgress from '@/components/StitchProgress.vue'
 import SkeletonScreen from '@/components/SkeletonScreen.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
+import BadgeComposer from '@/components/BadgeComposer.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -70,7 +78,11 @@ const loading = ref(true) // pour afficher un skeleton tant que les données cha
 const linkedPattern = ref(null) // patron lié (lien dans Détails, photos dans Galerie)
 const { open: menuOpen, triggerRef, menuRef } = useDismissMenu()
 const tab = ref(route.query.tab || 'sections')
-const TABS = ['sections', 'infos', 'photos', 'sessions']
+// Onglet d'entrée capturé une fois pour toutes ici (voir handleBackPressed plus bas) : `tab`
+// change ensuite au fil des `changeTab()`, donc le relire depuis la route à ce moment-là ne
+// donnerait plus l'onglet de départ.
+const entryTab = tab.value
+const TABS = ['sections', 'infos', 'photos', 'sessions', 'stats']
 // Indice de défilement (T8, audit UX 17/07) : la bande d'onglets défile déjà
 // (`overflow-x: auto`) mais sa barre de scroll est masquée volontairement — rien ne dit
 // donc qu'« Sessions », coupé à droite sur un petit écran, est atteignable. `tabsFade.active`
@@ -83,6 +95,45 @@ const tabsEl = ref(null)
 // retombée. Piège classique de la Composition API — cf. `useDismissMenu` plus haut, même
 // motif de déstructuration.
 const { active: tabsFadeActive } = useScrollFade(tabsEl)
+
+// Onglet Stats : même schéma que StatsView.vue (heatmap teintée sur l'accent choisi),
+// mais scopé au projet courant — pas de fenêtre glissante, `aggregateProjectStats` borne
+// la grille à la vie du projet (cf. commentaire de buildProjectWindow dans project-stats.js).
+const effectiveTheme = useEffectiveTheme()
+const heatFirstDay = computed(() => settings.weekStart ?? 1)
+const heatColors = computed(() => generateHeatColors(settings.effectiveAccentHue(effectiveTheme.value)))
+const projectStats = computed(() =>
+  project.value
+    ? aggregateProjectStats(project.value, sessionsStore.sessions, yarnsStore.yarns, linkedPattern.value)
+    : null,
+)
+// `aggregateProjectStats` calcule déjà ce détail par laine en interne (yarnUsage) pour
+// cumuler ballsUsed/metersUsed — le relire ici plutôt que de rappeler `projectYarnUsage`
+// séparément sur les mêmes project/yarns, qui referait le même filtrage en double.
+const badgeYarnUsage = computed(() => projectStats.value?.yarnUsage || [])
+// Mètres de fil utilisés : même profil ('total', bascule m/km autorisée) et même
+// système d'unités que le Stock (StashView.vue) — cohérence d'affichage dans toute
+// l'app. `metersUsed` est TOUJOURS en mètres (project-stats.js reste pur, aucune
+// notion d'unité choisie) ; la bascule métrique/impériale se fait ici, à l'affichage.
+const metersStat = computed(() =>
+  formatLength(projectStats.value?.metersUsed || 0, { locale: locale.value, system: settings.unitSystem, profile: 'total' }),
+)
+const showBadgeComposer = ref(false)
+// Même idiome que addPhoto/removePhoto/setCover ci-dessous (onglet Photos) : le composeur
+// écrit directement en base via projectsStore.update, `project.value` local ne le sait pas
+// tant qu'on ne relit pas — sinon la Galerie resterait sur l'ancien tableau de photos tant
+// que la fiche n'est pas rechargée.
+// La feuille reste OUVERTE après génération : elle affiche l'aperçu plein écran du badge
+// produit (spec §141, « la feuille affiche le résultat … avec un bouton Fermer »). La fermer
+// ici la démontait avant que son `resultUrl` n'ait pu être rendu — l'aperçu était du code
+// mort. C'est le bouton Fermer du composeur (@close) qui referme, comme prévu.
+// Pas de snackbar de confirmation ici : la feuille étant désormais OUVERTE et opaque
+// (z-index 1050), le SnackBar (z-index 100) serait rendu DESSOUS, donc invisible à coup sûr.
+// L'aperçu affiché dans la feuille EST la confirmation — c'est ce que décrit la spec §141,
+// qui n'a jamais demandé de snackbar pour ce flux.
+async function onBadgeSaved() {
+  project.value = await projectsStore.get(project.value.id)
+}
 
 async function loadAll() {
   loading.value = true
@@ -188,6 +239,13 @@ async function setActiveSize(sz) {
 // question, rien à faire ici pour couvrir 'abandoned'.
 async function changeStatus(status) {
   await projectConsumption.requestStatusChange(project.value, status, async () => {
+    // Un chrono qui tourne sur CE projet n'a plus de contrôle possible dès que le
+    // statut passe à Terminé/Abandonné : `chronoVisible` masque la pastille au même
+    // instant (cf. plus bas), laissant la session tourner jusqu'à la prochaine
+    // navigation (garde « sortie de bulle » du routeur). Fermer AVANT l'écriture du
+    // statut — même convention que toggleTimerFromDetail ci-dessous : la session doit
+    // être enregistrée avant que l'état qui la rend invisible ne soit persisté.
+    if (['done', 'abandoned'].includes(status) && chronoMine.value) await closeChronoSession()
     await projectsStore.update(project.value.id, { status })
     // Relit le projet ÉCRIT plutôt que de recopier `status` seul (correction ultérieure) :
     // passer à 'done' fait écrire `finishedAt` en base comme effet de la
@@ -231,6 +289,51 @@ function changeTab(next) {
   slideDir.value = TABS.indexOf(next) >= cur ? 'next' : 'prev'
   tab.value = next
 }
+// Interception du retour (App.vue, `currentViewRef.value?.handleBackPressed?.()`, même motif que
+// `folderGateHandlesBack`/`backupPromptRef.handleBackPressed`) : `tab` n'est jamais reflété dans
+// l'historique de navigation (cf. commentaire de sa déclaration plus haut), donc un retour
+// depuis un onglet non par défaut quitterait la fiche projet vers l'écran précédent sans jamais
+// « revenir » sur cet onglet — retour Julien, 19/09 : le geste doit rester sur la fiche projet
+// tant qu'on n'est pas sur son onglet d'entrée. Le bouton retour explicite de l'en-tête
+// (`.phdr__back`, @click="goBack") continue, lui, de toujours quitter la fiche — seul le geste
+// de retour (balayage/bouton système) change de comportement ici.
+// Retour progressif (revue finale du lot, tranchée par Julien le 20/09) : un simple `return
+// true` sans effet visible laissait le geste avalé pour de bon, sans aucun retour à l'écran —
+// bloqué jusqu'à ce que l'utilisatrice retape elle-même l'onglet Sections. Chaque geste ramène
+// donc d'abord sur l'onglet d'entrée (le changement d'onglet EST le retour visible), et seul le
+// geste SUIVANT, maintenant sur cet onglet, laisse passer vers smartBack(). Destination
+// `entryTab` et pas le littéral `TABS[0]` : en pratique les deux coïncident toujours
+// aujourd'hui (aucun `?tab=` produit nulle part, cf. déclaration d'`entryTab` plus haut), mais
+// si `TABS[0]` était utilisé ici alors que `entryTab` diffère, le prochain appel comparerait
+// `tab.value` (retombé sur `TABS[0]`) à `entryTab` (différent) : jamais égal, geste avalé pour
+// toujours — même blocage que celui qu'on corrige. `entryTab` aux deux endroits élimine ce cas.
+defineExpose({
+  changeTab,
+  showBadgeComposer,
+  handleBackPressed() {
+    // Le composeur de badge est un overlay LOCAL à cette vue (v-if, jamais un store global comme
+    // chartZoom/lightbox/colorPicker/projectConsumption, déjà gardés dans App.vue) — App.vue ne
+    // peut donc pas le fermer lui-même via sa chaîne de pop-up habituelle. Vérifié EN PREMIER,
+    // avant la logique d'onglet : sans cette garde, un retour depuis le composeur alors qu'on est
+    // déjà sur l'onglet d'entrée laissait passer le geste jusqu'à smartBack() (sortie vers
+    // l'Accueil), composeur toujours ouvert par-dessus l'écran qui disparaît (retour Julien, 20/09).
+    if (showBadgeComposer.value) {
+      // Même garde que le gestionnaire Échap du composeur lui-même (BadgeComposer.vue) : le
+      // recadreur (PhotoCropper, instance UNIQUE montée dans App.vue, v-if="cropper.open") survit
+      // au démontage du composeur puisqu'il vit à un niveau au-dessus. Fermer le composeur pendant
+      // que cropper.crop() est en attente démonterait BadgePhotoPicker sous le recadreur encore
+      // ouvert, perdant en silence toute la configuration du badge en cours (gabarit, couleur,
+      // stats choisies) — l'incident que la garde d'Échap du composeur existe déjà pour éviter,
+      // désormais atteignable par ce chemin de retour (revue finale du lot, 20/09).
+      if (cropper.open) return true
+      showBadgeComposer.value = false
+      return true
+    }
+    if (tab.value === entryTab) return false
+    changeTab(entryTab)
+    return true
+  },
+})
 onMounted(loadAll)
 // Navigation sortante (la suppression ci-dessous fait router.replace vers l'accueil) :
 // params.id disparaît AVANT le démontage, et le watcher tirait un loadAll(undefined)
@@ -251,6 +354,7 @@ const needleList = computed(() => {
 })
 const hasNeedle = computed(() => needleList.value.length > 0)
 const isCrochet = computed(() => project.value?.technique === 'crochet')
+const isDone = computed(() => project.value?.status === 'done')
 const projectYarns = computed(() => yarnsStore.yarns.filter((y) => reservationsOf(y)[project.value?.id] != null))
 // Laines dont CE projet a réellement tricoté des pelotes (trace de consommation,
 // décision produit) — distinct des réservations ci-dessus : une fois consommée,
@@ -270,6 +374,11 @@ const chronoMine = computed(() => active.isActive && active.projectId === projec
 
 // Réglage par projet ; défaut « affiché » pour tous les projets déjà en base.
 const showTimer = computed(() => project.value?.showTimer ?? true)
+// Un projet Terminé ou Abandonné n'a plus de raison d'avoir un chrono actif — indépendant
+// du réglage showTimer, qui ne pilote que la préférence d'affichage sur un projet EN COURS.
+const chronoVisible = computed(
+  () => showTimer.value && !['done', 'abandoned'].includes(project.value?.status),
+)
 
 // Geste de la pastille : pause si CE chrono tourne, sinon démarrage — le comportement de
 // l'ancien bouton du bloc « Temps de travail », repris tel quel. Sur un chrono d'un autre
@@ -334,6 +443,12 @@ function edit() {
   menuOpen.value = false
   router.push({ name: 'project-edit', params: { id: route.params.id } })
 }
+// Menu ⋮ : ouvre le composeur de badge, comme le bouton « Partager » de l'onglet Stats
+// (le composeur est téléporté hors des onglets, l'onglet courant n'a pas à changer).
+function shareFromMenu() {
+  menuOpen.value = false
+  showBadgeComposer.value = true
+}
 // Menu ⋮ (#7) : ouvre le PDF d'origine du patron rattaché, dans une appli externe. Best-effort
 // (cf. openPdfExternally) : un échec (natif ou web) ne doit pas faire planter la fiche, juste
 // avertir — même garde que PatternView.openExternal (clé i18n partagée).
@@ -385,6 +500,7 @@ const addingSection = ref(false)
 
 // --- Compteurs (rangs, + augm/dim et répétitions en option) ---
 const addingCounter = ref(false)
+watch(isDone, (done) => { if (done) addingCounter.value = false })
 async function addCounter({ name, extra }) {
   await countersStore.add(project.value.id, name || t('counter.default'), extra)
   addingCounter.value = false
@@ -438,19 +554,18 @@ function rowDuration(s) {
 }
 
 const addingSession = ref(false)
-const newSess = reactive({ date: '', durationMin: '', rows: '' })
+const newSess = reactive({ date: '', durationMin: '' })
 async function saveManualSession() {
   const min = Number(newSess.durationMin) || 0
-  if (!min && !newSess.rows) return
+  if (!min) return
   await sessionsStore.add({
     projectId: project.value.id,
     sectionId: null,
     date: (newSess.date ? localDayToDate(newSess.date) : new Date()).toISOString(),
     durationSec: min * 60,
-    rowsDone: Number(newSess.rows) || 0,
     manual: true,
   })
-  Object.assign(newSess, { date: '', durationMin: '', rows: '' })
+  Object.assign(newSess, { date: '', durationMin: '' })
   addingSession.value = false
 }
 async function removeSession(id) {
@@ -458,10 +573,10 @@ async function removeSession(id) {
   snackbar.show(t('session.deleted'), { actionLabel: t('common.undo'), onAction: () => sessionsStore.restore(s) })
 }
 
-// Rectifier le temps / les rangs / la date d'une session existante — utile si on a oublié
+// Rectifier le temps / la date d'une session existante — utile si on a oublié
 // de démarrer ou d'arrêter le chrono (PRD §7.6).
 const editingSessionId = ref(null)
-const editSess = reactive({ date: '', durationMin: '', rows: '' })
+const editSess = reactive({ date: '', durationMin: '' })
 function startEditSession(s) {
   editingSessionId.value = s.id
   // Le jour LOCAL, pas les 10 premiers caractères de la chaîne ISO (qui sont en UTC) : sinon
@@ -470,14 +585,12 @@ function startEditSession(s) {
   // côté lecture cette fois).
   editSess.date = s.date ? ymdLocal(new Date(s.date)) : ''
   editSess.durationMin = String(Math.round((s.durationSec || 0) / 60))
-  editSess.rows = String(s.rowsDone || 0)
   addingSession.value = false
 }
 async function saveEditSession() {
   await sessionsStore.update(editingSessionId.value, {
     date: (editSess.date ? localDayToDate(editSess.date) : new Date()).toISOString(),
     durationSec: (Number(editSess.durationMin) || 0) * 60,
-    rowsDone: Number(editSess.rows) || 0,
   })
   editingSessionId.value = null
   snackbar.show(t('session.updated'))
@@ -518,6 +631,27 @@ async function removePhoto(idx) {
 async function setCover(idx) {
   await projectsStore.update(project.value.id, { coverIndex: idx })
   project.value = await projectsStore.get(project.value.id)
+}
+// Partage natif (mail, messagerie…) : même montage que src/utils/open-pdf.js — écrit la
+// data URL en fichier cache pour obtenir un URI que le plugin Share sait attacher, un
+// data: URI n'étant pas partageable tel quel. Erreur avalée : annuler le partage n'en
+// est pas une (feuille système fermée par l'utilisatrice).
+async function sharePhoto(idx) {
+  const dataUrl = photos.value[idx]
+  if (!dataUrl) return
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const fileName = `rowtine-photo-${Date.now()}.jpg`
+      const base64 = dataUrl.split(',')[1] || ''
+      await Filesystem.writeFile({ path: fileName, data: base64, directory: Directory.Cache })
+      const { uri } = await Filesystem.getUri({ path: fileName, directory: Directory.Cache })
+      await Share.share({ files: [uri] })
+    } else {
+      await Share.share({ url: dataUrl })
+    }
+  } catch {
+    // partage annulé ou indisponible : rien à signaler
+  }
 }
 
 // --- Visionneuse plein écran (tap sur une photo) ---
@@ -564,6 +698,10 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
           <button class="menu__item" @click="edit">{{ t('project.edit') }}</button>
           <button v-if="linkedPattern?.pdf" class="menu__item" @click="viewPatternPdf">{{ t('project.viewPdf') }}</button>
           <button v-if="linkedPattern?.reader?.sections?.length" class="menu__item" @click="correctPattern">{{ t('project.correctPattern') }}</button>
+          <!-- Second chemin vers le composeur de badge (demande Julien, 21/09) : le bouton
+               « Partager » de l'onglet Stats reste, mais il faut aller le chercher ; ici il
+               est à portée depuis n'importe quel onglet. Même libellé que ce bouton. -->
+          <button class="menu__item" data-test="menu-share-badge" @click="shareFromMenu">{{ t('project.stats.badge.create') }}</button>
           <!-- Porte de retour du chrono masqué (08/09) : dynamique selon l'état —
                « Masquer le chrono » (redondant avec le chevron de la pastille : même geste,
                autre chemin, accessible clavier/lecteur d'écran) / « Afficher le chrono »
@@ -695,7 +833,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             </div>
             <StitchProgress :technique="isCrochet ? 'crochet' : 'knitting'" :done="readerOverview.done" :total="readerOverview.total" />
           </div>
-          <button class="btn btn--primary btn--block reader-btn" @click="openReader"><AppIcon name="book" :size="18" /> {{ t('reader.followPattern') }}</button>
+          <button v-if="!isDone" class="btn btn--primary btn--block reader-btn" @click="openReader"><AppIcon name="book" :size="18" /> {{ t('reader.followPattern') }}</button>
           <div v-for="s in readerOverview.sections" :key="s.id" class="rovw">
             <button class="rovw__main" @click="openSection(s)">
               <span class="rovw__ic"><AppIcon :name="s.kind" :size="20" /></span>
@@ -707,7 +845,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
                 <span class="rovw__track"><span class="rovw__fill" :class="{ 'rovw__fill--done': s.complete }" :style="{ width: s.pct + '%' }"></span></span>
               </span>
             </button>
-            <AppCheckbox v-if="s.total" class="rovw__done" :modelValue="s.complete" :aria-label="t('section.markDoneA11y')" @update:modelValue="() => onToggleSection(s)" />
+            <AppCheckbox v-if="s.total" class="rovw__done" :modelValue="s.complete" :aria-label="t('section.markDoneA11y')" :disabled="isDone" @update:modelValue="() => onToggleSection(s)" />
           </div>
         </template>
 
@@ -721,11 +859,13 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
           <div v-if="countersStore.counters.length" class="clist">
             <CounterCard v-for="c in countersStore.counters" :key="c.id" :counter="c" @set="setCounter" @update="updateCounter" @remove="removeCounter" />
           </div>
-          <div v-if="addingCounter" class="mt2">
-            <CounterForm @submit="addCounter" />
-            <button class="btn btn--block mt2" @click="addingCounter = false">{{ t('common.cancel') }}</button>
-          </div>
-          <button v-else class="btn btn--block mt2" @click="addingCounter = true"><AppIcon name="plus" :size="17" /> {{ t('counter.add') }}</button>
+          <template v-if="!isDone">
+            <div v-if="addingCounter" class="mt2">
+              <CounterForm @submit="addCounter" />
+              <button class="btn btn--block mt2" @click="addingCounter = false">{{ t('common.cancel') }}</button>
+            </div>
+            <button v-else class="btn btn--block mt2" @click="addingCounter = true"><AppIcon name="plus" :size="17" /> {{ t('counter.add') }}</button>
+          </template>
         </section>
       </div>
 
@@ -766,7 +906,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
       </div>
 
       <!-- SESSIONS -->
-      <div v-else id="panel-sessions" class="sessions-tab" role="tabpanel" aria-labelledby="tab-sessions">
+      <div v-else-if="tab === 'sessions'" id="panel-sessions" class="sessions-tab" role="tabpanel" aria-labelledby="tab-sessions">
         <!-- Le bandeau « Session en cours » a disparu (chantier « chrono unifié », 2026-08-30) :
              c'est la pastille chrono flottante, visible sur tous les onglets, qui rappelle
              désormais la session qui tourne — cf. .chrono-dock en fin de template. -->
@@ -784,10 +924,8 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         <div v-if="addingSession" class="card addform">
           <label class="field-label" for="sd">{{ t('session.date') }}</label>
           <input id="sd" v-model="newSess.date" class="input" type="date" />
-          <div class="row mt2">
-            <div class="col"><label class="field-label" for="sm">{{ t('session.durationMin') }}</label><input id="sm" v-model="newSess.durationMin" class="input" inputmode="numeric" placeholder="30" /></div>
-            <div class="col"><label class="field-label" for="sr">{{ t('session.rows') }}</label><input id="sr" v-model="newSess.rows" class="input" inputmode="numeric" placeholder="12" /></div>
-          </div>
+          <label class="field-label mt2" for="sm">{{ t('session.durationMin') }}</label>
+          <input id="sm" v-model="newSess.durationMin" class="input" inputmode="numeric" placeholder="30" />
           <div class="addform__actions">
             <button class="btn" @click="addingSession = false">{{ t('common.cancel') }}</button>
             <button class="btn btn--primary" @click="saveManualSession">{{ t('common.save') }}</button>
@@ -820,10 +958,8 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             <div v-if="editingSessionId === s.id" class="card addform">
               <label class="field-label" :for="`esd-${s.id}`">{{ t('session.date') }}</label>
               <input :id="`esd-${s.id}`" v-model="editSess.date" class="input" type="date" />
-              <div class="row mt2">
-                <div class="col"><label class="field-label" :for="`esm-${s.id}`">{{ t('session.durationMin') }}</label><input :id="`esm-${s.id}`" v-model="editSess.durationMin" class="input" inputmode="numeric" /></div>
-                <div class="col"><label class="field-label" :for="`esr-${s.id}`">{{ t('session.rows') }}</label><input :id="`esr-${s.id}`" v-model="editSess.rows" class="input" inputmode="numeric" /></div>
-              </div>
+              <label class="field-label mt2" :for="`esm-${s.id}`">{{ t('session.durationMin') }}</label>
+              <input :id="`esm-${s.id}`" v-model="editSess.durationMin" class="input" inputmode="numeric" />
               <div class="addform__actions">
                 <button class="btn" @click="editingSessionId = null">{{ t('common.cancel') }}</button>
                 <button class="btn btn--primary" @click="saveEditSession">{{ t('common.save') }}</button>
@@ -835,7 +971,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             <div v-else class="ses-row" :class="{ 'ses-row--live': s.id === liveTarget?.id }">
               <div>
                 <span class="ses-row__date">{{ formatLocalDate(s.date, locale) }}</span>
-                <span class="ses-row__meta">{{ fmtDuration(rowDuration(s)) }}<template v-if="s.rowsDone"> · {{ s.rowsDone }} {{ t('session.rowsShort') }}</template></span>
+                <span class="ses-row__meta">{{ fmtDuration(rowDuration(s)) }}</span>
               </div>
               <span
                 v-if="s.id === liveTarget?.id"
@@ -855,6 +991,67 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
              l'utilisateur qui vient de démarrer ne doit pas lire « aucune session ». -->
         <p v-if="!sessionsStore.sessions.length && !virtualLive" class="muted">{{ t('session.empty') }}</p>
       </div>
+
+      <!-- STATS -->
+      <div v-else id="panel-stats" class="stats-tab" role="tabpanel" aria-labelledby="tab-stats">
+        <template v-if="projectStats && projectStats.sessionsCount > 0">
+          <div class="stat-grid">
+            <div class="stile">
+              <span class="stile__k">{{ t('project.stats.totalTime') }}</span>
+              <span class="stile__v">{{ formatDuration(projectStats.totalSeconds) }}</span>
+            </div>
+            <div class="stile">
+              <span class="stile__k">{{ t('project.stats.sessionsCount') }}</span>
+              <span class="stile__v">{{ t('project.stats.sessionsValue', projectStats.sessionsCount) }}</span>
+            </div>
+            <div class="stile">
+              <span class="stile__k">{{ t('project.stats.ballsUsed') }}</span>
+              <span class="stile__v">
+                {{ t('project.stats.ballsValue', projectStats.ballsUsed) }}<template v-if="projectStats.metersUsed"> · {{ metersStat.text }} {{ t(metersStat.unitKey) }}</template>
+              </span>
+            </div>
+            <div class="stile">
+              <span class="stile__k">{{ t('project.stats.period') }}</span>
+              <!-- Deux clés DISTINCTES selon `ongoing` : « {from} au {to} » avec `to` =
+                   « en cours » donnait « 20/08/2026 au en cours » (et l'équivalent en de/es).
+                   `periodOngoing` porte la phrase entière du cas en cours. Même branchement
+                   dans badge-render.js (statLine), qui compose la même donnée. -->
+              <span class="stile__v">
+                {{
+                  projectStats.ongoing
+                    ? t('project.stats.periodOngoing', { from: formatLocalDate(projectStats.startDay, locale) })
+                    : t('project.stats.periodValue', {
+                        from: formatLocalDate(projectStats.startDay, locale),
+                        to: formatLocalDate(projectStats.endDay, locale),
+                      })
+                }}
+              </span>
+            </div>
+            <div class="stile">
+              <span class="stile__k">{{ t('project.stats.bestStreak') }}</span>
+              <span class="stile__v">{{ t('project.stats.streakValue', projectStats.bestStreak) }}</span>
+            </div>
+          </div>
+          <StatsHeatmap
+            :grid="projectStats.grid"
+            :locale="locale"
+            :first-day="heatFirstDay"
+            :heat-colors="heatColors"
+          />
+        </template>
+        <p v-else class="muted">{{ t('project.stats.empty') }}</p>
+        <!-- Accessible même pour un projet sans aucune séance (retour Julien, 18/09) : les
+             stats agrégées (aggregateProjectStats) restent valides à 0 séance, seul cet
+             affichage les masquait. -->
+        <button
+          class="btn btn--block mt"
+          type="button"
+          data-test="open-badge-composer"
+          @click="showBadgeComposer = true"
+        >
+          <AppIcon name="badgeVertical" :size="17" /> {{ t('project.stats.badge.create') }}
+        </button>
+      </div>
       </Transition>
       </div>
     </div>
@@ -872,12 +1069,24 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
           @keydown="trapTabFocus"
         >
           <img class="viewer__img" :src="photos[viewerIdx]" :alt="`${project.name} — ${viewerIdx + 1}`" />
+          <button class="viewer__share" :aria-label="t('photo.share')" @click="sharePhoto(viewerIdx)"><AppIcon name="share" :size="20" /></button>
           <button class="viewer__close" :aria-label="t('common.close')" @click="closeViewer"><AppIcon name="close" :size="22" /></button>
           <button v-if="viewerIdx > 0" class="viewer__nav viewer__nav--prev" :aria-label="t('common.previous')" @click="viewerPrev"><AppIcon name="chevronLeft" :size="26" /></button>
           <button v-if="viewerIdx < photos.length - 1" class="viewer__nav viewer__nav--next" :aria-label="t('common.next')" @click="viewerNext"><AppIcon name="chevronRight" :size="26" /></button>
           <div class="viewer__count">{{ viewerIdx + 1 }} / {{ photos.length }}</div>
         </div>
       </Transition>
+    </Teleport>
+
+    <Teleport to="body">
+      <BadgeComposer
+        v-if="showBadgeComposer"
+        :project="project"
+        :stats="projectStats"
+        :yarn-usage="badgeYarnUsage"
+        @saved="onBadgeSaved"
+        @close="showBadgeComposer = false"
+      />
     </Teleport>
 
     <!-- « Combien de pelotes as-tu réellement utilisées/perdues ? » (Terminé ou Abandonné,
@@ -901,7 +1110,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
          « Afficher le chrono » du kebab ci-dessus (toujours là) et l'interrupteur du
          formulaire d'édition (ProjectEditView). -->
     <div class="chrono-dock">
-      <ChronoPill v-if="showTimer" can-hide @toggle="toggleChrono" @hide="toggleTimerFromDetail" />
+      <ChronoPill v-if="chronoVisible" can-hide @toggle="toggleChrono" @hide="toggleTimerFromDetail" />
 
       <!-- Retour en haut : DANS le dock, retiré du flux de la rangée — même motif que la
            barre du lecteur (cf. ReaderView.vue, même commentaire) : son `position: fixed`
@@ -1147,6 +1356,28 @@ html[data-theme='dark'] .chrono-dock {
 .rtile--sage { background: var(--sage-tile-bg); border-color: var(--sage-tile-line); }
 .rtile--sage .rtile__k { color: var(--sage-deep); }
 .rtile--sage .rtile__v { color: var(--sage); }
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.stile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--tile);
+}
+.stile__k {
+  font-size: 0.8rem;
+  color: var(--ink-55);
+}
+.stile__v {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
 .ses-row { display: flex; align-items: center; justify-content: space-between; background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4); box-shadow: var(--clay-sm); }
 .ses-row__date { font-weight: 600; margin-right: var(--sp-3); }
 .ses-row__meta { color: var(--ink-55); font-size: 13px; }
@@ -1209,6 +1440,7 @@ html[data-theme='dark'] .chrono-dock {
 .viewer { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.9); padding: max(var(--sp-4), var(--sa-top)) var(--sa-right) var(--sa-bottom) var(--sa-left); }
 .viewer__img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .viewer__close { position: absolute; top: calc(var(--sp-3) + var(--sa-top)); right: calc(var(--sp-3) + var(--sa-right)); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; font-size: 18px; }
+.viewer__share { position: absolute; top: calc(var(--sp-3) + var(--sa-top)); right: calc(var(--sp-3) + var(--sa-right) + 52px); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; }
 .viewer__nav { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; font-size: 28px; line-height: 1; }
 .viewer__nav--prev { left: calc(var(--sp-2) + var(--sa-left)); }
 .viewer__nav--next { right: calc(var(--sp-2) + var(--sa-right)); }

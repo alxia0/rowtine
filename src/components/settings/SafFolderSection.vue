@@ -132,11 +132,16 @@ async function loadState() {
   // qui rejette en UNIMPLEMENTED) — on garde l'état par défaut « aucun dossier »
   // plutôt que de déclencher un rejet non intercepté à l'ouverture des Réglages.
   if (!Capacitor.isNativePlatform()) return
-  const has = await hasFolder()
+  // Deux lectures indépendantes (aucune ne dépend du résultat de l'autre) : en
+  // parallèle plutôt qu'en série, même principe que le trio `db.*.count()` plus bas.
+  const [has, path] = await Promise.all([
+    hasFolder(),
+    // Libellé d'affichage du dossier (cf. commentaire au-dessus de `folderPath`) :
+    // une seule lecture via le site unique de composition (réglage + repli nom).
+    folderDisplayPath(),
+  ])
   designated.value = has
-  // Libellé d'affichage du dossier (cf. commentaire au-dessus de `folderPath`) :
-  // une seule lecture via le site unique de composition (réglage + repli nom).
-  folderPath.value = await folderDisplayPath()
+  folderPath.value = path
 
   // Diagnostic (04/08/2026) : dire à l'utilisatrice POURQUOI la restauration est
   // ou n'est pas possible. Sans ces trois lignes, une restauration qui ne se
@@ -178,16 +183,18 @@ async function loadState() {
       db.yarns.count(),
     ])
     counts.value = { p, m, l }
-    // Site unique de vérité (lot du 06/08) : la ligne « en pause » ET le `v-if` du bouton
-    // de sortie qui en découle doivent suivre EXACTEMENT le critère qui gouverne
-    // l'écriture. Les dériver à part est ce qui avait rendu le cul-de-sac possible.
-    pauseReason.value = await backupPauseReason(storage)
-    // Fiche d'identité (lot du 06/08). Quelques centaines d'octets — principe général à
-    // garder : ne jamais lire ici un fichier potentiellement lourd (ex. un gros
-    // original.pdf) juste pour afficher trois lignes. `laines.json` ne relève plus de cette
-    // mise en garde depuis le 15/08/2026 (photos de laine externalisées) : il redevient
-    // petit quelle que soit la taille du stock.
-    const described = await describeOrigin(storage)
+    // Encore deux lectures indépendantes de `storage` (même remarque qu'au-dessus) :
+    // - Site unique de vérité (lot du 06/08) : la ligne « en pause » ET le `v-if` du
+    //   bouton de sortie qui en découle doivent suivre EXACTEMENT le critère qui
+    //   gouverne l'écriture. Les dériver à part est ce qui avait rendu le cul-de-sac
+    //   possible.
+    // - Fiche d'identité (lot du 06/08). Quelques centaines d'octets — principe
+    //   général à garder : ne jamais lire ici un fichier potentiellement lourd (ex.
+    //   un gros original.pdf) juste pour afficher trois lignes. `laines.json` ne
+    //   relève plus de cette mise en garde depuis le 15/08/2026 (photos de laine
+    //   externalisées) : il redevient petit quelle que soit la taille du stock.
+    const [reason, described] = await Promise.all([backupPauseReason(storage), describeOrigin(storage)])
+    pauseReason.value = reason
     origin.value = described.origin
     manifest.value = described.manifest
   } catch {

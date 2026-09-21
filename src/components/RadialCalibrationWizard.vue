@@ -57,6 +57,20 @@ const GUIDE_R_PCT_INNER = 15
 const GUIDE_R_PCT_OUTER = 30
 const GUIDE_R_PCT = computed(() => (step.value === 'outer' ? GUIDE_R_PCT_OUTER : GUIDE_R_PCT_INNER))
 const RESIZE_SENSITIVITY = 0.15 // % de rayon par pixel de glissé vertical en mode Agrandir·Rétrécir
+const MIN_RING_GAP = 2 // écart minimal (en %) entre r0 et r1, dans les deux sens
+const MAX_RADIUS = 60 // rayon maximal (en %) atteignable par r1
+
+// Arrondi au dixième — motif répété à chaque écriture de cx/cy/r0/r1 (glissé, pavé
+// directionnel), factorisé pour ne porter le calcul qu'à un seul endroit.
+function round1(n) {
+  return Math.round(n * 10) / 10
+}
+// Fusionne un patch dans `draft` : évite de répéter `draft.value = { ...draft.value, … }`
+// à chaque site d'écriture (glissé, formes, pas, pavé directionnel — huit occurrences
+// avant cette factorisation).
+function patchDraft(patch) {
+  draft.value = { ...draft.value, ...patch }
+}
 
 const viewportEl = ref(null)
 const imgwrapEl = ref(null)
@@ -150,15 +164,14 @@ function onViewportMove(e) {
   if (dragMode === 'move') {
     const dCx = (dxPx / dragStart.contentW) * 100
     const dCy = (dyPx / dragStart.contentH) * 100
-    draft.value = {
-      ...draft.value,
-      cx: Math.round(Math.max(0, Math.min(100, dragStart.cx - dCx)) * 10) / 10,
-      cy: Math.round(Math.max(0, Math.min(100, dragStart.cy - dCy)) * 10) / 10,
-    }
+    patchDraft({
+      cx: round1(Math.max(0, Math.min(100, dragStart.cx - dCx))),
+      cy: round1(Math.max(0, Math.min(100, dragStart.cy - dCy))),
+    })
   } else {
     const newR = dragStart.r + dyPx * RESIZE_SENSITIVITY
-    if (step.value === 'inner') draft.value = { ...draft.value, r0: Math.round(Math.max(0, Math.min(newR, draft.value.r1 - 2)) * 10) / 10 }
-    else draft.value = { ...draft.value, r1: Math.round(Math.max(draft.value.r0 + 2, Math.min(60, newR)) * 10) / 10 }
+    if (step.value === 'inner') patchDraft({ r0: round1(Math.max(0, Math.min(newR, draft.value.r1 - MIN_RING_GAP))) })
+    else patchDraft({ r1: round1(Math.max(draft.value.r0 + MIN_RING_GAP, Math.min(MAX_RADIUS, newR))) })
   }
 }
 function onViewportUp() {
@@ -167,7 +180,7 @@ function onViewportUp() {
 }
 
 function setShape(field, shape) {
-  draft.value = { ...draft.value, [field]: shape }
+  patchDraft({ [field]: shape })
 }
 
 // ─── Canvas statique (écrans switch/review uniquement) : dessin figé, formes affichées à
@@ -192,14 +205,14 @@ function validateInner() { step.value = 'outer' }
 function backToInner() { step.value = 'inner' }
 function validateOuter() {
   if (needsSwitch.value) {
-    if (draft.value.switchRound == null) draft.value = { ...draft.value, switchRound: 2 }
+    if (draft.value.switchRound == null) patchDraft({ switchRound: 2 })
     step.value = 'switch'
   } else {
     // Un seul rang possible (chart.rows < 2, écran de transition inatteignable) mais des
     // formes différentes tout de même posées : le rang doit rendre la forme EXTÉRIEURE
     // (r1Shape, le contour visible), pas retomber silencieusement sur r0Shape par défaut.
     // switchRound: 1 fait toujours choisir r1Shape dans chartRings.shapeForRound (round >= 1).
-    draft.value = { ...draft.value, switchRound: draft.value.r0Shape !== draft.value.r1Shape ? 1 : null }
+    patchDraft({ switchRound: draft.value.r0Shape !== draft.value.r1Shape ? 1 : null })
     step.value = 'review'
   }
 }
@@ -210,21 +223,20 @@ function backFromReview() { step.value = needsSwitch.value ? 'switch' : 'outer' 
 // ─── Écran de transition : sélecteur de rang + aperçu réutilisant chartRings (aucune
 // duplication du calcul de rayon/forme par rang, déjà écrit pour la lecture) ─────────
 function decSwitchRound() {
-  draft.value = { ...draft.value, switchRound: Math.max(2, draft.value.switchRound - 1) }
+  patchDraft({ switchRound: Math.max(2, draft.value.switchRound - 1) })
 }
 function incSwitchRound() {
-  draft.value = { ...draft.value, switchRound: Math.min(rows.value, draft.value.switchRound + 1) }
+  patchDraft({ switchRound: Math.min(rows.value, draft.value.switchRound + 1) })
 }
 const switchPreview = computed(() => chartRings(draft.value.switchRound || 2, rows.value, draft.value))
 
 // ─── Écran récapitulatif : nudge du centre partagé (bouge donc les deux limites,
 // concentriques par construction) ──────────────────────────────────────────────
 function nudgeCenter(dx, dy) {
-  draft.value = {
-    ...draft.value,
-    cx: Math.round(Math.max(0, Math.min(100, draft.value.cx + dx)) * 10) / 10,
-    cy: Math.round(Math.max(0, Math.min(100, draft.value.cy + dy)) * 10) / 10,
-  }
+  patchDraft({
+    cx: round1(Math.max(0, Math.min(100, draft.value.cx + dx))),
+    cy: round1(Math.max(0, Math.min(100, draft.value.cy + dy))),
+  })
 }
 
 // Réinitialiser (écran 1 seulement) : recommence à zéro SANS quitter l'assistant — un

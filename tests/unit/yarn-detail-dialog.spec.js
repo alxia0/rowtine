@@ -107,6 +107,19 @@ describe('YarnDetailDialog', () => {
     expect(fieldValue(w, fr.yarn.lastPurchaseDate)).toBeNull()
   })
 
+  // Revue finale (découverte annexe au chantier prix/pelote) : `yarn.price` du jeu d'essai
+  // est un nombre JS (`3.2`, ligne 20) depuis que StashView.vue le normalise ainsi — sans la
+  // reconversion en virgule française, cette fiche en lecture seule aurait affiché « 3.2 »,
+  // pas « 3,2 » : la même régression que celle corrigée dans StashView.vue `openEdit`, mais
+  // ici jamais couverte par un test (ce fichier ne vérifiait jusqu'ici que la PRÉSENCE du
+  // texte « 5 » de la quantité, pas la valeur du prix).
+  it('affiche le prix avec la virgule française, pas le point JS', () => {
+    const w = mountDialog()
+    // Devise par défaut EUR (settings.js) : le libellé attendu porte donc « € », comme
+    // vérifié par ailleurs (StashView-form-units.spec.js, « Prix / pelote (€) »).
+    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('3,2')
+  })
+
   it('émet edit puis close', async () => {
     const w = mountDialog()
     await w.find('.ydet__edit').trigger('click')

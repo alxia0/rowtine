@@ -34,7 +34,10 @@ export function buildReconstructedPurchase(yarn, currency) {
     yarnLabel: labelOf(yarn),
     kind: 'buy',
     quantity: acquiredFromStock(yarn),
-    unitPrice: String(yarn.price ?? ''),
+    // `yarn.price` peut être un nombre JS (fiche saisie après la normalisation du prix,
+    // StashView.vue:save()) — la virgule française, pas le point, alimente ce champ partout
+    // ailleurs (cf. YarnPurchases.vue `openEdit`, même parade).
+    unitPrice: String(yarn.price ?? '').replace('.', ','),
     currency,
     date: String(yarn.purchasedAt ?? ''),
     bain: String(yarn.bain ?? ''),

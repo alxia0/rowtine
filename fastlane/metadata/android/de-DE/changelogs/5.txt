@@ -1,0 +1,3 @@
+Keine funktionale Änderung gegenüber 1.2.1, diese Version fügt nur den
+Fastlane-Eintrag hinzu (diese Beschreibung, die Screenshots), der bei der
+F-Droid-Prüfung angefordert wurde.

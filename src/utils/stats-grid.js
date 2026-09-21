@@ -3,7 +3,8 @@
 // ce qui rend chaque fonction testable sans faux timer.
 // Les jours sont des chaînes 'AAAA-MM-JJ' en heure LOCALE (ymdLocal, jamais toISOString) et se
 // comparent de CHAÎNE À CHAÎNE : exact par construction, insensible au fuseau.
-import { startOfWeek, ymdLocal } from '@/utils/time-periods'
+import { startOfWeek, ymdLocal, addDays } from '@/utils/time-periods'
+import { localDayToDate } from '@/utils/date-format'
 
 export const WINDOW_WEEKS = { month: 5, quarter: 13, semester: 26, year: 53 }
 export const DEFAULT_WINDOW = 'quarter'
@@ -28,12 +29,6 @@ export function levelOf(seconds) {
   if (s < LEVEL_THRESHOLDS[1]) return 2
   if (s < LEVEL_THRESHOLDS[2]) return 3
   return 4
-}
-
-function addDays(date, n) {
-  const d = new Date(date)
-  d.setDate(d.getDate() + n)
-  return d
 }
 
 // Fenêtre d'observation : N semaines ENTIÈRES commençant au premier jour choisi (`firstDay`,
@@ -91,8 +86,7 @@ function isMonthStart(mondayDay, previousMondayDay) {
 // seront rendus ABSENTS, jamais comme un jour sans tricot.
 export function buildGrid(win, byDay) {
   const columns = win.mondayDays.map((monday, i) => {
-    const [y, m, d] = monday.split('-').map(Number)
-    const mondayDate = new Date(y, m - 1, d, 12, 0, 0)
+    const mondayDate = localDayToDate(monday)
     const cells = []
     for (let k = 0; k < 7; k++) {
       const day = ymdLocal(addDays(mondayDate, k))
@@ -130,14 +124,10 @@ export function monthGroups(grid) {
   return groups
 }
 
-function dayBefore(day) {
-  const [y, m, d] = day.split('-').map(Number)
-  return ymdLocal(new Date(y, m - 1, d - 1, 12, 0, 0))
-}
-
-function dayAfter(day) {
-  const [y, m, d] = day.split('-').map(Number)
-  return ymdLocal(new Date(y, m - 1, d + 1, 12, 0, 0))
+// Décale un jour 'AAAA-MM-JJ' de `delta` jours (±1 typiquement) — une seule fonction pour les
+// deux sens plutôt que deux miroirs quasi identiques.
+function shiftDay(day, delta) {
+  return ymdLocal(addDays(localDayToDate(day), delta))
 }
 
 // Jours consécutifs jusqu'à aujourd'hui. BORD D'AUJOURD'HUI : si rien n'est encore enregistré
@@ -148,11 +138,11 @@ function dayAfter(day) {
 export function currentStreak(daySet, refDate) {
   if (!daySet?.size) return 0
   let cursor = ymdLocal(refDate)
-  if (!daySet.has(cursor)) cursor = dayBefore(cursor)
+  if (!daySet.has(cursor)) cursor = shiftDay(cursor, -1)
   let n = 0
   while (daySet.has(cursor)) {
     n += 1
-    cursor = dayBefore(cursor)
+    cursor = shiftDay(cursor, -1)
   }
   return n
 }
@@ -169,7 +159,7 @@ export function longestStreakInWindow(daySet, win) {
   while (day <= win.endDay) {
     run = daySet?.has(day) ? run + 1 : 0
     if (run > best) best = run
-    day = dayAfter(day)
+    day = shiftDay(day, 1)
   }
   return best
 }
@@ -179,8 +169,7 @@ export function longestStreakInWindow(daySet, win) {
 // par jour de semaine décaleraient d'un cran dès que le premier jour n'est plus lundi. Défaut
 // `firstDay = 1` (lundi) : identique à l'ancien calcul figé quand l'appelant ne passe rien.
 function weekdayIndex(day, firstDay = 1) {
-  const [y, m, d] = day.split('-').map(Number)
-  const js = new Date(y, m - 1, d, 12, 0, 0).getDay()
+  const js = localDayToDate(day).getDay()
   return (js - firstDay + 7) % 7
 }
 
@@ -192,7 +181,7 @@ function* daysOf(win) {
   let day = win.startDay
   while (day <= win.endDay) {
     yield day
-    day = dayAfter(day)
+    day = shiftDay(day, 1)
   }
 }
 

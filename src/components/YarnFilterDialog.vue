@@ -60,6 +60,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 // « Réinitialiser » n'a de sens que s'il y a quoi réinitialiser : au moins une valeur non
 // vide dans `filters` ET un libellé fourni par le parent.
 const resetVisible = computed(() => Boolean(props.resetLabel) && Object.values(props.filters || {}).some((v) => v))
+// Valeur courante du critère actif — lue deux fois dans le template (coche « toutes »,
+// coche de chaque option) : un seul calcul, réutilisé aux deux endroits.
+const activeValue = computed(() => props.filters?.[activeCriterion.value?.key] || '')
 
 // Libellé secondaire d'un critère sur la page des critères : l'option choisie, ou le
 // libellé « toutes » si aucun filtre (valeur '' ou valeur inconnue).
@@ -74,16 +77,15 @@ function openOptions(criterion) {
   activeKey.value = criterion.key
   page.value = 'options'
 }
+function goBack() {
+  page.value = 'criteria'
+  activeKey.value = null
+}
 function choose(value) {
   // Quoi qu'on ait choisi (« toutes » comprise), on retourne à la liste des critères :
   // le geste suivant le plus probable est de filtrer sur un autre critère.
   emit('set-filter', activeKey.value, value)
-  page.value = 'criteria'
-  activeKey.value = null
-}
-function goBack() {
-  page.value = 'criteria'
-  activeKey.value = null
+  goBack()
 }
 
 // Liste d'affichage de la page options : les options du critère actif, entrecoupées d'un
@@ -145,13 +147,13 @@ const optionRows = computed(() => {
             <div class="yfd__list">
               <button class="yfd__row" type="button" data-test="filter-all" @click="choose('')">
                 <span class="yfd__row-label">{{ activeCriterion.allLabel }}</span>
-                <AppIcon v-if="!(filters[activeCriterion.key] || '')" class="yfd__check" name="check" :size="18" />
+                <AppIcon v-if="!activeValue" class="yfd__check" name="check" :size="18" />
               </button>
               <template v-for="row in optionRows" :key="row.id">
                 <div v-if="row.kind === 'group'" class="yfd__group">{{ row.label }}</div>
                 <button v-else class="yfd__row" type="button" data-test="filter-option" @click="choose(row.value)">
                   <span class="yfd__row-label">{{ row.label }}</span>
-                  <AppIcon v-if="(filters[activeCriterion.key] || '') === row.value" class="yfd__check" name="check" :size="18" />
+                  <AppIcon v-if="activeValue === row.value" class="yfd__check" name="check" :size="18" />
                 </button>
               </template>
             </div>

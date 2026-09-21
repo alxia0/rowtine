@@ -9,6 +9,8 @@ import { useYarnsStore } from '@/stores/yarns'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSettingsStore } from '@/stores/settings'
 import { useSnackbarStore } from '@/stores/snackbar'
+import { useActiveSessionStore } from '@/stores/activeSession'
+import { closeChronoSession } from '@/utils/close-chrono-session'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
 import { STATUS_ORDER, TECHNIQUES } from '@/constants/status'
 import { fillProjectFromPattern } from '@/utils/project-fill'
@@ -30,6 +32,7 @@ const yarnsStore = useYarnsStore()
 const patternsStore = usePatternsStore()
 const settings = useSettingsStore()
 const snackbar = useSnackbarStore()
+const activeSession = useActiveSessionStore()
 const projectConsumption = useProjectConsumption()
 
 const isEdit = computed(() => !!route.params.id)
@@ -337,6 +340,17 @@ async function saveProject() {
   // Ne vaut que dans le sens « renseigner » : effacer une date ne dé-termine pas un projet.
   const avant = isEdit.value ? await projectsStore.get(route.params.id) : null
   if (shouldDeriveDone(avant, payload)) payload.status = 'done'
+  // Un chrono qui tourne sur CE projet peut survivre à cet écran : `project-edit` reste
+  // dans la « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que
+  // l'id ne change pas — et `finishSave` ci-dessus renvoie justement vers `project` avec
+  // le MÊME id, donc le garde ne fermera RIEN à la navigation de sortie. Si le statut posé
+  // ici est Terminé/Abandonné, la pastille sera masquée dès l'atterrissage sur la fiche
+  // (chronoVisible, ProjectDetailView) sans que la session ait été close — même défaut que
+  // changeStatus là-bas, même correctif : fermer AVANT l'écriture du statut.
+  if (isEdit.value && ['done', 'abandoned'].includes(payload.status) && activeSession.isActive
+    && activeSession.projectId === pid.value) {
+    await closeChronoSession()
+  }
   let projectId
   if (isEdit.value) {
     await projectsStore.update(route.params.id, payload)

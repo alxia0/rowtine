@@ -1,0 +1,2 @@
+Corrige que la aplicación no se iniciara en dispositivos Android con una
+WebView del sistema desactualizada (sin ningún otro cambio funcional).

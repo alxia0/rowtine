@@ -5,11 +5,13 @@
 // perdues ? » (R3 : mode 'done' ou 'abandoned') doit donc être posée à l'enregistrement,
 // pas au clic sur la pastille, et seulement APRÈS `applyYarnLinks` (les réservations
 // doivent exister avant de demander combien en a été utilisé).
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import i18n from '@/i18n'
+import { useActiveSessionStore } from '@/stores/activeSession'
+import { SESSION_NO_SECTION } from '@/constants/session'
 
 const nav = vi.hoisted(() => ({
   route: { params: {}, query: {} },
@@ -327,5 +329,75 @@ describe('ProjectEditView — interrupteur Chrono (project.showTimer)', () => {
     await w.find('.btn--primary').trigger('click')
     await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
     expect((await db.projects.get(pid)).showTimer).toBe(true)
+  })
+})
+
+// Revue finale du lot « corrections stats/badge » (16/09) : `project-edit` reste dans la
+// « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que l'id ne
+// change pas — et `finishSave` renvoie précisément vers `project` avec le MÊME id. Le
+// garde « sortie de bulle » ne ferme donc RIEN à l'entrée ni à la sortie de cet écran :
+// si le statut enregistré ici est Terminé/Abandonné, un chrono qui tournait sur CE projet
+// resterait actif et invisible (chronoVisible masque la pastille sur la fiche dès l'arrivée).
+// Même correctif que ProjectDetailView.changeStatus : fermer AVANT l'écriture du statut.
+describe('ProjectEditView — chrono actif sur ce projet à l’enregistrement', () => {
+  const T0 = 1_700_000_000_000
+  beforeEach(() => vi.spyOn(Date, 'now').mockReturnValue(T0))
+  afterEach(() => vi.restoreAllMocks())
+
+  // Pinia PARTAGÉE entre le montage et le test (même motif que project-detail-chrono.spec.js) :
+  // setActivePinia AVANT de démarrer le chrono ET avant le mount, puis la même instance passée
+  // en plugin — sinon la vue et l'assertion `active.isActive` ne verraient pas le même store.
+  async function mountEditSharedPinia(pid) {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const active = useActiveSessionStore()
+    await active.openFor(pid, SESSION_NO_SECTION, 0)
+    await active.play()
+    Date.now.mockReturnValue(T0 + 5000) // 5 s courues avant l'enregistrement
+    const w = mount(ProjectEditView, { global: { plugins: [pinia, i18n] } })
+    await waitHydrated(w)
+    return { w, active }
+  }
+
+  it('passer au statut Terminé pendant que le chrono de CE projet tourne le clôt avant d’enregistrer', async () => {
+    const pid = await seedProject()
+    const { w, active } = await mountEditSharedPinia(pid)
+
+    await chip(w, 'done').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+
+    // Le chrono est bien fermé (pas seulement masqué à l'arrivée sur la fiche) : sinon la
+    // séance resterait ouverte, invisible, jusqu'à la prochaine « vraie » sortie de bulle.
+    expect(active.isActive).toBe(false)
+    // …et journalisé avec une durée saine (rien perdu).
+    const rows = await db.sessions.where('projectId').equals(pid).toArray()
+    expect(rows.length).toBe(1)
+    expect(rows[0].durationSec).toBe(5)
+  })
+
+  it('passer au statut Abandonné pendant que le chrono de CE projet tourne le clôt aussi', async () => {
+    const pid = await seedProject()
+    const { w, active } = await mountEditSharedPinia(pid)
+
+    await chip(w, 'abandoned').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+
+    expect(active.isActive).toBe(false)
+    const rows = await db.sessions.where('projectId').equals(pid).toArray()
+    expect(rows.length).toBe(1)
+    expect(rows[0].durationSec).toBe(5)
+  })
+
+  it('laisser le statut à « En cours » n’y touche pas : le chrono de ce projet continue', async () => {
+    const pid = await seedProject()
+    const { w, active } = await mountEditSharedPinia(pid)
+
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+
+    expect(active.isActive).toBe(true)
+    await active.pause() // coupe le setInterval réel, sinon il fuit d'un test à l'autre
   })
 })

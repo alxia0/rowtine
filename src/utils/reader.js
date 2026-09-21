@@ -383,6 +383,27 @@ export function isCheckable(step) {
   return !!step && !step.note && !step.chart
 }
 
+// Items COCHABLES d'une section, id tagué `<secId>#<index dans le tableau complet>` (jamais
+// l'index de la liste déjà filtrée, qui décalerait les ids dès qu'une note/un diagramme précède
+// un rang). Exportée : `readerProgress` ci-dessous et `section-mark.js` (bascule « section
+// faite ») en ont chacun besoin, sur exactement ce même calcul.
+export function checkableStepsOf(sec) {
+  return sec.steps.map((s, i) => ({ ...s, id: `${sec.id}#${i}` })).filter(isCheckable)
+}
+
+// Un step est-il fait, compte tenu de `size` (répartition des répétitions par taille) ? Un
+// step à répétition (`step.repeat`) est fait quand son compteur atteint `repeatTotal` (ou
+// d'emblée si ce total vaut 0 — rien à répéter) ; un step simple, quand il est coché dans
+// `done`. Exportée pour la même raison que `checkableStepsOf` : `readerProgress` et
+// `section-mark.js` appliquent EXACTEMENT cette règle, jamais une variante.
+export function stepIsDone(step, done, counters, size) {
+  if (step.repeat) {
+    const tot = repeatTotal(step, size)
+    return tot === 0 ? true : (counters[step.id] || 0) >= tot
+  }
+  return !!done[step.id]
+}
+
 // Cible de défilement à l'ouverture du lecteur (#9) : une section explicite dans l'URL
 // (clic depuis l'onglet Sections de la fiche projet, `?section=<id>`) PRIME sur la reprise
 // au rang en cours. Fonction pure (aucun DOM ici — l'appelant fait le scrollIntoView) :
@@ -401,15 +422,9 @@ export function readerProgress(reader, state = {}) {
   const size = typeof state?.size === 'number' ? state.size : null
   const done = state?.done || {}
   const counters = state?.counters || {}
-  const stepDone = (s) => {
-    if (s.repeat) {
-      const tot = repeatTotal(s, size)
-      return tot === 0 ? true : (counters[s.id] || 0) >= tot
-    }
-    return !!done[s.id]
-  }
+  const stepDone = (s) => stepIsDone(s, done, counters, size)
   const sections = (reader?.sections || []).map((sec) => {
-    const countable = sec.steps.map((s, i) => ({ ...s, id: `${sec.id}#${i}` })).filter(isCheckable)
+    const countable = checkableStepsOf(sec)
     const doneN = countable.filter(stepDone).length
     return {
       id: sec.id,

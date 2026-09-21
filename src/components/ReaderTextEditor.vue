@@ -468,8 +468,23 @@ defineExpose({ revealLine, replaceLine, insertImageLine })
   min-width: 0;
 }
 
-/* Même carré 44×44 (icône seule + aria-label) que .rte__toggle plus bas — regroupées ici,
-   la déclaration commune ne se maintient qu'à un seul endroit. */
+/* Carré 44×44 (icône seule + aria-label) partagé par les flèches monter/descendre
+   (.rte__arrow) et « Modifier le texte » (.rte__toggle) — déclaration commune,
+   un seul endroit à maintenir.
+   Retour terrain : « Modifier le texte » était le seul contrôle du bandeau à porter
+   un libellé CÔTE À CÔTE de son icône (~157px, mesuré) — l'unique raison pour
+   laquelle `.rte__controls` (44+44+157 ≈ 260px) ne pouvait pas rejoindre les 6
+   puces de `.cm-retag-toolbar` sur la même ligne défilante sans déborder bien
+   davantage. « Modifier le texte »/« Vue enrichie » (les 2 états du libellé, cf.
+   codeLabel) sont des PHRASES, pas des mots courts comme les puces
+   Étape/Note/Texte : les empiler icône/libellé à 9px sous l'icône (comme ces
+   puces) les faisait retomber à la ligne DANS le carré 44px, cassant sa hauteur.
+   Repli sur le MÊME patron que les flèches (icône seule + `aria-label`, carré
+   44×44 identique) plutôt qu'un empilement qui ne tient pas : la découvrabilité
+   tactile (raison d'être du libellé visible sur les puces, cf. leur commentaire)
+   reste couverte différemment ici — `.rte__hint` juste en dessous NOMME déjà ce
+   bouton en toutes lettres (« Active « Modifier le texte » pour taper »), un texte
+   TOUJOURS visible, contrairement au `title` HTML qu'il remplaçait à l'origine. */
 .rte__arrow,
 .rte__toggle {
   display: inline-flex;
@@ -500,23 +515,6 @@ defineExpose({ revealLine, replaceLine, insertImageLine })
   background: var(--surface);
   box-shadow: var(--clay-sm);
 }
-
-/* Retour terrain : « Modifier le texte » était le seul
-   contrôle du bandeau à porter un libellé CÔTE À CÔTE de son icône (~157px, mesuré) —
-   l'unique raison pour laquelle `.rte__controls` (44+44+157 ≈ 260px) ne pouvait pas
-   rejoindre les 6 puces de `.cm-retag-toolbar` sur la même ligne défilante sans
-   déborder bien davantage. « Modifier le texte »/« Vue enrichie » (les 2 états du
-   libellé, cf. codeLabel) sont des PHRASES, pas des mots courts comme les puces
-   Étape/Note/Texte : les empiler icône/libellé à 9px sous l'icône (comme ces puces)
-   les faisait retomber à la ligne DANS le carré 44px, cassant sa hauteur. Repli sur
-   le MÊME patron que les flèches juste à côté (icône seule + `aria-label`, carré
-   44×44 identique) plutôt qu'un empilement qui ne tient pas : la découvrabilité
-   tactile (raison d'être du libellé visible sur les puces, cf. leur commentaire)
-   reste couverte différemment ici — `.rte__hint` juste en dessous NOMME déjà ce
-   bouton en toutes lettres (« Active « Modifier le texte » pour taper »), un texte
-   TOUJOURS visible, contrairement au `title` HTML qu'il remplaçait à l'origine.
-   Déclaration commune (carré 44×44) fusionnée avec .rte__arrow plus haut — voir
-   ce bloc pour les propriétés. */
 
 .rte__host {
   border-radius: var(--r-sm);
@@ -630,7 +628,12 @@ html[data-theme='dark'] .rte {
   outline-offset: -2px;
   background: rgba(47, 102, 144, 0.16);
 }
-.rte .cm-line.md-reference {
+/* Teinte commune aux trois lignes de la famille « aide-mémoire » (référence,
+   sous-titre de technique, repli de tableau) — factorisée, chacune n'ajoute plus que
+   sa propre déclaration ci-dessous. */
+.rte .cm-line.md-reference,
+.rte .cm-line.md-sous-titre,
+.rte .cm-line.md-tableau {
   border-left: 3px solid var(--mdc-reference);
   background: rgba(138, 122, 110, 0.08);
 }
@@ -639,8 +642,6 @@ html[data-theme='dark'] .rte {
    famille d'aide-mémoire. `font-weight` distingue visuellement le titre de technique du
    corps `.md-texte` qui l'entoure, une fois le `### ` masqué par addLineMaskDecorations. */
 .rte .cm-line.md-sous-titre {
-  border-left: 3px solid var(--mdc-reference);
-  background: rgba(138, 122, 110, 0.08);
   font-weight: 700;
 }
 /* Ligne de tableau NON rendue en widget (repli) : rangées de largeurs
@@ -649,8 +650,6 @@ html[data-theme='dark'] .rte {
    d'un tableau : même teinte que `.md-reference` (un tableau ne vit que dans un bloc
    d'aide-mémoire, Abréviations ou Tailles) et chiffres alignés. */
 .rte .cm-line.md-tableau {
-  border-left: 3px solid var(--mdc-reference);
-  background: rgba(138, 122, 110, 0.08);
   font-variant-numeric: tabular-nums;
 }
 .rte .cm-line.md-texte {

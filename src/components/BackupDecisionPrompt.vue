@@ -49,10 +49,7 @@ const emit = defineEmits(['resolved'])
 const snackbar = useSnackbarStore()
 
 const busy = ref(false)
-const panel = ref(null)
 const restoreBtn = ref(null)
-const startFreshBtn = ref(null)
-const laterBtn = ref(null)
 
 // Étape 1a : « Restaurer » peut-il seulement aboutir ? `runRestore` refuse
 // (`not-empty`) si la base contient autre chose que les exemples semés. Sans cette
@@ -338,7 +335,6 @@ function onKeydown(e) {
 
 <template>
   <div
-    ref="panel"
     class="bdp-overlay"
     role="dialog"
     aria-modal="true"
@@ -375,7 +371,6 @@ function onKeydown(e) {
           {{ t('restore.cta') }}
         </button>
         <button
-          ref="startFreshBtn"
           class="btn"
           data-test="prompt-start-fresh"
           :disabled="busy"
@@ -387,7 +382,6 @@ function onKeydown(e) {
              d'échouer, étape 1d) — jamais dans le cas nominal. -->
         <button
           v-if="canLeave"
-          ref="laterBtn"
           class="btn"
           data-test="later"
           :disabled="busy"

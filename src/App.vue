@@ -89,6 +89,11 @@ const pauseReason = ref(null)
 const backupPromptRef = ref(null)
 // La porte du dossier (09/08) : interrogée par les DEUX chaînes de retour.
 const folderGateRef = ref(null)
+// La vue actuellement routée (Task 3, lot intents 20/09) : interrogée par les DEUX chaînes de
+// retour, même motif que `backupPromptRef` ci-dessus — cf. `onBack()`/le handler `backButton`
+// plus bas, et le commentaire de `ProjectDetailView.handleBackPressed()`. `null` sur toutes les
+// vues qui n'exposent pas `handleBackPressed` (le chaînage optionnel `?.()` s'en accommode).
+const currentViewRef = ref(null)
 
 // Pont Réglages → porte (décision produit du 05/09/2026) : SafFolderSection,
 // profond dans le RouterView, appelle `requestChange()` sur le mini-store
@@ -355,7 +360,13 @@ function onBack() {
   else if (lightbox.open) lightbox.close()
   else if (colorPicker.open) colorPicker.close()
   else if (projectConsumption.open) projectConsumption.close()
-  else smartBack()
+  // La vue routée courante (Task 3, lot intents 20/09) : cf. commentaire de
+  // `currentViewRef` ci-dessus. Placée en DERNIER recours, après tous les pop-up — elle
+  // ne doit intercepter QUE le cas où aucun overlay bloquant n'est ouvert ; sinon un
+  // dialogue « combien de pelotes ? » ouvert depuis un onglet non par défaut ne se
+  // fermerait plus jamais au retour, régression sur une décision produit déjà actée
+  // (cf. commentaire de tête de `onBack()`, « Back n'échappe pas à la question »).
+  else if (!currentViewRef.value?.handleBackPressed?.()) smartBack()
 }
 
 // Geste « retour » : balayage depuis le bord gauche (utile en navigation à 3 boutons) ET
@@ -378,6 +389,9 @@ if (typeof window !== 'undefined') {
         else if (lightbox.open) lightbox.close()
         else if (colorPicker.open) colorPicker.close()
         else if (projectConsumption.open) projectConsumption.close()
+        // Même ajout que dans onBack() ci-dessus, à la même position de précédence — cf.
+        // commentaire de `currentViewRef` : dernier recours, après tous les pop-up.
+        else if (currentViewRef.value?.handleBackPressed?.()) return
         else if (canGoBack || window.history.state?.back != null) smartBack()
         else App.exitApp()
       })
@@ -426,7 +440,7 @@ if (typeof window !== 'undefined') {
        prefers-reduced-motion. -->
   <RouterView v-slot="{ Component }">
     <Transition name="route-fade" mode="out-in">
-      <component :is="Component" />
+      <component :is="Component" ref="currentViewRef" />
     </Transition>
   </RouterView>
   <SnackBar />

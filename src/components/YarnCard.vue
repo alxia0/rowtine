@@ -49,6 +49,14 @@ function act(name) {
   menuOpen.value = false
   emit(name, props.yarn)
 }
+// Même calcul que `usageLabel` dans YarnDetailDialog.vue (fiche détaillée) : le
+// détail « X/Y » ne s'affiche que pour un usage partiel, jamais pour un stock libre
+// ou entièrement consommé.
+const usageDetail = computed(() =>
+  props.usage.state !== 'free' && props.usage.used < props.usage.total
+    ? ` · ${props.usage.used}/${props.usage.total}`
+    : '',
+)
 </script>
 
 <template>
@@ -62,9 +70,7 @@ function act(name) {
         <span v-if="yarn.weight" class="tag">{{ weightLabel(yarn.weight) }}</span>
         <span v-if="yarn.colorType && yarn.colorType !== 'uni'" class="tag">{{ t(`yarn.colorTypes.${yarn.colorType}`) }}</span>
         <span>×{{ yarn.quantity }}<template v-if="lengthText"> · {{ lengthText.text }} {{ t(lengthText.unitKey) }}</template><template v-if="weightText"> · {{ weightText.text }} {{ t(weightText.unitKey) }}</template></span>
-        <span class="tag" :class="`tag--${usage.state}`">
-          {{ t(`yarn.usage.${usage.state}`) }}<template v-if="usage.state !== 'free' && usage.used < usage.total"> · {{ usage.used }}/{{ usage.total }}</template>
-        </span>
+        <span class="tag" :class="`tag--${usage.state}`">{{ t(`yarn.usage.${usage.state}`) }}{{ usageDetail }}</span>
       </div>
       <!-- Ligne TOUJOURS rendue, même sans engagement : en vue grille les cartes sont
            côte à côte, une ligne qui n'apparaît que parfois ferait sautiller la grille. -->

@@ -1,0 +1,2 @@
+Corrige l'application qui ne démarrait pas sur les appareils Android avec
+une WebView système obsolète (aucun autre changement fonctionnel).

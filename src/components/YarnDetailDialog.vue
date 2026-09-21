@@ -52,7 +52,11 @@ const rows = computed(() => {
   const wgt = y.grams ? formatWeight(y.grams, opts) : null
   push(imperial ? 'yarn.ounces' : 'yarn.grams', wgt ? wgt.text : '')
   push('yarn.quantity', y.quantity)
-  push('yarn.priceWithSymbol', y.price)
+  // `y.price` est un nombre JS depuis que StashView.vue le normalise ainsi à l'enregistrement
+  // (revue finale) — réafficher tel quel montrerait « 3.2 » au lieu de « 3,2 » sur cette fiche
+  // en lecture seule, même parade que StashView.vue `openEdit`/`purchases-reprise.js`. Une
+  // fiche non repassée par cette normalisation garde sa chaîne d'origine inchangée.
+  push('yarn.priceWithSymbol', Number.isFinite(y.price) ? String(y.price).replace('.', ',') : y.price)
   // Récapitulatif du registre d'achats (travaux sur le budget) — remplace les deux anciens
   // champs `yarn.bain`/`yarn.purchasedAt` de la fiche, retirés du formulaire lors des
   // travaux précédents : rien n'est perdu, bain et date se lisent maintenant sur TOUTES les

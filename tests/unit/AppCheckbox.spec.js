@@ -80,7 +80,8 @@ describe('AppCheckbox', () => {
     expect(css).toMatch(/\.chk__input\s*\{[^}]*clip-path:\s*inset\(50%\)/s)
     expect(css).toMatch(/\.chk__input\s*\{[^}]*width:\s*1px/s)
     expect(css).not.toMatch(/display:\s*none/)
-    expect(css).not.toMatch(/opacity:\s*0/)
+    // Check that .chk__input specifically doesn't use opacity: 0 for masking (uses clip-path instead)
+    expect(css).not.toMatch(/\.chk__input\s*\{[^}]*opacity:\s*0/s)
   })
 
   it('règle de cible tactile ≥ 44 px présente dans le CSS', () => {
@@ -92,5 +93,25 @@ describe('AppCheckbox', () => {
     expect(css).toMatch(/\.chk__input:focus-visible\s*\+\s*\.chk__box/) // anneau au focus clavier, porté sur la case
     expect(css).not.toMatch(/:focus-within/)                           // plus de :focus-within (anneau résiduel après tap tactile)
     expect(css).not.toMatch(/:has\(/)                                  // toujours pas de :has() (WebView Android < Chrome 105)
+  })
+
+  it("disabled=true → l'input natif porte l'attribut disabled", () => {
+    const w = mount(AppCheckbox, { props: { modelValue: false, disabled: true } })
+    expect(w.get('input').element.disabled).toBe(true)
+  })
+
+  it("disabled non fourni (par défaut) → l'input reste actif (rétrocompatibilité)", () => {
+    const w = mount(AppCheckbox, { props: { modelValue: false } })
+    expect(w.get('input').element.disabled).toBe(false)
+  })
+
+  it("disabled=true : classe visuelle dédiée posée sur le <label>, sans :has() ni :focus-within", () => {
+    const w = mount(AppCheckbox, { props: { modelValue: false, disabled: true } })
+    expect(w.get('label').classes()).toContain('chk--disabled')
+    const css = styleCss()
+    expect(css).toMatch(/\.chk--disabled\s*\{[^}]*cursor:\s*not-allowed/s)
+    expect(css).toMatch(/\.chk--disabled\s+\.chk__box\s*\{[^}]*opacity:\s*0\.5/s)
+    expect(css).not.toMatch(/:has\(/)
+    expect(css).not.toMatch(/:focus-within/)
   })
 })

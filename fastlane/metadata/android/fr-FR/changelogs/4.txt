@@ -1,0 +1,7 @@
+Première publication sur F-Droid.
+
+Suivi de projets de tricot et de crochet : compteurs de rangs et de
+mailles, séances chronométrées. Bibliothèque de patrons avec import PDF,
+lecture pas à pas et diagrammes. Stock de laines, achats et coût par
+projet. Hors ligne, données locales, sauvegarde vers le dossier de ton
+choix. Interface en français, anglais, espagnol et allemand.

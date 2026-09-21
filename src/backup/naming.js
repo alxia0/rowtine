@@ -108,3 +108,11 @@ export function photoFileName(dataUrl, fallbackIndex) {
   if (!parsed) return `photo-${fallbackIndex}.bin`
   return `photo-${hash8(parsed.base64)}.${parsed.ext}`
 }
+
+// Nom de fichier pour un asset sérialisé avec un autre préfixe que "photo-"
+// (patron-photo-, gallery-, laine-photo-…) : même hash/dédup que photoFileName, juste
+// le préfixe substitué. photoFileName renvoie toujours "photo-<suffixe>" (hash ou
+// index de repli), donc la substitution ne porte que sur les 6 premiers caractères.
+export function assetFileName(dataUrl, fallbackIndex, prefix) {
+  return prefix + photoFileName(dataUrl, fallbackIndex).slice('photo-'.length)
+}

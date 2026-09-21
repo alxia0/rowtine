@@ -96,3 +96,66 @@ describe('PhotoCropper.confirm() — fond blanc avant recadrage', () => {
     expect(calls).toEqual([])
   })
 })
+
+describe('PhotoCropper — ratio imposé (badge)', () => {
+  it('initialise le cadre au ratio demandé, centré', async () => {
+    const { fake, calls } = stubCanvas()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const cropper = useCropperStore()
+    const wrapper = mount(PhotoCropper, { global: { plugins: [i18n, pinia] } })
+
+    const settled = cropper.crop('data:image/png;base64,AA==', 4 / 3)
+    await flushPromises()
+
+    const img = wrapper.find('img.cr__img').element
+    Object.defineProperty(img, 'naturalWidth', { value: 1280, configurable: true })
+    Object.defineProperty(img, 'naturalHeight', { value: 1280, configurable: true })
+    const stage = wrapper.find('.cr__stage').element
+    Object.defineProperty(stage, 'clientWidth', { value: 1080, configurable: true })
+    Object.defineProperty(stage, 'clientHeight', { value: 2100, configurable: true })
+    await wrapper.find('img.cr__img').trigger('load')
+    await flushPromises()
+
+    // Même scène que le test « fond blanc » ci-dessus (image carrée 1280², scène 1080×2100 →
+    // affichage 1080×1080 centré à y=510) mais avec un ratio 4:3 imposé : le cadre initial
+    // fait 1080×810, centré verticalement dans le carré affiché (y = 510 + (1080-810)/2 = 645).
+    const frame = wrapper.find('.cr__frame').element
+    expect(frame.style.width).toBe('1080px')
+    expect(frame.style.height).toBe('810px')
+    expect(frame.style.left).toBe('0px')
+    expect(frame.style.top).toBe('645px')
+
+    await wrapper.findAll('button').filter((b) => b.text() === 'Recadrer').at(0).trigger('click')
+    await expect(settled).resolves.toBe('data:image/jpeg;base64,ZZ')
+    // Sortie au ratio 4:3 (1280×960), preuve que le ratio a survécu jusqu'au canvas final.
+    expect(calls).toContainEqual(['toDataURL', 'image/jpeg', 0.85])
+    expect(fake.width).toBe(1280)
+    expect(fake.height).toBe(960)
+  })
+
+  it('sans ratio, le comportement libre existant est inchangé', async () => {
+    const { calls } = stubCanvas()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const cropper = useCropperStore()
+    const wrapper = mount(PhotoCropper, { global: { plugins: [i18n, pinia] } })
+
+    cropper.crop('data:image/png;base64,AA==')
+    await flushPromises()
+    const img = wrapper.find('img.cr__img').element
+    Object.defineProperty(img, 'naturalWidth', { value: 1280, configurable: true })
+    Object.defineProperty(img, 'naturalHeight', { value: 1280, configurable: true })
+    const stage = wrapper.find('.cr__stage').element
+    Object.defineProperty(stage, 'clientWidth', { value: 1080, configurable: true })
+    Object.defineProperty(stage, 'clientHeight', { value: 2100, configurable: true })
+    await wrapper.find('img.cr__img').trigger('load')
+    await flushPromises()
+
+    const frame = wrapper.find('.cr__frame').element
+    // Cadre libre par défaut, 80 % centré (inchangé depuis avant ce lot).
+    expect(frame.style.width).toBe('864px')
+    expect(frame.style.height).toBe('864px')
+    expect(calls).toEqual([])
+  })
+})

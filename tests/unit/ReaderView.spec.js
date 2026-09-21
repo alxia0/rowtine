@@ -278,6 +278,20 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     expect(w.find('.chrono-fab').exists()).toBe(true)
   })
 
+  it('projet Terminé (contexte projet) → pastille absente même avec showTimer', async () => {
+    await seedProject(FIX_READER, { status: 'done' })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.chrono-fab').exists()).toBe(false)
+  })
+
+  it('projet Abandonné (contexte projet) → pastille absente même avec showTimer', async () => {
+    await seedProject(FIX_READER, { status: 'abandoned' })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.chrono-fab').exists()).toBe(false)
+  })
+
   // ── Chevron de la pastille (spec 08/09, variante B : l'œil a disparu de la barre) ──
   // Le chevron vit DANS la pastille (ChronoPill) ; ses invariants de composant sont dans
   // chrono-pill.spec.js. Ici : le CÂBLAGE vue — canHide en contexte projet, l'appui

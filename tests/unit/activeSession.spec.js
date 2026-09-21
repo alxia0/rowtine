@@ -64,7 +64,6 @@ describe('pause — le journal', () => {
     // suit réécrirait les 5 s une deuxième fois.
     const line = lines[0]
     expect(line.durationSec).toBe(5) // floor de 5,5 s — jamais 6 (chunkToCommit)
-    expect(line.rowsDone).toBe(0)
     expect(line.manual).toBeUndefined() // ligne du chrono, pas une saisie main
     expect(line.date).toBe(iso(T0 + 5_500))
     expect(line.lastWriteAt).toBe(iso(T0 + 5_500))
@@ -112,28 +111,26 @@ describe('pause — le journal', () => {
 })
 
 describe('reprise — fusion ou split', () => {
-  it('reprise sous 2 h : fusion par UPDATE PARTIEL — date, sectionId et rowsDone de la cible intacts', async () => {
+  it('reprise sous 2 h : fusion par UPDATE PARTIEL — date et sectionId de la cible intacts', async () => {
     const s = useActiveSessionStore()
     await s.openFor(1, 3, 0)
     await s.play()
     atTime(T0 + 5_000)
     await s.pause() // naissance de la ligne (sectionId 3, date = T0+5 s)
     const born = (await journal(1))[0]
-    await db.sessions.update(born.id, { rowsDone: 6 }) // rangs corrigés inline entre-temps
     atTime(T0 + 10 * 60_000) // reprise 10 min plus tard : dernier contact à T0+5 s -> adoption
     await s.play()
     atTime(T0 + 10 * 60_000 + 3_000)
     await s.pause() // chunk = floor(8 - 5) = 3
     const lines = await journal(1)
     // Mutation interceptée : put complet (ou update emportant d'autres champs) -> `date`
-    // deviendrait l'heure de la fusion, sectionId retomberait, rowsDone (corrigé inline)
-    // serait écrasé. La fusion ne touque QUE durationSec et lastWriteAt.
+    // deviendrait l'heure de la fusion, sectionId retomberait. La fusion ne touche QUE
+    // durationSec et lastWriteAt.
     expect(lines).toHaveLength(1)
     expect(lines[0].durationSec).toBe(8)
     expect(lines[0].lastWriteAt).toBe(iso(T0 + 10 * 60_000 + 3_000))
     expect(lines[0].date).toBe(born.date)
     expect(lines[0].sectionId).toBe(3)
-    expect(lines[0].rowsDone).toBe(6)
   })
 
   it('reprise à 3 h : split — épisode neuf, NOUVELLE ligne, triplet remis à zéro', async () => {

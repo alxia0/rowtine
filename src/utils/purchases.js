@@ -64,9 +64,10 @@ export function acquiredFromStock(yarn) {
   return rest + used
 }
 
-export function acquiredFromLines(lines) {
-  return totalSkeins(lines)
-}
+// Alias sémantique de `totalSkeins` côté « historique d'achats » (nom utilisé par `stockGap`
+// ci-dessous et par YarnPurchases.vue) — délégué direct, jamais dupliqué, pour qu'il ne puisse
+// pas diverger du vrai calcul (même parti pris que `startOfWeekMonday`, time-periods.js).
+export const acquiredFromLines = totalSkeins
 
 // Positif : le stock dépasse l'historique (achat non enregistré, ou cadeau).
 // Négatif : l'historique dépasse le stock (pelotes sorties sans passer par un projet).

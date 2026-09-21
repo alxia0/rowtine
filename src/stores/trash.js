@@ -3,9 +3,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db, plain } from '@/db/db'
-import { setProjectReservation, consumedOf } from '@/utils/yarn-usage'
 import { usePurchasesStore } from '@/stores/purchases'
-import { useYarnsStore } from '@/stores/yarns'
+import { refreshYarnsIfLoaded } from '@/stores/yarns'
+import { reinjectYarnLinks } from '@/stores/projects'
 import { createLoadGuard } from '@/stores/load-guard'
 
 const TABLE = { project: 'projects', yarn: 'yarns', pattern: 'patterns' }
@@ -33,7 +33,7 @@ export const useTrashStore = defineStore('trash', () => {
     return id
   }
   async function restore(trashId) {
-    const shortfalls = []
+    let shortfalls = []
     const row = await db.trash.get(Number(trashId))
     if (row) {
       if (row.type === 'project') {
@@ -49,36 +49,12 @@ export const useTrashStore = defineStore('trash', () => {
         if (b.diagrams?.length) await db.diagrams.bulkPut(b.diagrams)
         if (b.counters?.length) await db.counters.bulkPut(b.counters)
         if (b.sessions?.length) await db.sessions.bulkPut(b.sessions)
-        // Pool : même logique que projects.js `restore` — réinjecte l'allocation de
-        // CE projet sans toucher celle des autres.
-        for (const l of b.yarnLinks || []) {
-          let y = await db.yarns.get(l.id)
-          if (!y) continue
-          // Trace de consommation (K3, même logique que projects.js `restore`) :
-          // indépendante de la réservation ci-dessous, peut exister SEULE (la
-          // réservation ayant déjà été retirée au moment de la consommation) — réinjectée
-          // avant tout, sinon le garde `!qty` plus bas la sauterait.
-          if (l.consumedQty != null) {
-            const nextConsumed = { ...consumedOf(y), [b.project?.id]: l.consumedQty }
-            await db.yarns.update(l.id, { consumed: nextConsumed })
-            y = await db.yarns.get(l.id)
-          }
-          if (l.qty == null) continue
-          const key = b.project?.id
-          const qty = l.qty
-          if (!qty || !key) continue
-          const next = setProjectReservation(y, key, qty)
-          // Signal (pas de correctif) : si l'allocation obtenue est inférieure à celle
-          // demandée, un autre projet a pris la place entre-temps — setProjectReservation
-          // a déjà borné correctement (jamais de pelotes inventées), on se contente ici
-          // de le faire remonter à l'appelant (SettingsView) pour avertir l'utilisatrice.
-          const got = next[key] ?? 0
-          if (got < qty) shortfalls.push({ yarnId: l.id, requested: qty, got })
-          // L'effacement des scalaires hérités reservedFor/reservedQty (ancien modèle
-          // « 1 laine = 1 projet ») a été retiré le 07/09/2026 (ménage pré-1.0) :
-          // cette écriture ne pose plus que la map `reservations` du modèle courant.
-          await db.yarns.update(l.id, { reservations: next })
-        }
+        // Pool : réinjecte l'allocation de CE projet (même mécanisme que projects.js
+        // `restore`, cf. `reinjectYarnLinks`). `collectShortfalls` : si l'allocation obtenue
+        // est inférieure à celle demandée (un autre projet a pris la place entre-temps), le
+        // signale à l'appelant (SettingsView) pour avertir l'utilisatrice — setProjectReservation
+        // a déjà borné correctement (jamais de pelotes inventées), ce n'est qu'un signal.
+        shortfalls = await reinjectYarnLinks(b.yarnLinks, b.project?.id, { collectShortfalls: true })
       } else if (TABLE[row.type]) {
         await db[TABLE[row.type]].put(row.payload)
       }
@@ -93,8 +69,7 @@ export const useTrashStore = defineStore('trash', () => {
     // (`useSoftDelete`), lui, ne recharge que le magasin de l'entité supprimée — sur une
     // suppression de PROJET, personne ne rechargeait les laines et le stock affichait encore les
     // pelotes comme libres alors qu'elles venaient d'être re-réservées.
-    const yarnsStore = useYarnsStore()
-    if (yarnsStore.loaded) await yarnsStore.load()
+    await refreshYarnsIfLoaded()
     return { shortfalls }
   }
   // Suppression DÉFINITIVE d'une laine : ses achats survivent (arbitrage produit, 31/07 —

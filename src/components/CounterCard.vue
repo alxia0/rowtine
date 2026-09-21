@@ -37,19 +37,32 @@ function onTarget(e) {
 function reset() {
   emit('set', props.counter.id, 0)
 }
+// Pourcentage plafonné à 100, commun aux trois barres de progression de la carte
+// (objectif de rangs, augmentations/diminutions, répétitions) : même formule,
+// un seul endroit à faire évoluer si l'arrondi doit changer.
+function pctOf(done, goal) {
+  return goal > 0 ? Math.min(100, Math.round((100 * done) / goal)) : 0
+}
+// Nombre de cycles complets écoulés (un cycle = `size` rangs), commun aux
+// augmentations/diminutions (intervalle) et aux répétitions (longueur de bloc).
+function cycleDone(n, size) {
+  return size > 0 ? Math.floor(n / size) : 0
+}
+// Vrai exactement au rang qui clôt un cycle (multiple de `size`, rang 0 exclu).
+function isCycleBoundary(n, size) {
+  return size > 0 && n > 0 && n % size === 0
+}
 function pct(c) {
-  return c.target > 0 ? Math.min(100, Math.round((100 * val(c)) / c.target)) : 0
+  return pctOf(val(c), c.target)
 }
 
 // --- Module augmentations / diminutions (tous les X rangs) ---
 const hasShaping = (c) => !!c.hasShaping
 function shapingDone(c) {
-  const iv = Number(c.interval) || 0
-  return iv > 0 ? Math.floor(val(c) / iv) : 0
+  return cycleDone(val(c), Number(c.interval) || 0)
 }
 function isShapingRow(c) {
-  const iv = Number(c.interval) || 0
-  return iv > 0 && val(c) > 0 && val(c) % iv === 0
+  return isCycleBoundary(val(c), Number(c.interval) || 0)
 }
 function nextInRows(c) {
   const iv = Number(c.interval) || 0
@@ -59,8 +72,7 @@ function nextInRows(c) {
 }
 const shapingGoal = (c) => Number(c.shapingTarget) || 0
 function shapingPct(c) {
-  const g = shapingGoal(c)
-  return g > 0 ? Math.min(100, Math.round((100 * shapingDone(c)) / g)) : 0
+  return pctOf(shapingDone(c), shapingGoal(c))
 }
 const everyText = (c) =>
   c.shapingMode === 'dec' ? t('icounter.everyDec', { n: c.interval }) : t('icounter.everyInc', { n: c.interval })
@@ -85,8 +97,7 @@ const hasRepeat = (c) => !!c.hasRepeat
 const repeatRows = (c) => Number(c.repeatRows) || 0
 const repeatGoal = (c) => Number(c.repeatTarget) || 0
 function repeatsDone(c) {
-  const rr = repeatRows(c)
-  return rr > 0 ? Math.floor(val(c) / rr) : 0
+  return cycleDone(val(c), repeatRows(c))
 }
 function rowInRepeat(c) {
   const rr = repeatRows(c)
@@ -95,12 +106,10 @@ function rowInRepeat(c) {
   return rem === 0 ? rr : rem
 }
 function isRepeatBoundary(c) {
-  const rr = repeatRows(c)
-  return rr > 0 && val(c) > 0 && val(c) % rr === 0
+  return isCycleBoundary(val(c), repeatRows(c))
 }
 function repeatPct(c) {
-  const g = repeatGoal(c)
-  return g > 0 ? Math.min(100, Math.round((100 * repeatsDone(c)) / g)) : 0
+  return pctOf(repeatsDone(c), repeatGoal(c))
 }
 function repeatProgressText(c) {
   const done = repeatsDone(c)

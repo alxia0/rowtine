@@ -268,13 +268,14 @@ export async function readBackup(storage, { onProgress } = {}) {
   // n'invente jamais une progression sur des tailles absentes. L'appelant sans
   // onProgress (sauvegarde de fond) ne paie rien : lecture simple.
   const lecteurDossier = (entries) => {
-    if (!onProgress) return (path, encoding) => storage.readFile(path, { encoding })
+    const lectureSimple = (path, encoding) => storage.readFile(path, { encoding })
+    if (!onProgress) return lectureSimple
     const subTotal = entries
       .filter((e) => !e.isDir && !RESIDU_ECRITURE.test(e.name))
       .reduce((somme, e) => somme + (e.size > 0 ? e.size : 0), 0)
     if (subTotal <= 0) {
       report?.(undefined, null)
-      return (path, encoding) => storage.readFile(path, { encoding })
+      return lectureSimple
     }
     let dejaLus = 0
     return async (path, encoding, file) => {

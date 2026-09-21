@@ -247,3 +247,84 @@ describe('formulaire du stock — mode métrique inchangé', () => {
     expect(saved.grams).toBe(50)
   })
 })
+
+describe('formulaire du stock -- Prix/pelote normalisé', () => {
+  beforeEach(async () => {
+    await db.open()
+  })
+
+  it('normalise le prix/pelote en nombre à l\'enregistrement, comme le métrage', async () => {
+    const w = await mountStash()
+    await w.findAll('button').find((b) => /Ajouter une laine/.test(b.text())).trigger('click')
+    await flushPromises()
+    // Remplir les champs obligatoires
+    const inputs = w.findAll('.addform input')
+    const priceInput = inputs.find((i) => i.attributes('id') === 'yarn-price')
+    await priceInput.setValue(',7366')
+    await priceInput.trigger('input')
+    // Coloris obligatoire
+    await w.find('.palette__sw').trigger('click')
+    await saveForm(w)
+    const saved = await db.yarns.toCollection().last()
+    expect(saved.price).toBe(0.7366)
+    expect(typeof saved.price).toBe('number')
+  })
+
+  it('laisse un prix vide vide, sans y écrire 0', async () => {
+    const w = await mountStash()
+    await w.findAll('button').find((b) => /Ajouter une laine/.test(b.text())).trigger('click')
+    await flushPromises()
+    // Laisser le prix vide (ne pas le remplir)
+    // Coloris obligatoire
+    await w.find('.palette__sw').trigger('click')
+    await saveForm(w)
+    const saved = await db.yarns.toCollection().last()
+    expect(saved.price).toBe('')
+  })
+
+  // `filtrerSaisieDecimale` (utils/decimal.js) garde volontairement un séparateur SEUL tel
+  // quel (« , » reste « , », sans quoi « 0,5 » collapserait en « 05 » au moment même où la
+  // virgule est tapée) — donc form.price === ',' n'entre PAS dans la branche `=== ''` et
+  // partait tout droit dans parseDecimal(','), un NaN écrit en base (revue finale). Un prix
+  // resté à un séparateur seul doit s'enregistrer vide, exactement comme un champ jamais
+  // touché.
+  it('enregistre vide, pas NaN, un prix laissé à un séparateur seul', async () => {
+    const w = await mountStash()
+    await w.findAll('button').find((b) => /Ajouter une laine/.test(b.text())).trigger('click')
+    await flushPromises()
+    const inputs = w.findAll('.addform input')
+    const priceInput = inputs.find((i) => i.attributes('id') === 'yarn-price')
+    await priceInput.setValue(',')
+    await priceInput.trigger('input')
+    // Coloris obligatoire
+    await w.find('.palette__sw').trigger('click')
+    await saveForm(w)
+    const saved = await db.yarns.toCollection().last()
+    expect(saved.price).toBe('')
+    expect(Number.isNaN(saved.price)).toBe(false)
+  })
+
+  // `price: null` peut venir d'une fiche restaurée/importée : avant ce correctif, `null !==
+  // ''` faisait passer la valeur dans parseDecimal(null), un NaN écrit en base au premier
+  // enregistrement suivant (revue finale) — la fiche perdait silencieusement son « prix
+  // inconnu » pour un prix APPAREMMENT connu (NaN ne matche plus `isPriceUnknown`).
+  it('un prix hérité à null reste vide après un aller-retour édition/enregistrement', async () => {
+    const w = await mountStash({ yarns: [{ brand: 'Maison', colorName: 'Rouge', quantity: 1, price: null }] })
+    await openEditOn(w, 'Maison')
+    await saveForm(w)
+    const saved = (await db.yarns.toArray())[0]
+    expect(saved.price).toBe('')
+    expect(Number.isNaN(saved.price)).toBe(false)
+  })
+
+  // Depuis que `price` est un nombre JS en base (ce lot), rouvrir une fiche doit réafficher
+  // « 9,5 » — pas « 9.5 » — dans le champ prix : même parité que le métrage/poids (`toInput`),
+  // le but affiché de ce chantier (revue finale, finding 2).
+  it('réaffiche un prix numérique avec la virgule française à la réouverture', async () => {
+    const w = await mountStash({ yarns: [{ brand: 'Maison', colorName: 'Rouge', quantity: 1, price: 9.5 }] })
+    await openEditOn(w, 'Maison')
+    const inputs = w.findAll('.addform input')
+    const priceInput = inputs.find((i) => i.attributes('id') === 'yarn-price')
+    expect(priceInput.element.value).toBe('9,5')
+  })
+})

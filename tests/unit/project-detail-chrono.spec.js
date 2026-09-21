@@ -172,6 +172,16 @@ describe('ProjectDetailView — pastille chrono flottante', () => {
     )
     await useActiveSessionStore().pause()
   })
+
+  it('projet Terminé : pastille absente même si showTimer est vrai', async () => {
+    const { w } = await mountView(FREE, { status: 'done' })
+    expect(w.find('.chrono-dock .chrono-fab').exists()).toBe(false)
+  })
+
+  it('projet Abandonné : pastille absente même si showTimer est vrai', async () => {
+    const { w } = await mountView(FREE, { status: 'abandoned' })
+    expect(w.find('.chrono-dock .chrono-fab').exists()).toBe(false)
+  })
 })
 
 // ── Spec 08/09 (fusion chrono + œil, variante B) : l'œil a disparu du dock. Masquer passe
@@ -455,6 +465,68 @@ describe('ProjectDetailView — suppression : bord « discard réussi + cascade 
     expect(await db.sessions.where('projectId').equals(projectId).count()).toBe(0)
     // La cascade ayant échoué, le projet SURVIT — sans son temps non commis.
     expect(await db.projects.get(projectId)).not.toBeUndefined()
+  })
+})
+
+// Revue finale du lot « corrections stats/badge » (16/09) : `changeStatus` posait le
+// nouveau statut sans jamais toucher au chrono actif. `chronoVisible` masque la pastille
+// dès que le statut passe à Terminé/Abandonné (bloc plus haut), mais un chrono qui
+// tournait sur CE projet à cet instant-là continuait — plus aucun contrôle à l'écran
+// jusqu'à la prochaine « sortie de bulle » du routeur (aucune perte de temps, mais une
+// séance de durée arbitraire journalisée contre un projet déjà clos). Même correctif que
+// le geste chevron/kebab ci-dessus (closeChronoSession), branché depuis changeStatus.
+describe('ProjectDetailView — changement de statut avec un chrono actif', () => {
+  beforeEach(() => vi.spyOn(Date, 'now').mockReturnValue(T0))
+  afterEach(() => vi.restoreAllMocks())
+
+  it('passer au statut Terminé clôt le chrono de CE projet : journalisé, plus actif, pastille disparue', async () => {
+    const { w, projectId } = await mountView()
+    await startAndRun(w) // 5 s courues sur le chrono de ce projet
+    await w.find('.badge--editable').trigger('click')
+    const item = w.findAll('.menu__item').find((b) => b.text() === fr.status.done)
+    expect(item, 'entrée de menu « Terminé » introuvable').toBeTruthy()
+    await item.trigger('click')
+    await vi.waitFor(async () => expect((await db.projects.get(projectId)).status).toBe('done'), {
+      timeout: 10000,
+    })
+    // Le chrono est bien fermé, pas seulement masqué par `chronoVisible` : sinon la
+    // séance resterait ouverte, invisible, jusqu'à la prochaine navigation.
+    expect(useActiveSessionStore().isActive).toBe(false)
+    expect(w.find('.chrono-dock .chrono-fab').exists()).toBe(false)
+    // …et journalisé avec une durée saine (rien perdu).
+    const rows = await db.sessions.where('projectId').equals(projectId).toArray()
+    expect(rows.length).toBe(1)
+    expect(rows[0].durationSec).toBe(5)
+  })
+
+  it('passer au statut Abandonné clôt aussi le chrono de CE projet', async () => {
+    const { w, projectId } = await mountView()
+    await startAndRun(w)
+    await w.find('.badge--editable').trigger('click')
+    const item = w.findAll('.menu__item').find((b) => b.text() === fr.status.abandoned)
+    expect(item, 'entrée de menu « Abandonné » introuvable').toBeTruthy()
+    await item.trigger('click')
+    await vi.waitFor(async () => expect((await db.projects.get(projectId)).status).toBe('abandoned'), {
+      timeout: 10000,
+    })
+    expect(useActiveSessionStore().isActive).toBe(false)
+    const rows = await db.sessions.where('projectId').equals(projectId).toArray()
+    expect(rows.length).toBe(1)
+    expect(rows[0].durationSec).toBe(5)
+  })
+
+  it('passer à un statut qui ne clôt pas (En pause) laisse le chrono de ce projet tourner', async () => {
+    const { w, projectId } = await mountView()
+    await startAndRun(w)
+    await w.find('.badge--editable').trigger('click')
+    const item = w.findAll('.menu__item').find((b) => b.text() === fr.status.pause)
+    expect(item, 'entrée de menu « En pause » introuvable').toBeTruthy()
+    await item.trigger('click')
+    await vi.waitFor(async () => expect((await db.projects.get(projectId)).status).toBe('pause'), {
+      timeout: 10000,
+    })
+    expect(useActiveSessionStore().isActive).toBe(true)
+    await useActiveSessionStore().pause() // coupe le setInterval réel, sinon il fuit d'un test à l'autre
   })
 })
 

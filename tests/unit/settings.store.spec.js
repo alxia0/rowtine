@@ -197,4 +197,24 @@ describe('store settings', () => {
     expect(store.accentHueChosen).toBe(true)
     expect(store.effectiveAccentHue('dark')).toBe(70) // pas de bascule surprise
   })
+
+  it('rememberBadgeColor : ajoute en tête, déduplique, plafonne à 8, persiste', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    expect(store.badgeColorHistory).toEqual([])
+
+    await store.rememberBadgeColor('hsl(120 70% 50%)')
+    await store.rememberBadgeColor('hsl(240 70% 50%)')
+    await store.rememberBadgeColor('hsl(120 70% 50%)') // déjà présente : remonte en tête, pas de doublon
+    expect(store.badgeColorHistory).toEqual(['hsl(120 70% 50%)', 'hsl(240 70% 50%)'])
+
+    for (let h = 0; h < 10; h++) await store.rememberBadgeColor(`hsl(${h} 70% 50%)`)
+    expect(store.badgeColorHistory).toHaveLength(8)
+    expect(store.badgeColorHistory[0]).toBe('hsl(9 70% 50%)') // le plus récent en tête
+
+    setActivePinia(createPinia())
+    const reloaded = useSettingsStore()
+    await reloaded.load()
+    expect(reloaded.badgeColorHistory).toEqual(store.badgeColorHistory)
+  })
 })

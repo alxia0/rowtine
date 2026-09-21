@@ -48,7 +48,7 @@
       "id": "section-1",
       "title": [
         {
-          "text": "1. Inicio — tu panel de control",
+          "text": "1. Inicio: tu panel de control",
           "bold": false,
           "italic": false
         }
@@ -363,7 +363,7 @@
       "id": "section-2",
       "title": [
         {
-          "text": "2. Tus proyectos — el corazón de la app",
+          "text": "2. Tus proyectos, el corazón de la app",
           "bold": false,
           "italic": false
         }
@@ -566,6 +566,31 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Estadísticas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": las cifras de este proyecto en concreto (tiempo total, número de sesiones, ovillos usados, periodo, mejor racha de días activos) y su cuadrícula de calendario, y luego el botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Compartir",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", que abre el creador de insignias descrito un poco más abajo.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         },
@@ -573,7 +598,7 @@
           "type": "subsection",
           "title": [
             {
-              "text": "Trabajar en directo — la sesión",
+              "text": "Trabajar en directo: la sesión",
               "bold": false,
               "italic": false
             }
@@ -749,7 +774,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "La pestaña Sesiones de la ficha de un proyecto cuenta la historia de ese proyecto, y solo de ese. Para repasar todo tu historial, con todos los proyectos juntos, el menú de la app abre la pantalla ",
+              "text": "La pestaña Sesiones de la ficha de un proyecto registra todo el tiempo dedicado a ese proyecto. Para repasar todo tu historial, con todos los proyectos juntos, el menú de la app abre la pantalla ",
               "bold": false,
               "italic": false
             },
@@ -774,6 +799,249 @@
               "italic": false
             }
           ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Compartir una insignia de tu proyecto",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02c-badge-partage",
+          "alt": "Pantalla para compartir la insignia del proyecto «Sweater for me»: la foto del jersey, Tiempo total 32 h 07 min, Avance 67 %, 30 sesiones y el mapa de calendario.",
+          "caption": [
+            {
+              "text": "La pantalla para compartir, abierta desde la pestaña Estadísticas o el menú de la ficha del proyecto.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Desde la pestaña ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Estadísticas",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " de un proyecto, el botón ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Compartir",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (o la entrada ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Compartir",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " del menú de la ficha, arriba a la derecha, desde cualquier pestaña) compone una imagen para enviar a quien quieras: tu labor, sus cifras, con los colores que elijas. La pantalla muestra por defecto la imagen de portada del proyecto y, abajo, un cajón de ajustes.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "El cajón de ajustes tiene tres pestañas:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Formato",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": cuatro plantillas. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vertical",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (la foto arriba y las cifras debajo), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Horizontal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (la foto a la izquierda y las cifras a la derecha), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Solo texto",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (sin foto, útil para un proyecto que todavía no tiene ninguna) y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Dos imágenes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (dos fotos una junto a otra, por ejemplo un antes y un después). Si tu proyecto tiene foto de portada, la insignia se abre en Vertical con ella; si no, en Solo texto.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Color",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": una paleta de tonos, un botón + para elegir otro libremente y, encima, los últimos colores que has usado de verdad en una insignia.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Info",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": lo que la insignia debe contener. Cada pastilla muestra el valor real del proyecto (tiempo total, fechas de inicio y de fin, lanas usadas con sus ovillos, avance mientras el proyecto está en curso, mejor racha, número de sesiones, técnica punto o ganchillo): tócala para incluirla o quitarla. La pastilla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mapa de calendario",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " añade la cuadrícula de los días trabajados. Ahí eliges también el ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Idioma",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " del texto de la insignia, independiente del de la app (práctico para enviársela a alguien que no habla el tuyo), y una línea de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Texto libre (opcional)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", de 80 caracteres como máximo.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Para cambiar una foto, tócala en la vista previa: aparece un botón ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Editar",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", que te propone una foto del proyecto o una imagen de tu galería, el formato (cuadrado, horizontal o vertical) y luego el recorte.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "El botón ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Compartir",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", arriba de la pantalla, genera la imagen, la guarda en la ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Galería",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo sin enviar nada: la insignia se queda en la galería. Y si cambias un ajuste y vuelves a compartir, la insignia anterior de esa misma apertura se sustituye, no se duplica.",
+              "bold": false,
+              "italic": false
+            }
+          ]
         }
       ]
     },
@@ -781,7 +1049,7 @@
       "id": "section-3",
       "title": [
         {
-          "text": "3. El patrón que se adapta a ti — el lector interactivo",
+          "text": "3. El patrón que se adapta a ti: el lector interactivo",
           "bold": false,
           "italic": false
         }
@@ -1954,7 +2222,7 @@
               ],
               [
                 {
-                  "text": "Una casilla que marcar al tejer o ganchillar — el corazón del seguimiento paso a paso.",
+                  "text": "Una casilla que marcar al tejer o ganchillar, el corazón del seguimiento paso a paso.",
                   "bold": false,
                   "italic": false
                 }
@@ -2022,7 +2290,7 @@
               ],
               [
                 {
-                  "text": "Un título de parte (Delantero, Manga, Cuello…), con su icono automático — es lo que divide tu patrón en la pestaña Secciones.",
+                  "text": "Un título de parte (Delantero, Manga, Cuello…), con su icono automático: es lo que divide tu patrón en la pestaña Secciones.",
                   "bold": false,
                   "italic": false
                 }
@@ -2038,7 +2306,7 @@
               ],
               [
                 {
-                  "text": "Información de la ficha del patrón (hilo, agujas, tallas…) — ",
+                  "text": "Información de la ficha del patrón (hilo, agujas, tallas…), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2118,7 +2386,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (la tabla de medidas finales — no las instrucciones por talla, que son Secciones), ",
+                  "text": " (la tabla de medidas finales, no las instrucciones por talla, que son Secciones), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2144,7 +2412,7 @@
               ],
               [
                 {
-                  "text": "Un párrafo simple, sin ningún rol particular — generalmente el texto de introducción o de cierre del patrón.",
+                  "text": "Un párrafo simple, sin ningún rol particular, generalmente el texto de introducción o de cierre del patrón.",
                   "bold": false,
                   "italic": false
                 }
@@ -2835,7 +3103,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": si marcas Vegano en una lana que contiene una fibra animal, la app te lo señala («Esta lana contiene … (fibra animal). La etiqueta vegana parece contradictoria — revisa la composición.») sin impedirte guardar: te avisa, no decide por ti.",
+                        "text": ": si marcas Vegano en una lana que contiene una fibra animal, la app te lo señala («Esta lana contiene … (fibra animal). La etiqueta vegana parece contradictoria: revisa la composición.») sin impedirte guardar: te avisa, no decide por ti.",
                         "bold": false,
                         "italic": false
                       }
@@ -4353,7 +4621,7 @@
       "id": "section-9",
       "title": [
         {
-          "text": "9. Bajo el capó — lo que {app} te garantiza",
+          "text": "9. Bajo el capó: lo que {app} te garantiza",
           "bold": false,
           "italic": false
         }

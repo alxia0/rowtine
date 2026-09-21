@@ -48,7 +48,7 @@
       "id": "section-1",
       "title": [
         {
-          "text": "1. Start — deine Übersicht",
+          "text": "1. Start: deine Übersicht",
           "bold": false,
           "italic": false
         }
@@ -363,7 +363,7 @@
       "id": "section-2",
       "title": [
         {
-          "text": "2. Deine Projekte — das Herzstück der App",
+          "text": "2. Deine Projekte, das Herzstück der App",
           "bold": false,
           "italic": false
         }
@@ -566,6 +566,41 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Statistik",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": die Zahlen dieses einen Projekts (Gesamtzeit, Anzahl der Sitzungen, verwendete Knäuel, Zeitraum, beste Serie aktiver Tage) und seine Kalenderkarte, dann die Schaltfläche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Teilen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", die den Bildschirm ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Abzeichen erstellen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet, beschrieben etwas weiter unten.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         },
@@ -573,7 +608,7 @@
           "type": "subsection",
           "title": [
             {
-              "text": "Live arbeiten — die Sitzung",
+              "text": "Live arbeiten: die Sitzung",
               "bold": false,
               "italic": false
             }
@@ -749,7 +784,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Der Reiter Sitzungen einer Projektseite erzählt von diesem Projekt, und nur von ihm. Um deine ganze Historie zu sehen, alle Projekte zusammen, öffnet das Menü der App den Bildschirm ",
+              "text": "Der Reiter Sitzungen einer Projektseite verzeichnet die gesamte Zeit, die du an diesem Projekt verbracht hast. Um deine ganze Historie zu sehen, alle Projekte zusammen, öffnet das Menü der App den Bildschirm ",
               "bold": false,
               "italic": false
             },
@@ -774,6 +809,289 @@
               "italic": false
             }
           ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Ein Abzeichen deines Projekts teilen",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02c-badge-partage",
+          "alt": "Bildschirm zum Teilen des Abzeichens für das Projekt „Sweater for me“: das Foto des Pullovers, Gesamtzeit 32 h 07 min, Fortschritt 67 %, 30 Sitzungen und die Kalenderkarte.",
+          "caption": [
+            {
+              "text": "Der Bildschirm zum Teilen, geöffnet über den Reiter Statistik oder das Menü der Projektseite.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Im Reiter ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Statistik",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " eines Projekts stellt die Schaltfläche ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Teilen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (oder der Eintrag ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Teilen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " im Menü der Projektseite, oben rechts, aus jedem Reiter heraus) ein Bild zusammen, das du verschicken kannst, an wen du willst: dein Werkstück, seine Zahlen, in den Farben deiner Wahl. Der Bildschirm zeigt standardmäßig das Coverfoto des Projekts und unten einen Einstellungsbereich.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Der Einstellungsbereich hat drei Reiter:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Format",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": vier Vorlagen. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vertikal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (das Foto oben, die Zahlen darunter), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Horizontal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (das Foto links, die Zahlen rechts), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nur Text",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (ohne Foto, praktisch für ein Projekt, das noch keines hat) und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Zwei Bilder",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (zwei Fotos nebeneinander, zum Beispiel ein Vorher und ein Nachher). Hat dein Projekt ein Coverfoto, öffnet sich das Abzeichen in Vertikal mit diesem Foto; sonst in Nur Text.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Farbe",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": eine Palette von Farbtönen, eine Schaltfläche + für eine frei gewählte andere Farbe und darüber, unter ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Zuletzt verwendet",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", die letzten Farben, die du tatsächlich für ein Abzeichen benutzt hast.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Infos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": was das Abzeichen enthalten soll. Jede Angabe zeigt den echten Wert des Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihren Knäueln, Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der Sitzungen, Technik Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder wieder herauszunehmen. Die Angabe ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Kalenderkarte",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " fügt das Raster der gearbeiteten Tage hinzu. Hier wählst du auch die ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sprache",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " des Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem zu schicken, der deine nicht spricht), und eine Zeile ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Freitext (optional)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", höchstens 80 Zeichen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Um ein Foto zu wechseln, tippst du es in der Vorschau an: Eine Schaltfläche ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Bearbeiten",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " erscheint, die dir ein Foto des Projekts oder ein Bild aus deiner Galerie anbietet, dann das Format (",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Quadratisch",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Horizontal",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " oder ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Vertikal",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ") und schließlich den Zuschnitt.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Die Schaltfläche ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Teilen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " oben am Bildschirm erzeugt das Bild, speichert es unter den ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Fotos",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " des Projekts und öffnet dann das Teilen-Menü deines Telefons. Du kannst es schließen, ohne etwas zu verschicken: Das Abzeichen bleibt bei den Fotos. Und wenn du eine Einstellung änderst und erneut teilst, ohne den Bildschirm verlassen zu haben, wird das vorige Abzeichen ersetzt, nicht verdoppelt.",
+              "bold": false,
+              "italic": false
+            }
+          ]
         }
       ]
     },
@@ -781,7 +1099,7 @@
       "id": "section-3",
       "title": [
         {
-          "text": "3. Die Anleitung, die sich dir anpasst — der interaktive Lesemodus",
+          "text": "3. Die Anleitung, die sich dir anpasst: der interaktive Lesemodus",
           "bold": false,
           "italic": false
         }
@@ -1954,7 +2272,7 @@
               ],
               [
                 {
-                  "text": "Ein Kästchen zum Abhaken beim Stricken oder Häkeln — das Herzstück der Schritt-für-Schritt-Verfolgung.",
+                  "text": "Ein Kästchen zum Abhaken beim Stricken oder Häkeln, das Herzstück der Schritt-für-Schritt-Verfolgung.",
                   "bold": false,
                   "italic": false
                 }
@@ -2022,7 +2340,7 @@
               ],
               [
                 {
-                  "text": "Ein Abschnittstitel (Vorderteil, Ärmel, Kragen…), mit automatischem Symbol — er unterteilt deine Anleitung im Reiter Abschnitte.",
+                  "text": "Ein Abschnittstitel (Vorderteil, Ärmel, Kragen…), mit automatischem Symbol. Er unterteilt deine Anleitung im Reiter Abschnitte.",
                   "bold": false,
                   "italic": false
                 }
@@ -2038,7 +2356,7 @@
               ],
               [
                 {
-                  "text": "Eine Information von der Anleitungskarte (Garn, Nadeln, Größen…) — ",
+                  "text": "Eine Information von der Anleitungskarte (Garn, Nadeln, Größen…), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2118,7 +2436,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (die Tabelle der Endmaße — nicht die Anleitungen je Größe, das sind Abschnitte), ",
+                  "text": " (die Tabelle der Endmaße, nicht die Anleitungen je Größe, das sind Abschnitte), ",
                   "bold": false,
                   "italic": false
                 },
@@ -2144,7 +2462,7 @@
               ],
               [
                 {
-                  "text": "Ein einfacher Absatz, ohne besondere Rolle — meist der Einleitungs- oder Schlusstext der Anleitung.",
+                  "text": "Ein einfacher Absatz, ohne besondere Rolle, meist der Einleitungs- oder Schlusstext der Anleitung.",
                   "bold": false,
                   "italic": false
                 }
@@ -2835,7 +3153,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": Kreuzt du Vegan bei einem Garn an, das eine tierische Faser enthält, weist dich die App darauf hin („Dieses Garn enthält … (tierische Faser). Das Vegan-Label wirkt widersprüchlich — prüfe die Zusammensetzung.“), ohne dich am Speichern zu hindern: Sie warnt dich, sie entscheidet nicht an deiner Stelle.",
+                        "text": ": Kreuzt du Vegan bei einem Garn an, das eine tierische Faser enthält, weist dich die App darauf hin („Dieses Garn enthält … (tierische Faser). Das Vegan-Label wirkt widersprüchlich: Prüfe die Zusammensetzung.“), ohne dich am Speichern zu hindern: Sie warnt dich, sie entscheidet nicht an deiner Stelle.",
                         "bold": false,
                         "italic": false
                       }
@@ -4353,7 +4671,7 @@
       "id": "section-9",
       "title": [
         {
-          "text": "9. Unter der Haube — was {app} dir garantiert",
+          "text": "9. Unter der Haube: was {app} dir garantiert",
           "bold": false,
           "italic": false
         }

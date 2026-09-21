@@ -99,11 +99,11 @@ export async function collectBackupData() {
     patterns: [...libraryPatterns.map((p) => p.id), ...trash.patterns],
   }
 
-  // Ids en corbeille (uniquement) : exposés à part de `keepIds` pour que S3 sache
-  // reconnaître, à la restauration, les dossiers dont le contenu a été supprimé par
-  // l'utilisateur (mais conservé sur disque par la réconciliation de `backupAll`,
-  // via `keepIds`) — cf. `corbeille.json` (orchestrator.js) et `readBackup` (restore.js).
-  const trashIndex = { projects: trash.projects, patterns: trash.patterns }
+  // `trash` sert aussi de valeur pour `trashIds` ci-dessous : ids en corbeille
+  // (uniquement), exposés à part de `keepIds` pour que S3 sache reconnaître, à la
+  // restauration, les dossiers dont le contenu a été supprimé par l'utilisateur (mais
+  // conservé sur disque par la réconciliation de `backupAll`, via `keepIds`) — cf.
+  // `corbeille.json` (orchestrator.js) et `readBackup` (restore.js).
 
-  return { projects, libraryPatterns, yarns, purchases, activeDays, independentCounters, settings, keepIds, trashIds: trashIndex }
+  return { projects, libraryPatterns, yarns, purchases, activeDays, independentCounters, settings, keepIds, trashIds: trash }
 }

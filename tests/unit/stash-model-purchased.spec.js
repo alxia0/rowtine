@@ -70,7 +70,7 @@ describe('StashView — modèle (binding formulaire) et ligne d’achat automati
     expect(line.yarnId).toBe(42) // l'id retourné par yarnsStore.add, pas un id inventé
     expect(line.date).toBe(todayISO())
     expect(line.quantity).toBe(4)
-    expect(line.unitPrice).toBe('9,50')
+    expect(line.unitPrice).toBe(9.5)
     expect(line.kind).toBe('buy')
   })
 })

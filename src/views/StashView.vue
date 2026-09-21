@@ -498,6 +498,11 @@ function openAdd() {
 }
 function openEdit(y) {
   Object.assign(form, emptyYarn(), y)
+  // `y.price` est un nombre JS (ou `null`) depuis que save() le normalise ainsi (cf. son
+  // commentaire) — réafficher tel quel montrerait « 9.5 » au lieu de « 9,5 » dans un champ
+  // qui n'accepte que la virgule française, cassant la parité avec le métrage/poids
+  // (`toInput`, mêmes deux lignes plus haut dans ce fichier).
+  form.price = y.price === '' || y.price == null ? '' : String(y.price).replace('.', ',')
   form.composition = normalizeComposition(y.composition) // filtre les valeurs invalides
   // Une fiche venue d'une sauvegarde peut porter n'importe quoi dans `labels` (édition
   // manuelle, ancien format) : `normalizeLabels` écarte toute clé hors des huit avant que
@@ -594,6 +599,7 @@ async function save() {
     // surprenant sans explication visible. Signalé en revue finale.
     const payload = {
       ...form, ...canonicalUnitFields(),
+      price: form.price === '' || !Number.isFinite(parseDecimal(form.price)) ? '' : parseDecimal(form.price),
       quantity: normalizedQuantity(form.quantity),
       composition: normalizeComposition(form.composition),
       colorNotes: form.colorType === 'uni' ? '' : form.colorNotes,

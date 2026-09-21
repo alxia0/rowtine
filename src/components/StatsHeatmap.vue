@@ -9,7 +9,7 @@ import { ref, computed, onMounted, nextTick, watch, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { HEAT_COLORS, monthGroups } from '@/utils/stats-grid'
 import { fmtDuration } from '@/stores/activeSession'
-import { formatLocalDate } from '@/utils/date-format'
+import { formatLocalDate, localDayToDate } from '@/utils/date-format'
 import { weekdayNames } from '@/utils/time-periods'
 
 const props = defineProps({
@@ -98,8 +98,7 @@ const weekdayInitials = computed(() => weekdayNames(props.locale, props.firstDay
 // chaque colonne du mois plutôt qu'un `new Intl.DateTimeFormat` par appel.
 const monthFormatter = computed(() => new Intl.DateTimeFormat(props.locale, { month: 'short' }))
 function monthLabel(monday) {
-  const [y, m, d] = monday.split('-').map(Number)
-  return monthFormatter.value.format(new Date(y, m - 1, d))
+  return monthFormatter.value.format(localDayToDate(monday))
 }
 
 // La MÊME phrase à l'écran et en accessibilité : l'information ne repose jamais sur la seule

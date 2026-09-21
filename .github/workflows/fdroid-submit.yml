@@ -62,6 +62,7 @@ jobs:
           exit 1
 
       - name: Clone fork and add metadata
+        id: metadata
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
@@ -69,6 +70,14 @@ jobs:
           cd fork
           git remote add upstream "https://gitlab.com/$UPSTREAM_PATH.git"
           git fetch upstream "${{ steps.upstream.outputs.default_branch }}"
+
+          if git show "upstream/${{ steps.upstream.outputs.default_branch }}:metadata/com.rowtine.app.yml" > /dev/null 2>&1; then
+            IS_UPDATE=true
+          else
+            IS_UPDATE=false
+          fi
+          echo "is_update=$IS_UPDATE" >> "$GITHUB_OUTPUT"
+
           git checkout -B add-com-rowtine-app "upstream/${{ steps.upstream.outputs.default_branch }}"
           git config user.name "$GITLAB_USER"
           git config user.email "$GITLAB_USER@users.noreply.gitlab.com"
@@ -80,8 +89,8 @@ jobs:
             - Time Tracker
           License: Apache-2.0
           AuthorName: alxia0
-          AuthorEmail: contact@rowtine.app
-          WebSite: https://github.com/alxia0/rowtine
+          AuthorEmail: rowtine-fdroid.stash285@silomails.com
+          WebSite: https://rowtine.app
           SourceCode: https://github.com/alxia0/rowtine
           IssueTracker: https://github.com/alxia0/rowtine/issues
           Changelog: https://github.com/alxia0/rowtine/blob/main/CHANGELOG.md
@@ -93,8 +102,8 @@ jobs:
           Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
 
           Builds:
-            - versionName: 1.2.3
-              versionCode: 6
+            - versionName: 1.2.2
+              versionCode: 5
               commit: ${{ inputs.commit_hash }}
               subdir: android/app
               sudo:
@@ -121,12 +130,16 @@ jobs:
           UpdateCheckMode: HTTP
           UpdateCheckData: 
             https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
-          CurrentVersion: 1.2.3
-          CurrentVersionCode: 6
+          CurrentVersion: 1.2.2
+          CurrentVersionCode: 5
           YAML
 
           git add metadata/com.rowtine.app.yml
-          git commit -m "New app: Rowtine" --allow-empty
+          if [ "$IS_UPDATE" = "true" ]; then
+            git commit -m "Update com.rowtine.app metadata" --allow-empty
+          else
+            git commit -m "New app: Rowtine" --allow-empty
+          fi
           git diff upstream/${{ steps.upstream.outputs.default_branch }} --stat
 
       - name: Push branch
@@ -134,27 +147,40 @@ jobs:
         working-directory: fork
         run: git push origin add-com-rowtine-app --force-with-lease
 
-      - name: Open merge request if none exists yet
+      - name: Open or find merge request
+        id: mr
         if: ${{ !inputs.dry_run }}
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
+          if [ "${{ steps.metadata.outputs.is_update }}" = "true" ]; then
+            TITLE="Update com.rowtine.app: WebSite and contact email"
+            DESCRIPTION="Updates metadata for the already-included com.rowtine.app (Rowtine): WebSite now points to rowtine.app instead of the GitHub repo, AuthorEmail is refreshed, plus the latest Build entry."
+          else
+            TITLE="New app: Rowtine"
+            DESCRIPTION="Adds com.rowtine.app (Rowtine), a knitting/crochet companion."
+          fi
+
           EXISTING_MRS=$(curl -fsS -H "PRIVATE-TOKEN: $TOKEN" \
             "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests?source_branch=add-com-rowtine-app&source_project_id=${{ steps.fork.outputs.id }}&state=opened")
           if [ "$(echo "$EXISTING_MRS" | jq 'length')" -gt 0 ]; then
+            IID=$(echo "$EXISTING_MRS" | jq -r '.[0].iid')
             echo "MR already open: $(echo "$EXISTING_MRS" | jq -r '.[0].web_url')"
-            exit 0
+          else
+            CREATED=$(curl -fsS -X POST -H "PRIVATE-TOKEN: $TOKEN" \
+              --data-urlencode "source_branch=add-com-rowtine-app" \
+              --data-urlencode "target_branch=${{ steps.upstream.outputs.default_branch }}" \
+              --data-urlencode "target_project_id=${{ steps.upstream.outputs.id }}" \
+              --data-urlencode "title=$TITLE" \
+              --data-urlencode "description=$DESCRIPTION" \
+              "$GITLAB_API/projects/${{ steps.fork.outputs.id }}/merge_requests")
+            IID=$(echo "$CREATED" | jq -r '.iid')
+            echo "MR created: $(echo "$CREATED" | jq -r '.web_url')"
           fi
-          curl -fsS -X POST -H "PRIVATE-TOKEN: $TOKEN" \
-            --data-urlencode "source_branch=add-com-rowtine-app" \
-            --data-urlencode "target_branch=${{ steps.upstream.outputs.default_branch }}" \
-            --data-urlencode "target_project_id=${{ steps.upstream.outputs.id }}" \
-            --data-urlencode "title=New app: Rowtine" \
-            --data-urlencode "description=Adds com.rowtine.app (Rowtine), a knitting/crochet companion." \
-            "$GITLAB_API/projects/${{ steps.fork.outputs.id }}/merge_requests"
+          echo "iid=$IID" >> "$GITHUB_OUTPUT"
 
-      - name: Update merge request description
-        if: ${{ !inputs.dry_run }}
+      - name: Add F-Droid inclusion checklist to the merge request
+        if: ${{ !inputs.dry_run && steps.metadata.outputs.is_update != 'true' }}
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
@@ -181,7 +207,7 @@ jobs:
           - [ ] Multiple apks for native code
 
           /label ~\"New App\"" \
-            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests/48896" \
+            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests/${{ steps.mr.outputs.iid }}" \
           || echo "Could not update the MR description via the API (token scope?) — update it manually in the GitLab UI." >&2
 
       - name: Dry-run summary

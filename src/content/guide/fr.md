@@ -12,7 +12,7 @@ libre et fonctionne hors ligne** : tes données restent sur ton appareil, pas s
 un serveur. Rien n'est jamais perdu par erreur : tout ce que tu supprimes se
 retrouve dans une corbeille.
 
-## 1. L'accueil — ton tableau de bord
+## 1. L'accueil : ton tableau de bord
 
 ![L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur le projet Bonnet d'hiver à 0 %, puis le tableau de bord (1 en cours, durée de la semaine, dernière session datée d'aujourd'hui, budget dépensé) et les outils Compteur, Calculateur, Aiguilles](images/fr/01-accueil.webp)
 
@@ -56,7 +56,7 @@ En ouvrant l'app, tu retrouves :
   écrans : où que tu sois dans l'app, tu peux repartir ailleurs sans revenir à
   l'accueil.
 
-## 2. Tes projets — le cœur de l'app
+## 2. Tes projets, le cœur de l'app
 
 ![Le projet Bonnet d'hiver, marqué En attente, ouvert sur son onglet Sections : 0 % et 0 / 12 en haut, le bouton pleine largeur « Suivre le patron », puis Bordure en côtes, Corps et torsade, Diminutions du sommet et Finitions, toutes encore à 0 % ; la pastille du chrono flotte en bas, au repos](images/fr/02-fiche-projet.webp)
 
@@ -103,8 +103,11 @@ de prix à lui.
   chacune, et la possibilité d'ajouter une session
   manuellement (si tu as tricoté sans l'app ouverte). La session en cours
   s'y voit aussi, en direct.
+- **Stats** : les chiffres de ce projet-là (temps total, nombre de sessions, pelotes
+  utilisées, période, meilleure série de jours actifs) et sa grille calendaire, puis
+  le bouton **Partager**, qui ouvre le composeur de badge décrit un peu plus bas.
 
-### Travailler en direct — la session
+### Travailler en direct : la session
 
 Partout dans le projet, un **chrono** flotte en bas de l'écran : la même pastille
 sur la fiche, quel que soit l'onglet, et dans le lecteur. Un chevron sur la
@@ -133,7 +136,7 @@ fiche projet ou la case à cocher
 
 ### Toutes tes sessions, au même endroit
 
-L'onglet Sessions d'une fiche projet raconte ce projet-là, et lui seul. Pour revoir tout ton
+L'onglet Sessions d'une fiche projet trace tout le temps passé sur ce projet. Pour revoir tout ton
 historique, tous projets confondus, le menu de l'app ouvre l'écran **Sessions**, entre Statistiques et Dépenses. Chaque session s'y affiche, de
 la plus récente à la plus ancienne : le nom du projet, puis la date et la
 durée. Un appui sur une ligne ouvre la fiche du projet concerné.
@@ -141,7 +144,44 @@ durée. Un appui sur une ligne ouvre la fiche du projet concerné.
 Cet écran ne fait que consulter : c'est sur la fiche du projet, dans son onglet
 Sessions, qu'une session se rectifie ou s'efface. Pas de filtre, pas de regroupement : c'est une première version, volontairement simple.
 
-## 3. Le patron qui s'adapte à toi — le lecteur interactif
+### Partager un badge de ton projet
+
+![Écran de partage du badge pour le projet "Sweater for me" : la photo du pull, Temps total 32 h 07 min, Avancement 67 %, 30 sessions et la carte calendaire.](images/fr/02c-badge-partage.webp)
+
+*L'écran de partage, ouvert depuis l'onglet Stats ou le menu de la fiche projet.*
+
+Depuis l'onglet **Stats** d'un projet, le bouton **Partager** (ou l'entrée **Partager** du
+menu de la fiche, en haut à droite, depuis n'importe quel onglet) compose une image à envoyer
+à qui tu veux : ton ouvrage, ses chiffres, aux couleurs de ton choix. L'écran montre
+par défaut l'image de couverture du projet et un tiroir de réglages en bas.
+
+Le tiroir de réglages a trois onglets :
+- **Format** : quatre gabarits. **Vertical** (la photo en haut, les chiffres dessous),
+  **Horizontal** (la photo à gauche, les chiffres à droite), **Texte seul** (sans photo,
+  utile pour un projet qui n'en a pas encore) et **Deux images** (deux photos côte à
+  côte, par exemple un avant et un après). Si ton projet a une photo de couverture, le
+  badge s'ouvre en Vertical avec elle ; sinon en Texte seul.
+- **Couleur** : une palette de teintes, un bouton + pour en choisir une autre librement,
+  et, au-dessus, les dernières couleurs que tu as réellement utilisées pour un badge.
+- **Infos** : ce que le badge doit contenir. Chaque pastille montre la valeur réelle du
+  projet (temps total, dates de début et de fin, laines utilisées avec leurs pelotes,
+  avancement tant que le projet est en cours, meilleure série, nombre de sessions, technique crochet ou tricot) :
+  appuie dessus pour l'inclure ou la retirer. La pastille **Carte calendaire** ajoute la
+  grille des jours travaillés. Tu y choisis aussi la **langue** du texte du badge,
+  indépendante de celle de l'app (pratique pour l'envoyer à quelqu'un qui ne parle pas la
+  tienne), et une ligne de **texte libre**, 80 caractères au plus.
+
+Pour changer une photo, appuie dessus sur l'aperçu : un bouton **Modifier** apparaît,
+qui propose une photo du projet ou une image de ta galerie, le format (carré, horizontal
+ou vertical), puis le recadrage.
+
+Le bouton **Partager**, en haut de l'écran, génère l'image, l'enregistre dans la
+**Galerie** du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le
+refermer sans rien envoyer : le badge reste dans la galerie. Et si tu changes un réglage
+puis partages à nouveau, le badge précédent de cette même ouverture est remplacé, pas
+dupliqué.
+
+## 3. Le patron qui s'adapte à toi : le lecteur interactif
 
 ![Le patron Bonnet Torsade ouvert dans le projet Bonnet d'hiver : « Revenir à mon étape », puis le sommaire du lecteur (une puce par section), « 1. Choisis ta taille » proposant S 50-52, M 54-56 déjà retenue et L 58-60, et le chrono en bas](images/fr/03a-lecteur-haut.webp)
 
@@ -367,12 +407,12 @@ retoucher le texte si une phrase a été mal coupée.
 
 | Catégorie | Ce que ça donne dans ton projet |
 |---|---|
-| **Étape** | Une case à cocher pendant le tricot ou le crochet — le cœur du suivi pas à pas. |
+| **Étape** | Une case à cocher pendant le tricot ou le crochet, le cœur du suivi pas à pas. |
 | **Compteur** | Une étape répétée, avec son propre compteur. Deux variantes : **Répétition** (refaire la ligne N fois) et **Cadence** (refaire la ligne tous les X rangs, N fois). |
 | **Note** | Un texte informatif affiché à cet endroit-là, sans case à cocher. |
-| **Section** | Un titre de partie (Devant, Manche, Col…), avec son icône automatique — c'est ce qui découpe ton patron dans l'onglet Sections. |
-| **Aide-mémoire** | Une information de la fiche du patron (fil, aiguilles, tailles…) — **pas** du suivi pas à pas. Huit sous-catégories : **Fil** (marque, matière, métrage, quantités), **Aiguilles/Crochet** (taille et type), **Échantillon** (la mesure de référence, ex. « 10 × 10 cm = 22 mailles »), **Matériel** (le reste : boutons, marqueurs…), **Conseils** (les recommandations du créateur), **Abréviations** (une par ligne), **Tailles** (le tableau des mesures finales — pas les instructions par taille, qui sont des Sections), **Techniques** (une technique expliquée). Ce sont ces blocs qui remplissent l'aide-mémoire du lecteur interactif (section 3 ci-dessus). |
-| **Texte** | Un paragraphe simple, sans rôle particulier — généralement le texte d'introduction ou de conclusion du patron. |
+| **Section** | Un titre de partie (Devant, Manche, Col…), avec son icône automatique : c'est ce qui découpe ton patron dans l'onglet Sections. |
+| **Aide-mémoire** | Une information de la fiche du patron (fil, aiguilles, tailles…), **pas** du suivi pas à pas. Huit sous-catégories : **Fil** (marque, matière, métrage, quantités), **Aiguilles/Crochet** (taille et type), **Échantillon** (la mesure de référence, ex. « 10 × 10 cm = 22 mailles »), **Matériel** (le reste : boutons, marqueurs…), **Conseils** (les recommandations du créateur), **Abréviations** (une par ligne), **Tailles** (le tableau des mesures finales, pas les instructions par taille, qui sont des Sections), **Techniques** (une technique expliquée). Ce sont ces blocs qui remplissent l'aide-mémoire du lecteur interactif (section 3 ci-dessus). |
+| **Texte** | Un paragraphe simple, sans rôle particulier, généralement le texte d'introduction ou de conclusion du patron. |
 | **Image** | Une photo ou un diagramme. |
 
 **L'aide intégrée.** L'écran de correction contient sa propre aide, repliée en tête
@@ -488,7 +528,7 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
     végétal ». Quand l'app ne peut pas conclure pour toutes les fibres saisies, elle le dit (« Origine incomplète ») au lieu de deviner : c'est volontaire.
   - **L'avertissement vegan** : si tu coches Vegan sur une laine qui contient une
     fibre animale, l'app te le signale (« Cette laine contient une fibre animale :
-    … Le label vegan paraît contradictoire — vérifie la composition. ») sans
+    … Le label vegan paraît contradictoire : vérifie la composition. ») sans
     t'empêcher d'enregistrer : elle te prévient, elle ne décide pas à ta place.
   - **Retrouver tes laines** : ces étiquettes se retrouvent dans le filtre du
     stock (critère « Label ») et dans la recherche par texte.
@@ -719,7 +759,7 @@ puis l'écran du dossier de sauvegarde, décrit juste au-dessus. Ensuite, trois 
   seule fois en tout**, pas une fois par écran ; le bouton « C'est compris »
   la referme.
 
-## 9. Sous le capot — ce que {app} te garantit
+## 9. Sous le capot : ce que {app} te garantit
 
 - **Hors ligne par défaut** : aucune de tes données ne quitte ton appareil,
   sauf le dossier de sauvegarde que **tu choisis toi-même**.

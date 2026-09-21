@@ -1,0 +1,7 @@
+Primera publicación en F-Droid.
+
+Seguimiento de proyectos de punto y ganchillo: contadores de filas y
+puntos, sesiones cronometradas. Biblioteca de patrones con importación
+PDF, lectura paso a paso y diagramas. Stock de lana, compras y coste por
+proyecto. Sin conexión, datos locales, copia de seguridad en la carpeta
+que elijas. Interfaz en francés, inglés, español y alemán.

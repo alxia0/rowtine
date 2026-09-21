@@ -1,0 +1,32 @@
+Rowtine es una aplicación de punto y ganchillo. Reúne en un solo lugar lo
+que normalmente se dispersa en un proyecto: stock de lana, patrones en
+PDF, contadores de filas y notas de proyecto.
+
+Funciones:
+
+* Seguir cada proyecto desde el montaje hasta la pieza terminada. Entre
+  cada sesión, la aplicación recuerda dónde se dejó la labor.
+* Importar un patrón en PDF: secciones, filas y tallas se reconstruyen
+  automáticamente, todo en el dispositivo. Se admiten patrones en inglés,
+  francés, alemán y español.
+* Leer un patrón con un selector de talla: cada número del texto se
+  filtra según la talla elegida.
+* Seguir un diagrama fila a fila, con un marcador desplazable y una hoja
+  de abreviaturas siempre a mano. En una tableta, el diagrama y el texto
+  pueden mostrarse en paralelo.
+* Gestionar un stock de lana: lo reservado para un proyecto, lo que queda
+  libre, con un aviso cuando no queda suficiente para terminar una pieza,
+  incluidas las lanas multicolor (degradado, autorayado, moteado, teñido
+  a mano).
+* Seguir el coste de cada proyecto; compras y regalos se contabilizan por
+  separado.
+* Buscar una medida de aguja o ganchillo a partir de la etiqueta de un
+  ovillo y de la muestra de un patrón.
+* Dos herramientas independientes: una calculadora de reparto de
+  aumentos/disminuciones y un contador autónomo.
+* Unidades métricas o imperiales, cinco monedas.
+* Interfaz, guía integrada e importación de patrones en inglés, francés,
+  alemán y español.
+
+La aplicación funciona sin conexión y guarda todos los datos en el
+dispositivo: sin cuenta, sin recopilación de datos, sin servidor.

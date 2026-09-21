@@ -24,7 +24,7 @@ import { mdToPattern } from '@/utils/pattern-md'
 import { W, WARNING_CODES, isStructuredWarning } from '@/utils/pattern-md/warning-codes'
 import { resolveReaderAssets } from './resolve-reader-assets'
 import { capReaderAssets } from './cap-reader-assets'
-import { reconcileReaderState } from './reconcile-reader-state'
+import { reconcileReaderState, buildIndex } from './reconcile-reader-state'
 import { mergePatternFromMd, isMdSafeToMerge, chartRepeatLabelsLost } from './merge-pattern-md'
 import { suppressAutoBackup } from './auto-backup'
 import { isAutoBackupRunning } from './backup-service'
@@ -67,12 +67,13 @@ export function whenSyncIdle() {
 // backup-service.js, c'est donc un `await import('./patron-md-sync')`
 // paresseux (même stratégie que `callRunBackup` dans auto-backup.js).
 
-// Rapport de réconciliation à zéro (même forme que `reconcileReaderState`), utilisé
-// comme neutre d'agrégation (patron de bibliothèque sans aucun projet lié : la
-// fusion a bien lieu mais il n'y a rien à réconcilier).
-// EXPORTÉ : CorrectionView.onSave a besoin du MÊME neutre pour son
-// propre fan-out de réconciliation (mi-projet) — évite une 2ᵉ copie qui pourrait
-// dériver de celle-ci si la forme du rapport change.
+// Rapport de réconciliation à zéro (compteurs Lost/sizeReset agrégés, même forme que
+// le retour de `reconcileReaderState` pour ces champs-là), utilisé comme neutre
+// d'agrégation (patron de bibliothèque sans aucun projet lié : la fusion a bien lieu
+// mais il n'y a rien à réconcilier).
+// EXPORTÉ : sert de graine au `reduce` d'`aggregateReconcileReports`, elle-même
+// partagée avec CorrectionView.onSave (cf. plus bas) — une seule implémentation, pas
+// de copie fidèle susceptible de diverger silencieusement.
 export function emptyReconcileReport() {
   return {
     doneKept: 0,
@@ -201,11 +202,15 @@ async function reconcileProgress({ db }, live, resolvedReader, forkProjectId, pr
     return { reports: [report], projectPatches: [{ projectId: forkProjectId, readerState: state }] }
   }
   const linked = await db.projects.filter((p) => p.patternId === live.id).toArray()
+  // live.reader/resolvedReader sont les MÊMES pour tous les projets liés de ce
+  // fan-out (seul oldState varie ci-dessous) : l'index de résolution par contenu est
+  // donc calculé une seule fois ici plutôt que reconstruit à chaque itération.
+  const precomputedIndex = { oldIndex: buildIndex(live.reader), newIndex: buildIndex(resolvedReader) }
   const reports = []
   const projectPatches = []
   for (const p of linked) {
     const oldState = p.readerState || {}
-    const { state, report } = reconcileReaderState(live.reader, oldState, resolvedReader)
+    const { state, report } = reconcileReaderState(live.reader, oldState, resolvedReader, precomputedIndex)
     reports.push(report)
     projectPatches.push({ projectId: p.id, readerState: state })
   }

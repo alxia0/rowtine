@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useCropperStore } from '@/stores/cropper'
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/body-scroll-lock'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
+import { initialRectForAspect, resizeWithAspect } from '@/utils/crop-geometry'
 
 // Recadreur in-app : l'image s'affiche en entier (contain) ; un rectangle ajustable (déplaçable
 // + 4 poignées d'angle, tout ratio) définit la zone gardée. À la validation, on découpe via canvas.
@@ -40,6 +41,10 @@ function computeLayout() {
     w = sh * ia
   }
   disp.value = { x: (sw - w) / 2, y: (sh - h) / 2, w, h }
+  if (cropper.aspect) {
+    rect.value = initialRectForAspect(disp.value, cropper.aspect)
+    return
+  }
   const inset = 0.1
   rect.value = {
     x: disp.value.x + w * inset,
@@ -88,14 +93,18 @@ function onImgLoad() {
 // --- Interactions (pointer = tactile + souris) ---
 let drag = null // { mode, startX, startY, orig }
 
-function clientToStage(e) {
-  const r = stage.value.getBoundingClientRect()
+function clientToStage(e, r = stage.value.getBoundingClientRect()) {
   return { x: e.clientX - r.left, y: e.clientY - r.top }
 }
 function onPointerDown(mode, e) {
   e.preventDefault()
   e.stopPropagation()
-  drag = { mode, ...clientToStage(e), orig: { ...rect.value } }
+  // Rect du stage mesuré UNE fois ici (force un reflow) et réutilisé pendant tout le
+  // geste (`onPointerMove` ci-dessous) : le stage ne bouge ni ne change de taille
+  // pendant un glisser, le relire à chaque `pointermove` ne faisait que payer le même
+  // reflow à chaque frame sans rien apprendre de plus.
+  const stageRect = stage.value.getBoundingClientRect()
+  drag = { mode, ...clientToStage(e, stageRect), orig: { ...rect.value }, stageRect }
   window.addEventListener('pointermove', onPointerMove)
   window.addEventListener('pointerup', onPointerUp)
   // `pointercancel` AUTANT que `pointerup` : sur WebView Android c'est LUI qui part quand le
@@ -107,7 +116,7 @@ function onPointerDown(mode, e) {
 }
 function onPointerMove(e) {
   if (!drag) return
-  const p = clientToStage(e)
+  const p = clientToStage(e, drag.stageRect)
   const dx = p.x - drag.x
   const dy = p.y - drag.y
   const o = drag.orig
@@ -118,6 +127,10 @@ function onPointerMove(e) {
     nx = Math.max(b.x, Math.min(nx, b.x + b.w - o.w))
     ny = Math.max(b.y, Math.min(ny, b.y + b.h - o.h))
     rect.value = { ...o, x: nx, y: ny }
+    return
+  }
+  if (cropper.aspect) {
+    rect.value = resizeWithAspect(drag.mode, o, dx, dy, b, cropper.aspect, MIN)
     return
   }
   // Redimensionnement par un coin : on borne les bords à l'image, mini MIN.

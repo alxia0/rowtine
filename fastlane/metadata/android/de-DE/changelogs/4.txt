@@ -1,0 +1,7 @@
+Erste Veröffentlichung auf F-Droid.
+
+Projektverfolgung für Stricken und Häkeln: Reihen- und Maschenzähler,
+zeitgemessene Sitzungen. Anleitungsbibliothek mit PDF-Import,
+Schritt-für-Schritt-Leser und Diagrammen. Garnvorrat, Käufe und Kosten pro
+Projekt. Offline, lokale Daten, Sicherung in den Ordner deiner Wahl.
+Oberfläche auf Französisch, Englisch, Spanisch und Deutsch.

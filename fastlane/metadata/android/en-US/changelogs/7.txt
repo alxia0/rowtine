@@ -1,0 +1,1 @@
+New Stats tab on every project: total time, sessions, skeins used, timespan, longest daily streak and a calendar view. A Share button composes a badge of your work (photo, numbers, colors, four layouts, free text, choice of language) to send anywhere. Share a project photo from the gallery. Yarn stash: price now accepts a comma. Photo access permission removed (system picker).

@@ -45,9 +45,12 @@
          `<uses-permission android:name="android.permission.INTERNET" tools:node="remove"/>`
          et revérifier l'APK au aapt (`dump permissions`). -->
 
-    <!-- Photos : appareil photo + accès aux images (galerie). -->
+    <!-- Photos : appareil photo. La galerie passe par un <input type="file"> (sélecteur
+         système, src/utils/photo.js), qui ne demande aucune permission de stockage/média —
+         READ_MEDIA_IMAGES n'est PAS déclarée ici, ni requise par @capacitor/camera (vérifié
+         dans son AndroidManifest.xml) ; Google Play l'avait signalée comme inutilisée,
+         retirée le 17/09/2026. Ne pas la rajouter sans un usage réel qui la consomme. -->
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

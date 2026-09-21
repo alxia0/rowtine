@@ -195,7 +195,7 @@ describe('StashView — formulaire de laine et registre d’achats', () => {
     const purchases = await db.purchases.toArray()
     expect(purchases).toHaveLength(1)
     expect(purchases[0]).toMatchObject({
-      yarnId: yarns[0].id, date: '2025-03-17', bain: 'B-9917', quantity: 4, unitPrice: '7,25',
+      yarnId: yarns[0].id, date: '2025-03-17', bain: 'B-9917', quantity: 4, unitPrice: 7.25,
     })
   })
 
@@ -237,7 +237,7 @@ describe('StashView — formulaire de laine et registre d’achats', () => {
       yarnId: yarns[0].id,
       kind: 'buy',
       quantity: 3,
-      unitPrice: '12,50',
+      unitPrice: 12.5,
       currency: 'EUR', // devise des réglages : jamais changée dans ce test, défaut EUR
       date: todayISO(),
       reconstructed: false,
@@ -286,7 +286,7 @@ describe('StashView — formulaire de laine et registre d’achats', () => {
     const purchases = await db.purchases.toArray()
     expect(purchases).toHaveLength(1)
     expect(purchases[0]).toMatchObject({
-      yarnId: 1, kind: 'buy', quantity: 3, unitPrice: '8,90', date: todayISO(), reconstructed: false,
+      yarnId: 1, kind: 'buy', quantity: 3, unitPrice: 8.9, date: todayISO(), reconstructed: false,
     })
   })
 
