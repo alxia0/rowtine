@@ -94,7 +94,7 @@ inclusion is submitted under the Apache License 2.0, with no separate paperwork.
 ## Contact
 
 - Bugs, ideas, questions → [issues](https://github.com/alxia0/rowtine/issues)
-- Anything else → contact@rowtine.app
+- Anything else → rowtine-fdroid.stash285@silomails.com
 
 ---
 
