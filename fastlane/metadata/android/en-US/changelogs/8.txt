@@ -1,0 +1,1 @@
+HEIC/HEIF photo support (requires Android 9 / API 28 or higher). Yarn stash menu: UX improvements.

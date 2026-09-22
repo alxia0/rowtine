@@ -102,8 +102,30 @@ jobs:
           Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
 
           Builds:
-            - versionName: 1.2.2
-              versionCode: 5
+            - versionName: 1.2.3
+              versionCode: 6
+              commit: 718a6e3da7131566922d0c7c7ad89a7d5b986c37
+              subdir: android/app
+              sudo:
+                - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+                - apt-get update
+                - apt-get install -y -t forky nodejs npm
+                - npm install -g corepack
+                - corepack enable
+              init:
+                - cd ../..
+                - yarn install --immutable
+                - yarn build
+                - yarn cap sync android
+              gradle:
+                - yes
+              scandelete:
+                - node_modules
+                - .yarn
+                - tests/e2e/fixtures
+
+            - versionName: 1.3.1
+              versionCode: 8
               commit: ${{ inputs.commit_hash }}
               subdir: android/app
               sudo:
@@ -126,12 +148,12 @@ jobs:
 
           AllowedAPKSigningKeys: 4a85cad2642267b1fa54675b34b3f7c07f21937b0c22ac9cd2aa0a7c9391faa5
 
-          AutoUpdateMode: Version %v
+          AutoUpdateMode: Version v%v
           UpdateCheckMode: HTTP
-          UpdateCheckData: 
+          UpdateCheckData:
             https://raw.githubusercontent.com/alxia0/rowtine/main/package.json|"buildNumber":\s*([0-9]+)|.|"version":\s*"([^"]+)"
-          CurrentVersion: 1.2.2
-          CurrentVersionCode: 5
+          CurrentVersion: 1.3.1
+          CurrentVersionCode: 8
           YAML
 
           git add metadata/com.rowtine.app.yml
@@ -154,8 +176,8 @@ jobs:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
           if [ "${{ steps.metadata.outputs.is_update }}" = "true" ]; then
-            TITLE="Update com.rowtine.app: WebSite and contact email"
-            DESCRIPTION="Updates metadata for the already-included com.rowtine.app (Rowtine): WebSite now points to rowtine.app instead of the GitHub repo, AuthorEmail is refreshed, plus the latest Build entry."
+            TITLE="Update com.rowtine.app: 1.3.1 build entry, fix AutoUpdateMode tag prefix"
+            DESCRIPTION="Adds the 1.3.1 Build entry for the already-included com.rowtine.app (Rowtine). Also fixes AutoUpdateMode to 'Version v%v' (was 'Version %v'): this repo's release tags are prefixed with 'v' (e.g. v1.3.1), so the un-prefixed pattern made the last automated checkupdates run generate an invalid commit ref ('1.3.0' instead of 'v1.3.0') and fail CI (see MR !49730)."
           else
             TITLE="New app: Rowtine"
             DESCRIPTION="Adds com.rowtine.app (Rowtine), a knitting/crochet companion."
