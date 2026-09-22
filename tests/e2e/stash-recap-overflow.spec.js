@@ -16,6 +16,7 @@ import { completeOnboarding } from './helpers'
 // stash.spec.js, qui ne remplit que la quantité.
 async function addYarn(page, { brand, colorKey, qty, lengthM, grams, price }) {
   await page.getByRole('button', { name: /Ajouter une laine/ }).click()
+  await page.waitForURL('**/stash/new')
   await page.locator('.addform select').first().selectOption('__other__')
   await page.locator('input[placeholder="Saisis la marque"]').fill(brand)
   await page.locator(`.palette__sw[aria-label="${colorKey}"]`).click()
@@ -24,6 +25,10 @@ async function addYarn(page, { brand, colorKey, qty, lengthM, grams, price }) {
   await page.locator('input[placeholder="1"]').fill(String(qty))
   await page.locator('input[placeholder="—"]').fill(String(price))
   await page.getByRole('button', { name: 'Enregistrer' }).click()
+  // « Enregistrer » navigue vers la fiche fraîchement créée (route stash-item) : le récap
+  // mesuré par ce fichier vit sur /stash, on y revient.
+  await page.waitForURL(/\/stash\/\d+$/)
+  await page.goto('/stash')
 }
 
 async function setup(page, { qty = 99 } = {}) {

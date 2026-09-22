@@ -482,12 +482,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/camera@npm:^8.2.2":
-  version: 8.2.2
-  resolution: "@capacitor/camera@npm:8.2.2"
+"@capacitor/camera@npm:^8.2.4":
+  version: 8.2.4
+  resolution: "@capacitor/camera@npm:8.2.4"
   peerDependencies:
     "@capacitor/core": ">=8.0.0"
-  checksum: 10c0/16e174084d10e90c7f90714c8aca9326873bd34e36f0ffa36fb5eba711348e6fe3ca4b02fbab55a045703a2970ca424361fd2beeaf8cc774c8473c575721249c
+  checksum: 10c0/bc079028438a75b086ea6a4942529f1ee73e4580bcec0e3ae05de1ca93dc73c2f64bd3833fa3006e486e3ad991e62c6bf8c1b6ac1166853cc3cc9601a0630dd3
   languageName: node
   linkType: hard
 
@@ -5123,7 +5123,7 @@ __metadata:
     "@capacitor-community/file-opener": "npm:^8.0.1"
     "@capacitor/android": "npm:^8.5.0"
     "@capacitor/app": "npm:^8.1.1"
-    "@capacitor/camera": "npm:^8.2.2"
+    "@capacitor/camera": "npm:^8.2.4"
     "@capacitor/cli": "npm:^8.5.0"
     "@capacitor/core": "npm:^8.5.0"
     "@capacitor/filesystem": "npm:^8.1.2"

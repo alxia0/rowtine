@@ -26,7 +26,7 @@ import { db } from '@/db/db'
 import { filtrerSaisieDecimale } from '@/utils/decimal'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
-import StashView from '@/views/StashView.vue'
+import YarnEditView from '@/views/YarnEditView.vue'
 import YarnPurchases from '@/components/YarnPurchases.vue'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
 
@@ -72,26 +72,29 @@ describe('filtrerSaisieDecimale — la règle, isolée', () => {
 // ─── Les trois champs, au niveau du composant ───────────────────────────────
 // Une fonction pure testée ne prouve pas que les champs l'appellent.
 
-describe('le prix d’une laine (StashView, #yarn-price)', () => {
+describe('le prix d’une laine (YarnEditView, #yarn-price)', () => {
   it('refuse le symbole de devise à la frappe', async () => {
     await db.open()
     await Promise.all(db.tables.map((t) => t.clear()))
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: '/', name: 'stash', component: StashView }],
+      routes: [
+        { path: '/stash', name: 'stash', component: { template: '<div />' } },
+        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      ],
     })
-    router.push('/')
+    router.push('/stash/new')
     await router.isReady()
     const pinia = createPinia()
-    const w = mount(StashView, { global: { plugins: [router, i18n, pinia] } })
+    const w = mount(YarnEditView, {
+      global: { plugins: [router, i18n, pinia], stubs: { YarnWeightHelp: true, ColorPickerDialog: true } },
+    })
     const settings = useSettingsStore(pinia)
     let tours = 0
     while (!settings.loaded && tours < 20) {
       await flushPromises()
       tours++
     }
-    await flushPromises()
-    await w.findAll('button').find((b) => /Ajouter une laine/.test(b.text())).trigger('click')
     await flushPromises()
     const champ = w.find('#yarn-price')
     await champ.setValue('18,90 €')

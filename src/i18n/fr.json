@@ -484,6 +484,7 @@
     "add": "Ajouter une laine",
     "edit": "Modifier la laine",
     "updated": "Laine modifiée.",
+    "notFound": "Laine introuvable.",
     "brand": "Marque",
     "brandPick": "Choisis une marque…",
     "brandOther": "Autre…",
@@ -587,14 +588,16 @@
     "filterCritWeight": "Épaisseur",
     "filterCritGrams": "Poids de pelote",
     "filterCritColor": "Couleur",
+    "filterCritUsage": "État",
     "filterWeightAll": "Toutes les épaisseurs",
     "filterGramsAll": "Tous les poids",
     "filterColorAll": "Toutes les couleurs",
+    "filterUsageAll": "Tous les états",
     "filterCompositionAll": "Toutes les compositions",
     "colorCustomFamily": "Hors palette",
     "filterReset": "Réinitialiser",
     "filterActiveCount": "Filtres actifs : {n}",
-    "unit": { "m": "mètres", "km": "km", "g": "grammes", "kg": "kg", "yd": "yards", "oz": "onces", "lb": "livres" }
+    "unit": { "m": "m", "km": "km", "g": "g", "kg": "kg", "yd": "yards", "oz": "onces", "lb": "livres" }
   },
   "pattern": {
     "all": "Tous",
@@ -848,7 +851,9 @@
     "empty": "Aucune photo pour l'instant.",
     "deleted": "Photo supprimée.",
     "change": "Changer la photo",
-    "share": "Partager la photo"
+    "share": "Partager la photo",
+    "heicNotSupported": "Ce format de photo (HEIC) n'est pas pris en charge sur cet appareil. Essaie une autre photo, ou change le réglage de format de ton appareil photo.",
+    "importFailed": "Cette photo n'a pas pu être importée : essaies-en une autre."
   },
   "settings": {
     "profile": "Profil",
@@ -1231,8 +1236,6 @@
     "fromPage": "p. {n}",
     "addedImage": "Image ajoutée",
     "addImage": "Ajouter une image",
-    "addImageCamera": "Caméra ou galerie",
-    "addImageFiles": "Parcourir les fichiers",
     "addImagePdf": "Depuis le PDF du patron",
     "pdfPickerTitle": "Choisir une page",
     "pdfPickerUse": "Utiliser cette page",

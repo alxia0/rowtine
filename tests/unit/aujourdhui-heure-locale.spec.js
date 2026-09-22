@@ -7,7 +7,8 @@
 // captures.
 //
 // La mesure du 21/08/2026 a trouvé CINQ sites, pas un seul : seul `StashView.todayISO` était
-// connu jusque-là. Les quatre autres — `SettingsView.today`, `YarnPurchases.openAddMissing`
+// connu jusque-là (déplacé vers `YarnEditView.todayISO` depuis, cf. plan « refonte stock
+// laine »). Les quatre autres — `SettingsView.today`, `YarnPurchases.openAddMissing`
 // et les deux `startedAt` de `projects.seedExamplesIfEmpty` — partagent exactement la même
 // racine. `projects.js` importait DÉJÀ `ymdLocal` et ne s'en servait pas pour `startedAt`.
 //
@@ -27,7 +28,7 @@ import { ymdLocal } from '@/utils/time-periods'
 import { useSettingsStore } from '@/stores/settings'
 import { useProjectsStore } from '@/stores/projects'
 import { usePurchasesStore } from '@/stores/purchases'
-import StashView from '@/views/StashView.vue'
+import YarnEditView from '@/views/YarnEditView.vue'
 import YarnPurchases from '@/components/YarnPurchases.vue'
 
 const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
@@ -68,7 +69,7 @@ describe('témoin — sans lui, ce fichier ne prouve rien', () => {
   })
 })
 
-describe('la date d’achat proposée à la création d’une laine (StashView)', () => {
+describe('la date d’achat proposée à la création d’une laine (YarnEditView)', () => {
   beforeEach(basculeVersLosAngeles)
   afterEach(retourAuFuseauDeLaMachine)
 
@@ -77,12 +78,17 @@ describe('la date d’achat proposée à la création d’une laine (StashView)'
     await Promise.all(db.tables.map((t) => t.clear()))
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: '/', name: 'stash', component: StashView }],
+      routes: [
+        { path: '/stash', name: 'stash', component: { template: '<div />' } },
+        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      ],
     })
-    router.push('/')
+    router.push('/stash/new')
     await router.isReady()
     const pinia = createPinia()
-    const w = mount(StashView, { global: { plugins: [router, i18n, pinia] } })
+    const w = mount(YarnEditView, {
+      global: { plugins: [router, i18n, pinia], stubs: { YarnWeightHelp: true, ColorPickerDialog: true } },
+    })
     // cf. stash-purchases-form.spec.js : settings.load() enchaîne des lectures Dexie
     // séquentielles, un compte de tours fixe est fragile — on attend le signal réel.
     const settings = useSettingsStore(pinia)
@@ -92,10 +98,8 @@ describe('la date d’achat proposée à la création d’une laine (StashView)'
       tours++
     }
     await flushPromises()
-    // Le champ de date d'achat n'existe qu'en CRÉATION (`v-if="!editId"`), une fois le
-    // formulaire ouvert — même geste qu'en stash-purchases-form.spec.js:59.
-    await w.findAll('button').find((b) => /Ajouter une laine/.test(b.text())).trigger('click')
-    await flushPromises()
+    // Le champ de date d'achat n'existe qu'en CRÉATION (`v-if="!isEdit"`) : l'écran est
+    // déjà monté en création (route stash-new), plus besoin d'ouvrir un formulaire inline.
     expect(w.find('#yarn-purchased-at').element.value).toBe(JOUR_LOCAL)
     w.unmount()
   })

@@ -56,15 +56,17 @@ vi.mock('vue-router', () => ({
 }))
 
 const pickImageMock = vi.hoisted(() => vi.fn())
-const resizeDataUrlMock = vi.hoisted(() => vi.fn((dataUrl) => Promise.resolve(dataUrl)))
 // `pickAndCropImage` est ré-exporté ici bien qu'AUCUN import de CorrectionView ne le
 // réclame aujourd'hui : `vi.mock` remplace le module ENTIER, donc un futur import du vrai
 // module échouerait de façon opaque (« No export named ») plutôt que sur la ligne fautive.
 // Même parade que tests/unit/pattern-form-gallery.spec.js.
+// `resizeDataUrl` n'est plus mocké ici (harmonisation du 22/09/2026) : CorrectionView.vue ne
+// l'importe plus depuis ce module, le sélecteur système « Parcourir les fichiers » a disparu
+// avec le menu popover, seule source qui le réclamait. Même surface de mock que
+// tests/unit/pattern-form-gallery.spec.js pour ce même module.
 vi.mock('@/utils/photo', () => ({
   pickAndCropImage: vi.fn().mockResolvedValue(null),
   pickImage: (...args) => pickImageMock(...args),
-  resizeDataUrl: (...args) => resizeDataUrlMock(...args),
 }))
 const cropMock = vi.hoisted(() => vi.fn())
 vi.mock('@/stores/cropper', () => ({ useCropperStore: () => ({ crop: cropMock }) }))
@@ -259,19 +261,13 @@ async function openGalleryStrip(w) {
   await flushPromises()
 }
 
-// Les trois sources d'ajout ne sont plus trois boutons mais UN bouton + un menu
-// (openMenuPopover, cm-editor.js — même mécanisme que les sous-popovers de type).
-// `sourceLabel` est le libellé de l'entrée à choisir ; `null` ouvre le menu sans rien choisir
-// (pour vérifier ce qu'il propose).
-async function openGalleryAddMenu(w) {
+// UN bouton, plus de popover (harmonisation du 22/09/2026, cf. PatternForm.vue et
+// tests/unit/pattern-form-gallery.spec.js pour le même geste) : le clic ouvre directement
+// `pickImage` (mocké dans ce fichier via `pickImageMock`), qui résout soit une data-URL
+// classique, soit `'extra'` (choix PDF de la feuille standard, cf. addGalleryImage), soit
+// `null` (annulation).
+async function clickGalleryAdd(w) {
   await w.find('.gallery-strip__add').trigger('click')
-  await flushPromises()
-  return [...document.querySelectorAll('.cm-menu-popover__item')].map((el) => el.textContent)
-}
-async function addGalleryImageFrom(w, sourceLabel) {
-  await openGalleryAddMenu(w)
-  const item = [...document.querySelectorAll('.cm-menu-popover__item')].find((el) => el.textContent.includes(sourceLabel))
-  item.click()
   await flushPromises()
 }
 
@@ -1204,7 +1200,7 @@ describe('CorrectionView — galerie du patron (ajout/suppression, sans promotio
     pickImageMock.mockResolvedValue('data:image/png;base64,NEW')
     const { w, pattern } = await mountView({ pattern: { gallery: [] } })
     await openGalleryStrip(w)
-    await addGalleryImageFrom(w, fr.patternExtras.addImageCamera)
+    await clickGalleryAdd(w)
     expect(w.findAll('.gallery-strip__img')).toHaveLength(1)
 
     await clickSaveAndSettle(w)
@@ -1234,7 +1230,7 @@ describe('CorrectionView — galerie du patron (ajout/suppression, sans promotio
     const { w } = await mountView({ pattern: { gallery: [] } })
     expect(nav.leaveGuard()).toBe(true)
     await openGalleryStrip(w)
-    await addGalleryImageFrom(w, fr.patternExtras.addImageCamera)
+    await clickGalleryAdd(w)
     expect(nav.leaveGuard()).toBe(false)
   })
 
@@ -1242,7 +1238,7 @@ describe('CorrectionView — galerie du patron (ajout/suppression, sans promotio
     pickImageMock.mockResolvedValue('data:image/png;base64,NEW')
     const { w, pattern } = await mountView({ pattern: { gallery: [] } })
     await openGalleryStrip(w)
-    await addGalleryImageFrom(w, fr.patternExtras.addImageCamera)
+    await clickGalleryAdd(w)
     // Ne clique PAS Enregistrer : le composant est simplement démonté (équivalent à
     // une navigation confirmée par "Quitter") — rien n'a jamais été écrit en base.
     w.unmount()
@@ -1463,69 +1459,57 @@ describe('CorrectionView — vignettes et détection des diagrammes incomplets',
   })
 })
 
-describe('CorrectionView — 3 sources d\'ajout d\'image de galerie', () => {
+describe('CorrectionView, sources d\'ajout d\'image de galerie (feuille standard)', () => {
   beforeEach(() => {
     pickImageMock.mockReset()
-    resizeDataUrlMock.mockClear()
     cropMock.mockReset()
   })
 
-  // UN bouton + un menu depuis le lot « bandes du bas » (26/08/2026) : trois boutons pleine
-  // largeur mangeaient le bas d'un écran déjà chargé alors que deux des trois sources sont
-  // rares. L'entrée PDF reste conditionnée au patron, exactement comme le bouton d'avant.
-  it('un seul bouton d’ajout, dont le menu propose les 3 sources — le PDF seulement si le patron en porte un', async () => {
+  // UN bouton, plus de popover (harmonisation du 22/09/2026) : le menu à 3 options (dont un
+  // « Parcourir les fichiers » redondant avec le sélecteur système déjà proposé par la feuille
+  // standard) a été retiré au profit de PhotoSourceSheet, même changement que PatternForm.vue
+  // (cf. tests/unit/pattern-form-gallery.spec.js pour le test équivalent).
+  it('un seul bouton d\'ajout (feuille standard, plus de menu popover)', async () => {
     const { w } = await mountView({ pattern: { gallery: [], pdf: '' } })
     await openGalleryStrip(w)
     expect(w.findAll('.gallery-strip__add')).toHaveLength(1)
-    const sansPdf = await openGalleryAddMenu(w)
-    expect(sansPdf).toEqual([fr.patternExtras.addImageCamera, fr.patternExtras.addImageFiles])
-
-    const { w: w2 } = await mountView({ pattern: { id: 8, gallery: [], pdf: 'data:application/pdf;base64,AAAA' } })
-    await openGalleryStrip(w2)
-    expect(await openGalleryAddMenu(w2)).toContain(fr.patternExtras.addImagePdf)
   })
 
-  it('avec un PDF stocké : choisir une page l\'enchaîne sur le recadrage puis l\'ajoute au brouillon', async () => {
-    cropMock.mockResolvedValue('data:image/jpeg;base64,CROPPED')
+  it('choix "extra" (4e bouton de la feuille) ouvre le picker PDF quand le patron a un PDF stocké', async () => {
+    pickImageMock.mockResolvedValue('extra')
     const { w } = await mountView({ pattern: { gallery: [], pdf: 'data:application/pdf;base64,AAAA' } })
     await openGalleryStrip(w)
-    await addGalleryImageFrom(w, fr.patternExtras.addImagePdf)
+    await clickGalleryAdd(w)
+    expect(pickImageMock).toHaveBeenCalledWith(fr.patternExtras.addImagePdf)
     // PdfPagePickerDialog est chargé en defineAsyncComponent (cf. CorrectionView.vue) : sa
     // résolution passe par une microtâche de plus que flushPromises() ne draine à froid —
     // même parade que tests/unit/pattern-form-gallery.spec.js (même composant).
+    await vi.waitFor(() => expect(w.findComponent({ name: 'PdfPagePickerDialog' }).exists()).toBe(true), { timeout: 10000 })
+    expect(w.findComponent({ name: 'PdfPagePickerDialog' }).props('open')).toBe(true)
+  })
+
+  it('sans PDF sur le patron, pickImage est appelé avec null (pas de 4e bouton demandé)', async () => {
+    pickImageMock.mockResolvedValue(null)
+    const { w } = await mountView({ pattern: { gallery: [], pdf: '' } })
+    await openGalleryStrip(w)
+    await clickGalleryAdd(w)
+    expect(pickImageMock).toHaveBeenCalledWith(null)
+  })
+
+  it('avec un PDF stocké : choisir une page l\'enchaîne sur le recadrage puis l\'ajoute au brouillon', async () => {
+    pickImageMock.mockResolvedValue('extra')
+    cropMock.mockResolvedValue('data:image/jpeg;base64,CROPPED')
+    const { w } = await mountView({ pattern: { gallery: [], pdf: 'data:application/pdf;base64,AAAA' } })
+    await openGalleryStrip(w)
+    await clickGalleryAdd(w)
+    // PdfPagePickerDialog est chargé en defineAsyncComponent (cf. CorrectionView.vue) : sa
+    // résolution passe par une microtâche de plus que flushPromises() ne draine à froid.
+    // Même parade que tests/unit/pattern-form-gallery.spec.js (même composant).
     await vi.waitFor(() => expect(w.findComponent({ name: 'PdfPagePickerDialog' }).exists()).toBe(true), { timeout: 10000 })
     await w.findComponent({ name: 'PdfPagePickerDialog' }).vm.$emit('pick', 'data:image/jpeg;base64,PAGE')
     await flushPromises()
     expect(cropMock).toHaveBeenCalledWith('data:image/jpeg;base64,PAGE')
     expect(w.findAll('.gallery-strip__img')).toHaveLength(1)
-  })
-
-  it('« Parcourir les fichiers » redimensionne puis ajoute au brouillon', async () => {
-    const { w } = await mountView({ pattern: { gallery: [] } })
-    await openGalleryStrip(w)
-    const input = w.find('input[type="file"]')
-    const file = new File(['x'], 'diagramme.png', { type: 'image/png' })
-    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
-    await input.trigger('change')
-    // FileReader n'est pas mocké (jsdom l'implémente nativement) : `readAsDataURL` résout
-    // via son propre event loop, un seul flushPromises() ne suffit pas — même parade que
-    // tests/unit/pattern-form-gallery.spec.js.
-    await vi.waitFor(() => expect(resizeDataUrlMock).toHaveBeenCalled(), { timeout: 10000 })
-    expect(w.findAll('.gallery-strip__img')).toHaveLength(1)
-  })
-
-  it('« Parcourir les fichiers » : un fichier non-image est rejeté (snackbar, rien poussé au brouillon)', async () => {
-    const { w } = await mountView({ pattern: { gallery: [] } })
-    const snackbar = useSnackbarStore()
-    await openGalleryStrip(w)
-    const input = w.find('input[type="file"]')
-    const file = new File(['x'], 'notice.pdf', { type: 'application/pdf' })
-    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
-    await input.trigger('change')
-    await flushPromises()
-    expect(resizeDataUrlMock).not.toHaveBeenCalled()
-    expect(w.findAll('.gallery-strip__img')).toHaveLength(0)
-    expect(snackbar.visible).toBe(true)
   })
 })
 

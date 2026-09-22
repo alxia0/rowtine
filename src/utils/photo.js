@@ -1,6 +1,8 @@
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { Capacitor } from '@capacitor/core'
 import { resizeDataUrl } from './image-resize'
 import { usePhotoSourceStore } from '@/stores/photo-source'
+import { pickAndDecodeGalleryImage } from '@/native/image-decode'
 
 // Réexportée pour compatibilité : `resizeDataUrl` vit maintenant dans image-resize.js
 // (module pur, sans dépendance @capacitor/camera — cf. zip-import.js).
@@ -56,11 +58,30 @@ function pickGalleryFile() {
   })
 }
 
+// Détection d'un fichier HEIC/HEIF choisi en galerie (réglage « haute efficacité » par
+// défaut sur de nombreux appareils Android, notamment les plus anciens) : la WebView ne
+// sait pas le décoder. resizeDataUrl (image-resize.js) ne le signale PAS comme une erreur
+// (img.onerror y résout avec la data URL d'origine, jamais un rejet, cf. contrat documenté
+// en tête de ce module) : sans cette détection en amont, l'utilisatrice se retrouvait
+// devant un cadre de recadrage vide sans explication. Détection sur le type MIME d'abord,
+// repli sur l'extension du nom de fichier si le type est vide (certains sélecteurs Android
+// ne renseignent pas le type MIME des fichiers HEIC).
+function isHeicFile(file) {
+  const type = (file.type || '').toLowerCase()
+  if (type === 'image/heic' || type === 'image/heif') return true
+  if (type) return false
+  const name = (file.name || '').toLowerCase()
+  return name.endsWith('.heic') || name.endsWith('.heif')
+}
+
 // Capture/sélection d'une photo : feuille maison « galerie / appareil photo » puis, selon
 // le geste, input fichier (octets d'origine) ou plugin natif. Renvoie une data URL
 // redimensionnée (≤ 1280 px, JPEG fond blanc), ou null si l'utilisatrice annule (ou en
-// cas d'échec — l'appelant reste fonctionnel).
-export async function pickImage() {
+// cas d'échec — l'appelant reste fonctionnel). `extraLabel`, s'il est fourni, ajoute un 4e
+// choix à la feuille (voir stores/photo-source.js) ; si l'utilisatrice le choisit, cette
+// fonction renvoie la chaîne littérale 'extra' (jamais une data URL, jamais null dans ce
+// cas précis), à l'appelant de distinguer ce cas avant de traiter le retour comme une image.
+export async function pickImage(extraLabel = null) {
   // Seam e2e : en build de test (VITE_E2E défini), on renvoie une photo déterministe
   // injectée par Playwright sans toucher au plugin natif NI à la feuille. Tree-shaké en
   // prod (VITE_E2E est undefined → la condition est éliminée au build). Voir tests/e2e/.
@@ -72,8 +93,9 @@ export async function pickImage() {
   //    PhotoSourceSheet.vue via vue-i18n). `usePhotoSourceStore()` est appelé ICI, à
   //    l'exécution (pas au niveau du module) : l'import ne doit exiger aucune instance
   //    Pinia active, seuls les appels réels en ont une.
-  const choice = await usePhotoSourceStore().askSource()
+  const choice = await usePhotoSourceStore().askSource(extraLabel)
   if (!choice) return null
+  if (choice === 'extra') return 'extra'
 
   if (choice === 'camera') {
     try {
@@ -101,11 +123,45 @@ export async function pickImage() {
     }
   }
 
-  // 2. Geste « galerie » : input fichier → octets d'origine → borne 1280 px + fond blanc
-  //    (cf. bloc POURQUOI/piège mémoire en tête de module).
+  // 2. Geste « galerie ». Sur plateforme native, le sélecteur ET le décodage sont
+  //    natifs (src/native/image-decode.js) : la WebView Android ne sait pas décoder le
+  //    HEIC/HEIF (réglage « haute efficacité » par défaut sur de nombreux appareils
+  //    récents), l'OS oui. Hors natif (web, banc de test), on garde l'input fichier +
+  //    décodage WebView ci-dessous (cf. bloc POURQUOI en tête de module) : HEIC n'y
+  //    fonctionnera jamais, sans conséquence, ce chemin ne servant qu'au développement.
+  if (Capacitor.isNativePlatform()) {
+    try {
+      return await pickAndDecodeGalleryImage()
+    } catch (e) {
+      if (e?.code !== 'UNSUPPORTED_API') {
+        // Un fichier A été choisi mais n'a pas pu être décodé (format non supporté même
+        // par l'OS, fichier corrompu) : contrairement à une annulation, on le signale.
+        // Sans ce message, l'utilisatrice se retrouve devant un geste sans effet visible,
+        // sans comprendre pourquoi (bug remonté par Anne-Sophie, 21/09/2026).
+        const [{ useSnackbarStore }, { default: i18n }] = await Promise.all([
+          import('@/stores/snackbar'),
+          import('@/i18n'),
+        ])
+        useSnackbarStore().show(i18n.global.t('photo.importFailed'))
+        return null
+      }
+      // Android 7/8 (API < 28) : le décodage natif n'existe pas. On repli sur le chemin
+      // web ci-dessous (input fichier + décodage WebView, JPEG/PNG seulement).
+    }
+  }
   try {
     const file = await pickGalleryFile()
     if (!file) return null
+    if (isHeicFile(file)) {
+      // Cf. isHeicFile ci-dessus : la WebView ne décode pas le HEIC/HEIF, avertir plutôt
+      // que de tenter un import qui aboutirait à un cadre de recadrage vide silencieux.
+      const [{ useSnackbarStore }, { default: i18n }] = await Promise.all([
+        import('@/stores/snackbar'),
+        import('@/i18n'),
+      ])
+      useSnackbarStore().show(i18n.global.t('photo.heicNotSupported'))
+      return null
+    }
     const dataUrl = await fileToDataUrl(file)
     if (!dataUrl) return null
     return await resizeDataUrl(dataUrl, 1280, 0.8)

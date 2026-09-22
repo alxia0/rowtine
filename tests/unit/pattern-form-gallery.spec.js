@@ -9,18 +9,15 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import i18n from '@/i18n'
 import PatternForm from '@/components/PatternForm.vue'
-import { useSnackbarStore } from '@/stores/snackbar'
 
 // vi.hoisted OBLIGATOIRE ici : vi.mock est hoisté par Vitest au-dessus du reste du
 // fichier, donc une simple `const pickImageMock = vi.fn()` non hoistée serait encore en
 // zone morte temporelle quand la factory du mock s'exécute (même piège documenté dans
 // CorrectionView.spec.js pour `nav`/`vue-router`).
 const pickImageMock = vi.hoisted(() => vi.fn())
-const resizeDataUrlMock = vi.hoisted(() => vi.fn((dataUrl) => Promise.resolve(dataUrl)))
 vi.mock('@/utils/photo', () => ({
   pickAndCropImage: vi.fn().mockResolvedValue(null),
   pickImage: (...args) => pickImageMock(...args),
-  resizeDataUrl: (...args) => resizeDataUrlMock(...args),
 }))
 
 const cropMock = vi.hoisted(() => vi.fn())
@@ -110,20 +107,21 @@ describe('PatternForm — galerie du patron (ajout/suppression)', () => {
     ])
   })
 
-  it('3 boutons de source : caméra/galerie, fichiers, PDF (visible seulement si form.pdf existe)', () => {
+  it('un seul bouton d\'ajout (feuille standard, plus de "Parcourir les fichiers")', () => {
     const w = mountForm(makeInitial([]))
-    expect(w.find('[aria-label="Caméra ou galerie"]').exists()).toBe(true)
-    expect(w.find('[aria-label="Parcourir les fichiers"]').exists()).toBe(true)
-    expect(w.find('[aria-label="Depuis le PDF du patron"]').exists()).toBe(false) // pas de pdf sur ce fixture
+    expect(w.findAll('.galleryrow__add')).toHaveLength(1)
+    expect(w.find('[aria-label="Ajouter une image"]').exists()).toBe(true)
+    expect(w.find('[aria-label="Parcourir les fichiers"]').exists()).toBe(false)
   })
 
-  it('bouton PDF visible et fonctionnel quand le patron a un PDF stocké', async () => {
+  it('choix "extra" (4e bouton de la feuille) ouvre le picker PDF quand le patron a un PDF stocké', async () => {
+    pickImageMock.mockResolvedValue('extra')
     const initial = makeInitial([])
     initial.pdf = 'data:application/pdf;base64,AAAA'
     const w = mountForm(initial)
-    const pdfBtn = w.find('[aria-label="Depuis le PDF du patron"]')
-    expect(pdfBtn.exists()).toBe(true)
-    await pdfBtn.trigger('click')
+    await w.find('.galleryrow__add').trigger('click')
+    await flushPromises()
+    expect(pickImageMock).toHaveBeenCalledWith('Depuis le PDF du patron')
     // PdfPagePickerDialog est chargé en asynchrone (defineAsyncComponent, cf. PatternForm.vue) :
     // la résolution passe par la vraie transformation Vite du module, pas seulement par des
     // microtâches — un nombre fixe de flushPromises() est insuffisant à froid (mesuré : encore
@@ -133,12 +131,22 @@ describe('PatternForm — galerie du patron (ajout/suppression)', () => {
     expect(w.findComponent({ name: 'PdfPagePickerDialog' }).props('open')).toBe(true)
   })
 
-  it('sélection d\'une page PDF enchaîne sur le recadrage puis ajoute l\'image recadrée', async () => {
+  it('sans PDF sur le patron, pickImage est appelé avec null (pas de 4e bouton demandé)', async () => {
+    pickImageMock.mockResolvedValue(null)
+    const w = mountForm(makeInitial([]))
+    await w.find('.galleryrow__add').trigger('click')
+    await flushPromises()
+    expect(pickImageMock).toHaveBeenCalledWith(null)
+  })
+
+  it('sélection d\'une page PDF (via la feuille standard) enchaîne sur le recadrage puis ajoute l\'image recadrée', async () => {
+    pickImageMock.mockResolvedValue('extra')
     cropMock.mockResolvedValue('data:image/jpeg;base64,CROPPED')
     const initial = makeInitial([])
     initial.pdf = 'data:application/pdf;base64,AAAA'
     const w = mountForm(initial)
-    await w.find('[aria-label="Depuis le PDF du patron"]').trigger('click')
+    await w.find('.galleryrow__add').trigger('click')
+    await flushPromises()
     await vi.waitFor(() => expect(w.find('.ppd').exists()).toBe(true), { timeout: 10000 }) // résolution du composant async
     await w.findComponent({ name: 'PdfPagePickerDialog' }).vm.$emit('pick', 'data:image/jpeg;base64,PAGE')
     await flushPromises()
@@ -147,47 +155,16 @@ describe('PatternForm — galerie du patron (ajout/suppression)', () => {
   })
 
   it('annuler le recadrage (crop résout null) n\'ajoute rien', async () => {
+    pickImageMock.mockResolvedValue('extra')
     cropMock.mockResolvedValue(null)
     const initial = makeInitial([])
     initial.pdf = 'data:application/pdf;base64,AAAA'
     const w = mountForm(initial)
-    await w.find('[aria-label="Depuis le PDF du patron"]').trigger('click')
+    await w.find('.galleryrow__add').trigger('click')
+    await flushPromises()
     await vi.waitFor(() => expect(w.find('.ppd').exists()).toBe(true), { timeout: 10000 }) // résolution du composant async
     await w.findComponent({ name: 'PdfPagePickerDialog' }).vm.$emit('pick', 'data:image/jpeg;base64,PAGE')
     await flushPromises()
     expect(w.findAll('.galleryrow__img')).toHaveLength(0)
-  })
-
-  it('« Parcourir les fichiers » : le fichier choisi est redimensionné puis ajouté', async () => {
-    const w = mountForm(makeInitial([]))
-    const input = w.find('input[type="file"]')
-    const file = new File(['x'], 'diagramme.png', { type: 'image/png' })
-    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
-    // FileReader n'est pas mocké : jsdom l'implémente nativement, readAsDataURL fonctionne,
-    // mais son évènement `load` retombe après plusieurs tours de boucle d'évènements — un
-    // seul flushPromises() (= un setImmediate) ne suffit pas ici ; vi.waitFor() sonde jusqu'à
-    // ce que l'image apparaisse (même pattern que CorrectionView.spec.js).
-    await input.trigger('change')
-    await vi.waitFor(() => expect(w.findAll('.galleryrow__img')).toHaveLength(1), { timeout: 10000 })
-    expect(resizeDataUrlMock).toHaveBeenCalled()
-  })
-
-  it('« Parcourir les fichiers » : un fichier non-image est rejeté (snackbar, rien ajouté)', async () => {
-    const pinia = createPinia()
-    setActivePinia(pinia)
-    const w = mount(PatternForm, {
-      props: { initial: makeInitial([]), submitLabel: 'Enregistrer' },
-      global: { plugins: [pinia, i18n] },
-    })
-    const snackbar = useSnackbarStore(pinia)
-    resizeDataUrlMock.mockClear() // ne compte que les appels DE CE test (pas réinitialisé en beforeEach)
-    const input = w.find('input[type="file"]')
-    const file = new File(['x'], 'notice.pdf', { type: 'application/pdf' })
-    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
-    await input.trigger('change')
-    await flushPromises()
-    expect(w.findAll('.galleryrow__img')).toHaveLength(0)
-    expect(resizeDataUrlMock).not.toHaveBeenCalled()
-    expect(snackbar.visible).toBe(true)
   })
 })

@@ -70,7 +70,7 @@ import {
 import { reconcileReaderState } from '@/backup/reconcile-reader-state'
 import { aggregateReconcileReports } from '@/backup/patron-md-sync'
 import { photoFileName } from '@/backup/naming'
-import { pickImage, resizeDataUrl } from '@/utils/photo'
+import { pickImage } from '@/utils/photo'
 import { useCropperStore } from '@/stores/cropper'
 import { W, WARNING_CODES } from '@/utils/pattern-md/warning-codes'
 import { isDirty } from '@/utils/correction-dirty'
@@ -318,42 +318,20 @@ function openGalleryShapeMenu(row, anchorEl) {
   openMenuPopover(anchorEl, chartShapeMenuItems(), (uiValue) => promoteGalleryImage(row.idx, shapeFromUiValue(uiValue)))
 }
 
-// TROIS sources (retour terrain 25/08/2026, sources d'image élargies — même logique que
-// PatternForm.vue) : caméra/galerie (inchangé), fichiers (sélecteur système, redimensionné
-// via resizeDataUrl puisqu'il ne passe pas par le plugin natif qui réduit déjà côté Android),
-// PDF du patron (SEULE source qui recadre — une page de PDF couvre presque toujours plus que
-// le seul diagramme visé). Toutes poussent en QUEUE, en fin de tableau.
+// DEUX sources (harmonisation du 22/09/2026 : le menu popover à 3 options, dont un
+// "Parcourir les fichiers" redondant avec le sélecteur système déjà proposé par la feuille
+// standard, a été retiré au profit de PhotoSourceSheet, même changement que
+// PatternForm.vue). Toutes poussent en QUEUE, en fin de tableau.
 function pushDraftGalleryImage(dataUrl) {
   draftGallery.value = [...draftGallery.value, { src: dataUrl, page: 0, w: 0, h: 0 }]
 }
 async function addGalleryImage() {
-  const dataUrl = await pickImage()
-  if (dataUrl) pushDraftGalleryImage(dataUrl)
-}
-const galleryFileInputRef = ref(null)
-function openGalleryFilePicker() {
-  galleryFileInputRef.value?.click()
-}
-async function onGalleryFilePicked(event) {
-  const file = event.target.files?.[0]
-  event.target.value = ''
-  if (!file) return
-  if (!file.type.startsWith('image/')) {
-    snackbar.show(t('patternExtras.pickError'))
+  const result = await pickImage(pattern.value?.pdf ? t('patternExtras.addImagePdf') : null)
+  if (result === 'extra') {
+    openGalleryPdfPicker()
     return
   }
-  try {
-    const reader = new FileReader()
-    const raw = await new Promise((resolve, reject) => {
-      reader.onload = () => resolve(reader.result)
-      reader.onerror = () => reject(reader.error)
-      reader.readAsDataURL(file)
-    })
-    const resized = await resizeDataUrl(raw, 1280, 0.8)
-    pushDraftGalleryImage(resized)
-  } catch {
-    snackbar.show(t('patternExtras.pickError'))
-  }
+  if (result) pushDraftGalleryImage(result)
 }
 const galleryPdfPickerOpen = ref(false)
 function openGalleryPdfPicker() {
@@ -366,33 +344,6 @@ async function onGalleryPdfPagePicked(pageDataUrl) {
   } catch {
     snackbar.show(t('patternExtras.pickError'))
   }
-}
-
-// UN bouton, un menu (retour terrain 26/08/2026) : les trois sources occupaient trois boutons
-// pleine largeur en bas d'un écran déjà chargé (éditeur + panneau Diagrammes + barre d'action
-// collante), alors que deux d'entre elles sont rares. `openMenuPopover` est le mécanisme de
-// menu DÉJÀ en place ici (sous-popovers de type, panneau et galerie) — pas un second.
-//
-// AUCUN `selectedValue` passé : c'est le 3e état documenté de openMenuPopover (« ce popover
-// ne porte pas de notion de sélection »), le bon pour un menu d'ACTIONS — sinon une coche
-// viendrait s'afficher devant des entrées qui ne représentent aucun état.
-//
-// L'entrée PDF n'est construite que si le patron en porte un, exactement comme le `v-if` du
-// bouton qu'elle remplace : une entrée grisée ne dirait rien de plus qu'une entrée absente.
-function galleryAddMenuItems() {
-  const items = [
-    { value: 'camera', label: t('patternExtras.addImageCamera') },
-    { value: 'files', label: t('patternExtras.addImageFiles') },
-  ]
-  if (pattern.value?.pdf) items.push({ value: 'pdf', label: t('patternExtras.addImagePdf') })
-  return items
-}
-function openGalleryAddMenu(anchorEl) {
-  openMenuPopover(anchorEl, galleryAddMenuItems(), (value) => {
-    if (value === 'camera') addGalleryImage()
-    else if (value === 'files') openGalleryFilePicker()
-    else if (value === 'pdf') openGalleryPdfPicker()
-  })
 }
 
 function removeGalleryImage(idx) {
@@ -1412,12 +1363,10 @@ function onCancel() {
           <button
             type="button"
             class="gallery-strip__add btn"
-            aria-haspopup="menu"
-            @click="openGalleryAddMenu($event.currentTarget)"
+            @click="addGalleryImage"
           >
             <AppIcon name="plus" :size="18" /> {{ t('patternExtras.addImage') }}
           </button>
-          <input ref="galleryFileInputRef" type="file" accept="image/*" class="gallery-strip__fileinput" @change="onGalleryFilePicked" />
           <PdfPagePickerDialog v-if="pattern?.pdf" v-model:open="galleryPdfPickerOpen" :pdf="pattern.pdf" @pick="onGalleryPdfPagePicked" />
         </div>
       </section>
@@ -1699,14 +1648,6 @@ function onCancel() {
   min-height: 56px;
   width: 100%;
   justify-content: center;
-}
-.gallery-strip__fileinput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
 }
 .correct {
   max-width: var(--w-content); /* repris de .screen : centrage tablette/desktop */

@@ -55,11 +55,11 @@ describe('StashView — récap', () => {
     await db.settings.clear()
   })
 
-  it('affiche mètres et grammes sous le seuil', async () => {
+  it('affiche m et g sous le seuil', async () => {
     const w = await mountStash([{ brand: 'A', colorName: 'Rouge', quantity: 2, lengthM: 100, grams: 50 }])
     const [, longueur, poids] = tiles(w)
-    expect(longueur).toEqual({ num: '200', lbl: 'mètres' })
-    expect(poids).toEqual({ num: '100', lbl: 'grammes' })
+    expect(longueur).toEqual({ num: '200', lbl: 'm' })
+    expect(poids).toEqual({ num: '100', lbl: 'g' })
   })
 
   it('bascule en km et kg au-delà du seuil, avec 3 décimales', async () => {
@@ -92,8 +92,8 @@ describe('StashView — récap', () => {
     // fiche, un chiffre FAUX (pas seulement masqué) sur le récap du stock.
     const w = await mountStash([{ brand: 'A', colorName: 'Rouge', quantity: 1, lengthM: '87,5', grams: '4,5' }])
     const [, longueur, poids] = tiles(w)
-    expect(longueur).toEqual({ num: '88', lbl: 'mètres' })
-    expect(poids).toEqual({ num: '5', lbl: 'grammes' })
+    expect(longueur).toEqual({ num: '88', lbl: 'm' })
+    expect(poids).toEqual({ num: '5', lbl: 'g' })
   })
 
   it('libelle le montant avec le symbole de la devise choisie', async () => {

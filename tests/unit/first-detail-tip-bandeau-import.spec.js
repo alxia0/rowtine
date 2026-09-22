@@ -37,7 +37,6 @@ import LibraryView from '@/views/LibraryView.vue'
 import StashView from '@/views/StashView.vue'
 import PatternView from '@/views/PatternView.vue'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
-import YarnDetailDialog from '@/components/YarnDetailDialog.vue'
 
 beforeEach(async () => {
   setActivePinia(createPinia())
@@ -181,10 +180,9 @@ describe('astuce de balayage : placement sur les listes, pas sur la fiche patron
     const w = mount(StashView, { global: { plugins: [i18n] } })
     await settle()
 
-    // PRÉCONDITION : aucune fiche laine ouverte — sinon ce test prouverait l'ANCIEN
-    // comportement (astuce liée à la fiche laine) sans le savoir.
-    expect(w.findComponent(YarnDetailDialog).props('open')).toBe(false)
-
+    // La laine a désormais son propre écran routé (stash-item, cf. YarnDetailView.vue) :
+    // monter StashView seul suffit à garantir qu'aucune fiche n'est ouverte, plus besoin
+    // de vérifier l'état d'un tiroir qui n'existe plus.
     expect(w.findComponent(FirstDetailTip).exists()).toBe(true)
     expect(w.findComponent(FirstDetailTip).findComponent(ConfirmDialog).props('open')).toBe(true)
   })

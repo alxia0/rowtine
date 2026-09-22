@@ -159,3 +159,20 @@ describe('PhotoCropper — ratio imposé (badge)', () => {
     expect(calls).toEqual([])
   })
 })
+
+describe('PhotoCropper — image non décodable (@error)', () => {
+  it('un échec de chargement règle avec null au lieu de rester bloqué sur un cadre vide', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const cropper = useCropperStore()
+    const wrapper = mount(PhotoCropper, { global: { plugins: [i18n, pinia] } })
+
+    const settled = cropper.crop('data:image/heic;base64,AA==')
+    await flushPromises()
+
+    await wrapper.find('img.cr__img').trigger('error')
+
+    await expect(settled).resolves.toBeNull()
+    expect(cropper.open).toBe(false)
+  })
+})

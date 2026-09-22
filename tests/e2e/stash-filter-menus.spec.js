@@ -15,6 +15,7 @@ test.beforeEach(async ({ page }) => {
 // d'enregistrement : fiche ET ligne d'achat écrites (cf. stash.spec.js).
 async function ajouterLaine(page, { marque, couleur = 'moutarde', epaisseur = '', matieres = [], dateAchat = '' }) {
   await page.getByRole('button', { name: 'Ajouter une laine' }).click()
+  await page.waitForURL('**/stash/new')
   await page.locator('.addform select').first().selectOption('__other__')
   await page.locator('input[placeholder="Saisis la marque"]').fill(marque)
   await page.locator(`.palette__sw[aria-label="${couleur}"]`).click()
@@ -22,7 +23,10 @@ async function ajouterLaine(page, { marque, couleur = 'moutarde', epaisseur = ''
   if (dateAchat) await page.locator('#yarn-purchased-at').fill(dateAchat)
   for (const m of matieres) await page.locator('.chip', { hasText: m }).click()
   await page.getByRole('button', { name: 'Enregistrer' }).click()
-  await expect(page.locator('.addform')).toHaveCount(0)
+  // « Enregistrer » navigue vers la fiche fraîchement créée (route stash-item) : on revient
+  // sur la liste pour que l'appelant retrouve le même point de départ qu'avant.
+  await page.waitForURL(/\/stash\/\d+$/)
+  await page.goto('/stash')
 }
 
 // Pose un filtre depuis la popup : critère → option (« Toutes… » si `libelle` est null).

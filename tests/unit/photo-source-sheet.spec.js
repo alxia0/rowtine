@@ -144,3 +144,47 @@ describe('PhotoSourceSheet — clics et fermeture', () => {
     await expect(p).resolves.toBeNull()
   })
 })
+
+describe('PhotoSourceSheet - 4e bouton optionnel (extra)', () => {
+  it('askSource(label) affiche un 4e bouton entre "Prendre une photo" et "Annuler"', async () => {
+    const wrapper = mountSheet()
+    const store = usePhotoSourceStore()
+    store.askSource('Depuis le PDF du patron')
+    await flushPromises()
+
+    const buttons = wrapper.findAll('button')
+    expect(buttons.map((b) => b.text())).toEqual([
+      'Choisir dans la galerie',
+      'Prendre une photo',
+      'Depuis le PDF du patron',
+      'Annuler',
+    ])
+    expect(wrapper.find('[data-test="photo-source-extra"]').attributes('class')).not.toContain(
+      'btn--primary',
+    )
+    store.settle(null)
+    await flushPromises()
+  })
+
+  it('askSource() sans argument n\'affiche pas de 4e bouton (comportement existant inchangé)', async () => {
+    const wrapper = mountSheet()
+    const store = usePhotoSourceStore()
+    store.askSource()
+    await flushPromises()
+    expect(wrapper.find('[data-test="photo-source-extra"]').exists()).toBe(false)
+    store.settle(null)
+    await flushPromises()
+  })
+
+  it('cliquer le 4e bouton résout à "extra" et ferme la feuille', async () => {
+    const wrapper = mountSheet()
+    const store = usePhotoSourceStore()
+    const p = store.askSource('Depuis le PDF du patron')
+    await flushPromises()
+
+    await wrapper.find('[data-test="photo-source-extra"]').trigger('click')
+    await expect(p).resolves.toBe('extra')
+    expect(store.open).toBe(false)
+    expect(wrapper.find('[data-test="photo-source-extra"]').exists()).toBe(false)
+  })
+})

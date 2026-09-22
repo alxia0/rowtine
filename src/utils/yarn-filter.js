@@ -70,6 +70,14 @@ export function matchesGrams(yarn, gramsValue) {
   return Number.isFinite(grams) && grams === parseDecimal(gramsValue)
 }
 
+// État d'engagement (libre/réservée/utilisée/partiellement utilisée) : contrairement aux
+// autres critères, ce matcher reçoit l'état DÉJÀ DÉRIVÉ (yarnUsageState(...).state), pas la
+// laine brute — l'état dépend de `projectsById`, que ce module ne connaît pas et ne doit
+// pas connaître (module pur, sans dépendance au store projets).
+export function matchesUsageState(state, filterValue) {
+  return !filterValue || state === filterValue
+}
+
 // Sentinelle du menu déroulant « Couleur » : regroupe les laines dont la couleur est hors
 // palette. Même mécanique que NO_BRAND ci-dessus : exportée pour être partagée telle quelle
 // entre les vues (même chaîne, jamais retapée à deux endroits).

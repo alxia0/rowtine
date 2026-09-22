@@ -484,6 +484,7 @@
     "add": "Add yarn",
     "edit": "Edit yarn",
     "updated": "Yarn updated.",
+    "notFound": "Yarn not found.",
     "brand": "Brand",
     "brandPick": "Pick a brand…",
     "brandOther": "Other…",
@@ -572,11 +573,11 @@
     },
     "veganWarning": "This yarn contains {fibre} (animal fibre). The vegan label looks contradictory: check the composition.",
     "filterLabel": "Filter", "filterAll": "All yarns", "brandFilterAll": "All brands", "brandNone": "No brand",
-    "filterCritLabel": "Label", "filterCritWeight": "Weight", "filterCritGrams": "Skein weight", "filterCritColor": "Colour",
-    "filterWeightAll": "All weights", "filterGramsAll": "All skein weights", "filterColorAll": "All colours",
+    "filterCritLabel": "Label", "filterCritWeight": "Weight", "filterCritGrams": "Skein weight", "filterCritColor": "Colour", "filterCritUsage": "Status",
+    "filterWeightAll": "All weights", "filterGramsAll": "All skein weights", "filterColorAll": "All colours", "filterUsageAll": "All statuses",
     "filterCompositionAll": "All compositions", "colorCustomFamily": "Off palette",
     "filterReset": "Reset", "filterActiveCount": "Active filters: {n}",
-    "unit": { "m": "meters", "km": "km", "g": "grams", "kg": "kg", "yd": "yards", "oz": "ounces", "lb": "pounds" }
+    "unit": { "m": "m", "km": "km", "g": "g", "kg": "kg", "yd": "yards", "oz": "ounces", "lb": "pounds" }
   },
   "pattern": {
     "all": "All",
@@ -830,7 +831,9 @@
     "empty": "No photos yet.",
     "deleted": "Photo deleted.",
     "change": "Change photo",
-    "share": "Share photo"
+    "share": "Share photo",
+    "heicNotSupported": "This photo format (HEIC) is not supported on this device. Try a different photo, or change your camera's format setting.",
+    "importFailed": "This photo could not be imported. Try a different one."
   },
   "settings": {
     "profile": "Profile",
@@ -1213,8 +1216,6 @@
     "fromPage": "p. {n}",
     "addedImage": "Added image",
     "addImage": "Add an image",
-    "addImageCamera": "Camera or gallery",
-    "addImageFiles": "Browse files",
     "addImagePdf": "From the pattern's PDF",
     "pdfPickerTitle": "Choose a page",
     "pdfPickerUse": "Use this page",

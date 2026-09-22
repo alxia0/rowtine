@@ -69,8 +69,13 @@ describe('flèche maison des <select> (charte §2.4bis)', () => {
     // Retour terrain (01/08, jour suivant) : StashView.vue EN REGAGNE un — #yarn-purchased-at,
     // affiché UNIQUEMENT à la création, pour saisir la date de la 1re ligne d'achat écrite
     // automatiquement sans repasser par la fiche. Total : 6.
+    //
+    // Bascule fiche/navigation (refonte stock laine, cf. plan) : le formulaire d'ajout/
+    // édition quitte StashView.vue pour l'écran dédié YarnEditView.vue — #yarn-purchased-at
+    // déménage avec lui. StashView.vue n'a donc plus AUCUN <input type="date">, YarnEditView.vue
+    // en porte désormais un. Total inchangé : 6.
     const vues = [
-      'src/views/StashView.vue',
+      'src/views/YarnEditView.vue',
       'src/views/ProjectDetailView.vue',
       'src/views/ProjectEditView.vue',
       'src/components/YarnPurchases.vue',

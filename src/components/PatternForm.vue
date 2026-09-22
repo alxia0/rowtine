@@ -5,7 +5,7 @@ import FieldHelp from '@/components/FieldHelp.vue'
 import { emptyPattern } from '@/stores/patterns'
 import { PATTERN_CATEGORIES } from '@/constants/catalog'
 import { TECHNIQUES as TECHS } from '@/constants/status'
-import { pickAndCropImage, pickImage, resizeDataUrl } from '@/utils/photo'
+import { pickAndCropImage, pickImage } from '@/utils/photo'
 import { useCropperStore } from '@/stores/cropper'
 import { useSettingsStore } from '@/stores/settings'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -63,51 +63,29 @@ function removePhoto(idx) {
 // ci-dessus (push/splice, validé au submit) — pas de transformation en diagramme ici, ce
 // formulaire ne connaît pas `reader` (cf. CorrectionView.vue pour cette capacité).
 //
-// TROIS sources (retour terrain 25/08/2026, sources d'image élargies) :
-// - `addGalleryImage` (caméra/galerie) : `pickImage`, PAS `pickAndCropImage` — une image de
-//   galerie est souvent un schéma technique, un recadrage imposé risquerait de couper une
-//   maille ou une légende.
-// - `openFilePicker`/`onFilePicked` (fichiers) : `<input type="file">` ouvre le sélecteur
-//   SYSTÈME (Fichiers/Drive/Téléchargements…), pas seulement Appareil photo/Galerie comme le
-//   plugin Capacitor Camera — même mécanisme que l'import PDF/zip (LocalPdfImportView.vue).
-//   Redimensionné via `resizeDataUrl` (même plafond que pickImage : 1280px/0.8) puisque ce
-//   chemin ne passe PAS par le plugin natif qui réduit déjà côté Android.
+// DEUX sources (harmonisation du 22/09/2026 : le menu maison à 3 options, dont un
+// "Parcourir les fichiers" redondant avec le sélecteur système déjà proposé par la feuille
+// standard, a été retiré au profit de PhotoSourceSheet partout dans l'app) :
+// - `addGalleryImage` (caméra/galerie/PDF via la feuille standard) : `pickImage`, PAS
+//   `pickAndCropImage` pour la galerie/caméra (une image de galerie est souvent un schéma
+//   technique, un recadrage imposé risquerait de couper une maille ou une légende). Le 4e
+//   bouton de la feuille (PDF, visible seulement si `form.pdf`) résout à 'extra' : dans ce
+//   cas SEUL le PDF est recadré (`onPdfPagePicked` ci-dessous), pas la galerie/caméra.
 // - `openPdfPicker`/`onPdfPagePicked` (PDF du patron) : SEULE source qui recadre — une page
 //   de PDF rendue couvre presque toujours plus que le seul diagramme visé.
 function pushGalleryImage(dataUrl) {
   form.gallery.push({ src: dataUrl, page: 0, w: 0, h: 0 })
 }
 async function addGalleryImage() {
-  const dataUrl = await pickImage()
-  if (dataUrl) pushGalleryImage(dataUrl)
+  const result = await pickImage(form.pdf ? t('patternExtras.addImagePdf') : null)
+  if (result === 'extra') {
+    openPdfPicker()
+    return
+  }
+  if (result) pushGalleryImage(result)
 }
 function removeGalleryImage(idx) {
   form.gallery.splice(idx, 1)
-}
-const fileInputRef = ref(null)
-function openFilePicker() {
-  fileInputRef.value?.click()
-}
-async function onFilePicked(event) {
-  const file = event.target.files?.[0]
-  event.target.value = '' // permet de rechoisir le MÊME fichier plus tard (change ne se déclenche pas sinon)
-  if (!file) return
-  if (!file.type.startsWith('image/')) {
-    snackbar.show(t('patternExtras.pickError'))
-    return
-  }
-  try {
-    const reader = new FileReader()
-    const raw = await new Promise((resolve, reject) => {
-      reader.onload = () => resolve(reader.result)
-      reader.onerror = () => reject(reader.error)
-      reader.readAsDataURL(file)
-    })
-    const resized = await resizeDataUrl(raw, 1280, 0.8)
-    pushGalleryImage(resized)
-  } catch {
-    snackbar.show(t('patternExtras.pickError'))
-  }
 }
 const pdfPickerOpen = ref(false)
 function openPdfPicker() {
@@ -247,15 +225,8 @@ function submit() {
         <img :src="g.src" class="galleryrow__img" alt="" />
         <button type="button" class="galleryrow__del" :aria-label="t('common.delete')" @click="removeGalleryImage(idx)"><AppIcon name="close" :size="15" /></button>
       </div>
-      <button type="button" class="galleryrow__add" :aria-label="t('patternExtras.addImageCamera')" @click="addGalleryImage"><AppIcon name="camera" :size="20" /></button>
-      <button type="button" class="galleryrow__add" :aria-label="t('patternExtras.addImageFiles')" @click="openFilePicker"><AppIcon name="import" :size="20" /></button>
-      <button v-if="form.pdf" type="button" class="galleryrow__add" :aria-label="t('patternExtras.addImagePdf')" @click="openPdfPicker"><AppIcon name="book" :size="20" /></button>
+      <button type="button" class="galleryrow__add" :aria-label="t('patternExtras.addImage')" @click="addGalleryImage"><AppIcon name="plus" :size="20" /></button>
     </div>
-    <!-- Caché visuellement (clip 1px, cf. .galleryrow__fileinput) mais TOUJOURS dans l'arbre
-         d'accessibilité : sans nom accessible, axe le remonte « critical » (règle `label`,
-         constatée au parcours e2e complet du 30/08). Le bouton « Parcourir les fichiers »
-         porte le même libellé : l'input EST ce geste, déclenché par lui. -->
-    <input ref="fileInputRef" type="file" accept="image/*" class="galleryrow__fileinput" :aria-label="t('patternExtras.addImageFiles')" @change="onFilePicked" />
     <PdfPagePickerDialog v-if="form.pdf" v-model:open="pdfPickerOpen" :pdf="form.pdf" @pick="onPdfPagePicked" />
 
     <div class="addform__actions">
@@ -293,14 +264,6 @@ function submit() {
 .galleryrow__del { position: absolute; top: -6px; right: -6px; width: 26px; height: 26px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; }
 .galleryrow__del::after { content: ''; position: absolute; inset: -9px; }
 .galleryrow__add { width: 56px; height: 56px; border: 1px dashed var(--line); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; background: var(--bg); color: var(--ink-55); }
-.galleryrow__fileinput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
 .addform__actions { display: flex; gap: var(--sp-3); margin-top: var(--sp-3); }
 .addform__actions .btn { flex: 1; }
 </style>

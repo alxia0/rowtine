@@ -1,4 +1,4 @@
-// Unitaire — YarnCard : menu kebab (Modifier/Dupliquer/Supprimer) + ouverture détail.
+// Unitaire — YarnCard : ouverture de la fiche (tap sur la ligne) + affichage badges/labels.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
@@ -16,45 +16,11 @@ function mountCard() {
   return mount(YarnCard, { props: { yarn: YARN, usage: USAGE }, global: { plugins: [i18n, createPinia()], stubs: { ThumbImage: true } } })
 }
 
-async function openMenu(w) {
-  await w.find('.ycard__kebab').trigger('click')
-}
-
 describe('YarnCard', () => {
   it('le clic sur le corps émet "view" avec la laine complète', async () => {
     const w = mountCard()
     await w.find('.ycard__view').trigger('click')
     expect(w.emitted('view')[0]).toEqual([YARN])
-  })
-
-  it('le kebab ouvre un menu avec Modifier / Dupliquer / Supprimer', async () => {
-    const w = mountCard()
-    expect(w.find('.menu').exists()).toBe(false)
-    await openMenu(w)
-    const items = w.findAll('.menu__item').map((b) => b.text())
-    expect(items).toEqual([fr.common.edit, fr.common.duplicate, fr.common.delete])
-  })
-
-  it('"Modifier" émet "edit" avec la laine complète et referme le menu', async () => {
-    const w = mountCard()
-    await openMenu(w)
-    await w.findAll('.menu__item')[0].trigger('click')
-    expect(w.emitted('edit')[0]).toEqual([YARN])
-    expect(w.find('.menu').exists()).toBe(false)
-  })
-
-  it('"Dupliquer" émet "duplicate" avec la laine complète', async () => {
-    const w = mountCard()
-    await openMenu(w)
-    await w.findAll('.menu__item')[1].trigger('click')
-    expect(w.emitted('duplicate')[0]).toEqual([YARN])
-  })
-
-  it('"Supprimer" émet "delete" avec la laine complète', async () => {
-    const w = mountCard()
-    await openMenu(w)
-    await w.findAll('.menu__item')[2].trigger('click')
-    expect(w.emitted('delete')[0]).toEqual([YARN])
   })
 
   it('badge de type de coloris affiché pour une pelote non-Uni (ex. Moucheté)', () => {
@@ -97,11 +63,11 @@ describe('YarnCard', () => {
     expect(w.findAll('.ycard__labels .app-icon')).toHaveLength(1)
   })
 
-  it('rend la ligne d’icônes MÊME VIDE, pour ne pas faire varier la hauteur', () => {
+  it('n’affiche aucune ligne d’icônes sans engagement (plus de grille à préserver)', () => {
     const w = mount(YarnCard, {
       props: { yarn: { ...YARN, labels: [] }, usage: USAGE },
       global: { plugins: [i18n, createPinia()], stubs: { ThumbImage: true } },
     })
-    expect(w.find('.ycard__labels').exists()).toBe(true)
+    expect(w.find('.ycard__labels').exists()).toBe(false)
   })
 })

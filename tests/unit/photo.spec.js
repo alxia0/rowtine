@@ -35,6 +35,20 @@ const resizeDataUrlMock = vi.hoisted(() =>
 )
 vi.mock('@/utils/image-resize', () => ({ resizeDataUrl: (...args) => resizeDataUrlMock(...args) }))
 
+const isNativeMock = vi.hoisted(() => vi.fn(() => false))
+vi.mock('@capacitor/core', () => ({
+  Capacitor: { isNativePlatform: (...args) => isNativeMock(...args) },
+}))
+const pickAndDecodeGalleryImageMock = vi.hoisted(() => vi.fn())
+vi.mock('@/native/image-decode', () => ({
+  pickAndDecodeGalleryImage: (...args) => pickAndDecodeGalleryImageMock(...args),
+}))
+const snackbarShowMock = vi.hoisted(() => vi.fn())
+vi.mock('@/stores/snackbar', () => ({
+  useSnackbarStore: () => ({ show: (...args) => snackbarShowMock(...args) }),
+}))
+vi.mock('@/i18n', () => ({ default: { global: { t: (key) => key } } }))
+
 import { fileToDataUrl, pickImage } from '@/utils/photo'
 
 // Stub de l'input fichier, au motif du stub canvas d'image-resize.spec.js : createElement
@@ -73,6 +87,9 @@ beforeEach(() => {
   getPhotoMock.mockClear().mockResolvedValue({ dataUrl: 'data:image/jpeg;base64,AAAA' })
   resizeDataUrlMock.mockClear().mockResolvedValue('data:image/jpeg;base64,RESIZED')
   askSourceMock.mockReset()
+  isNativeMock.mockReset().mockReturnValue(false)
+  pickAndDecodeGalleryImageMock.mockReset()
+  snackbarShowMock.mockClear()
   vi.stubGlobal('FileReader', FakeFileReader)
 })
 
@@ -188,6 +205,129 @@ describe('pickImage — chemin « galerie » (input fichier, octets d’origine)
     listeners.change()
     await expect(promise).resolves.toBeNull()
     expect(resizeDataUrlMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('pickImage — chemin « galerie » : fichier HEIC/HEIF non supporté', () => {
+  it('type MIME image/heic → message affiché, ni lecture ni resizeDataUrl, résout null', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    const { listeners } = stubFileInput([{ name: 'photo.heic', type: 'image/heic' }])
+
+    const promise = pickImage()
+    await flushPromises()
+
+    listeners.change()
+    const result = await promise
+
+    expect(result).toBeNull()
+    expect(resizeDataUrlMock).not.toHaveBeenCalled()
+    expect(snackbarShowMock).toHaveBeenCalledWith('photo.heicNotSupported')
+  })
+
+  it('type MIME image/heif → message affiché', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    const { listeners } = stubFileInput([{ name: 'photo.heif', type: 'image/heif' }])
+
+    const promise = pickImage()
+    await flushPromises()
+
+    listeners.change()
+    await expect(promise).resolves.toBeNull()
+    expect(snackbarShowMock).toHaveBeenCalledWith('photo.heicNotSupported')
+  })
+
+  it('type MIME vide mais extension .heic (sélecteur qui ne renseigne pas le type) → message affiché', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    const { listeners } = stubFileInput([{ name: 'IMG_1234.HEIC', type: '' }])
+
+    const promise = pickImage()
+    await flushPromises()
+
+    listeners.change()
+    await expect(promise).resolves.toBeNull()
+    expect(snackbarShowMock).toHaveBeenCalledWith('photo.heicNotSupported')
+  })
+
+  it('photo JPEG normale → aucun message, chemin inchangé', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    const { listeners } = stubFileInput([{ name: 'photo.jpg', type: 'image/jpeg' }])
+
+    const promise = pickImage()
+    await flushPromises()
+
+    listeners.change()
+    await expect(promise).resolves.toBe('data:image/jpeg;base64,RESIZED')
+    expect(snackbarShowMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('pickImage — chemin « galerie » sur plateforme native (décodage OS)', () => {
+  it('plateforme native : décodage direct, sans input fichier ni resizeDataUrl', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    isNativeMock.mockReturnValue(true)
+    pickAndDecodeGalleryImageMock.mockResolvedValue('data:image/jpeg;base64,NATIF')
+
+    await expect(pickImage()).resolves.toBe('data:image/jpeg;base64,NATIF')
+
+    expect(pickAndDecodeGalleryImageMock).toHaveBeenCalledTimes(1)
+    expect(resizeDataUrlMock).not.toHaveBeenCalled()
+    expect(snackbarShowMock).not.toHaveBeenCalled()
+  })
+
+  it('sélecteur natif annulé → null, aucun message', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    isNativeMock.mockReturnValue(true)
+    pickAndDecodeGalleryImageMock.mockResolvedValue(null)
+
+    await expect(pickImage()).resolves.toBeNull()
+    expect(snackbarShowMock).not.toHaveBeenCalled()
+  })
+
+  it('échec de décodage natif → null ET message affiché (au lieu d’un cadre vide silencieux)', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    isNativeMock.mockReturnValue(true)
+    pickAndDecodeGalleryImageMock.mockRejectedValue(new Error('décodage impossible'))
+
+    await expect(pickImage()).resolves.toBeNull()
+    expect(snackbarShowMock).toHaveBeenCalledWith('photo.importFailed')
+  })
+
+  it('rejet UNSUPPORTED_API (Android 7/8) → repli sur le chemin web, sans message', async () => {
+    askSourceMock.mockResolvedValue('gallery')
+    isNativeMock.mockReturnValue(true)
+    // Le plugin rejette AVANT d'ouvrir le moindre sélecteur : sur ces appareils
+    // ImageDecoder n'existe pas, l'input fichier reprend la main (JPEG/PNG).
+    const err = new Error('décodage indisponible sous Android 9 (API 25)')
+    err.code = 'UNSUPPORTED_API'
+    pickAndDecodeGalleryImageMock.mockRejectedValue(err)
+    const { fake, listeners } = stubFileInput([{ name: 'croquis.png', type: 'image/png' }])
+
+    const promise = pickImage()
+    await flushPromises()
+
+    expect(fake.click).toHaveBeenCalledTimes(1)
+    listeners.change()
+    await expect(promise).resolves.toBe('data:image/jpeg;base64,RESIZED')
+    expect(snackbarShowMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('pickImage, 4e choix optionnel (extra)', () => {
+  it('relaie extraLabel à askSource() et renvoie "extra" sans toucher au plugin ni au redimensionneur', async () => {
+    askSourceMock.mockResolvedValue('extra')
+
+    const result = await pickImage('Depuis le PDF du patron')
+
+    expect(askSourceMock).toHaveBeenCalledWith('Depuis le PDF du patron')
+    expect(result).toBe('extra')
+    expect(getPhotoMock).not.toHaveBeenCalled()
+    expect(resizeDataUrlMock).not.toHaveBeenCalled()
+  })
+
+  it('sans argument, askSource() est appelé avec null par défaut (comportement existant)', async () => {
+    askSourceMock.mockResolvedValue(null)
+    await pickImage()
+    expect(askSourceMock).toHaveBeenCalledWith(null)
   })
 })
 

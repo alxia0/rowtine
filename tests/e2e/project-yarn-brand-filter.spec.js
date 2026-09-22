@@ -8,11 +8,15 @@ test.beforeEach(async ({ page }) => {
 async function ajouterLaine(page, marque) {
   await page.goto('/stash')
   await page.getByRole('button', { name: 'Ajouter une laine' }).click()
+  await page.waitForURL('**/stash/new')
   await page.locator('.addform select').first().selectOption('__other__')
   await page.locator('input[placeholder="Saisis la marque"]').fill(marque)
   await page.locator('.palette__sw[aria-label="moutarde"]').click()
   await page.getByRole('button', { name: 'Enregistrer' }).click()
-  await page.waitForTimeout(300)
+  // « Enregistrer » navigue vers la fiche fraîchement créée (route stash-item) — le prochain
+  // appelant (creerProjetEtOuvrirEdition) navigue lui-même ailleurs ensuite, pas besoin de
+  // revenir sur /stash ici.
+  await page.waitForURL(/\/stash\/\d+$/)
 }
 
 async function creerProjetEtOuvrirEdition(page, nom) {

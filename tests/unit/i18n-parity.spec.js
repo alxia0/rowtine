@@ -63,7 +63,9 @@ const IDENTICAL_VALUE_ALLOWED = {
     'yarn.weightGuide.bulky.m100',
     'yarn.weightGuide.superbulky.m50',
     'yarn.weightGuide.superbulky.m100',
+    'yarn.unit.m', // symbole SI, universel
     'yarn.unit.km', // symbole SI, universel
+    'yarn.unit.g', // symbole SI, universel
     'yarn.unit.kg', // symbole SI, universel
     'calc.everyTimes', // "{every} × {count}" — pur gabarit (deux marqueurs + ×), rien de linguistique : {every} porte déjà la traduction (calc.everyN/everyOne)
     'project.stats.progressValue', // "{pct} %" — pur gabarit (chiffre + symbole %), rien de linguistique ; en.json seul s'en écarte (pas d'espace avant %, convention anglophone)

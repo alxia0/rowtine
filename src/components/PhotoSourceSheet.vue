@@ -9,7 +9,11 @@
 // l'input fichier (galerie, cf. utils/photo.js) ou le plugin natif (appareil photo).
 // Montée UNE FOIS dans App.vue, pilotée par le store photo-source (promesse), au motif
 // exact de PhotoCropper.vue. AUCUNE clé i18n nouvelle : photo.add/cameraChoose/cameraTake
-// et common.cancel existent déjà dans les 4 locales.
+// et common.cancel existent déjà dans les 4 locales. Un 4e bouton optionnel (source.extra)
+// peut s'ajouter entre « Prendre une photo » et « Annuler » : son libellé est fourni par
+// l'appelant via askSource(extraLabel) (décision du 22/09/2026, unification des menus
+// d'ajout de photo du patron avec cette feuille), pas de nouvelle clé i18n ici non plus,
+// l'appelant passe une clé déjà existante de son propre domaine (ex. patternExtras.addImagePdf).
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePhotoSourceStore } from '@/stores/photo-source'
@@ -77,6 +81,14 @@ watch(
         </button>
         <button class="btn" data-test="photo-source-camera" @click="source.settle('camera')">
           {{ t('photo.cameraTake') }}
+        </button>
+        <button
+          v-if="source.extra"
+          class="btn"
+          data-test="photo-source-extra"
+          @click="source.settle('extra')"
+        >
+          {{ source.extra }}
         </button>
         <button class="btn" data-test="photo-source-cancel" @click="source.settle(null)">
           {{ t('common.cancel') }}

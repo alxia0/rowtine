@@ -90,6 +90,10 @@ function onImgLoad() {
   computeLayout()
 }
 
+function onImgError() {
+  cropper.settle(null)
+}
+
 // --- Interactions (pointer = tactile + souris) ---
 let drag = null // { mode, startX, startY, orig }
 
@@ -202,7 +206,7 @@ function confirm() {
 <template>
   <div v-if="cropper.open" class="cr" role="dialog" aria-modal="true" @keydown="trapTabFocus">
     <div ref="stage" class="cr__stage">
-      <img ref="imgEl" :src="cropper.src" class="cr__img" alt="" @load="onImgLoad" />
+      <img ref="imgEl" :src="cropper.src" class="cr__img" alt="" @load="onImgLoad" @error="onImgError" />
       <!-- masque assombri autour du cadre (4 bandes) -->
       <div class="cr__shade" :style="{ left: 0, top: 0, right: 0, height: rect.y + 'px' }"></div>
       <div class="cr__shade" :style="{ left: 0, top: rect.y + 'px', width: rect.x + 'px', height: rect.h + 'px' }"></div>

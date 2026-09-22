@@ -202,7 +202,7 @@ describe('ProjectDetailView', () => {
     expect(panel.exists()).toBe(true)
     expect(panel.text()).toContain('2 sessions')
     expect(panel.text()).toContain('3 pelotes')
-    expect(panel.text()).toContain('300 mètres')
+    expect(panel.text()).toContain('300 m')
     // Projet EN COURS : phrase dédiée, pas « 05/01/2026 au en cours » ; dates localisées,
     // jamais l'ISO brut (mêmes règles que la ligne « période » du badge).
     expect(panel.text()).toContain('Depuis le 05/01/2026')

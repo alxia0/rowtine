@@ -1,6 +1,7 @@
 // tests/unit/yarn-tag-contrast.spec.js
 // Intent contrastes-restants-sage-et-reserve : .tag--reserved (YarnCard.vue,
-// YarnDetailDialog.vue) posait var(--mustard) sur var(--tile) — 1,83:1, sous AA.
+// YarnDetailView.vue — anciennement YarnDetailDialog.vue, retiré cf. plan « refonte stock
+// laine ») posait var(--mustard) sur var(--tile) — 1,83:1, sous AA.
 // --mustard-deep existe déjà (tokens.css, utilisé par STATUS_META.pause) : même
 // remplacement mécanique que le badge de statut « en pause ».
 import { describe, it, expect } from 'vitest'
@@ -23,8 +24,8 @@ const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16))
 const repoRoot = resolve(process.cwd())
 
 describe('tag « Réservé » des cartes laine', () => {
-  it('YarnCard.vue et YarnDetailDialog.vue utilisent --mustard-deep (et plus --mustard, 1,83:1 sur --tile)', () => {
-    for (const file of ['src/components/YarnCard.vue', 'src/components/YarnDetailDialog.vue']) {
+  it('YarnCard.vue et YarnDetailView.vue utilisent --mustard-deep (et plus --mustard, 1,83:1 sur --tile)', () => {
+    for (const file of ['src/components/YarnCard.vue', 'src/views/YarnDetailView.vue']) {
       const src = readFileSync(resolve(repoRoot, file), 'utf8')
       expect(src, file).toMatch(/\.tag--reserved\s*\{\s*color:\s*var\(--mustard-deep\)/)
     }

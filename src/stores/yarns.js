@@ -34,7 +34,10 @@ export function emptyYarn() {
     labels: [],
     reservations: {}, // pool : { [projectId]: nb de pelotes prises par ce projet } (source de vérité)
     consumed: {}, // trace : { [projectId]: nb de pelotes réellement tricotées, déjà déduites de quantity }
-    photo: '',
+    photos: [], // galerie (tableau de data URLs) — cf. src/utils/yarn-photos.js pour la
+    // lecture tolérante de l'ancien champ `photo` (chaîne unique) des fiches antérieures
+    // à cette refonte, jamais réécrites tant qu'elles ne sont pas modifiées.
+    coverIndex: 0,
   }
 }
 
