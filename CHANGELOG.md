@@ -2,6 +2,11 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.3.1]
+
+- HEIC/HEIF photo support (requires Android 9 / API 28 or higher).
+- Yarn stash menu: UX improvements.
+
 ## [1.3.0]
 
 - Stats tab on every project: total time, sessions, skeins used, timespan,
