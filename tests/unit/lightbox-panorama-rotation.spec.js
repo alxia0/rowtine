@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — la visionneuse présente un PANORAMA pivoté dans un viewport portrait (12/08/2026).
 //
 // Fichier séparé de photo-lightbox-zoom.spec.js (lot du 09/08) pour ne pas mêler les

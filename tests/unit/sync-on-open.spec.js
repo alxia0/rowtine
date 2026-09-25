@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — synchro MD ciblée à l'ouverture d'un patron/projet (Lot N3). Toutes les
 // dépendances impures sont mockées (Capacitor, backup-service, patron-md-sync,
 // sync-report-decision, stores Pinia) : ce test vérifie UNIQUEMENT le câblage des

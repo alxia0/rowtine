@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@/utils/pdf', () => ({
@@ -65,11 +66,43 @@ describe('parsePdfLocally', () => {
     // extract vient avant images
     expect(phases.indexOf('extract')).toBeLessThan(phases.indexOf('images'))
   })
-  it('PDF scanné (texte quasi nul) → scanned:true, pas de pattern', async () => {
+  it('PDF scanné (texte quasi nul) → rejected scanned, scanned:true, pas de pattern', async () => {
     extractPages.mockResolvedValue([[L('x')], []])
     const out = await parsePdfLocally(FILE)
+    expect(out.rejected).toEqual({ reason: 'scanned', detail: null })
     expect(out.scanned).toBe(true)
     expect(out.pattern).toBeNull()
+  })
+  it('pas un patron (notice de couture) → refus AVANT l’assemblage : ni images, ni lecture du PDF', async () => {
+    extractPages.mockResolvedValue([[
+      L('Robe Capucine', { size: 22 }),
+      L('Valeurs de couture de 1 cm comprises.'),
+      L('Placer les pièces sur le droit-fil du tissu.'),
+      L('Coudre endroit contre endroit, puis surfiler les bords.'),
+      L('Entoilage thermocollant : 50 cm.'),
+    ]])
+    const out = await parsePdfLocally(FILE)
+    expect(out.rejected).toEqual({ reason: 'notPattern', detail: 'otherCraft' })
+    expect(out.notPattern).toBe(true)
+    expect(out.notPatternReason).toBe('otherCraft')
+    expect(out.scanned).toBe(false)
+    expect(out.pattern).toBeNull()
+    expect(out.blocking).toBeNull()
+    expect(extractImagesWithPos).not.toHaveBeenCalled()
+    expect(readFileAsDataUrl).not.toHaveBeenCalled()
+  })
+  it('parcours nominal : rejected null, notPattern false, multiPattern jamais dans blocking en variante A', async () => {
+    extractPages.mockResolvedValue(NOMINAL)
+    const out = await parsePdfLocally(FILE)
+    expect(out.rejected).toBeNull()
+    expect(out.notPattern).toBe(false)
+    expect(out.notPatternReason).toBeNull()
+    expect(out.blocking.reasons).not.toContain('multiPattern')
+  })
+  it('repli extraction impossible : rejected null (ce n’est pas un refus)', async () => {
+    extractPages.mockRejectedValue(new Error('worker indisponible'))
+    const out = await parsePdfLocally(FILE)
+    expect(out.rejected).toBeNull()
   })
   it('échec du rendu de couverture toléré (best-effort)', async () => {
     extractPages.mockResolvedValue(NOMINAL)

@@ -3,7 +3,7 @@
 // (bande surlignée sur le rang courant, rangs faits estompés) + compteur « Rang X / total ».
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { chartBands, chartRings, chartPathRows, nextChartPosition, readDirLabel, chartMotifLabel } from '@/utils/reader'
+import { chartBands, chartRings, hexagonPoints, chartPathRows, nextChartPosition, readDirLabel, chartMotifLabel } from '@/utils/reader'
 import AppIcon from '@/components/AppIcon.vue'
 
 const { t } = useI18n()
@@ -23,7 +23,7 @@ const canvasEl = ref(null)
 // Grille importée : le nombre de rangs est inconnu tant que la tricoteuse ne l'a pas indiqué
 // (rows:0 = sentinel « à renseigner »). Sans rows connu, pas de suivi rang-par-rang ni de bandes.
 const hasRows = computed(() => Number(props.chart.rows) > 0)
-const isRadial = computed(() => props.chart.shape === 'radial-square' || props.chart.shape === 'radial-circle')
+const isRadial = computed(() => props.chart.shape === 'radial-square' || props.chart.shape === 'radial-circle' || props.chart.shape === 'radial-hexagon')
 const isPath = computed(() => props.chart.shape === 'path')
 // Grille classique (ni radiale ni tracé) : les bandes de suivi haut/bas, seules pertinentes
 // pour cette forme, sont conditionnées à ce seul booléen plutôt qu'à `!isRadial && !isPath`
@@ -31,6 +31,12 @@ const isPath = computed(() => props.chart.shape === 'path')
 const isLinear = computed(() => !isRadial.value && !isPath.value)
 const pathRows = computed(() => chartPathRows(props.frame?.points, props.chart.rows, props.frame?.spacing))
 const rings = computed(() => chartRings(props.modelValue, props.chart.rows, props.frame, props.chart.shape))
+const hexOrientation = computed(() => (props.frame?.hexOrientation === 'pointy' ? 'pointy' : 'flat'))
+function hexRingPoints(r) {
+  return hexagonPoints(rings.value.cx, rings.value.cy, r, hexOrientation.value, canvasAspect.value)
+    .map((p) => `${p.x},${p.y}`)
+    .join(' ')
+}
 const bands = computed(() => chartBands(props.modelValue, props.chart.rows, props.frame))
 // Les deux cartes d'étape (nombre de rangs + calage) sont visibles ensemble uniquement
 // pour une grille fraîche (rangs inconnus ET non calée) → on numérote 1/2 dans ce seul cas.
@@ -167,6 +173,9 @@ watch(
             <ellipse v-if="rings.doneShape === 'circle'" class="chart__ring chart__ring--done" :cx="rings.cx" :cy="rings.cy" :rx="rings.doneR" :ry="rings.doneR * canvasAspect" :stroke-width="rings.doneStrokeWidth" />
             <ellipse v-if="rings.hlShape === 'circle'" class="chart__ring chart__ring--hl-edge" :cx="rings.cx" :cy="rings.cy" :rx="rings.hlR" :ry="rings.hlR * canvasAspect" :stroke-width="rings.hlStrokeWidth + 3" />
             <ellipse v-if="rings.hlShape === 'circle'" class="chart__ring chart__ring--hl" :cx="rings.cx" :cy="rings.cy" :rx="rings.hlR" :ry="rings.hlR * canvasAspect" :stroke-width="rings.hlStrokeWidth" />
+            <polygon v-if="rings.doneShape === 'hexagon'" class="chart__ring chart__ring--done" :points="hexRingPoints(rings.doneR)" :stroke-width="rings.doneStrokeWidth" />
+            <polygon v-if="rings.hlShape === 'hexagon'" class="chart__ring chart__ring--hl-edge" :points="hexRingPoints(rings.hlR)" :stroke-width="rings.hlStrokeWidth + 3" />
+            <polygon v-if="rings.hlShape === 'hexagon'" class="chart__ring chart__ring--hl" :points="hexRingPoints(rings.hlR)" :stroke-width="rings.hlStrokeWidth" />
           </svg>
           <svg v-else-if="isPath" class="chart__path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polyline

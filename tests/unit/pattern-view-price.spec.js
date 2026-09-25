@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // La fiche patron AFFICHE le prix et la date d'achat, là où ils se saisissent (lot 08/08).
 // Avant ce lot, ils ne se lisaient QUE sur la fiche projet et dans l'écran Dépenses.
 //
@@ -16,6 +17,9 @@ const nav = vi.hoisted(() => ({
 vi.mock('vue-router', () => ({ useRoute: () => nav.route, useRouter: () => nav.router }))
 
 import PatternView from '@/views/PatternView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const wrappers = []
 async function monter(over) {
@@ -76,12 +80,12 @@ describe('fiche patron — prix et date d’achat', () => {
     // plausible (les deux textes sont mutuellement exclusifs par construction, un seul
     // `return`). `toBe` mord en revanche sur une fuite de montant, une mauvaise clé i18n, ou
     // une date absente/mal placée.
-    expect(txt).toBe('Gratuit, obtenu le 07/08/2026')
+    expect(txt).toBe(tk('pattern.priceFreeOn', { date: '07/08/2026' }))
   })
 
   it('4. prix « 0 » sans date ⇒ « Gratuit » tout court', async () => {
     const w = await monter({ price: '0' })
-    expect(ligne(w).text()).toBe('Gratuit')
+    expect(ligne(w).text()).toBe(tk('pattern.priceFree'))
   })
 
   it('5. aucun prix noté ⇒ AUCUNE ligne (pas une ligne vide)', async () => {

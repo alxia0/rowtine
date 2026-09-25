@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — ÉVO E (11/08) : le premier jour de la semaine (Réglages) gouverne aussi la remise
 // à zéro du total « cette semaine » de l'Accueil (tuile `home.thisWeek`).
 //

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — retour « intelligent » : router.back() s’il y a un historique, sinon fallback.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 

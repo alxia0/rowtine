@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran Guide utilisateur (lot 2 « écran À propos et guide in-app »). Le contenu
 // vient du fichier GÉNÉRÉ (src/generated/guide-content.<langue>.json, cf.
 // scripts/gen-guide-content.mjs et parse-guide-markdown.js) — ce test vérifie que l'écran le
@@ -28,7 +29,13 @@ import guideEs from '@/generated/guide-content.es.json'
 // besoin d'une route qui existe, sans paramètre `section` — sinon `useRoute()` rend `undefined`
 // (aucun routeur n'est installé dans `mountGuide` ci-dessous) et `route.query.section` lève une
 // exception non interceptée à chaque montage (mesuré : 17 rejets non gérés, suite plantée).
-vi.mock('vue-router', () => ({ useRoute: () => ({ query: {} }) }))
+//
+// `useRouter` (lot « visite guidée », 23/09/2026) : GuideView.vue appelle désormais aussi
+// `useStartTour()` au montage (bouton « Revoir la visite guidée » de la section-0), qui
+// résout `useRouter()` — sans ce mock, le montage lève « useRouter is not a function ».
+// Ce fichier ne teste pas la navigation elle-même (cf. tests/unit/guide-replay-tour.spec.js) :
+// un simple espion suffit ici à ne pas planter le montage.
+vi.mock('vue-router', () => ({ useRoute: () => ({ query: {} }), useRouter: () => ({ push: vi.fn() }) }))
 
 import GuideView from '@/views/GuideView.vue'
 

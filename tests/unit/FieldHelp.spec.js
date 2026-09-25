@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // FieldHelp — bouton d'aide contextuelle d'un champ.
 //
 // Deux défauts corrigés ici :

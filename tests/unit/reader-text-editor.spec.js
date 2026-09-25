@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Task C1 (cluster « éditeur zone-de-texte ») — ReaderTextEditor.vue habille
 // createCmEditor (CM6, @/components/cm/cm-editor) en composant v-model:md.
 //
@@ -12,6 +13,7 @@ import { mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import AppIcon from '@/components/AppIcon.vue'
 import fr from '@/i18n/fr.json'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
 // Une instance par appel de createCmEditor, poussée dans `instances` pour que
 // chaque test récupère ses propres stubs (opts capturées + espions).
@@ -57,7 +59,9 @@ import { measureStickyTopHeight } from '@/utils/sticky-top'
 // ci-dessus, ce plugin sert seulement à ce que useI18n() ne plante pas au
 // montage ; le contenu réel des libellés traduits est couvert par
 // cm-editor-toolbar-i18n.spec.js et cm-editor-section-menu.spec.js.
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 // P2 : le libellé de bascule balisage (markupLabel) doit passer par t(), pas
 // être codé en dur en FR — instance EN dédiée pour le prouver (une instance FR
 // seule ne peut jamais détecter une fuite FR figée dans le composant).
@@ -238,7 +242,7 @@ describe('ReaderTextEditor', () => {
     const w = mountEditor()
     const toggles = w.findAll('.rte__toggle')
     expect(toggles.length).toBe(1)
-    expect(w.text()).toContain('Modifier le texte')
+    expect(w.text()).toContain(tk('correction.toolbar.editCode'))
   })
 
   // Retour terrain second tour : « Modifier le texte »

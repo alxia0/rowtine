@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Fiche projet — onglet Sections unifié : aperçu « reader » dérivé, cochage sans navigation,
 // guard v-if sur les cases. Les attentes sont des FAITS OBSERVABLES (`vi.waitFor` relit le
 // DOM jusqu'à ce que l'attente soit vraie), pas des délais : les tuiles n'existent qu'après
@@ -8,22 +9,21 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 async function mountDetail(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 2' }]) {
   await db.patterns.clear(); await db.projects.clear()
   const pid = await db.patterns.add({ name: 'Écharpe', sections })
   const prj = await db.projects.add({ name: 'Mon écharpe', patternId: pid, status: 'wip', readerState: {} })
-  const router = createRouter({ history: createMemoryHistory(), routes: [
+  const router = createTestRouter([
     { path: '/project/:id', name: 'project', component: ProjectDetailView },
     { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-  ] })
+  ])
   router.push(`/project/${prj}?tab=sections`); await router.isReady()
   const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, createPinia()] } })
   return { w, router }

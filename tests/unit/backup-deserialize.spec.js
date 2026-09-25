@@ -191,6 +191,25 @@ describe('round-trip serializeProject → deserializeProject', () => {
   })
 })
 
+describe('deserializeProject : note en étoiles bornée', () => {
+  // Protège : une note hors 0..5 ou non entière (projet.json retouché) ne gèle ni ne fait planter l'affichage.
+  it.each([
+    [1e9, 5],
+    [-1, 0],
+    [2.5, 3],
+    ['4', 4],
+    [null, 0],
+    ['abc', 0],
+    [3, 3],
+  ])('stars %j devient %j', (stars, attendu) => {
+    expect(deserializeProject({ name: 'P', stars }).project.stars).toBe(attendu)
+  })
+
+  it('sans clé stars, n’en ajoute pas', () => {
+    expect('stars' in deserializeProject({ name: 'P' }).project).toBe(false)
+  })
+})
+
 describe('round-trip serializePattern → deserializePattern', () => {
   it('patron biblio avec pdf et 2 photos : round-trip identique', () => {
     const pattern = { id: 9, name: 'Écharpe Twist', photos: [PHOTO_A, PHOTO_B], pdf: PDF }
@@ -471,6 +490,17 @@ describe('round-trip serializeSettings → deserializeSettings', () => {
       { key: 'theme', value: 'clay' },
       { key: 'lastBackupAt', value: '2026-07-02T10:00:00.000Z' },
     ])
+  })
+
+  // Protège les réglages locaux de l'appareil contre un reglages.json retouché à la main.
+  it('les clés exclues de la sauvegarde sont aussi écartées à la lecture', () => {
+    const restored = deserializeSettings({
+      theme: 'clay',
+      deviceId: 'autre-appareil',
+      activeSession: { projectId: 1 },
+      backupDecision: 'restored',
+    })
+    expect(restored).toEqual([{ key: 'theme', value: 'clay' }])
   })
 
   it('objet vide → tableau vide', () => {

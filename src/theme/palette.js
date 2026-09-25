@@ -139,21 +139,25 @@ export function warmAdapted(hue, effectiveTheme) {
   return h >= WARM_BAND.min && h <= WARM_BAND.max
 }
 
-// Rôle brand EFFECTIF pour cette teinte/thème : en bande chaude claire, L/C du sombre +
-// off du clair. Partagé par generatePalette ET hueGradientCss — le curseur de glissé
-// « s'ennoblit » pareil (ce qui rendait brun rend doré), sans cas spécial dans les
+// Rôle EFFECTIF (brand ou brandGradTop) pour cette teinte/thème : en bande chaude claire,
+// L/C du sombre + off du clair. Partagé par generatePalette ET hueGradientCss — le curseur
+// de glissé « s'ennoblit » pareil (ce qui rendait brun rend doré), sans cas spécial dans les
 // composants ni duplication de la logique ici.
-function brandRoleFor(hue, effectiveTheme) {
+function warmAdaptedRole(roleName, hue, effectiveTheme) {
   const roles = ROLES[effectiveTheme] ?? ROLES.light
-  if (!warmAdapted(hue, effectiveTheme)) return roles.brand
-  return { L: ROLES.dark.brand.L, C: ROLES.dark.brand.C, off: roles.brand.off }
+  const role = roles[roleName]
+  if (!warmAdapted(hue, effectiveTheme)) return role
+  const darkRole = ROLES.dark[roleName]
+  return { L: darkRole.L, C: darkRole.C, off: role.off }
+}
+
+function brandRoleFor(hue, effectiveTheme) {
+  return warmAdaptedRole('brand', hue, effectiveTheme)
 }
 
 // Même basculement pour l'arrêt haut du dégradé de marque (brandGradTop).
 function brandGradRoleFor(hue, effectiveTheme) {
-  const roles = ROLES[effectiveTheme] ?? ROLES.light
-  if (!warmAdapted(hue, effectiveTheme)) return roles.brandGradTop
-  return { L: ROLES.dark.brandGradTop.L, C: ROLES.dark.brandGradTop.C, off: roles.brandGradTop.off }
+  return warmAdaptedRole('brandGradTop', hue, effectiveTheme)
 }
 
 // role: une entrée de ROLES[theme] ({ L, C, off }). hue: la teinte globale (0-360),

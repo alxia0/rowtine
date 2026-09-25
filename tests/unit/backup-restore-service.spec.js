@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — service de restauration runtime : sélection du
 // stockage natif (mêmes règles que backup-service.js), permission, lecture de
 // l'arbo + écriture DB, rechargement des stores Pinia globaux. Toutes les
@@ -91,8 +92,10 @@ vi.mock('@/stores/activeSession', () => ({
 // "not implemented" en environnement de test), ce qui produirait `decided: false`
 // silencieusement plutôt que de tester ce que ce fichier veut réellement isoler.
 const recordBackupDecision = vi.fn()
+const clearBackupDecision = vi.fn()
 vi.mock('@/backup/backup-decision', () => ({
   recordBackupDecision: (...a) => recordBackupDecision(...a),
+  clearBackupDecision: (...a) => clearBackupDecision(...a),
 }))
 
 // Fiche d'identité du dossier (lot du 06/08/2026) : `runRestore` écrit la fiche
@@ -259,6 +262,25 @@ describe('runRestore', () => {
     // écrire la fiche dans un autre dossier que celui qu'on vient de lire ne
     // s'approprierait rien.
     expect(writeManifest).toHaveBeenCalledWith(storage)
+  })
+
+  // Protège le dossier d'une restauration incomplète : sans appropriation ni décision, la sauvegarde reste en pause.
+  it("restauration avec écarts : ni fiche, ni décision, ni dossier propre, ni message de retour, owned:false", async () => {
+    getBackupStorage.mockReturnValue({})
+    getBackupPermissionOk.mockResolvedValue(true)
+    hasBackup.mockResolvedValue(true)
+    const ecarts = [{ where: 'Projets/Marisol [3]', error: 'Unexpected end of JSON input' }]
+    readBackup.mockResolvedValue({ projects: [], errors: ecarts })
+    writeSnapshotToDb.mockResolvedValue()
+
+    const res = await runRestore({ notifyRestored: true })
+
+    expect(res).toEqual({ ok: true, decided: false, owned: false, errors: ecarts })
+    expect(writeManifest).not.toHaveBeenCalled()
+    expect(recordBackupDecision).not.toHaveBeenCalled()
+    expect(clearBackupDecision).toHaveBeenCalledTimes(1)
+    expect(isFolderCleanSinceRestore()).toBe(false)
+    await expect(getSetting('restoredDue')).resolves.toBe(false)
   })
 
   // Contrainte de PLACEMENT, pas cosmétique — même exigence que `readBackup` et
@@ -527,6 +549,59 @@ describe('runRestore', () => {
     // Le cas qui compte : sans le correctif, la fusion de `writeSnapshotToDb` PRÉSERVE les
     // clés absentes du snapshot restauré, et le `true` posé localement survivrait.
     await expect(getSetting('welcomeDue')).resolves.toBe(false)
+  })
+
+  // ─── `tourProjectId`/`tourPatternId` ne survivent pas à une restauration (revue finale,
+  // lot du 23/09/2026, constat important n°1) ────────────────────────────────────────
+  //
+  // Ces deux clés sont exclues de la sauvegarde (EXCLUDED_SETTINGS_KEYS, serialize.js) :
+  // `writeSnapshotToDb` (restore.js, la VRAIE ici via `vi.importActual`, même technique que
+  // le test `welcomeDue` juste au-dessus) les garde donc TELLES QUELLES pendant la fusion,
+  // quel que soit le contenu du snapshot restauré — le cas qui compte est un id local qui
+  // DEVIENT FAUX une fois `projects`/`patterns` (tables REMPLACÉES, pas fusionnées) par le
+  // snapshot : un vrai projet ou patron importé peut désormais porter le même id, et la
+  // visite guidée s'ouvrirait dessus. `runRestore` doit donc les effacer explicitement,
+  // comme `welcomeDue` — sans quoi `ensureTourProject` (tour-sample.js) les prendrait pour
+  // de bons candidats sans jamais les revérifier après une restauration.
+  it("après une restauration, tourProjectId et tourPatternId ne survivent pas — même si la sauvegarde n'en porte pas la clé", async () => {
+    const { writeSnapshotToDb: writeSnapshotToDbReel } = await vi.importActual('@/backup/restore')
+
+    getBackupStorage.mockReturnValue({})
+    getBackupPermissionOk.mockResolvedValue(true)
+    hasBackup.mockResolvedValue(true)
+    readBackup.mockResolvedValue({ projects: [], settings: [] })
+    writeSnapshotToDb.mockImplementation(writeSnapshotToDbReel)
+
+    // Posés LOCALEMENT par une visite guidée jouée sur cet appareil avant la restauration.
+    await setSetting('tourProjectId', 2)
+    await setSetting('tourPatternId', 5)
+
+    const res = await runRestore()
+
+    expect(res).toEqual({ ok: true, decided: true })
+    await expect(getSetting('tourProjectId')).resolves.toBeNull()
+    await expect(getSetting('tourPatternId')).resolves.toBeNull()
+  })
+
+  // Protège : les ids du semis LOCAL ne désignent plus des exemples une fois les tables remplacées.
+  it("seededSampleIds local ne survit pas à une sauvegarde qui n'en porte pas, mais celui du snapshot est gardé", async () => {
+    const { writeSnapshotToDb: writeSnapshotToDbReel } = await vi.importActual('@/backup/restore')
+    getBackupStorage.mockReturnValue({})
+    getBackupPermissionOk.mockResolvedValue(true)
+    hasBackup.mockResolvedValue(true)
+    writeSnapshotToDb.mockImplementation(writeSnapshotToDbReel)
+
+    await recordSeededSamples({ patterns: [1, 3], projects: [1, 2] })
+    readBackup.mockResolvedValue({ projects: [], settings: [] })
+    expect(await runRestore()).toEqual({ ok: true, decided: true })
+    await expect(getSetting('seededSampleIds')).resolves.toBeNull()
+
+    await Promise.all(db.tables.map((t) => t.clear()))
+    await recordSeededSamples({ patterns: [1, 3], projects: [1, 2] })
+    const restored = { patterns: [7], projects: [8] }
+    readBackup.mockResolvedValue({ projects: [], settings: [{ key: 'seededSampleIds', value: restored }] })
+    expect(await runRestore()).toEqual({ ok: true, decided: true })
+    await expect(getSetting('seededSampleIds')).resolves.toEqual(restored)
   })
 
   // ─── `importCaveatDue` SURVIT à une restauration — invariant INVERSE de celui de
@@ -857,6 +932,34 @@ describe('isDbRestorable : une base qui ne contient que les exemples semés est 
     expect(await isDbRestorable()).toBe(true)
   })
 
+  // Protège la restauration d'une base qui ne porte que le projet recréé par la visite guidée.
+  it('projet recréé par la visite guidée sur un patron semé, sans travail → restaurable', async () => {
+    const { buildWipProject } = await vi.importActual('@/stores/projects')
+    const p = await db.patterns.add({ name: 'Bonnet Torsade', sizes: ['S', 'M'] })
+    await recordSeededSamples({ patterns: [p], projects: [] })
+    const j = await db.projects.add(
+      buildWipProject({ demo: { name: 'Bonnet Torsade', patternId: p, sizes: ['S', 'M'], activeSize: 'M' } }),
+    )
+    await setSetting('tourProjectId', j)
+    expect(await isDbRestorable()).toBe(true)
+    await db.projects.update(j, { readerState: { size: 1, done: { 0: true } } })
+    expect(await isDbRestorable()).toBe(false)
+  })
+
+  // Protège un patron de l'utilisatrice relié au projet de la visite : jamais pris pour un exemple.
+  it('patron réel relié au projet de la visite (tourPatternId) → pas restaurable', async () => {
+    const { buildWipProject } = await vi.importActual('@/stores/projects')
+    const seme = await db.patterns.add({ name: 'Bonnet Torsade' })
+    await recordSeededSamples({ patterns: [seme], projects: [] })
+    const reel = await db.patterns.add({ name: 'Anders Cardigan', sizes: ['S', 'M'] })
+    const j = await db.projects.add(
+      buildWipProject({ demo: { name: 'Bonnet Torsade', patternId: reel, sizes: ['S', 'M'], activeSize: 'M' } }),
+    )
+    await setSetting('tourProjectId', j)
+    await setSetting('tourPatternId', reel)
+    expect(await isDbRestorable()).toBe(false)
+  })
+
   it('semis + UN patron réel → pas restaurable', async () => {
     const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
     await recordSeededSamples({ patterns: [p1], projects: [] })
@@ -966,6 +1069,12 @@ describe('isDbRestorable : une base qui ne contient que les exemples semés est 
     const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
     await recordSeededSamples({ patterns: [p1], projects: [] })
     await db.trash.add({ type: 'yarn', deletedAt: '2026-08-04' })
+    expect(await isDbRestorable()).toBe(false)
+  })
+
+  // Protège : une corbeille non vide bloque aussi la restauration quand les tables sont vides.
+  it('tables vides + UN élément dans la corbeille → pas restaurable', async () => {
+    await db.trash.add({ type: 'project', deletedAt: '2026-09-24' })
     expect(await isDbRestorable()).toBe(false)
   })
 

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 // resolveImageObj n'importe que setTimeout + page.objs.get (pas de canvas) → testable seul.

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Suppression d'un projet dont le chrono tourne — plus de séance orpheline (revue de code
 // du 31/08, entrée §2 du chrono unifié). Le défaut : la cascade de
 // projectsStore.remove purge les sessions du projet, puis le router.replace vers l'accueil

@@ -154,6 +154,11 @@ describe('consumeProjectReservation', () => {
   it('tout tricoté (défaut si on ferme la question)', () => {
     expect(consumeProjectReservation(base(), 1, 3)).toEqual({ quantity: 2, reservations: {}, consumed: { 1: 3 } })
   })
+  it('stock décimal : la fraction de pelote n est jamais perdue', () => {
+    const yarn = { quantity: 2.5, reservations: { 7: 2 }, consumed: {} }
+    expect(consumeProjectReservation(yarn, 7, 2).quantity).toBe(0.5)
+    expect(consumeProjectReservation(yarn, 7, 0).quantity).toBe(2.5)
+  })
   it('rien tricoté (0) → tout retourne au stock, aucune trace', () => {
     expect(consumeProjectReservation(base(), 1, 0)).toEqual({ quantity: 5, reservations: {}, consumed: {} })
   })

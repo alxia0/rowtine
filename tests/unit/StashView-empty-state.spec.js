@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran vide accueillant du stock (P2 T5) — sur un stock VRAIMENT vide (0 laine), on affiche
 // une carte exemple factice (badgée « Exemple », cf. tests/unit/stash-empty-example.spec.js
 // pour le détail de cette carte) + le texte guidant, et on masque recherche/tri/compteurs (des
@@ -7,11 +8,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import StashView from '@/views/StashView.vue'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 const stubs = { AppHeader: true, AppIcon: true, ThumbImage: true, YarnWeightHelp: true, ColorPickerDialog: true }
 
 // Une vraie laine, avec les champs qui alimentent le récap (quantity/lengthM/grams) —
@@ -63,7 +66,7 @@ describe('StashView — écran vide accueillant', () => {
     // « 175 m · 250 g » en dur, quel que soit le réglage choisi.
     const w = mountView([], { unitSystem: 'imperial' })
     const meta = w.find('.ycard--example .ycard__meta').text()
-    expect(meta).toContain('yards')
+    expect(meta).toContain(tk('yarn.unit.yd'))
     expect(meta).not.toContain('175 m')
     expect(meta).not.toContain('250 g')
   })

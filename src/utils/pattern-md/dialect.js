@@ -140,8 +140,13 @@ export function readDirFromMd(raw) {
 // `lecture` ci-dessus, aucun patron existant ne porte cette valeur : pas de legacy à préserver,
 // donc pas besoin du double mot+tag — un mot suffit. Absent = comportement historique inchangé
 // (diagramme linéaire), aucun patron existant n'est concerné.
-const CHART_SHAPE_TO_MD_WORD = { 'radial-square': 'radial-carré', 'radial-circle': 'radial-rond', path: 'tracé' }
-const CHART_SHAPE_FROM_MD_WORD = { 'radial-carré': 'radial-square', 'radial-rond': 'radial-circle', tracé: 'path' }
+const CHART_SHAPE_TO_MD_WORD = { 'radial-square': 'radial-carré', 'radial-circle': 'radial-rond', 'radial-hexagon': 'radial-hexagone', path: 'tracé' }
+// Dérivée par inversion, comme KIND_TO_FR/FRONTMATTER_TO_FR plus haut dans ce même
+// fichier : un second littéral recopié à la main aurait pu diverger de CHART_SHAPE_TO_MD_WORD
+// au premier ajout de forme.
+const CHART_SHAPE_FROM_MD_WORD = Object.fromEntries(
+  Object.entries(CHART_SHAPE_TO_MD_WORD).map(([k, v]) => [v, k])
+)
 
 export function chartShapeToMd(shape) {
   return CHART_SHAPE_TO_MD_WORD[shape] || ''

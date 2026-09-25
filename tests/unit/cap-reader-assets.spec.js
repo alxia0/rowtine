@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { capDataUrlIfOversized } from '@/utils/image-resize'
 import { capReaderAssets } from '@/backup/cap-reader-assets'

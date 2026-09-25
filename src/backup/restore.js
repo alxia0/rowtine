@@ -4,7 +4,7 @@
 // dbSnapshot prêt pour Dexie (ids d'origine préservés) ; `writeSnapshotToDb`
 // remplace l'état courant de la base par ce snapshot, dans une transaction.
 import { db } from '@/db/db'
-import { parseEntryId, displayEntryName } from './naming'
+import { parseEntryId, displayEntryName, MIME_TO_EXT, MAX_BACKUP_FILE_BYTES } from './naming'
 import { YARN_PHOTOS_DIR } from './serialize'
 import { normalizeYarnReservations } from '@/utils/yarn-usage'
 import { runReprise } from '@/db/purchases-reprise'
@@ -60,6 +60,39 @@ export async function hasBackup(storage) {
 // alignées À LA MAIN si l'une des deux change.
 const RESIDU_ECRITURE = /\.(part|tmp)$/i
 
+// LECTURE BORNÉE (correctif revue 1.3.2). Tout fichier d'un dossier d'entrée était lu
+// en base64, alors que seuls les fichiers écrits par la sauvegarde servent : une vidéo
+// déposée à la main faisait planter la WebView à chaque restauration. On ne lit donc que
+// les extensions que la sauvegarde écrit elle-même (images et PDF de MIME_TO_EXT, plus
+// `bin`, le repli de `parseDataUrl` pour un type inconnu) et le `patron.json` imbriqué.
+// Un fichier au nom légitime mais plus gros que le plafond n'est pas lu non plus, et
+// l'écart est consigné : la restauration est alors incomplète, donc le dossier n'est
+// pas repris (restore-service.js), rien n'y sera effacé.
+// Le plafond est large : un PDF de patron ou un patron.json imbriqué de plusieurs Mo
+// reste lu. Une taille 0 veut dire « inconnue » chez certains fournisseurs SAF : le
+// fichier est lu, jamais écarté sur ce seul motif.
+// Plafond partagé avec patron-md-sync.js, défini dans naming.js (module sans dépendance).
+export { MAX_BACKUP_FILE_BYTES }
+const EXTENSIONS_SAUVEGARDE = new Set([...Object.values(MIME_TO_EXT), 'bin'])
+// Code d'écart, jamais une phrase (même règle que ENTITY_REJECTED plus bas).
+const FILE_TOO_LARGE = 'file-too-large'
+
+function isBackupAssetName(name) {
+  if (name === 'patron.json') return true
+  const dot = name.lastIndexOf('.')
+  return dot !== -1 && EXTENSIONS_SAUVEGARDE.has(name.slice(dot + 1).toLowerCase())
+}
+
+// Vrai si le fichier `entry` d'un dossier d'entrée sera effectivement lu : ni dossier,
+// ni résidu d'écriture, et soit le JSON principal, soit un fichier de sauvegarde sous
+// le plafond. Partagé par la lecture ET par le total de la sous-barre de progression,
+// sans quoi la barre n'atteindrait jamais sa fin.
+function isReadEntry(entry, mainJsonName) {
+  if (entry.isDir || RESIDU_ECRITURE.test(entry.name)) return false
+  if (entry.name === mainJsonName) return true
+  return isBackupAssetName(entry.name) && !(entry.size > MAX_BACKUP_FILE_BYTES)
+}
+
 // Construit le `filesByName` (convention documentée dans deserialize.js) d'un
 // dossier d'entrée (Projets/<...> ou Patrons/<...>) : tous les fichiers du dossier
 // SAUF le JSON principal (`mainJsonName`, fourni séparément déjà parsé par
@@ -74,7 +107,7 @@ const RESIDU_ECRITURE = /\.(part|tmp)$/i
 // alimente la sous-barre (voir `lecteurDossier` dans readBackup) ; par défaut,
 // lecture simple — les dossiers hors progression (Laines/) n'ont pas de sous-barre
 // à nourrir.
-async function readFolderFiles(storage, dir, mainJsonName, entries, readOne) {
+async function readFolderFiles(storage, dir, mainJsonName, entries, errors, readOne) {
   const read = readOne ?? ((path, encoding) => storage.readFile(path, { encoding }))
   // SANS PROTOTYPE : les clés sont des noms de fichiers lus sur le disque. Sur un objet
   // littéral, `filesByName['__proto__'] = contenu` ne range rien — l'affectation change
@@ -93,6 +126,12 @@ async function readFolderFiles(storage, dir, mainJsonName, entries, readOne) {
     // l'appareil le plus faible. Une photo à moitié écrite, c'est plusieurs Mo lus
     // pour rien.
     if (RESIDU_ECRITURE.test(entry.name)) continue
+    // Fichier étranger à la sauvegarde (vidéo, document déposé à la main) : jamais lu.
+    if (!isBackupAssetName(entry.name)) continue
+    if (entry.size > MAX_BACKUP_FILE_BYTES) {
+      errors.push({ where: dir, code: FILE_TOO_LARGE, file: entry.name })
+      continue
+    }
     if (entry.name === 'patron.json') {
       filesByName[entry.name] = await read(`${dir}/${entry.name}`, 'utf8', entry.name)
     } else {
@@ -105,7 +144,7 @@ async function readFolderFiles(storage, dir, mainJsonName, entries, readOne) {
 // Construit le filesByName (même convention que readFolderFiles) des fichiers RACINE dont
 // le nom commence par `prefix` — utilisé pour laine-photo-*, qui vivent à la racine de la
 // sauvegarde (laines.json, contrairement à projet.json/patron.json, n'a pas de dossier).
-async function readRootFilesByPrefix(storage, prefix) {
+async function readRootFilesByPrefix(storage, prefix, errors) {
   const entries = await storage.readdir('')
   // Sans prototype, même raison que `readFolderFiles` ci-dessus.
   const filesByName = Object.create(null)
@@ -113,6 +152,12 @@ async function readRootFilesByPrefix(storage, prefix) {
     if (entry.isDir) continue
     if (!entry.name.startsWith(prefix)) continue
     if (RESIDU_ECRITURE.test(entry.name)) continue
+    // Mêmes bornes que `readFolderFiles` ci-dessus.
+    if (!isBackupAssetName(entry.name)) continue
+    if (entry.size > MAX_BACKUP_FILE_BYTES) {
+      errors.push({ where: '', code: FILE_TOO_LARGE, file: entry.name })
+      continue
+    }
     filesByName[entry.name] = await storage.readFile(entry.name, { encoding: 'base64' })
   }
   return filesByName
@@ -267,11 +312,11 @@ export async function readBackup(storage, { onProgress } = {}) {
   // DocumentFile.length() rend 0 chez certains fournisseurs SAF — on se MASQUE, on
   // n'invente jamais une progression sur des tailles absentes. L'appelant sans
   // onProgress (sauvegarde de fond) ne paie rien : lecture simple.
-  const lecteurDossier = (entries) => {
+  const lecteurDossier = (entries, mainJsonName) => {
     const lectureSimple = (path, encoding) => storage.readFile(path, { encoding })
     if (!onProgress) return lectureSimple
     const subTotal = entries
-      .filter((e) => !e.isDir && !RESIDU_ECRITURE.test(e.name))
+      .filter((e) => isReadEntry(e, mainJsonName))
       .reduce((somme, e) => somme + (e.size > 0 ? e.size : 0), 0)
     if (subTotal <= 0) {
       report?.(undefined, null)
@@ -317,9 +362,9 @@ export async function readBackup(storage, { onProgress } = {}) {
       // gros fichier. Même comptage d'appels qu'avant ce changement : readFolderFiles ne
       // fait plus le sien, il reçoit ces entries.
       const entries = await storage.readdir(dir)
-      const lire = lecteurDossier(entries)
+      const lire = lecteurDossier(entries, 'projet.json')
       const projetJson = JSON.parse(await lire(`${dir}/projet.json`, 'utf8', 'projet.json'))
-      const filesByName = await readFolderFiles(storage, dir, 'projet.json', entries, lire)
+      const filesByName = await readFolderFiles(storage, dir, 'projet.json', entries, errors, lire)
       const missing = []
       const restored = deserializeProject(projetJson, filesByName, missing)
       reportMissingAssets(missing, dir, errors)
@@ -355,9 +400,9 @@ export async function readBackup(storage, { onProgress } = {}) {
     report?.(displayEntryName(entry.name), null)
     try {
       const entries = await storage.readdir(dir)
-      const lire = lecteurDossier(entries)
+      const lire = lecteurDossier(entries, 'patron.json')
       const patronJson = JSON.parse(await lire(`${dir}/patron.json`, 'utf8', 'patron.json'))
-      const filesByName = await readFolderFiles(storage, dir, 'patron.json', entries, lire)
+      const filesByName = await readFolderFiles(storage, dir, 'patron.json', entries, errors, lire)
       const missing = []
       patterns.push(...keepEntities([deserializePattern(patronJson, filesByName, missing)], 'patterns', errors, dir))
       reportMissingAssets(missing, dir, errors)
@@ -382,7 +427,7 @@ export async function readBackup(storage, { onProgress } = {}) {
   // lecture ne doit pas faire échouer le reste.
   const yarnPhotoFiles = Object.assign(
     Object.create(null),
-    await readRootFilesByPrefix(storage, 'laine-photo-'),
+    await readRootFilesByPrefix(storage, 'laine-photo-', errors),
   )
   try {
     // readdir passé au site d'appel (readFolderFiles n'en fait plus lui-même) ;
@@ -395,6 +440,7 @@ export async function readBackup(storage, { onProgress } = {}) {
         YARN_PHOTOS_DIR,
         null,
         await storage.readdir(YARN_PHOTOS_DIR),
+        errors,
       ),
     )
   } catch (err) {

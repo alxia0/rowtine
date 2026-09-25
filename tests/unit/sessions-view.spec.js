@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/sessions-view.spec.js
 // Écran Sessions (T4, 31/08) : toutes les séances, tous projets, du
 // plus récent au plus ancien, chaque ligne ouvrant la fiche de son projet.
@@ -10,14 +11,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { useSessionsStore } from '@/stores/sessions'
 import { useProjectsStore } from '@/stores/projects'
 import SessionsView from '@/views/SessionsView.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 const router = { push: vi.fn(), replace: vi.fn(), back: vi.fn() }
 vi.mock('vue-router', () => ({

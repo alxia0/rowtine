@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/knitting-loader.spec.js
 // Animation d'attente. Deux variantes RÉELLEMENT distinctes (le test doit rougir si les
 // deux rendent le même dessin) et un dessin décoratif, muet pour les lecteurs d'écran.

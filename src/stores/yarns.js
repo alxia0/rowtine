@@ -29,6 +29,7 @@ export function emptyYarn() {
     bain: '',
     purchasedAt: '',
     composition: [],
+    compositionPercents: {}, // { matière: pourcentage }, cf. constants/compositions.js#normalizeCompositionPercents
     // Caractéristiques cochées (lot 05/08/2026) : clés parmi YARN_LABELS. Non indexé —
     // le filtre s'applique en mémoire, donc aucune montée de schéma Dexie n'est requise.
     labels: [],
@@ -38,6 +39,8 @@ export function emptyYarn() {
     // lecture tolérante de l'ancien champ `photo` (chaîne unique) des fiches antérieures
     // à cette refonte, jamais réécrites tant qu'elles ne sont pas modifiées.
     coverIndex: 0,
+    notes: '', // texte libre, alimenté notamment par l'import Ravelry (Comments + annexes)
+    storedIn: '', // lieu de rangement physique, alimenté notamment par « Stored in » (Ravelry)
   }
 }
 

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — piège à focus commun des dialogues (src/composables/useFocusTrap.js).
 // Dette de l'audit UX du 16/07 : dans une surface role="dialog", Tab/Maj+Tab ne doivent
 // JAMAIS sortir vers la page derrière (le voile ne bloque que visuellement), et la

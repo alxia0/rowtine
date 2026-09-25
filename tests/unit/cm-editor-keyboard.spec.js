@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Clavier : pas d'ouverture au tap + bouton afficher/masquer (décision
 // produit) — taper dans le texte doit poser le CURSEUR sans ouvrir le clavier
 // virtuel par défaut ; un bouton dédié (ReaderTextEditor.vue) appelle

@@ -213,11 +213,9 @@ export function mergeIntoReference(docText, fromLine, toLine, opts = {}) {
 
 function buildMergeChanges(doc, selection, target, opts) {
   const lines = doc.split('\n')
-  const offsetOf = (lineNo) => {
-    let offset = 0
-    for (let i = 0; i < lineNo - 1; i++) offset += lines[i].length + 1
-    return offset
-  }
+  // Même calcul que `offsetOfLine` ci-dessus, réutilisé plutôt que recopié : cette
+  // fonction avait sa propre copie en closure (identique caractère pour caractère).
+  const offsetOf = (lineNo) => offsetOfLine(lines, lineNo)
 
   const selFrom = offsetOf(selection.from)
   const selected = lines.slice(selection.from - 1, selection.to)

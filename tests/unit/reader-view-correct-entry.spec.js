@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // reader-view-correct-entry.spec.js — l'action
 // « Corriger le patron », retirée de la fiche (cf. pattern-view-preview.spec.js),
 // est déplacée vers l'écran Prévisualiser (ReaderView en contexte bibliothèque,
@@ -16,6 +17,9 @@ const nav = vi.hoisted(() => ({
 vi.mock('vue-router', () => ({ useRoute: () => nav.route, useRouter: () => nav.router }))
 
 import ReaderView from '@/views/ReaderView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const READER = {
   sizeLabels: [],
@@ -49,7 +53,23 @@ describe('ReaderView (aperçu bibliothèque) — action « Corriger le patron »
     nav.route = { name: 'pattern-read', params: { id: String(id) }, query: {} }
     const w = mountReader()
     await settle()
-    const btn = w.findAll('button').find((b) => b.text().includes('Corriger le patron'))
+    const btn = w.findAll('button').find((b) => b.text().includes(tk('correction.entry')))
+    expect(btn).toBeTruthy()
+    await btn.trigger('click')
+    expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-correct', params: { id: String(id) } })
+  })
+
+  it('patron créé manuellement (sections vides, une galerie) : affiche Corriger et navigue vers pattern-correct', async () => {
+    const id = await db.patterns.add({
+      name: 'P',
+      type: 'knitting',
+      reader: { sizeLabels: [], sections: [] },
+      gallery: [{ src: 'data:image/png;base64,GAL', page: 0, w: 10, h: 10 }],
+    })
+    nav.route = { name: 'pattern-read', params: { id: String(id) }, query: {} }
+    const w = mountReader()
+    await settle()
+    const btn = w.findAll('button').find((b) => b.text().includes(tk('correction.entry')))
     expect(btn).toBeTruthy()
     await btn.trigger('click')
     expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-correct', params: { id: String(id) } })
@@ -61,7 +81,7 @@ describe('ReaderView (aperçu bibliothèque) — action « Corriger le patron »
     nav.route = { name: 'project-read', params: { id: String(projectId) }, query: {} }
     const w = mountReader()
     await settle()
-    const btn = w.findAll('button').find((b) => b.text().includes('Corriger le patron'))
+    const btn = w.findAll('button').find((b) => b.text().includes(tk('correction.entry')))
     expect(btn).toBeFalsy()
   })
 })

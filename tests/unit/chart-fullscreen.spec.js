@@ -1,9 +1,13 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import i18n from '@/i18n'
 import ChartFullscreen from '@/components/ChartFullscreen.vue'
 import { useChartZoomStore } from '@/stores/chart-zoom'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 let pinia
 const wrappers = []
@@ -187,7 +191,7 @@ describe('ChartFullscreen', () => {
     await w.find('.cfs__cal').trigger('click')
     const grip = w.find('.cfs__handle--top .cfs__grip')
     expect(grip.exists()).toBe(true)
-    expect(grip.text()).toContain('Haut du quadrillage')
+    expect(grip.text()).toContain(tk('reader.chart.handleTop'))
   })
 
   it('relâcher deux poignées de calage coup sur coup ne déclenche PAS le double-tap du viewport', async () => {

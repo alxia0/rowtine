@@ -1,26 +1,10 @@
-// Garde de l'attribut `lang` du document (revue finale du passage multilingue, 29/07).
+// @vitest-environment jsdom
+// `<html lang>` suit la locale de i18n, à l'import puis à chaque changement : sinon TalkBack
+// lit l'allemand ou l'espagnol avec la phonétique française (index.html livre lang="fr").
 //
-// Le défaut d'origine : `index.html` livre `<html lang="fr">` en dur et RIEN dans src/ ne le
-// mettait à jour. Conséquence mesurable côté utilisatrice : TalkBack prononce l'interface
-// allemande et espagnole avec la phonétique française (inintelligible), et la césure CSS
-// comme le correcteur orthographique de la WebView partent sur la mauvaise langue.
-//
-// Le correctif est UN observateur unique dans `src/i18n/index.js` (pas trois appels aux trois
-// endroits qui écrivent la locale). Ce fichier garde les deux moitiés du contrat :
-//   - l'état INITIAL (au premier import du module, avant tout changement) ;
-//   - CHAQUE changement de locale ensuite.
-//
-// Piège évité : `document.documentElement.lang` est mis à 'zz' AVANT l'import. Sans ce
-// salissage, « lang vaut la locale de départ après import » passerait aussi avec
-// l'observateur supprimé (le document de test, comme index.html, peut déjà porter 'fr') —
-// l'assertion ne pourrait pas rougir. Les assertions de changement portent sur 'de'/'es'/'en',
-// jamais sur 'fr'.
-//
-// Task A2 (30/07) : la locale de départ de `src/i18n/index.js` n'est plus 'fr' codé en dur,
-// elle suit `detectDeviceLocale()` — donc `navigator.languages` (priorité sur
-// `navigator.language`, cf. src/utils/app-locale.js). Le test « état initial » mocke cette
-// valeur pour rester déterministe : sous jsdom, `navigator.languages` vaut par défaut
-// `['en-US', 'en']`, ce qui aurait accidentellement fait passer l'ancienne assertion 'fr'.
+// Harnais : `lang` est sali à 'zz' AVANT l'import, sinon l'état initial passerait même sans
+// l'observateur. La locale de départ suit `navigator.languages` (src/utils/app-locale.js),
+// d'où le mock : sous jsdom elle vaut ['en-US', 'en'] par défaut.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 describe('`<html lang>` suit la locale de i18n', () => {

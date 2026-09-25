@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // L'onglet Séances montre la séance qui VIT (lot « séances live », 30/08) : ligne cible
 // étendue du temps en cours, ligne virtuelle quand l'épisode n'a encore rien commis,
 // badge muet en marche / « en pause », tuiles récap qui racontent la journée en cours
@@ -8,16 +9,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { buildFreePattern } from '@/constants/free-pattern'
 import { SESSION_NO_SECTION } from '@/constants/session'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const T0 = 1_700_000_000_000
 const atTime = (ms) => Date.now.mockReturnValue(ms)
 
@@ -38,13 +38,10 @@ async function mountSessions(projectPatch = {}, seeds = []) {
   for (const s of seeds) await db.sessions.add({ projectId: prj, sectionId: SESSION_NO_SECTION, rowsDone: 0, ...s })
   const pinia = createPinia()
   setActivePinia(pinia)
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/project/:id', name: 'project', component: ProjectDetailView },
-      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/project/:id', name: 'project', component: ProjectDetailView },
+    { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+  ])
   router.push(`/project/${prj}?tab=sessions`)
   await router.isReady()
   const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, pinia] } })
@@ -238,13 +235,10 @@ describe('ProjectDetailView — onglet Séances : chrono d’un AUTRE projet', (
     await active.play()
     atTime(T0 + 5000)
 
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/project/:id', name: 'project', component: ProjectDetailView },
-        { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/project/:id', name: 'project', component: ProjectDetailView },
+      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+    ])
     router.push(`/project/${mien}?tab=sessions`)
     await router.isReady()
     const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, pinia] } })

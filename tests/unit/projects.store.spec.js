@@ -1,6 +1,7 @@
+// @vitest-environment jsdom
 // Unitaire — store projets sur une vraie base Dexie (fake-indexeddb).
 // Couvre le CRUD et surtout la suppression EN CASCADE + restauration fidèle.
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import { useProjectsStore, emptyProject } from '@/stores/projects'
@@ -168,6 +169,24 @@ describe('store projets — suppression en cascade + restauration', () => {
     const y = await db.yarns.get(yid)
     expect(y.consumed).toEqual({ [pid]: 2 })
     expect(y.quantity).toBe(3)
+  })
+
+  // Protège l'atomicité de la cascade : un échec en cours de route n'ampute ni le pool ni le projet.
+  it('une suppression qui échoue en cours de cascade ne laisse rien à moitié fait', async () => {
+    const pid = await db.projects.add({ name: 'P', technique: 'knitting' })
+    await db.sections.add({ projectId: pid, name: 'Dos', order: 0 })
+    const yid = await db.yarns.add({ brand: 'L', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const projects = useProjectsStore()
+    await projects.load()
+    const spy = vi.spyOn(db.projects, 'delete').mockRejectedValue(new Error('disque plein'))
+    try {
+      await expect(projects.remove(pid)).rejects.toThrow('disque plein')
+    } finally {
+      spy.mockRestore()
+    }
+    expect(await db.projects.get(pid)).toBeDefined()
+    expect(await db.sections.where('projectId').equals(pid).count()).toBe(1)
+    expect((await db.yarns.get(yid)).reservations).toEqual({ [pid]: 2 })
   })
 
   it('seedExamplesIfEmpty ne seed qu’une base vide', async () => {

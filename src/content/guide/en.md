@@ -1,20 +1,49 @@
 # {app} Guide
 
-## The spirit of {app}
+## {app} in 4 steps
 
-![Welcome to {app}, and under it Your knitting and crochet projects over time: English, Knitting, System, Imperial (yd, oz) and USD already picked, with Ready? Start knitting! pinned to the bottom](images/en/00-bienvenue.webp)
+{app} isn't a binder of PDFs. It's an interactive reader that walks you
+through your pattern: it shows only the numbers for your size and
+remembers every step you've done. You import your pattern once, then
+knit or crochet without ever reopening the PDF.
 
-*The very first launch: first name, craft, language and theme.*
+### 1. Import your pattern
 
-{app} helps you keep all your knitting and crochet projects in one
-place: your yarn, your patterns adjusted to your size, and your
-progress. It's **free, open-source and works offline**: your data
-stays on your device, not on a server. Nothing is ever lost by mistake:
-everything you delete ends up in a trash bin.
+From the library, pick a PDF. {app} reads it for you: sections, rows,
+sizes, abbreviations and charts. Everything happens on your device.
+See chapter 4.
+
+### 2. Create a project and pick your size
+
+On the pattern's page, "Create a project from this pattern". In the
+reader, pick your size: every "88 (96) 104" adapts to show only your
+number.
+
+A pattern you've imported once can be used as many times as you like:
+a green cardigan in L for you, a red one in M for your sister. Each
+project keeps its own size, yarn and progress, and the pattern's price
+is only counted once. See chapter 2.
+
+### 3. Knit or crochet with the reader
+
+This is where it all happens. Tick off each step as you go: your
+progress moves forward, and "Back to my step" brings you right back
+where you left off. The chart follows your row, and tapping an
+underlined term in the text shows its definition. See chapter 3.
+
+### 4. Keep track
+
+The timer logs your sessions, the Photos tab keeps the pattern's
+images and your own photos, statistics sum up your activity on the
+project, and a badge is shared in one tap. See chapters 2 and 7.
+
+To try it right away: the "Replay the guided tour" button, just below
+and in Settings, opens the sample hat in the reader with explanation
+bubbles.
 
 ## 1. Home: your dashboard
 
-![{app}'s home screen: "Hello Camille!", the Resume tile holding the Winter Beanie project at 0 %, then the dashboard (1 in progress, this week's time, the latest session dated today, the money spent) and the Counter, Calculator and Needles tools](images/en/01-accueil.webp)
+![{app}'s home screen: "Hello Camille!", the Resume tile on Cable Beanie knitted size M, the tiles 1 in progress and 0 h this week, the latest session on Winter Beanie today (0:06), then the Counter, Calculator and Needles tools](images/en/01-accueil.webp)
 
 *Home: the "Resume" tile jumps back to the last piece you worked on, the dashboard sums up the essentials, recent sessions included, and the three tools are within thumb's reach.*
 
@@ -23,25 +52,9 @@ Opening the app, you'll find:
   where you left off. It really is the last project you **actually
   knitted or crocheted on** (your last session), not just the last one
   you edited, and it shows you the current row.
-- A **summary**: how many projects you have in progress, the time
+- A **summary**: how many projects you have in progress, and the time
   you've spent knitting or crocheting this week (with details in
-  **Statistics**), and your **money spent**: the total of everything
-  you've paid for yarn since you started using the app, in the
-  currency you chose. This figure never goes down by itself: using up
-  a skein or finishing a project doesn't lower it (only a new purchase
-  raises it); it can only go down if you delete or correct a purchase
-  line yourself in the "Purchases and gifts" block of a yarn's page
-  (point 5). (If you've used more than one currency, each keeps its
-  own total: the app never mixes them, since it has no exchange rate
-  to rely on.) Tapping this figure opens the **Expenses** screen,
-  described in point 5. This tile doesn't appear until you've recorded
-  at least one purchase (for example on a brand-new install); the
-  screen stays reachable from the menu at any time.
-- This figure is different from your **stash value**, shown in the
-  **Yarn stash** screen (point 5): that one tracks what's currently on
-  your shelves and drops when you use a skein. The two figures live
-  side by side on purpose: one tells you what you've spent, the other
-  what you have left.
+  **Statistics**).
 - **Recent sessions**: as soon as you've knitted or crocheted at least once,
   a tile lists your two most recent sessions: the project's name, the day
   ("Yesterday", "3 days ago"…) and the duration. Tapping it opens the
@@ -88,7 +101,7 @@ means not declaring anything. If your project uses the "Free-form
 pattern", this field doesn't even show up: it's shared by all your
 patternless projects, so it can never have a price of its own.
 
-![The New project form on Winter Beanie: under the Cable Beanie pattern, Pattern price ($) reads 12 next to the Free button, Purchase date holds 12/08/2026, and Status sits on To do](images/en/02b-projet-prix-patron.webp)
+![The New project form on Winter Beanie: under the Cable Beanie pattern, Pattern price ($) reads 12 next to the Free button, Purchase date holds 24/09/2026, Status sits on To do and the Show the timer switch is on](images/en/02b-projet-prix-patron.webp)
 
 *Below the pattern choice: its price, a "Free" button and the purchase date, pre-filled to today.*
 
@@ -107,7 +120,7 @@ patternless projects, so it can never have a price of its own.
   knitted, and in brackets the pattern price, which you only pay once, even if you
   knit it three times. If a yarn has no price recorded, the app says so instead of
   pretending it was free.
-- **Gallery**: your project photos, plus the pattern's original photos
+- **Photos**: your project photos, plus the pattern's original photos
   below them. You choose which one to use as the **cover photo** (by
   default, the pattern's first photo). Tap a photo to open it full
   screen: you can then zoom (pinch with two fingers or double-tap) to
@@ -127,8 +140,8 @@ patternless projects, so it can never have a price of its own.
 Anywhere in the project, a **timer** floats at the bottom of the screen: the same
 pill on the project sheet, whichever tab you're on, and in the reader. A chevron
 on the pill opens a small menu whose "Hide timer" entry tucks it away; the
-**Actions** menu (vertical three-dot icon) on the project sheet or the "Timer"
-checkbox in the edit form brings it back.
+**Actions** menu (vertical three-dot icon) on the project sheet or the "Show the
+timer" switch in the edit form brings it back.
 - One timer per project, and it **never starts on its own**: you tap it to start
   it, and tap it again to pause for an interruption (the button then shows
   **Resume** with the time already counted).
@@ -160,8 +173,8 @@ name, then the date and the duration. Tapping a line opens the page of the
 project it belongs to.
 
 This screen is for viewing only: it's on the project sheet, in its Sessions
-tab, that a session gets corrected or erased. No filters, no grouping: it's a
-first version, deliberately simple.
+tab, that a session gets corrected or erased. The screen is
+deliberately simple, with no filters and no grouping.
 
 ### Share a badge of your project
 
@@ -196,8 +209,8 @@ project photo or an image from your gallery, then the shape (square, horizontal 
 vertical), then the crop.
 
 The **Share** button, at the top of the screen, generates the image, saves it in the
-project's **Gallery**, then opens your phone's share menu. You can close that menu
-without sending anything: the badge stays in the gallery. And if you change a setting
+project's **Photos**, then opens your phone's share menu. You can close that menu
+without sending anything: the badge stays in the photos. And if you change a setting
 then share again, the previous badge from that same visit to the composer is
 replaced, not duplicated.
 
@@ -286,13 +299,14 @@ pattern itself. If you start a second project from the same
 pattern, you'll need to do it again once for the new project (the
 operation only takes a few seconds).
 
-**And round or square charts?** Granny grids, round or square, don't get
-aligned with two lines: the same **Align** button opens a **guided assistant**
+**And round, square or hexagonal charts?** Granny grids, round, square or
+hexagonal, don't get aligned with two lines: the same **Align** button opens a **guided assistant**
 there, because the chart's shape (its type, chosen during correcting, section
 4) is what decides. It has you place, one after the other, the motif's two
 boundaries: the first, which marks the bottom of the first row, then the
-outside of the last row. Each one is declared **Round** or **Square**, moved
-and adjusted (**Move** and **Resize** buttons) while the picture scrolls and
+outside of the last row. Each one is declared **Round**, **Square** or
+**Hexagon** (for a hexagon, two more buttons set its orientation: **Flat side
+on top** or **Point on top**), moved and adjusted (**Move** and **Resize** buttons) while the picture scrolls and
 grows under a fixed loupe. When the two boundaries don't share the same shape, one
 extra step asks from which row the motif changes; a last screen lets you touch
 everything up before you **Save**. The result is remembered just like linear
@@ -300,7 +314,7 @@ alignment: with the project's progress, chart by chart. And as long as a
 radial chart isn't aligned, a button in the reader's flow, "Set the motif's
 center and radii", offers to take you there.
 
-![The same granny alignment assistant, the boundary declared round this time: the round loupe, marked with the same cross, circling the same central flower of the blurred-stitch square, the Round and Square buttons (Round active), then Move, active as well, Resize, and at the bottom Reset, Cancel and Confirm](images/en/03h-calage-granny-rond.webp)
+![The same granny alignment assistant, the boundary declared round this time: the round loupe, marked with the same cross, circling the central flower of the blurred-stitch square, the Round, Square and Hexagon buttons (Round active), then Move, active as well, Resize, and at the bottom Reset, Cancel and Confirm](images/en/03h-calage-granny-rond.webp)
 
 *The boundary declared round: the loupe follows the chosen shape, and the Round and Square buttons set it at every step.*
 
@@ -363,11 +377,11 @@ it to use in two places: in the pattern reader, and on the statistics screen.
 
 ![The two-pane reader on a tablet: on the left the Cable Beanie, its Ribbed brim section at 0/3 and Cast on 96 sts on 4mm circular needles; on the right Chart · 8 sts × 24 rows, sitting at row 7 / 24](images/en/03e-tablette-lecteur.webp)
 
-*On a tablet held sideways: your instructions on the left, the chart permanently on the right, with no more scrolling between the two.*
+*On a tablet held sideways: your instructions on the left, the chart permanently on the right, with no scrolling between the two.*
 
 Knit on a tablet held sideways and the reader switches on its own to
 **two columns**, your instructions on the left and a chart displayed
-permanently on the right: no more scrolling back and forth between
+permanently on the right: you do not have to scroll back and forth between
 the two. You keep control:
 
 - On any other chart in the pattern, the **Show on the right** button
@@ -382,14 +396,14 @@ the two. You keep control:
 
 This setting only lasts for your current session: reopening the
 pattern brings back the panel with the first chart. On a phone (or a
-tablet held upright), the reader stays in a single column, as before.
+tablet held upright), the reader shows a single column.
 A pattern with no chart has no side panel at all. The reader's contents
 stay, for their part, at the top of the instructions column, same
 dots, same gesture.
 
-**Statistics, with room to breathe.**
+**Statistics, full width.**
 
-![Statistics with room to breathe on a tablet: the calendar grid runs Mar to Sep in one piece, and the tiles line up two by two below it: Total time 119:40:06, Active days 127 of 181, Current streak 6 days](images/en/03f-tablette-stats.webp)
+![Statistics with room to breathe on a tablet: the calendar grid runs Mar to Sep in one piece, and the tiles line up two by two below it: Total time 116:40:06, Active days 125 of 179, Current streak 6 days, Longest streak 12 days](images/en/03f-tablette-stats.webp)
 
 *Statistics on a tablet held sideways, in the Half-year window: the calendar grid shows the last six months at a glance, where a phone makes you swipe sideways to see them, and the number tiles line up two by two below it.*
 
@@ -405,7 +419,7 @@ just more comfortable.
 
 *The library, with the three sample patterns provided on first launch.*
 
-![Cable Beanie, subtitled Knitting · Accessories · S, M, L, then the line Bought for $12 on 8/12/2026 and a photo of the cable hat resting on a wooden board, an edit pencil in the top corner, and the two buttons Create a project from this pattern and Preview the pattern](images/en/04b-fiche-patron.webp)
+![Cable Beanie, subtitled Knitting · Accessories · S, M, L, then the line Bought for $12 on 9/24/2026 and a photo of the cable hat resting on a wooden board, an edit pencil in the top corner, and the two buttons Create a project from this pattern and Preview the pattern](images/en/04b-fiche-patron.webp)
 
 *A pattern's page, deliberately spare: create a project, or preview. (Correcting the import is reached from the preview, or from the menu of an in-progress project that uses this pattern.)*
 
@@ -419,8 +433,24 @@ just more comfortable.
   many times as you like, and that pass is what makes the difference
   between a roughly-right pattern and a project that shows the right
   figures and the right explanations.
+  As soon as the import finishes, a "Your pattern is imported" summary counts
+  what the app found (sections, steps to tick off, sizes, charts), reminds you
+  to read the pattern through before you start, and the **Preview the
+  pattern** button takes you straight there to browse it, section by section.
   (The reading also recognises the round and square grids of granny patterns,
   never perfectly: the read-through remains essential.)
+- **Import in {app} format**: in "+ Add pattern", this option takes a
+  **.rowtine** file, that is a pattern already prepared in the
+  {app} format (its text and images). It goes into your library as is,
+  without reading any PDF, and still offline.
+- **Create a pattern by hand**: in "+ Add pattern", the **Create manually**
+  choice opens a dedicated screen (name, type, category, sizes, source,
+  author…) with a single **Photos** section for its images. On the pattern's
+  page, a star on each photo in "Pattern photos" sets it as the **cover**:
+  that's the one that illustrates the pattern in the library. (An imported
+  pattern keeps the cover taken from its PDF.) And as soon as it has a photo,
+  the **Preview the pattern** button appears: you can then follow an image
+  as a chart, exactly as for an imported pattern.
 - **Find a pattern**: category buttons at the top of the library show
   you **how many patterns** each one holds, for an instant sense of
   where to look.
@@ -546,7 +576,7 @@ converted yet. The number in brackets, for example "Diagrams (2)", counts
 all of those sections, photos included: it doesn't tell you how many charts
 are already being followed. For an image not converted yet, a
 **Follow as a chart** button opens a choice of type, each explained in plain
-language: standard rows, radial square, radial round, or path, to match
+language: standard rows, radial square, radial round, radial hexagon or path, to match
 the real shape of your motif (a granny square doesn't read like standard
 rows). For an image already followed as a chart, an **Interactive chart**
 tag states where it currently stands, next to a **Change type** button (the
@@ -554,19 +584,19 @@ same choice, to fix a wrongly guessed type) and a **Just an image** button
 to go back to a plain photo, handy if the import missed a chart or if
 you'd rather a plain photo stayed a plain photo.
 
-**Adding images: three doors.** In a pattern's gallery, from its page or
+**Adding images: three doors.** In a pattern's photos, from its page or
 from the correction editor, the **Add an image** button offers three
 sources: **Camera or gallery** (a sheet lets you choose between taking a
 photo and picking one from your own images), **Browse files** (your device's
 picker, for an image stored elsewhere), and **From the pattern's PDF** when
 it exists: you pick the page there and the app has you crop it, the
 only source that goes through that cropping. Every image joins the pattern's
-gallery, ready to be inserted or followed.
+photos, ready to be inserted or followed.
 
 **An image's menu.** In the editor's text, tapping an image opens a small
 immediate menu: **follow it as a chart** if it isn't one yet, or
 **change its type** otherwise, bring it back down to a mere illustration (**Just an
-image**), or **send it to the pattern's gallery**. In the "Pattern gallery"
+image**), or **send it to the pattern's photos**. In the "Pattern photos"
 band, every image can be deleted, inserted into the text, or followed as a
 chart: the three gestures in the same place.
 
@@ -580,7 +610,7 @@ and asks for confirmation: nothing gets lost by mistake here either.
 
 ## 5. Your yarn stash
 
-![10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent across the top, the Search yarn… field and the Filter and Sort buttons, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf below it, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free](images/en/05-stock.webp)
+![10 skeins, 1,932 yards, 31.25 pounds and 31 $ spent across the top, the Search yarn… field, the Filter and Sort buttons, then Add yarn and Import from Ravelry side by side, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free](images/en/05-stock.webp)
 
 *The stash: totals up top (skeins, length, weight, value), then one card per yarn with its status, free or reserved by a project.*
 
@@ -591,12 +621,15 @@ and asks for confirmation: nothing gets lost by mistake here either.
   you need one), quantity, price, length and weight per skein, plus
   the purchase date and dye lot number.
   **As soon as you save it, the app immediately records the matching
-  purchase**, and your money spent (point 1) goes up by the amount you
-  entered. The date it suggests is today's: if you bought the yarn
+  purchase**, and the total in the **Expenses** screen goes up by the
+  amount you entered. The date it suggests is today's: if you bought the yarn
   earlier, you can correct it directly in the form. (These two fields
   only appear when you create the entry. On an already-saved yarn
   page, the **Purchases and gifts** block takes over, with one line
   per acquisition.)
+- **Where it's stored, what you think of it**: two free fields, **Stored
+  in** ("e.g. Shelf 2, blue basket") and **Notes**, then show up on the
+  yarn's page.
 - **Yarn that isn't a single colour**: a **Colour type** field (solid,
   gradient, self-striping, speckled, hand-dyed) and a **Colourway
   description** field ("blue, green, yellow speckled with black")
@@ -622,7 +655,7 @@ and asks for confirmation: nothing gets lost by mistake here either.
     filter (the "Label" criterion) and in the text search.
   - These characteristics also come out in the **spreadsheet export**.
 
-![The page opens over the stash totals 10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent: a yellow dot for Moutarde, brand Drops, 165 yd, 50 oz a skein, quantity 4, price per skein 3,20, last purchase 2026-08-12](images/en/05b-fiche-laine.webp)
+![The full-screen page for Drops · Moutarde: brand Drops, length 165 yd, 50 oz a skein, quantity 4 at $3.20 a skein, one recorded purchase, the last on 9/24/2026, composition Cotton, then Plant fibre, the Vegan and Organic fibres (GOTS) tags, the Free state and the Add a photo button](images/en/05b-fiche-laine.webp)
 
 *A yarn's page: its fibre content, the "Plant fibre" note, and its two labels "Vegan" and "Organic fibres (GOTS)".*
 
@@ -631,15 +664,15 @@ and asks for confirmation: nothing gets lost by mistake here either.
   totals get large), and your stash's total value.
 - **Search, filter, sort**: a search field and the **Filter** and **Sort**
   buttons at the top of the stash. Filter opens a two-level window: the list
-  of six criteria (**Brand**, **Label**, **Weight**, **Skein weight**,
-  **Colour**, **Composition**), then, for the criterion you tapped, its
+  of seven criteria (**Brand**, **Label**, **Weight**, **Skein weight**,
+  **Colour**, **Composition**, **Status**: free, reserved or used), then, for the criterion you tapped, its
   values. One choice per criterion, but criteria combine; a badge on the
   Filter button counts the active filters, and **Reset** clears them in one
   gesture. Sort offers **Brand** (the default), **Weight** or **Purchase
   date**. None of this is remembered: every return to the stash starts
-  again with no filter, sorted by brand. List or visual grid, your choice.
-- **Edit, duplicate or delete** an entry from its card's **Actions**
-  menu (vertical three-dot icon). "Duplicate" is handy for the same
+  again with no filter, sorted by brand.
+- **Edit, duplicate or delete** a yarn from the **Actions** menu
+  (vertical three-dot icon) at the top of its page. "Duplicate" is handy for the same
   yarn in a different colourway: everything carries over, you just
   need to change the colour.
 - **The skein pool**: for each yarn, you can see at a glance how many
@@ -649,19 +682,24 @@ and asks for confirmation: nothing gets lost by mistake here either.
   restoring a project from the trash puts your yarn reservations at
   risk. The project comes back regardless, with a reduced
   reservation and a message explaining it to you.
-- **A yarn's detail page**: a full summary (skeins, metres, projects
-  using it), and a **Purchases and gifts** block that keeps a record
-  of every acquisition of that yarn for you:
+- **A yarn's page**: tapping its card opens it full screen. It gathers
+  everything you noted (brand, colourway, storage, length, quantity,
+  price, purchases, composition, notes), its characteristics, its status
+  (free, reserved, used) and its **photos**: you can add several and
+  choose, with a tap on the star, the one used as the cover.
+- **Purchases and gifts**: in a yarn's **Edit** screen, this block keeps
+  a record of every acquisition for you:
   - Each line carries a quantity, a price, a date and a dye lot, and
     states whether it was a **purchase** or a **gift** (a gift never
-    counts towards your money spent). The three most recent lines are
+    counts towards your expenses). A **Bought at** field also keeps the
+    name of the shop. The three most recent lines are
     visible right away, the rest unfolds with a tap.
   - You can **add, edit or delete** a line at any time.
-  - **Increase the quantity** of a yarn from its page and the app
+  - **Increase the quantity** of a yarn by editing it and the app
     offers to record the matching purchase, dated today: you can
     accept it, mark it as a gift, or ignore it if you don't want to
     keep it. **Decreasing a quantity, however, never touches your
-    money spent**: only an increase can create a purchase.
+    expenses**: only an increase can create a purchase.
   - If the number of skeins on the page doesn't match what the
     history recorded (for example after you manually corrected the
     stash), an alert points it out and a **Fix** button offers you two
@@ -671,16 +709,45 @@ and asks for confirmation: nothing gets lost by mistake here either.
     yarn's page: no yarn purchase disappears, it stays visible in the
     **Expenses** screen.
 
+### Import your stash from Ravelry
+
+If you already keep your stash on Ravelry, there's no need to type it all in
+again: the **Import from Ravelry** button, at the top of the stash, creates the
+pages for the yarn you already have there, all at once.
+
+1. On Ravelry, open "my notebook", then the "Stash" tab.
+2. Click "Export" at the top right of the list: an .xls file downloads.
+3. Come back to {app}, pick that file, then **Analyse the file**.
+
+Before creating anything at all, the app shows you a summary: how many rows it read,
+how many yarns it will create, how many are **already in your stock** (they're
+skipped: running an import again doesn't create duplicates) and how many are no
+longer in stock on Ravelry ("Used Up", "Will Trade Or Sell",
+"Traded/Sold/Gifted"), skipped as well. Nothing is written until you tap the
+"Import … yarn(s)" button.
+
+The brand, the name, the colour, the weight, the length and skein weight, the
+number of skeins, where it's stored, the notes, as well as the price, date and
+shop of the purchase come from the file; the colour swatch is picked from the
+colour family Ravelry gives. The photo, though, is still yours to add by hand.
+Everything happens on your device: {app} reads the file you give it, it never
+connects to Ravelry.
+
 ### The Expenses screen
 
 ![Under the large $43 spent, split into Yarn $30.50 and Patterns $12, and the Since the start line, 2026 totals $42.50, and so does August: ×6 Hobbii · Sauge at $17.70 and ×4 Drops · Moutarde at $12.80, both tagged Yarn and each with a cross to delete it, then Cloud Scarf tagged Pattern and Free, and Cable Beanie tagged Pattern at $12](images/en/05c-depenses.webp)
 
 *The Year and Type menus at the top, the total with its yarn / pattern breakdown, then the detail by month.*
 
-Reached by tapping the money spent on Home (point 1), this screen
+Reached from the app menu, this screen
 summarises everything you've paid for your knitting, **yarn** and
 **patterns** alike:
-- The **total spent**, by currency if you've used more than one. As
+- The **total spent**, by currency if you've used more than one (the
+  app never mixes them, since it has no exchange rate to rely on). This
+  total never goes down by itself: using up a skein or finishing a
+  project doesn't lower it. It is different from your **stash value**, at
+  the top of the **Yarn stash** screen, which tracks what you have left
+  and drops when you use a skein. As
   long as you haven't noted any pattern price, this total stays
   exactly as you know it; as soon as a pattern shows up in it, it
   breaks down into two sub-lines: what went to yarn, what went to
@@ -745,11 +812,11 @@ from Home:
 
 ## 7. Statistics
 
-![The Quarter tab selected among Month, Half-year and Year, 6/15/2026 to 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards](images/en/07-statistiques.webp)
+![The Quarter tab selected among Month, Half-year and Year, 6/29/2026 to 9/24/2026, the Over the period card reading 72:40:06, then Calendar rather than Rhythm, a grid from Jun to Sep graded from less to more, and the Total time 72:40:06 and Active days 69 of 88 cards](images/en/07-statistiques.webp)
 
 *The selector at the top picks an observation window (Month, Quarter, Half-year or Year), and the whole screen follows it; here, the Quarter window. The "Calendar" tab, shown by default, shows the grid and the nine number tiles.*
 
-The selector at the top of the screen no longer just picks a display span:
+The selector at the top of the screen does not just pick a display span:
 it picks an **observation window** (Month, Quarter, Half-year or Year).
 Everything below follows it, from the total time to the nine number tiles.
 Just below it, an **All / Knitting / Crochet**
@@ -774,7 +841,7 @@ Year, so the two gestures don't get confused):
   and a sentence naming your most consistent day across your whole
   history.
 
-![Statistics, Rhythm view: the weeks from 18/05 to 27/07 as bars, from 1:10:00 to 12:10:00, then By day of the week from Mon to Sun, and at the bottom Across all time, your most active day is Wednesday](images/en/07b-stats-rythme.webp)
+![Statistics, Rhythm view: the weeks from 06/29 to 09/07 as bars, from 1:10:00 to 12:10:00, then By day of the week from Mon to Sun, and at the bottom Across all time, your most active day is Thursday](images/en/07b-stats-rythme.webp)
 
 *The "Rhythm" tab: the bars of time spent per period, the seven bars per day of the week, and the sentence naming your most consistent day.*
 
@@ -789,7 +856,7 @@ are **fixed**: a dark square always means the same thing, month after month,
 even in a quieter quarter than usual. A bolder outline frames the columns
 that belong to the same month, so you can spot them at a glance.
 
-![A whole year of the calendar grid, Aug to Aug: one column per week, one square per day, the M T W T F S S initials down the left margin, a heavier frame around each month, and a five-step less-to-more legend](images/en/07c-stats-annee.webp)
+![A whole year of the calendar grid, Sep to Sep: one column per week, one square per day, the M T W T F S S initials down the left margin, a heavier frame around each month, and a five-step less-to-more legend](images/en/07c-stats-annee.webp)
 
 *The grid in the Year window: a complete year at a single glance, one column per week and one square per day, with the outlines separating the months. Tap the image to enlarge it and read the detail.*
 
@@ -856,6 +923,8 @@ doesn't count: it takes a **logged** action.
     folder so you have a copy elsewhere is a good idea; using it from a
     phone **and** a tablet is not: each would wipe out the other's work.
     A second device needs a folder of its own.
+- **Help**: "Replay the guided tour" reopens the sample hat in the reader
+  with its explanation bubbles, and recreates it if you've deleted it.
 - **Contribute**: a link to the source code (the app is open source), and
   two other links in the same settings block:
   - **Support {app}** leads to a donations page, **freely**: nothing is
@@ -864,15 +933,28 @@ doesn't count: it takes a **logged** action.
 
 ### What happens at the very first launch
 
+![Welcome to {app}, and under it Your knitting and crochet projects over time: English, Knitting, System, Imperial (yd, oz) and USD already picked, with Ready? Start knitting! pinned to the bottom](images/en/00-bienvenue.webp)
+
+*The very first launch: first name, craft, language and theme.*
+
 In order, the first time you open {app}: the welcome screen asks for your
 first name, your craft, your language, your theme, your units and your
-currency; then the backup folder screen, described just above. After that,
-three small messages greet you, **once each**: you won't see them again.
+currency; on Android, the backup folder screen follows, described just
+above. After that, a few small things greet you, each **once**: you
+won't see them again (except the guided tour, which you can replay
+whenever you like).
 
-- A **word of welcome**, set in the middle of the Home screen as soon as your
-  backup folder is in place: it tells you everything is ready and invites you
-  to open the sample projects and patterns to get your bearings. Its button
-  closes it, and it doesn't come back.
+- A **word of welcome**, set in the middle of Home: it tells you everything
+  is ready and invites you to open the sample projects and patterns to get
+  your bearings. Two buttons close it: "Explore the reader" starts the
+  guided tour below right away, "Later" closes it without the tour. Either
+  way, it doesn't come back.
+- If you picked "Explore the reader", a **guided tour of the reader** opens
+  right away on the sample hat, with three explanation bubbles: your size,
+  ticking off a step, and the chart following your row. You can replay it
+  any time: the "Replay the guided tour" button sits at the bottom of the
+  first section of this guide (above), and in the **Help** block of
+  Settings; the latter recreates the sample hat if you've deleted it.
 - A **warning about imported patterns**, the first time you open your pattern
   library: it reminds you that the app reads your PDF on its own and gets
   things wrong sometimes (a skipped row, two sizes mixed up, a badly split
@@ -887,8 +969,7 @@ three small messages greet you, **once each**: you won't see them again.
 
 ## 9. Under the hood: what {app} guarantees you
 
-- **Offline by default**: none of your data ever leaves your device,
-  except the backup folder **you choose yourself**.
+- **Offline by default**: none of your data ever leaves your device.
 - **No account, no paywall**: every feature above is free, with no
   core feature locked away.
 - **Nothing is lost by mistake**: every deletion can be undone
@@ -900,7 +981,7 @@ three small messages greet you, **once each**: you won't see them again.
   your lists of projects and patterns spread across several columns
   instead of one long stack, and the reader can keep the chart next
   to the text. The app accounts for your screen's reserved areas
-  (status bar, notch, navigation bar): content no longer slides
+  (status bar, notch, navigation bar): content does not slide
   underneath them.
 - **A privacy policy in plain words**: from the About screen, it tells you
   where your data lives, what may leave your phone and in which cases, what

@@ -1,15 +1,16 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
+import { createTestI18n } from './helpers/i18n-router'
 
 vi.mock('@/utils/pdf', () => ({
   renderPdfPageToDataUrl: vi.fn().mockResolvedValue('data:image/jpeg;base64,PAGE'),
   pdfPageCount: vi.fn().mockResolvedValue(3),
 }))
 import PdfViewer from '@/components/PdfViewer.vue'
+import { renderPdfPageToDataUrl } from '@/utils/pdf'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const mountViewer = () =>
   mount(PdfViewer, { props: { pdf: 'data:application/pdf;base64,AAAA' }, global: { plugins: [i18n], stubs: { AppIcon: true } } })
 
@@ -43,6 +44,40 @@ describe('PdfViewer', () => {
     await w.find('[data-test=pick]').trigger('click')
     expect(w.emitted('pick')).toBeTruthy()
     expect(w.emitted('pick')[0][0]).toContain('PAGE') // renderPdfPageToDataUrl mocké plus haut
+  })
+
+  // Protège : « Utiliser cette page » n'envoie jamais l'image d'une autre page que celle affichée.
+  it('mode pickable : pendant le rendu de la page suivante, pick est inactif ; un rendu dépassé ne gagne pas', async () => {
+    const w = mount(PdfViewer, {
+      props: { pdf: 'data:application/pdf;base64,AAAA', pickable: true },
+      global: { plugins: [i18n], stubs: { AppIcon: true } },
+    })
+    await flushPromises()
+    const pending = {}
+    renderPdfPageToDataUrl.mockImplementation((_f, n) => new Promise((r) => (pending[n] = r)))
+    await w.find('[data-test=next]').trigger('click') // page 2
+    await w.find('[data-test=next]').trigger('click') // page 3
+    expect(w.find('[data-test=pick]').attributes('disabled')).toBeDefined()
+    await w.find('[data-test=pick]').trigger('click')
+    expect(w.emitted('pick')).toBeFalsy()
+
+    pending[3]('data:image/jpeg;base64,P3')
+    await flushPromises()
+    pending[2]('data:image/jpeg;base64,P2') // rendu dépassé, arrivé en dernier
+    await flushPromises()
+    await w.find('[data-test=pick]').trigger('click')
+    expect(w.emitted('pick')[0][0]).toBe('data:image/jpeg;base64,P3')
+    renderPdfPageToDataUrl.mockReset().mockResolvedValue('data:image/jpeg;base64,PAGE')
+  })
+
+  // Protège : un rendu en échec ne laisse pas « Chargement » affiché pour toujours.
+  it('un rendu en échec retire l’indicateur de chargement', async () => {
+    const w = mountViewer()
+    await flushPromises()
+    renderPdfPageToDataUrl.mockRejectedValueOnce(new Error('boom'))
+    await w.find('[data-test=next]').trigger('click')
+    await flushPromises()
+    expect(w.find('.pdfv__loading').exists()).toBe(false)
   })
 
   it('sans pickable (défaut), aucun bouton "Utiliser cette page" — comportement inchangé', async () => {

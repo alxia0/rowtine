@@ -13,14 +13,20 @@ const capStatusBarPlugin = {
 }
 
 // Config Vitest dédiée (sans vite-plugin-vue-devtools, inutile/bruyant en test).
-// jsdom pour les tests de composants ; fake-indexeddb pour les stores Dexie.
+// Environnement `node` par défaut : démarrer jsdom coûtait trois fois le temps des tests
+// eux-mêmes. jsdom seulement pour les specs qui le déclarent en première ligne
+// (`// @vitest-environment jsdom`) : celles qui montent un composant (@vue/test-utils),
+// celles qui importent, même indirectement, un module dont le comportement dépend de
+// l'environnement (`typeof window`, `typeof document`, matchMedia, navigator...), et celles
+// qui touchent au DOM. Vitest 4 n'a plus `environmentMatchGlobs`, d'où le docblock.
+// fake-indexeddb (setup.js) sert les stores Dexie dans les deux environnements.
 export default defineConfig({
   plugins: [vue(), capStatusBarPlugin],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     globals: true,
     setupFiles: ['./tests/unit/setup.js'],
     include: ['tests/unit/**/*.spec.js'],

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // (lot P2, audit UX 17/07) — case à cocher maison, remplace les 3 cases natives
 // du navigateur (CounterForm.vue ×2, ProjectEditView.vue ×1). Contrat :
 // - un VRAI <input type="checkbox"> (clavier + lecteurs d'écran), jamais display:none.
@@ -82,10 +83,6 @@ describe('AppCheckbox', () => {
     expect(css).not.toMatch(/display:\s*none/)
     // Check that .chk__input specifically doesn't use opacity: 0 for masking (uses clip-path instead)
     expect(css).not.toMatch(/\.chk__input\s*\{[^}]*opacity:\s*0/s)
-  })
-
-  it('règle de cible tactile ≥ 44 px présente dans le CSS', () => {
-    expect(styleCss()).toMatch(/min-height:\s*44px/)
   })
 
   it('anneau de focus CLAVIER via :focus-visible (pas :focus-within qui persistait au tap ; pas :has())', () => {

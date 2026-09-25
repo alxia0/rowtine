@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
 // Le vrai pdfjs-dist plante à l'import en jsdom (DOMMatrix absent) ; on le mocke comme les

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { chartRings } from '@/utils/reader'
+import { chartRings, hexagonPoints } from '@/utils/reader'
 import AppIcon from '@/components/AppIcon.vue'
 
 const props = defineProps({
@@ -15,7 +15,12 @@ const { t } = useI18n()
 // Forme par défaut d'une limite sans valeur explicite : dérivée de chart.shape, même
 // repli que `chartRings` (reader.js) — garde le calage cohérent avec la lecture.
 function defaultShape() {
-  return props.chart?.shape === 'radial-square' ? 'square' : 'circle'
+  if (props.chart?.shape === 'radial-square') return 'square'
+  if (props.chart?.shape === 'radial-hexagon') return 'hexagon'
+  return 'circle'
+}
+function isValidShape(s) {
+  return s === 'square' || s === 'circle' || s === 'hexagon'
 }
 function makeDraft(frame) {
   const f = frame || {}
@@ -26,9 +31,15 @@ function makeDraft(frame) {
     // zoom de l'écran 1/2 (cf. loupe fixe ci-dessous) sans exiger un premier réglage à vide.
     r0: Number.isFinite(f.r0) ? f.r0 : 15,
     r1: Number.isFinite(f.r1) ? f.r1 : 45,
-    r0Shape: f.r0Shape === 'square' || f.r0Shape === 'circle' ? f.r0Shape : defaultShape(),
-    r1Shape: f.r1Shape === 'square' || f.r1Shape === 'circle' ? f.r1Shape : defaultShape(),
+    r0Shape: isValidShape(f.r0Shape) ? f.r0Shape : defaultShape(),
+    r1Shape: isValidShape(f.r1Shape) ? f.r1Shape : defaultShape(),
     switchRound: Number.isFinite(f.switchRound) ? f.switchRound : null,
+    // Orientation de l'hexagone ('flat' = côté plat en haut/bas, 'pointy' = sommet en haut) :
+    // propriété du CHART entier (pas par limite r0/r1) — un motif garde la même orientation
+    // du centre au bord, seule sa forme (rond/carré/hexagone) peut varier par limite.
+    // Toujours présente dans le draft (même hors hexagone) : évite un `undefined` à
+    // renseigner ailleurs, ignorée au rendu quand aucune limite n'est hexagonale.
+    hexOrientation: f.hexOrientation === 'pointy' ? 'pointy' : 'flat',
   }
 }
 
@@ -182,18 +193,58 @@ function onViewportUp() {
 function setShape(field, shape) {
   patchDraft({ [field]: shape })
 }
+function setOrientation(orientation) {
+  patchDraft({ hexOrientation: orientation })
+}
+// Points du polygone hexagonal (canvas statique), aspect-compensés comme les <rect> carrés
+// voisins — cf. hexagonPoints (reader.js) pour la convention (r = apothème).
+function hexPointsAttr(r) {
+  return hexagonPoints(draft.value.cx, draft.value.cy, r, draft.value.hexOrientation, canvasAspect.value)
+    .map((p) => `${p.x},${p.y}`)
+    .join(' ')
+}
 
 // ─── Canvas statique (écrans switch/review uniquement) : dessin figé, formes affichées à
 // leur position/taille réelle en % — même patron que l'ancien calage (canvasAspect corrige
 // l'étirement du viewBox 0-100 non carré pour qu'un cercle reste rond). ───────────────────
 const staticCanvasEl = ref(null)
-const canvasAspect = ref(1)
+// La boîte `.rcw__canvas` (flex: 1) n'a PAS les proportions du dessin : l'image y est posée
+// en `object-fit: contain`, avec des bandes vides. cx/cy/r0/r1 sont en % de l'IMAGE (écrans
+// loupe, lecteur) : le calque des formes doit donc couvrir le rectangle réellement occupé
+// par l'image, sinon l'aperçu du récapitulatif est décalé et trop grand (tablette paysage :
+// anneaux ~2× trop larges) et la croix de recentrage fait enregistrer un calage faux.
+const staticBox = ref({ w: 0, h: 0 })
+const staticImgAspect = ref(0) // naturalWidth / naturalHeight, 0 tant que l'image n'est pas chargée
+function onStaticImgLoad(e) {
+  const img = e.target
+  if (img?.naturalWidth && img?.naturalHeight) staticImgAspect.value = img.naturalWidth / img.naturalHeight
+}
+// Rectangle « contain » (px, repère de la boîte), null tant qu'une mesure manque : le calque
+// retombe alors sur la boîte entière (comportement d'origine).
+const staticFit = computed(() => {
+  const { w, h } = staticBox.value
+  const ia = staticImgAspect.value
+  if (!w || !h || !ia) return null
+  const fw = w / h > ia ? h * ia : w
+  const fh = w / h > ia ? h : w / ia
+  return { left: (w - fw) / 2, top: (h - fh) / 2, width: fw, height: fh }
+})
+const overlayStyle = computed(() => {
+  const f = staticFit.value
+  return f ? { left: `${f.left}px`, top: `${f.top}px`, width: `${f.width}px`, height: `${f.height}px` } : null
+})
+const canvasAspect = computed(() => {
+  const f = staticFit.value
+  if (f) return f.width / f.height
+  const { w, h } = staticBox.value
+  return w && h ? w / h : 1
+})
 let staticRO = null
 onMounted(() => {
   if (staticCanvasEl.value && typeof ResizeObserver !== 'undefined') {
     staticRO = new ResizeObserver(() => {
       const r = staticCanvasEl.value?.getBoundingClientRect()
-      if (r && r.height > 0) canvasAspect.value = r.width / r.height
+      if (r && r.height > 0) staticBox.value = { w: r.width, h: r.height }
     })
     staticRO.observe(staticCanvasEl.value)
   }
@@ -249,6 +300,7 @@ function resetDraft() {
 function save() {
   const next = { cx: draft.value.cx, cy: draft.value.cy, r0: draft.value.r0, r1: draft.value.r1, r0Shape: draft.value.r0Shape, r1Shape: draft.value.r1Shape }
   if (draft.value.switchRound != null) next.switchRound = draft.value.switchRound
+  if (draft.value.r0Shape === 'hexagon' || draft.value.r1Shape === 'hexagon') next.hexOrientation = draft.value.hexOrientation
   emit('save', next)
 }
 function cancel() {
@@ -258,7 +310,11 @@ function cancel() {
 const hintText = computed(() => {
   if (step.value === 'inner') return t('reader.chart.wizardStepInnerHint')
   if (step.value === 'outer') return t('reader.chart.wizardStepOuterHint')
-  if (step.value === 'switch') return draft.value.r1Shape === 'square' ? t('reader.chart.wizardStepSwitchHintToSquare') : t('reader.chart.wizardStepSwitchHintToCircle')
+  if (step.value === 'switch') {
+    if (draft.value.r1Shape === 'square') return t('reader.chart.wizardStepSwitchHintToSquare')
+    if (draft.value.r1Shape === 'hexagon') return t('reader.chart.wizardStepSwitchHintToHexagon')
+    return t('reader.chart.wizardStepSwitchHintToCircle')
+  }
   return t('reader.chart.wizardStepReviewHint')
 })
 
@@ -283,14 +339,18 @@ defineExpose({ step, draft, canvasAspect, zoom })
       </div>
       <!-- Repère HORS du viewport défilant à dessein : posé DEDANS (même en position absolue),
            il suivrait le défilement au lieu de rester fixe à l'écran (retour terrain 26/08). -->
-      <div class="rcw__guide" :class="{ 'rcw__guide--square': currentShape === 'square' }" :style="{ width: guideDiameterPx + 'px', height: guideDiameterPx + 'px' }">
+      <div
+        class="rcw__guide"
+        :class="{ 'rcw__guide--square': currentShape === 'square', 'rcw__guide--hexagon': currentShape === 'hexagon', 'rcw__guide--pointy': currentShape === 'hexagon' && draft.hexOrientation === 'pointy' }"
+        :style="{ width: guideDiameterPx + 'px', height: guideDiameterPx + 'px' }"
+      >
         <span class="rcw__guide-cross"></span>
       </div>
     </div>
 
     <div v-show="!isZoomStep" ref="staticCanvasEl" class="rcw__canvas">
-      <img :src="chart.img" alt="" draggable="false" />
-      <svg class="rcw__overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <img :src="chart.img" alt="" draggable="false" @load="onStaticImgLoad" />
+      <svg class="rcw__overlay" :style="overlayStyle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <!-- Les <rect> compensent l'aspect du canvas exactement comme les <ellipse> voisines
              (`viewBox` 100x100 + preserveAspectRatio="none" étire les deux axes) : sans
              `canvasAspect` sur y/height, un carré se peignait aplati ICI alors que le lecteur
@@ -298,16 +358,21 @@ defineExpose({ step, draft, canvasAspect, zoom })
              l'écran ») — l'utilisatrice calait donc une forme et en obtenait une autre. -->
         <template v-if="step === 'review'">
           <rect v-if="draft.r0Shape === 'square'" class="rcw__shape rcw__shape--inner" :x="draft.cx - draft.r0" :y="draft.cy - draft.r0 * canvasAspect" :width="draft.r0 * 2" :height="draft.r0 * 2 * canvasAspect" />
+          <polygon v-else-if="draft.r0Shape === 'hexagon'" class="rcw__shape rcw__shape--inner" :points="hexPointsAttr(draft.r0)" />
           <ellipse v-else class="rcw__shape rcw__shape--inner" :cx="draft.cx" :cy="draft.cy" :rx="draft.r0" :ry="draft.r0 * canvasAspect" />
           <rect v-if="draft.r1Shape === 'square'" class="rcw__shape rcw__shape--outer" :x="draft.cx - draft.r1" :y="draft.cy - draft.r1 * canvasAspect" :width="draft.r1 * 2" :height="draft.r1 * 2 * canvasAspect" />
+          <polygon v-else-if="draft.r1Shape === 'hexagon'" class="rcw__shape rcw__shape--outer" :points="hexPointsAttr(draft.r1)" />
           <ellipse v-else class="rcw__shape rcw__shape--outer" :cx="draft.cx" :cy="draft.cy" :rx="draft.r1" :ry="draft.r1 * canvasAspect" />
         </template>
         <template v-if="step === 'switch'">
           <rect v-if="draft.r0Shape === 'square'" class="rcw__shape rcw__shape--ghost" :x="draft.cx - draft.r0" :y="draft.cy - draft.r0 * canvasAspect" :width="draft.r0 * 2" :height="draft.r0 * 2 * canvasAspect" />
+          <polygon v-else-if="draft.r0Shape === 'hexagon'" class="rcw__shape rcw__shape--ghost" :points="hexPointsAttr(draft.r0)" />
           <ellipse v-else class="rcw__shape rcw__shape--ghost" :cx="draft.cx" :cy="draft.cy" :rx="draft.r0" :ry="draft.r0 * canvasAspect" />
           <rect v-if="draft.r1Shape === 'square'" class="rcw__shape rcw__shape--ghost" :x="draft.cx - draft.r1" :y="draft.cy - draft.r1 * canvasAspect" :width="draft.r1 * 2" :height="draft.r1 * 2 * canvasAspect" />
+          <polygon v-else-if="draft.r1Shape === 'hexagon'" class="rcw__shape rcw__shape--ghost" :points="hexPointsAttr(draft.r1)" />
           <ellipse v-else class="rcw__shape rcw__shape--ghost" :cx="draft.cx" :cy="draft.cy" :rx="draft.r1" :ry="draft.r1 * canvasAspect" />
           <rect v-if="draft.r1Shape === 'square'" class="rcw__shape rcw__shape--preview" :x="draft.cx - switchPreview.hlR" :y="draft.cy - switchPreview.hlR * canvasAspect" :width="switchPreview.hlR * 2" :height="switchPreview.hlR * 2 * canvasAspect" :stroke-width="switchPreview.hlStrokeWidth" />
+          <polygon v-else-if="draft.r1Shape === 'hexagon'" class="rcw__shape rcw__shape--preview" :points="hexPointsAttr(switchPreview.hlR)" :stroke-width="switchPreview.hlStrokeWidth" />
           <ellipse v-else class="rcw__shape rcw__shape--preview" :cx="draft.cx" :cy="draft.cy" :rx="switchPreview.hlR" :ry="switchPreview.hlR * canvasAspect" :stroke-width="switchPreview.hlStrokeWidth" />
         </template>
         <path class="rcw__center" :d="`M${draft.cx - 3},${draft.cy} h6 M${draft.cx},${draft.cy - 3} v6`" />
@@ -320,6 +385,15 @@ defineExpose({ step, draft, canvasAspect, zoom })
       <div v-if="step === 'inner' || step === 'outer'" class="rcw__shapes">
         <button class="rcw__shapebtn" :class="{ 'rcw__shapebtn--active': currentShape === 'circle' }" :aria-pressed="currentShape === 'circle'" @click="setShape(shapeField, 'circle')">{{ t('reader.chart.wizardShapeCircle') }}</button>
         <button class="rcw__shapebtn" :class="{ 'rcw__shapebtn--active': currentShape === 'square' }" :aria-pressed="currentShape === 'square'" @click="setShape(shapeField, 'square')">{{ t('reader.chart.wizardShapeSquare') }}</button>
+        <button class="rcw__shapebtn" :class="{ 'rcw__shapebtn--active': currentShape === 'hexagon' }" :aria-pressed="currentShape === 'hexagon'" @click="setShape(shapeField, 'hexagon')">{{ t('reader.chart.wizardShapeHexagon') }}</button>
+      </div>
+
+      <!-- Orientation de l'hexagone : propriété du chart entier (draft.hexOrientation, pas
+           shapeField) — visible dès qu'une limite est hexagonale, même si ce n'est pas celle
+           de l'écran courant, pour que le choix reste accessible aux deux écrans. -->
+      <div v-if="draft.r0Shape === 'hexagon' || draft.r1Shape === 'hexagon'" class="rcw__orient">
+        <button class="rcw__orientbtn" :class="{ 'rcw__orientbtn--active': draft.hexOrientation !== 'pointy' }" :aria-pressed="draft.hexOrientation !== 'pointy'" @click="setOrientation('flat')">{{ t('reader.chart.wizardHexOrientationFlat') }}</button>
+        <button class="rcw__orientbtn" :class="{ 'rcw__orientbtn--active': draft.hexOrientation === 'pointy' }" :aria-pressed="draft.hexOrientation === 'pointy'" @click="setOrientation('pointy')">{{ t('reader.chart.wizardHexOrientationPointy') }}</button>
       </div>
 
       <div v-if="step === 'inner' || step === 'outer'" class="rcw__tools">
@@ -378,6 +452,10 @@ defineExpose({ step, draft, canvasAspect, zoom })
   place-items: center;
 }
 .rcw__guide--square { border-radius: 0; }
+/* Hexagone régulier "côté plat en haut" (clip-path standard) ; --pointy le tourne de 90°
+   pour un sommet en haut — même repère fixe, orientation seule change. */
+.rcw__guide--hexagon { border-radius: 0; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
+.rcw__guide--hexagon.rcw__guide--pointy { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
 .rcw__guide-cross { position: relative; width: 16px; height: 16px; }
 .rcw__guide-cross::before, .rcw__guide-cross::after { content: ''; position: absolute; background: var(--brand); }
 .rcw__guide-cross::before { left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; }
@@ -391,9 +469,9 @@ defineExpose({ step, draft, canvasAspect, zoom })
 .rcw__center { stroke: var(--brand); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .rcw__bar { padding: var(--sp-2) max(var(--sp-3), var(--sa-right)) max(var(--sp-2), var(--sa-bottom)) max(var(--sp-3), var(--sa-left)); color: #fff; background: rgb(20, 18, 16); }
 .rcw__hint { margin: 0 0 var(--sp-2); font-size: 12.5px; color: rgba(255, 255, 255, 0.8); }
-.rcw__shapes, .rcw__tools { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-2); }
-.rcw__shapebtn, .rcw__tool { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 40px; border: none; border-radius: var(--r-md); background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 12.5px; font-weight: 700; }
-.rcw__shapebtn--active, .rcw__tool--active { background: var(--brand); color: var(--on-accent); }
+.rcw__shapes, .rcw__tools, .rcw__orient { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.rcw__shapebtn, .rcw__tool, .rcw__orientbtn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 40px; border: none; border-radius: var(--r-md); background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 12.5px; font-weight: 700; }
+.rcw__shapebtn--active, .rcw__tool--active, .rcw__orientbtn--active { background: var(--brand); color: var(--on-accent); }
 .rcw__stepper, .rcw__dpad { display: flex; align-items: center; justify-content: center; gap: var(--sp-3); margin-bottom: var(--sp-2); }
 .rcw__stepbtn { width: 40px; height: 40px; border: none; border-radius: var(--r-md); background: rgba(255, 255, 255, 0.16); color: #fff; font-size: 20px; font-weight: 800; }
 .rcw__stepbtn:disabled { opacity: 0.35; }

@@ -7,7 +7,7 @@ import { buildPatternMdFiles } from './pattern-md-file'
 
 // Clés de reglages.json à ne JAMAIS sauvegarder : état volatil, propre à cet
 // appareil et à cette installation.
-const EXCLUDED_SETTINGS_KEYS = [
+export const EXCLUDED_SETTINGS_KEYS = [
   // Session de lecture/correction en cours : n'a de sens que sur CET appareil,
   // à cet instant. La restaurer ferait rouvrir une session qui n'existe plus.
   'activeSession',
@@ -27,6 +27,22 @@ const EXCLUDED_SETTINGS_KEYS = [
   // Réglages le chemin de l'ANCIEN appareil (« Documents/Rowtine ») — un dossier qui
   // n'existe pas ici, et pour toujours puisqu'il ne s'écrit qu'à la désignation.
   'safFolderLabel',
+  // Identifiants du projet et du patron d'exemple utilisés par la visite guidée (lot du
+  // 23/09/2026) : LOCAUX à cette base, comme `deviceId`/`safFolderLabel` ci-dessus.
+  // ATTENTION, le danger n'est PAS que ces clés partent dans la sauvegarde (exclues d'ici,
+  // elles n'y partent jamais) : c'est qu'ÉTANT exclues, elles NE SONT PAS écrasées par le
+  // snapshot restauré — `writeSnapshotToDb` (restore.js) FUSIONNE les réglages (garde ceux
+  // du snapshot, complète avec ceux qui manquent) au lieu de les remplacer, donc l'ANCIEN
+  // id local SURVIT tel quel à la fusion. Or `projects`/`patterns` (tables REMPLACÉES, pas
+  // fusionnées) peuvent désormais porter, au MÊME id, un vrai projet ou patron importé de
+  // la sauvegarde — la visite s'ouvrirait alors sur le travail de l'utilisatrice.
+  // `restore-service.js` efface donc ces deux clés explicitement après l'écriture du
+  // snapshot (même geste que `welcomeDue`/`restoredDue` juste à côté) ; `ensureTourProject`
+  // (src/utils/tour-sample.js) traite `null` comme absent et retrouve — ou recrée — le
+  // bonnet de démonstration sans elles, exactement comme une installation antérieure à
+  // cette fonctionnalité.
+  'tourProjectId',
+  'tourPatternId',
 ]
 
 // Une data URL que `parseDataUrl` REFUSE (il n'accepte que la forme base64) ne peut pas
@@ -56,7 +72,7 @@ function isInlineDataUrl(value) {
 // des fichiers à écrire (chemins relatifs à `dir`, pas encore préfixés).
 function buildPhotoFiles(photos, dir, { prefix = 'photo-' } = {}) {
   const names = []
-  const seen = new Map() // nom -> fichier déjà construit (dédup)
+  const seen = new Set() // noms déjà construits (dédup)
   const files = []
   photos.forEach((dataUrl, index) => {
     // Non analysable : la valeur elle-même prend la place du nom dans le JSON, et aucun
@@ -73,7 +89,7 @@ function buildPhotoFiles(photos, dir, { prefix = 'photo-' } = {}) {
     const parsed = parseDataUrl(dataUrl)
     const data = parsed ? parsed.base64 : ''
     const file = { path: `${dir}/${name}`, data, encoding: 'base64' }
-    seen.set(name, file)
+    seen.add(name)
     files.push(file)
   })
   return { names, files }
@@ -83,7 +99,7 @@ function buildPhotoFiles(photos, dir, { prefix = 'photo-' } = {}) {
 // fichier base64 dédupliqué ; les métadonnées (page/w/h) restent dans le JSON.
 function buildGalleryFiles(gallery, dir) {
   const items = []
-  const seen = new Map()
+  const seen = new Set()
   const files = []
   ;(gallery || []).forEach((g, index) => {
     // Même défaut, même correction que `buildPhotoFiles` : une image de galerie non
@@ -97,7 +113,7 @@ function buildGalleryFiles(gallery, dir) {
     if (seen.has(name)) return
     const parsed = parseDataUrl(g.src)
     const file = { path: `${dir}/${name}`, data: parsed ? parsed.base64 : '', encoding: 'base64' }
-    seen.set(name, file)
+    seen.add(name)
     files.push(file)
   })
   return { items, files }
@@ -281,7 +297,7 @@ export function serializePattern(pattern) {
 export const YARN_PHOTOS_DIR = 'Laines'
 
 export function serializeYarns(yarns) {
-  const seen = new Map() // nom -> fichier déjà construit (dédup par contenu)
+  const seen = new Set() // noms déjà construits (dédup par contenu)
   const files = []
   const photoNames = [] // noms référencés, dans l'ordre : sert au ménage des orphelines
   const yarnsJson = (yarns || []).map((yarn, index) => {
@@ -296,7 +312,7 @@ export function serializeYarns(yarns) {
         data: parsed ? parsed.base64 : '',
         encoding: 'base64',
       }
-      seen.set(name, file)
+      seen.add(name)
       files.push(file)
       photoNames.push(name)
     }

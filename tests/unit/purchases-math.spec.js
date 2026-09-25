@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest'
 import {
   emptyPurchase, lineAmount, totalsByCurrency, totalSkeins,
   acquiredFromStock, acquiredFromLines, stockGap, isPriceUnknown,
+  latestPurchaseDate, bainsOf,
 } from '@/utils/purchases'
 
 const buy = (over = {}) => ({ ...emptyPurchase(), kind: 'buy', currency: 'EUR', ...over })
@@ -25,6 +26,7 @@ describe('emptyPurchase()', () => {
       currency: '',
       date: '',
       bain: '',
+      purchasedFrom: '',
       reconstructed: false,
       category: 'yarn',
     })
@@ -34,6 +36,10 @@ describe('emptyPurchase()', () => {
 describe('montant d’une ligne', () => {
   it('achat : quantité × prix, virgule française acceptée', () => {
     expect(lineAmount(buy({ quantity: 4, unitPrice: '5,50' }))).toBe(22)
+  })
+  it('quantité saisie à la virgule : comptée, pas zéro', () => {
+    expect(lineAmount(buy({ quantity: '1,5', unitPrice: '8,00' }))).toBe(12)
+    expect(totalSkeins([buy({ quantity: '1,5' }), buy({ quantity: 2 })])).toBe(3.5)
   })
   it('cadeau : zéro même si un prix traîne dans la donnée', () => {
     expect(lineAmount(buy({ kind: 'gift', quantity: 3, unitPrice: '9,90' }))).toBe(0)
@@ -177,5 +183,46 @@ describe('groupByPeriod — identifiants mixtes (nombres et chaînes)', () => {
     expect(group.months[0].lines.map((l) => l.id)).toEqual([4, 2, 'pat:9'])
     expect(groupByPeriod(lines)[0].months[0].lines.map((l) => l.id)).toEqual([4, 2, 'pat:9'])
     expect(group.total).toEqual({ EUR: 51 })
+  })
+})
+
+// Dérivés du registre d'achats lus par la fiche détail, le tri du stock et l'export CSV :
+// `bain` et `purchasedAt` ont quitté la fiche de laine pour les lignes d'achat. Les nombres
+// et dates du jeu d'essai sont TOUS distincts, pour qu'une assertion fausse ait une chance
+// de rougir.
+describe('dérivés du registre d’achats', () => {
+  const line = (over = {}) => ({ ...emptyPurchase(), ...over })
+
+  describe('latestPurchaseDate()', () => {
+    it('renvoie la date la plus récente parmi des lignes non triées, une ligne sans date parmi elles', () => {
+      const lines = [line({ date: '2026-01-10' }), line({ date: '' }), line({ date: '2026-05-04' })]
+      expect(latestPurchaseDate(lines)).toBe('2026-05-04')
+    })
+
+    it('chaîne vide quand aucune ligne n’a de date', () => {
+      const lines = [line({ date: '' }), line({ date: '' })]
+      expect(latestPurchaseDate(lines)).toBe('')
+    })
+
+    it('chaîne vide sur un tableau vide, jamais undefined', () => {
+      expect(latestPurchaseDate([])).toBe('')
+      expect(latestPurchaseDate(undefined)).toBe('')
+    })
+  })
+
+  describe('bainsOf()', () => {
+    it('dédoublonne et joint les bains non vides, dans l’ordre d’apparition', () => {
+      const lines = [line({ bain: 'A12' }), line({ bain: '' }), line({ bain: 'A12' }), line({ bain: 'B03' })]
+      expect(bainsOf(lines)).toBe('A12 · B03')
+    })
+
+    it('chaîne vide quand aucune ligne n’a de bain', () => {
+      expect(bainsOf([line({ bain: '' }), line({ bain: '' })])).toBe('')
+    })
+
+    it('chaîne vide sur un tableau vide, jamais undefined', () => {
+      expect(bainsOf([])).toBe('')
+      expect(bainsOf(undefined)).toBe('')
+    })
   })
 })

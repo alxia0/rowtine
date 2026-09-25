@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — témoin « dernière séance de tricot » (`project.lastWorkedAt`), décision produit 25/07.
 // La tuile « Reprendre » de l'accueil doit suivre le dernier projet sur lequel on a réellement
 // AVANCÉ (coché un rang ou une section, avancé une grille, bougé un compteur) — et NON le dernier

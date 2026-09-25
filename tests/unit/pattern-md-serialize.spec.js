@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { patternToMd } from '@/utils/pattern-md/serialize'
+import { mdToPattern } from '@/utils/pattern-md/parse'
 import { buildReference } from '@/utils/reader-reference'
 
 const DATA_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
@@ -177,5 +178,52 @@ describe('isIntro (serialize.js) : id stable préféré au titre affiché', () =
     const { md } = patternToMd({ reader })
     expect(md).not.toMatch(/## Présentation/)
     expect(md).toMatch(/Texte historique\./)
+  })
+})
+
+describe('patternToMd → mdToPattern : titres et scalaires piégeux', () => {
+  const roundTrip = (pattern) => mdToPattern(patternToMd(pattern).md).pattern
+  const withSections = (sections, extra = {}) => ({
+    name: 'P', author: '', authorUrl: '', gallery: [],
+    reader: { sizeLabels: ['S', 'M'], sizeSub: [], sizeSubLabel: '', easeHint: '', sections },
+    ...extra,
+  })
+
+  // Protège : une section de kind par défaut garde son titre, son kind et son id quel que soit son titre.
+  it.each(['Fil', 'Conseils', 'Galerie', 'Matériel', 'Échantillon', 'Abréviations', 'Tailles', 'Techniques', 'Aiguilles', 'Rang {x}', 'Rang {x} ', ''])(
+    'section « %s » (kind par défaut) survit au round-trip',
+    (title) => {
+      const before = withSections([
+        { id: 'a', kind: 'corps', title: 'Avant', steps: [{ t: 'Monter.' }] },
+        { id: 'b', kind: 'pelote', title, steps: [{ t: 'Tricoter.' }] },
+      ])
+      const secs = roundTrip(before).reader.sections
+      expect(secs).toHaveLength(2)
+      expect(secs[1].title).toBe(title.trim())
+      expect(secs[1].kind || 'pelote').toBe('pelote')
+      expect(secs[1].steps.map((s) => s.t)).toEqual(['Tricoter.'])
+    },
+  )
+
+  it('titre ordinaire de kind par défaut : aucune balise ajoutée', () => {
+    const md = patternToMd(withSections([{ id: 'f', kind: 'pelote', title: 'Finitions', steps: [{ t: 'x' }] }])).md
+    expect(md).toContain('## Finitions\n')
+  })
+
+  // Protège : un saut de ligne dans un scalaire ne casse pas la structure du MD.
+  it('sauts de ligne remplacés par une espace (nom, titre, étape, taille)', () => {
+    const p = roundTrip(
+      withSections([{ id: 'c', kind: 'corps', title: 'Co\nrps', steps: [{ t: 'Monter\n## Fil' }, { t: 'Suite.' }] }], {
+        name: 'Mon\nauthor: X',
+        reader: { sizeLabels: ['S\nM', 'L · XL'], sizeSub: [], sizeSubLabel: '', easeHint: '', sections: [{ id: 'c', kind: 'corps', title: 'Co\nrps', steps: [{ t: 'Monter\n## Fil' }, { t: 'Suite.' }] }] },
+      }),
+    )
+    expect(p.name).toBe('Mon author: X')
+    expect(p.author).toBe('')
+    expect(p.reader.sizeLabels).toHaveLength(2)
+    expect(p.reader.sizeLabels[0]).toBe('S M')
+    expect(p.reader.sections).toHaveLength(1)
+    expect(p.reader.sections[0].title).toBe('Co rps')
+    expect(p.reader.sections[0].steps.map((s) => s.t)).toEqual(['Monter ## Fil', 'Suite.'])
   })
 })

@@ -1,0 +1,1 @@
+Wollvorrat aus einem Ravelry-Export (.xlsx) importieren: Status, Farbe, Käufe, Notizen, Aufbewahrungsort und „Gekauft bei“ für jeden Kauf. Verschiedene Anzeigekorrekturen.

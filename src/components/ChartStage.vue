@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { chartBands, chartRings, chartPathRows, DEFAULT_PATH_SPACING, nextChartPosition, curtainBand, retractCurtain, flipCurtainSide, chartMotifLabel } from '@/utils/reader'
+import { chartBands, chartRings, hexagonPoints, chartPathRows, DEFAULT_PATH_SPACING, nextChartPosition, curtainBand, retractCurtain, flipCurtainSide, chartMotifLabel } from '@/utils/reader'
 import { usePinchZoom } from '@/composables/usePinchZoom'
 import AppIcon from '@/components/AppIcon.vue'
 import RadialCalibrationWizard from '@/components/RadialCalibrationWizard.vue'
@@ -27,11 +27,16 @@ const draft = ref({ top: 0, bottom: 100 })
 const draftPath = ref({ points: [], spacing: DEFAULT_PATH_SPACING })
 let dragging = null // 'top' | 'bottom'
 
+// Arrondi au dixième, motif répété à chaque écriture de coordonnée/borne en pourcentage
+// dans ce fichier (poignées, points de tracé, rideau) — factorisé pour ne porter le calcul
+// qu'à un seul endroit.
+const round1 = (n) => Math.round(n * 10) / 10
+
 const chart = computed(() => props.chart || {})
 // Revue finale (31/07) : `chart.repeat` ne survit pas à un aller-retour Rowtine-MD
 // (import zip, synchro patron.md) — voir ReaderChart.vue et parse.js pour le détail.
 const motifLabel = computed(() => chartMotifLabel(chart.value, t))
-const isRadial = computed(() => chart.value.shape === 'radial-square' || chart.value.shape === 'radial-circle')
+const isRadial = computed(() => chart.value.shape === 'radial-square' || chart.value.shape === 'radial-circle' || chart.value.shape === 'radial-hexagon')
 const isPath = computed(() => chart.value.shape === 'path')
 const pathRows = computed(() =>
   chartPathRows(
@@ -41,6 +46,12 @@ const pathRows = computed(() =>
   ),
 )
 const rings = computed(() => chartRings(row.value, chart.value.rows, frame.value, chart.value.shape))
+const hexOrientation = computed(() => (frame.value?.hexOrientation === 'pointy' ? 'pointy' : 'flat'))
+function hexRingPoints(r) {
+  return hexagonPoints(rings.value.cx, rings.value.cy, r, hexOrientation.value, canvasAspect.value)
+    .map((p) => `${p.x},${p.y}`)
+    .join(' ')
+}
 // Le cadre SVG (viewBox 100×100, preserveAspectRatio="none") étire ses deux axes selon le
 // ratio réel du canvas — voir la note "Décision : compensation d'aspect" du plan. `ry` d'une
 // ellipse radial-circle en dépend ; lu ici plutôt que fixé à 1, mis à jour au montage et à
@@ -113,6 +124,9 @@ defineExpose({ focusViewport, canvasAspect, draftPath })
 // ─── Suivi rang/répétition ────────────────────────────────────────────────────
 function step(delta) {
   const next = nextChartPosition(chart.value, row.value, rep.value, delta)
+  // Borne atteinte (rang 1, ou dernier rang de la dernière répétition) : rien ne bouge,
+  // donc rien à émettre, sinon le parent persiste `worked: true` et inscrit un jour actif.
+  if (next.row === row.value && next.rep === rep.value) return
   if (next.rep !== rep.value) {
     rep.value = next.rep
     emit('update:rep', next.rep)
@@ -139,7 +153,11 @@ function startCalibrate() {
 function cancelCalibrate() {
   calibrating.value = false
 }
+// Tracé : moins de 2 repères ne décrit aucun rang. L'enregistrer effaçait l'affichage des
+// rangs ET l'invite de calage (le `frame` n'étant plus nul), sans aucun signal.
+const pathTooShort = computed(() => isPath.value && draftPath.value.points.length < 2)
 function saveCalibrate() {
+  if (pathTooShort.value) return
   calibrating.value = false
   const next = isPath.value
     ? { points: draftPath.value.points.map((p) => ({ x: p.x, y: p.y })), spacing: draftPath.value.spacing }
@@ -168,7 +186,7 @@ function onHandleMove(e) {
   const d = draft.value
   if (dragging === 'top') d.top = Math.min(pct, d.bottom - 5)
   else d.bottom = Math.max(pct, d.top + 5)
-  draft.value = { top: Math.round(d.top * 10) / 10, bottom: Math.round(d.bottom * 10) / 10 }
+  draft.value = { top: round1(d.top), bottom: round1(d.bottom) }
 }
 function onHandleUp() {
   dragging = null
@@ -186,7 +204,7 @@ function onHandleKey(which, e) {
   const d = { ...draft.value }
   if (which === 'top') d.top = Math.max(0, Math.min(d.bottom - 5, d.top + dir * STEP))
   else d.bottom = Math.min(100, Math.max(d.top + 5, d.bottom + dir * STEP))
-  draft.value = { top: Math.round(d.top * 10) / 10, bottom: Math.round(d.bottom * 10) / 10 }
+  draft.value = { top: round1(d.top), bottom: round1(d.bottom) }
 }
 
 // ─── Mode caler par tracé (pose/déplace/supprime des repères + espacement) ─────────────────
@@ -218,7 +236,7 @@ function onPathCanvasUp(e) {
   const py = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100))
   draftPath.value = {
     ...draftPath.value,
-    points: [...draftPath.value.points, { x: Math.round(px * 10) / 10, y: Math.round(py * 10) / 10 }],
+    points: [...draftPath.value.points, { x: round1(px), y: round1(py) }],
   }
 }
 let draggingPointIndex = null
@@ -237,7 +255,7 @@ function onPathPointMove(e) {
   const px = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))
   const py = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100))
   const points = draftPath.value.points.slice()
-  points[draggingPointIndex] = { x: Math.round(px * 10) / 10, y: Math.round(py * 10) / 10 }
+  points[draggingPointIndex] = { x: round1(px), y: round1(py) }
   draftPath.value = { ...draftPath.value, points }
 }
 function onPathPointUp() {
@@ -272,14 +290,14 @@ function onPathPointKey(index, e) {
   else if (e.key === 'ArrowDown') p.y = Math.min(100, p.y + STEP)
   else return
   e.preventDefault()
-  points[index] = { x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }
+  points[index] = { x: round1(p.x), y: round1(p.y) }
   draftPath.value = { ...draftPath.value, points }
 }
 function decSpacing() {
-  draftPath.value = { ...draftPath.value, spacing: Math.max(1, Math.round((draftPath.value.spacing - 0.5) * 10) / 10) }
+  draftPath.value = { ...draftPath.value, spacing: Math.max(1, round1(draftPath.value.spacing - 0.5)) }
 }
 function incSpacing() {
-  draftPath.value = { ...draftPath.value, spacing: Math.min(9, Math.round((draftPath.value.spacing + 0.5) * 10) / 10) }
+  draftPath.value = { ...draftPath.value, spacing: Math.min(9, round1(draftPath.value.spacing + 0.5)) }
 }
 
 // ─── Rideau : drag pleine hauteur (touch-action pan-y — le défilement vertical natif reste
@@ -304,9 +322,13 @@ function incSpacing() {
 // réel d'un vrai drag dépasse largement le seuil de tap du composable, qui le classe donc
 // en pan, jamais en tap — pas de risque de double-tap fantôme.
 let curtainDragging = false
+// Position au posé du doigt : un appui SANS glisser ne change rien, il n'émet donc rien
+// (le parent persisterait sinon `worked: true`, un jour actif pour un simple toucher).
+let curtainAtDown = null
 function onCurtainDown(e) {
   if (activePointers() > 0) return // un doigt déjà posé ailleurs = pincement en cours, pas un drag
   curtainDragging = true
+  curtainAtDown = JSON.stringify(curtain.value)
   e.target.setPointerCapture?.(e.pointerId)
 }
 function onCurtainMove(e) {
@@ -314,11 +336,12 @@ function onCurtainMove(e) {
   if (activePointers() >= 2) { curtainDragging = false; return } // 2e doigt arrivé depuis : on cède au pincement
   const r = canvasEl.value.getBoundingClientRect()
   const pct = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100))
-  curtain.value = { x: Math.round(pct * 10) / 10, side: effectiveCurtain.value.side }
+  curtain.value = { x: round1(pct), side: effectiveCurtain.value.side }
 }
 function onCurtainUp() {
   if (!curtainDragging) return
   curtainDragging = false
+  if (JSON.stringify(curtain.value) === curtainAtDown) return
   emit('update:curtain', curtain.value)
 }
 function onCurtainKey(e) {
@@ -330,7 +353,7 @@ function onCurtainKey(e) {
   e.preventDefault()
   const base = effectiveCurtain.value
   const x = Math.max(0, Math.min(100, base.x + dir * STEP))
-  curtain.value = { x: Math.round(x * 10) / 10, side: base.side }
+  curtain.value = { x: round1(x), side: base.side }
   emit('update:curtain', curtain.value)
 }
 function flipCurtain() {
@@ -379,6 +402,9 @@ function flipCurtain() {
             <ellipse v-if="rings.doneShape === 'circle' && !calibrating" class="cfs__ring cfs__ring--done" :cx="rings.cx" :cy="rings.cy" :rx="rings.doneR" :ry="rings.doneR * canvasAspect" :stroke-width="rings.doneStrokeWidth" />
             <ellipse v-if="rings.hlShape === 'circle'" class="cfs__ring cfs__ring--hl-edge" :cx="rings.cx" :cy="rings.cy" :rx="rings.hlR" :ry="rings.hlR * canvasAspect" :stroke-width="rings.hlStrokeWidth + 3" />
             <ellipse v-if="rings.hlShape === 'circle'" class="cfs__ring cfs__ring--hl" :class="{ 'cfs__ring--calibrating': calibrating }" :cx="rings.cx" :cy="rings.cy" :rx="rings.hlR" :ry="rings.hlR * canvasAspect" :stroke-width="rings.hlStrokeWidth" />
+            <polygon v-if="rings.doneShape === 'hexagon' && !calibrating" class="cfs__ring cfs__ring--done" :points="hexRingPoints(rings.doneR)" :stroke-width="rings.doneStrokeWidth" />
+            <polygon v-if="rings.hlShape === 'hexagon'" class="cfs__ring cfs__ring--hl-edge" :points="hexRingPoints(rings.hlR)" :stroke-width="rings.hlStrokeWidth + 3" />
+            <polygon v-if="rings.hlShape === 'hexagon'" class="cfs__ring cfs__ring--hl" :class="{ 'cfs__ring--calibrating': calibrating }" :points="hexRingPoints(rings.hlR)" :stroke-width="rings.hlStrokeWidth" />
           </svg>
           <svg v-else-if="isPath" class="cfs__path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polyline
@@ -473,7 +499,7 @@ function flipCurtain() {
       <div class="cfs__calbtns">
         <button class="btn cfs__calreset" @click="resetCalibrate">{{ t('reader.chart.calibrateReset') }}</button>
         <button class="btn cfs__calcancel" @click="cancelCalibrate">{{ t('reader.chart.calibrateCancel') }}</button>
-        <button class="btn primary cfs__calsave" @click="saveCalibrate">{{ t('reader.chart.calibrateSave') }}</button>
+        <button class="btn primary cfs__calsave" :disabled="pathTooShort" @click="saveCalibrate">{{ t('reader.chart.calibrateSave') }}</button>
       </div>
     </div>
     <!-- `!calibrating` explicite : la barre de calage juste au-dessus est conditionnée à
@@ -482,7 +508,7 @@ function flipCurtain() {
          frère en flux, pas un calque), et son `+` écrivait `persist({ worked: true })` depuis
          ce que l'utilisatrice lit comme un écran de réglage. -->
     <div v-else-if="!calibrating && !readOnly && hasRows" class="cfs__rowbar">
-      <button class="cfs__big cfs__prev" :disabled="row <= 1 && rep <= 1" :aria-label="t('reader.chart.prev')" @click="step(-1)"><AppIcon name="minus" :size="22" /></button>
+      <button class="cfs__big cfs__prev" :disabled="row <= 1" :aria-label="t('reader.chart.prev')" @click="step(-1)"><AppIcon name="minus" :size="22" /></button>
       <div class="cfs__vals">
         <span class="cfs__rowval">{{ row }} / {{ chart.rows }}</span>
         <span v-if="Number(chart.reps) > 0" class="cfs__repval">{{ rep }} / {{ chart.reps }}</span>

@@ -1,4 +1,4 @@
-// Les 4 onglets de la fiche projet (Sections/Détails/Galerie/Sessions) débordent sur un
+// Les 4 onglets de la fiche projet (Sections/Détails/Photos/Sessions) débordent sur un
 // écran étroit — le défilement horizontal EXISTE déjà (`.tabs { overflow-x: auto }`), mais
 // la barre de scroll est masquée volontairement (`scrollbar-width: none`) : rien ne dit
 // donc que « Sessions », coupé à droite, est atteignable. On vérifie ici l'indice de

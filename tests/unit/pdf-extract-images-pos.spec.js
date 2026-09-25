@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // Mock pdfjs : une page avec save → transform(échelle+position) → paint → restore.

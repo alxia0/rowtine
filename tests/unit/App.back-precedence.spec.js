@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, retour Android vs pop-up sélecteur de couleur (deuxième revue,
 // Important). Avant ce correctif, le handler `backButton` ne consultait que chartZoom et
 // lightbox : avec le pop-up ColorPickerDialog ouvert (StashView), Back naviguait hors de

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Voile de correction posé sur une carte du lecteur. Deux cibles centrées, un
 // appui sur le voile lui-même le retire, et le voile se retire aussi tout
 // seul après 3 secondes d'inactivité (retouche 2026-08-21). Aucun glyphe :
@@ -7,6 +8,9 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import i18n from '@/i18n'
 import ReaderFixOverlay from '@/components/ReaderFixOverlay.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 function mountOverlay() {
   return mount(ReaderFixOverlay, { global: { plugins: [i18n] } })
@@ -19,11 +23,11 @@ afterEach(() => {
 describe('ReaderFixOverlay', () => {
   it('porte un bouton Corriger et un bouton Fermer nommé', () => {
     const w = mountOverlay()
-    expect(w.find('.rfix__do').text()).toBe('Corriger')
+    expect(w.find('.rfix__do').text()).toBe(tk('reader.fixHere'))
     // Round 2 (essai réel) : le nom accessible vient du texte affiché, plus
     // d'un aria-label qui le doublerait (WCAG 2.5.3, Label in Name).
     expect(w.find('.rfix__close').attributes('aria-label')).toBeUndefined()
-    expect(w.find('.rfix__close').text()).toBe('Fermer')
+    expect(w.find('.rfix__close').text()).toBe(tk('common.close'))
   })
 
   it('« Corriger » émet fix, et rien d’autre', async () => {

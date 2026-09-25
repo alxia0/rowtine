@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — HomeView : tuile « Dernières sessions » (T5, 31/08 ; ligne
 // « {jour} · {durée} » ajoutée par T4, 31/08 soir). Rendu CONDITIONNEL uniquement : la tuile
 // n'existe que s'il y a au moins une séance, et montre au plus 2 séances (nom du projet en
@@ -5,8 +6,7 @@
 // limite vivent dans le store (`recentSessions`, couvert par sessions.store.spec.js) :
 // ici, l'action est stubbée (createTestingPinia) et retourne la fixture directement.
 //
-// Montage calqué sur tests/unit/home-budget-tile.spec.js : pas de base Dexie réelle,
-// l'état du composant ne dépend QUE de ce que le stub renvoie.
+// Pas de base Dexie réelle : l'état du composant ne dépend QUE de ce que le stub renvoie.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
@@ -15,8 +15,10 @@ import HomeView from '@/views/HomeView.vue'
 import { useSessionsStore } from '@/stores/sessions'
 import { useProjectsStore } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
-import { usePurchasesStore } from '@/stores/purchases'
 import { usePatternsStore } from '@/stores/patterns'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const nav = vi.hoisted(() => ({ router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() } }))
 vi.mock('vue-router', () => ({ useRouter: () => nav.router }))
@@ -28,17 +30,13 @@ async function mountHome({ recent = [] } = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn })
   const sessionsStore = useSessionsStore(pinia)
   sessionsStore.recentSessions.mockResolvedValue(recent)
-  // Les autres lectures du onMounted : vides, pour isoler la tuile sessions
-  // (hasPurchases faux → tuile budget absente, aucune interférence de sélecteur).
+  // Les autres lectures du onMounted : vides, pour isoler la tuile sessions.
   const projectsStore = useProjectsStore(pinia)
   projectsStore.projects = []
   projectsStore.loaded = true
   const yarnsStore = useYarnsStore(pinia)
   yarnsStore.yarns = []
   yarnsStore.loaded = true
-  const purchasesStore = usePurchasesStore(pinia)
-  purchasesStore.purchases = []
-  purchasesStore.loaded = true
   const patternsStore = usePatternsStore(pinia)
   patternsStore.patterns = []
   patternsStore.loaded = true
@@ -98,8 +96,8 @@ describe('HomeView — tuile dernières sessions', () => {
       recent: [{ id: 1, projectId: 1, date: '2026-08-30T10:00:00', durationSec: 600, projectName: 'Échantillon' }],
     })
     const tile = sessionsTile(w)
-    // Même règle WCAG 2.5.3 que les tuiles « cette semaine » et « budget » : pas
-    // d'aria-label, sinon le nom lisible écraserait les durées affichées.
+    // Même règle WCAG 2.5.3 que la tuile « cette semaine » : pas d'aria-label,
+    // sinon le nom lisible écraserait les durées affichées.
     expect(tile.attributes('aria-label')).toBeUndefined()
     await tile.trigger('click')
     expect(nav.router.push).toHaveBeenCalledWith({ name: 'sessions' })
@@ -109,6 +107,6 @@ describe('HomeView — tuile dernières sessions', () => {
     const w = await mountHome({
       recent: [{ id: 9, projectId: 42, date: '2026-08-28T10:00:00', durationSec: 600, projectName: '' }],
     })
-    expect(sessionsTile(w).find('.tile__row-name').text()).toBe('Projet supprimé')
+    expect(sessionsTile(w).find('.tile__row-name').text()).toBe(tk('sessions.unknownProject'))
   })
 })

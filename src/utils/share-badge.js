@@ -6,15 +6,13 @@
 // URI n'étant pas partageable tel quel par le plugin Share, on l'écrit d'abord en fichier
 // cache pour obtenir un vrai URI.
 import { Capacitor } from '@capacitor/core'
-import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
+import { writeDataUrlToCacheFile } from './cache-file'
 
 export async function shareImageDataUrl(dataUrl, { title = '', filename = 'badge.jpg' } = {}) {
   try {
     if (Capacitor.isNativePlatform()) {
-      const base64 = dataUrl.split(',')[1] || ''
-      await Filesystem.writeFile({ path: filename, data: base64, directory: Directory.Cache })
-      const { uri } = await Filesystem.getUri({ path: filename, directory: Directory.Cache })
+      const uri = await writeDataUrlToCacheFile(dataUrl, filename)
       await Share.share({ files: [uri], title })
     } else {
       await Share.share({ url: dataUrl, title })

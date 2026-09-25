@@ -1,12 +1,13 @@
+// @vitest-environment jsdom
 // Unitaire — YarnCard : ouverture de la fiche (tap sur la ligne) + affichage badges/labels.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import YarnCard from '@/components/YarnCard.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const YARN = { id: 42, brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu', quantity: 2 }
 const USAGE = { state: 'free', used: 0, total: 0 }
 

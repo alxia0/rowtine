@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
 import { validateReader } from '@/utils/reader'
 import { isKind } from '@/utils/section-kinds'

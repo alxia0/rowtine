@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Après revue — les puces cliquables du texte (CounterWidget,
 // SectionKindWidget) étaient `role="button" tabindex="0"` avec un SEUL écouteur
 // `click` : atteignables au Tab (annoncées comme bouton par un lecteur d'écran)
@@ -72,6 +73,37 @@ describe('Puces du texte — activation clavier (Entrée/Espace)', () => {
     expect(counterChip.tabIndex).toBe(0)
     expect(sectionChip.getAttribute('role')).toBe('button')
     expect(counterChip.getAttribute('role')).toBe('button')
+    host.remove()
+  })
+})
+
+// Protège : une puce réutilisée par CodeMirror (même offset, lignes décalées au-dessus) agit sur SA ligne.
+describe('Puces du texte : ligne résolue au clic', () => {
+  it('CounterWidget : après une fusion de lignes au-dessus (offset inchangé), la puce ouvre SA valeur', () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const editor = createCmEditor(host, { value: 'a\nb\n- {×3} x\n- {×5} y\n' })
+    // « a\nb » → « abc » : même longueur, une ligne de moins au-dessus des puces.
+    editor.view.dispatch({ changes: { from: 0, to: 3, insert: 'abc' } })
+    const chip = [...host.querySelectorAll('.cm-counter-chip')].find((el) => el.textContent.includes('3'))
+    chip.click()
+    expect(document.querySelector('.cm-numprompt__input').value).toBe('3')
+    document.querySelector('.cm-numprompt__input').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    host.remove()
+  })
+
+  it('SectionKindWidget : après la même fusion, la puce retague SON titre, pas le voisin', () => {
+    const host = document.createElement('div')
+    document.body.appendChild(host)
+    const editor = createCmEditor(host, { value: 'a\nb\n## Corps\n## Bordure\n' })
+    editor.view.dispatch({ changes: { from: 0, to: 3, insert: 'abc' } })
+    host.querySelectorAll('.cm-section-kind-chip')[0].click() // puce de « ## Corps »
+    const item = [...document.querySelectorAll('.cm-menu-popover__item')].find((b) => b.textContent === 'Manche')
+    item.click()
+    const lignes = editor.getValue().split('\n')
+    expect(lignes[1]).toMatch(/^## Corps \{\w+\}$/)
+    expect(lignes[2]).toBe('## Bordure')
+    document.querySelectorAll('.cm-menu-popover, .cm-menu-popover-scrim').forEach((el) => el.remove())
     host.remove()
   })
 })

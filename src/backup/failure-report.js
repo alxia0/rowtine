@@ -34,6 +34,8 @@ const AUTO_BACKUP_FAILURE_TITLE = 'Enregistrement automatique des données Rowti
 // choisit par `kind` sans les recopier.
 export const RESTORE_FAILURE_REPORT_TITLE = 'Restauration des données — échec'
 export const RESTORE_UNOWNED_REPORT_TITLE = 'Restauration des données — reprise du dossier non confirmée'
+// Restauration partielle (écarts de lecture, dossier non repris) : cf. RestoreErrorDialog.
+export const RESTORE_PARTIAL_REPORT_TITLE = 'Restauration des données, incomplète'
 
 // Date/heure LOCALE au format ISO 8601 avec décalage (2026-09-05T18:42:10+02:00).
 // `toISOString()` serait trompeur : il tranche en UTC et fabrique des

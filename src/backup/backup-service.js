@@ -85,8 +85,9 @@ export function isAutoBackupRunning() {
   return backupRunning
 }
 
-// Anti-boucle : toute la collecte+écriture tourne sous
-// `suppressAutoBackup` — `setSetting('lastBackupAt')` ci-dessous est lui-même
+// Anti-boucle : les écritures DB propres à la sauvegarde tournent sous
+// `suppressAutoBackup` (pas la collecte ni l'écriture SAF, cf.
+// `runBackupSerialized`) — `setSetting('lastBackupAt')` ci-dessous est lui-même
 // une écriture DB qui, sans cette suppression, réarmerait indéfiniment la
 // sauvegarde débouncée via le hook Dexie (`src/db/db.js`).
 export function runBackup(options = {}) {
@@ -135,11 +136,21 @@ async function runBackupSerialized({ force = false, overwriteBackup = false, onP
   try {
     const { isSyncRunning, whenSyncIdle } = await import('./patron-md-sync')
     if (isSyncRunning()) await whenSyncIdle()
-    return await suppressAutoBackup(async () => {
-      try {
+    // SUPPRESSION EN DEUX MORCEAUX, PAS AUTOUR DE TOUT LE PASSAGE. Elle n'existe que
+    // pour les écritures DB de la sauvegarde ELLE-MÊME (`lastBackupAt`, décision,
+    // identifiant d'appareil créé au premier appel) — cf. `runBackup`. Posée autour de
+    // la collecte et de l'écriture SAF (des dizaines de secondes), elle avalait aussi les
+    // mutations de l'utilisatrice faites PENDANT ce temps : postérieures à la collecte,
+    // absentes du snapshot, et jamais programmées (`scheduleAutoBackup` sort sans rien
+    // armer sous suppression) — le dossier restait sur l'état antérieur jusqu'à la
+    // mutation suivante, `flushAutoBackup` n'ayant rien à envoyer à la mise en veille.
+    // Hors suppression, une telle mutation arme le débounce, et le passage suivant
+    // prend son rang dans `backupChain` derrière celui-ci.
+    try {
+      const pre = await suppressAutoBackup(async () => {
         const storage = await getBackupStorage()
-        if (!storage) return { ok: false, skipped: 'web' }
-        if (!(await getBackupPermissionOk())) return { ok: false, skipped: 'permission' }
+        if (!storage) return { done: { ok: false, skipped: 'web' } }
+        if (!(await getBackupPermissionOk())) return { done: { ok: false, skipped: 'permission' } }
 
         // Garde anti-écrasement. Posée ICI, à l'entrée du
         // point destructeur, et non dans `callRunBackup` : l'en-tête de ce fichier
@@ -153,7 +164,7 @@ async function runBackupSerialized({ force = false, overwriteBackup = false, onP
         // « Synchroniser maintenant », qui doit rester soumis à la garde.
         const { isBackupPaused } = await import('./backup-pause')
         if (!overwriteBackup && (await isBackupPaused(storage))) {
-          return { ok: false, skipped: 'restorable' }
+          return { done: { ok: false, skipped: 'restorable' } }
         }
 
         // Le dossier était-il vide AVANT cette écriture ? Décisif : c'est le seul cas
@@ -170,9 +181,15 @@ async function runBackupSerialized({ force = false, overwriteBackup = false, onP
         // nouveau mode d'échec (une erreur de LECTURE sur `hasBackup` ferait échouer une
         // écriture qui, elle, aurait réussi).
         const folderWasEmpty = overwriteBackup ? false : !(await hasBackup(storage))
+        return { storage, folderWasEmpty }
+      })
+      if (pre.done) return pre.done
+      const { storage, folderWasEmpty } = pre
 
-        const snapshot = await collectBackupData()
-        await backupAll(storage, snapshot, { onProgress })
+      const snapshot = await collectBackupData()
+      await backupAll(storage, snapshot, { onProgress })
+
+      return await suppressAutoBackup(async () => {
         await setSetting('lastBackupAt', new Date().toISOString())
 
         // Fiche d'identité (depuis le 06/08/2026) — écrite EN DERNIER, exprès : sa date doit
@@ -207,10 +224,10 @@ async function runBackupSerialized({ force = false, overwriteBackup = false, onP
         }
 
         return { ok: true }
-      } catch (e) {
-        return { ok: false, error: e?.message || String(e) }
-      }
-    })
+      })
+    } catch (e) {
+      return { ok: false, error: e?.message || String(e) }
+    }
   } finally {
     backupRunning = false
   }

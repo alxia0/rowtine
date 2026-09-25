@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aucune donnée de Rowtine ne quitte l'appareil par les mécanismes Android (décision du
+     06/09, app 100 % hors ligne) : ni sauvegarde dans le nuage, ni transfert d'appareil à
+     appareil. La seule sauvegarde est le dossier choisi par l'utilisatrice. Une base
+     remise en place par Android bloquerait en outre la restauration depuis ce dossier
+     (la garde « base non vide » la refuserait). Lu à partir d'Android 12 (API 31) ;
+     en dessous, `android:allowBackup="false"` suffit. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+        <exclude domain="external" path="." />
+        <exclude domain="device_root" path="." />
+        <exclude domain="device_file" path="." />
+        <exclude domain="device_database" path="." />
+        <exclude domain="device_sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>

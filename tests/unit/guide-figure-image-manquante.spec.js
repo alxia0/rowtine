@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Guide, figures agrandissables (lot du 11/08, §6) — LE CAS D'UNE FIGURE DONT LA
 // CAPTURE N'EXISTE PAS ENCORE.
 //
@@ -29,7 +30,10 @@ vi.mock('@/content/guide/images', () => ({
 // `useRoute()` au montage pour lire `route.query.section` — voir le même mock, avec la même
 // justification, dans GuideView.spec.js. Sans lui, `route.query.section` lève sur `undefined`
 // à chaque montage de ce fichier (aucun routeur n'est installé ci-dessous non plus).
-vi.mock('vue-router', () => ({ useRoute: () => ({ query: {} }) }))
+// `useRouter` (lot « visite guidée », 23/09/2026) : GuideView.vue appelle aussi
+// `useStartTour()` au montage désormais, qui résout `useRouter()` — même correctif que
+// GuideView.spec.js.
+vi.mock('vue-router', () => ({ useRoute: () => ({ query: {} }), useRouter: () => ({ push: vi.fn() }) }))
 
 // Importé APRÈS les mocks (hissés par Vitest) pour que la vue consomme bien le faux résolveur.
 const GuideView = (await import('@/views/GuideView.vue')).default

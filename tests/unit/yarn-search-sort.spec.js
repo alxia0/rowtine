@@ -73,7 +73,7 @@ describe('recherche de laine', () => {
 // dégénérait silencieusement en fin de liste, pour toujours (revue précédente).
 describe('tri du stock par date d’achat', () => {
   // Une seule ligne par laine ici (le cas multi-lignes — « la plus récente compte » —
-  // est couvert par latestPurchaseDate lui-même, tests/unit/yarn-purchases-derived.spec.js).
+  // est couvert par latestPurchaseDate lui-même, tests/unit/purchases-math.spec.js).
   // Dates et marques toutes distinctes (règle du projet) : aucune coïncidence qui
   // laisserait passer un tri faux.
   const linesById = {

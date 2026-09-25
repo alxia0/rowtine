@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // ChronoPill — zone chevron ▾ et mini-menu « Masquer le chrono » (spec 08/09/2026,
 // variante B : fusion du bouton œil dans la pastille). La pastille reste SANS
 // politique : le corps émet `toggle` (lecture/pause), la zone chevron ouvre un

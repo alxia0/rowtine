@@ -4,19 +4,27 @@
       "id": "section-0",
       "title": [
         {
-          "text": "L'esprit de {app}",
+          "text": "{app} en 4 étapes",
           "bold": false,
           "italic": false
         }
       ],
       "blocks": [
         {
-          "type": "image",
-          "src": "00-bienvenue",
-          "alt": "« Bienvenue sur {app} », et dessous « Tes projets tricot et crochet au fil du temps » : Français, Tricot, Système et Métrique (m, g) déjà retenus, et le bouton « Prêt·e ? Commence à tricoter ! » en bas",
-          "caption": [
+          "type": "paragraph",
+          "spans": [
             {
-              "text": "La toute première ouverture : prénom, technique, langue et thème.",
+              "text": "{app} n'est pas un classeur de PDF. C'est un lecteur interactif qui te fait suivre ton patron : il ne t'affiche que les chiffres de ta taille et se souvient de chaque étape que tu as faite. Tu importes ton patron une fois, puis tu tricotes ou crochètes sans jamais avoir à rouvrir le PDF.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "1. Importe ton patron",
               "bold": false,
               "italic": false
             }
@@ -26,17 +34,87 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "{app} t'aide à garder tous tes projets de tricot et de crochet au même endroit : ta laine, tes patrons adaptés à ta taille et ta progression. Elle est ",
+              "text": "Depuis la bibliothèque, choisis un PDF. {app} le lit pour toi : sections, rangs, tailles, abréviations et diagrammes. Tout se passe sur ton appareil. Voir le chapitre 4.",
               "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
             {
-              "text": "gratuite, libre et fonctionne hors ligne",
-              "bold": true,
+              "text": "2. Crée un projet et choisis ta taille",
+              "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
             {
-              "text": " : tes données restent sur ton appareil, pas sur un serveur. Rien n'est jamais perdu par erreur : tout ce que tu supprimes se retrouve dans une corbeille.",
+              "text": "Sur la fiche du patron, « Créer un projet à partir de ce patron ». Dans le lecteur, sélectionne ta taille : chaque « 88 (96) 104 » s'adapte pour afficher uniquement ton chiffre.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Un patron importé sert autant de fois que tu veux : un gilet vert en L pour toi, un rouge en M pour ta sœur. Chaque projet garde sa taille, sa laine et son avancement, et le prix du patron n'est compté qu'une fois. Voir le chapitre 2.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "3. Tricote ou crochète avec le lecteur",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "C'est ici que tout se joue. Coche chaque étape faite : la progression avance et tu reprends exactement où tu en étais grâce à « Revenir à mon étape ». Le diagramme suit ton rang, les définitions des abréviations apparaissent en touchant les termes soulignés dans le texte. Voir le chapitre 3.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "4. Garde la trace",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Le chrono enregistre tes sessions, l'onglet Photos garde les images du patron et tes propres photos, les statistiques résument ton activité sur le projet, et un badge se partage en un geste. Voir les chapitres 2 et 7.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Pour essayer tout de suite : le bouton « Revoir la visite guidée », juste en dessous et dans les Réglages, ouvre le bonnet d'exemple dans le lecteur avec des bulles d'explication.",
               "bold": false,
               "italic": false
             }
@@ -57,7 +135,7 @@
         {
           "type": "image",
           "src": "01-accueil",
-          "alt": "L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur le projet Bonnet d'hiver à 0 %, puis le tableau de bord (1 en cours, durée de la semaine, dernière session datée d'aujourd'hui, budget dépensé) et les outils Compteur, Calculateur, Aiguilles",
+          "alt": "L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur et Aiguilles",
           "caption": [
             {
               "text": "L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les trois outils sont à portée de pouce.",
@@ -128,7 +206,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : combien de projets sont en cours, ton temps passé à tricoter ou crocheter cette semaine (avec le détail dans ",
+                  "text": " : combien de projets sont en cours, et ton temps passé à tricoter ou crocheter cette semaine (avec le détail dans ",
                   "bold": false,
                   "italic": false
                 },
@@ -138,57 +216,7 @@
                   "italic": false
                 },
                 {
-                  "text": "), et ton ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "budget dépensé",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": " : le total de tout ce que tu as payé pour ta laine depuis que tu utilises l'app, dans la devise que tu as choisie. Ce chiffre ne redescend jamais tout seul : consommer une pelote ou terminer un projet ne le fait pas baisser (seul un nouvel achat le fait monter) ; il ne peut baisser que si tu supprimes ou corriges toi-même une ligne d'achat dans le bloc « Achats et cadeaux » d'une fiche de laine (point 5). (Si tu as plusieurs devises, chacune a son propre total : l'app ne les mélange pas, faute de connaître un taux de change.) En touchant ce chiffre, tu ouvres l'écran ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Dépenses",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ", décrit au point 5. Cette tuile n'apparaît pas tant qu'aucun achat n'a encore été enregistré (par exemple sur une app toute neuve) ; l'écran reste joignable par le menu à tout moment.",
-                  "bold": false,
-                  "italic": false
-                }
-              ],
-              "children": null
-            },
-            {
-              "spans": [
-                {
-                  "text": "Ce chiffre est différent de la ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "valeur de ton stock",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ", affichée dans l'écran ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Stock de laine",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": " (point 5) : celle-là suit ce que tu as actuellement dans tes placards et baisse quand tu utilises une pelote. Les deux chiffres cohabitent volontairement : l'un raconte ce que tu as dépensé, l'autre ce qu'il te reste.",
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }
@@ -464,7 +492,7 @@
         {
           "type": "image",
           "src": "02b-projet-prix-patron",
-          "alt": "Le formulaire Nouveau projet sur Bonnet d'hiver : sous le patron Bonnet Torsade, « Prix du patron (€) » affiche 12 à côté du bouton « Gratuit », « Date d'achat » le 12/08/2026, et Statut sur En attente",
+          "alt": "Le formulaire Nouveau projet sur Bonnet d'hiver : sous le patron Bonnet Torsade, « Prix du patron (€) » affiche 12 à côté du bouton « Gratuit », « Date d'achat » le 24/09/2026, Statut sur En attente et l'interrupteur « Afficher le chronomètre » activé",
           "caption": [
             {
               "text": "Sous le choix du patron : son prix, un bouton « Gratuit » et la date d'achat, pré-remplie à aujourd'hui.",
@@ -530,7 +558,7 @@
             {
               "spans": [
                 {
-                  "text": "Galerie",
+                  "text": "Photos",
                   "bold": true,
                   "italic": false
                 },
@@ -628,7 +656,7 @@
               "italic": false
             },
             {
-              "text": " (icône verticale à trois points) de la fiche projet ou la case à cocher « Chrono » du formulaire d'édition.",
+              "text": " (icône verticale à trois points) de la fiche projet ou l'interrupteur « Afficher le chronomètre » du formulaire d'édition.",
               "bold": false,
               "italic": false
             }
@@ -794,7 +822,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Cet écran ne fait que consulter : c'est sur la fiche du projet, dans son onglet Sessions, qu'une session se rectifie ou s'efface. Pas de filtre, pas de regroupement : c'est une première version, volontairement simple.",
+              "text": "Cet écran ne fait que consulter : c'est sur la fiche du projet, dans son onglet Sessions, qu'une session se rectifie ou s'efface. L'écran reste volontairement simple, sans filtre ni regroupement.",
               "bold": false,
               "italic": false
             }
@@ -1027,17 +1055,17 @@
               "italic": false
             },
             {
-              "text": ", en haut de l'écran, génère l'image, l'enregistre dans la ",
+              "text": ", en haut de l'écran, génère l'image, l'enregistre dans les ",
               "bold": false,
               "italic": false
             },
             {
-              "text": "Galerie",
+              "text": "Photos",
               "bold": true,
               "italic": false
             },
             {
-              "text": " du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le refermer sans rien envoyer : le badge reste dans la galerie. Et si tu changes un réglage puis partages à nouveau, le badge précédent de cette même ouverture est remplacé, pas dupliqué.",
+              "text": " du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le refermer sans rien envoyer : le badge reste dans les photos. Et si tu changes un réglage puis partages à nouveau, le badge précédent de cette même ouverture est remplacé, pas dupliqué.",
               "bold": false,
               "italic": false
             }
@@ -1402,12 +1430,12 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Et les diagrammes ronds ou carrés ?",
+              "text": "Et les diagrammes ronds, carrés ou hexagonaux ?",
               "bold": true,
               "italic": false
             },
             {
-              "text": " Les grilles granny, rondes ou carrées, ne se calent pas avec deux lignes : le même bouton ",
+              "text": " Les grilles granny, rondes, carrées ou hexagonales, ne se calent pas avec deux lignes : le même bouton ",
               "bold": false,
               "italic": false
             },
@@ -1437,7 +1465,7 @@
               "italic": false
             },
             {
-              "text": " ou ",
+              "text": ", ",
               "bold": false,
               "italic": false
             },
@@ -1447,7 +1475,37 @@
               "italic": false
             },
             {
-              "text": ", se déplace et s'ajuste (boutons ",
+              "text": " ou ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Hexagone",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (pour un hexagone, deux boutons de plus fixent son orientation : ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Côté plat en haut",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " ou ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Pointe en haut",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "), se déplace et s'ajuste (boutons ",
               "bold": false,
               "italic": false
             },
@@ -1486,7 +1544,7 @@
         {
           "type": "image",
           "src": "03h-calage-granny-rond",
-          "alt": "Le même assistant de calage granny, la limite déclarée ronde cette fois : la loupe ronde, marquée de la même croix, cerne la même fleur centrale du carré aux points flous, les boutons Rond et Carré (Rond activé), puis Déplacer, activé lui aussi, Agrandir·Rétrécir, et en bas Réinitialiser, Annuler et Valider",
+          "alt": "Le même assistant de calage granny, la limite déclarée ronde cette fois : la loupe ronde, marquée de la même croix, cerne la fleur centrale du carré aux points flous, les boutons Rond, Carré et Hexagone (Rond activé), puis Déplacer, activé lui aussi, Agrandir·Rétrécir, et en bas Réinitialiser, Annuler et Valider",
           "caption": [
             {
               "text": "La limite déclarée ronde : la loupe suit la forme choisie, et les boutons Rond et Carré décident de la sienne à chaque étape.",
@@ -1745,7 +1803,7 @@
           "alt": "Le lecteur en deux volets sur tablette : à gauche le Bonnet Torsade, sa section Bordure en côtes à 0/3 et « Monter 96 m. avec les aiguilles circulaires n° 4 » ; à droite « Diagramme · 8 m × 24 rangs », au rang 7 / 24",
           "caption": [
             {
-              "text": "Sur une tablette tenue à l'horizontale : les instructions à gauche, le diagramme affiché en permanence à droite, sans plus rien faire défiler entre les deux.",
+              "text": "Sur une tablette tenue à l'horizontale : les instructions à gauche, le diagramme affiché en permanence à droite, sans rien faire défiler entre les deux.",
               "bold": false,
               "italic": false
             }
@@ -1765,7 +1823,7 @@
               "italic": false
             },
             {
-              "text": ", tes instructions à gauche et un diagramme affiché en permanence à droite : plus besoin de faire défiler entre les deux. Tu gardes la main dessus :",
+              "text": ", tes instructions à gauche et un diagramme affiché en permanence à droite : tu n'as pas à faire défiler entre les deux. Tu gardes la main dessus :",
               "bold": false,
               "italic": false
             }
@@ -1841,7 +1899,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Ce réglage ne vaut que le temps de ta consultation : en rouvrant le patron, tu retrouves le volet avec le premier diagramme. Sur téléphone (ou sur une tablette tenue à la verticale), le lecteur reste en une seule colonne, comme avant. Un patron sans diagramme n'a pas de volet du tout. Le sommaire du lecteur reste, lui, en haut de la colonne des instructions, mêmes puces, même geste.",
+              "text": "Ce réglage ne vaut que le temps de ta consultation : en rouvrant le patron, tu retrouves le volet avec le premier diagramme. Sur téléphone (ou sur une tablette tenue à la verticale), le lecteur s'affiche en une seule colonne. Un patron sans diagramme n'a pas de volet du tout. Le sommaire du lecteur reste, lui, en haut de la colonne des instructions, mêmes puces, même geste.",
               "bold": false,
               "italic": false
             }
@@ -1851,7 +1909,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Les statistiques, au large.",
+              "text": "Les statistiques, en pleine largeur.",
               "bold": true,
               "italic": false
             }
@@ -1860,7 +1918,7 @@
         {
           "type": "image",
           "src": "03f-tablette-stats",
-          "alt": "Les statistiques au large sur tablette : la grille va de mars à sept. d'un seul tenant, et les tuiles se rangent deux par deux : Temps total 119:40:06, Jours actifs 127 sur 181, Série en cours 6 jours",
+          "alt": "Les statistiques au large sur tablette : la grille va de mars à sept. d'un seul tenant, et les tuiles se rangent deux par deux : Temps total 116:40:06, Jours actifs 125 sur 179, Série en cours 6 jours, Plus longue série 12 jours",
           "caption": [
             {
               "text": "Les statistiques sur une tablette tenue à l'horizontale, en fenêtre Semestre : la grille calendaire montre d'un coup les six derniers mois, quand un téléphone t'oblige à faire glisser du doigt, et les tuiles chiffrées se rangent deux par deux en dessous.",
@@ -1916,7 +1974,7 @@
         {
           "type": "image",
           "src": "04b-fiche-patron",
-          "alt": "Bonnet Torsade, sous-titré Tricot · Accessoires · S, M, L, puis la ligne Acheté 12 € le 12/08/2026 et une photo du bonnet torsadé posé sur une planche de bois, un crayon de modification en haut à droite, et les deux boutons Créer un projet à partir de ce patron et Prévisualiser le patron",
+          "alt": "Bonnet Torsade, sous-titré Tricot · Accessoires · S, M, L, puis la ligne Acheté 12 € le 24/09/2026 et une photo du bonnet torsadé posé sur une planche de bois, un crayon de modification en haut à droite, et les deux boutons Créer un projet à partir de ce patron et Prévisualiser le patron",
           "caption": [
             {
               "text": "La fiche d'un patron, volontairement épurée : créer un projet, ou prévisualiser. (On accède à la correction de l'import depuis l'aperçu, ou depuis le menu d'un projet en cours qui utilise ce patron.)",
@@ -1977,7 +2035,97 @@
                   "italic": false
                 },
                 {
-                  "text": ", autant de fois que tu veux, et c'est ce passage-là qui fait la différence entre un patron « à peu près » et un projet qui affiche les bons chiffres et les bonnes explications. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)",
+                  "text": ", autant de fois que tu veux, et c'est ce passage-là qui fait la différence entre un patron « à peu près » et un projet qui affiche les bons chiffres et les bonnes explications. Dès la fin de l'import, un bilan « Ton patron est importé » compte ce que l'app a trouvé (sections, étapes à cocher, tailles, diagrammes), rappelle de relire le patron avant de commencer, et le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Prévisualiser le patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " t'emmène directement le parcourir, section par section. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Importer au format {app}",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : dans « + Ajouter un patron », ce choix accepte un fichier ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": ".rowtine",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", c'est-à-dire un patron déjà mis au format de {app} (son texte et ses images). Il entre tel quel dans ta bibliothèque, sans passer par la lecture d'un PDF, et toujours sans connexion.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Créer un patron à la main",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : dans « + Ajouter un patron », le choix ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Créer manuellement",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre un écran dédié (nom, type, catégorie, tailles, source, auteur…) avec une seule rubrique ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Photos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " pour ses images. Sur la fiche du patron, une étoile sur chaque photo de « Photos du patron » la désigne comme ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "couverture",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : c'est elle qui illustre le patron dans la bibliothèque. (Un patron importé garde la couverture tirée de son PDF.) Et dès qu'il a une photo, le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Prévisualiser le patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " apparaît : tu peux alors y suivre une image comme un diagramme, exactement comme pour un patron importé.",
                   "bold": false,
                   "italic": false
                 }
@@ -2733,7 +2881,7 @@
               "italic": false
             },
             {
-              "text": " ouvre un choix de type, chacun expliqué en clair : rangs standards, radial-carré, radial-rond ou tracé, pour l'adapter à la forme réelle de ton motif (un granny carré ne se lit pas comme des rangs classiques). Pour une image déjà suivie comme diagramme, une étiquette ",
+              "text": " ouvre un choix de type, chacun expliqué en clair : rangs standards, radial-carré, radial-rond, radial-hexagone ou tracé, pour l'adapter à la forme réelle de ton motif (un granny carré ne se lit pas comme des rangs classiques). Pour une image déjà suivie comme diagramme, une étiquette ",
               "bold": false,
               "italic": false
             },
@@ -2778,7 +2926,7 @@
               "italic": false
             },
             {
-              "text": " Dans la galerie d'un patron, depuis sa fiche ou depuis l'éditeur de correction, le bouton ",
+              "text": " Dans les photos d'un patron, depuis sa fiche ou depuis l'éditeur de correction, le bouton ",
               "bold": false,
               "italic": false
             },
@@ -2818,7 +2966,7 @@
               "italic": false
             },
             {
-              "text": " quand il existe : tu y choisis la page et l'app te la fait recadrer, seule source à passer par ce recadrage. Chaque image rejoint la galerie du patron, prête à être insérée ou suivie.",
+              "text": " quand il existe : tu y choisis la page et l'app te la fait recadrer, seule source à passer par ce recadrage. Chaque image rejoint les photos du patron, prête à être insérée ou suivie.",
               "bold": false,
               "italic": false
             }
@@ -2868,12 +3016,12 @@
               "italic": false
             },
             {
-              "text": "envoyer vers la galerie",
+              "text": "envoyer vers les photos",
               "bold": true,
               "italic": false
             },
             {
-              "text": " du patron. Dans la bande « Galerie du patron », chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit.",
+              "text": " du patron. Dans la bande « Photos du patron », chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit.",
               "bold": false,
               "italic": false
             }
@@ -2941,7 +3089,7 @@
         {
           "type": "image",
           "src": "05-stock",
-          "alt": "10 pelotes, 1,932 km, 500 grammes et 31 € dépensés en tête, le champ Rechercher une laine… et les boutons Filtrer et Trier, puis Drops · Moutarde, ×4 · 165 mètres · 200 grammes, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 mètres · 300 grammes, toutes deux libres",
+          "alt": "10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, le champ Rechercher une laine…, les boutons Filtrer et Trier, Ajouter une laine et Import Ravelry, puis Drops · Moutarde, ×4 · 165 m · 200 g, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 m · 300 g, toutes deux libres",
           "caption": [
             {
               "text": "Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec son état, libre ou réservée par un projet.",
@@ -2972,7 +3120,17 @@
                   "italic": false
                 },
                 {
-                  "text": " et ton budget dépensé (point 1) monte du montant indiqué. La date proposée est celle du jour : si tu as acheté cette laine il y a plus longtemps, corrige-la directement dans le formulaire. (Ces deux champs n'apparaissent qu'à la création. Sur une fiche déjà enregistrée, c'est le bloc ",
+                  "text": " et le total de l'écran ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Dépenses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " monte du montant indiqué. La date proposée est celle du jour : si tu as acheté cette laine il y a plus longtemps, corrige-la directement dans le formulaire. (Ces deux champs n'apparaissent qu'à la création. Sur une fiche déjà enregistrée, c'est le bloc ",
                   "bold": false,
                   "italic": false
                 },
@@ -2983,6 +3141,41 @@
                 },
                 {
                   "text": " qui prend le relais, avec une ligne par acquisition.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Où elle est rangée, ce que tu en penses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : deux champs libres, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Lieu de rangement",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (« Étagère 2, panier bleu ») et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Notes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", s'affichent ensuite sur la fiche de la laine.",
                   "bold": false,
                   "italic": false
                 }
@@ -3163,7 +3356,7 @@
         {
           "type": "image",
           "src": "05b-fiche-laine",
-          "alt": "La fiche s'ouvre par-dessus le stock et ses totaux 10 pelotes, 1,932 km, 500 grammes, 31 € dépensés : pastille jaune Moutarde, marque Drops, 165 m, 50 g par pelote, quantité 4 à 3,20 €, dernier achat le 2026-08-12",
+          "alt": "La fiche plein écran de Drops · Moutarde : marque Drops, 165 m, 50 g par pelote, quantité 4 à 3,20 €, un achat enregistré le 24/09/2026, composition Coton, puis Fibre végétale, les étiquettes Vegan et Fibres biologiques (GOTS), l'état Libre et le bouton Ajouter une photo",
           "caption": [
             {
               "text": "La fiche d'une laine : sa composition, la mention « Fibre végétale », et ses deux étiquettes « Vegan » et « Fibres biologiques (GOTS) ».",
@@ -3219,7 +3412,7 @@
                   "italic": false
                 },
                 {
-                  "text": " en haut du stock. Filtrer ouvre une fenêtre à deux niveaux : la liste de six critères (",
+                  "text": " en haut du stock. Filtrer ouvre une fenêtre à deux niveaux : la liste de sept critères (",
                   "bold": false,
                   "italic": false
                 },
@@ -3279,7 +3472,17 @@
                   "italic": false
                 },
                 {
-                  "text": "), puis, pour le critère touché, ses valeurs. Un seul choix par critère, mais les critères se cumulent ; une pastille sur le bouton Filtrer compte les filtres actifs, et ",
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "État",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : libre, réservée ou utilisée), puis, pour le critère touché, ses valeurs. Un seul choix par critère, mais les critères se cumulent ; une pastille sur le bouton Filtrer compte les filtres actifs, et ",
                   "bold": false,
                   "italic": false
                 },
@@ -3319,7 +3522,7 @@
                   "italic": false
                 },
                 {
-                  "text": ". Rien de tout cela ne se mémorise : chaque retour sur le stock repart sans filtre, trié par marque. Liste ou grille visuelle, au choix.",
+                  "text": ". Rien de tout cela ne se mémorise : chaque retour sur le stock repart sans filtre, trié par marque.",
                   "bold": false,
                   "italic": false
                 }
@@ -3334,7 +3537,7 @@
                   "italic": false
                 },
                 {
-                  "text": " une fiche depuis le menu ",
+                  "text": " une laine depuis le menu ",
                   "bold": false,
                   "italic": false
                 },
@@ -3344,7 +3547,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (icône verticale à trois points) de sa carte. « Dupliquer » est pratique pour la même laine dans un autre coloris : tout est repris, tu n'as plus qu'à changer la couleur.",
+                  "text": " (icône verticale à trois points) en haut de sa fiche. « Dupliquer » est pratique pour la même laine dans un autre coloris : tout est repris, tu n'as plus qu'à changer la couleur.",
                   "bold": false,
                   "italic": false
                 }
@@ -3389,22 +3592,47 @@
             {
               "spans": [
                 {
-                  "text": "Fiche détail",
+                  "text": "La fiche d'une laine",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": " d'une laine : récapitulatif complet (pelotes, mètres, projets qui l'utilisent), et un bloc ",
+                  "text": " : un appui sur sa carte l'ouvre en plein écran. Elle rassemble tout ce que tu as noté (marque, coloris, rangement, métrage, quantité, prix, achats, composition, notes), ses caractéristiques, son état (libre, réservée, utilisée) et ses ",
                   "bold": false,
                   "italic": false
                 },
+                {
+                  "text": "photos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : tu peux en ajouter plusieurs et choisir, d'un appui sur l'étoile, celle qui sert de couverture.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
                 {
                   "text": "Achats et cadeaux",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": " qui garde la trace de chaque acquisition de cette laine :",
+                  "text": " : dans l'écran ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Modifier",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " d'une laine, ce bloc garde la trace de chaque acquisition :",
                   "bold": false,
                   "italic": false
                 }
@@ -3435,7 +3663,17 @@
                         "italic": false
                       },
                       {
-                        "text": " (un cadeau ne compte jamais dans ton budget dépensé). Les trois lignes les plus récentes sont visibles tout de suite, le reste se déplie d'un geste.",
+                        "text": " (un cadeau ne compte jamais dans tes dépenses). Un champ ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Acheté chez",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " garde en plus le nom de la boutique. Les trois lignes les plus récentes sont visibles tout de suite, le reste se déplie d'un geste.",
                         "bold": false,
                         "italic": false
                       }
@@ -3470,12 +3708,12 @@
                         "italic": false
                       },
                       {
-                        "text": " d'une laine depuis sa fiche te propose d'enregistrer l'achat correspondant, daté du jour : tu peux l'accepter, le marquer comme cadeau, ou l'ignorer si tu ne veux pas le garder. ",
+                        "text": " d'une laine en la modifiant te propose d'enregistrer l'achat correspondant, daté du jour : tu peux l'accepter, le marquer comme cadeau, ou l'ignorer si tu ne veux pas le garder. ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "Diminuer une quantité, en revanche, ne touche jamais à ton budget",
+                        "text": "Diminuer une quantité, en revanche, ne touche jamais à tes dépenses",
                         "bold": true,
                         "italic": false
                       },
@@ -3536,6 +3774,112 @@
           "type": "subsection",
           "title": [
             {
+              "text": "Importer ton stock depuis Ravelry",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Si tu tiens déjà ton stock sur Ravelry, inutile de tout ressaisir : le bouton ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Import Ravelry",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", en haut du stock, crée d'un coup les fiches des laines que tu y as déjà.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Sur Ravelry, ouvre « Mon espace » (« my notebook » en anglais), puis l'onglet « Stock » (« Stash »).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Clique « Export », en haut à droite de la liste : un fichier .xls se télécharge.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Reviens dans {app}, choisis ce fichier, puis ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Analyser le fichier",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Avant de créer quoi que ce soit, l'app te montre un résumé : combien de lignes elle a lues, combien de laines elle va créer, combien sont ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "déjà dans ton stock",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (elles sont ignorées : relancer un import ne crée pas de doublon) et combien ne sont plus en stock côté Ravelry (« Epuisé », « A échanger ou à vendre », « Echangé/Vendu/Offert »), ignorées elles aussi. Rien n'est écrit tant que tu n'as pas appuyé sur le bouton « Importer … laine(s) ».",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "La marque, le modèle, la couleur, l'épaisseur, le métrage et le poids, le nombre de pelotes, le lieu de rangement, les notes, ainsi que le prix, la date et la boutique de l'achat viennent du fichier ; la pastille de couleur est choisie d'après la famille de couleur indiquée par Ravelry. La photo, elle, reste à ajouter à la main. Tout se passe sur ton appareil : {app} lit le fichier que tu lui donnes, il ne se connecte jamais à Ravelry.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
               "text": "L'écran Dépenses",
               "bold": false,
               "italic": false
@@ -3558,7 +3902,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Accessible en touchant le budget dépensé sur l'accueil (point 1), cet écran récapitule tout ce que tu as payé pour ton tricot, la ",
+              "text": "Accessible depuis le menu de l'app, cet écran récapitule tout ce que tu as payé pour ton tricot, la ",
               "bold": false,
               "italic": false
             },
@@ -3601,7 +3945,27 @@
                   "italic": false
                 },
                 {
-                  "text": ", par devise si tu en as utilisé plusieurs. Tant que tu n'as noté aucun prix de patron, ce total reste exactement celui que tu connais ; dès qu'un patron y figure, il se ventile en deux sous-lignes : ce qui est parti en laine, ce qui est parti en patrons.",
+                  "text": ", par devise si tu en as utilisé plusieurs (l'app ne les mélange pas, faute de connaître un taux de change). Ce total ne redescend jamais tout seul : consommer une pelote ou terminer un projet ne le fait pas baisser. Il est différent de la ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "valeur de ton stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", en haut de l'écran ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stock de laine",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", qui suit ce qu'il te reste et baisse quand tu utilises une pelote. Tant que tu n'as noté aucun prix de patron, ce total reste exactement celui que tu connais ; dès qu'un patron y figure, il se ventile en deux sous-lignes : ce qui est parti en laine, ce qui est parti en patrons.",
                   "bold": false,
                   "italic": false
                 }
@@ -3894,7 +4258,7 @@
         {
           "type": "image",
           "src": "07-statistiques",
-          "alt": "L'onglet Trimestre retenu entre Mois, Semestre et Année, du 15/06/2026 au 12/09/2026, la carte Sur la période à 73:00:06, puis l'onglet Calendrier plutôt que Rythme, une grille de juin à sept. graduée de moins à plus, et les cartes Temps total 73:00:06 et Jours actifs 71 sur 90",
+          "alt": "L'onglet Trimestre retenu entre Mois, Semestre et Année, du 29/06/2026 au 24/09/2026, la carte Sur la période à 72:40:06, puis l'onglet Calendrier plutôt que Rythme, une grille de juin à sept. graduée de moins à plus, et les cartes Temps total 72:40:06 et Jours actifs 69 sur 88",
           "caption": [
             {
               "text": "Le sélecteur du haut choisit une fenêtre d'observation (Mois, Trimestre, Semestre ou Année), et tout l'écran s'y soumet ; ici, la fenêtre Trimestre. L'onglet « Calendrier », affiché ici par défaut, montre la grille et les neuf tuiles chiffrées.",
@@ -3907,7 +4271,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Le sélecteur en haut de l'écran ne choisit plus une simple durée d'affichage : il choisit une ",
+              "text": "Le sélecteur en haut de l'écran ne choisit pas une simple durée d'affichage : il choisit une ",
               "bold": false,
               "italic": false
             },
@@ -4032,7 +4396,7 @@
         {
           "type": "image",
           "src": "07b-stats-rythme",
-          "alt": "Statistiques, vue Rythme : les semaines du 18/05 au 29/06 en barres, de 1:10:00 à 10:50:00, puis « Par jour de la semaine » de Lun. à Dim., et en bas « Sur tout l'historique, ton jour le plus assidu est le mercredi »",
+          "alt": "Statistiques, vue Rythme : les semaines du 29/06 au 07/09 en barres, de 1:10:00 à 12:10:00, puis « Par jour de la semaine » de Lun. à Dim., et en bas « Sur tout l'historique, ton jour le plus assidu est le jeudi »",
           "caption": [
             {
               "text": "L'onglet « Rythme » : les barres du temps passé par période, les sept barres par jour de la semaine, et la phrase qui nomme ton jour le plus assidu.",
@@ -4074,7 +4438,7 @@
         {
           "type": "image",
           "src": "07c-stats-annee",
-          "alt": "Une année entière de grille calendaire, d'août à août : une colonne par semaine, une case par jour, les initiales L M M J V S D en marge, un cadre plus marqué par mois, et cinq crans de « moins » à « plus » en légende",
+          "alt": "Une année entière de grille calendaire, de sept. à sept. : une colonne par semaine, une case par jour, les initiales L M M J V S D en marge, un cadre plus marqué par mois, et cinq crans de « moins » à « plus » en légende",
           "caption": [
             {
               "text": "La grille en fenêtre Année : une année complète d'un seul coup d'œil, une colonne par semaine et une case par jour, avec les cadres qui séparent les mois. Touche l'image pour l'agrandir et la lire en détail.",
@@ -4456,6 +4820,21 @@
             {
               "spans": [
                 {
+                  "text": "Aide",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : « Revoir la visite guidée » rouvre le bonnet d'exemple dans le lecteur avec ses bulles d'explication, et le recrée si tu l'as supprimé.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Contribuer",
                   "bold": true,
                   "italic": false
@@ -4525,20 +4904,32 @@
           ]
         },
         {
+          "type": "image",
+          "src": "00-bienvenue",
+          "alt": "« Bienvenue sur {app} », et dessous « Tes projets tricot et crochet au fil du temps » : Français, Tricot, Système et Métrique (m, g) déjà retenus, et le bouton « Prêt·e ? Commence à tricoter ! » en bas",
+          "caption": [
+            {
+              "text": "La toute première ouverture : prénom, technique, langue et thème.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
           "type": "paragraph",
           "spans": [
             {
-              "text": "Dans l'ordre, la première fois que tu ouvres {app} : l'écran de bienvenue te demande ton prénom, ta technique, ta langue, ton thème, tes unités et ta devise ; puis l'écran du dossier de sauvegarde, décrit juste au-dessus. Ensuite, trois petits messages t'accueillent, ",
+              "text": "Dans l'ordre, la première fois que tu ouvres {app} : l'écran de bienvenue te demande ton prénom, ta technique, ta langue, ton thème, tes unités et ta devise ; sur Android, l'écran du dossier de sauvegarde suit, décrit juste au-dessus. Ensuite, quelques petits messages t'accueillent, chacun ",
               "bold": false,
               "italic": false
             },
             {
-              "text": "une seule fois chacun",
+              "text": "une seule fois",
               "bold": true,
               "italic": false
             },
             {
-              "text": " : tu ne les reverras plus.",
+              "text": " : tu ne les reverras plus (sauf la visite guidée, que tu peux relancer quand tu veux).",
               "bold": false,
               "italic": false
             }
@@ -4561,7 +4952,37 @@
                   "italic": false
                 },
                 {
-                  "text": ", posé au milieu de l'accueil dès que ton dossier de sauvegarde est en place : il te dit que tout est prêt et t'invite à ouvrir les projets et les patrons d'exemple pour te faire la main. Son bouton le referme, et il ne revient pas.",
+                  "text": ", posé au milieu de l'accueil : il te dit que tout est prêt et t'invite à ouvrir les projets et les patrons d'exemple pour te faire la main. Deux boutons le ferment : « Découvrir le lecteur » lance tout de suite la visite guidée ci-dessous, « Plus tard » le referme sans elle. Dans les deux cas, il ne revient pas.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Si tu as choisi « Découvrir le lecteur », une ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "visite guidée du lecteur",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " s'ouvre aussitôt sur le bonnet d'exemple, avec trois bulles d'explication : ta taille, une étape à cocher, le diagramme qui suit ton rang. Tu peux la revoir à tout moment : le bouton « Revoir la visite guidée », en bas de la première section de ce guide (ci-dessus), ou dans le bloc ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Aide",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " des Réglages ; ce dernier recrée le bonnet d'exemple si tu l'as supprimé entre-temps.",
                   "bold": false,
                   "italic": false
                 }
@@ -4644,17 +5065,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : aucune de tes données ne quitte ton appareil, sauf le dossier de sauvegarde que ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "tu choisis toi-même",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ".",
+                  "text": " : aucune de tes données ne quitte ton appareil.",
                   "bold": false,
                   "italic": false
                 }
@@ -4714,7 +5125,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : sur un petit téléphone, rien ne déborde ni ne se coupe ; sur une tablette, l'app profite de la place : tes listes de projets et de patrons s'affichent sur plusieurs colonnes au lieu d'une seule longue pile, et le lecteur peut garder le diagramme à côté du texte. L'app tient compte des zones réservées de ton écran (barre d'état, encoche, barre de navigation) : le contenu ne se glisse plus dessous.",
+                  "text": " : sur un petit téléphone, rien ne déborde ni ne se coupe ; sur une tablette, l'app profite de la place : tes listes de projets et de patrons s'affichent sur plusieurs colonnes au lieu d'une seule longue pile, et le lecteur peut garder le diagramme à côté du texte. L'app tient compte des zones réservées de ton écran (barre d'état, encoche, barre de navigation) : le contenu ne se glisse pas dessous.",
                   "bold": false,
                   "italic": false
                 }

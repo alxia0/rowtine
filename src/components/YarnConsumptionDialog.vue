@@ -58,6 +58,10 @@ function onInput(id, e) {
   // repeint pas le champ sous le doigt) et la frappe suivante la remplacera normalement.
   if (next === null) return
   used[id] = next
+  // Saisie bornée (au-dessus du réservé, négative, décimale) : réécrite dans le champ. Si la
+  // valeur retenue ne change pas, Vue ne repeint rien et le champ montrerait « 7 » pour 5
+  // enregistrées.
+  if (e.target.value !== String(next)) e.target.value = String(next)
 }
 
 // Toute fermeture applique le défaut du mode (« jamais perdre l'info » : fermer la

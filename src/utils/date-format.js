@@ -42,6 +42,12 @@ export function formatLocalDate(value, locale) {
   return new Date(y, m - 1, d).toLocaleDateString(locale)
 }
 
+// Jour et mois seuls (libellé « semaine du … » des barres de rythme), dans l'ordre et avec
+// la ponctuation de la langue : 07/09 en français, 09/07 en anglais, 07.09. en allemand.
+export function formatDayMonth(date, locale) {
+  return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit' }).format(date)
+}
+
 // Une date saisie AU JOUR (input type="date") désigne un JOUR LOCAL, pas un instant.
 // `new Date('2026-08-10')` vaut minuit UTC : à l'ouest de Greenwich la session se rangerait la
 // VEILLE, et une grille où chaque jour a sa case l'exposerait à l'écran.

@@ -291,7 +291,7 @@ const KIND_KEYWORDS = [
   // « ## CANESÚ », empiècement espagnol), « rumpfteil » (sunflower, aux côtés de
   // rückenteil/vorderteil déjà couverts), « devants? » élargi au pluriel (very-granny,
   // « ## DEVANTS » resté sans kind alors que le singulier existait).
-  ['corps', /\bcorps\b|\bbody\b|\bdos\b|\bderri[èe]re\b|\bback\b|\bdevants?\b|\bfront\b|empi[èe]cement|canes[úu]|\byoke\b|\bpasse\b|r[üu]cken(?:teil)?|rumpfteil|vorderteil|\bryg\b|forstykke|bagstykke|espalda|delantero|trasero|dietro|davanti|\bmaglione\b|\brug\b|voorpand|achterpand|\brugpand\b|\barmsgat\b|ty[łl]\b|prz[óo]d|takakappale|etukappale|bakstycke|framstycke|b[æä]restycke|b[æä]restykke|\boket\b|jupes?|skirts?|shawls?|\brock\b|nederdel(?:en)?|kjol(?:en|e)?|kjole|robes?|dress(?:es)?|falda|gonna|jurk|\brok\b|sp[óo]dnic\w*|hame(?:et)?|kl[äa]nning|vestido|sukienk\w*|\bcuerpos?\b/i],
+  ['corps', /\bcorps\b|\bbody\b|\bdos\b|\bderri[èe]re\b|\bback\b|\bdevants?\b|\bfront\b|empi[èe]cement|canes[úu]|\byoke\b|\bpasse\b|r[üu]cken(?:teil)?|rumpfteil|vorderteil|\bryg\b|forstykke|bagstykke|espalda|delantero|trasero|dietro|davanti|\bmaglione\b|\brug\b|voorpand|achterpand|\brugpand\b|\barmsgat\b|ty[łl](?![\wÀ-ž])|prz[óo]d|takakappale|etukappale|bakstycke|framstycke|b[æä]restycke|b[æä]restykke|\boket\b|jupes?|skirts?|shawls?|\brock\b|nederdel(?:en)?|kjol(?:en|e)?|kjole|robes?|dress(?:es)?|falda|gonna|jurk|\brok\b|sp[óo]dnic\w*|hame(?:et)?|kl[äa]nning|vestido|sukienk\w*|\bcuerpos?\b/i],
   // Ancrages \b ajoutés partout (défaut latent campagne vague 6, « zéro occurrence dans le
   // corpus ») : l'alternative « cabeza » sans frontière de TÊTE matchait l'intérieur
   // d'« enCABEZAdo » (ES « encabezado » = en-tête) — un tel titre basculait en `tete` et
@@ -958,7 +958,8 @@ function modalLineGap(pages) {
 // (conjonction/préposition) ou un adjectif décliné en attente d'un nom (« die gesamte ») ?
 // Un vrai titre ne se termine jamais ainsi ; une vraie continuation de phrase, souvent.
 // Isolé à isGerman : FR/EN/ES gardent le test minuscule inchangé.
-const GERMAN_DANGLING_RE = /\b(?:dass|weil|wenn|als|ob|während|bevor|nachdem|auf|an|bei|vor|über|unter|durch|ohne|um|gegen|zwischen|nach|aus|bis|seit)\s*$/i
+// « über » à part : un `\b` ne tient pas devant « ü » (lettre hors \w sans drapeau u).
+const GERMAN_DANGLING_RE = /(?:\b(?:dass|weil|wenn|als|ob|während|bevor|nachdem|auf|an|bei|vor|unter|durch|ohne|um|gegen|zwischen|nach|aus|bis|seit)|(?<![\wÀ-ž])über)\s*$/i
 // Adjectif décliné en attente d'un nom. Liste CHOISIE, pas un suffixe brut : un nom
 // féminin allemand complet finit AUSSI en « -e » (« die Länge », « die Masche ») — un
 // suffixe seul confondrait un adjectif en attente d'un nom avec un nom déjà complet.
@@ -1780,8 +1781,13 @@ export function segmentSections(pages, { isGerman = false, onMerge = null } = {}
       return sections.slice(idx + 1).some((s) => s.title === candidate.title)
     }
     const isDuplicateWorkPreview = isMiniLabel && sec.lines.length > 0 && titleReappearsLater(sec)
+    // Branche page 0 : jamais vers une section d'abréviations, qui ne garde que ce que
+    // l'extracteur de glossaire sait lire — le reste du contenu rétrogradé y disparaîtrait.
+    // (Vers un bandeau bruit de couverture, la rétrogradation reste voulue : elle écarte le
+    // titre/sous-titre de couverture, mesuré sur le corpus.)
     const demote =
-      prev && isMiniLabel && !isDuplicateWorkPreview && (sec.page === 0 || BOX_REF.has(prev.ref))
+      prev && isMiniLabel && !isDuplicateWorkPreview &&
+      ((sec.page === 0 && prev.ref !== 'abbr') || BOX_REF.has(prev.ref))
     if (demote) {
       // Garde : ne pas re-pousser le titre s'il est déjà la 1ʳᵉ ligne de la section.
       if (sec.lines[0] !== sec.titleLine) prev.lines.push(sec.titleLine)

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — l'écran d'import RETROUVE son bloc de réussite au retour du guide (revue
 // du 19/08/2026, important 6, tranché : « corrige ce point dans le
 // guide et le reste »).
@@ -15,9 +16,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import fr from '@/i18n/fr.json'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
 vi.mock('@/utils/pdf-import', () => ({ parsePdfLocally: vi.fn() }))
 
@@ -26,7 +26,7 @@ import LocalPdfImportView from '@/views/LocalPdfImportView.vue'
 import { usePatternsStore } from '@/stores/patterns'
 import { useImportReportStore } from '@/stores/import-report'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppHeader: true, AppIcon: true }
 
 const okResult = () => ({
@@ -41,14 +41,11 @@ const okResult = () => ({
 const App = { template: '<RouterView />' }
 
 function creerRouteur() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/import', name: 'import-local', component: LocalPdfImportView },
-      { path: '/guide', name: 'guide', component: { template: '<div class="guide-stub" />' } },
-      { path: '/p/:id', name: 'pattern', component: { template: '<div class="pattern-stub" />' } },
-    ],
-  })
+  return createTestRouter([
+    { path: '/import', name: 'import-local', component: LocalPdfImportView },
+    { path: '/guide', name: 'guide', component: { template: '<div class="guide-stub" />' } },
+    { path: '/p/:id', name: 'pattern', component: { template: '<div class="pattern-stub" />' } },
+  ])
 }
 
 async function settle() {
@@ -59,6 +56,14 @@ async function settle() {
 
 function boutonParTexte(w, texte) {
   return w.findAll('button').find((b) => b.text().includes(texte))
+}
+
+// Constat mineur n°3 (revue finale, lot du 23/09/2026) : `savedSummary` (bilan
+// sections/étapes/tailles/diagrammes) est lu sans garde dans le gabarit — le prouver en
+// relevant les valeurs des tuiles avant le départ et en les comparant à celles du retour,
+// plutôt que de se contenter d'un texte statique qui passerait même sur un bilan vide.
+function valeursDesTuiles(w) {
+  return w.findAll('.done__tile-val').map((el) => el.text())
 }
 
 async function choisirFichier(w) {
@@ -93,8 +98,10 @@ describe("écran d'import — aller-retour vers le guide", () => {
     // retour ne prouverait rien.
     expect(w.find('.done').exists()).toBe(true)
     expect(w.text()).toContain('Pull torsadé')
-    expect(w.text()).toContain(fr.importLocal.doneCaveat)
+    expect(w.text()).toContain(fr.importLocal.caveatBody)
     expect(boutonParTexte(w, fr.importLocal.viewPattern)).toBeTruthy()
+    const tuilesAvant = valeursDesTuiles(w)
+    expect(tuilesAvant.length).toBeGreaterThan(0) // précondition : le bilan a bien des tuiles à comparer
 
     await boutonParTexte(w, fr.importLocal.doneHowToFix).trigger('click')
     await settle()
@@ -117,9 +124,12 @@ describe("écran d'import — aller-retour vers le guide", () => {
     // LE CŒUR : elle retrouve exactement ce qu'elle a quitté.
     expect(w.find('.done').exists()).toBe(true)
     expect(w.text()).toContain('Pull torsadé')
-    expect(w.text()).toContain(fr.importLocal.doneCaveat)
+    expect(w.text()).toContain(fr.importLocal.caveatBody)
     expect(w.text()).toContain(fr.importLocal.warnings.replace('{n}', '1'))
     expect(boutonParTexte(w, fr.importLocal.viewPattern)).toBeTruthy()
+    // Le bilan chiffré (tuiles sections/étapes/tailles/diagrammes) survit à l'identique —
+    // pas seulement le texte fixe des titres, qui passerait même sur un bilan vide.
+    expect(valeursDesTuiles(w)).toEqual(tuilesAvant)
     // Et le bouton « Choisir un fichier » n'est PAS revenu : l'écran n'est pas reparti de
     // zéro (c'était le symptôme exact du cul-de-sac).
     expect(w.find('label.file-pick').exists()).toBe(false)
@@ -164,7 +174,7 @@ describe("écran d'import — aller-retour vers le guide", () => {
     // Piège nommé par la revue : un état de réussite qui survivrait « au cas où » ferait
     // apparaître un bloc là où rien n'a jamais été enregistré. Le PDF scanné n'enregistre
     // RIEN — l'écran doit rester celui du choix de fichier, à l'aller comme au retour.
-    parsePdfLocally.mockResolvedValue({ ...okResult(), scanned: true })
+    parsePdfLocally.mockResolvedValue({ ...okResult(), scanned: true, rejected: { reason: 'scanned', detail: null } })
     const add = vi.spyOn(usePatternsStore(), 'add').mockResolvedValue(9)
 
     const router = creerRouteur()

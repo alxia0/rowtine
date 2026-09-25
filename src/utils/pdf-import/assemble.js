@@ -372,7 +372,10 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
   for (const l of (cleanPages || []).slice(0, 2).flat()) {
     if (l.consumed) continue
     const a = parseAuthorLine(l.text)
-    if (a) { author = a; l.consumed = true; break }
+    // Auteur déjà trouvé sur les pages brutes (ligne retirée depuis par stripBoilerplate) :
+    // une AUTRE ligne « Conception : … » plus loin n'est pas l'auteur (souvent une consigne),
+    // elle ne l'écrase pas et reste dans le corps.
+    if (a && (!author || a === author)) { author = a; l.consumed = true; break }
   }
   // Glossaire mis en page en deux colonnes SANS séparateur (Hobbii/Go handmade) : lu ICI,
   // avant le reflow de la l.226 — celui-ci agglutine les entrées courtes en un seul
@@ -461,7 +464,10 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
     if (!isLetterSpaced(raw)) return raw.toLowerCase()
     return (restoreWords(despace(raw), docMetaTitle) || raw).toLowerCase()
   }
-  const docTitleNorm = normalizeTitleForDedup(detectTitle(pages, { metaTitle: docMetaTitle }))
+  // Calculé une seule fois : detectTitle() est pure sur `pages` (jamais muté depuis),
+  // réutilisé plus bas pour pattern.name (évite de rebalayer les 2 premières pages deux fois).
+  const docTitle = detectTitle(pages, { metaTitle: docMetaTitle })
+  const docTitleNorm = normalizeTitleForDedup(docTitle)
   if (docTitleNorm) {
     for (const sec of sections) {
       if (!sec.ref && !sec.noise && sec.page === 0 && !sec.intro &&
@@ -517,7 +523,7 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
 
   const base = (fileName || 'Patron').replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').trim()
   const pattern = {
-    name: detectTitle(pages, { metaTitle: docMetaTitle }) || base,
+    name: docTitle || base,
     type: 'knitting',
     category: '',
     categoryCustom: '',

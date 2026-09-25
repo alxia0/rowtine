@@ -51,6 +51,15 @@ function onPrice(event) {
   patch({ price, purchasedAt })
 }
 
+// En quittant le champ : un séparateur SEUL (« , », que `filtrerSaisieDecimale` garde pour
+// la frappe en cours) n'est pas un prix. Enregistré tel quel, il valait « renseigné » pour
+// `isPricedPattern` mais 0 à l'affichage, donc « Gratuit ». On le vide.
+function onPriceChange(event) {
+  if (/\d/.test(event.target.value) || event.target.value === '') return
+  event.target.value = ''
+  patch({ price: '' })
+}
+
 function setFree() {
   const purchasedAt = String(props.modelValue.purchasedAt || '').trim() ? props.modelValue.purchasedAt : ymdLocal(new Date())
   patch({ price: '0', purchasedAt })
@@ -72,6 +81,7 @@ function setFree() {
         :value="modelValue.price"
         placeholder="—"
         @input="onPrice"
+        @change="onPriceChange"
       />
       <button type="button" class="btn ppf__free" data-test="pattern-price-free" @click="setFree">
         {{ t('pattern.priceFree') }}

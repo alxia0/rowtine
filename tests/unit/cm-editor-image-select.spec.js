@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Retrait du bouton Image + tap-to-select — les widgets image
 // (ImageThumbWidget/ImagePlaceholderWidget, cm-editor.js) sont posés en
 // Decoration.replace ET rendus atomiques par maskAtomicRanges : un tap ne pose

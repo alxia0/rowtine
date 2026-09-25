@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCropperStore } from '@/stores/cropper'
 import { pickImage } from '@/utils/photo'
@@ -68,7 +68,11 @@ async function confirmRatio(ratio) {
 useDialogFocusReturn(() => props.open)
 function onKey(e) {
   if (cropper.open) return
-  if (e.key === 'Escape') emit('close')
+  if (e.key !== 'Escape') return
+  // Marque l'Échap comme consommé : le composeur (écouteur `window`, atteint APRÈS ce
+  // `document`) le lit et ne se ferme pas avec cette pop-up.
+  e.preventDefault()
+  emit('close')
 }
 watch(
   () => props.open,
@@ -78,6 +82,9 @@ watch(
   },
   { immediate: true },
 )
+// Démontée encore ouverte (composeur fermé par-dessus) : le watch ci-dessus ne voit jamais
+// `open` repasser à false, l'écouteur resterait accroché à `document`.
+onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 </script>
 
 <template>

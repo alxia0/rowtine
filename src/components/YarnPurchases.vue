@@ -167,7 +167,9 @@ async function submitForm() {
   submitting.value = true
   try {
     const { id: _staleId, ...payload } = form
-    if (payload.kind === 'gift') payload.unitPrice = ''
+    // Séparateur seul (« , », gardé par le filtre pendant la frappe) : pas un prix, et
+    // enregistré tel quel il s'affichait comme un montant nul au lieu de « prix inconnu ».
+    if (payload.kind === 'gift' || !/\d/.test(String(payload.unitPrice ?? ''))) payload.unitPrice = ''
     if (formMode.value === 'edit') {
       await purchasesStore.update(editingId.value, payload)
     } else {
@@ -240,6 +242,7 @@ function lineAmountText(line) {
           <span class="ypur__line-qty">×{{ line.quantity }}</span>
           <span v-if="line.date" class="ypur__line-date">{{ line.date }}</span>
           <span v-if="line.bain" class="ypur__line-bain">{{ line.bain }}</span>
+          <span v-if="line.purchasedFrom" class="ypur__line-bain">{{ line.purchasedFrom }}</span>
         </div>
         <div class="ypur__line-tags">
           <span v-if="line.reconstructed" class="tag">{{ t('purchases.reconstructedTag') }}</span>
@@ -302,6 +305,8 @@ function lineAmountText(line) {
       <input id="ypur-date" v-model="form.date" type="date" class="input" />
       <label class="field-label mt2" for="ypur-bain">{{ t('yarn.bain') }}</label>
       <input id="ypur-bain" v-model="form.bain" class="input" />
+      <label class="field-label mt2" for="ypur-purchased-from">{{ t('purchases.purchasedFrom') }}</label>
+      <input id="ypur-purchased-from" v-model="form.purchasedFrom" class="input" />
       <div class="ypur__form-actions">
         <button type="button" class="btn" data-test="purchases-form-cancel" @click="closeForm">{{ t('common.cancel') }}</button>
         <button type="button" class="btn btn--primary" data-test="purchases-form-save" :disabled="submitting" @click="submitForm">{{ t('common.save') }}</button>

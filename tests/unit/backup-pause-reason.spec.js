@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LE prédicat unique de pause (lot du 06/08/2026). Le critère
 // « la sauvegarde est-elle en pause ? » était recalculé à QUATRE endroits ; ce fichier
 // couvre la source de vérité désormais unique, `backupPauseReason`, et le mince

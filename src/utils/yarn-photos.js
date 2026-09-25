@@ -1,3 +1,5 @@
+import { boundedIndex } from './bounded-index'
+
 // Galerie de photos d'une laine : `yarn.photos` (tableau de data URLs) + `yarn.coverIndex`,
 // même forme que `project.photos`/`project.coverIndex` (src/stores/projects.js). Lecture
 // tolérante de l'ANCIEN champ `photo` (chaîne unique, avant cette refonte) : une fiche
@@ -15,6 +17,5 @@ export function photosOf(yarn) {
 export function coverPhotoOf(yarn) {
   const photos = photosOf(yarn)
   if (!photos.length) return ''
-  const idx = Number(yarn?.coverIndex)
-  return photos[Number.isInteger(idx) && idx >= 0 && idx < photos.length ? idx : 0]
+  return photos[boundedIndex(yarn?.coverIndex, photos.length)]
 }

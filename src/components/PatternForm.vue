@@ -5,7 +5,7 @@ import FieldHelp from '@/components/FieldHelp.vue'
 import { emptyPattern } from '@/stores/patterns'
 import { PATTERN_CATEGORIES } from '@/constants/catalog'
 import { TECHNIQUES as TECHS } from '@/constants/status'
-import { pickAndCropImage, pickImage } from '@/utils/photo'
+import { pickImage } from '@/utils/photo'
 import { useCropperStore } from '@/stores/cropper'
 import { useSettingsStore } from '@/stores/settings'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -33,6 +33,10 @@ const snackbar = useSnackbarStore()
 
 const seed = props.initial ? JSON.parse(JSON.stringify(props.initial)) : {}
 const form = reactive({ ...emptyPattern(), ...seed })
+// Empreinte de chaque champ À L'OUVERTURE, sérialisée tout de suite : `form` partage ses
+// tableaux avec `seed` (spread superficiel), un `push` dans la galerie modifie les deux.
+// Sert à `submit()` pour n'envoyer que les champs réellement modifiés.
+const openedJson = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, JSON.stringify(v)]))
 const nameInput = ref(null)
 const nameError = ref('')
 const sizesText = ref((form.sizes || []).join(', '))
@@ -52,13 +56,6 @@ const priceHiddenReason = computed(() => (form.builtin ? 'builtin' : null))
 const isCrochet = computed(() => form.type === 'crochet')
 
 const cropper = useCropperStore()
-async function addPhoto() {
-  const dataUrl = await pickAndCropImage(cropper.crop)
-  if (dataUrl) form.photos.push(dataUrl)
-}
-function removePhoto(idx) {
-  form.photos.splice(idx, 1)
-}
 // Galerie du patron (pattern.gallery) : ajout/suppression SEULEMENT, comme les photos
 // ci-dessus (push/splice, validé au submit) — pas de transformation en diagramme ici, ce
 // formulaire ne connaît pas `reader` (cf. CorrectionView.vue pour cette capacité).
@@ -85,7 +82,9 @@ async function addGalleryImage() {
   if (result) pushGalleryImage(result)
 }
 function removeGalleryImage(idx) {
+  const ci = form.coverIndex ?? 0
   form.gallery.splice(idx, 1)
+  form.coverIndex = idx === ci ? 0 : idx < ci ? ci - 1 : ci
 }
 const pdfPickerOpen = ref(false)
 function openPdfPicker() {
@@ -128,6 +127,16 @@ function submit() {
     form.priceCurrency = settings.currency
   }
   const payload = JSON.parse(JSON.stringify(form))
+  // Édition : seuls les champs CHANGÉS depuis l'ouverture partent (`patternsStore.update`
+  // fusionne, le reste garde sa valeur EN BASE). Renvoyer la copie figée à l'ouverture
+  // réécrivait `reader`/`gallery`/`sizes` qu'une synchro `patron.md` (reprise de l'app)
+  // venait de fusionner : progression des projets recalée sur un reader aussitôt remplacé,
+  // puis `patron.md` régénéré avec l'ancien contenu par la sauvegarde auto.
+  if (props.initial) {
+    for (const key of Object.keys(payload)) {
+      if (JSON.stringify(payload[key]) === openedJson[key]) delete payload[key]
+    }
+  }
   emit('submit', payload)
 }
 </script>
@@ -211,21 +220,12 @@ function submit() {
     />
 
     <p class="field-label mt2">{{ t('photo.title') }}</p>
-    <div class="photorow">
-      <div v-for="(ph, idx) in form.photos" :key="idx" class="photorow__item">
-        <img :src="ph" class="photorow__img" alt="" />
-        <button type="button" class="photorow__del" :aria-label="t('common.delete')" @click="removePhoto(idx)"><AppIcon name="close" :size="15" /></button>
-      </div>
-      <button type="button" class="photorow__add" :aria-label="t('photo.add')" @click="addPhoto"><AppIcon name="plus" :size="22" /></button>
-    </div>
-
-    <p class="field-label mt2">{{ t('patternExtras.galleryTitle') }}</p>
     <div class="galleryrow">
       <div v-for="(g, idx) in form.gallery" :key="idx" class="galleryrow__item">
         <img :src="g.src" class="galleryrow__img" alt="" />
         <button type="button" class="galleryrow__del" :aria-label="t('common.delete')" @click="removeGalleryImage(idx)"><AppIcon name="close" :size="15" /></button>
       </div>
-      <button type="button" class="galleryrow__add" :aria-label="t('patternExtras.addImage')" @click="addGalleryImage"><AppIcon name="plus" :size="20" /></button>
+      <button type="button" class="galleryrow__add" :aria-label="t('photo.add')" @click="addGalleryImage"><AppIcon name="plus" :size="20" /></button>
     </div>
     <PdfPagePickerDialog v-if="form.pdf" v-model:open="pdfPickerOpen" :pdf="form.pdf" @pick="onPdfPagePicked" />
 
@@ -252,12 +252,6 @@ function submit() {
 .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink-55); font-weight: 600; font-size: 13px; padding: 0 13px; border-radius: var(--r-pill); min-height: 44px; display: inline-flex; align-items: center; }
 .chip--on { background: var(--brand); border-color: var(--brand); color: var(--on-accent); }
-.photorow { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-1); }
-.photorow__item { position: relative; }
-.photorow__img { width: 56px; height: 56px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); display: block; }
-.photorow__del { position: absolute; top: -6px; right: -6px; width: 26px; height: 26px; border: none; border-radius: 50%; background: rgba(58, 46, 40, 0.7); color: #fff; font-size: 11px; }
-.photorow__del::after { content: ''; position: absolute; inset: -9px; }
-.photorow__add { width: 56px; height: 56px; border: 1px dashed var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--ink-55); font-size: 22px; }
 .galleryrow { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-2); }
 .galleryrow__item { position: relative; }
 .galleryrow__img { width: 56px; height: 56px; object-fit: cover; border-radius: var(--r-sm); display: block; }

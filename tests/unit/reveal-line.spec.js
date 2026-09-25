@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // revealLine — pose le curseur sur une ligne donnée d'un VRAI éditeur CM6
 // (créé par createCmEditor, donc avec les plages atomiques des lignes image
 // actives, cf. move-line.spec.js). On vérifie la SÉLECTION, pas le défilement :

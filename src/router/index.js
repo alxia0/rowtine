@@ -5,6 +5,8 @@ import { navStart, navDone } from '@/composables/useNavProgress'
 import { useSettingsStore } from '@/stores/settings'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { closeChronoSession } from '@/utils/close-chrono-session'
+import { useSnackbarStore } from '@/stores/snackbar'
+import { handleStorageError } from '@/db/storage-guard'
 import { applyTheme } from '@/theme/apply'
 import { detectDeviceLocale } from '@/utils/app-locale'
 import { checkVersionGuardOnStartup } from '@/db/version-guard'
@@ -64,8 +66,11 @@ const router = createRouter({
     { path: '/stash/:id', name: 'stash-item', component: () => import('../views/YarnDetailView.vue') },
     { path: '/stash/new', name: 'stash-new', component: () => import('../views/YarnEditView.vue') },
     { path: '/stash/:id/edit', name: 'stash-edit', component: () => import('../views/YarnEditView.vue') },
+    { path: '/stash/import-ravelry', name: 'stash-import-ravelry', component: () => import('../views/RavelryImportView.vue') },
     { path: '/library', name: 'library', component: () => import('../views/LibraryView.vue') },
-    { path: '/import-local', name: 'import-local', component: () => import('../views/LocalPdfImportView.vue') },
+    // `?format=rowtine` : porte « Importer au format Rowtine » (23/09), passée en prop.
+    { path: '/import-local', name: 'import-local', component: () => import('../views/LocalPdfImportView.vue'), props: (route) => ({ format: route.query.format === 'rowtine' ? 'rowtine' : 'pdf' }) },
+    { path: '/pattern/new', name: 'pattern-new', component: () => import('../views/PatternCreateView.vue') },
     { path: '/pattern/:id', name: 'pattern', component: () => import('../views/PatternView.vue') },
     { path: '/pattern/:id/read', name: 'pattern-read', component: () => import('../views/ReaderView.vue') },
     { path: '/pattern/:id/correct', name: 'pattern-correct', component: () => import('../views/CorrectionView.vue') },
@@ -142,7 +147,16 @@ router.beforeEach(async (to) => {
   // idempotente (chrono inactif → no-op).
   if (!startup) {
     const active = useActiveSessionStore()
-    if (active.isActive && !inChronoBubble(to, active.projectId)) await closeChronoSession()
+    // Un échec d'écriture (stockage plein) ne doit pas bloquer la sortie : vue-router avale
+    // l'erreur en silence (RouterLink, retour), chaque geste restait sans effet. Le chrono
+    // reste actif et la prochaine sortie retente la fermeture ; l'échec est signalé.
+    if (active.isActive && !inChronoBubble(to, active.projectId)) {
+      try {
+        await closeChronoSession()
+      } catch (e) {
+        if (!handleStorageError(e, useSnackbarStore())) console.error(e)
+      }
+    }
   }
   return true
 })

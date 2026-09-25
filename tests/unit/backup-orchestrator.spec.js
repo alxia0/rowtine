@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — orchestrateur `backupAll` : arborescence, écriture
 // incrémentale des photos, renommage, réconciliation des suppressions (corbeille).
 import { describe, it, expect, beforeEach } from 'vitest'

@@ -29,7 +29,10 @@ const NOISE_RES = [
   // Ancrée sur la formule complète (pas juste « personal use ») : trop générique,
   // « personal » collisionnerait avec une vraie instruction (mesures personnalisées).
   /\bfor personal use only\b/i,
-  /^(?:seite|page|pagina|página|side|sida|sivu|strona|pag\.?)\s*\d+(?:\s*(?:\/|af|of|de|di|van|av|z)\s*\d+)?$/i,
+  // « side » (page, da/no) exige le total : « Side 1 » seul est aussi un intertitre anglais
+  // (face d'un coussin) ; un folio danois répété en bande reste retiré par `repeated`.
+  /^(?:seite|page|pagina|página|sida|sivu|strona|pag\.?)\s*\d+(?:\s*(?:\/|af|of|de|di|van|av|z)\s*\d+)?$/i,
+  /^side\s*\d+\s*(?:\/|af|av|of)\s*\d+$/i,
   /^\d+\s*\/\s*\d+$/, // « 3 / 7 »
   /^-?\s*\d{1,3}\s*-?$/, // numéro de page nu
   /^No\.?\s*\d{3,}[-\d]*$/i, // numéro de patron Hobbii « No. 2004-184-5508 »
@@ -67,7 +70,11 @@ const NOISE_RES = [
   // proximité immédiate, sur le modèle du fallback suggéré pour ce bug. NB : @/#
   // sont hors groupe \w — un \b juste avant eux ne matche jamais après un espace
   // (aucune transition mot/non-mot), d'où l'alternative séparée [@#]\w+ sans \b.
-  /^(?:partage|share|teil(?:e|en)?\s+.{0,30}(?:\b(?:instagram|facebook|hashtag)\b|[@#]\w+)|del\s+(?:dette|denne)|comparte|condividi|deel|udost[ęe]pnij|jaa |dela )/i,
+  // « partage/share/deel/dela/jaa » : même piège que « teil » — le verbe ouvre aussi une
+  // consigne de répartition (« Partager les mailles sur 2 aiguilles », « Share the stitches
+  // evenly », « Deel de steken », « Dela maskorna »). Filtré seulement suivi d'un possessif
+  // (« ta création », « your project », « je werk », « ditt arbete ») ou d'un signal réseau.
+  /^(?:(?:partage[rz]?|share|deel|dela|jaa)\s+(?:(?:ton|ta|tes|votre|vos|your|je|jouw|ditt|din|dina|dit)\s|.{0,60}(?:instagram|facebook|hashtag|[@#]\w+))|teil(?:e|en)?\s+.{0,30}(?:\b(?:instagram|facebook|hashtag)\b|[@#]\w+)|del\s+(?:dette|denne)|comparte|condividi|udost[ęe]pnij)/i,
   // --- Pied/CTA de clôture DROPS (Garnstudio), multilingue ---
   // Présent sur tout patron DROPS, absent des références → fuit en « > ». Motifs
   // ancrés (question fermée en fin de ligne) ou très spécifiques (mention légale),
@@ -486,7 +493,8 @@ export function stripBoilerplate(pages) {
         // (« = », « : ») et un libellé de diagramme comme « knit thru back loop » n'en
         // a pas — seul le FLAG posé par lines.js (et voyagé par les spreads {...l} de
         // toLines/reflow) porte le contexte « rangée de grille ». Restore-only.
-        if (edges[i].has(l) && !l.pairedRow && repeated.has(norm(t)) && !isRowStart(t)) return false
+        const nt = norm(t) // calculé une fois, réutilisé par les deux gardes ci-dessous (repeated/captions)
+        if (edges[i].has(l) && !l.pairedRow && repeated.has(nt) && !isRowStart(t)) return false
         if (urlFragments[i].has(l)) return false
         if (orphanTails[i].has(l)) return false
         if (noiseCascades[i].has(l)) return false
@@ -501,7 +509,7 @@ export function stripBoilerplate(pages) {
         // chiffres (> 12 chars, hors isGridToken) dont le gabarit écrasé
         // collisionnerait avec un token court d'une autre page. Restore-only par
         // construction.
-        if (captions.has(norm(t)) && !isGridToken(t)) return false
+        if (captions.has(nt) && !isGridToken(t)) return false
         return true
       })
       // BB4 : une bannière de tirets peut se coller à du texte via le reflow

@@ -42,4 +42,8 @@ describe('resolveCover — couverture d\'un projet', () => {
   it('tolère un projet sans tableau photos', () => {
     expect(resolveCover({}, { photos: ['p1'] })).toBe('p1')
   })
+
+  it('repli sur la 1re image de la galerie du patron quand ni le projet ni le patron n\'ont de photo (patron créé manuellement)', () => {
+    expect(resolveCover({ photos: [] }, { photos: [], gallery: [{ src: 'g1', page: 0, w: 0, h: 0 }] })).toBe('g1')
+  })
 })

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — ProjectEditView : formulaire d'édition/création de projet. Couvre le
 // TROISIÈME point d'entrée (R2) qui peut clore/abandonner un projet : le sélecteur de
 // statut par pastilles (~lignes 249-258) ne fait que poser `form.status` — le statut
@@ -399,5 +400,49 @@ describe('ProjectEditView — chrono actif sur ce projet à l’enregistrement',
 
     expect(active.isActive).toBe(true)
     await active.pause() // coupe le setInterval réel, sinon il fuit d'un test à l'autre
+  })
+})
+
+describe('ProjectEditView — suivi du lecteur (readerState)', () => {
+  const READER = { sizeLabels: ['S', 'M', 'L'], sections: [{ id: 'a', title: 'A', steps: [{ t: 'Rang' }] }] }
+
+  // Le formulaire ne réécrit pas un readerState recalé en base pendant qu'il était ouvert (synchro).
+  it('enregistrer ne renvoie pas le readerState lu à l’ouverture', async () => {
+    const pid = await seedProject({ readerState: { size: 0, done: { 'a#0': true } } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await db.projects.update(pid, { readerState: { size: 0, done: { 'a#1': true } } })
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    expect((await db.projects.get(pid)).readerState.done).toEqual({ 'a#1': true })
+  })
+
+  // Changer la taille tricotée ici pilote aussi l'index du lecteur (même règle que la fiche).
+  it('changer la taille tricotée met à jour readerState.size', async () => {
+    const patternId = await db.patterns.add({ name: 'Pull', type: 'knitting', reader: READER, sizes: ['S', 'M', 'L'] })
+    const pid = await seedProject({ patternId, sizes: ['S', 'M', 'L'], activeSize: 'S', readerState: { size: 0, done: { 'a#0': true } } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('select#asize').setValue('L')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    const p = await db.projects.get(pid)
+    expect(p.activeSize).toBe('L')
+    expect(p.readerState).toEqual({ size: 2, done: { 'a#0': true } })
+  })
+})
+
+describe('ProjectEditView — bornes des dates', () => {
+  // Protège : les champs de date proposent la même plage d'années que celle retenue par les statistiques.
+  it('début et fin portent min 1900-01-01 et max à la fin de l’année suivante', async () => {
+    await seedProject()
+    const w = mountEdit()
+    await waitHydrated(w)
+    const max = `${new Date().getFullYear() + 1}-12-31`
+    for (const id of ['#start', '#end']) {
+      expect(w.find(id).attributes('min')).toBe('1900-01-01')
+      expect(w.find(id).attributes('max')).toBe(max)
+    }
+    w.unmount()
   })
 })

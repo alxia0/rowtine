@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — indice de défilement (dégradé de bord) : `active` reflète le débordement
 // RÉEL d'un conteneur (scrollWidth/clientWidth/scrollLeft), jamais un état forcé — sinon
 // l'indice mentirait (cf. P2). jsdom ne calcule pas de vraie mise en page

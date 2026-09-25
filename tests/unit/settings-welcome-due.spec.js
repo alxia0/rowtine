@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le réglage `welcomeDue` (lot « pop-ups du premier lancement », 10/08/2026).
 //
 // Sens choisi : « à montrer », et non « déjà montré ». C'est ce sens qui protège les

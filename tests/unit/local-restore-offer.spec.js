@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LocalRestoreOffer.vue. La modale maison qui remplace l'ancien
 // `window.confirm` natif de l'offre de restauration LOCALE (données trouvées dans le
 // dossier qu'on vient de désigner, cf. restore-on-designate.js) — une fenêtre système
@@ -15,12 +16,11 @@
 // (l'ouverture de la confirmation), jamais la destruction directe.
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
+import { createTestI18n } from './helpers/i18n-router'
 
 import LocalRestoreOffer from '@/components/LocalRestoreOffer.vue'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 let wrapper
 const mountIt = () => {

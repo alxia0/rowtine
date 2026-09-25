@@ -7,6 +7,29 @@ import { startOfWeek, ymdLocal, addDays } from '@/utils/time-periods'
 import { localDayToDate } from '@/utils/date-format'
 
 export const WINDOW_WEEKS = { month: 5, quarter: 13, semester: 26, year: 53 }
+
+// Garde-fous contre une date aberrante (sauvegarde retouchée : séance datée 9999, `finishedAt`
+// en l'an 1000). Chaque fonction ci-dessous parcourt la fenêtre jour par jour ou semaine par
+// semaine : sans borne, l'onglet Stats et le composeur de badge gèlent.
+// - Une année hors 1900..(année en cours + 1) n'est pas un jour : elle est ignorée. Seule
+//   exception à la règle « aucune date implicite » du module, faute de date de référence
+//   dans `dayKeyOf` (appelée en `.map`).
+// - Une fenêtre ne dépasse jamais MAX_WINDOW_WEEKS semaines : au-delà, seules les plus
+//   récentes sont parcourues.
+export const MIN_YEAR = 1900
+export const MAX_WINDOW_WEEKS = 520
+
+export function isPlausibleDay(day) {
+  const y = Number(String(day || '').slice(0, 4))
+  return Number.isInteger(y) && y >= MIN_YEAR && y <= new Date().getFullYear() + 1
+}
+
+// Premier jour effectivement parcouru d'une fenêtre : `startDay`, ou le jour situé
+// MAX_WINDOW_WEEKS semaines avant `endDay` s'il est plus récent.
+function boundedStart(win) {
+  const floor = ymdLocal(addDays(localDayToDate(win.endDay), -MAX_WINDOW_WEEKS * 7 + 1))
+  return floor.startsWith('NaN') || win.startDay > floor ? win.startDay : floor
+}
 export const DEFAULT_WINDOW = 'quarter'
 
 // Les huit couleurs de l'échelle. Ce sont des CONSTANTES DE LA GRILLE, pas des jetons de thème :
@@ -57,7 +80,9 @@ export function buildWindow(refDate, period, firstDay = 1) {
 export function dayKeyOf(session) {
   if (!session?.date) return null
   const d = new Date(session.date)
-  return Number.isNaN(d.getTime()) ? null : ymdLocal(d)
+  if (Number.isNaN(d.getTime())) return null
+  const day = ymdLocal(d)
+  return isPlausibleDay(day) ? day : null
 }
 
 // Map jour -> { seconds, count, lastDate }. `lastDate` (instant de la session la plus récente du
@@ -85,7 +110,8 @@ function isMonthStart(mondayDay, previousMondayDay) {
 // (lundi en haut). Les jours POSTÉRIEURS à la date de référence sont marqués `future` : ils
 // seront rendus ABSENTS, jamais comme un jour sans tricot.
 export function buildGrid(win, byDay) {
-  const columns = win.mondayDays.map((monday, i) => {
+  const mondayDays = win.mondayDays.slice(-MAX_WINDOW_WEEKS)
+  const columns = mondayDays.map((monday, i) => {
     const mondayDate = localDayToDate(monday)
     const cells = []
     for (let k = 0; k < 7; k++) {
@@ -100,7 +126,7 @@ export function buildGrid(win, byDay) {
         future,
       })
     }
-    return { monday, monthStart: isMonthStart(monday, win.mondayDays[i - 1]), cells }
+    return { monday, monthStart: isMonthStart(monday, mondayDays[i - 1]), cells }
   })
   return { columns }
 }
@@ -155,7 +181,7 @@ export function currentStreak(daySet, refDate) {
 export function longestStreakInWindow(daySet, win) {
   let best = 0
   let run = 0
-  let day = win.startDay
+  let day = boundedStart(win)
   while (day <= win.endDay) {
     run = daySet?.has(day) ? run + 1 : 0
     if (run > best) best = run
@@ -178,7 +204,7 @@ function inWindow(day, win) {
 }
 
 function* daysOf(win) {
-  let day = win.startDay
+  let day = boundedStart(win)
   while (day <= win.endDay) {
     yield day
     day = shiftDay(day, 1)

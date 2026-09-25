@@ -1,17 +1,19 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import fr from '@/i18n/fr.json'
 import LibraryView from '@/views/LibraryView.vue'
 import { usePatternsStore } from '@/stores/patterns'
+import { createTestI18n, createTestRouter, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
-const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', name: 'library', component: { template: '<div/>' } }, { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } }, { path: '/i', name: 'import-local', component: { template: '<div/>' } }] })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
+const router = createTestRouter([{ path: '/', name: 'library', component: { template: '<div/>' } }, { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } }, { path: '/i', name: 'import-local', component: { template: '<div/>' } }])
 
 async function mountView() {
-  const w = mount(LibraryView, { global: { plugins: [createPinia(), i18n, router], stubs: { AppHeader: true, ThumbImage: true, PatternForm: true, ConfirmDialog: true, AppIcon: true } } })
+  const w = mount(LibraryView, { global: { plugins: [createPinia(), i18n, router], stubs: { AppHeader: true, ThumbImage: true, ConfirmDialog: true, AppIcon: true } } })
   await flushPromises(); return w
 }
 
@@ -22,7 +24,7 @@ describe('LibraryView — carte exemple sur bibliothèque vide', () => {
     const store = usePatternsStore(); store.patterns = []; store.loaded = true
     await flushPromises()
     expect(w.find('.pcard--example').exists()).toBe(true)
-    expect(w.text()).toContain('Exemple')
+    expect(w.text()).toContain(tk('common.example'))
   })
 
   // Distinction importante : un filtre de catégorie qui ne renvoie rien NE DOIT PAS

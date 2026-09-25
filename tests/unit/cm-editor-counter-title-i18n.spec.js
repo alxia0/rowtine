@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Tâche « dernier reliquat 4 langues » (29/07) — la puce compteur du mode
 // enrichi (CounterWidget, cm-editor.js) codait en dur son `title` HTML
 // (survol souris) : `span.title = 'Modifier le compteur'`, invariant quelle

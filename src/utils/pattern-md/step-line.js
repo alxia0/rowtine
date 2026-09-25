@@ -55,9 +55,7 @@
 // repli en tête de document plutôt qu'un curseur posé dans la mauvaise
 // section.
 import { slug } from '../reader.js'
-import { lineType, h2Title } from './md-line-type.js'
-
-const H2_ANY_RE = /^##\s/
+import { lineType, h2Title, H2_PREFIXE_RE } from './md-line-type.js'
 
 // Cette ligne brute ouvre-t-elle une étape ?
 function opensStep(raw) {
@@ -97,7 +95,10 @@ export function stepLine(md, sectionTitle, index) {
   if (start < 0) return null
   let n = 0
   for (let i = start + 1; i < lines.length; i += 1) {
-    if (H2_ANY_RE.test(lines[i])) return null // section suivante atteinte
+    // `H2_PREFIXE_RE` (md-line-type.js), pas un second littéral `/^##\s/` local : en
+    // test booléen les deux sont équivalents (`\s+` exige déjà au moins un blanc),
+    // réutilisée plutôt que recopiée pour la même raison que le reste du fichier.
+    if (H2_PREFIXE_RE.test(lines[i])) return null // section suivante atteinte
     if (!opensStep(lines[i])) continue
     if (n === index) return i + 1
     n += 1

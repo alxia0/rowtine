@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
@@ -9,6 +10,7 @@ import { resolve } from 'node:path'
 const CHART = { rows: 50, cols: 132, img: 'g.png', repeat: '132 m × 50 rangs', reps: 3 }
 const CHART_RADIAL_SQUARE = { rows: 5, img: 'g.png', shape: 'radial-square' }
 const CHART_RADIAL_CIRCLE = { rows: 5, img: 'g.png', shape: 'radial-circle' }
+const CHART_RADIAL_HEXAGON = { rows: 5, img: 'g.png', shape: 'radial-hexagon' }
 const CHART_PATH = { rows: 3, img: 'g.png', shape: 'path' }
 const PATH_FRAME = { points: [{ x: 20, y: 30 }, { x: 80, y: 30 }], spacing: 5 }
 const PATH_FRAME_2PTS = { points: [{ x: 20, y: 30 }, { x: 80, y: 30 }], spacing: 5 }
@@ -40,6 +42,18 @@ describe('ChartStage — afficheur unique du diagramme', () => {
     const w = mountStage()
     await w.setProps({ row: 12 })
     expect(w.find('.cfs__rowval').text()).toBe('12 / 50')
+  })
+
+  // Protège : un appui qui ne déplace rien n'émet rien (sinon persist({ worked: true }) inscrit un jour actif).
+  it('aux bornes (rang 1 en répétition 2, dernier rang de la dernière répétition), − et + n’émettent rien', async () => {
+    const w = mountStage({ row: 1, rep: 2 })
+    expect(w.find('.cfs__prev').attributes('disabled')).toBeDefined()
+    w.vm.$.setupState.step(-1)
+    const fin = mountStage({ row: 50, rep: 3 })
+    await fin.find('.cfs__next').trigger('click')
+    expect(w.emitted('update:row')).toBeFalsy()
+    expect(fin.emitted('update:row')).toBeFalsy()
+    expect(fin.emitted('update:rep')).toBeFalsy()
   })
 
   it('remonte le rang par un évènement, sans store', async () => {
@@ -96,6 +110,24 @@ describe('ChartStage — afficheur unique du diagramme', () => {
     await w.setProps({ chart: { rows: 10, cols: 5, img: 'autre.png', repeat: '5 m × 10 rangs' } })
     expect(vp.scrollTop).toBe(0)
     expect(vp.scrollLeft).toBe(0)
+  })
+
+  // Protège : un simple appui sur la poignée du rideau, sans glisser, n'émet rien (pas de « travaillé » fantôme).
+  it('rideau : appui sans glisser n’émet rien ; un glissé émet la nouvelle position', async () => {
+    const w = mountStage()
+    const line = w.find('.cfs__curtain-line')
+    await line.trigger('pointerdown', { pointerId: 1 })
+    await line.trigger('pointerup', { pointerId: 1 })
+    expect(w.emitted('update:curtain')).toBeFalsy()
+
+    w.vm.$el.querySelector('.cfs__canvas').getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 100, right: 200, bottom: 100 })
+    await line.trigger('pointerdown', { pointerId: 1 })
+    const move = new Event('pointermove', { bubbles: true })
+    Object.assign(move, { pointerId: 1, clientX: 50 })
+    line.element.dispatchEvent(move)
+    await line.trigger('pointerup', { pointerId: 1 })
+    expect(w.emitted('update:curtain')).toHaveLength(1)
+    expect(w.emitted('update:curtain')[0][0].x).toBe(25)
   })
 
   it('affiche un repère vertical plein-hauteur sur le rideau, en plus de la poignée ronde', () => {
@@ -175,6 +207,36 @@ describe('ChartStage — anneau radial (lecture)', () => {
     expect(Number(hl.attributes('height'))).toBeCloseTo(155.5)
     expect(Number(hl.attributes('x'))).toBeCloseTo(25)
     expect(Number(hl.attributes('y'))).toBeCloseTo(-27.75)
+  })
+
+  it('un motif radial-hexagon rend un polygon (6 sommets), pas de rect ni ellipse', () => {
+    const w = mountStage({ chart: CHART_RADIAL_HEXAGON, row: 3 })
+    expect(w.find('polygon.cfs__ring--hl').exists()).toBe(true)
+    expect(w.find('rect').exists()).toBe(false)
+    expect(w.find('ellipse').exists()).toBe(false)
+    const hl = w.find('polygon.cfs__ring--hl')
+    const pts = hl.attributes('points').trim().split(' ')
+    expect(pts).toHaveLength(6)
+  })
+
+  it("orientation par défaut 'flat' (frame sans hexOrientation) : sommet le plus à droite sur l'axe horizontal du centre", () => {
+    // chartRings(3, 5, null) : cx=cy=50, hlR=25. Apothème 25 → circonrayon R=25/cos(30°).
+    const w = mountStage({ chart: CHART_RADIAL_HEXAGON, row: 3 })
+    const hl = w.find('polygon.cfs__ring--hl')
+    const pts = hl.attributes('points').trim().split(' ').map((p) => p.split(',').map(Number))
+    const R = 25 / Math.cos(Math.PI / 6)
+    const rightmost = pts.find(([x, y]) => Math.abs(x - (50 + R)) < 1e-6 && Math.abs(y - 50) < 1e-6)
+    expect(rightmost).toBeTruthy()
+  })
+
+  it("frame.hexOrientation 'pointy' : un sommet exactement au-dessus du centre", () => {
+    const frame = { cx: 50, cy: 50, r0: 0, r1: 50, r0Shape: 'hexagon', r1Shape: 'hexagon', hexOrientation: 'pointy' }
+    const w = mountStage({ chart: CHART_RADIAL_HEXAGON, row: 3, frame })
+    const hl = w.find('polygon.cfs__ring--hl')
+    const pts = hl.attributes('points').trim().split(' ').map((p) => p.split(',').map(Number))
+    const top = pts.find(([x]) => Math.abs(x - 50) < 1e-6)
+    expect(top).toBeTruthy()
+    expect(top[1]).toBeLessThan(50)
   })
 
   it('rend un contour mixte : rangs avant le switchRound en cercle, à partir de lui en carré', () => {
@@ -349,8 +411,24 @@ describe('ChartStage — calage par tracé (aperçu, sans poignées de drag)', (
     const w = mountStage({ chart: CHART_PATH, row: 1 })
     await w.find('.cfs__cal').trigger('click')
     w.vm.draftPath = { points: [{ x: 10, y: 10 }, { x: 90, y: 90 }], spacing: 6 }
+    await nextTick()
     await w.find('.cfs__calsave').trigger('click')
     expect(w.emitted('update:frame').at(-1)).toEqual([{ points: [{ x: 10, y: 10 }, { x: 90, y: 90 }], spacing: 6 }])
+  })
+
+  // Protège : un tracé à moins de 2 repères n'est jamais enregistré (il effacerait l'affichage des rangs et l'invite de calage).
+  it('Enregistrer est inactif tant que le tracé a moins de 2 repères', async () => {
+    const w = mountStage({ chart: CHART_PATH, row: 1 })
+    await w.find('.cfs__cal').trigger('click')
+    expect(w.find('.cfs__calsave').attributes('disabled')).toBeDefined()
+    w.vm.$.setupState.saveCalibrate()
+    w.vm.draftPath = { points: [{ x: 10, y: 10 }], spacing: 6 }
+    await nextTick()
+    expect(w.find('.cfs__calsave').attributes('disabled')).toBeDefined()
+    expect(w.emitted('update:frame')).toBeFalsy()
+    w.vm.draftPath = { points: [{ x: 10, y: 10 }, { x: 90, y: 90 }], spacing: 6 }
+    await nextTick()
+    expect(w.find('.cfs__calsave').attributes('disabled')).toBeUndefined()
   })
 
   it("les polylignes prévisualisent draftPath pendant le calage (pas encore enregistré)", async () => {

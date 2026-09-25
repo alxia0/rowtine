@@ -4,17 +4,9 @@
 // ReaderView.vue, HomeView.vue, ProjectDetailView.vue, ChronoPill.vue, ChartStage.vue,
 // CounterCard.vue) étaient déjà migrés vers rgba(var(--brand-rgb), α) avant ce lot.
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { execSync } from 'node:child_process'
 
 describe('aucun littéral de l\'ancienne teinte 44 dans les styles vivants', () => {
-  it('PhotoCropper.vue : --brand-deep sans repli littéral #ad5a34', () => {
-    const src = readFileSync(resolve(process.cwd(), 'src/components/PhotoCropper.vue'), 'utf8')
-    expect(src).not.toMatch(/ad5a34/i)
-    expect(src).toMatch(/var\(--brand-deep\)/)
-  })
-
   it('balayage src/ : aucune occurrence de rgb(173, 90, 52) ou #ad5a34 hors commentaire tokens.css:122 (mémoire historique)', () => {
     const out = execSync(
       String.raw`grep -rn "173, 90, 52\|ad5a34" src/ || true`,

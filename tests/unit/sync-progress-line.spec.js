@@ -1,12 +1,14 @@
+// @vitest-environment jsdom
 // Unitaire — la ligne de progression (spec 2026-08-04, §4.3/§4.4).
 import { afterEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import SyncProgressLine from '@/components/SyncProgressLine.vue'
 import { syncProgress, beginSyncProgress, endSyncProgress } from '@/backup/progress'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 const mountLine = (owner) =>
   mount(SyncProgressLine, { props: owner ? { owner } : {}, global: { plugins: [i18n] } })
 
@@ -48,7 +50,7 @@ describe('SyncProgressLine', () => {
     report({ phase: 'read', done: 12, total: 24, current: 'Marisol Shawl' })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.sync-progress__label').text()).toBe('Lecture… 12 sur 24 — Marisol Shawl')
+    expect(wrapper.find('.sync-progress__label').text()).toBe(tk('saf.progressReadCurrent', { done: 12, total: 24, current: 'Marisol Shawl' }))
   })
 
   it('phase read SANS courant (report initial ou finally) : libellé inchangé (progressRead)', async () => {
@@ -57,11 +59,11 @@ describe('SyncProgressLine', () => {
     report({ phase: 'read', done: 2, total: 7, current: '' })
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('.sync-progress__label').text()).toBe('Lecture… 2 sur 7')
+    expect(wrapper.find('.sync-progress__label').text()).toBe(tk('saf.progressRead', { done: 2, total: 7 }))
 
     report({ phase: 'read', done: 3, total: 7, current: undefined })
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.sync-progress__label').text()).toBe('Lecture… 3 sur 7')
+    expect(wrapper.find('.sync-progress__label').text()).toBe(tk('saf.progressRead', { done: 3, total: 7 }))
   })
 
   // Sous-barre du dossier en cours : une seconde piste fine, sous la
@@ -85,7 +87,9 @@ describe('SyncProgressLine', () => {
     expect(wrapper.find('[data-test="sync-progress-subbar"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="sync-progress-subbar"]').attributes('style')).toContain('6%')
     expect(wrapper.find('.sync-progress__label').text()).toBe(
-      'Lecture… 12 sur 24 — Marisol Shawl · patron.json (0,5/8,9 Mo)',
+      tk('saf.progressReadFile', {
+        done: 12, total: 24, current: 'Marisol Shawl', file: 'patron.json', subDone: '0,5', subTotal: '8,9',
+      }),
     )
   })
 
@@ -107,7 +111,7 @@ describe('SyncProgressLine', () => {
     report({ phase: 'read', done: 2, total: 2, current: 'Marisol Shawl', sub: null })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-test="sync-progress-subbar"]').exists()).toBe(false)
-    expect(wrapper.find('.sync-progress__label').text()).toBe('Lecture… 2 sur 2 — Marisol Shawl')
+    expect(wrapper.find('.sync-progress__label').text()).toBe(tk('saf.progressReadCurrent', { done: 2, total: 2, current: 'Marisol Shawl' }))
   })
 
   it('sub sans total exploitable (0) : traitée comme absente, jamais de division par zéro', async () => {
@@ -122,7 +126,7 @@ describe('SyncProgressLine', () => {
     })
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-test="sync-progress-subbar"]').exists()).toBe(false)
-    expect(wrapper.find('.sync-progress__label').text()).toBe('Lecture… 1 sur 2 — Marisol Shawl')
+    expect(wrapper.find('.sync-progress__label').text()).toBe(tk('saf.progressReadCurrent', { done: 1, total: 2, current: 'Marisol Shawl' }))
   })
 
   it('largeur de barre proportionnelle, et jamais de division par zéro', async () => {

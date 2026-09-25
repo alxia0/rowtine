@@ -7,7 +7,7 @@ import { useYarnsStore, emptyYarn } from '@/stores/yarns'
 import { reservedTotal } from '@/utils/yarn-usage'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { YARN_WEIGHTS, YARN_BRANDS, YARN_COLOR_TYPES } from '@/constants/catalog'
-import { COLOR_PALETTE, isCustomColor } from '@/constants/swatch'
+import { COLOR_PALETTE, isCustomColor, paletteColorLabel } from '@/constants/swatch'
 import { COMPOSITIONS, normalizeComposition, compositionLabel as compositionLabelOf } from '@/constants/compositions'
 import { LABEL_GROUPS, normalizeLabels } from '@/constants/yarn-labels'
 import { animalFibersIn } from '@/constants/fiber-origin'
@@ -56,8 +56,7 @@ const compositionOptions = computed(() => {
   return [...COMPOSITIONS, ...[...custom].sort((a, b) => a.localeCompare(b))]
 })
 
-// Libellé lisible d'une couleur de la palette (« rouge » → « Rouge »).
-const colorLabel = (key) => key.charAt(0).toUpperCase() + key.slice(1)
+const colorLabel = paletteColorLabel
 // Choisir une pastille : renseigne la couleur ET remplit le nom automatiquement.
 function pickColor(c) {
   const label = colorLabel(c.key)
@@ -131,7 +130,8 @@ const firstPurchaseBain = ref('')
 // la quantité déjà réservée). `Math.max(0, n)` APRÈS le test `Number.isFinite`.
 function normalizedQuantity(raw) {
   if (raw === '' || raw == null) return 1
-  const n = Number(raw)
+  // Virgule décimale acceptée (« 2,5 ») : `Number` natif en faisait NaN, donc 1 en silence.
+  const n = parseDecimal(raw)
   return Number.isFinite(n) ? Math.max(0, n) : 1
 }
 // Proposition d'achat en attente (hausse de quantité en édition, cf. save()) :
@@ -316,7 +316,8 @@ async function save() {
     if (isEdit.value) {
       current = yarnsStore.yarns.find((y) => y.id === Number(route.params.id))
       const minQty = current ? reservedTotal(current) : 0
-      if (Number(form.quantity) < minQty) {
+      // Même lecture que la valeur enregistrée : un NaN (« 2,5 ») passait sous ce plancher.
+      if (normalizedQuantity(form.quantity) < minQty) {
         snackbar.show(t('yarn.quantityBelowReserved', { n: minQty }))
         return
       }
@@ -498,6 +499,9 @@ async function resolvePendingPurchase(kind) {
         <div class="col"><label class="field-label" for="yarn-quantity">{{ t('yarn.quantity') }}</label><input id="yarn-quantity" v-model="form.quantity" class="input" inputmode="numeric" placeholder="1" /></div>
         <div class="col"><label class="field-label" for="yarn-price">{{ t('yarn.priceWithSymbol', { symbol: currencySymbol(settings.currency, locale) }) }}</label><input id="yarn-price" :value="form.price" class="input" inputmode="decimal" placeholder="—" @input="onPrixLaine" /></div>
       </div>
+      <label class="field-label mt2" for="yarn-stored-in">{{ t('yarn.storedIn') }}</label>
+      <input id="yarn-stored-in" v-model="form.storedIn" class="input" :placeholder="t('yarn.storedInPlaceholder')" />
+
       <!-- Date d'achat et bain, UNIQUEMENT à la création. La duplication EST une création
            (isEdit reste false, cf. onMounted) : ces champs s'y affichent aussi. -->
       <div v-if="!isEdit" class="row row--fields mt2">
@@ -571,6 +575,9 @@ async function resolvePendingPurchase(kind) {
         </div>
       </template>
       <p v-if="veganConflit" class="veganwarn">{{ t('yarn.veganWarning', { fibre: veganConflit }) }}</p>
+
+      <label class="field-label mt2" for="yarn-notes">{{ t('yarn.notes') }}</label>
+      <textarea id="yarn-notes" v-model="form.notes" class="input" rows="3" :placeholder="t('yarn.notesPlaceholder')"></textarea>
 
       <div class="addform__actions">
         <button class="btn" @click="router.back()">{{ t('common.cancel') }}</button>

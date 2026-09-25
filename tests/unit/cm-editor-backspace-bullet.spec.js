@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Retour-arrière en début de ligne — la commande défensive
 // deleteMarkupBackward (cm-editor.js) doit produire, sur la 6.43.6 épinglée, la
 // MÊME transaction que le chemin par défaut (deleteCharBackward + skipAtomic de

@@ -15,17 +15,27 @@ test('le bouton d’import mène à l’écran local, qui analyse et sauvegarde'
   // ouvre le sélecteur natif ; fournir le fichier à l'input caché déclenche la navigation
   // vers import-local et démarre l'import au montage.
   await openAddPatternSheet(page)
-  // La feuille d'ajout partage la classe `.lib-import__input` avec le choix .zip (Task B3) :
+  // La feuille d'ajout partage la classe `.lib-import__input` avec le choix Rowtine (23/09) :
   // scoper par `accept` pour cibler le choix PDF sans ambiguïté.
   await page.locator('.lib-import__input[accept*="pdf"]').setInputFiles(FIXTURE)
-  // Depuis le 17/08 : plus de navigation automatique — l'écran reste
-  // affiché avec un bloc de réussite, et c'est le clic sur « Voir le patron » qui navigue.
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
+  // Depuis le 17/08 : plus de navigation automatique — l'écran reste affiché avec un bloc
+  // de réussite. Depuis la refonte du bilan (lot du 23/09/2026) : titre, bilan chiffré (bulle
+  // en cartes), puis « Prévisualiser le patron » comme bouton principal (le fixture a des
+  // sections) — plus de « Voir le patron » pour ce cas.
+  await expect(page.getByText('Ton patron est importé')).toBeVisible()
+  const sectionsTile = page.locator('.done__tile').filter({ hasText: /section/ })
+  await expect(sectionsTile.locator('.done__tile-val')).not.toHaveText('0')
+  const stepsTile = page.locator('.done__tile').filter({ hasText: /étape/ })
+  await expect(stepsTile.locator('.done__tile-val')).not.toHaveText('0')
+
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+
+  // Retour : la fiche patron a pris la place de l'écran d'import dans l'historique (cf.
+  // previewPattern() dans LocalPdfImportView.vue) — un retour arrière ramène donc sur la
+  // fiche, jamais sur le bloc de réussite déjà quitté.
+  await page.goBack()
   await expect(page).toHaveURL(/\/pattern\/\d+$/)
-  // La fiche patron est épurée, plus d'aperçu inline. La preuve
-  // que le PDF a bien été analysé (sections extraites) est la présence du bouton
-  // « Prévisualiser le patron », restauré et gardé sur reader.sections.length.
-  await expect(page.getByRole('button', { name: /Prévisualiser le patron/ })).toBeVisible()
 })
 
 test('🚩 écran au repos : nouvelle ligne visible, ET le tap sur le bouton ouvre toujours le VRAI sélecteur de fichiers natif', async ({
@@ -47,8 +57,9 @@ test('🚩 écran au repos : nouvelle ligne visible, ET le tap sur le bouton ouv
   expect(chooser.isMultiple()).toBe(false)
 
   // Bout en bout : fournir le fichier au chooser mène bien à l'analyse, puis à
-  // l'enregistrement — l'écran reste affiché, avec un bouton vers la fiche.
+  // l'enregistrement — l'écran reste affiché, avec un bouton vers le lecteur (le fixture a
+  // des sections, cf. le test précédent).
   await chooser.setFiles(FIXTURE)
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
-  await expect(page).toHaveURL(/\/pattern\/\d+$/)
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
 })

@@ -9,9 +9,10 @@
 // manuellement n'a donc aucune section tant qu'il n'a pas été importé/corrigé.
 //
 // Scénario A : créer un patron en bibliothèque (infos seules, sans reader) →
-//              réapparaît dans la liste ; la fiche affiche « Aucune section. »
+//              la sauvegarde navigue directement vers la fiche (écran dédié
+//              pattern-new), qui affiche « Aucune section. »
 //              (ni bouton Prévisualiser ni Corriger, faute de reader — les deux sont
-//              gardés sur pattern.reader?.sections?.length :
+//              gardés sur pattern.reader?.sections?.length || pattern.gallery?.length :
 //              Prévisualiser restauré sur la fiche, Corriger vit sur l'aperçu).
 // Scénario C : audit a11y axe-core sur l'écran d'édition de patron (infos seules).
 //
@@ -27,7 +28,7 @@ import { completeOnboarding, openAddPatternSheet } from './helpers'
 
 // ─── Scénario A : création depuis la bibliothèque ─────────────────────────────
 
-test('bibliothèque : créer un patron (infos seules) → apparaît dans la liste ; fiche sans section', async ({ page }) => {
+test('bibliothèque : créer un patron (infos seules) → navigue vers la fiche ; fiche sans section', async ({ page }) => {
   const name = 'Chaussette Test'
   await completeOnboarding(page, { firstName: 'Alex' })
   await page.goto('/library')
@@ -36,16 +37,15 @@ test('bibliothèque : créer un patron (infos seules) → apparaît dans la list
   await page.locator('#pat-name').fill(name)
   await page.getByRole('button', { name: 'Enregistrer' }).click()
 
-  // Le patron apparaît dans la liste bibliothèque.
-  await expect(page.getByRole('button', { name })).toBeVisible()
-
-  // Ouvrir la fiche patron.
-  await page.getByRole('button', { name }).click()
+  // La sauvegarde navigue directement vers la fiche du patron créé (écran dédié
+  // pattern-new, cf. PatternCreateView.vue) — il n'y a plus de détour par la liste.
   await expect(page).toHaveURL(/\/pattern\/\d+/)
+  await expect(page.getByRole('heading', { name })).toBeVisible()
 
   // Aucun reader composé à la création (PatternForm ne le permet plus) : message
   // « Aucune section. » et ni bouton Prévisualiser ni Corriger le patron (les deux
-  // sont gardés sur pattern.reader?.sections?.length, ici vide).
+  // sont gardés sur pattern.reader?.sections?.length || pattern.gallery?.length,
+  // tous deux vides ici).
   await expect(page.getByText('Aucune section.')).toBeVisible()
   await expect(page.getByRole('button', { name: /Prévisualiser le patron/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /Corriger le patron/ })).toHaveCount(0)

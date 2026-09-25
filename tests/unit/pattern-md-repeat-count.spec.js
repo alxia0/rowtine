@@ -174,3 +174,18 @@ describe('D2 — marqueur {×N} vs relecture legacy (défaut vague 2)', () => {
     expect(pattern.reader.sections[0].steps[0].total).toEqual([7])
   })
 })
+
+// Protège : l'unité « x » (admise par l'import PDF) garde un total PAR TAILLE à l'aller-retour.
+describe('répétition par taille avec l’unité « x »', () => {
+  it('« rows {{0}} … {{1}} x » : le total par taille survit à patternToMd → mdToPattern', () => {
+    const pattern = {
+      name: 'P',
+      reader: {
+        sizeLabels: ['S', 'M', 'L'],
+        sections: [{ title: 'Dos', kind: 'dos', steps: [{ t: 'Rep the last {{0}} rows {{1}} x.', c: [[4, 6, 8], [3, 4, 5]], repeat: true, total: [3, 4, 5] }] }],
+      },
+    }
+    const st = repStep(mdToPattern(patternToMd(pattern).md).pattern.reader)
+    expect(st.total).toEqual([3, 4, 5])
+  })
+})

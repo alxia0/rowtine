@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
 import { renderBadge, BADGE_TEMPLATES, computeBadgeGeometry, wrapText, statValue, createBadgeCanvas, buildRawStatLines, drawTechniqueBadge } from '@/utils/badge-render'
 import { calendarRealHeight, drawCalendar } from '@/utils/badge-calendar'

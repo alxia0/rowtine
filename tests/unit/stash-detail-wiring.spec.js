@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — StashView : un tap sur le corps d'une carte navigue vers la fiche laine
 // (route stash-item), plus vers un tiroir. Seule preuve unitaire du câblage @view de
 // StashView.vue depuis la bascule vers les écrans fiche/édition (Task 4 du plan
@@ -6,23 +7,19 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import StashView from '@/views/StashView.vue'
 import { useYarnsStore } from '@/stores/yarns'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 function makeRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/stash', name: 'stash', component: StashView },
-      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-      { path: '/stash/new', name: 'stash-new', component: { template: '<div />' } },
-    ],
-  })
+  return createTestRouter([
+    { path: '/stash', name: 'stash', component: StashView },
+    { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+    { path: '/stash/new', name: 'stash-new', component: { template: '<div />' } },
+  ])
 }
 
 describe('StashView — corps de carte ouvre la fiche laine', () => {

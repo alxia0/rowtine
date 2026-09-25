@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — helper PARTAGÉ de restauration sur désignation de dossier
 // (extrait dans src/backup/restore-on-designate.js
 // pour être consommé à la fois par OnboardingFolderPrompt.vue et

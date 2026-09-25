@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Les identifiants créés par le semis du 1er lancement sont ENREGISTRÉS, pas devinés :
 // c'est ce qui permet à `isDbRestorable` de distinguer « base neuve avec ses
 // 3 exemples » de « base où l'utilisatrice a travaillé », sans jamais se tromper sur

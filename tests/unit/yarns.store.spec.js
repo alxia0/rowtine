@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — store stock de laines : CRUD + valeurs par défaut + suppression/restauration.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
@@ -53,6 +54,15 @@ describe('store yarns', () => {
 
   it('emptyYarn a une trace de consommation vide', () => {
     expect(emptyYarn().consumed).toEqual({})
+  })
+
+  // Modèle distinct de la marque, notes et lieu de rangement : vides par défaut,
+  // remplis par l'import Ravelry ou la saisie manuelle (rendu couvert par
+  // tests/unit/YarnDetailView.spec.js:339, describe « YarnDetailView, Notes et
+  // Lieu de rangement », remise à vide de purchasedAt par YarnEditView.spec.js).
+  // Épinglé ici directement sur emptyYarn().
+  it('emptyYarn a un modèle, des notes et un lieu de rangement vides par défaut', () => {
+    expect(emptyYarn()).toMatchObject({ model: '', notes: '', storedIn: '' })
   })
 
   it('emptyYarn a un type de coloris "uni" et des notes de couleur vides par défaut', () => {

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran plein d'ajout/édition de laine (routes stash-new / stash-edit) — extrait du
 // formulaire jusqu'ici inline dans StashView.vue (Task 3 de la refonte fiche/navigation).
 // Ce fichier porte les assertions de 9 anciens fichiers de test de StashView (table de la
@@ -8,8 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import fr from '@/i18n/fr.json'
 import YarnEditView from '@/views/YarnEditView.vue'
 import { useYarnsStore, emptyYarn } from '@/stores/yarns'
@@ -19,8 +19,11 @@ import { useSettingsStore } from '@/stores/settings'
 import { db } from '@/db/db'
 import { ymdLocal } from '@/utils/time-periods'
 import { photosOf } from '@/utils/yarn-photos'
+import { createTestI18n, createTestRouter, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 function todayISO() {
   return ymdLocal(new Date())
@@ -113,6 +116,25 @@ describe('YarnEditView — plancher de quantité sous le total réservé', () =>
 
     expect(useYarnsStore(pinia).update).not.toHaveBeenCalled()
     expect(useSnackbarStore(pinia).show).toHaveBeenCalledWith(fr.yarn.quantityBelowReserved.replace('{n}', '5'))
+  })
+
+  // Une quantité à virgule (« 4,5 ») est lue comme un nombre : plancher appliqué, jamais 1 en silence.
+  it('quantité à virgule sous le réservé : refusée, jamais enregistrée à 1', async () => {
+    const { w, pinia } = await mountView({ routeParams: { id: '1' }, existingYarns: [SOURCE] })
+    await w.find('#yarn-quantity').setValue('4,5')
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+    expect(useYarnsStore(pinia).update).not.toHaveBeenCalled()
+
+  })
+
+  it('quantité à virgule au-dessus du réservé : enregistrée comme nombre décimal', async () => {
+    const { w, pinia } = await mountView({ routeParams: { id: '1' }, existingYarns: [{ ...SOURCE, quantity: 8 }] })
+    await w.find('#yarn-quantity').setValue('6,5')
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+    expect(useYarnsStore(pinia).update).toHaveBeenCalledTimes(1)
+    expect(useYarnsStore(pinia).update.mock.calls[0][1].quantity).toBe(6.5)
   })
 
   it('autorise la sauvegarde à exactement le total réservé (borne inclusive)', async () => {
@@ -393,13 +415,10 @@ describe('YarnEditView — duplication de fiche laine', () => {
         photos: ['data:image/png;base64,xxx', 'data:image/png;base64,yyy'],
         coverIndex: 1,
       })
-      const router = createRouter({
-        history: createMemoryHistory(),
-        routes: [
-          { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-          { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-        ],
-      })
+      const router = createTestRouter([
+        { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      ])
       router.push({ name: 'stash-new', query: { duplicateFrom: String(sourceId) } })
       await router.isReady()
       const pinia = createPinia()
@@ -434,13 +453,10 @@ describe('YarnEditView — duplication de fiche laine', () => {
         quantity: 1, composition: [],
         photo: 'data:image/png;base64,xxx', // ex-champ unique, AUCUNE clé `photos`
       })
-      const router = createRouter({
-        history: createMemoryHistory(),
-        routes: [
-          { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-          { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-        ],
-      })
+      const router = createTestRouter([
+        { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      ])
       router.push({ name: 'stash-new', query: { duplicateFrom: String(sourceId) } })
       await router.isReady()
       const pinia = createPinia()
@@ -479,13 +495,10 @@ describe('YarnEditView — duplicateFrom pointant vers une fiche disparue', () =
   })
 
   it('id de duplicateFrom introuvable en base : longueur/poids laissés vides s’enregistrent comme "" (pas null)', async () => {
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+    ])
     router.push({ name: 'stash-new', query: { duplicateFrom: '999999' } }) // id absent de la base
     await router.isReady()
     const pinia = createPinia()
@@ -536,14 +549,11 @@ describe('YarnEditView — la navigation n’a lieu qu’une fois la ligne d’a
     await db.settings.clear()
     await db.purchases.clear()
     for (const y of yarns) await db.yarns.add(y)
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-        { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
+    ])
     const name = routeParams.id ? 'stash-edit' : 'stash-new'
     router.push({ name, params: routeParams })
     await router.isReady()
@@ -614,14 +624,11 @@ describe('YarnEditView — formulaire (unités, prix) avec store + Dexie réels'
   }
 
   async function mountReal({ routeParams = {}, routeQuery = {} } = {}) {
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-        { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
+    ])
     const name = routeParams.id ? 'stash-edit' : 'stash-new'
     router.push({ name, params: routeParams, query: routeQuery })
     await router.isReady()
@@ -649,9 +656,9 @@ describe('YarnEditView — formulaire (unités, prix) avec store + Dexie réels'
     it('libelle les champs en yards et en onces', async () => {
       await setupDb({ imperial: true })
       const w = await mountReal()
-      expect(w.text()).toContain('Longueur (yd)')
-      expect(w.text()).toContain('oz / pelote')
-      expect(w.text()).not.toContain('Métrage (m)')
+      expect(w.text()).toContain(tk('yarn.lengthYd'))
+      expect(w.text()).toContain(tk('yarn.ounces'))
+      expect(w.text()).not.toContain(tk('yarn.lengthM'))
     })
 
     it('associe chaque libellé au bon champ, pas seulement leur présence sur la page', async () => {
@@ -660,15 +667,15 @@ describe('YarnEditView — formulaire (unités, prix) avec store + Dexie réels'
       const cols = w.findAll('.row--fields .col')
       const lengthCol = cols.find((c) => c.find('input').attributes('placeholder') === '100')
       const weightCol = cols.find((c) => c.find('input').attributes('placeholder') === '50')
-      expect(lengthCol.find('.field-label').text()).toBe('Longueur (yd)')
-      expect(weightCol.find('.field-label').text()).toBe('oz / pelote')
+      expect(lengthCol.find('.field-label').text()).toBe(tk('yarn.lengthYd'))
+      expect(weightCol.find('.field-label').text()).toBe(tk('yarn.ounces'))
     })
 
     it('le libellé du prix porte le symbole de la devise choisie, pas une devise en dur', async () => {
       await setupDb({ imperial: true, currency: 'USD' })
       const w = await mountReal()
-      expect(w.text()).toContain('Prix / pelote ($)')
-      expect(w.text()).not.toContain('Prix / pelote (€)')
+      expect(w.text()).toContain(tk('yarn.priceWithSymbol', { symbol: '$' }))
+      expect(w.text()).not.toContain(tk('yarn.priceWithSymbol', { symbol: '€' }))
     })
 
     it('pré-remplit les champs avec les valeurs converties', async () => {
@@ -869,5 +876,27 @@ describe('YarnEditView — formulaire (unités, prix) avec store + Dexie réels'
       const priceInput = inputs.find((i) => i.attributes('id') === 'yarn-price')
       expect(priceInput.element.value).toBe('9,5')
     })
+  })
+})
+
+// Lieu de rangement et notes libres, champs ajoutés au modèle laine (Task 1 du plan import Ravelry).
+describe('YarnEditView, Notes et Lieu de rangement', () => {
+  it('affiche les deux champs, vides à la création', async () => {
+    const { w } = await mountView()
+    const stored = w.find('#yarn-stored-in')
+    const notes = w.find('#yarn-notes')
+    expect(stored.exists()).toBe(true)
+    expect(notes.exists()).toBe(true)
+    expect(stored.element.value).toBe('')
+    expect(notes.element.value).toBe('')
+  })
+
+  it('reprend les valeurs existantes en édition', async () => {
+    const { w } = await mountView({
+      existingYarns: [{ id: 5, brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu', storedIn: 'Étagère 2', notes: 'Douce', composition: [], labels: [] }],
+      routeParams: { id: '5' },
+    })
+    expect(w.find('#yarn-stored-in').element.value).toBe('Étagère 2')
+    expect(w.find('#yarn-notes').element.value).toBe('Douce')
   })
 })

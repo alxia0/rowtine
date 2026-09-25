@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — modale singleton d'incident de restauration (décision produit
 // du 05/09/2026 : « informer l'utilisateur qu'une erreur technique a été
 // rencontrée à la restauration et donner un moyen de voir le détail de l'erreur,
@@ -112,6 +113,25 @@ describe('RestoreErrorDialog', () => {
     expect(detailTexte()).toContain('Restauration des données — reprise du dossier non confirmée')
     // `error` null : le compositeur ne laisse pas de trou silencieux.
     expect(detailTexte()).toContain('Erreur :\n')
+  })
+
+  // Protège le message d'une restauration incomplète : elle ne doit pas se dire complète.
+  it('variante unowned avec écarts : formulation « restaurées en partie », écarts dans le rapport', async () => {
+    const w = mountIt()
+    useRestoreErrorStore().setReport({
+      kind: 'unowned',
+      error: null,
+      path: 'Documents/Rowtine',
+      at: '2026-09-05T18:42:10+02:00',
+      details: [{ where: 'Projets/Marisol [3]', error: 'Unexpected end of JSON input' }],
+    })
+    await flushPromises()
+
+    expect(w.text()).toContain(fr.restoreFailure.partialTitle)
+    expect(w.text()).toContain(fr.restoreFailure.partialBody)
+    expect(w.text()).not.toContain(fr.restoreFailure.unownedBody)
+    expect(detailTexte()).toContain('Restauration des données, incomplète')
+    expect(detailTexte()).toContain('Projets/Marisol [3]')
   })
 
   it('« Copier le rapport » copie EXACTEMENT le texte affiché dans le détail', async () => {
@@ -248,7 +268,7 @@ describe('i18n restoreFailure — clés et parité FR/EN', () => {
   })
 
   it('toutes les clés attendues sont présentes', () => {
-    const expected = ['errorTitle', 'errorBody', 'unownedTitle', 'unownedBody', 'copyAction']
+    const expected = ['errorTitle', 'errorBody', 'unownedTitle', 'unownedBody', 'partialTitle', 'partialBody', 'copyAction']
     for (const key of expected) {
       expect(fr.restoreFailure).toHaveProperty(key)
       expect(en.restoreFailure).toHaveProperty(key)

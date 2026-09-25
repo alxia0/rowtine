@@ -22,6 +22,9 @@ import { base64ToBytes, bytesToBase64 } from '@/utils/base64'
 // logs). Toute levée passe par E : un `new Error` nu dans ce fichier est une régression
 // du canal, interdite par la garde de tests/unit/warnings-no-french.spec.js.
 import { E, WARNING_CODES } from '@/utils/pattern-md/warning-codes'
+// base64ByteLength partagée avec memory-storage.js (même algorithme, même contrainte :
+// mesurer ne doit jamais coûter une copie complète du contenu) — cf. naming.js.
+import { base64ByteLength } from './naming'
 
 // Taille d'une tranche, en octets. MULTIPLE DE 3, impératif : le base64
 // encode 3 octets en 4 caractères ; une tranche dont le nombre d'octets n'est pas
@@ -29,15 +32,6 @@ import { E, WARNING_CODES } from '@/utils/pattern-md/warning-codes'
 // tranches devient invalide. Doit rester ≤ MAX_CHUNK_BYTES du plugin natif, qui
 // écrête de toute façon toute demande supérieure.
 export const CHUNK_BYTES = 393216 // 384 Kio = 3 × 131072
-
-// Longueur en OCTETS d'une chaîne base64 canonique, SANS la décoder : 4 caractères
-// valent 3 octets, moins le remplissage final. Décoder une photo pour la MESURER
-// coûterait une copie complète de plus — exactement ce que ce correctif combat.
-function base64ByteLength(b64) {
-  if (b64.length === 0) return 0
-  const pad = b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0
-  return (b64.length / 4) * 3 - pad
-}
 
 // base64 STRICTEMENT canonique : alphabet standard, longueur multiple de 4,
 // remplissage en fin seulement. C'est la condition pour découper la chaîne telle

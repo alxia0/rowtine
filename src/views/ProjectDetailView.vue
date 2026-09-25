@@ -27,6 +27,7 @@ import { Capacitor } from '@capacitor/core'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
 import { formatLocalDate, localDayToDate } from '@/utils/date-format'
+import { parseDecimal } from '@/utils/decimal'
 import { ymdLocal } from '@/utils/time-periods'
 import { startedAtPatch } from '@/utils/project-started-at'
 import { readerProgress, patternToReader, slug, sectionTitleLabel, sizeLabelText } from '@/utils/reader'
@@ -47,6 +48,7 @@ import { aggregateProjectStats, formatDuration } from '@/utils/project-stats'
 import { generateHeatColors } from '@/theme/palette'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import AppIcon from '@/components/AppIcon.vue'
+import { clampStars } from '@/utils/project-stars'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import ProjectPdfGallery from '@/components/ProjectPdfGallery.vue'
 import StitchProgress from '@/components/StitchProgress.vue'
@@ -74,6 +76,8 @@ const softDelete = useSoftDelete()
 const projectConsumption = useProjectConsumption()
 
 const project = ref(null)
+// Note bornée à l'affichage (défense en profondeur, cf. clampStars) : pilote un v-for.
+const starCount = computed(() => clampStars(project.value?.stars))
 const loading = ref(true) // pour afficher un skeleton tant que les données chargent
 const linkedPattern = ref(null) // patron lié (lien dans Détails, photos dans Galerie)
 const { open: menuOpen, triggerRef, menuRef } = useDismissMenu()
@@ -329,6 +333,12 @@ defineExpose({
       showBadgeComposer.value = false
       return true
     }
+    // Visionneuse photo : overlay LOCAL aussi (téléporté, jamais le store `lightbox` qu'App.vue
+    // ferme). Sans cette garde, le retour changeait d'onglet derrière elle, restée ouverte.
+    if (viewerIdx.value != null) {
+      closeViewer()
+      return true
+    }
     if (tab.value === entryTab) return false
     changeTab(entryTab)
     return true
@@ -342,6 +352,11 @@ onMounted(loadAll)
 watch(() => route.params.id, (id) => { if (id != null) loadAll() })
 
 const hasGauge = computed(() => project.value?.gaugeStitches || project.value?.gaugeRows)
+const gaugeText = computed(() =>
+  [project.value?.gaugeStitches && `${project.value.gaugeStitches} m`, project.value?.gaugeRows && `${project.value.gaugeRows} rg`]
+    .filter(Boolean)
+    .join(' × '),
+)
 // Liste d'aiguilles : nouveau format needles[] ; repli sur les scalaires hérités si le
 // projet n'a pas encore été migré. On ne garde que les entrées renseignées, formatées.
 const needleList = computed(() => {
@@ -555,18 +570,26 @@ function rowDuration(s) {
 
 const addingSession = ref(false)
 const newSess = reactive({ date: '', durationMin: '' })
+// Garde anti double appui : entre le clic et la fermeture du formulaire, `add()` recharge les
+// séances ; un 2e appui dans cette fenêtre enregistrait une séance en double.
+let savingManual = false
 async function saveManualSession() {
   const min = Number(newSess.durationMin) || 0
-  if (!min) return
-  await sessionsStore.add({
-    projectId: project.value.id,
-    sectionId: null,
-    date: (newSess.date ? localDayToDate(newSess.date) : new Date()).toISOString(),
-    durationSec: min * 60,
-    manual: true,
-  })
-  Object.assign(newSess, { date: '', durationMin: '' })
-  addingSession.value = false
+  if (!min || savingManual) return
+  savingManual = true
+  try {
+    await sessionsStore.add({
+      projectId: project.value.id,
+      sectionId: null,
+      date: (newSess.date ? localDayToDate(newSess.date) : new Date()).toISOString(),
+      durationSec: min * 60,
+      manual: true,
+    })
+    Object.assign(newSess, { date: '', durationMin: '' })
+    addingSession.value = false
+  } finally {
+    savingManual = false
+  }
 }
 async function removeSession(id) {
   const s = await sessionsStore.remove(id)
@@ -585,13 +608,25 @@ function startEditSession(s) {
   // côté lecture cette fois).
   editSess.date = s.date ? ymdLocal(new Date(s.date)) : ''
   editSess.durationMin = String(Math.round((s.durationSec || 0) / 60))
+  editSessInitial = { date: editSess.date, durationMin: editSess.durationMin }
   addingSession.value = false
 }
+let editSessInitial = { date: '', durationMin: '' }
+// Seuls les champs TOUCHÉS partent : réécrire la durée préremplie (arrondie à la minute)
+// rognait les secondes à chaque rectification de date, et écrasait le temps que le chrono
+// venait de fusionner dans cette ligne. Une durée vidée ou illisible est refusée (jamais 0),
+// une date vidée garde la date d'origine (jamais « aujourd'hui »).
 async function saveEditSession() {
-  await sessionsStore.update(editingSessionId.value, {
-    date: (editSess.date ? localDayToDate(editSess.date) : new Date()).toISOString(),
-    durationSec: (Number(editSess.durationMin) || 0) * 60,
-  })
+  const patch = {}
+  if (editSess.date && editSess.date !== editSessInitial.date) {
+    patch.date = localDayToDate(editSess.date).toISOString()
+  }
+  if (String(editSess.durationMin).trim() !== editSessInitial.durationMin) {
+    const min = parseDecimal(String(editSess.durationMin).trim())
+    if (String(editSess.durationMin).trim() === '' || !Number.isFinite(min) || min < 0) return
+    patch.durationSec = Math.round(min * 60)
+  }
+  if (Object.keys(patch).length) await sessionsStore.update(editingSessionId.value, patch)
   editingSessionId.value = null
   snackbar.show(t('session.updated'))
 }
@@ -697,7 +732,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         <nav v-if="menuOpen" ref="menuRef" class="menu">
           <button class="menu__item" @click="edit">{{ t('project.edit') }}</button>
           <button v-if="linkedPattern?.pdf" class="menu__item" @click="viewPatternPdf">{{ t('project.viewPdf') }}</button>
-          <button v-if="linkedPattern?.reader?.sections?.length" class="menu__item" @click="correctPattern">{{ t('project.correctPattern') }}</button>
+          <button v-if="linkedPattern?.reader?.sections?.length || linkedPattern?.gallery?.length" class="menu__item" @click="correctPattern">{{ t('project.correctPattern') }}</button>
           <!-- Second chemin vers le composeur de badge (demande Julien, 21/09) : le bouton
                « Partager » de l'onglet Stats reste, mais il faut aller le chercher ; ici il
                est à portée depuis n'importe quel onglet. Même libellé que ce bouton. -->
@@ -772,10 +807,10 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         <div class="info-bento">
           <div class="itile"><span class="itile__k">{{ t('project.technique') }}</span><span class="itile__v">{{ t(`technique.${project.technique}`) }}</span></div>
           <div v-if="hasNeedle" class="itile"><span class="itile__k">{{ isCrochet ? t('project.hooks') : t('project.needles') }}</span><span class="itile__v">{{ needleList.join(', ') }}</span></div>
-          <div v-if="hasGauge" class="itile"><span class="itile__k">{{ t('project.gauge') }}</span><span class="itile__v">{{ [project.gaugeStitches && project.gaugeStitches + ' m', project.gaugeRows && project.gaugeRows + ' rg'].filter(Boolean).join(' × ') }}</span></div>
+          <div v-if="hasGauge" class="itile"><span class="itile__k">{{ t('project.gauge') }}</span><span class="itile__v">{{ gaugeText }}</span></div>
           <div v-if="project.startedAt" class="itile"><span class="itile__k">{{ t('project.startedAt') }}</span><span class="itile__v">{{ formatLocalDate(project.startedAt, locale) }}</span></div>
           <div v-if="project.finishedAt" class="itile"><span class="itile__k">{{ t('project.finishedAt') }}</span><span class="itile__v">{{ formatLocalDate(project.finishedAt, locale) }}</span></div>
-          <div v-if="project.stars" class="itile itile--wide"><span class="itile__k">{{ t('project.stars') }}</span><span class="itile__v stars" role="img" :aria-label="t('project.starsValue', { n: project.stars })"><AppIcon v-for="n in project.stars" :key="n" name="starFilled" :size="16" /></span></div>
+          <div v-if="starCount" class="itile itile--wide"><span class="itile__k">{{ t('project.stars') }}</span><span class="itile__v stars" role="img" :aria-label="t('project.starsValue', { n: starCount })"><AppIcon v-for="n in starCount" :key="n" name="starFilled" :size="16" /></span></div>
           <div v-if="project.notes" class="itile itile--wide"><span class="itile__k">{{ t('project.notes') }}</span><p class="itile__notes">{{ project.notes }}</p></div>
           <div class="itile itile--wide">
             <span class="itile__k">{{ t('project.yarns') }}</span>

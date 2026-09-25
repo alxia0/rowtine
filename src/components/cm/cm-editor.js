@@ -227,8 +227,9 @@ class CounterWidget extends WidgetType {
   constructor(counter, onEdit, title, from) {
     super()
     // Position de la ligne : ENTRE dans `eq()` comme pour ReferenceTitleWidget/
-    // ImageThumbWidget/ImagePlaceholderWidget/TableWidget. `onEdit` gèle `line.number` à la
-    // construction ; sans `from` dans l'égalité, deux puces au compteur IDENTIQUE restaient
+    // ImageThumbWidget/ImagePlaceholderWidget/TableWidget. `onEdit` relit la ligne depuis
+    // `from` au clic (un numéro gelé périmait si les lignes au-dessus changeaient à offset
+    // constant) ; sans `from` dans l'égalité, deux puces au compteur IDENTIQUE restaient
     // interchangeables, CodeMirror réutilisait le nœud DOM (et donc la fermeture périmée)
     // après un décalage de lignes, et éditer une puce réécrivait le compteur d'une AUTRE
     // ligne — ou levait un RangeError si le numéro gelé dépassait la fin du document.
@@ -354,7 +355,11 @@ function buildCounterWidgets(view, labels) {
       const line = view.state.doc.lineAt(pos)
       const hit = counterOnLine(line)
       if (hit) {
-        const onEdit = () => editCounterOnLine(view, line.number, labels)
+        // Ligne relue AU CLIC depuis `from` : `eq()` ne compare que l'offset, donc une
+        // transaction qui change le nombre de lignes au-dessus sans changer l'offset (coller
+        // « abc » sur « a\nb ») réutilise ce widget, et un numéro gelé visait la ligne voisine.
+        const lineFrom = line.from
+        const onEdit = () => editCounterOnLine(view, view.state.doc.lineAt(lineFrom).number, labels)
         const widget = new CounterWidget(hit.counter, onEdit, labels.editCounterTitle, line.from)
         builder.push(Decoration.replace({ widget }).range(hit.from, hit.to))
       }
@@ -604,7 +609,7 @@ class SectionKindWidget extends WidgetType {
     this.label = label
     this.onEdit = onEdit
     // Position de la ligne : ENTRE dans `eq()`, même contrat que ReferenceTitleWidget juste
-    // au-dessus. `onEdit` gèle `line.number` à la construction ; sans `from` dans l'égalité,
+    // au-dessus. `onEdit` relit la ligne depuis `from` au clic ; sans `from` dans l'égalité,
     // deux titres au MÊME libellé de puce (« Générique » par défaut, donc le cas courant)
     // restaient interchangeables : après un décalage de lignes CodeMirror réutilisait le nœud
     // DOM et sa fermeture périmée, et toucher la puce retaguait une AUTRE ligne — un « - Rang
@@ -1076,6 +1081,23 @@ function tableDecorations(state) {
 // plugin.
 const tableAtomicRanges = EditorView.atomicRanges.of((view) => tableDecorations(view.state))
 
+// Retour-arrière / Suppr avec le curseur STRICTEMENT dans un bloc tableau (là où le pose
+// un clic sur une cellule d'une rangée intérieure) : le chemin par défaut calcule pos∓1,
+// encore dans la plage atomique, que `skipAtomic` repousse jusqu'au bord du bloc, et tout
+// l'intervalle partait (en-tête, séparatrice et rangées au-dessus, ou toutes les rangées
+// en dessous) d'une seule touche, sans annulation possible. On avale la touche : rien
+// n'est modifiable ici, le texte des cellules se corrige en vue brute.
+function guardTableDelete(view) {
+  const { main } = view.state.selection
+  if (!main.empty) return false
+  const pos = main.head
+  let inside = false
+  tableDecorations(view.state).between(pos, pos, (from, to) => {
+    if (from < pos && pos < to) inside = true
+  })
+  return inside
+}
+
 // Affordance « rangée du curseur ». Sans elle, le curseur posé
 // par un clic sur une cellule est INVISIBLE — la ligne source est masquée par le
 // widget, et `cm-active-block` (posé par `lineTypePlugin` sur `.cm-line`) tombe donc
@@ -1116,10 +1138,10 @@ function addLineMaskDecorations(builder, line, imageMap, view, labels, imageActi
     // lui-même, pas dans la barre d'outil. Regarde comment c'est fait pour le
     // compteur ») — même patron que CounterWidget, TOUJOURS posée (même sans balise
     // source — kind par défaut) pour que le type reste visible d'un coup d'œil,
-    // jamais seulement « pas de balise = deviner ». `lineNumber` (pas `line`)
-    // capturé dans la closure : relu au clic (editSectionKindOnLine), jamais un
-    // objet Line qui aurait pu périmer entre la construction de la décoration et le
-    // clic (édition ailleurs dans le document).
+    // jamais seulement « pas de balise = deviner ». Seul l'offset `lineFrom` est
+    // capturé : la ligne est relue au clic (editSectionKindOnLine), jamais un objet
+    // Line ni un numéro qui aurait pu périmer entre la construction de la décoration
+    // et le clic (édition ailleurs dans le document).
     //
     // `Decoration.widget` (PAS `.replace`) quand `suffixFrom === suffixTo` (aucune
     // balise à remplacer, kind par défaut) : un `.replace().range(pos, pos)` a fait
@@ -1129,9 +1151,11 @@ function addLineMaskDecorations(builder, line, imageMap, view, labels, imageActi
     // `.replace` à plage vide n'est pas un point d'insertion valide pour ce
     // RangeSetBuilder. `.replace` reste correct quand une vraie balise existe
     // (plage non vide, même contrat que CounterWidget/ReferenceTitleWidget).
-    const lineNumber = line.number
+    // Ligne relue AU CLIC depuis `from` (même raison que la puce compteur) : `eq()` compare
+    // l'offset, pas le numéro de ligne, qu'une fusion de lignes au-dessus peut décaler.
+    const lineFrom = line.from
     const label = sectionKindLabel(labels, currentSectionKind(line.text))
-    const onEdit = (anchorEl) => editSectionKindOnLine(view, lineNumber, labels, anchorEl)
+    const onEdit = (anchorEl) => editSectionKindOnLine(view, view.state.doc.lineAt(lineFrom).number, labels, anchorEl)
     const widget = new SectionKindWidget(label, onEdit, line.from)
     if (ranges.suffixTo > ranges.suffixFrom) {
       builder.push(Decoration.replace({ widget }).range(ranges.suffixFrom, ranges.suffixTo))
@@ -2849,7 +2873,12 @@ export function createCmEditor(host, opts = {}) {
       // transaction que le chemin par défaut sur la 6.43.6, mais indépendant de la
       // résolution du curseur au bord du widget que la 6.43.7 a fragilisée — cf.
       // commentaire de deleteMarkupBackward et celui d'épinglage en tête de fichier.
-      keymap.of([{ key: 'Backspace', run: deleteMarkupBackward }, ...defaultKeymap]),
+      keymap.of([
+        { key: 'Backspace', run: guardTableDelete },
+        { key: 'Delete', run: guardTableDelete },
+        { key: 'Backspace', run: deleteMarkupBackward },
+        ...defaultKeymap,
+      ]),
     ],
   })
 

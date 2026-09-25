@@ -30,18 +30,31 @@ export const useImportSuccessStore = defineStore('import-success', () => {
   const patternId = ref(null)
   const name = ref('')
   const warnCount = ref(0)
+  // Bilan (sections/étapes/tailles/diagrammes) et « prévisualisable » (cf.
+  // LocalPdfImportView.vue, summarizeImportedPattern) : le bloc de réussite (lot du
+  // 23/09/2026) en a besoin pour se reconstruire à l'identique au retour du guide,
+  // exactement comme name/warnCount ci-dessus. `previewable` par défaut à `true` : c'est
+  // le cas le plus courant (un import
+  // qui a des sections), et un `set()` toujours appelé avec ce 5e argument explicite (seul
+  // site d'appel, howToFix) ne laisse de toute façon jamais ce défaut jouer en pratique.
+  const summary = ref(null)
+  const previewable = ref(true)
 
-  function set(id, patternName, count) {
+  function set(id, patternName, count, patternSummary, patternPreviewable) {
     patternId.value = id
     name.value = patternName || ''
     warnCount.value = Number.isFinite(count) ? count : 0
+    summary.value = patternSummary || null
+    previewable.value = patternPreviewable !== false
   }
 
   function clear() {
     patternId.value = null
     name.value = ''
     warnCount.value = 0
+    summary.value = null
+    previewable.value = true
   }
 
-  return { patternId, name, warnCount, set, clear }
+  return { patternId, name, warnCount, summary, previewable, set, clear }
 })

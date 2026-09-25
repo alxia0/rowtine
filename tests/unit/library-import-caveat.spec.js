@@ -1,9 +1,9 @@
+// @vitest-environment jsdom
 // Unitaire — l'avertissement « un patron importé se relit », à la première visite de la
 // Bibliothèque (19/08/2026, §4.2).
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db, getSetting } from '@/db/db'
 import { useSettingsStore } from '@/stores/settings'
@@ -11,6 +11,7 @@ import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { NOTICE } from '@/constants/notice-queue'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
 const nav = vi.hoisted(() => ({
   route: { name: 'library', params: {}, query: {} },
@@ -24,7 +25,7 @@ vi.mock('vue-router', () => ({
 
 import LibraryView from '@/views/LibraryView.vue'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // ⚠️ UNE SEULE Pinia pour tous les montages d'un même test — c'est ce qui fait qu'un second
 // montage est bien la MÊME session. Une `createPinia()` par montage donnerait un magasin

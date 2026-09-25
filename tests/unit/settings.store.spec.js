@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — réglages : valeurs par défaut, onboarding, profil, persistance Dexie.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'

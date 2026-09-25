@@ -3,11 +3,12 @@
 import { sectionKind, DEFAULT_KIND } from '../section-kinds'
 import { photoFileName, parseDataUrl } from '../../backup/naming'
 import { stepTextToMd, mdTextToStep } from './line'
-import { emitFrontMatter } from './meta'
+import { emitFrontMatter, mdScalar, mdSizeLabel } from './meta'
 import { emitStepCounter, legacyRepeatTotal } from './counters'
 import { referenceToFlat } from './reference-flat'
-import { referenceBlocksToMd } from './refblocks'
+import { referenceBlocksToMd, reservedKey } from './refblocks'
 import { kindToEn, REF_TO_EN, readDirToMd, chartShapeToMd } from './dialect'
+import { TITLE_KIND_RE } from './md-line-type'
 
 // Un pas répétition peut-il rester en forme legacy « - × <texte rendu> » sans perte ?
 // La forme legacy est relue par le lecteur (parse.js) qui reconstruit `total` à partir
@@ -45,6 +46,14 @@ function isIntro(sec) {
   return sec.id ? sec.id === 'presentation' : sec.title === 'Présentation'
 }
 
+// Un titre de kind par défaut s'émet nu (`## Titre`), sauf s'il serait mal relu : vide (`## `
+// n'est pas un titre), réservé (`## Fil` redevient un bloc de référence), ou finissant par
+// `{…}` (pris pour une balise). La section disparaissait ou changeait de kind et d'id, donc
+// la progression était perdue. La balise explicite lève l'ambiguïté.
+function titleNeedsKindTag(title) {
+  return !title.trim() || reservedKey(title) != null || TITLE_KIND_RE.test(title.trimEnd())
+}
+
 export function patternToMd(pattern, { assetDir = 'img', galleryPrefix = 'galerie-' } = {}) {
   const reader = pattern?.reader || { sizeLabels: [], sections: [] }
   const n = (reader.sizeLabels || []).length
@@ -66,17 +75,19 @@ export function patternToMd(pattern, { assetDir = 'img', galleryPrefix = 'galeri
 
   if (isIntro(sections[0])) {
     for (const st of sections.shift().steps) {
-      out.push(stepTextToMd(st.t, st.c), '')
+      out.push(mdScalar(stepTextToMd(st.t, st.c)), '')
       for (const img of st.imgs || []) out.push(`![](${asset(img)})`, '')
     }
   }
 
-  const refMd = referenceBlocksToMd(referenceToFlat(reader.reference), reader.sizeLabels || [])
+  const refMd = referenceBlocksToMd(referenceToFlat(reader.reference), (reader.sizeLabels || []).map(mdSizeLabel))
   if (refMd) out.push(refMd)
 
   for (const sec of sections) {
     const kind = sectionKind(sec)
-    out.push(`## ${sec.title}${kind !== DEFAULT_KIND ? ` {${kindToEn(kind)}}` : ''}`, '')
+    const title = mdScalar(sec.title)
+    const tagged = kind !== DEFAULT_KIND || titleNeedsKindTag(title)
+    out.push(`## ${title}${tagged ? ` {${kindToEn(kind)}}` : ''}`, '')
     for (const st of sec.steps || []) {
       if (st.chart) {
         // Rétrocompat : patrons pré-multi-grilles où seul reader.chart (global) est renseigné,
@@ -91,13 +102,13 @@ export function patternToMd(pattern, { assetDir = 'img', galleryPrefix = 'galeri
         // d'attributs doit quand même sortir, sinon le type choisi disparaît au 1er
         // enregistrement, avant même que l'utilisatrice ait saisi ses rangs/mailles.
         if (ch.rows || ch.cols || ch.shape || ch.readDir || ch.reps || (Array.isArray(ch.sizes) && ch.sizes.length)) {
-          const sizes = Array.isArray(ch.sizes) && ch.sizes.length ? ` · tailles ${ch.sizes.join(', ')}` : ''
+          const sizes = Array.isArray(ch.sizes) && ch.sizes.length ? ` · tailles ${ch.sizes.map(mdSizeLabel).join(', ')}` : ''
           out.push(`${ch.cols} m × ${ch.rows} rangs${ch.shape ? ` · forme ${chartShapeToMd(ch.shape)}` : ''}${ch.readDir ? ` · lecture ${readDirToMd(ch.readDir)}` : ''}${ch.reps ? ` · répéter ${ch.reps} fois` : ''}${sizes}`)
         }
         out.push('')
         continue
       }
-      const text = stepTextToMd(st.t, st.c)
+      const text = mdScalar(stepTextToMd(st.t, st.c))
       if (st.note) out.push('', `> ${text}`, '')
       else if (st.repeat) {
         // `times` = le compte du marqueur (N). À n=0, normalizeReaderForSave VIDE `total`

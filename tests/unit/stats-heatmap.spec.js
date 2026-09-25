@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le composant grille. Les tests portent sur ce que la grille REND, pas sur un
 // instantané : une case doit changer de NIVEAU quand la donnée change (test par mutation).
 import { describe, it, expect, beforeEach } from 'vitest'
@@ -5,8 +6,15 @@ import { mount, flushPromises } from '@vue/test-utils'
 import i18n from '@/i18n'
 import StatsHeatmap from '@/components/StatsHeatmap.vue'
 import { buildWindow, buildGrid, sessionsByDay, sessionsByDayAndProject, monthGroups, HEAT_COLORS } from '@/utils/stats-grid'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const REF = new Date(2026, 6, 15, 10, 0, 0)
+
+// Libellés attendus, rendus par les clés que le composant appelle (pas de texte en dur).
+const nSessions = (n) => tk('stats.heatmap.sessions', { n }, n)
+const ligne = (name, duration) => tk('stats.heatmap.projectLine', { name, duration })
 
 function sess(ymd, durationSec, projectId = 1) {
   const [y, m, d] = ymd.split('-').map(Number)
@@ -73,7 +81,7 @@ describe('StatsHeatmap', () => {
     const w = monter([sess('2026-07-13', 8100)]) // 2 h 15
     const c = w.find('[data-day="2026-07-13"]')
     expect(c.attributes('aria-label')).toContain('2:15:00')
-    expect(c.attributes('aria-label')).toContain('1 session')
+    expect(c.attributes('aria-label')).toContain(nSessions(1))
   })
 
   it('deux séances le même jour : la case porte la forme PLURIELLE (« 2 séances »), pas « 1 séance » répété', () => {
@@ -82,8 +90,8 @@ describe('StatsHeatmap', () => {
     // atteignable en passant par le composant) que la revue avait laissé sans test.
     const w = monter([sess('2026-07-13', 600), sess('2026-07-13', 900)])
     const c = w.find('[data-day="2026-07-13"]')
-    expect(c.attributes('aria-label')).toContain('2 sessions')
-    expect(c.attributes('aria-label')).not.toContain('1 session')
+    expect(c.attributes('aria-label')).toContain(nSessions(2))
+    expect(c.attributes('aria-label')).not.toContain(nSessions(1))
   })
 
   it("n=0 pour stats.heatmap.sessions, dans les quatre langues (pas atteignable via le composant : la case vide passe par cellEmpty, jamais par 'sessions')", () => {
@@ -107,7 +115,7 @@ describe('StatsHeatmap', () => {
     const w = monter([sess('2026-07-13', 0)])
     const c = w.find('[data-day="2026-07-13"]')
     expect(c.attributes('data-level')).toBe('0') // niveau correct : rien EN TEMPS
-    expect(c.attributes('aria-label')).toContain('1 session') // mais PAS silencieux sur la séance
+    expect(c.attributes('aria-label')).toContain(nSessions(1)) // mais PAS silencieux sur la séance
     expect(c.attributes('aria-label')).not.toBe('dimanche 13 juillet 2026 — rien de tricoté')
   })
 
@@ -128,9 +136,9 @@ describe('StatsHeatmap', () => {
     const w = monter([])
     const cases = w.findAll('.hm__legend .hm__swatch')
     expect(cases).toHaveLength(5)
-    expect(cases[4].attributes('aria-label')).toBe('2 heures et plus')
-    expect(w.find('.hm__legend').text()).toContain('moins')
-    expect(w.find('.hm__legend').text()).toContain('plus')
+    expect(cases[4].attributes('aria-label')).toBe(tk('stats.heatmap.level4'))
+    expect(w.find('.hm__legend').text()).toContain(tk('stats.heatmap.less'))
+    expect(w.find('.hm__legend').text()).toContain(tk('stats.heatmap.more'))
   })
 
   it('les huit couleurs de l’échelle sont EXACTEMENT celles de la spec', () => {
@@ -352,8 +360,8 @@ describe('StatsHeatmap — liste des projets du jour (ÉVO C)', () => {
     await w.find('[data-day="2026-07-13"]').trigger('click')
     const lignes = w.findAll('.hm__day-project')
     expect(lignes).toHaveLength(2)
-    expect(lignes[0].text()).toBe('Twist Loop Top — 1:00:00') // temps décroissant : le + gros en premier
-    expect(lignes[1].text()).toBe('Écharpe — 10:00')
+    expect(lignes[0].text()).toBe(ligne('Twist Loop Top', '1:00:00')) // temps décroissant : le + gros en premier
+    expect(lignes[1].text()).toBe(ligne('Écharpe', '10:00'))
   })
 
   it('RECOUPEMENT : la somme des temps des lignes vaut le temps total affiché sous la grille', async () => {
@@ -371,7 +379,7 @@ describe('StatsHeatmap — liste des projets du jour (ÉVO C)', () => {
       return acc + secs
     }, 0)
     expect(total).toBe(4500)
-    expect(w.findAll('.hm__day-project').map((li) => li.text())).toContain('Twist Loop Top — 1:05:00')
+    expect(w.findAll('.hm__day-project').map((li) => li.text())).toContain(ligne('Twist Loop Top', '1:05:00'))
   })
 
   it('un projet SUPPRIMÉ (séance orpheline) affiche un libellé honnête, jamais un nom vide ou "undefined"', async () => {
@@ -379,7 +387,7 @@ describe('StatsHeatmap — liste des projets du jour (ÉVO C)', () => {
     const w = monter(sessions, 'quarter', { dayProjects: dayProjectsFrom(sessions, PROJECTS) })
     await w.find('[data-day="2026-07-13"]').trigger('click')
     const texte = w.find('.hm__day-project').text()
-    expect(texte).toBe('Projet supprimé — 20:00')
+    expect(texte).toBe(ligne(tk('stats.heatmap.projectDeleted'), '20:00'))
     expect(texte).not.toContain('undefined')
     expect(texte.trim()).not.toBe('—' + ' 20:00') // pas de tiret nu en guise de nom
   })
@@ -389,7 +397,7 @@ describe('StatsHeatmap — liste des projets du jour (ÉVO C)', () => {
     const w = monter(sessions, 'quarter', { dayProjects: dayProjectsFrom(sessions, PROJECTS) })
     await w.find('[data-day="2026-07-13"]').trigger('click')
     const texte = w.find('.hm__day-project').text()
-    expect(texte).toBe('Twist Loop Top — temps non mesuré')
+    expect(texte).toBe(tk('stats.heatmap.projectLineNoTime', { name: 'Twist Loop Top' }))
     expect(texte).not.toContain('0:00')
   })
 

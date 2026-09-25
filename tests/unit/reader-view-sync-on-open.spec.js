@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — ReaderView, câblage de la synchro MD ciblée à l'ouverture (Lot N3,
 // tâche B). `syncPatronMdOnOpen` (src/backup/sync-on-open.js) est mocké : ce test
 // couvre le CÂBLAGE (bon { kind, id } résolu, ordre synchro→relecture, non-blocage

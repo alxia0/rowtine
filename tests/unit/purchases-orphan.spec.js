@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/purchases-orphan.spec.js
 // Arbitrage produit : la dépense survit à la suppression DÉFINITIVE d'une laine.
 // Le passage en corbeille, lui, ne doit RIEN casser — la fiche peut revenir.

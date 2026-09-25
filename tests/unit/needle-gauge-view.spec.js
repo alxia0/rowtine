@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Front (composant) — l'écran de recommandation de taille d'aiguilles/crochet.
 // On teste le comportement à travers l'UI réelle (montage + i18n), pas une copie de
 // la logique de src/utils/needle-gauge.js (déjà couverte par ses propres tests unitaires,
@@ -8,6 +9,9 @@ import { createPinia } from 'pinia'
 import { createTestingPinia } from '@pinia/testing'
 import NeedleGaugeView from '@/views/NeedleGaugeView.vue'
 import i18n from '@/i18n'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 // Depuis le correctif « le calculateur ignore le réglage » (revue finale lot 2, 26/07),
 // NeedleGaugeView lit useSettingsStore() dès le setup : un Pinia actif est désormais requis
@@ -27,8 +31,9 @@ async function fillTarget(w, stitches, rows = '') {
   await w.find('input[placeholder="20"]').setValue(String(stitches))
   if (rows) await w.find('input[placeholder="28"]').setValue(String(rows))
 }
-function clickToggle(w, label) {
-  return w.findAll('.toggle__opt').find((b) => b.text() === label).trigger('click')
+// Bascule repérée par la clé i18n de son libellé.
+function clickToggle(w, key) {
+  return w.findAll('.toggle__opt').find((b) => b.text() === tk(key)).trigger('click')
 }
 function clickSearch(w) {
   return w.find('button.btn--primary').trigger('click')
@@ -37,7 +42,7 @@ function clickSearch(w) {
 describe('NeedleGaugeView', () => {
   it('invite à remplir les champs tant que la recommandation ne peut pas être calculée', () => {
     const w = mountView()
-    expect(w.text()).toContain('Remplis au moins la taille')
+    expect(w.text()).toContain(tk('needleGauge.fillIn'))
   })
 
   it("n'affiche rien tant que le bouton Calculer n'a pas été cliqué, même champs remplis", async () => {
@@ -45,7 +50,7 @@ describe('NeedleGaugeView', () => {
     await fillLabel(w, 4, 22)
     await fillTarget(w, 20)
     expect(w.text()).not.toContain('4,5 mm')
-    expect(w.text()).toContain('Remplis au moins la taille')
+    expect(w.text()).toContain(tk('needleGauge.fillIn'))
   })
 
   it('recommande une aiguille plus grosse (tricot) quand la laine tricote plus serré que la cible', async () => {
@@ -69,7 +74,7 @@ describe('NeedleGaugeView', () => {
     await fillLabel(w, 4, 20)
     await fillTarget(w, 20)
     await clickSearch(w)
-    expect(w.text()).toContain('pas besoin de changer')
+    expect(w.text()).toContain(tk('needleGauge.sameGauge'))
   })
 
   it('bascule sur Crochet et applique une table de tailles standards différente de celle du tricot', async () => {
@@ -77,21 +82,21 @@ describe('NeedleGaugeView', () => {
     await fillLabel(knitting, 6, 10)
     await fillTarget(knitting, 20)
     await clickSearch(knitting)
-    expect(knitting.text()).toContain('taille en dessous : 3 mm')
+    expect(knitting.text()).toContain(tk('needleGauge.resultSmaller', { mm: '3' }))
 
     const crochet = mountView()
-    await clickToggle(crochet, 'Crochet')
+    await clickToggle(crochet, 'technique.crochet')
     await fillLabel(crochet, 6, 10)
     await fillTarget(crochet, 20)
     await clickSearch(crochet)
-    expect(crochet.text()).toContain('taille en dessous : 2,75 mm')
+    expect(crochet.text()).toContain(tk('needleGauge.resultSmaller', { mm: '2,75' }))
   })
 
   it('bascule cm → pouces et met à jour le libellé du carré affiché', async () => {
     const w = mountView()
-    expect(w.text()).toContain('10×10 cm')
-    await clickToggle(w, 'pouces')
-    expect(w.text()).toContain('4×4 po')
+    expect(w.text()).toContain(tk('needleGauge.squareCm'))
+    await clickToggle(w, 'needleGauge.unitIn')
+    expect(w.text()).toContain(tk('needleGauge.squareIn'))
   })
 
   it('s’ouvre directement en pouces quand le réglage choisi est impérial (revue finale 26/07)', () => {
@@ -101,8 +106,8 @@ describe('NeedleGaugeView', () => {
     const w = mount(NeedleGaugeView, {
       global: { plugins: [i18n, pinia], stubs: { AppHeader: true, FieldHelp: true } },
     })
-    expect(w.text()).toContain('4×4 po')
-    expect(w.text()).not.toContain('10×10 cm')
+    expect(w.text()).toContain(tk('needleGauge.squareIn'))
+    expect(w.text()).not.toContain(tk('needleGauge.squareCm'))
   })
 
   it('signale un écart hors gamme quand le résultat calculé sort des tailles standards', async () => {
@@ -110,7 +115,7 @@ describe('NeedleGaugeView', () => {
     await fillLabel(w, 5, 10)
     await fillTarget(w, 40)
     await clickSearch(w)
-    expect(w.text()).toContain('sort des tailles courantes')
+    expect(w.text()).toContain(tk('needleGauge.outOfRange'))
   })
 
   it('signale une divergence de tendance sur les rangs', async () => {
@@ -118,7 +123,7 @@ describe('NeedleGaugeView', () => {
     await fillLabel(w, 4, 22, 26)
     await fillTarget(w, 20, 28)
     await clickSearch(w)
-    expect(w.text()).toContain('rangs ne va pas dans le même sens')
+    expect(w.text()).toContain(tk('needleGauge.rowNote'))
   })
 
   it('affiche toujours le rappel de vérification par échantillon une fois un résultat calculé', async () => {
@@ -126,7 +131,7 @@ describe('NeedleGaugeView', () => {
     await fillLabel(w, 4, 22)
     await fillTarget(w, 20)
     await clickSearch(w)
-    expect(w.text()).toContain('Tricote un échantillon')
+    expect(w.text()).toContain(tk('needleGauge.caveat'))
   })
 
   it('invalide le résultat affiché si un champ est modifié après le calcul (ne montre jamais une reco périmée)', async () => {
@@ -137,7 +142,7 @@ describe('NeedleGaugeView', () => {
     expect(w.text()).toContain('4,5 mm')
     await w.find('input[placeholder="20"]').setValue('18')
     expect(w.text()).not.toContain('4,5 mm')
-    expect(w.text()).toContain('Remplis au moins la taille')
+    expect(w.text()).toContain(tk('needleGauge.fillIn'))
   })
 })
 

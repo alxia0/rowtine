@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — câblage du déclenchement auto de sauvegarde à la mise en pause.
 // On vérifie que le listener
 // `pause` est bien enregistré et qu'il déclenche `flushAutoBackup` — sans

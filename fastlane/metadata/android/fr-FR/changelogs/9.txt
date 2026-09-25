@@ -1,0 +1,1 @@
+Import du stock de laines depuis un export Ravelry (.xlsx) : statut, couleur, achats, notes, lieu de rangement et « Acheté chez » sur chaque achat. Corrections d'affichage diverses.

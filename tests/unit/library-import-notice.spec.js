@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le rappel de prévention d'import (fichiers multi-patrons / livres / >2 colonnes non
 // reconnus) a d'abord vécu en petit sous le bouton « Importer un patron PDF » de la
 // feuille d'ajout. Il a été retiré le 17/08 : le cas réel est
@@ -7,20 +8,15 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import fr from '@/i18n/fr.json'
 import LibraryView from '@/views/LibraryView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
-const router = createRouter({
-  history: createMemoryHistory(),
-  routes: [
-    { path: '/', name: 'library', component: { template: '<div/>' } },
-    { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } },
-    { path: '/i', name: 'import-local', component: { template: '<div/>' } },
-  ],
-})
+const i18n = createTestI18n()
+const router = createTestRouter([
+  { path: '/', name: 'library', component: { template: '<div/>' } },
+  { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } },
+  { path: '/i', name: 'import-local', component: { template: '<div/>' } },
+])
 
 describe("LibraryView — la feuille d’ajout n’affiche plus le rappel de prévention", () => {
   beforeEach(() => setActivePinia(createPinia()))
@@ -29,7 +25,7 @@ describe("LibraryView — la feuille d’ajout n’affiche plus le rappel de pr�
     const w = mount(LibraryView, {
       global: {
         plugins: [createPinia(), i18n, router],
-        stubs: { AppHeader: true, ThumbImage: true, PatternForm: true, ConfirmDialog: true, AppIcon: true },
+        stubs: { AppHeader: true, ThumbImage: true, ConfirmDialog: true, AppIcon: true },
       },
     })
     await flushPromises()

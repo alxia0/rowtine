@@ -1,20 +1,51 @@
 # Guía de {app}
 
-## El espíritu de {app}
+## {app} en 4 pasos
 
-![«¡Te damos la bienvenida a {app}!», y debajo «Tus proyectos de punto y ganchillo a lo largo del tiempo»: Español, Punto, Sistema, Métrico (m, g) y EUR ya marcados, y abajo el botón «¿Todo listo? ¡Empieza a tejer!»](images/es/00-bienvenue.webp)
+{app} no es una carpeta de PDF. Es un lector interactivo que te guía a
+través de tu patrón: solo te muestra las cifras de tu talla y recuerda
+cada paso que ya has hecho. Importas tu patrón una vez, y después
+tejes o haces ganchillo sin tener que volver a abrir el PDF.
 
-*El primer inicio: nombre, técnica, idioma y tema.*
+### 1. Importa tu patrón
 
-{app} te ayuda a tener todos tus proyectos de punto y ganchillo en un
-solo sitio: tu lana, tus patrones adaptados a tu talla y tu progreso. Es
-**gratuita, de código abierto y funciona sin conexión**: tus datos se
-quedan en tu dispositivo, no en un servidor. Nada se pierde nunca por
-error: todo lo que borras acaba en una papelera.
+Desde la biblioteca, elige un PDF. {app} lo lee por ti: secciones,
+filas, tallas, abreviaturas y diagramas. Todo ocurre en tu dispositivo.
+Ver el capítulo 4.
+
+### 2. Crea un proyecto y elige tu talla
+
+En la ficha del patrón, «Crear un proyecto a partir de este patrón».
+En el lector, elige tu talla: cada «88 (96) 104» se adapta para
+mostrar solo tu cifra.
+
+Un patrón importado sirve tantas veces como quieras: una chaqueta de punto verde
+en L para ti, una roja en M para tu hermana. Cada proyecto conserva su
+talla, su lana y su avance, y el precio del patrón solo se cuenta una
+vez. Ver el capítulo 2.
+
+### 3. Teje o haz ganchillo con el lector
+
+Aquí es donde ocurre todo. Marca cada paso hecho: el progreso avanza
+y retomas exactamente donde lo dejaste gracias a «Volver a mi paso».
+El diagrama sigue tu fila, y las definiciones de las abreviaturas
+aparecen al tocar los términos subrayados en el texto. Ver el
+capítulo 3.
+
+### 4. Guarda el rastro
+
+El cronómetro registra tus sesiones, la pestaña Fotos guarda las
+imágenes del patrón y tus propias fotos, las estadísticas resumen tu
+actividad en el proyecto, y una insignia se comparte en un gesto. Ver
+los capítulos 2 y 7.
+
+Para probarlo ahora mismo: el botón «Repetir la visita guiada», justo
+debajo y en Ajustes, abre el gorro de ejemplo en el lector con
+burbujas de explicación.
 
 ## 1. Inicio: tu panel de control
 
-![El inicio de {app}: «¡Hola, Camille!», la ficha Continuar muestra el proyecto Gorro de invierno al 0 por ciento, y debajo el panel (1 en curso, el tiempo de la semana, la última sesión con fecha de hoy, el presupuesto gastado) y las herramientas Contador, Calculadora y Agujas](images/es/01-accueil.webp)
+![El inicio de {app}: «¡Hola, Camille!», la ficha Continuar sobre Gorro de Trenzas en talla tejida M, las fichas En curso 1 y Esta semana 0 h, la última sesión de Gorro de invierno hoy (0:06), y luego las herramientas Contador, Calculadora y Agujas](images/es/01-accueil.webp)
 
 *Inicio: la ficha «Continuar» te lleva a la última pieza en la que trabajaste, el panel resume lo esencial hasta las últimas sesiones, y las tres herramientas están a mano.*
 
@@ -23,25 +54,9 @@ Al abrir la app encuentras:
   donde lo dejaste. Es realmente el proyecto en el que **de verdad
   tejiste o ganchillaste** por última vez (tu última sesión), no simplemente
   el último que modificaste, y la ficha te muestra la fila en curso.
-- Un **resumen**: cuántos proyectos tienes en curso, el tiempo que has
+- Un **resumen**: cuántos proyectos tienes en curso, y el tiempo que has
   dedicado a tejer o ganchillar esta semana (con el detalle en
-  **Estadísticas**), y tu **presupuesto gastado**: el total de todo lo
-  que has pagado por lana desde que usas la app, en la moneda que
-  elegiste. Esta cifra nunca baja sola: usar un ovillo o terminar un
-  proyecto no la reduce (solo una compra nueva la aumenta); solo puede
-  bajar si tú borras o corriges una línea de compra en el bloque
-  «Compras y regalos» de una ficha de lana (punto 5). (Si has usado
-  varias monedas, cada una tiene su propio total: la app nunca las
-  mezcla, porque no conoce un tipo de cambio.) Al tocar esta cifra abres
-  la pantalla **Gastos**, descrita en el punto 5. Esta ficha no aparece
-  hasta que hayas registrado al menos una compra (por ejemplo en una
-  instalación recién hecha), pero la pantalla sigue siendo accesible
-  desde el menú en todo momento.
-- Esta cifra es distinta de tu **valor del stock**, mostrado en la
-  pantalla **Stock de lana** (punto 5): ese sigue lo que tienes
-  actualmente en el armario y baja cuando usas un ovillo. Las dos cifras
-  conviven a propósito: una cuenta lo que has gastado, la otra lo que
-  te queda.
+  **Estadísticas**).
 - Las **últimas sesiones**: en cuanto hayas tejido o ganchillado al menos
   una vez, una ficha lista tus dos sesiones más recientes: el nombre del
   proyecto, el día («Ayer», «Hace 3 días»…) y la duración. Al tocarla se
@@ -91,7 +106,7 @@ no declarar nada. Si tu proyecto usa el «Patrón libre», este campo ni
 siquiera aparece: es común a todos tus proyectos sin patrón, así que
 nunca puede tener un precio propio.
 
-![El formulario Nuevo proyecto sobre el Gorro de invierno: bajo el patrón Gorro de Trenzas, Precio del patrón (€) muestra 12 junto al botón Gratis, Fecha de compra marca 12/08/2026 y Estado está en Pendiente.](images/es/02b-projet-prix-patron.webp)
+![El formulario Nuevo proyecto sobre el Gorro de invierno: bajo el patrón Gorro de Trenzas, Precio del patrón (€) muestra 12 junto al botón Gratis, Fecha de compra marca 24/09/2026, Estado está en Pendiente y el interruptor Mostrar el cronómetro está activado.](images/es/02b-projet-prix-patron.webp)
 
 *Debajo de la elección del patrón: su precio, un botón «Gratis» y la fecha de compra, prerrellenada con hoy.*
 
@@ -112,7 +127,7 @@ nunca puede tener un precio propio.
   tejido, y entre paréntesis el precio del patrón, que solo pagas una vez aunque tejas el
   mismo patrón tres veces. Si una lana no tiene precio anotado, la app te lo dice en lugar
   de hacer como si fuera gratis.
-- **Galería**: tus fotos del proyecto, más las fotos originales del
+- **Fotos**: tus fotos del proyecto, más las fotos originales del
   patrón debajo. Eliges cuál sirve de **foto de portada** (por defecto,
   la primera foto del patrón). Toca una foto para abrirla a pantalla
   completa: entonces puedes hacer zoom (pellizcar con dos dedos o doble
@@ -134,7 +149,7 @@ la pantalla: la misma pastilla en la ficha, en cualquiera de sus pestañas, y en
 lector. Una flecha en la pastilla abre un pequeño menú cuya entrada «Ocultar el
 cronómetro» la esconde; vuelve gracias al menú **Acciones** (icono vertical de
 tres puntos) de la ficha o a la
-casilla «Cronómetro» del formulario de edición.
+interruptor «Mostrar el cronómetro» del formulario de edición.
 - Un solo cronómetro por proyecto, y **nunca se pone en marcha solo**: lo tocas
   para empezar, y vuelves a tocarlo para pausarlo en una interrupción (el botón
   muestra entonces **Reanudar** con el tiempo ya contado).
@@ -168,8 +183,8 @@ proyecto, y luego la fecha y la duración. Al tocar una línea se abre la
 ficha del proyecto al que pertenece.
 
 Esta pantalla solo sirve para consultar: es en la ficha del proyecto, en su
-pestaña Sesiones, donde se corrige o se borra una sesión. Sin filtros, sin
-agrupaciones: es una primera versión, deliberadamente sencilla.
+pestaña Sesiones, donde se corrige o se borra una sesión. La pantalla es
+deliberadamente sencilla, sin filtros ni agrupaciones.
 
 ### Compartir una insignia de tu proyecto
 
@@ -203,9 +218,9 @@ Para cambiar una foto, tócala en la vista previa: aparece un botón **Editar**,
 propone una foto del proyecto o una imagen de tu galería, el formato (cuadrado, horizontal
 o vertical) y luego el recorte.
 
-El botón **Compartir**, arriba de la pantalla, genera la imagen, la guarda en la
-**Galería** del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo
-sin enviar nada: la insignia se queda en la galería. Y si cambias un ajuste y vuelves a
+El botón **Compartir**, arriba de la pantalla, genera la imagen, la guarda en las
+**Fotos** del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo
+sin enviar nada: la insignia se queda en las fotos. Y si cambias un ajuste y vuelves a
 compartir, la insignia anterior de esa misma apertura se sustituye, no se duplica.
 
 ## 3. El patrón que se adapta a ti: el lector interactivo
@@ -296,14 +311,15 @@ proyecto, no con el patrón en sí. Así que si empiezas un segundo
 proyecto con el mismo patrón, tendrás que repetirla una vez para el
 proyecto nuevo (la operación solo lleva unos segundos).
 
-**¿Y los diagramas redondos o cuadrados?** Las rejillas granny, redondas o
-cuadradas, no se calibran con dos líneas: el mismo botón **Calibrar** abre
+**¿Y los diagramas redondos, cuadrados o hexagonales?** Las rejillas granny,
+redondas, cuadradas o hexagonales, no se calibran con dos líneas: el mismo botón **Calibrar** abre
 entonces un **asistente guiado**, porque es la forma del diagrama (su tipo,
 elegido en la corrección, sección 4) la que decide. Te hace colocar una tras
 otra las dos fronteras del motivo: la primera, que marca la base de la
 primera vuelta, y luego el exterior de la última vuelta. Cada una se
-declara **Redondo** o **Cuadrado**, se mueve y se ajusta (botones **Mover**
-y **Ampliar/Reducir**) mientras el dibujo desfila y crece bajo una lupa fija.
+declara **Redondo**, **Cuadrado** o **Hexágono** (para un hexágono, dos
+botones más fijan su orientación: **Lado plano arriba** o **Punta arriba**),
+se mueve y se ajusta (botones **Mover** y **Ampliar/Reducir**) mientras el dibujo desfila y crece bajo una lupa fija.
 Cuando las dos fronteras no tienen la misma forma, un paso más pregunta a
 partir de qué vuelta cambia el motivo; una última pantalla lo deja retocar
 todo antes de **Guardar**. El resultado se memoriza igual que la calibración
@@ -311,7 +327,7 @@ lineal: con el progreso del proyecto, diagrama a diagrama. Y mientras un
 diagrama radial no esté calibrado, un botón en el hilo del lector, «Coloca
 el centro y los radios del motivo», te propone ponerte a ello.
 
-![El mismo asistente de calibración del granny, con el límite declarado redondo esta vez: la lupa redonda, marcada con la misma cruz, rodea la misma flor central del cuadrado de puntos desenfocados, los botones Redondo y Cuadrado (Redondo activo), luego Mover, activo también, Ampliar/Reducir, y abajo Restablecer, Cancelar y Confirmar](images/es/03h-calage-granny-rond.webp)
+![El mismo asistente de calibración del granny, con el límite declarado redondo esta vez: la lupa redonda, marcada con la misma cruz, rodea la flor central del cuadrado de puntos desenfocados, los botones Redondo, Cuadrado y Hexágono (Redondo activo), luego Mover, activo también, Ampliar/Reducir, y abajo Restablecer, Cancelar y Confirmar](images/es/03h-calage-granny-rond.webp)
 
 *El límite declarado redondo: la lupa sigue la forma elegida, y los botones Redondo y Cuadrado la deciden en cada paso.*
 
@@ -378,7 +394,7 @@ estadísticas.
 
 Si tejes con una tableta sujeta en horizontal, el lector cambia solo a
 **dos columnas**, tus instrucciones a la izquierda y un diagrama que
-queda mostrado de forma permanente a la derecha: ya no tienes que
+queda mostrado de forma permanente a la derecha: no tienes que
 desplazarte entre los dos. Mantienes el control:
 
 - En cualquier otro diagrama del patrón, el botón **Mostrar a la
@@ -392,14 +408,14 @@ desplazarte entre los dos. Mantienes el control:
 
 Este ajuste solo dura mientras consultas el patrón: al volver a
 abrirlo, aparece de nuevo el panel con el primer diagrama. En teléfono
-(o en una tableta sujeta en vertical), el lector se queda en una sola
-columna, como antes. Un patrón sin diagrama no tiene panel en absoluto.
+(o en una tableta sujeta en vertical), el lector se muestra en una sola
+columna. Un patrón sin diagrama no tiene panel en absoluto.
 El índice del lector, por su parte, sigue arriba de la columna de las
 instrucciones, con los mismos puntos y el mismo gesto.
 
-**Las estadísticas, con espacio.**
+**Las estadísticas, a todo lo ancho.**
 
-![Las estadísticas a sus anchas en tableta: la cuadrícula del calendario va de mar a sept y debajo las casillas se colocan de dos en dos: Tiempo total 119:40:06, Días activos 127 de 181, Racha actual 6 días.](images/es/03f-tablette-stats.webp)
+![Las estadísticas a sus anchas en tableta: la cuadrícula del calendario va de mar a sept de una sola pieza y debajo las casillas se colocan de dos en dos: Tiempo total 116:40:06, Días activos 125 de 179, Racha actual 6 días, Racha más larga 12 días.](images/es/03f-tablette-stats.webp)
 
 *Las estadísticas en una tableta sujeta en horizontal, en la ventana Semestre: la cuadrícula del calendario muestra los últimos seis meses de un vistazo, cuando en el teléfono hay que deslizarla con el dedo, y las casillas numéricas se colocan de dos en dos debajo.*
 
@@ -415,7 +431,7 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
 
 *La biblioteca, con los tres patrones de muestra incluidos desde el primer inicio.*
 
-![El patrón Gorro de Trenzas, con la línea Punto, Accesorios, S, M, L, la línea Comprado por 12 € el 12/8/2026 y una foto del gorro de trenzas sobre una tabla de madera; los dos botones se llaman Crear un proyecto a partir de este patrón y Previsualizar el patrón.](images/es/04b-fiche-patron.webp)
+![El patrón Gorro de Trenzas, con la línea Punto, Accesorios, S, M, L, la línea Comprado por 12 € el 24/9/2026 y una foto del gorro de trenzas sobre una tabla de madera, un lápiz de edición arriba a la derecha, y los dos botones Crear un proyecto a partir de este patrón y Previsualizar el patrón.](images/es/04b-fiche-patron.webp)
 
 *La ficha de un patrón, deliberadamente sencilla: crear un proyecto, o previsualizar. (La corrección del import se abre desde la vista previa, o desde el menú de un proyecto en curso que use este patrón.)*
 
@@ -429,8 +445,26 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   del patrón**, tantas veces como quieras, y es ese repaso el que marca la
   diferencia entre un patrón más o menos correcto y un proyecto que
   muestra las cifras y las explicaciones correctas.
+  En cuanto termina el import, un resumen «Tu patrón está importado» cuenta
+  lo que la app ha encontrado (secciones, pasos para marcar, tallas,
+  diagramas), te recuerda que releas el patrón antes de empezar, y el botón
+  **Previsualizar el patrón** te lleva directamente a recorrerlo, sección
+  por sección.
   (La lectura también reconoce las rejillas redondas y cuadradas de los
   patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)
+- **Importar en formato {app}**: en «+ Añadir un patrón», esta opción
+  acepta un archivo **.rowtine**, es decir, un patrón ya preparado
+  en el formato de {app} (su texto y sus imágenes). Entra tal cual en tu
+  biblioteca, sin leer ningún PDF, y siempre sin conexión.
+- **Crear un patrón a mano**: en «+ Añadir un patrón», la opción
+  **Crear manualmente** abre una pantalla propia (nombre, tipo, categoría,
+  tallas, fuente, autor…) con un único apartado **Fotos** para sus imágenes.
+  En la ficha del patrón, una estrella en cada foto de «Fotos del patrón» la
+  marca como **portada**: es la que ilustra el patrón en la biblioteca. (Un
+  patrón importado conserva la portada sacada de su PDF.) Y en cuanto tiene
+  una foto, aparece el botón **Previsualizar el patrón**: puedes entonces
+  seguir una imagen como diagrama, exactamente igual que en un patrón
+  importado.
 - **Encontrar un patrón**: las etiquetas de categoría en la parte
   superior de la biblioteca te muestran **cuántos patrones** hay en
   cada una, para saber de un vistazo dónde buscar.
@@ -561,7 +595,7 @@ secciones, fotos incluidas: no dice cuántos diagramas se siguen ya. Para una
 imagen aún sin
 convertir, un botón **Seguir como diagrama** abre una elección de tipo, cada
 uno explicado en lenguaje claro: filas estándar, radial cuadrado, radial
-redondo o trazado, para adaptarlo a la forma real de tu motivo
+redondo, radial hexagonal o trazado, para adaptarlo a la forma real de tu motivo
 (un granny cuadrado no se lee como filas estándar). Para una imagen que ya
 se sigue como diagrama, una etiqueta **Diagrama interactivo** indica el
 estado actual, junto a un botón **Cambiar tipo** (la misma elección, para
@@ -569,20 +603,20 @@ corregir un tipo mal adivinado) y un botón **Solo una imagen** para volver a
 una simple foto, práctico si el import se ha saltado un diagrama, o al
 revés, si quieres que una simple foto siga siendo una simple foto.
 
-**Añadir imágenes: tres puertas.** En la galería de un patrón, desde su
+**Añadir imágenes: tres puertas.** En las fotos de un patrón, desde su
 ficha o desde el editor de corrección, el botón **Añadir una imagen**
 ofrece tres fuentes: **Cámara o galería** (una hoja te deja elegir entre
 hacer una foto y escoger entre tus imágenes), **Buscar archivos** (el
 selector de tu dispositivo, para una imagen guardada en otro sitio), y
 **Desde el PDF del patrón** cuando existe: allí eliges la página, y la app
 te la hace recortar, la única fuente que pasa por ese recorte. Cada
-imagen se une a la galería del patrón, lista para insertarse o seguirse.
+imagen se une a las fotos del patrón, lista para insertarse o seguirse.
 
 **El menú de una imagen.** En el texto del editor, un toque sobre una
 imagen abre un pequeño menú inmediato: **seguirla como diagrama** si aún
 no lo es, o **cambiar su tipo** en caso contrario, rebajarla a simple
-ilustración (**Solo una imagen**), o **enviarla a la galería** del patrón.
-En la banda «Galería del patrón», cada imagen se elimina, se inserta en el
+ilustración (**Solo una imagen**), o **enviarla a las fotos** del patrón.
+En la banda «Fotos del patrón», cada imagen se elimina, se inserta en el
 texto o se sigue como diagrama: los tres gestos en el mismo sitio.
 
 ![Sobre la barra de categorías asoma una casilla, Esconder los hilos por el revés, y debajo la línea de nota Truco: dejar secar el gorro húmedo sobre un bol para redondear la copa, con Cancelar y Guardar al pie](images/es/04e-correction-diagrammes.webp)
@@ -596,7 +630,7 @@ nada por error.
 
 ## 5. Tu stock de lana
 
-![10 ovillos, 1,932 km, 500 gramos y 31 € gastados arriba, el campo Buscar una lana… y los botones Filtrar y Ordenar, luego Drops · Moutarde, ×4 · 165 metros · 200 gramos, marcada con una pequeña hoja, y Hobbii · Sauge, ×6 · 212 metros · 300 gramos, ambas libres](images/es/05-stock.webp)
+![10 ovillos, 1,932 km, 500 g y 31 € gastados arriba, el campo Buscar una lana…, los botones Filtrar y Ordenar, debajo Añadir una lana e Importar de Ravelry uno encima del otro, luego Drops · Moutarde, ×4 · 165 m · 200 g, marcada con una pequeña hoja, y Hobbii · Sauge, ×6 · 212 m · 300 g, ambas libres](images/es/05-stock.webp)
 
 *El stock: los totales arriba (ovillos, longitud, peso, valor), y luego una ficha por lana con su estado, libre o reservada por un proyecto.*
 
@@ -608,12 +642,15 @@ nada por error.
   longitud y peso por ovillo, más la fecha de compra y el número de
   baño de tinte.
   **En cuanto guardas, la app registra al instante la compra
-  correspondiente**, y tu presupuesto gastado (punto 1) sube por el
+  correspondiente**, y el total de la pantalla **Gastos** sube por el
   importe indicado. La fecha que te propone es la de hoy: si compraste
   esa lana hace más tiempo, puedes corregirla directamente en el
   formulario. (Estos dos campos solo aparecen al crear la ficha. En una
   ficha ya guardada, es el bloque **Compras y regalos** el que se
   encarga, con una línea por adquisición.)
+- **Dónde la guardas, lo que opinas de ella**: dos campos libres,
+  **Guardado en** («Estante 2, cesta azul») y **Notas**, se muestran luego
+  en la ficha de la lana.
 - **Las lanas que no son de un solo color**: un campo **Tipo de color**
   (liso, degradado, autorrayado, jaspeado, teñido a mano) y un campo
   **Descripción del color** («azul, verde, amarillo jaspeado de negro»)
@@ -640,7 +677,7 @@ nada por error.
   - Estas características salen también en la **exportación a hoja de
     cálculo**.
 
-![La ficha se abre sobre el stock y sus totales 10 ovillos, 1,932 km, 500 gramos y 31 € gastados: punto amarillo Moutarde, marca Drops, 165 m, 50 g por ovillo, cantidad 4 a 3,20 €, última compra 2026-08-12](images/es/05b-fiche-laine.webp)
+![La ficha a pantalla completa de Drops · Moutarde: marca Drops, 165 m, 50 g por ovillo, cantidad 4 a 3,20 €, una compra registrada, la última el 24/9/2026, composición Algodón, luego Fibra vegetal, las etiquetas Vegano y Fibras biológicas (GOTS), el estado Libre y el botón Añadir una foto](images/es/05b-fiche-laine.webp)
 
 *La ficha de una lana: su composición, la mención «Fibra vegetal», y sus dos etiquetas «Vegano» y «Fibras biológicas (GOTS)».*
 
@@ -649,16 +686,16 @@ nada por error.
   cuando los totales crecen), y el valor total de tu stock.
 - **Buscar, filtrar, ordenar**: un campo de búsqueda y los botones
   **Filtrar** y **Ordenar** en la parte superior del stock. Filtrar abre una
-  ventana de dos niveles: la lista de seis criterios (**Marca**,
-  **Etiqueta**, **Grosor**, **Peso del ovillo**, **Color**, **Composición**),
-  y luego, para el criterio tocado, sus valores. Una sola elección por
+  ventana de dos niveles: la lista de siete criterios (**Marca**,
+  **Etiqueta**, **Grosor**, **Peso del ovillo**, **Color**, **Composición**,
+  **Estado**: libre, reservada o usada), y luego, para el criterio tocado, sus valores. Una sola elección por
   criterio, pero los criterios se acumulan; una pastilla en el botón Filtrar
   cuenta los filtros activos, y **Restablecer** los borra de un gesto.
   Ordenar propone **Marca** (por defecto), **Grosor** o **Fecha de compra**.
   Nada de esto se memoriza: cada vuelta al stock parte sin filtro, ordenado
-  por marca. Lista o cuadrícula visual, a elegir.
-- **Editar, duplicar o eliminar** una ficha desde el menú **Acciones**
-  (icono vertical de tres puntos) de su tarjeta. «Duplicar» te resulta
+  por marca.
+- **Editar, duplicar o eliminar** una lana desde el menú **Acciones**
+  (icono vertical de tres puntos) en la parte superior de su ficha. «Duplicar» te resulta
   útil para la misma lana en otro color: se copia todo, solo te queda
   cambiar el color.
 - **El fondo común de ovillos**: ves de un vistazo, para cada lana,
@@ -668,21 +705,26 @@ nada por error.
   avisa si restaurar un proyecto desde la papelera pone en duda tus
   reservas de lana. El proyecto vuelve igualmente, con una
   reserva reducida y un mensaje que te lo explica.
-- **Ficha de detalle** de una lana: un resumen completo (ovillos,
-  metros, proyectos que la usan), y un bloque **Compras y regalos** que
-  guarda para ti el registro de cada adquisición de esa lana:
+- **La ficha de una lana**: al tocar su tarjeta se abre a pantalla
+  completa. Reúne todo lo que anotaste (marca, color, ubicación, metraje,
+  cantidad, precio, compras, composición, notas), sus características, su
+  estado (libre, reservada, usada) y sus **fotos**: puedes añadir varias
+  y elegir, tocando la estrella, la que sirve de portada.
+- **Compras y regalos**: en la pantalla **Editar** de una lana, este
+  bloque guarda para ti el registro de cada adquisición:
   - Cada línea lleva una cantidad, un precio, una fecha y un baño de
     tinte, e indica si fue una **compra** o un **regalo** (un regalo
-    nunca cuenta en tu presupuesto gastado). Las tres líneas más
+    nunca cuenta en tus gastos). Un campo **Comprado en** guarda además el
+    nombre de la tienda. Las tres líneas más
     recientes las ves de inmediato, el resto se despliega con un
     gesto.
   - Una línea la puedes **añadir, editar o eliminar** en cualquier
     momento.
-  - **Si aumentas la cantidad** de una lana desde su ficha, la app te
+  - **Si aumentas la cantidad** de una lana al editarla, la app te
     propone registrar la compra correspondiente, fechada hoy: puedes
     aceptarla, marcarla como regalo, o descartarla si no quieres
-    conservarla. **Disminuir una cantidad, en cambio, nunca toca tu
-    presupuesto gastado**: solo un aumento puede crear una compra.
+    conservarla. **Disminuir una cantidad, en cambio, nunca toca tus
+    gastos**: solo un aumento puede crear una compra.
   - Si el número de ovillos de la ficha no coincide con lo que
     registra el historial (por ejemplo tras una corrección manual del
     stock), un aviso te lo señala y un botón **Corregir** te ofrece
@@ -692,17 +734,45 @@ nada por error.
     ficha de la lana: ninguna compra de lana desaparece, sigue visible
     en la pantalla **Gastos**.
 
+### Importar tu stock desde Ravelry
+
+Si ya llevas tu stock en Ravelry, no hace falta volver a escribirlo todo: el
+botón **Importar de Ravelry**, arriba del stock, crea de golpe las fichas de
+las lanas que ya tienes allí.
+
+1. En Ravelry, abre «Mi cuaderno» («my notebook» en inglés) y luego la
+   pestaña «Reservas» («Stash»).
+2. Haz clic en «Export», arriba a la derecha de la lista: se descarga un
+   archivo .xls.
+3. Vuelve a {app}, elige ese archivo y luego **Analizar el archivo**.
+
+Antes de crear nada, la app te muestra un resumen: cuántas filas ha leído,
+cuántas lanas va a crear, cuántas están **ya en tu stock** (se ignoran:
+repetir un import no crea duplicados) y cuántas ya no están en stock en
+Ravelry («Agotadas», «Vendo o intercambio»,
+«Intercambiadas/Vendidas/Regaladas»), ignoradas también. No se escribe nada hasta que tocas el botón
+«Importar … hilo(s)».
+
+La marca, el modelo, el color, el grosor, el metraje y el peso, el número de
+ovillos, el lugar donde la guardas, las notas, así como el precio, la fecha y
+la tienda de la compra vienen del archivo; la pastilla de color se elige según
+la familia de color que indica Ravelry. La foto, en cambio, la añades tú a
+mano. Todo ocurre en tu dispositivo: {app} lee el archivo que le das, nunca
+se conecta a Ravelry.
+
 ### La pantalla Gastos
 
 ![Bajo el 43 € gastados en grande, repartido en Lana 30,50 € y Patrones 12 €, y la línea Desde el principio, 2026 suma 42,50 €, igual que agosto: ×6 Hobbii · Sauge por 17,70 € y ×4 Drops · Moutarde por 12,80 €, ambas con la etiqueta Lana y su aspa para borrarlas, y después Bufanda Nube con Patrón y Gratis, y Gorro de Trenzas con Patrón y 12 €](images/es/05c-depenses.webp)
 
 *Los menús Año y Tipo arriba, el total con su desglose lana / patrones, y luego el detalle por mes.*
 
-Accesible tocando el presupuesto gastado en el inicio (punto 1), esta
-pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la
+Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la
 **lana** como los **patrones**:
-- El **total gastado**, por moneda si has usado más de una. Mientras no
-  hayas anotado ningún precio de patrón, este total sigue siendo
+- El **total gastado**, por moneda si has usado más de una (la app nunca
+  las mezcla, porque no conoce un tipo de cambio). Este total nunca baja
+  solo: usar un ovillo o terminar un proyecto no lo reduce. Es distinto del
+  **valor de tu stock**, arriba en la pantalla **Stock de lana**, que sigue
+  lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón, este total sigue siendo
   exactamente el que conoces; en cuanto aparece un patrón en él, se
   desglosa en dos sublíneas: lo que fue a lana, lo que fue a patrones.
 - Dos menús arriba: **Año** solo muestra el año elegido (o «Todos los
@@ -768,11 +838,11 @@ accesibles desde el inicio:
 
 ## 7. Estadísticas
 
-![La pantalla Estadísticas con la pestaña Trimestre activa junto a Mes, Semestre y Año: del 15/6/2026 al 12/9/2026, en el periodo 73:00:06, debajo Calendario en vez de Ritmo, una cuadrícula de junio a septiembre graduada de menos a más, y las tarjetas Tiempo total 73:00:06 y Días activos 71 de 90.](images/es/07-statistiques.webp)
+![La pantalla Estadísticas con la pestaña Trimestre activa junto a Mes, Semestre y Año: del 29/6/2026 al 24/9/2026, en el periodo 72:40:06, debajo Calendario en vez de Ritmo, una cuadrícula de jun a sept graduada de menos a más, y las tarjetas Tiempo total 72:40:06 y Días activos 69 de 88.](images/es/07-statistiques.webp)
 
 *El selector de arriba elige una ventana de observación (Mes, Trimestre, Semestre o Año), y toda la pantalla se ajusta a ella; aquí, la ventana Trimestre. La pestaña «Calendario», mostrada por defecto, muestra la cuadrícula y las nueve casillas numéricas.*
 
-El selector de la parte superior de la pantalla ya no elige simplemente una
+El selector de la parte superior de la pantalla no elige simplemente una
 duración de visualización: elige una **ventana de observación** (Mes,
 Trimestre, Semestre o Año). Todo lo que sigue se ajusta a ella, del tiempo
 total a las nueve casillas numéricas. Justo debajo, un filtro
@@ -798,7 +868,7 @@ horizontalmente en Semestre y Año, para no confundir los dos gestos):
   la semana, y una frase que nombra tu día más constante en todo tu
   historial.
 
-![Estadísticas, vista Ritmo: las semanas del 18/05 al 29/06 en barras, de 1:10:00 a 10:50:00, luego Por día de la semana de Lun a Dom, y abajo la frase En todo el historial, tu día más activo es el miércoles.](images/es/07b-stats-rythme.webp)
+![Estadísticas, vista Ritmo: las semanas del 29/6 al 7/9 en barras, de 1:10:00 a 12:10:00, luego Por día de la semana de Lun a Dom, y abajo la frase En todo el historial, tu día más activo es el jueves.](images/es/07b-stats-rythme.webp)
 
 *La pestaña «Ritmo»: las barras del tiempo dedicado por periodo, las siete barras por día de la semana y la frase que nombra tu día más constante.*
 
@@ -813,7 +883,7 @@ son **fijos**: una casilla oscura siempre significa lo mismo, mes tras mes,
 incluso en un trimestre más tranquilo de lo habitual. Un trazo más marcado
 rodea las columnas de un mismo mes, para reconocerlas de un vistazo.
 
-![Un año entero de cuadrícula del calendario, de ago a ago: una columna por semana, una casilla por día, las iniciales L M X J V S D en el margen izquierdo, un marco más marcado por mes y la leyenda de menos a más en cinco niveles.](images/es/07c-stats-annee.webp)
+![Un año entero de cuadrícula del calendario, de sept a sept: una columna por semana, una casilla por día, las iniciales L M X J V S D en el margen izquierdo, un marco más marcado por mes y la leyenda de menos a más en cinco niveles.](images/es/07c-stats-annee.webp)
 
 *La cuadrícula en la ventana Año: un año completo de un solo vistazo, una columna por semana y una casilla por día, con los marcos que separan los meses. Toca la imagen para ampliarla y leerla en detalle.*
 
@@ -883,6 +953,9 @@ no cuenta: se necesita una acción **registrada**.
     idea; usarla desde un teléfono **y** una tableta no lo es: cada uno
     borraría el trabajo del otro. Un segundo dispositivo necesita su
     propia carpeta.
+- **Ayuda**: «Repetir la visita guiada» vuelve a abrir el gorro de ejemplo
+  en el lector con sus burbujas de explicación, y lo vuelve a crear si lo
+  has eliminado.
 - **Contribuir**: enlace al código fuente (la app es de código abierto), y
   otros dos enlaces en el mismo bloque de los ajustes:
   - **Apoyar a {app}** lleva a una página de donaciones, **libre**: no se
@@ -892,16 +965,29 @@ no cuenta: se necesita una acción **registrada**.
 
 ### Qué pasa en el primer arranque
 
-Por orden, la primera vez que abres {app}: la pantalla de bienvenida te pide
-tu nombre, tu técnica, tu idioma, tu tema, tus unidades y tu moneda; después
-llega la pantalla de la carpeta de copia de seguridad, descrita justo arriba.
-A continuación te saludan tres mensajitos, **una sola vez cada uno**: no
-volverás a verlos.
+![«¡Te damos la bienvenida a {app}!», y debajo «Tus proyectos de punto y ganchillo a lo largo del tiempo»: Español, Punto, Sistema, Métrico (m, g) y EUR ya marcados, y abajo el botón «¿Todo listo? ¡Empieza a tejer!»](images/es/00-bienvenue.webp)
 
-- Una **bienvenida**, en el centro de la pantalla de inicio en cuanto tu
-  carpeta de copia de seguridad está lista: te dice que todo está preparado y
-  te invita a abrir los proyectos y los patrones de ejemplo para hacerte a la
-  app. Su botón la cierra, y no vuelve.
+*El primer inicio: nombre, técnica, idioma y tema.*
+
+Por orden, la primera vez que abres {app}: la pantalla de bienvenida te pide
+tu nombre, tu técnica, tu idioma, tu tema, tus unidades y tu moneda; en
+Android, después llega la pantalla de la carpeta de copia de seguridad,
+descrita justo arriba. A continuación, unos pocos detalles te reciben,
+cada uno **una sola vez**: no volverás a verlos (salvo la visita guiada,
+que puedes repetir cuando quieras).
+
+- Una **bienvenida**, en el centro de la pantalla de inicio: te dice que
+  todo está preparado y te invita a abrir los proyectos y los patrones de
+  ejemplo para hacerte a la app. Dos botones la cierran: «Descubrir el
+  lector» lanza enseguida la visita guiada de abajo, «Más tarde» la cierra
+  sin ella. En los dos casos, no vuelve.
+- Si elegiste «Descubrir el lector», una **visita guiada del lector** se
+  abre enseguida sobre el gorro de ejemplo, con tres burbujas de
+  explicación: tu talla, marcar un paso y el diagrama que sigue tu fila.
+  Puedes repetirla cuando quieras: el botón «Repetir la visita guiada» está
+  al final de la primera sección de esta guía (más arriba), y en el bloque
+  **Ayuda** de Ajustes; este último recrea el gorro de ejemplo si lo has
+  borrado.
 - Un **aviso sobre los patrones importados**, la primera vez que abres tu
   biblioteca de patrones: te recuerda que la app lee tu PDF por su cuenta y que
   a veces se equivoca (una vuelta saltada, dos tallas mezcladas, una tabla
@@ -918,7 +1004,7 @@ volverás a verlos.
 ## 9. Bajo el capó: lo que {app} te garantiza
 
 - **Sin conexión por defecto**: ningún dato tuyo sale nunca del
-  dispositivo, salvo la carpeta de copia de seguridad que **tú eliges**.
+  dispositivo.
 - **Sin cuenta, sin muro de pago**: todas las funciones anteriores son
   gratuitas, sin ninguna función esencial bloqueada.
 - **Nada se pierde por error**: cada eliminación la puedes deshacer al
@@ -932,7 +1018,7 @@ volverás a verlos.
   lugar de una sola pila larga, y el lector puede mantener el diagrama
   junto al texto. La app tiene en cuenta las zonas reservadas de la
   pantalla (barra de estado, muesca, barra de navegación): el
-  contenido ya no se desliza debajo de ellas.
+  contenido no se desliza debajo de ellas.
 - **Una política de privacidad en claro**: desde la pantalla Acerca de, dice
   dónde viven tus datos, qué puede salir de tu teléfono y en qué casos, qué
   pasa si desinstalas la app, y quién responde de ello: el responsable y la

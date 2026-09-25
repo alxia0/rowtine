@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest'
 
 // Deuxième passe de revue (rowtine-mvm) : PXOPTS (gapMin/minLen, cf. splitRegionGuarded) doit
@@ -34,7 +35,7 @@ const { OPS, page1 } = vi.hoisted(() => {
 vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({
   GlobalWorkerOptions: {},
   OPS,
-  getDocument: () => ({ promise: Promise.resolve({ numPages: 1, getPage: () => Promise.resolve(page1) }) }),
+  getDocument: () => ({ promise: Promise.resolve({ numPages: 1, getPage: () => Promise.resolve(page1) }), destroy: async () => {} }),
 }))
 vi.mock('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url', () => ({ default: '' }))
 

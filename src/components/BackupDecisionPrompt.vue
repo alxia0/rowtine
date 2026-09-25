@@ -194,7 +194,15 @@ async function onRestore() {
         // pouvant échouer sans l'autre — quand les deux échouent, la snackbar
         // dit la sienne sous la modale qui dit la sienne.
         await publishRestoreReport({ kind: 'unowned', error: null, details: res.errors })
-        if (res.decided) emit('resolved')
+        if (res.errors?.length) {
+          // Restauration INCOMPLÈTE : `runRestore` n'a volontairement ni repris le
+          // dossier ni enregistré la décision (la sauvegarde reste en pause pour ne rien
+          // effacer). La modale dit pourquoi ; `decisionNotSaved` inviterait à réessayer
+          // une restauration qui refusera désormais (base non vide). « Plus tard » est
+          // offert, sans quoi « Repartir de zéro », qui effacerait les dossiers illisibles,
+          // resterait la seule issue.
+          forceLater.value = true
+        } else if (res.decided) emit('resolved')
         else snackbar.show(t('saf.decisionNotSaved'))
       } else {
         snackbar.show(res.decided ? t('restore.done') : t('saf.decisionNotSaved'))
@@ -290,6 +298,10 @@ async function onStartFresh() {
 // d'App.vue, les DEUX significations (décision posée, ou bandeau simplement
 // refermé pour ce lancement) se traduisent par le même geste, masquer le bandeau.
 function onLater() {
+  // Retour Android et Échap passent aussi par ici : pendant une restauration (`busy`),
+  // fermer le bandeau rendrait l'app utilisable et toute saisie faite avant la fin serait
+  // effacée par l'écriture du snapshot. Même garde que le bouton, `:disabled="busy"`.
+  if (busy.value) return
   emit('resolved')
 }
 

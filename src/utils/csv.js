@@ -1,7 +1,13 @@
 // Export tableur (CSV). Séparateur « ; » (défaut Excel francophone) + BOM UTF-8 (accents).
 
+// Une CHAÎNE qui commence par = + - @ tabulation ou retour chariot est lue comme une formule
+// par le tableur (injection) : préfixée d'une apostrophe. Un nombre n'est jamais touché,
+// un négatif doit rester un nombre.
+const FORMULA_START_RE = /^[=+\-@\t\r]/
+
 function cell(v) {
-  const s = v == null ? '' : String(v)
+  let s = v == null ? '' : String(v)
+  if (typeof v === 'string' && FORMULA_START_RE.test(s)) s = "'" + s
   return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s
 }
 

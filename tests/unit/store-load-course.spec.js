@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/store-load-course.spec.js
 // Course entre deux rechargements de store (bug du 06/08, écran Dépenses : une des deux
 // laines achetées manquait au budget).
@@ -181,9 +182,9 @@ const MAGASINS = [
     nom: 'patterns',
     table: () => db.patterns,
     filtre: false,
-    // `reader` renseigné : sans lui, load() déclenche en plus une migration paresseuse qui
-    // écrit — hors sujet ici, et source de bruit dans la mesure.
-    semer: (n) => db.patterns.add({ name: `Patron ${n}`, reader: { blocks: [] } }),
+    // `reader` ET `coverIndex` renseignés : sans eux, load() déclenche en plus une migration
+    // paresseuse qui écrit — hors sujet ici, et source de bruit dans la mesure.
+    semer: (n) => db.patterns.add({ name: `Patron ${n}`, reader: { blocks: [] }, coverIndex: 0 }),
     store: () => usePatternsStore(),
     charger: (s) => s.load(),
     lire: (s) => s.patterns,

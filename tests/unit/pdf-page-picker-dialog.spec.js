@@ -1,7 +1,7 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
+import { createTestI18n } from './helpers/i18n-router'
 
 vi.mock('@/utils/pdf', () => ({
   renderPdfPageToDataUrl: vi.fn().mockResolvedValue('data:image/jpeg;base64,PAGE'),
@@ -9,7 +9,7 @@ vi.mock('@/utils/pdf', () => ({
 }))
 import PdfPagePickerDialog from '@/components/PdfPagePickerDialog.vue'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppIcon: true }
 
 describe('PdfPagePickerDialog', () => {

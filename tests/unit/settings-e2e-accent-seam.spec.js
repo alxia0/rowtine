@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — seam e2e de la teinte d'accent (alternance des couleurs par défaut des
 // captures du guide, spéc 2026-09-05) : l'ACTION du store, testée indépendamment de
 // l'enregistrement window (VITE_E2E n'est pas défini sous vitest — motif action +

@@ -1,10 +1,11 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import ColorPickerDialog from '@/components/ColorPickerDialog.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppIcon: true }
 const mountPicker = (props) => mount(ColorPickerDialog, { props, global: { plugins: [i18n], stubs } })
 

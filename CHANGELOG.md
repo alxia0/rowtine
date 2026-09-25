@@ -2,6 +2,12 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.3.2]
+
+- Import your yarn stash from a Ravelry export (.xlsx): status, colour,
+  purchases, notes, storage location, and "bought at" on each purchase.
+- Various display fixes.
+
 ## [1.3.1]
 
 - HEIC/HEIF photo support (requires Android 9 / API 28 or higher).

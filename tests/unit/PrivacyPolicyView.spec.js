@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran Politique de confidentialité. Exigence légale,
 // bloquante pour publier — le test vérifie que le contenu affiché porte bien les
 // affirmations substantielles attendues (rien ne sort du téléphone, fonctionnement hors

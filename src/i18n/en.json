@@ -22,8 +22,9 @@
     "swipeHint": "Swipe right to go back. And when a row of tabs or categories runs off the screen — in a project, in the library — drag it with your finger, from right to left.",
     "tipTitle": "Did you know?",
     "welcomeTitle": "Welcome to Rowtine!",
-    "welcomeBody": "Everything is ready. Two projects and a few sample patterns are waiting for you: open them to see how the app works, and add your first skeins to your Yarn stash. Wander through the menus and screens to get familiar with the interface — that's what these samples are for.",
-    "welcomeStart": "Let's go!",
+    "welcomeBody": "Everything is ready. Two projects and a few sample patterns are waiting for you: open them to see how the app works, and add your first skeins to your Yarn stash. Wander through the menus and screens to get familiar with the interface — that's what these samples are for. We'll start with a quick tour of the reader on the sample hat.",
+    "welcomeStart": "Explore the reader",
+    "welcomeLater": "Later",
     "firstName": "Your first name (optional)",
     "firstNamePlaceholder": "What's your name?",
     "technique": "Your favourite craft",
@@ -38,9 +39,9 @@
     "inProgress": "in progress",
     "thisWeek": "this week",
     "thisMonth": "this month",
-    "budgetSpent": "money spent",
     "resume": "Resume",
     "resumeRow": "row {done} / {total}",
+    "resumeSize": "knitted size {size}",
     "wipSummary": "You have {n} project in progress. | You have {n} projects in progress.",
     "lastProject": "Last project",
     "noProjects": "No projects yet. Create your first project to get started.",
@@ -52,7 +53,6 @@
     "toolCalc": "Calculator",
     "toolNeedle": "Needles",
     "statsLink": "View time statistics",
-    "expensesLink": "View expenses",
     "recentSessions": "Recent sessions",
     "sessionsLink": "View all sessions"
   },
@@ -340,7 +340,7 @@
     "tab": {
       "infos": "Details",
       "sections": "Sections",
-      "photos": "Gallery",
+      "photos": "Photos",
       "sessions": "Sessions",
       "stats": "Stats"
     },
@@ -482,6 +482,7 @@
     "sortWeight": "Weight",
     "sortPurchased": "Purchase date",
     "add": "Add yarn",
+    "importRavelry": "Import from Ravelry",
     "edit": "Edit yarn",
     "updated": "Yarn updated.",
     "notFound": "Yarn not found.",
@@ -506,6 +507,10 @@
     "quantity": "Quantity",
     "quantityBelowReserved": "This yarn already has {n} skein(s) allocated across several projects — you can't go below that. Reduce those allocations first.",
     "bain": "Dye lot",
+    "storedIn": "Stored in",
+    "storedInPlaceholder": "e.g. Shelf 2, blue basket",
+    "notes": "Notes",
+    "notesPlaceholder": "Your personal notes on this yarn…",
     "purchasesCount": "Recorded purchases",
     "lastPurchaseDate": "Last purchase",
     "composition": "Composition",
@@ -583,6 +588,7 @@
     "all": "All",
     "add": "Add pattern",
     "importPdf": "Import a PDF pattern",
+    "importRowtine": "Import in Rowtine format",
     "importing": "Reading PDF…",
     "importDone": "PDF imported. Review and complete the info.",
     "addManual": "Create manually",
@@ -652,6 +658,9 @@
   },
   "importLocal": {
     "title": "Import a PDF",
+    "titleRowtine": "Import in Rowtine format",
+    "leadRowtine": "A pattern already prepared in the Rowtine format: text and images are imported as is, on your device, offline.",
+    "pickRowtine": "Choose a .rowtine or .zip file",
     "lead": "The pattern is parsed on your device: free, offline, faithful to the PDF.",
     "leadNext": "The pattern is saved straight into your library; you'll be able to fix the sections afterwards if needed.",
     "pick": "Choose a PDF file",
@@ -659,20 +668,29 @@
     "parsing": "Parsing the PDF…",
     "confidence": "Confidence",
     "level": { "high": "high", "medium": "medium", "low": "low" },
-    "summary": "{sections} section(s) · {steps} step(s)",
+    "summaryTitle": "Your pattern is imported",
+    "summary": {
+      "sections": "sections | section | sections",
+      "steps": "steps to tick | step to tick | steps to tick",
+      "sizes": "sizes | size | sizes",
+      "singleSize": "one size",
+      "charts": "charts | chart | charts"
+    },
     "sizes": "Sizes: {labels}",
     "correctHint": "You'll be able to fix the section categorisation from inside the pattern.",
     "scanned": "This PDF looks scanned: it holds no readable text, so the app cannot extract anything from it. Enter the pattern by hand, or write to us at {email} — we can help you prepare it.",
+    "notPattern": "This PDF doesn't look like a knitting or crochet pattern: Rowtine can only read those. If it really is one, write to us at {email} and we'll look into why it wasn't recognized.",
     "cancelImport": "Cancel the import",
     "saved": "Pattern imported into the library",
-    "doneTitle": "Pattern imported",
-    "doneCaveat": "The conversion is never perfect: read the pattern through before you follow it. Everything can be fixed in the app.",
-    "doneHowToFix": "How to fix it",
+    "caveatTitle": "Read through the pattern before you start",
+    "caveatBody": "The import is never perfect: check the numbers, the sizes and the repeats, and fix them directly in the app.",
+    "doneHowToFix": "How to fix it?",
     "viewPattern": "View the pattern",
     "warnings": "{n} point(s) to check",
+    "nextHint": "Go through it section by section first and fix its content if needed. You'll start your project from the pattern.",
     "blockTitle": "Risky import",
     "blockColumns": "This PDF looks laid out in more than 2 columns: the extracted text will be scrambled.",
-    "blockMultiPattern": "This file looks like it contains several patterns (or a book): only one pattern can be imported at a time.",
+    "blockMultiPattern": "This file looks like it holds several patterns, or a whole book: Rowtine imports one pattern at a time. Save the pages of the pattern you want as a separate PDF, then import that file.",
     "blockLead": "Automatic import was paused. You can import it anyway, but it will likely need significant correction.",
     "importAnyway": "Import anyway"
   },
@@ -682,8 +700,8 @@
     "howToFix": "How to fix it"
   },
   "importZip": {
-    "noMd": "This zip contains no pattern file (.md). Check the file.",
-    "badZip": "This file is not a readable zip. Check the file.",
+    "noMd": "This file contains no pattern (.md). Check the file.",
+    "badZip": "This file is not a readable Rowtine archive (.rowtine or .zip). Check the file.",
     "failed": "Import failed. Check the file.",
     "phase": { "read": "Reading file…", "images": "Extracting images…", "done": "Done" }
   },
@@ -698,14 +716,14 @@
     "isChart": "Interactive chart",
     "followAsChart": "Follow as a chart",
     "justImage": "Just an image",
-    "sendToGallery": "Send to gallery",
+    "sendToGallery": "Send to photos",
     "changeType": "Change type",
     "renameDiagram": "Rename this chart",
     "renameLabel": "Chart name",
     "renameConfirm": "Rename",
     "renameProgressWarning": "Renaming resets this chart's progress in ongoing projects.",
     "renameFailed": "This chart could not be renamed: its title changed in the text.",
-    "galleryToggle": "Pattern gallery ({count})",
+    "galleryToggle": "Pattern photos ({count})",
     "insertIntoText": "Insert into text",
     "chartMenuIneligible": "Only the section's first image can become a chart",
     "brokenDiagramLabel": "Incomplete diagram",
@@ -723,6 +741,10 @@
       "radialCircle": {
         "label": "Radial round",
         "hint": "A motif knitted/crocheted in the round from the center outward — e.g. granny circle, circular yoke"
+      },
+      "radialHexagon": {
+        "label": "Radial hexagon",
+        "hint": "A motif knitted/crocheted in a hexagon from the center outward — e.g. granny hexagon"
       },
       "path": {
         "label": "Path",
@@ -779,8 +801,8 @@
       "steps3": "Save.",
       "tagsTitle": "What each category does",
       "stripsTitle": "The strips at the bottom of the screen",
-      "stripDiagrams": "Diagrams: the list of the pattern's charts. You can change a chart's tracking type, rename it, turn it back into a plain image, or send it to the gallery.",
-      "stripGallery": "Pattern gallery: the images that come with the pattern without being in the text. You can add some (camera, file, PDF page), remove some, or turn one into a chart.",
+      "stripDiagrams": "Diagrams: the list of the pattern's charts. You can change a chart's tracking type, rename it, turn it back into a plain image, or send it to the photos.",
+      "stripGallery": "Pattern photos: the images that come with the pattern without being in the text. You can add some (camera, file, PDF page), remove some, or turn one into a chart.",
       "stripImageTap": "In the text, tap an image to follow it as a chart, change its type, or turn it back into a plain image.",
       "tagsCol1": "Category",
       "tagsCol2": "What it becomes in your project",
@@ -859,10 +881,17 @@
     "restoreShortfall": "Project restored, but some reserved skeins had been claimed by another project in the meantime — the allocation was reduced accordingly.",
     "trashEmpty": "Trash is empty.",
     "emptyTrash": "Empty trash",
+    "emptyTrashTitle": "Empty the trash?",
+    "emptyTrashMessage": "Everything in the trash will be permanently deleted. This cannot be undone.",
     "types": {
       "project": "Project",
       "yarn": "Yarn",
       "pattern": "Pattern"
+    },
+    "help": {
+      "title": "Help",
+      "replayTour": "Replay the guided tour",
+      "replayTourHint": "Reopens the sample hat in the reader with the explanation bubbles."
     },
     "contribute": "Contribute",
     "suggest": "Suggest an improvement",
@@ -980,6 +1009,8 @@
     "errorBody": "A technical error occurred while restoring your data. The details are shown below; you can copy them to report the problem.",
     "unownedTitle": "Data restored",
     "unownedBody": "Your data has been restored, but taking over the folder could not be confirmed: saving your Rowtine data stays paused.",
+    "partialTitle": "Data partly restored",
+    "partialBody": "Some items in the folder could not be read: they are missing from the app, but remain untouched in the folder. So that nothing gets erased, saving your Rowtine data stays paused. The details are shown below; you can copy them to report the problem.",
     "copyAction": "Copy report"
   },
   "common": {
@@ -1084,9 +1115,13 @@
       "wizardResize": "Resize",
       "wizardShapeCircle": "Round",
       "wizardShapeSquare": "Square",
+      "wizardShapeHexagon": "Hexagon",
+      "wizardHexOrientationFlat": "Flat side on top",
+      "wizardHexOrientationPointy": "Point on top",
       "wizardStepInnerHint": "Place the chart's first marker on the bottom edge of the first row.",
       "wizardStepOuterHint": "Place the second marker on the outer edge of the last row.",
       "wizardStepSwitchHintToSquare": "Choose from which row the motif becomes square.",
+      "wizardStepSwitchHintToHexagon": "Choose from which row the motif becomes hexagonal.",
       "wizardStepSwitchHintToCircle": "Choose from which row the motif becomes round.",
       "wizardStepReviewHint": "Adjust the markers' position against the drawing if needed.",
       "wizardBack": "Back",
@@ -1212,7 +1247,7 @@
   "patternExtras": {
     "preview": "Preview",
     "openExternal": "Open",
-    "galleryTitle": "Pattern gallery",
+    "galleryTitle": "Pattern photos",
     "fromPage": "p. {n}",
     "addedImage": "Added image",
     "addImage": "Add an image",
@@ -1306,6 +1341,30 @@
       "sizeMismatch": "inconsistent size for {path}: {read} bytes read for {expected} announced (file modified during the read?)"
     }
   },
+  "ravelryImport": {
+    "title": "Import from Ravelry",
+    "lead1": "Grab your Ravelry stash export file to create the entries for the yarn you already own, all at once.",
+    "step1": "On Ravelry, open \"my notebook\", then the \"Stash\" tab.",
+    "step2": "Click \"Export\" at the top right of the list: an .xls file downloads.",
+    "step3": "Come back here and pick that file below.",
+    "lead2": "Only yarn still in your stash is imported, not \"Used Up\", \"Will Trade Or Sell\" or \"Traded/Sold/Gifted\"; colour, price and purchase date come from the file, the photo is still yours to add by hand.",
+    "pick": "Choose the downloaded file",
+    "analyze": "Analyse the file",
+    "analyzing": "Analysing…",
+    "confirming": "Importing…",
+    "summaryTotal": "{n} row(s) read from the file.",
+    "summaryEmpty": "This file doesn't contain any rows to import.",
+    "summaryCreate": "{n} yarn(s) will be created.",
+    "summaryAlready": "{n} already in your stock, skipped.",
+    "summaryExcluded": "{n} skipped (no longer in stock on Ravelry).",
+    "summaryNoStatusColumn": "No status found in this file (neither a Status column nor “In stash”… sheets): unable to tell which yarn is still in stock.",
+    "summaryUnmapped": "Unrecognised columns: {list}.",
+    "parseError": "Couldn't read this file. Check that it's an .xls, .xlsx or .csv export from Ravelry.",
+    "confirm": "Import {n} yarn(s)",
+    "pickAnother": "Choose another file",
+    "doneTitle": "{n} yarn(s) imported.",
+    "backToStash": "Back to stash"
+  },
   "purchases": {
     "title": "Purchases and gifts",
     "showMore": "Show {n} more",
@@ -1315,6 +1374,7 @@
     "correctAdjustStock": "Adjust the stock quantity to {n}",
     "kindBuy": "Purchase",
     "kindGift": "Gift",
+    "purchasedFrom": "Bought at",
     "reconstructedTag": "Automatically reconstructed",
     "priceUnknown": "Price unknown",
     "deleted": "Purchase deleted"
@@ -1367,5 +1427,26 @@
     "empty": "No sessions yet.",
     "emptyHint": "Start the timer from a project: sessions will be listed here.",
     "unknownProject": "Deleted project"
+  },
+  "tour": {
+    "size": {
+      "title": "Your size, once and for all",
+      "body": "Pick it here: every number in the pattern adapts to show only the ones for your size. No more “88 (96) 104”."
+    },
+    "steps": {
+      "title": "Tick off what you’ve done",
+      "body": "Rowtine remembers every step. Tomorrow or a month from now, you’ll pick up exactly where you left off."
+    },
+    "chart": {
+      "title": "The chart follows your row",
+      "body": "The highlighted band marks your current row, and finished rows are greyed out. The PDF can stay closed."
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Get started",
+    "progress": "Step {n} of {total}",
+    "label": "Guided tour of the reader",
+    "unavailable": "The sample project couldn't be prepared.",
+    "recreated": "The sample project was recreated for the tour."
   }
 }

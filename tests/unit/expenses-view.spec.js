@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/expenses-view.spec.js
 // Écran Dépenses (les travaux sur le budget laine cumulé) : couvre `groupByPeriod`
 // (pur, src/utils/purchases.js) puis l'écran monté. C'est le SEUL endroit de
@@ -19,7 +20,6 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import { db } from '@/db/db'
 import fr from '@/i18n/fr.json'
 import { usePurchasesStore } from '@/stores/purchases'
@@ -29,8 +29,9 @@ import { useSnackbarStore } from '@/stores/snackbar'
 import { groupByPeriod, yearsOf, filterByYear } from '@/utils/purchases'
 import ExpensesView from '@/views/ExpensesView.vue'
 import EmptyStateArt from '@/components/EmptyStateArt.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // Routeur minimal (ajouté avec le prix du patron, 07/08) : ExpensesView appelle désormais
 // useRouter() pour ouvrir la fiche d'un patron depuis sa ligne de dépense. Sans ce mock,

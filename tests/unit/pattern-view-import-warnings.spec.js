@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Les warnings d'un import PDF survivent au saut DIRECT vers la fiche
 // patron (LocalPdfImportView n'affiche plus d'écran de revue) via le
 // store transitoire import-report. PatternView les consomme au montage et les

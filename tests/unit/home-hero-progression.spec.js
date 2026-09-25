@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — HomeView, héros « Reprendre » : le visuel de mailles (`StitchProgress`) et le
 // « X % » ne s'affichent que si la progression DIT quelque chose — même prédicat que les
 // cartes (ProjectCard.vue : `known && pct > 0`, règle du 31/08/2026). Retour utilisateur :
@@ -23,6 +24,9 @@ const nav = vi.hoisted(() => ({
 vi.mock('vue-router', () => ({ useRouter: () => nav.router }))
 
 import HomeView from '@/views/HomeView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 // `needles` déjà au nouveau format : la migration paresseuse de `projectsStore.load()` ne
 // s'exécute pas du tout — le fixture reste inerte, aucune écriture parasite.
@@ -117,7 +121,7 @@ describe('HomeView — héros « Reprendre » : progression masquée à 0 % (pr�
     expect(tile.find('.resume__stitch').exists()).toBe(false)
     expect(tile.find('.resume__pct').exists()).toBe(false)
     // Le « rang 0 / 40 » est une LOCALISATION dans le patron, pas un avancement : gardé.
-    expect(tile.find('.resume__where').text()).toContain('rang 0 / 40')
+    expect(tile.find('.resume__where').text()).toContain(tk('home.resumeRow', { done: 0, total: 40 }))
     expect(tile.find('.resume__title').text()).toBe('Châle Bellis')
     expect(tile.find('.cta').exists()).toBe(true)
   })
@@ -142,5 +146,20 @@ describe('HomeView — héros « Reprendre » : progression masquée à 0 % (pr�
     await waitWhereLoaded(tile, 'Corps')
     expect(tile.find('.resume__stitch').exists()).toBe(true)
     expect(tile.find('.resume__pct').text()).toBe('13 %')
+  })
+
+  it('taille tricotée : libellé traduit d’un bloc, sans casse forcée (noms allemands capitalisés)', async () => {
+    await db.projects.update(projectId, { activeSize: 'M' })
+    const before = i18n.global.locale.value
+    i18n.global.locale.value = 'de'
+    try {
+      const w = mountHome()
+      const tile = await resumeTile(w)
+      await vi.waitFor(() => expect(tile.find('.resume__where').text()).toBe(tk('home.resumeSize', { size: 'M' })), {
+        timeout: 10000,
+      })
+    } finally {
+      i18n.global.locale.value = before
+    }
   })
 })

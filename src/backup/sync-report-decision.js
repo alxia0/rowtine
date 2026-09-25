@@ -37,8 +37,12 @@ export function classifySyncReport(report) {
     return { kind: 'none' }
   }
 
+  // `merged.length > 0` n'est pas testé ici : le premier retour anticipé ci-dessus a déjà
+  // écarté le seul cas où `merged` pourrait être vide en même temps que les deux autres
+  // conditions — `skippedWithReason.length === 0 && errors.length === 0` suffit donc seul
+  // à en dépendre, ce point n'est atteint qu'avec au moins une fusion.
   const anyFlagged = merged.some(isMergedEntryFlagged)
-  if (merged.length > 0 && !anyFlagged && skippedWithReason.length === 0 && errors.length === 0) {
+  if (!anyFlagged && skippedWithReason.length === 0 && errors.length === 0) {
     return { kind: 'snackbar', count: merged.length }
   }
 

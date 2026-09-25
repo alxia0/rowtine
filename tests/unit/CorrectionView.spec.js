@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // CorrectionView.spec.js — Task C2 : réécrit l'écran de correction post-import
 // autour de l'éditeur zone-de-texte (ReaderTextEditor, Task C1) + reader-editable
 // (readerToEditable/editableToReader, Phase B). Charge → édite (md) → enregistre
@@ -24,7 +25,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import en from '@/i18n/en.json'
 import { db } from '@/db/db'
@@ -33,6 +33,7 @@ import { usePatternsStore } from '@/stores/patterns'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { useSyncReportStore } from '@/stores/sync-report'
 import { WARNING_CODES } from '@/utils/pattern-md/warning-codes'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
 // Mock vue-router : même approche que pattern-view-preview.spec.js (route + router
 // mockés via vi.hoisted pour éviter la TDZ avec vi.mock hoisté).
@@ -86,7 +87,9 @@ import CorrectionView from '@/views/CorrectionView.vue'
 import { readerToEditable, editableToReader } from '@/utils/pattern-md/reader-editable'
 import { photoFileName } from '@/backup/naming'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 // ReaderTextEditor (C1) monte CM6 réel — non exploitable en jsdom (cf. sa propre
 // spec, tests/unit/reader-text-editor.spec.js). On le remplace ici par un stub
@@ -393,7 +396,7 @@ describe('CorrectionView — bande diagrammes conservée (Step 2)', () => {
     // (1) et non (2) depuis les travaux « bandes du bas » (26/08/2026) : le fixture porte UN vrai
     // diagramme et UNE image du texte promouvable ('Encolure') — cette dernière n'est plus
     // comptée ni listée ici (elle se promeut en tapant dessus dans le texte).
-    expect(toggle.text()).toContain('Diagrammes (1)')
+    expect(toggle.text()).toContain(tk('correction.diagramsToggle', { count: 1 }))
     expect(findButtonByText(w, fr.correction.justImage)).toBeFalsy()
 
     await openChartsStrip(w)
@@ -722,6 +725,34 @@ describe('CorrectionView — ré-édition mi-projet signale la perte (Step 3)', 
     // Fan-out : les pertes des deux projets sont AGRÉGÉES dans le même rapport.
     expect(syncReportStore.report.merged[0].reconcile.doneLost).toBe(2)
   })
+
+  // Deux appuis sur Enregistrer : une seule sauvegarde, un seul retour arrière.
+  it('double appui sur Enregistrer : un seul router.back()', async () => {
+    const reader = fixtureReader()
+    const { w } = await mountView({ pattern: { id: 7, name: 'Pull', reader } })
+    const btn = findButtonByText(w, fr.correction.save)
+    btn.trigger('click')
+    btn.trigger('click')
+    await vi.waitFor(() => expect(nav.router.back).toHaveBeenCalled(), { timeout: 10000 })
+    await flushPromises()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(nav.router.back).toHaveBeenCalledTimes(1)
+  })
+
+  // Un projet sans taille retenue dans le suivi (size null) ne doit pas basculer sur la 1re taille.
+  it('readerState sans taille : la taille reste non choisie après l’Enregistrer', async () => {
+    const reader = fixtureReader()
+    const pattern = { id: 7, name: 'Pull', reader }
+    const project = { id: 10, patternId: 7, activeSize: 'M', readerState: { size: null, done: {}, counters: {} } }
+    const { w } = await mountView({ pattern, projects: [project] })
+
+    const edited = textarea(w).element.value.replace('Tricoter au point mousse.', 'Tricoter tout autrement.')
+    await textarea(w).setValue(edited)
+    await clickSaveAndSettle(w)
+
+    const persisted = await db.projects.get(10)
+    expect(persisted.readerState.size).toBe(null)
+  })
 })
 
 // Task D (D1) : les écritures des projets liés ET du patron doivent être
@@ -1020,7 +1051,7 @@ describe('CorrectionView — choix de type de diagramme (panneau + clic-image)',
     await findButtonByText(w, fr.correction.changeType).trigger('click')
     await flushPromises()
     const items = [...document.querySelectorAll('.cm-menu-popover__item')]
-    expect(items.length).toBe(4)
+    expect(items.length).toBe(5)
     expect(items[0].getAttribute('aria-checked')).toBe('true') // 'standard' présélectionné
     expect(items.slice(1).every((el) => el.getAttribute('aria-checked') === 'false')).toBe(true)
   })
@@ -1088,7 +1119,7 @@ describe('CorrectionView — choix de type de diagramme (panneau + clic-image)',
     expect(info.primary.label).toBe(fr.correction.followAsChart)
     expect(info.demoteLabel).toBeNull()
     expect(info.selectedShape).toBe('standard')
-    expect(info.shapeOptions.map((o) => o.value)).toEqual(['standard', 'radial-square', 'radial-circle', 'path'])
+    expect(info.shapeOptions.map((o) => o.value)).toEqual(['standard', 'radial-square', 'radial-circle', 'radial-hexagon', 'path'])
   })
 
   it("getInfo(line, mdPath) : image qui n'est pas la 1re image ancrée de sa section → enabled:false + hint", async () => {
@@ -1225,6 +1256,72 @@ describe('CorrectionView — galerie du patron (ajout/suppression, sans promotio
     expect(persisted.gallery).toEqual([{ src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 }])
   })
 
+  it('supprime l\'image de couverture : coverIndex recalé à 0 après Enregistrer', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 1, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    await w.findAll('.gallery-strip__del')[1].trigger('click') // retire B, la couverture (coverIndex: 1)
+    await flushPromises()
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(0)
+  })
+
+  it('supprime une image AVANT la couverture : coverIndex décrémenté d\'un cran après Enregistrer', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 2, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+        { src: 'data:image/png;base64,C', page: 3, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    await w.findAll('.gallery-strip__del')[0].trigger('click') // retire A, avant la couverture (C, coverIndex: 2)
+    await flushPromises()
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(1)
+    expect(persisted.gallery.map((g) => g.src)).toEqual(['data:image/png;base64,B', 'data:image/png;base64,C'])
+  })
+
+  it('supprime une image APRÈS la couverture : coverIndex inchangé après Enregistrer', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 0, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    await w.findAll('.gallery-strip__del')[1].trigger('click') // retire B, après la couverture (A, coverIndex: 0)
+    await flushPromises()
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(0)
+  })
+
+  it('Annuler (leave sans Enregistrer) ne persiste aucun changement de coverIndex', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 1, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    await w.findAll('.gallery-strip__del')[1].trigger('click') // retirerait la couverture, si persisté
+    await flushPromises()
+    // Ne clique PAS Enregistrer : équivalent à une navigation confirmée par "Quitter".
+    w.unmount()
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(1)
+  })
+
   it('dirty()/garde de sortie déclenchée par un changement de galerie SEUL (texte et tailles inchangés)', async () => {
     pickImageMock.mockResolvedValue('data:image/png;base64,NEW')
     const { w } = await mountView({ pattern: { gallery: [] } })
@@ -1342,6 +1439,75 @@ describe('CorrectionView — transformer une image de galerie en diagramme', () 
     expect(added).toBeTruthy()
     expect(added.chart.img).toBe('data:image/png;base64,GAL')
     expect(added.chart.shape).toBe('radial-square')
+  })
+
+  it('promouvoir l\'image de couverture : coverIndex recalé à 0 après Enregistrer', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 1, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    // Ligne 1 = B, la couverture (coverIndex: 1) : la promotion la retire de la galerie
+    // exactement comme removeGalleryImage, même recalage attendu.
+    await promoteGalleryImageViaStrip(w, 1, fr.correction.chartShape.radialSquare.label)
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(0)
+  })
+
+  it('promouvoir une image AVANT la couverture : coverIndex décrémenté d\'un cran après Enregistrer', async () => {
+    // 3 images, coverIndex: 2 (C) — décrémenter (2 → 1) et remettre à 0 donneraient tous
+    // deux "0" avec seulement 2 images, ce qui ne distinguerait pas un vrai décrément d'une
+    // remise à zéro accidentelle ; ce fixture à 3 images tranche.
+    const { w, pattern } = await mountView({
+      pattern: { coverIndex: 2, gallery: [
+        { src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 },
+        { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+        { src: 'data:image/png;base64,C', page: 3, w: 10, h: 10 },
+      ] },
+    })
+    await openGalleryStrip(w)
+    // Ligne 0 = A, avant la couverture (C, coverIndex: 2).
+    await promoteGalleryImageViaStrip(w, 0, fr.correction.chartShape.radialSquare.label)
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.coverIndex).toBe(1)
+    // B et C (la couverture) n'ont pas été promues : elles restent dans la galerie, décalées
+    // d'un cran — d'où le recalage de coverIndex (2 → 1) vérifié ci-dessus.
+    expect(persisted.gallery).toEqual([
+      { src: 'data:image/png;base64,B', page: 2, w: 10, h: 10 },
+      { src: 'data:image/png;base64,C', page: 3, w: 10, h: 10 },
+    ])
+  })
+
+  it('patron créé manuellement (reader.sections vide au départ, pas de fixtureReader) : promouvoir une image de galerie crée la toute première section', async () => {
+    const { w, pattern } = await mountView({
+      pattern: { reader: { sizeLabels: [], sections: [] }, gallery: [{ src: 'data:image/png;base64,GAL', page: 0, w: 10, h: 10 }] },
+    })
+    await openGalleryStrip(w)
+    await promoteGalleryImageViaStrip(w, 0, fr.correction.chartShape.radialSquare.label)
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    expect(persisted.reader.sections).toHaveLength(1)
+    expect(persisted.reader.sections[0].chart.img).toBe('data:image/png;base64,GAL')
+    expect(persisted.reader.sections[0].chart.shape).toBe('radial-square')
+    expect(persisted.gallery).toEqual([])
+  })
+
+  it('promotion avec le type "Radial-hexagone" : après Enregistrer, la nouvelle section porte chart.shape "radial-hexagon"', async () => {
+    const { w, pattern } = await mountView({ pattern: { gallery: [{ src: 'data:image/png;base64,GAL', page: 4, w: 10, h: 10 }] } })
+    await openGalleryStrip(w)
+    await promoteGalleryImageViaStrip(w, 0, fr.correction.chartShape.radialHexagon.label)
+
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(pattern.id)
+    const added = persisted.reader.sections.find((s) => s.chart?.img === 'data:image/png;base64,GAL')
+    expect(added?.chart.shape).toBe('radial-hexagon')
   })
 
   it('deux images de galerie au src BYTE-IDENTIQUE (même empreinte) : promouvoir la PREMIÈRE seulement ne perd pas la seconde, visible tout de suite', async () => {
@@ -1682,7 +1848,7 @@ describe('CorrectionView — promotion galerie→diagramme immédiate', () => {
 describe('CorrectionView — le panneau Diagrammes ne liste que des diagrammes', () => {
   it("une image du texte jamais promue n'apparaît pas dans le panneau, et n'est pas comptée", async () => {
     const { w } = await mountView()
-    expect(w.find('.chart-strip__toggle').text()).toContain('Diagrammes (1)')
+    expect(w.find('.chart-strip__toggle').text()).toContain(tk('correction.diagramsToggle', { count: 1 }))
     await openChartsStrip(w)
     expect(w.findAll('.chart-strip__row')).toHaveLength(1)
     expect(w.text()).toContain('Diagramme 1')
@@ -1702,7 +1868,7 @@ describe('CorrectionView — le panneau Diagrammes ne liste que des diagrammes',
   it('promue depuis le texte, elle entre AUSSITÔT dans le panneau', async () => {
     const { w } = await mountView()
     await promoteEncolureImage(w)
-    expect(w.find('.chart-strip__toggle').text()).toContain('Diagrammes (2)')
+    expect(w.find('.chart-strip__toggle').text()).toContain(tk('correction.diagramsToggle', { count: 2 }))
     await openChartsStrip(w)
     expect(w.text()).toContain('Encolure')
   })

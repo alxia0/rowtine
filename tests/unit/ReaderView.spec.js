@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — ReaderView. Deux contextes :
 //  - biblio (pattern-read) : APERÇU LECTURE SEULE (ni taille, ni coches, ni progression, ni compteur).
 //  - projet (project-read) : SUIVI INTERACTIF (taille, progression, compteur, diagramme, persistance projet).
@@ -28,6 +29,9 @@ vi.mock('vue-router', () => ({
 }))
 
 import ReaderView from '@/views/ReaderView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 // Modèle « plat » : chaque item de section est ROW / NOTE / REP(repeat) / CHART. IDs générés
 // au rendu sous la forme `${sec.id}#${index}`.
@@ -468,6 +472,33 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     expect(p.activeSize).toBe('L') // synchro taille active du projet
   })
 
+  // Une taille enregistrée hors des tailles du patron (patron changé) ne doit pas être restaurée.
+  it('readerState.size hors bornes : aucune taille retenue, activeSize jamais écrit undefined', async () => {
+    const { projectId } = await seedProject(FIX_READER, { readerState: { size: 5 } })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.szpill--on').exists()).toBe(false)
+    expect(w.find('.szcard__chosen').text()).toBe(tk('reader.noSize'))
+    await w.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.size).toBe(null)
+    expect(p.activeSize).toBe('')
+  })
+
+  // Index hors bornes mais libellé `activeSize` connu : le libellé reprend la main.
+  it('readerState.size hors bornes + activeSize connu : la taille du libellé est retenue', async () => {
+    const { projectId } = await seedProject(FIX_READER, { activeSize: 'M', readerState: { size: 5 } })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.szpill--on').text()).toBe('M90')
+    await w.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.size).toBe(1)
+    expect(p.activeSize).toBe('M')
+  })
+
   it('la section passe en « Faite » quand rangs cochés et répétitions atteintes', async () => {
     await seedProject()
     const w = mountReader()
@@ -646,10 +677,10 @@ describe('ReaderView — tuile Conseils (tips)', () => {
 
     const titles = w.findAll('.amtile__t').map((n) => n.text())
     const subs = w.findAll('.amtile__s').map((n) => n.text())
-    expect(titles).toContain('Conseils')
-    expect(subs).toContain('Astuces du patron')
+    expect(titles).toContain(tk('reader.reference.tips.label'))
+    expect(subs).toContain(tk('reader.reference.tips.sub'))
 
-    const tipsTile = w.findAll('.amtile').find((n) => n.find('.amtile__t').text() === 'Conseils')
+    const tipsTile = w.findAll('.amtile').find((n) => n.find('.amtile__t').text() === tk('reader.reference.tips.label'))
     const iconSvg = tipsTile.find('.amtile__ic svg').html()
     // Le SVG rendu doit correspondre au tracé enregistré sous `tab-tips` (ampoule),
     // jamais au repli `pelote` (cercle + fils, cf. AppIcon.vue : nom inconnu → ICONS.pelote).
@@ -662,7 +693,7 @@ describe('ReaderView — tuile Conseils (tips)', () => {
     const w = mountReader()
     await settle()
     const titles = w.findAll('.amtile__t').map((n) => n.text())
-    expect(titles).not.toContain('Conseils')
+    expect(titles).not.toContain(tk('reader.reference.tips.label'))
   })
 })
 

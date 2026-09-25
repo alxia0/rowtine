@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // pattern-view-photo-pdf.spec.js — Task #5 : la photo source (rendu de la 1re page du
 // PDF importé) devient elle-même le point d'entrée vers le PDF original. La carte
 // « PDF original » séparée disparaît ; son action (ouvrir le PDF) se déplace sur la photo.

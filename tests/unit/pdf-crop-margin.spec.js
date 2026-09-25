@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/pdf-crop-margin.spec.js
 // cropCanvas : marge blanche horizontale pour les grilles.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'

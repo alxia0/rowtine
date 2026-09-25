@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Retour device : la saisie des compteurs (cadence/répétition,
 // depuis la barre ET depuis la puce compteur) passait par window.prompt(),
 // qui impose le clavier AZERTY complet sur Android. openNumberPrompt() le

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // (P2, audit UX 17/07) — La sélection des laines dans ProjectEditView.vue
 // utilise désormais AppCheckbox (case maison) au lieu d'un <input type="checkbox"> natif.
 // Piège : ce n'est PAS un v-model simple — `:checked="selectedYarnIds.includes(y.id)"`

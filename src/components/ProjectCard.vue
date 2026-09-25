@@ -12,6 +12,7 @@ import { useProjectConsumption } from '@/composables/useProjectConsumption'
 import { isProjectVegan } from '@/utils/yarn-usage'
 import { formatLocalDate } from '@/utils/date-format'
 import AppIcon from '@/components/AppIcon.vue'
+import { clampStars } from '@/utils/project-stars'
 
 const props = defineProps({
   project: { type: Object, required: true },
@@ -44,6 +45,8 @@ const techniqueLabel = computed(() => t(`technique.${props.project.technique}`))
 // Repli sur la 1re photo du patron lié (prop `pattern`) si le projet n'a pas de photo propre.
 const cover = computed(() => resolveCover(props.project, props.pattern))
 const isDone = computed(() => props.project.status === 'done')
+// Note bornée à l'affichage (défense en profondeur, cf. clampStars) : pilote un v-for.
+const starCount = computed(() => clampStars(props.project.stars))
 // Progression connue (sections avec total de rangs) ou non.
 const known = computed(() => !!(props.progress && props.progress.total > 0))
 // Signature de l'app : la progression rendue comme des mailles. On ne la rend que si elle
@@ -92,7 +95,7 @@ const finishedLabel = computed(() =>
         </div>
         <div class="pcard__meta">
           <span>{{ techniqueLabel }}<template v-if="project.activeSize"> · {{ project.activeSize }}</template><template v-if="finishedLabel"> · {{ finishedLabel }}</template></span>
-          <span v-if="project.stars" class="pcard__stars" role="img" :aria-label="t('project.starsValue', { n: project.stars })"><AppIcon v-for="n in project.stars" :key="n" name="starFilled" :size="13" /></span>
+          <span v-if="starCount" class="pcard__stars" role="img" :aria-label="t('project.starsValue', { n: starCount })"><AppIcon v-for="n in starCount" :key="n" name="starFilled" :size="13" /></span>
         </div>
         <div class="pcard__foot">
           <StitchProgress v-if="showStitch" class="pcard__stitch" :technique="project.technique" :done="stitchDone" :total="stitchTotal" :tone="isDone ? 'sage' : 'brand'" />

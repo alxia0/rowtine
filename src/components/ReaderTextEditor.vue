@@ -410,9 +410,7 @@ defineExpose({ revealLine, replaceLine, insertImageLine })
      c'est désormais le SEUL `top` sticky DE L'ÉDITEUR, là où il y en avait deux à
      faire s'accorder. L'écran, lui, en compte toujours un second : ce même `.hdr`
      est collant et calé à zéro, ici comme sur tous les écrans — c'est précisément
-     pourquoi le `top` ci-dessous reprend sa boîte. (Pas de déclaration `prop deux-points
-     valeur` écrite dans ce commentaire : reader-text-editor-sticky.spec.js scrape le
-     source CSS et lirait la prose comme une règle.) z-index entre
+     pourquoi le `top` ci-dessous reprend sa boîte. z-index entre
      AppHeader (40) et le contenu de l'éditeur : l'ordre de pile suit l'ordre
      d'empilement visuel (header, puis ce bandeau). */
   position: sticky;

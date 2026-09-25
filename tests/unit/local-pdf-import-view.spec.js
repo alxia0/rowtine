@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Depuis le 17/08 (chantier 3, trois retouches) : après une conversion locale réussie
 // (PDF non scanné), l'écran enregistre le patron et RESTE affiché — un bloc de réussite
 // montre son nom et un bouton d'action principal, « Voir le patron », qui fait la
@@ -12,8 +13,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
+import { createTestI18n } from './helpers/i18n-router'
 
 vi.mock('@/utils/pdf-import', () => ({ parsePdfLocally: vi.fn() }))
 // Objet partagé (via vi.hoisted, sinon TDZ car vi.mock est hoisté avant les
@@ -30,7 +31,7 @@ import { useImportHandoff } from '@/stores/import-handoff'
 import { useImportReportStore } from '@/stores/import-report'
 import { CONTACT_EMAIL } from '@/constants/app-links'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppHeader: true, AppIcon: true }
 
 const okResult = (overrides = {}) => ({
@@ -108,7 +109,7 @@ describe('LocalPdfImportView', () => {
     expect(router.replace).not.toHaveBeenCalled()
     expect(router.push).not.toHaveBeenCalled()
     // Le bloc de réussite affiche le nom du patron enregistré.
-    expect(w.text()).toContain(fr.importLocal.doneTitle)
+    expect(w.text()).toContain(fr.importLocal.summaryTitle)
     expect(w.text()).toContain('Pull') // okResult() → pattern.name = 'Pull'
     // « Voir le patron » est là (depuis le 19/08, « Comment corriger » s'y ajoute — cf.
     // le describe dédié plus bas — mais les boutons du sélecteur/de l'abandon, eux, ont
@@ -180,13 +181,12 @@ describe('LocalPdfImportView', () => {
   })
 
   it('PDF scanné → pas d’enregistrement automatique ; le message rendu affiche l’adresse de contact', async () => {
-    // La porte de service .zip n'est plus nommée dans l'interface. Le
-    // message invite désormais à la saisie manuelle ou au contact — et cette adresse
+    // Le message « PDF scanné » invite à la saisie manuelle ou au contact — et cette adresse
     // vient de `t('importLocal.scanned', { email: CONTACT_EMAIL })` : ancré sur le texte
     // RENDU, pas sur la clé JSON (« la chaîne existe dans le JSON » ne prouve rien —
     // leçon du lot « guide à jour »). Une interpolation manquante rendrait le littéral
     // "{email}" au lieu de l'adresse : les deux assertions ci-dessous le détecteraient.
-    parsePdfLocally.mockResolvedValue({ scanned: true, pattern: null, reader: null, warnings: [], confidence: null, stats: null })
+    parsePdfLocally.mockResolvedValue({ scanned: true, notPattern: false, notPatternReason: null, rejected: { reason: 'scanned', detail: null }, pattern: null, reader: null, warnings: [], confidence: null, stats: null, blocking: null })
     router.replace.mockClear()
     const pinia = createTestingPinia({ createSpy: vi.fn })
     const w = mount(LocalPdfImportView, { global: { plugins: [pinia, i18n], stubs } })
@@ -197,6 +197,21 @@ describe('LocalPdfImportView', () => {
     expect(w.text()).not.toContain('{email}')
     expect(usePatternsStore(pinia).add).not.toHaveBeenCalled()
     expect(router.replace).not.toHaveBeenCalled()
+  })
+
+  it('pas un patron → refus : message avec l’adresse de contact, rien d’enregistré, pas de forçage', async () => {
+    parsePdfLocally.mockResolvedValue({ scanned: false, notPattern: true, notPatternReason: 'otherCraft', rejected: { reason: 'notPattern', detail: 'otherCraft' }, pattern: null, reader: null, warnings: [], confidence: null, stats: null, blocking: null })
+    router.replace.mockClear()
+    const pinia = createTestingPinia({ createSpy: vi.fn })
+    const w = mount(LocalPdfImportView, { global: { plugins: [pinia, i18n], stubs } })
+    await pick(w)
+    expect(w.text()).toContain(fr.importLocal.notPattern.replace('{email}', CONTACT_EMAIL))
+    expect(w.text()).not.toContain('{email}')
+    expect(w.find('.block-anyway').exists()).toBe(false)
+    expect(usePatternsStore(pinia).add).not.toHaveBeenCalled()
+    expect(router.replace).not.toHaveBeenCalled()
+    // On peut choisir un autre fichier.
+    expect(w.find('label.file-pick input[type="file"]').exists()).toBe(true)
   })
 
   it('la sauvegarde utilise le reader tel quel : une section-diagramme (promote-grids) n’est pas re-normalisée/altérée', async () => {
@@ -324,9 +339,9 @@ describe('LocalPdfImportView', () => {
       expect(w.find('.done').exists()).toBe(true)
       // PRÉCONDITION 2 : on est bien dans le cas SANS avertissement. Sans elle, le test
       // pourrait passer sur un import qui en lève, et ne prouverait rien du cas muet.
-      expect(w.find('.done .muted').exists()).toBe(false)
+      expect(w.find('.done__warncount').exists()).toBe(false)
 
-      expect(w.text()).toContain(fr.importLocal.doneCaveat)
+      expect(w.text()).toContain(fr.importLocal.caveatBody)
     })
 
     it('avec des avertissements, la phrase fixe est là AUSSI, en plus du compte', async () => {
@@ -335,8 +350,8 @@ describe('LocalPdfImportView', () => {
       await pick(w)
 
       expect(w.find('.done').exists()).toBe(true)
-      expect(w.find('.done .muted').exists()).toBe(true) // le compte est bien là
-      expect(w.text()).toContain(fr.importLocal.doneCaveat) // et la phrase fixe aussi
+      expect(w.find('.done__warncount').exists()).toBe(true) // le compte est bien là
+      expect(w.text()).toContain(fr.importLocal.caveatBody) // et la phrase fixe aussi
     })
 
     it('« Comment corriger » mène au guide, sur la section Bibliothèque', async () => {
@@ -363,7 +378,7 @@ describe('LocalPdfImportView', () => {
       expect(w.find('label.file-pick').exists()).toBe(true)
       expect(w.text()).toContain(fr.importLocal.pick)
       expect(w.find('.done').exists()).toBe(false)
-      expect(w.text()).not.toContain(fr.importLocal.doneCaveat)
+      expect(w.text()).not.toContain(fr.importLocal.caveatBody)
     })
   })
 })

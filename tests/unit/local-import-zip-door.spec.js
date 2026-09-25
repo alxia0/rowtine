@@ -1,27 +1,34 @@
-// PORTE DE SERVICE (08/08) — un .zip déposé dans l'import PDF est traité comme un patron
-// déjà mis en forme. Invisible dans l'interface : c'est le point du lot. Ce fichier et
-// tests/e2e/import-zip.spec.js sont les DEUX seuls gardes de cette fonction ; tous deux
-// doivent être prouvés par mutation (cf. plan, étape 5).
+// @vitest-environment jsdom
+// Import d'un patron au format Rowtine (.rowtine ou .zip : patron .md + images) sur l'écran
+// d'import. Porte visible depuis le 23/09 (mode `format: 'rowtine'`) ; un zip déposé par la
+// porte PDF reste reconnu à son contenu. Garde e2e associée : tests/e2e/import-zip.spec.js.
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
 import { zipSync, strToU8 } from 'fflate'
 import fr from '@/i18n/fr.json'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
 // Le moteur PDF est simulé : il ne doit JAMAIS être appelé pour un zip — c'est une des
 // assertions ci-dessous.
 vi.mock('@/utils/pdf-import', () => ({ parsePdfLocally: vi.fn() }))
 const { router } = vi.hoisted(() => ({ router: { push: vi.fn(), replace: vi.fn() } }))
 vi.mock('vue-router', () => ({ useRouter: () => router }))
+// Vraie reconnaissance, enveloppée pour pouvoir simuler une lecture qui échoue.
+vi.mock('@/utils/import-kind', async (importOriginal) => {
+  const actual = await importOriginal()
+  return { ...actual, sniffFile: vi.fn(actual.sniffFile) }
+})
 
 import { parsePdfLocally } from '@/utils/pdf-import'
+import { sniffFile } from '@/utils/import-kind'
 import LocalPdfImportView from '@/views/LocalPdfImportView.vue'
 import { usePatternsStore } from '@/stores/patterns'
 import { useImportHandoff } from '@/stores/import-handoff'
 import { useImportReportStore } from '@/stores/import-report'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+const tk = makeTk(i18n)
 const stubs = { AppHeader: true, AppIcon: true, ImportProgress: true }
 
 const MD = `---
@@ -41,9 +48,9 @@ function zipFile(files = { 'patron.md': strToU8(MD) }, name = 'mini-patron.zip')
   return new File([zipSync(files)], name, { type: 'application/zip' })
 }
 
-function mountWithSavedId(id) {
+function mountWithSavedId(id, props = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn })
-  const w = mount(LocalPdfImportView, { global: { plugins: [pinia, i18n], stubs } })
+  const w = mount(LocalPdfImportView, { props, global: { plugins: [pinia, i18n], stubs } })
   usePatternsStore(pinia).add.mockResolvedValue(id)
   return { w, pinia }
 }
@@ -55,7 +62,7 @@ async function pick(w, file) {
   await flushPromises()
 }
 
-describe('porte de service : un .zip déposé dans l’import PDF', () => {
+describe('un .zip déposé dans l’import PDF', () => {
   beforeEach(() => {
     router.replace.mockClear()
     router.push.mockClear()
@@ -71,9 +78,13 @@ describe('porte de service : un .zip déposé dans l’import PDF', () => {
     // Pas de navigation automatique — le zip est un des trois chemins concernés.
     expect(router.replace).not.toHaveBeenCalled()
     expect(w.text()).toContain('Mini Patron')
-    const viewBtn = w.findAll('button').find((b) => b.text().includes(fr.importLocal.viewPattern))
-    await viewBtn.trigger('click')
+    // Le patron.md de zipFile() a une vraie section (« Corps ») : le bloc de réussite
+    // propose donc « Prévisualiser le patron » (bouton principal), pas le repli
+    // « Voir le patron » — même condition que le bouton Prévisualiser de PatternView.vue.
+    const previewBtn = w.findAll('button').find((b) => b.text().includes(fr.pattern.preview))
+    await previewBtn.trigger('click')
     expect(router.replace).toHaveBeenCalledWith({ name: 'pattern', params: { id: 42 } })
+    expect(router.push).toHaveBeenCalledWith({ name: 'pattern-read', params: { id: 42 } })
   })
 
   it('n’appelle JAMAIS le moteur PDF', async () => {
@@ -93,8 +104,8 @@ describe('porte de service : un .zip déposé dans l’import PDF', () => {
     expect(report.set).toHaveBeenCalledWith(7, expect.any(Array), false)
     // L'ordre AVANT/navigation n'a plus de sens : il n'y a plus de navigation
     // automatique. Ce qui reste vérifiable : le relais est posé dès l'enregistrement,
-    // avant même que le bloc de réussite (donc le bouton « Voir le patron ») existe.
-    expect(w.findAll('button').some((b) => b.text().includes(fr.importLocal.viewPattern))).toBe(true)
+    // avant même que le bloc de réussite (donc son bouton d'action) existe.
+    expect(w.findAll('button').some((b) => b.text().includes(fr.pattern.preview))).toBe(true)
   })
 
   it('un zip sans fichier patron affiche le message dédié, et n’enregistre rien', async () => {
@@ -155,13 +166,71 @@ describe('porte de service : un .zip déposé dans l’import PDF', () => {
     const w = mount(LocalPdfImportView, { global: { plugins: [pinia, i18n], stubs } })
     await flushPromises()
     expect(router.replace).not.toHaveBeenCalled()
-    expect(w.text()).toContain(fr.importLocal.doneTitle)
+    expect(w.text()).toContain(fr.importLocal.summaryTitle)
   })
 
-  it('le filtre du sélecteur laisse passer le zip (sinon la porte ne s’ouvre pas sur Android)', async () => {
+  it('en mode PDF, le filtre du sélecteur ne propose que le PDF', async () => {
     const { w } = mountWithSavedId(1)
     const accept = w.find('label.file-pick input[type="file"]').attributes('accept')
-    expect(accept).toContain('pdf')
-    expect(accept).toContain('zip')
+    expect(accept).toBe('application/pdf,.pdf')
+  })
+})
+
+describe('mode Rowtine (porte « Importer au format Rowtine »)', () => {
+  const ROWTINE = { format: 'rowtine' }
+  const pdfFile = () => new File(['%PDF-1.4 faux'], 'patron.pdf', { type: 'application/pdf' })
+
+  beforeEach(() => {
+    router.replace.mockClear()
+    parsePdfLocally.mockClear()
+  })
+
+  it('titre, accroche et bouton de choix disent le format Rowtine', () => {
+    const { w } = mountWithSavedId(1, ROWTINE)
+    expect(w.findComponent({ name: 'AppHeader' }).attributes('title')).toBe(tk('importLocal.titleRowtine'))
+    expect(w.text()).toContain(tk('importLocal.leadRowtine'))
+    expect(w.find('label.file-pick').text()).toContain(tk('importLocal.pickRowtine'))
+    expect(w.text()).not.toContain(tk('importLocal.lead'))
+  })
+
+  it('le filtre du sélecteur accepte .rowtine et .zip, types MIME compris (Android)', () => {
+    const { w } = mountWithSavedId(1, ROWTINE)
+    const accept = w.find('label.file-pick input[type="file"]').attributes('accept').split(',')
+    for (const a of ['.rowtine', '.zip', 'application/zip', 'application/x-zip-compressed', 'application/octet-stream']) {
+      expect(accept).toContain(a)
+    }
+    expect(accept.join(',')).not.toContain('pdf')
+  })
+
+  it('importe un .rowtine (même format qu’un zip)', async () => {
+    const { w, pinia } = mountWithSavedId(5, ROWTINE)
+    await pick(w, zipFile(undefined, 'mini.rowtine'))
+    expect(usePatternsStore(pinia).add).toHaveBeenCalledOnce()
+    expect(parsePdfLocally).not.toHaveBeenCalled()
+  })
+
+  it('un PDF est refusé avec l’erreur d’archive, sans passer par le moteur PDF', async () => {
+    const { w, pinia } = mountWithSavedId(2, ROWTINE)
+    await pick(w, pdfFile())
+    expect(w.text()).toContain(tk('importZip.badZip'))
+    expect(parsePdfLocally).not.toHaveBeenCalled()
+    expect(usePatternsStore(pinia).add).not.toHaveBeenCalled()
+    // L'écran reste utilisable : le bouton de choix revient.
+    expect(w.find('label.file-pick').exists()).toBe(true)
+  })
+
+  it('un contenu inconnu est refusé (pas de repli sur la voie PDF)', async () => {
+    const { w } = mountWithSavedId(2, ROWTINE)
+    await pick(w, new File(['bonjour'], 'x.rowtine'))
+    expect(w.text()).toContain(tk('importZip.badZip'))
+    expect(parsePdfLocally).not.toHaveBeenCalled()
+  })
+
+  it('un fichier illisible est refusé lui aussi', async () => {
+    sniffFile.mockRejectedValueOnce(new Error('illisible'))
+    const { w } = mountWithSavedId(2, ROWTINE)
+    await pick(w, new File(['x'], 'x.rowtine'))
+    expect(w.text()).toContain(tk('importZip.badZip'))
+    expect(parsePdfLocally).not.toHaveBeenCalled()
   })
 })

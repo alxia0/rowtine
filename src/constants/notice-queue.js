@@ -1,6 +1,6 @@
 // L'ORDRE DES MESSAGES QUI OCCUPENT L'ÉCRAN.
 //
-// Sept messages peuvent s'ouvrir par-dessus l'application sans qu'on les ait demandés.
+// Huit messages peuvent s'ouvrir par-dessus l'application sans qu'on les ait demandés.
 // Avant ce lot, rien ne disait lequel gagne quand deux se présentent ensemble : trois
 // d'entre eux partageaient même le rang d'empilement CSS 1200, et c'est l'ordre du DOM
 // qui tranchait, par accident. Deux incidents de cette famille sont au dossier (10/08 :
@@ -18,8 +18,10 @@
 //   3 backupDecision — elle décide du sort des données
 //   4 syncReport     — il rend compte d'une écriture DÉJÀ faite
 //   5 welcome        — elle accueille, elle n'urge pas
-//   6 importCaveat   — il ne se justifie qu'une fois arrivée dans la Bibliothèque
-//   7 swipeHint      — elle enseigne un geste, elle peut attendre que tous les autres aient
+//   6 readerTour     — la visite guidée du lecteur (lot du 23/09/2026) : demandée
+//                      explicitement (`?tour=1`), juste après la bienvenue qui la propose
+//   7 importCaveat   — il ne se justifie qu'une fois arrivée dans la Bibliothèque
+//   8 swipeHint      — elle enseigne un geste, elle peut attendre que tous les autres aient
 //                      parlé. ⚠️ Elle vit sur les écrans de LISTE (Bibliothèque, Stock) et
 //                      sur la fiche PROJET. « Elle peut attendre la fiche suivante », écrit
 //                      ici au départ, décrivait un placement supprimé le jour même : il n'y a
@@ -35,6 +37,7 @@ export const NOTICE = {
   BACKUP_DECISION: 'backupDecision',
   SYNC_REPORT: 'syncReport',
   WELCOME: 'welcome',
+  READER_TOUR: 'readerTour',
   IMPORT_CAVEAT: 'importCaveat',
   SWIPE_HINT: 'swipeHint',
 }
@@ -45,6 +48,7 @@ export const NOTICE_RANKS = {
   [NOTICE.BACKUP_DECISION]: 3,
   [NOTICE.SYNC_REPORT]: 4,
   [NOTICE.WELCOME]: 5,
-  [NOTICE.IMPORT_CAVEAT]: 6,
-  [NOTICE.SWIPE_HINT]: 7,
+  [NOTICE.READER_TOUR]: 6,
+  [NOTICE.IMPORT_CAVEAT]: 7,
+  [NOTICE.SWIPE_HINT]: 8,
 }

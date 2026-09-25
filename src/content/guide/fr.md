@@ -1,20 +1,50 @@
 # Guide {app}
 
-## L'esprit de {app}
+## {app} en 4 étapes
 
-![« Bienvenue sur {app} », et dessous « Tes projets tricot et crochet au fil du temps » : Français, Tricot, Système et Métrique (m, g) déjà retenus, et le bouton « Prêt·e ? Commence à tricoter ! » en bas](images/fr/00-bienvenue.webp)
+{app} n'est pas un classeur de PDF. C'est un lecteur interactif qui te fait
+suivre ton patron : il ne t'affiche que les chiffres de ta taille et se
+souvient de chaque étape que tu as faite. Tu importes ton patron une fois,
+puis tu tricotes ou crochètes sans jamais avoir à rouvrir le PDF.
 
-*La toute première ouverture : prénom, technique, langue et thème.*
+### 1. Importe ton patron
 
-{app} t'aide à garder tous tes projets de tricot et de crochet au même endroit :
-ta laine, tes patrons adaptés à ta taille et ta progression. Elle est **gratuite,
-libre et fonctionne hors ligne** : tes données restent sur ton appareil, pas sur
-un serveur. Rien n'est jamais perdu par erreur : tout ce que tu supprimes se
-retrouve dans une corbeille.
+Depuis la bibliothèque, choisis un PDF. {app} le lit pour toi : sections,
+rangs, tailles, abréviations et diagrammes. Tout se passe sur ton appareil.
+Voir le chapitre 4.
+
+### 2. Crée un projet et choisis ta taille
+
+Sur la fiche du patron, « Créer un projet à partir de ce patron ».
+Dans le lecteur, sélectionne ta taille : chaque « 88 (96) 104 »
+s'adapte pour afficher uniquement ton chiffre.
+
+Un patron importé sert autant de fois que tu veux : un gilet vert en L
+pour toi, un rouge en M pour ta sœur. Chaque projet garde sa taille, sa laine
+et son avancement, et le prix du patron n'est compté qu'une fois. Voir le
+chapitre 2.
+
+### 3. Tricote ou crochète avec le lecteur
+
+C'est ici que tout se joue. Coche chaque étape faite : la progression
+avance et tu reprends exactement où tu en étais grâce à « Revenir à mon
+étape ». Le diagramme suit ton rang, les définitions des abréviations
+apparaissent en touchant les termes soulignés dans le texte. Voir le
+chapitre 3.
+
+### 4. Garde la trace
+
+Le chrono enregistre tes sessions, l'onglet Photos garde les images du
+patron et tes propres photos, les statistiques résument ton activité sur le
+projet, et un badge se partage en un geste. Voir les chapitres 2 et 7.
+
+Pour essayer tout de suite : le bouton « Revoir la visite
+guidée », juste en dessous et dans les Réglages, ouvre le bonnet
+d'exemple dans le lecteur avec des bulles d'explication.
 
 ## 1. L'accueil : ton tableau de bord
 
-![L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur le projet Bonnet d'hiver à 0 %, puis le tableau de bord (1 en cours, durée de la semaine, dernière session datée d'aujourd'hui, budget dépensé) et les outils Compteur, Calculateur, Aiguilles](images/fr/01-accueil.webp)
+![L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur et Aiguilles](images/fr/01-accueil.webp)
 
 *L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les trois outils sont à portée de pouce.*
 
@@ -22,23 +52,8 @@ En ouvrant l'app, tu retrouves :
 - **Ton dernier projet**, avec un bouton **Reprendre** pour repartir directement
   là où tu en étais. C'est bien le dernier projet sur lequel tu as
   **réellement tricoté ou crocheté** (ta dernière session), pas simplement le dernier que tu as modifié, et la tuile t'indique le rang en cours.
-- Un **récapitulatif** : combien de projets sont en cours, ton temps passé à
-  tricoter ou crocheter cette semaine (avec le détail dans **Statistiques**),
-  et ton **budget dépensé** : le total de tout ce que tu as payé pour ta
-  laine depuis que tu utilises l'app, dans la devise que tu as choisie. Ce
-  chiffre ne redescend jamais tout seul : consommer une pelote ou terminer un
-  projet ne le fait pas baisser (seul un nouvel achat le fait monter) ; il ne
-  peut baisser que si tu supprimes ou corriges toi-même une ligne d'achat
-  dans le bloc « Achats et cadeaux » d'une fiche de laine (point 5). (Si tu as
-  plusieurs devises, chacune a son propre total : l'app ne les mélange pas,
-  faute de connaître un taux de change.) En touchant ce chiffre, tu ouvres
-  l'écran **Dépenses**, décrit au point 5. Cette tuile n'apparaît pas tant
-  qu'aucun achat n'a encore été enregistré (par exemple sur une app toute neuve) ; l'écran reste joignable par le menu à tout moment.
-- Ce chiffre est différent de la **valeur de ton stock**, affichée dans
-  l'écran **Stock de laine** (point 5) : celle-là suit ce que tu as
-  actuellement dans tes placards et baisse quand tu utilises une pelote. Les
-  deux chiffres cohabitent volontairement : l'un raconte ce que tu as
-  dépensé, l'autre ce qu'il te reste.
+- Un **récapitulatif** : combien de projets sont en cours, et ton temps passé à
+  tricoter ou crocheter cette semaine (avec le détail dans **Statistiques**).
 - Les **dernières sessions** : dès que tu as tricoté ou crocheté au moins une
   fois, une tuile liste tes deux sessions les plus récentes : le nom du projet, le jour (« Hier », « Il y a 3 jours »…) et la durée. Un appui dessus ouvre
   l'écran **Sessions** (point 2), qui rassemble tout ton historique.
@@ -78,7 +93,7 @@ déclarer. Si ton projet utilise le « Patron libre », ce champ n'apparaît m
 pas : il est commun à tous tes projets sans patron, il ne peut donc pas avoir
 de prix à lui.
 
-![Le formulaire Nouveau projet sur Bonnet d'hiver : sous le patron Bonnet Torsade, « Prix du patron (€) » affiche 12 à côté du bouton « Gratuit », « Date d'achat » le 12/08/2026, et Statut sur En attente](images/fr/02b-projet-prix-patron.webp)
+![Le formulaire Nouveau projet sur Bonnet d'hiver : sous le patron Bonnet Torsade, « Prix du patron (€) » affiche 12 à côté du bouton « Gratuit », « Date d'achat » le 24/09/2026, Statut sur En attente et l'interrupteur « Afficher le chronomètre » activé](images/fr/02b-projet-prix-patron.webp)
 
 *Sous le choix du patron : son prix, un bouton « Gratuit » et la date d'achat, pré-remplie à aujourd'hui.*
 
@@ -93,7 +108,7 @@ de prix à lui.
   déjà tricotées, et entre parenthèses le prix du patron, que tu ne paies qu'une fois,
   même si tu tricotes le même patron trois fois. Si une laine n'a pas de prix noté, l'app
   te le dit au lieu de faire comme si elle était gratuite.
-- **Galerie** : tes photos du projet, plus les photos d'origine du patron en
+- **Photos** : tes photos du projet, plus les photos d'origine du patron en
   dessous. Tu choisis laquelle sert de **photo de couverture** (par défaut,
   la première photo du patron). Tape sur une photo pour l'ouvrir en plein
   écran : tu peux alors zoomer (pincer à deux doigts ou double-tap) pour
@@ -113,8 +128,8 @@ Partout dans le projet, un **chrono** flotte en bas de l'écran : la même past
 sur la fiche, quel que soit l'onglet, et dans le lecteur. Un chevron sur la
 pastille ouvre un petit menu où « Masquer le chrono » le fait disparaître ; il
 revient par le menu **Actions** (icône verticale à trois points) de la
-fiche projet ou la case à cocher
-« Chrono » du formulaire d'édition.
+fiche projet ou l'interrupteur
+« Afficher le chronomètre » du formulaire d'édition.
 - Un seul chrono par projet, et il **ne se lance jamais tout seul** : c'est toi qui
   appuies dessus quand tu commences, et qui le remets en pause pour une
   interruption (le bouton affiche alors **Reprendre** avec le temps déjà compté).
@@ -142,7 +157,7 @@ la plus récente à la plus ancienne : le nom du projet, puis la date et la
 durée. Un appui sur une ligne ouvre la fiche du projet concerné.
 
 Cet écran ne fait que consulter : c'est sur la fiche du projet, dans son onglet
-Sessions, qu'une session se rectifie ou s'efface. Pas de filtre, pas de regroupement : c'est une première version, volontairement simple.
+Sessions, qu'une session se rectifie ou s'efface. L'écran reste volontairement simple, sans filtre ni regroupement.
 
 ### Partager un badge de ton projet
 
@@ -175,9 +190,9 @@ Pour changer une photo, appuie dessus sur l'aperçu : un bouton **Modifier** ap
 qui propose une photo du projet ou une image de ta galerie, le format (carré, horizontal
 ou vertical), puis le recadrage.
 
-Le bouton **Partager**, en haut de l'écran, génère l'image, l'enregistre dans la
-**Galerie** du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le
-refermer sans rien envoyer : le badge reste dans la galerie. Et si tu changes un réglage
+Le bouton **Partager**, en haut de l'écran, génère l'image, l'enregistre dans les
+**Photos** du projet, puis ouvre le menu de partage de ton téléphone. Tu peux le
+refermer sans rien envoyer : le badge reste dans les photos. Et si tu changes un réglage
 puis partages à nouveau, le badge précédent de cette même ouverture est remplacé, pas
 dupliqué.
 
@@ -253,15 +268,15 @@ ouvrage sur ce diagramme, dans **ce projet-là**. À savoir : le calage est mé
 refaire une fois pour ce nouveau projet (l'opération ne prend que quelques
 secondes).
 
-**Et les diagrammes ronds ou carrés ?** Les grilles granny, rondes ou carrées, ne se calent pas avec deux lignes : le même bouton **Caler** ouvre alors un
+**Et les diagrammes ronds, carrés ou hexagonaux ?** Les grilles granny, rondes, carrées ou hexagonales, ne se calent pas avec deux lignes : le même bouton **Caler** ouvre alors un
 **assistant guidé**, car c'est la forme du diagramme (son type, choisi dans la correction, section 4) qui décide. Il te fait placer l'une après l'autre les
-deux limites du motif : la première, qui marque le bas du premier rang, puis l'extérieur du dernier rang. Chacune se déclare **Rond** ou **Carré**, se déplace et s'ajuste (boutons **Déplacer** et **Agrandir·Rétrécir**) pendant que le dessin défile et se grossit sous une loupe fixe. Quand les deux limites n'ont pas la
+deux limites du motif : la première, qui marque le bas du premier rang, puis l'extérieur du dernier rang. Chacune se déclare **Rond**, **Carré** ou **Hexagone** (pour un hexagone, deux boutons de plus fixent son orientation : **Côté plat en haut** ou **Pointe en haut**), se déplace et s'ajuste (boutons **Déplacer** et **Agrandir·Rétrécir**) pendant que le dessin défile et se grossit sous une loupe fixe. Quand les deux limites n'ont pas la
 même forme, une étape de plus demande à partir de quel rang le motif change ;
 un dernier écran laisse tout retoucher avant d'**Enregistrer**. Le résultat se
 mémorise comme le calage linéaire : avec la progression du projet, diagramme
 par diagramme. Et tant qu'un diagramme radial n'est pas calé, un bouton dans le fil du lecteur, « Placez le centre et les rayons du motif », te propose de t'y mettre.
 
-![Le même assistant de calage granny, la limite déclarée ronde cette fois : la loupe ronde, marquée de la même croix, cerne la même fleur centrale du carré aux points flous, les boutons Rond et Carré (Rond activé), puis Déplacer, activé lui aussi, Agrandir·Rétrécir, et en bas Réinitialiser, Annuler et Valider](images/fr/03h-calage-granny-rond.webp)
+![Le même assistant de calage granny, la limite déclarée ronde cette fois : la loupe ronde, marquée de la même croix, cerne la fleur centrale du carré aux points flous, les boutons Rond, Carré et Hexagone (Rond activé), puis Déplacer, activé lui aussi, Agrandir·Rétrécir, et en bas Réinitialiser, Annuler et Valider](images/fr/03h-calage-granny-rond.webp)
 
 *La limite déclarée ronde : la loupe suit la forme choisie, et les boutons Rond et Carré décident de la sienne à chaque étape.*
 
@@ -322,9 +337,9 @@ l'écran des statistiques.
 
 ![Le lecteur en deux volets sur tablette : à gauche le Bonnet Torsade, sa section Bordure en côtes à 0/3 et « Monter 96 m. avec les aiguilles circulaires n° 4 » ; à droite « Diagramme · 8 m × 24 rangs », au rang 7 / 24](images/fr/03e-tablette-lecteur.webp)
 
-*Sur une tablette tenue à l'horizontale : les instructions à gauche, le diagramme affiché en permanence à droite, sans plus rien faire défiler entre les deux.*
+*Sur une tablette tenue à l'horizontale : les instructions à gauche, le diagramme affiché en permanence à droite, sans rien faire défiler entre les deux.*
 
-Si tu tricotes sur une tablette tenue à l'horizontale, le lecteur se met tout seul **en deux colonnes**, tes instructions à gauche et un diagramme affiché en permanence à droite : plus besoin de faire défiler entre les deux. Tu gardes
+Si tu tricotes sur une tablette tenue à l'horizontale, le lecteur se met tout seul **en deux colonnes**, tes instructions à gauche et un diagramme affiché en permanence à droite : tu n'as pas à faire défiler entre les deux. Tu gardes
 la main dessus :
 
 - Sur n'importe quel autre diagramme du patron, le bouton **Afficher à droite**
@@ -336,12 +351,11 @@ la main dessus :
 
 Ce réglage ne vaut que le temps de ta consultation : en rouvrant le patron,
 tu retrouves le volet avec le premier diagramme. Sur téléphone (ou sur une
-tablette tenue à la verticale), le lecteur reste en une seule colonne, comme
-avant. Un patron sans diagramme n'a pas de volet du tout. Le sommaire du lecteur reste, lui, en haut de la colonne des instructions, mêmes puces, même geste.
+tablette tenue à la verticale), le lecteur s'affiche en une seule colonne. Un patron sans diagramme n'a pas de volet du tout. Le sommaire du lecteur reste, lui, en haut de la colonne des instructions, mêmes puces, même geste.
 
-**Les statistiques, au large.**
+**Les statistiques, en pleine largeur.**
 
-![Les statistiques au large sur tablette : la grille va de mars à sept. d'un seul tenant, et les tuiles se rangent deux par deux : Temps total 119:40:06, Jours actifs 127 sur 181, Série en cours 6 jours](images/fr/03f-tablette-stats.webp)
+![Les statistiques au large sur tablette : la grille va de mars à sept. d'un seul tenant, et les tuiles se rangent deux par deux : Temps total 116:40:06, Jours actifs 125 sur 179, Série en cours 6 jours, Plus longue série 12 jours](images/fr/03f-tablette-stats.webp)
 
 *Les statistiques sur une tablette tenue à l'horizontale, en fenêtre Semestre : la grille calendaire montre d'un coup les six derniers mois, quand un téléphone t'oblige à faire glisser du doigt, et les tuiles chiffrées se rangent deux par deux en dessous.*
 
@@ -355,7 +369,7 @@ régler : c'est le même écran, simplement plus à l'aise.
 
 *La bibliothèque, avec les trois patrons de démonstration fournis à la première ouverture.*
 
-![Bonnet Torsade, sous-titré Tricot · Accessoires · S, M, L, puis la ligne Acheté 12 € le 12/08/2026 et une photo du bonnet torsadé posé sur une planche de bois, un crayon de modification en haut à droite, et les deux boutons Créer un projet à partir de ce patron et Prévisualiser le patron](images/fr/04b-fiche-patron.webp)
+![Bonnet Torsade, sous-titré Tricot · Accessoires · S, M, L, puis la ligne Acheté 12 € le 24/09/2026 et une photo du bonnet torsadé posé sur une planche de bois, un crayon de modification en haut à droite, et les deux boutons Créer un projet à partir de ce patron et Prévisualiser le patron](images/fr/04b-fiche-patron.webp)
 
 *La fiche d'un patron, volontairement épurée : créer un projet, ou prévisualiser. (On accède à la correction de l'import depuis l'aperçu, ou depuis le menu d'un projet en cours qui utilise ce patron.)*
 
@@ -364,7 +378,24 @@ régler : c'est le même écran, simplement plus à l'aise.
   **prévois d'y passer un vrai moment**. Un import ne ressort presque jamais parfait du premier coup. C'est normal : les PDF de patrons sont tous mis en page différemment. Tu relis, tu vérifies et tu corriges **depuis l'aperçu
   de sa fiche**, autant de fois que tu veux, et c'est ce passage-là qui fait
   la différence entre un patron « à peu près » et un projet qui affiche les bons chiffres et les bonnes explications.
+  Dès la fin de l'import, un bilan « Ton patron est importé » compte ce que l'app a
+  trouvé (sections, étapes à cocher, tailles, diagrammes), rappelle de relire le patron
+  avant de commencer, et le bouton **Prévisualiser le patron** t'emmène directement le
+  parcourir, section par section.
   (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)
+- **Importer au format {app}** : dans « + Ajouter un patron », ce choix
+  accepte un fichier **.rowtine**, c'est-à-dire un patron déjà mis au
+  format de {app} (son texte et ses images). Il entre tel quel dans ta
+  bibliothèque, sans passer par la lecture d'un PDF, et toujours sans connexion.
+- **Créer un patron à la main** : dans « + Ajouter un patron », le choix
+  **Créer manuellement** ouvre un écran dédié (nom, type, catégorie, tailles,
+  source, auteur…) avec une seule rubrique **Photos** pour ses images. Sur la
+  fiche du patron, une étoile sur chaque photo de « Photos du patron » la
+  désigne comme **couverture** : c'est elle qui illustre le patron dans la
+  bibliothèque. (Un patron importé garde la couverture tirée de son PDF.) Et
+  dès qu'il a une photo, le bouton **Prévisualiser le patron** apparaît : tu
+  peux alors y suivre une image comme un diagramme, exactement comme pour un
+  patron importé.
 - **Retrouver un patron** : les pastilles de catégorie en haut de la
   bibliothèque affichent **le nombre de patrons** de chacune, pour savoir d'un
   coup d'œil où chercher.
@@ -471,20 +502,20 @@ un titre de section au mauvais endroit.
 arriver : appuyer sur une image dans le texte, ou déplier le bandeau
 **Diagrammes** en bas de l'éditeur. Ce bandeau liste chaque section du patron qui porte une image, diagrammes déjà suivis comme photos pas encore converties. Le nombre entre parenthèses, par exemple « Diagrammes (2) »,
 compte toutes ces sections, photos comprises : il ne dit pas combien de
-diagrammes sont déjà suivis. Pour une image pas encore convertie, un bouton **Suivre comme diagramme** ouvre un choix de type, chacun expliqué en clair : rangs standards, radial-carré, radial-rond ou tracé, pour l'adapter à la forme réelle de ton motif (un granny carré ne se lit pas comme des rangs
+diagrammes sont déjà suivis. Pour une image pas encore convertie, un bouton **Suivre comme diagramme** ouvre un choix de type, chacun expliqué en clair : rangs standards, radial-carré, radial-rond, radial-hexagone ou tracé, pour l'adapter à la forme réelle de ton motif (un granny carré ne se lit pas comme des rangs
 classiques). Pour une image déjà suivie comme diagramme, une étiquette
 **Diagramme interactif** dit l'état actuel, à côté d'un bouton **Changer le
 type** (même choix, pour corriger un type mal deviné) et d'un bouton **Juste une image** pour revenir à une simple photo, utile si l'import a raté un diagramme ou si tu veux au contraire qu'une simple photo reste une simple photo.
 
-**Ajouter des images : trois portes.** Dans la galerie d'un patron, depuis sa fiche ou depuis l'éditeur de correction, le bouton **Ajouter une image**
+**Ajouter des images : trois portes.** Dans les photos d'un patron, depuis sa fiche ou depuis l'éditeur de correction, le bouton **Ajouter une image**
 propose trois sources : **Caméra ou galerie** (une feuille te laisse choisir
 entre prendre une photo et piocher dans tes images), **Parcourir les fichiers**
 (le sélecteur de ton appareil, pour une image rangée ailleurs), et **Depuis le PDF du patron** quand il existe : tu y choisis la page et l'app te la fait recadrer, seule source à passer par ce recadrage. Chaque image
-rejoint la galerie du patron, prête à être insérée ou suivie.
+rejoint les photos du patron, prête à être insérée ou suivie.
 
 **Le menu d'une image.** Dans le texte de l'éditeur, un appui sur une image
-ouvre un petit menu immédiat : la **suivre comme diagramme** si elle ne l'est pas encore, ou **changer son type** sinon, la rabaisser au rang de simple illustration (**Juste une image**), ou l'**envoyer vers la galerie** du patron.
-Dans la bande « Galerie du patron », chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit.
+ouvre un petit menu immédiat : la **suivre comme diagramme** si elle ne l'est pas encore, ou **changer son type** sinon, la rabaisser au rang de simple illustration (**Juste une image**), ou l'**envoyer vers les photos** du patron.
+Dans la bande « Photos du patron », chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit.
 
 ![En haut de l'écran de correction, les deux flèches et le bouton « Modifier le texte », la barre de catégories, puis la ligne de note « Astuce : faire sécher le bonnet humide sur un saladier pour arrondir la calotte »](images/fr/04e-correction-diagrammes.webp)
 
@@ -496,7 +527,7 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
 
 ## 5. Ton stock de laine
 
-![10 pelotes, 1,932 km, 500 grammes et 31 € dépensés en tête, le champ Rechercher une laine… et les boutons Filtrer et Trier, puis Drops · Moutarde, ×4 · 165 mètres · 200 grammes, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 mètres · 300 grammes, toutes deux libres](images/fr/05-stock.webp)
+![10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, le champ Rechercher une laine…, les boutons Filtrer et Trier, Ajouter une laine et Import Ravelry, puis Drops · Moutarde, ×4 · 165 m · 200 g, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 m · 300 g, toutes deux libres](images/fr/05-stock.webp)
 
 *Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec son état, libre ou réservée par un projet.*
 
@@ -506,12 +537,15 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
   comme les autres), couleur (choisie sur une palette, avec un sélecteur de
   teinte personnalisée si besoin), quantité, prix, longueur et poids par
   pelote, plus la date d'achat et le numéro de bain.
-  **Dès que tu enregistres, l'app note aussitôt l'achat correspondant** et ton
-  budget dépensé (point 1) monte du montant indiqué. La date proposée est celle
+  **Dès que tu enregistres, l'app note aussitôt l'achat correspondant** et le
+  total de l'écran **Dépenses** monte du montant indiqué. La date proposée est celle
   du jour : si tu as acheté cette laine il y a plus longtemps, corrige-la
   directement dans le formulaire. (Ces deux champs n'apparaissent qu'à la
   création. Sur une fiche déjà enregistrée, c'est le bloc **Achats et cadeaux**
   qui prend le relais, avec une ligne par acquisition.)
+- **Où elle est rangée, ce que tu en penses** : deux champs libres, **Lieu de
+  rangement** (« Étagère 2, panier bleu ») et **Notes**, s'affichent ensuite sur
+  la fiche de la laine.
 - **Les laines qui ne sont pas d'une seule couleur** : un champ **Type de
   coloris** (uni, dégradé, auto-rayant, moucheté, teint main) et un champ
   **Description du coloris** (« bleu, vert, jaune moucheté de noir ») complètent la pastille de couleur : une seule teinte ne suffit pas à décrire une laine multicolore. Le type de coloris se retrouve dans la recherche et dans
@@ -534,7 +568,7 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
     stock (critère « Label ») et dans la recherche par texte.
   - Ces caractéristiques sortent aussi dans l'**export tableur**.
 
-![La fiche s'ouvre par-dessus le stock et ses totaux 10 pelotes, 1,932 km, 500 grammes, 31 € dépensés : pastille jaune Moutarde, marque Drops, 165 m, 50 g par pelote, quantité 4 à 3,20 €, dernier achat le 2026-08-12](images/fr/05b-fiche-laine.webp)
+![La fiche plein écran de Drops · Moutarde : marque Drops, 165 m, 50 g par pelote, quantité 4 à 3,20 €, un achat enregistré le 24/09/2026, composition Coton, puis Fibre végétale, les étiquettes Vegan et Fibres biologiques (GOTS), l'état Libre et le bouton Ajouter une photo](images/fr/05b-fiche-laine.webp)
 
 *La fiche d'une laine : sa composition, la mention « Fibre végétale », et ses deux étiquettes « Vegan » et « Fibres biologiques (GOTS) ».*
 
@@ -543,32 +577,36 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
   deviennent importants), et la valeur totale de ton stock.
 - **Rechercher, filtrer, trier** : un champ de recherche et les boutons
   **Filtrer** et **Trier** en haut du stock. Filtrer ouvre une fenêtre à deux
-  niveaux : la liste de six critères (**Marque**, **Label**, **Épaisseur**, **Poids de pelote**, **Couleur**, **Composition**), puis, pour le critère touché, ses valeurs. Un seul choix par critère, mais les critères se
+  niveaux : la liste de sept critères (**Marque**, **Label**, **Épaisseur**, **Poids de pelote**, **Couleur**, **Composition**, **État** : libre, réservée ou utilisée), puis, pour le critère touché, ses valeurs. Un seul choix par critère, mais les critères se
   cumulent ; une pastille sur le bouton Filtrer compte les filtres actifs, et
   **Réinitialiser** les efface d'un geste. Trier propose **Marque** (le
   défaut), **Épaisseur** ou **Date d'achat**. Rien de tout cela ne se
   mémorise : chaque retour sur le stock repart sans filtre, trié par marque.
-  Liste ou grille visuelle, au choix.
-- **Modifier, dupliquer ou supprimer** une fiche depuis le menu **Actions**
-  (icône verticale à trois points) de sa carte. « Dupliquer » est pratique
+- **Modifier, dupliquer ou supprimer** une laine depuis le menu **Actions**
+  (icône verticale à trois points) en haut de sa fiche. « Dupliquer » est pratique
   pour la même laine dans un autre coloris :
   tout est repris, tu n'as plus qu'à changer la couleur.
 - **Le pool de pelotes** : tu vois d'un coup d'œil, pour chaque laine, combien
   de pelotes sont **réservées** à un projet et combien sont **libres**. Tu ne
   peux pas descendre la quantité en dessous de ce qui est déjà réservé (l'app
   te dit combien de pelotes sont retenues) ; et elle t'avertit si restaurer un projet depuis la corbeille remet en cause tes réserves de laine. Le projet revient quand même, avec une réservation réduite et un message qui te l'explique.
-- **Fiche détail** d'une laine : récapitulatif complet (pelotes, mètres,
-  projets qui l'utilisent), et un bloc **Achats et cadeaux** qui garde la
-  trace de chaque acquisition de cette laine :
+- **La fiche d'une laine** : un appui sur sa carte l'ouvre en plein écran.
+  Elle rassemble tout ce que tu as noté (marque, coloris, rangement, métrage,
+  quantité, prix, achats, composition, notes), ses caractéristiques, son état
+  (libre, réservée, utilisée) et ses **photos** : tu peux en ajouter plusieurs
+  et choisir, d'un appui sur l'étoile, celle qui sert de couverture.
+- **Achats et cadeaux** : dans l'écran **Modifier** d'une laine, ce bloc garde la
+  trace de chaque acquisition :
   - Chaque ligne porte une quantité, un prix, une date et un bain de
     teinture, et précise si c'était un **achat** ou un **cadeau** (un cadeau
-    ne compte jamais dans ton budget dépensé). Les trois lignes les plus
+    ne compte jamais dans tes dépenses). Un champ **Acheté chez** garde en
+    plus le nom de la boutique. Les trois lignes les plus
     récentes sont visibles tout de suite, le reste se déplie d'un geste.
   - Tu peux **ajouter, modifier ou supprimer** une ligne à tout moment.
-  - **Augmenter la quantité** d'une laine depuis sa fiche te propose
+  - **Augmenter la quantité** d'une laine en la modifiant te propose
     d'enregistrer l'achat correspondant, daté du jour : tu peux l'accepter,
     le marquer comme cadeau, ou l'ignorer si tu ne veux pas le garder.
-    **Diminuer une quantité, en revanche, ne touche jamais à ton budget** : seule une augmentation peut créer un achat.
+    **Diminuer une quantité, en revanche, ne touche jamais à tes dépenses** : seule une augmentation peut créer un achat.
   - Si le nombre de pelotes de ta fiche ne correspond pas à ce que
     l'historique a enregistré (par exemple après une correction manuelle du
     stock), une alerte te le signale et un bouton **Corriger** te propose les
@@ -578,14 +616,45 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
     de la laine : aucun achat de laine ne disparaît, il reste visible dans
     l'écran **Dépenses**.
 
+### Importer ton stock depuis Ravelry
+
+Si tu tiens déjà ton stock sur Ravelry, inutile de tout ressaisir : le bouton
+**Import Ravelry**, en haut du stock, crée d'un coup les fiches des laines que
+tu y as déjà.
+
+1. Sur Ravelry, ouvre « Mon espace » (« my notebook » en anglais), puis
+   l'onglet « Stock » (« Stash »).
+2. Clique « Export », en haut à droite de la liste : un fichier .xls se
+   télécharge.
+3. Reviens dans {app}, choisis ce fichier, puis **Analyser le fichier**.
+
+Avant de créer quoi que ce soit, l'app te montre un résumé : combien de lignes elle a lues,
+combien de laines elle va créer, combien sont **déjà dans ton stock** (elles
+sont ignorées : relancer un import ne crée pas de doublon) et combien ne sont
+plus en stock côté Ravelry (« Epuisé », « A échanger ou à vendre »,
+« Echangé/Vendu/Offert »), ignorées elles aussi. Rien n'est écrit tant que tu
+n'as pas appuyé sur le bouton « Importer … laine(s) ».
+
+La marque, le modèle, la couleur, l'épaisseur, le métrage et le poids, le
+nombre de pelotes, le lieu de rangement, les notes, ainsi que le prix, la date
+et la boutique de l'achat viennent du fichier ; la pastille de couleur est choisie d'après la famille de couleur
+indiquée par Ravelry. La photo, elle, reste à ajouter à la main. Tout se passe
+sur ton appareil : {app} lit le fichier que tu lui donnes, il ne se connecte
+jamais à Ravelry.
+
 ### L'écran Dépenses
 
 ![Sous le grand 43 € dépensés, ventilé en Laine 30,50 € et Patrons 12 €, et la mention Depuis le début, l'année 2026 totalise 42,50 €, comme le mois d'août : ×6 Hobbii · Sauge à 17,70 € et ×4 Drops · Moutarde à 12,80 €, étiquetées Laine et suivies chacune d'une croix de suppression, puis Écharpe Nuage, étiquetée Patron et Gratuit, et Bonnet Torsade, étiqueté Patron à 12 €](images/fr/05c-depenses.webp)
 
 *Les menus Année et Type en haut, le total avec sa ventilation laine / patrons, puis le détail par mois.*
 
-Accessible en touchant le budget dépensé sur l'accueil (point 1), cet écran récapitule tout ce que tu as payé pour ton tricot, la **laine** comme les **patrons** :
-- Le **total dépensé**, par devise si tu en as utilisé plusieurs. Tant que tu
+Accessible depuis le menu de l'app, cet écran récapitule tout ce que tu as payé pour ton tricot, la **laine** comme les **patrons** :
+- Le **total dépensé**, par devise si tu en as utilisé plusieurs (l'app ne les
+  mélange pas, faute de connaître un taux de change). Ce total ne redescend
+  jamais tout seul : consommer une pelote ou terminer un projet ne le fait pas
+  baisser. Il est différent de la **valeur de ton stock**, en haut de l'écran
+  **Stock de laine**, qui suit ce qu'il te reste et baisse quand tu utilises
+  une pelote. Tant que tu
   n'as noté aucun prix de patron, ce total reste exactement celui que tu
   connais ; dès qu'un patron y figure, il se ventile en deux sous-lignes : ce
   qui est parti en laine, ce qui est parti en patrons.
@@ -646,11 +715,11 @@ l'accueil :
 
 ## 7. Statistiques
 
-![L'onglet Trimestre retenu entre Mois, Semestre et Année, du 15/06/2026 au 12/09/2026, la carte Sur la période à 73:00:06, puis l'onglet Calendrier plutôt que Rythme, une grille de juin à sept. graduée de moins à plus, et les cartes Temps total 73:00:06 et Jours actifs 71 sur 90](images/fr/07-statistiques.webp)
+![L'onglet Trimestre retenu entre Mois, Semestre et Année, du 29/06/2026 au 24/09/2026, la carte Sur la période à 72:40:06, puis l'onglet Calendrier plutôt que Rythme, une grille de juin à sept. graduée de moins à plus, et les cartes Temps total 72:40:06 et Jours actifs 69 sur 88](images/fr/07-statistiques.webp)
 
 *Le sélecteur du haut choisit une fenêtre d'observation (Mois, Trimestre, Semestre ou Année), et tout l'écran s'y soumet ; ici, la fenêtre Trimestre. L'onglet « Calendrier », affiché ici par défaut, montre la grille et les neuf tuiles chiffrées.*
 
-Le sélecteur en haut de l'écran ne choisit plus une simple durée d'affichage :
+Le sélecteur en haut de l'écran ne choisit pas une simple durée d'affichage :
 il choisit une **fenêtre d'observation** (Mois, Trimestre, Semestre ou Année). Tout ce qui suit s'y soumet, du temps total aux neuf tuiles chiffrées. Juste en dessous, un filtre
 **Tout / Tricot / Crochet** restreint l'écran entier à une seule technique ;
 il n'est pas mémorisé et repart sur « Tout » chaque fois que tu reviens sur
@@ -667,7 +736,7 @@ Le reste de l'écran se partage en **deux onglets**, qui se changent au
 - **Rythme** : les barres par période, puis sept barres, une par jour de la semaine, et une phrase qui dit ton jour le plus assidu sur tout ton
   historique.
 
-![Statistiques, vue Rythme : les semaines du 18/05 au 29/06 en barres, de 1:10:00 à 10:50:00, puis « Par jour de la semaine » de Lun. à Dim., et en bas « Sur tout l'historique, ton jour le plus assidu est le mercredi »](images/fr/07b-stats-rythme.webp)
+![Statistiques, vue Rythme : les semaines du 29/06 au 07/09 en barres, de 1:10:00 à 12:10:00, puis « Par jour de la semaine » de Lun. à Dim., et en bas « Sur tout l'historique, ton jour le plus assidu est le jeudi »](images/fr/07b-stats-rythme.webp)
 
 *L'onglet « Rythme » : les barres du temps passé par période, les sept barres par jour de la semaine, et la phrase qui nomme ton jour le plus assidu.*
 
@@ -677,7 +746,7 @@ teinte d'accent choisie dans les réglages (§8), et son intensité dépend du t
 l'autre, même un trimestre plus calme que d'habitude. Un trait plus marqué
 entoure les colonnes d'un même mois, pour les repérer d'un coup d'œil.
 
-![Une année entière de grille calendaire, d'août à août : une colonne par semaine, une case par jour, les initiales L M M J V S D en marge, un cadre plus marqué par mois, et cinq crans de « moins » à « plus » en légende](images/fr/07c-stats-annee.webp)
+![Une année entière de grille calendaire, de sept. à sept. : une colonne par semaine, une case par jour, les initiales L M M J V S D en marge, un cadre plus marqué par mois, et cinq crans de « moins » à « plus » en légende](images/fr/07c-stats-annee.webp)
 
 *La grille en fenêtre Année : une année complète d'un seul coup d'œil, une colonne par semaine et une case par jour, avec les cadres qui séparent les mois. Touche l'image pour l'agrandir et la lire en détail.*
 
@@ -730,6 +799,8 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
   - **Un dossier de sauvegarde ne sert qu'à un seul appareil.** Le poser dans un
     dossier synchronisé pour en avoir une copie ailleurs est une bonne idée ; t'en servir depuis un téléphone **et** une tablette n'en est pas une : chacun effacerait le travail de l'autre. Pour un second appareil, il lui faut son propre
     dossier.
+- **Aide** : « Revoir la visite guidée » rouvre le bonnet d'exemple dans le
+  lecteur avec ses bulles d'explication, et le recrée si tu l'as supprimé.
 - **Contribuer** : lien vers le code source (l'app est open source), et deux autres
   liens dans le même bloc des réglages :
   - **Soutenir {app}** mène à une page de dons, **libre** : rien n'est déverrouillé
@@ -738,14 +809,29 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
 
 ### Ce qui se passe au tout premier lancement
 
-Dans l'ordre, la première fois que tu ouvres {app} : l'écran de bienvenue te
-demande ton prénom, ta technique, ta langue, ton thème, tes unités et ta devise ;
-puis l'écran du dossier de sauvegarde, décrit juste au-dessus. Ensuite, trois petits messages t'accueillent, **une seule fois chacun** : tu ne les reverras plus.
+![« Bienvenue sur {app} », et dessous « Tes projets tricot et crochet au fil du temps » : Français, Tricot, Système et Métrique (m, g) déjà retenus, et le bouton « Prêt·e ? Commence à tricoter ! » en bas](images/fr/00-bienvenue.webp)
 
-- Un **mot de bienvenue**, posé au milieu de l'accueil dès que ton dossier de
-  sauvegarde est en place : il te dit que tout est prêt et t'invite à ouvrir les
-  projets et les patrons d'exemple pour te faire la main. Son bouton le referme,
-  et il ne revient pas.
+*La toute première ouverture : prénom, technique, langue et thème.*
+
+Dans l'ordre, la première fois que tu ouvres {app} : l'écran de
+bienvenue te demande ton prénom, ta technique, ta langue, ton thème, tes
+unités et ta devise ; sur Android, l'écran du dossier de sauvegarde
+suit, décrit juste au-dessus. Ensuite, quelques petits messages
+t'accueillent, chacun **une seule fois** : tu ne les reverras plus (sauf
+la visite guidée, que tu peux relancer quand tu veux).
+
+- Un **mot de bienvenue**, posé au milieu de l'accueil : il te dit que
+  tout est prêt et t'invite à ouvrir les projets et les patrons d'exemple
+  pour te faire la main. Deux boutons le ferment : « Découvrir le
+  lecteur » lance tout de suite la visite guidée ci-dessous, « Plus
+  tard » le referme sans elle. Dans les deux cas, il ne revient pas.
+- Si tu as choisi « Découvrir le lecteur », une **visite guidée du
+  lecteur** s'ouvre aussitôt sur le bonnet d'exemple, avec trois bulles
+  d'explication : ta taille, une étape à cocher, le diagramme qui suit
+  ton rang. Tu peux la revoir à tout moment : le bouton
+  « Revoir la visite guidée », en bas de la première section de ce
+  guide (ci-dessus), ou dans le bloc **Aide** des Réglages ; ce dernier
+  recrée le bonnet d'exemple si tu l'as supprimé entre-temps.
 - Un **avertissement sur les patrons importés**, la première fois que tu ouvres
   ta bibliothèque de patrons : il te rappelle que l'app lit ton PDF toute
   seule et qu'elle se trompe parfois (un rang sauté, deux tailles mélangées, un tableau mal découpé), et qu'un patron importé se relit avant d'être suivi.
@@ -761,8 +847,7 @@ puis l'écran du dossier de sauvegarde, décrit juste au-dessus. Ensuite, trois 
 
 ## 9. Sous le capot : ce que {app} te garantit
 
-- **Hors ligne par défaut** : aucune de tes données ne quitte ton appareil,
-  sauf le dossier de sauvegarde que **tu choisis toi-même**.
+- **Hors ligne par défaut** : aucune de tes données ne quitte ton appareil.
 - **Pas de compte, pas de paywall** : toutes les fonctions ci-dessus sont
   gratuites, sans fonction cœur verrouillée.
 - **Rien ne se perd par erreur** : chaque suppression est annulable dans
@@ -774,7 +859,7 @@ puis l'écran du dossier de sauvegarde, décrit juste au-dessus. Ensuite, trois 
   ne se coupe ; sur une tablette, l'app profite de la place : tes listes de projets et de patrons s'affichent sur plusieurs colonnes au lieu d'une seule
   longue pile, et le lecteur peut garder le diagramme à côté du texte. L'app
   tient compte des zones réservées de ton écran (barre d'état, encoche, barre
-  de navigation) : le contenu ne se glisse plus dessous.
+  de navigation) : le contenu ne se glisse pas dessous.
 - **Une politique de confidentialité en clair** : depuis l'écran À propos, elle
   dit où vivent tes données, ce qui peut sortir de ton téléphone et dans quels
   cas, ce qu'il advient si tu désinstalles l'app, et qui en répond : le responsable et l'adresse de contact y sont nommés. Elle est écrite dans ta

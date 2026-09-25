@@ -1,18 +1,14 @@
-// Sans `scrollBehavior`, vue-router NE remet PAS le défilement à zéro entre deux écrans
-// (navigation client-side) : le scrollY d'un écran quitté « scrollé » survit à l'écran
-// suivant. Comme AppHeader est `position: sticky` sans espace de respiration au-dessus du
-// 1er contenu (ex. NeedleGaugeView, ses toggles Tricot/Crochet juste sous le bandeau), un
-// scrollY hérité > 0 fait immédiatement « coller » le bandeau PAR-DESSUS ce contenu dès
-// l'arrivée — retour terrain du 22/07 (« le haut est déjà caché sous le titre de l'écran »).
+// @vitest-environment jsdom
+// Sans `scrollBehavior`, vue-router ne remet pas le défilement à zéro entre deux écrans : un
+// scrollY hérité fait « coller » l'AppHeader sticky PAR-DESSUS le premier contenu de l'écran
+// d'arrivée.
 import { describe, it, expect } from 'vitest'
 import router from '@/router'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
 
-// ⚠️ Ces trois arguments sont ceux que vue-router passe RÉELLEMENT (une route résolue, une
-// route résolue, une position ou `null`). Jusqu'au 19/08/2026 ce fichier passait `undefined`
-// pour la destination : la fonction ne la lisait pas encore. Elle la lit désormais (cas du
-// guide, plus bas), et un `undefined` ferait échouer ces tests pour une raison qui n'existe
-// pas en production. On donne donc de vraies destinations.
+// Ces trois arguments sont ceux que vue-router passe RÉELLEMENT (route, route, position ou
+// `null`) : la fonction lit la destination (cas du guide), un `undefined` ferait échouer ces
+// tests pour une raison qui n'existe pas en production.
 const versEcran = (name, query = {}) => ({ name, query })
 
 describe('router — scrollBehavior remet en haut à chaque navigation', () => {
@@ -26,13 +22,11 @@ describe('router — scrollBehavior remet en haut à chaque navigation', () => {
   })
 })
 
-// Correctif du 19/08/2026 — le guide ouvert sur une section défilait tout seul, puis le
-// `{ top: 0 }` ci-dessus le ramenait en haut (vue-router appelle `scrollBehavior` APRÈS le
-// montage, cf. le commentaire de src/router/index.js). Le routeur doit donc rendre la main.
+// Le guide ouvert sur une section défile lui-même : le routeur (appelé APRÈS le montage)
+// doit rendre la main, sinon son `{ top: 0 }` le ramène en haut.
 //
-// ⚠️ CES TESTS NE PROUVENT PAS QUE L'ÉCRAN DÉFILE. Ils ne vérifient que le contrat de cette
-// fonction (« qui décide de la position d'arrivée »). La position RÉELLEMENT atteinte se
-// mesure dans un vrai navigateur : tests/e2e/guide-section-cible.spec.js.
+// Ces tests ne prouvent PAS que l'écran défile, seulement le contrat de cette fonction. La
+// position réellement atteinte se mesure dans tests/e2e/guide-section-cible.spec.js.
 describe('router — scrollBehavior laisse la main au guide ouvert sur une section', () => {
   it('/guide?section=<id> : ne défile pas lui-même (`false`), GuideView s en charge', () => {
     const to = versEcran('guide', { section: GUIDE_SECTION_BIBLIOTHEQUE })
@@ -40,13 +34,10 @@ describe('router — scrollBehavior laisse la main au guide ouvert sur une secti
   })
 
   it('… SAUF au retour arrière : une position sauvegardée passe AVANT l exception du guide', () => {
-    // CAS CROISÉ, et il fixe une PRÉCÉDENCE : les deux conditions de `scrollBehavior` se
-    // recouvrent ici, et les intervertir ne fait rougir aucun autre test de ce fichier
-    // (mesuré). Le comportement voulu est celui du navigateur : revenir en arrière sur le
-    // guide doit rendre la page là où on l'avait laissée, pas la repositionner sur la
-    // section de l'URL — sinon un aller-retour effacerait le défilement de la lectrice.
-    // ⚠️ Le commentaire de src/router/index.js dépend de cette précédence : c'est SEULEMENT
-    // sans position sauvegardée que GuideView devient responsable de la position d'arrivée.
+    // CAS CROISÉ, il fixe une PRÉCÉDENCE qu'aucun autre test de ce fichier ne verrait inversée :
+    // revenir en arrière sur le guide rend la page là où on l'avait laissée, pas sur la section de
+    // l'URL. Le commentaire de src/router/index.js en dépend : c'est SEULEMENT sans position
+    // sauvegardée que GuideView devient responsable de la position d'arrivée.
     const saved = { top: 412, left: 0 }
     const to = versEcran('guide', { section: GUIDE_SECTION_BIBLIOTHEQUE })
     expect(router.options.scrollBehavior(to, versEcran('library'), saved)).toBe(saved)
@@ -71,17 +62,9 @@ describe('router — scrollBehavior laisse la main au guide ouvert sur une secti
   })
 })
 
-// Extension du 31/08/2026 — le lecteur ouvert sur une section (`/project/:id/read` et
-// `/pattern/:id/read` portant `?section=<id>`) souffre du MÊME défaut que le guide d'alors :
-// ReaderView défile LUI-MÊME (montage en nextTick ; sommaire goToSection après router.push),
-// mais le `{ top: 0 }` du routeur — exécuté après le montage en microtask nextTick —
-// écrasait ces défilements : les liens du sommaire ne défilaient pas.
-// Le `scrollBehavior` rend donc la main comme pour
-// le guide ; le repli « section devenue introuvable » reste dans ReaderView.
-//
-// ⚠️ Ce bloc RENVERSE le test qui fermait ce fichier (« un AUTRE écran portant un `section`
-// (le lecteur) garde le comportement commun » → `{ top: 0 }`) : ce contrat d'alors est
-// précisément ce que le correctif du 31/08 corrige. L'exception reste Bornée à guide + lecteur :
+// Le lecteur ouvert sur une section (`?section=<id>` sur `/project/:id/read` et
+// `/pattern/:id/read`) défile LUI-MÊME, comme le guide : le routeur rend la main, sinon son
+// `{ top: 0 }` écrase les défilements du sommaire. L'exception est bornée à guide + lecteur :
 // toute autre route portant un `?section=` qu'elle n'exploite pas garde la remise en haut.
 describe('router — scrollBehavior laisse la main au lecteur ouvert sur une section', () => {
   it('project-read?section=<id> : ne défile pas lui-même (`false`), ReaderView s en charge', () => {

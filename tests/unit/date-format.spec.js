@@ -2,7 +2,7 @@
 // d'un jour. C'est tout l'enjeu : `new Date('2026-08-07')` est interprété en UTC, donc à
 // l'ouest de Greenwich il rend le 6 août.
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { formatLocalDate } from '@/utils/date-format'
+import { formatLocalDate, formatDayMonth } from '@/utils/date-format'
 
 describe('formatLocalDate', () => {
   it('1. rend la date dans la langue demandée', () => {
@@ -91,5 +91,17 @@ describe('formatLocalDate — date-jour et date-instant, vues depuis l’ouest (
     // d'été) : le jour LOCAL n'est pas celui que porte la date UTC. Fausse avec l'ancien
     // code (`slice(0, 10)` aurait rendu '11/08/2026', le jour UTC).
     expect(formatLocalDate('2026-08-11T02:00:00.000Z', 'fr')).toBe('10/08/2026')
+  })
+})
+
+describe('formatDayMonth', () => {
+  // Jour et mois seuls, dans l'ordre et avec la ponctuation de la langue.
+  it('suit la locale : 07/09 en français, 09/07 en anglais, 07.09. en allemand, 7/9 en espagnol', () => {
+    const d = new Date(2026, 8, 7, 12)
+    expect(formatDayMonth(d, 'fr')).toBe('07/09')
+    // L'espagnol (CLDR) ne complète pas à deux chiffres, comme ses dates longues (29/6/2026).
+    expect(formatDayMonth(d, 'es')).toBe('7/9')
+    expect(formatDayMonth(d, 'en')).toBe('09/07')
+    expect(formatDayMonth(d, 'de')).toBe('07.09.')
   })
 })

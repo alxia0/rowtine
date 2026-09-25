@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/purchases.store.spec.js
 // Unitaire — registre d'achats : CRUD, tri, orphelinage. La table `purchases` doit exister
 // (déclarée dans l'unique `db.version(1)` de src/db/db.js depuis la fusion du 13/08/2026,

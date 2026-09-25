@@ -1,12 +1,12 @@
+// @vitest-environment jsdom
 // Unitaire — YarnSortDialog : coche sur l'option courante, update:modelValue + close
 // au tap, fermetures (bouton, scrim, Échap).
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import YarnSortDialog from '@/components/YarnSortDialog.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 const OPTIONS = [
   { value: 'brand', label: 'Marque' },

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Cycle de vie du chrono — openFor. Le magasin n'avait qu'un test de formatage avant ces travaux.
 // Depuis l'ajout des « séances live » : openFor ne rend PLUS d'instantané `previous` — la
 // fermeture de l'ancien chrono vit DANS le store (commit du temps au journal + reset),

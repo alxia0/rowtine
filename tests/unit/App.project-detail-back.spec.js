@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, câblage de `currentViewRef` dans la chaîne de retour (Task 3, lot
 // intents 20/09 : « au swipe, je veux revenir à la fiche stats du projet ouvert »).
 // Même harnais de mocks que App.back-precedence.spec.js (router, backup-service, restore,

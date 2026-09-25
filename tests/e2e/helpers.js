@@ -8,16 +8,19 @@ import { expect } from '@playwright/test'
 export const FAKE_PHOTO =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
 
-// Écrit `swipeHintSeen: true` directement dans IndexedDB (contournement délibéré de l'UI,
-// cf. le commentaire de `completeOnboarding` ci-dessous pour la raison). On interroge
-// IndexedDB directement (pas d'import du module app : les chemins sont hashés sous
-// `vite preview`), comme le faisait l'ancien `waitForSwipeHintPersisted` qu'elle remplace
-// (pop-ups du premier lancement, 10/08/2026 — cf. plus bas pourquoi cette dernière a
-// disparu). La promesse ne se résout qu'à `tx.oncomplete` : l'écriture a RÉELLEMENT touché
-// le disque quand `completeOnboarding` rend la main, pas seulement été mise en file.
-async function seedSwipeHintSeen(page) {
+// Écrit une clé de la table `settings` directement dans IndexedDB (contournement délibéré
+// de l'UI, cf. le commentaire de `completeOnboarding` ci-dessous pour la raison de
+// `swipeHintSeen`). On interroge IndexedDB directement (pas d'import du module app : les
+// chemins sont hashés sous `vite preview`), comme le faisait l'ancien
+// `waitForSwipeHintPersisted` qu'elle remplace (pop-ups du premier lancement, 10/08/2026 —
+// cf. plus bas pourquoi cette dernière a disparu). La promesse ne se résout qu'à
+// `tx.oncomplete` : l'écriture a RÉELLEMENT touché le disque quand l'appelante rend la
+// main, pas seulement été mise en file. Exportée (au-delà de `swipeHintSeen`, son seul
+// usage initial) pour semer `welcomeDue` dans les tests de la visite guidée
+// (tests/e2e/visite-guidee.spec.js).
+export async function writeSetting(page, key, value) {
   await page.evaluate(
-    () =>
+    ({ key, value }) =>
       new Promise((resolve, reject) => {
         const req = indexedDB.open('rowtine')
         req.onerror = () => reject(req.error)
@@ -25,7 +28,7 @@ async function seedSwipeHintSeen(page) {
           const db = req.result
           try {
             const tx = db.transaction('settings', 'readwrite')
-            tx.objectStore('settings').put({ key: 'swipeHintSeen', value: true })
+            tx.objectStore('settings').put({ key, value })
             tx.oncomplete = () => resolve()
             tx.onerror = () => reject(tx.error)
           } catch (e) {
@@ -35,11 +38,12 @@ async function seedSwipeHintSeen(page) {
           }
         }
       }),
+    { key, value },
   )
 }
 
 // Lit une clé de la table `settings` directement dans IndexedDB — même raison que
-// `seedSwipeHintSeen` (pas d'import du module app sous `vite preview`), mais en LECTURE :
+// `writeSetting` (pas d'import du module app sous `vite preview`), mais en LECTURE :
 // sert à attendre qu'un réglage cliqué dans l'UI ait RÉELLEMENT atteint le disque avant un
 // `page.goto()` qui recharge l'app. `saveTheme()` (stores/settings.js) met `theme.value` à
 // jour de façon SYNCHRONE puis persiste en IndexedDB de façon ASYNCHRONE : un
@@ -71,7 +75,7 @@ export async function readSetting(page, key) {
 }
 
 // Sème directement dans IndexedDB (table `sessions`, contournement délibéré de l'UI — même
-// raison que `seedSwipeHintSeen` : pas d'import du module app sous `vite preview`) quatre
+// raison que `writeSetting` : pas d'import du module app sous `vite preview`) quatre
 // séances sur quatre jours DISTINCTS récents, une par niveau de la grille calendaire
 // (< 30 min, 30 min–1 h, 1–2 h, ≥ 2 h). Les dates sont calculées CÔTÉ NAVIGATEUR (pas côté
 // Node) pour rester dans le même fuseau que celui qui lira ensuite ces séances via
@@ -409,17 +413,16 @@ export async function completeOnboarding(page, { firstName = 'Alex', technique =
   // fois par session (`if (!settings.loaded)`) — sans ce rechargement, le store Pinia déjà
   // en mémoire garderait `swipeHintSeen` à `false` malgré l'écriture IndexedDB, et
   // `FirstDetailTip` continuerait de lire cette valeur périmée au premier écran concerné.
-  await seedSwipeHintSeen(page)
+  await writeSetting(page, 'swipeHintSeen', true)
   await page.reload()
   await expect(page.getByRole('heading', { name: helloHeading })).toBeVisible()
 }
 
-// Bibliothèque (P2 ; porte de service .zip depuis le 08/08) : un seul bouton
-// « Ajouter un patron » ouvre une feuille du bas à 2 choix (import PDF — qui laisse aussi
-// passer le .zip en sous-main — et ajout manuel) — les anciens boutons ne sont plus
-// directement présents sur /library. À appeler avant toute interaction avec
-// `.lib-import__input` (un seul input porte désormais cette classe : plus besoin de le
-// scoper par `accept`) ou le bouton « Créer manuellement » de la feuille.
+// Bibliothèque (P2) : un seul bouton « Ajouter un patron » ouvre une feuille du bas à 3
+// choix (import PDF, « Importer au format Rowtine » depuis le 23/09, ajout manuel) ; les
+// anciens boutons ne sont plus directement présents sur /library. À appeler avant toute
+// interaction avec `.lib-import__input--pdf` / `.lib-import__input--rowtine` ou le bouton
+// « Créer manuellement » de la feuille.
 // `label` par défaut en FRANÇAIS : la suite e2e ordinaire tourne toujours en locale fr-FR
 // (baseline `playwright.config.js`). Les générateurs de captures du site, seuls appelants en
 // locale non-française, passent `m.pattern.add` explicitement — sans quoi ce clic ne trouve

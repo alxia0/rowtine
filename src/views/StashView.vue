@@ -282,7 +282,10 @@ const sortOptions = computed(() => [
       </div>
     </template>
 
-    <button class="btn btn--primary btn--block mt" @click="router.push({ name: 'stash-new' })"><AppIcon name="plus" :size="17" /> {{ t('yarn.add') }}</button>
+    <div class="add-row mt">
+      <button class="btn btn--primary add-row__main" @click="router.push({ name: 'stash-new' })"><AppIcon name="plus" :size="17" /> {{ t('yarn.add') }}</button>
+      <button class="btn add-row__ravelry" data-test="import-ravelry-btn" @click="router.push({ name: 'stash-import-ravelry' })"><AppIcon name="import" :size="17" /> {{ t('yarn.importRavelry') }}</button>
+    </div>
 
     <template v-if="yarnsStore.yarns.length">
       <div class="ylist">
@@ -364,6 +367,12 @@ const sortOptions = computed(() => [
    (aria-hidden au template), la même information passe par l'aria-label du bouton. */
 .filter-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); background: var(--brand); color: var(--on-accent); font-size: 11.5px; font-weight: 700; }
 .mt { margin-top: var(--sp-2); }
+/* Chaque libellé tient sur UNE ligne : le bouton Ravelry prend sa largeur de contenu, le
+   bouton principal le reste. Si les deux ne tiennent pas côte à côte (allemand, espagnol sur
+   un téléphone), le second passe à la ligne et chacun occupe toute la largeur. */
+.add-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.add-row__main { flex: 999 1 auto; white-space: nowrap; }
+.add-row__ravelry { flex: 1 1 auto; white-space: nowrap; }
 .ylist { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4); }
 .ycard { display: flex; align-items: center; gap: var(--sp-3); background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3); box-shadow: var(--clay-sm); }
 .ycard__thumb { width: 46px; height: 46px; }

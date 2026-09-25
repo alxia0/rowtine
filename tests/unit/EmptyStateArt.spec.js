@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Illustration PROVISOIRE des écrans vides (stock, stats) — cf. src/components/EmptyStateArt.vue.
 // Ce test couvre le contrat du composant : rend un <svg>, taille pilotée par prop, couleur
 // héritée (currentColor, pas de couleur en dur), décoratif (aria-hidden, rien à annoncer).

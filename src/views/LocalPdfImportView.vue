@@ -9,7 +9,7 @@
 // le store transitoire import-report, affichés en bandeau persistant sur PatternView.
 // La correction reste accessible depuis l'aperçu Prévisualiser de la fiche (écran
 // « Corriger le patron », cf. CorrectionView.vue et ReaderView.vue).
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
@@ -19,8 +19,9 @@ import { usePatternsStore } from '@/stores/patterns'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { parsePdfLocally } from '@/utils/pdf-import'
 import { unzipToPattern } from '@/utils/zip-import'
-import { sniffFile } from '@/utils/import-kind'
+import { sniffFile, PDF_ACCEPT, ROWTINE_ACCEPT } from '@/utils/import-kind'
 import { isSingleSize } from '@/utils/reader'
+import { summarizeImportedPattern } from '@/utils/import-summary'
 import { useImportProgress } from '@/composables/useImportProgress'
 import { useImportHandoff } from '@/stores/import-handoff'
 import { useImportReportStore } from '@/stores/import-report'
@@ -29,6 +30,11 @@ import { beginImport, endImport } from '@/backup/import-guard'
 import { isSyncRunning, whenSyncIdle } from '@/backup/patron-md-sync'
 import { CONTACT_EMAIL } from '@/constants/app-links'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
+
+// Porte d'entrée (23/09) : 'pdf' (défaut) ou 'rowtine', passée par la route
+// (`?format=rowtine`, cf. router/index.js). Le retour arrière depuis le guide garde la requête.
+const props = defineProps({ format: { type: String, default: 'pdf' } })
+const isRowtine = computed(() => props.format === 'rowtine')
 
 const router = useRouter()
 const { t } = useI18n()
@@ -42,13 +48,19 @@ const importSuccess = useImportSuccessStore()
 const busy = ref(false)
 const error = ref('')
 const progress = useImportProgress()
-const result = ref(null) // { pattern, reader, warnings, confidence, stats, scanned }
+const result = ref(null) // { pattern, reader, warnings, confidence, stats, blocking, rejected, … } (cf. pdf-import/index.js)
 const savedId = ref(null)
 // Portées par le bloc de réussite (savedId != null) : le nom vient du patron tel
 // qu'écrit en base (identique aux 2 voies, PDF et zip), le compte de warnings de la
 // liste que ce même enregistrement a poussée dans import-report.
 const savedName = ref('')
 const savedWarnCount = ref(0)
+// Bilan du patron enregistré (sections/étapes/tailles/diagrammes) et « prévisualisable »
+// (même condition que le bouton Prévisualiser de PatternView.vue) : posés par ensureSaved,
+// restitués par le relais import-success au retour du guide (cf. onMounted plus bas et
+// howToFix). Portent la mise en page du bloc de réussite, jamais l'enregistrement lui-même.
+const savedSummary = ref(null)
+const savedPreviewable = ref(true)
 // true pendant l'écriture IndexedDB (patternsStore.add) : masque le bouton
 // d'abandon (cf. template) et rend ensureSaved non ré-entrant (double-tap).
 const saving = ref(false)
@@ -63,6 +75,17 @@ const waitingSync = ref(false)
 // moteur). « Interrompre l'import » incrémente ce jeton ; si la conversion en cours
 // se termine malgré tout, sa résolution tardive est ignorée (cf. abortImport).
 let importToken = 0
+
+// Message du refus net (scanné, pas un patron, plusieurs patrons) : un seul encart, un seul
+// texte, choisi par `result.rejected.reason`. Aucun bouton de forçage : ces fichiers ne
+// donneraient pas un patron utilisable (spec rejets d'import du 2026-09-24).
+const rejectMessage = computed(() => {
+  const reason = result.value?.rejected?.reason
+  if (reason === 'scanned') return t('importLocal.scanned', { email: CONTACT_EMAIL })
+  if (reason === 'notPattern') return t('importLocal.notPattern', { email: CONTACT_EMAIL })
+  if (reason === 'multiPattern') return t('importLocal.blockMultiPattern')
+  return ''
+})
 
 // Cœur d'import partagé par le sélecteur de fichier local ET par le relais depuis la
 // Bibliothèque (cf. useImportHandoff). parsePdfLocally n'est pas annulable : le jeton
@@ -102,11 +125,19 @@ async function startImport(file) {
   try {
     kind = await sniffFile(file)
   } catch {
-    kind = 'pdf' // fichier illisible : la voie PDF portera l'erreur, pas de message de plus
+    // Fichier illisible : par la porte PDF, la voie PDF portera l'erreur, pas de message de plus.
+    kind = isRowtine.value ? 'unknown' : 'pdf'
   }
   if (token !== importToken) return // abandon pendant la lecture des 4 octets
   if (kind === 'zip') {
     await startZipImport(file, token)
+    return
+  }
+  // Porte .rowtine : un contenu qui n'est pas une archive est refusé, jamais envoyé en
+  // silence au moteur PDF (pas de repli 'unknown' vers le PDF ici, contrairement à la porte PDF).
+  if (isRowtine.value) {
+    error.value = t('importZip.badZip')
+    busy.value = false
     return
   }
   progress.begin('local', file.size || 0)
@@ -115,11 +146,11 @@ async function startImport(file) {
     if (token !== importToken) return // import interrompu entre-temps : résultat tardif ignoré
     result.value = out
     progress.end()
-    // PDF scanné OU import risqué (blocking) : on n'enregistre PAS automatiquement,
-    // l'écran reste affiché. Le scanné aiguille vers la saisie manuelle ou le contact
-    // ; le bloqué propose « Importer quand même » (saveAndView) — réversible,
-    // « jamais perdre d'info ».
-    if (!out.scanned && !out.blocking?.blocked) await saveAndView()
+    // Refus net (rejected : scanné, pas un patron, plusieurs patrons) OU import risqué
+    // (blocking : colonnes) : on n'enregistre PAS automatiquement, l'écran reste affiché.
+    // Le refus dit pourquoi et laisse choisir un autre fichier ; le risqué propose
+    // « Importer quand même » (saveAndView), réversible, « jamais perdre d'info ».
+    if (!out.rejected && !out.blocking?.blocked) await saveAndView()
   } catch (err) {
     if (token !== importToken) return
     error.value = err?.message || String(err)
@@ -129,11 +160,9 @@ async function startImport(file) {
   }
 }
 
-// PORTE DE SERVICE (08/08). Un .zip déposé dans l'import PDF est un patron déjà mis en
-// forme (Rowtine-MD + images). RIEN ne l'annonce dans l'interface : ni libellé, ni titre,
-// ni texte d'aide — seul le filtre du sélecteur de fichiers le laisse sélectionnable. Elle
-// sert à dépanner une utilisatrice dont le PDF ne passe pas, en lui retravaillant son
-// patron. Ne pas la documenter dans l'interface ni dans le guide.
+// Import d'un patron au format de l'app (.rowtine ou .zip : Rowtine-MD + images). Depuis le
+// 23/09, porte visible et documentée (option de la feuille d'ajout, mode `format` rowtine) ;
+// un zip déposé par la porte PDF reste reconnu à son contenu et suit ce même chemin.
 //
 // La décompression décode et plafonne chaque image du kit (resizeDataUrl, canvas) : ce n'est
 // PLUS synchrone depuis le 15/08/2026 (compression des images importées). Deux fenêtres
@@ -207,6 +236,8 @@ onMounted(() => {
     savedId.value = importSuccess.patternId
     savedName.value = importSuccess.name
     savedWarnCount.value = importSuccess.warnCount
+    savedSummary.value = importSuccess.summary
+    savedPreviewable.value = importSuccess.previewable
   }
 })
 
@@ -252,6 +283,11 @@ async function ensureSaved(patternObject, warnings, low) {
     savedId.value = id
     savedName.value = patternObject.name
     savedWarnCount.value = Array.isArray(warnings) ? warnings.length : 0
+    savedSummary.value = summarizeImportedPattern(patternObject)
+    // Même condition que le bouton « Prévisualiser » de PatternView.vue (cf. son template) :
+    // un patron sans section ET sans galerie n'a rien à prévisualiser, le bloc retombe sur
+    // « Voir le patron » plutôt que d'ouvrir un lecteur vide.
+    savedPreviewable.value = !!(patternObject.reader?.sections?.length || patternObject.gallery?.length)
     snackbar.show(t('importLocal.saved'))
     importReport.set(id, warnings, low)
     return savedId.value
@@ -278,6 +314,19 @@ function viewPattern() {
   router.replace({ name: 'pattern', params: { id: savedId.value } })
 }
 
+// Bouton principal du bloc de réussite quand le patron A quelque chose à prévisualiser
+// (cf. savedPreviewable). `replace` d'abord (même raison que viewPattern ci-dessus : la
+// fiche prend la place de l'écran d'import dans l'historique), PUIS `push` vers le lecteur
+// — le bouton retour du lecteur ramène ainsi sur la fiche, où l'on crée le projet, jamais
+// sur ce bloc de réussite. `await` avant le `push` : même garde d'ordre que startFix dans
+// ReaderView.vue (son commentaire fait référence), sans quoi vue-router peut abandonner la
+// navigation vers la fiche si les deux appels tombent dans le même tick.
+async function previewPattern() {
+  importSuccess.clear()
+  await router.replace({ name: 'pattern', params: { id: savedId.value } })
+  router.push({ name: 'pattern-read', params: { id: savedId.value } })
+}
+
 // Renvoi vers le guide, section « Ta bibliothèque de patrons » (19/08/2026). Même
 // destination que la pop-up d'avertissement de la Bibliothèque : une seule page à tenir à
 // jour, pas deux.
@@ -288,7 +337,7 @@ function howToFix() {
   // n'a jamais ce bouton. Et il ne vit que le temps de l'aller-retour qu'on déclenche à la
   // ligne suivante, au lieu de survivre à toute la session : un bloc de réussite périmé,
   // rouvert plus tard sur un import qui n'a pas eu lieu, serait un mensonge d'interface.
-  importSuccess.set(savedId.value, savedName.value, savedWarnCount.value)
+  importSuccess.set(savedId.value, savedName.value, savedWarnCount.value, savedSummary.value, savedPreviewable.value)
   router.push({ name: 'guide', query: { section: GUIDE_SECTION_BIBLIOTHEQUE } })
 }
 
@@ -321,14 +370,14 @@ function abortImport() {
 
 <template>
 <div>
-  <AppHeader :title="t('importLocal.title')" back />
+  <AppHeader :title="t(isRowtine ? 'importLocal.titleRowtine' : 'importLocal.title')" back />
   <main class="screen">
-    <p class="lead">{{ t('importLocal.lead') }}</p>
+    <p class="lead">{{ t(isRowtine ? 'importLocal.leadRowtine' : 'importLocal.lead') }}</p>
     <p class="lead">{{ t('importLocal.leadNext') }}</p>
 
     <label v-if="!busy && savedId == null" class="btn btn--primary btn--block file-pick">
-      <AppIcon name="import" :size="18" /> {{ t('importLocal.pick') }}
-      <input type="file" accept="application/pdf,.pdf,.zip,application/zip" class="file-pick__input" @change="onFile" />
+      <AppIcon name="import" :size="18" /> {{ t(isRowtine ? 'importLocal.pickRowtine' : 'importLocal.pick') }}
+      <input type="file" :accept="isRowtine ? ROWTINE_ACCEPT : PDF_ACCEPT" class="file-pick__input" @change="onFile" />
     </label>
 
     <!-- Synchro MD déjà en cours à l'ouverture de l'écran (cf. waitingSync) : l'écran
@@ -346,23 +395,24 @@ function abortImport() {
     />
     <p v-if="error" class="err">{{ error }}</p>
 
-    <!-- PDF scanné : la voie locale ne peut rien extraire (aucun texte). On invite à
-         saisir le patron à la main, ou à nous écrire pour se faire aider — plus d'IA. -->
-    <section v-if="result?.scanned" class="res mt3">
-      <p class="warn"><AppIcon name="warning" :size="15" /> {{ t('importLocal.scanned', { email: CONTACT_EMAIL }) }}</p>
+    <!-- Refus net (spec du 2026-09-24) : PDF scanné, fichier qui n'est pas un patron de
+         tricot ou de crochet, ou recueil de plusieurs patrons. Rien n'est enregistré et
+         aucun bouton ne force l'import ; le sélecteur reste affiché pour choisir un autre
+         fichier. -->
+    <section v-if="result?.rejected" class="res mt3" role="alert">
+      <p class="warn"><AppIcon name="warning" :size="15" /> {{ rejectMessage }}</p>
     </section>
 
     <!-- Import risqué (blocking) : le moteur a détecté un cas mal géré
-         (colonnes / multi-patrons). Auto-save suspendu (cf. startImport) ; l'écran
+         (colonnes). Auto-save suspendu (cf. startImport) ; l'écran
          reste affiché avec les raisons et un bouton réversible « Importer quand
          même » qui déclenche saveAndView() manuellement. « Interrompre l'import »
          reste disponible plus bas — « jamais perdre d'info » : rien n'empêche
          l'import, seul l'automatisme est mis en pause. -->
-    <section v-if="result && !result.scanned && result.blocking?.blocked && savedId == null" class="res mt3" role="alert">
+    <section v-if="result && !result.rejected && result.blocking?.blocked && savedId == null" class="res mt3" role="alert">
       <p class="warn"><AppIcon name="warning" :size="15" /> {{ t('importLocal.blockTitle') }}</p>
       <ul class="block-reasons">
         <li v-if="result.blocking.reasons.includes('columns')">{{ t('importLocal.blockColumns') }}</li>
-        <li v-if="result.blocking.reasons.includes('multiPattern')">{{ t('importLocal.blockMultiPattern') }}</li>
       </ul>
       <p class="muted">{{ t('importLocal.blockLead') }}</p>
       <button type="button" class="btn btn--primary btn--block block-anyway" @click="saveAndView">
@@ -379,20 +429,72 @@ function abortImport() {
          nombre d'avertissements — ZÉRO COMPRIS. C'est justement le cas qui inquiète : la
          conversion peut se tromper sans lever le moindre avertissement, et jusqu'ici l'écran
          ne disait alors rien du tout. La ligne « n point(s) à vérifier » reste conditionnée à
-         n > 0 : l'une compte ce que le moteur a repéré, l'autre dit qu'il ne repère pas tout. -->
-    <section v-if="savedId != null" class="res mt3 done">
-      <p class="done__title"><AppIcon name="check" :size="18" /> {{ t('importLocal.doneTitle') }}</p>
-      <p class="done__name">« {{ savedName }} »</p>
-      <p v-if="savedWarnCount > 0" class="muted">{{ t('importLocal.warnings', { n: savedWarnCount }) }}</p>
-      <p class="done__caveat">
-        <AppIcon name="warning" :size="15" /> {{ t('importLocal.doneCaveat') }}
-      </p>
-      <button type="button" class="btn btn--block done__howto" @click="howToFix">
-        {{ t('importLocal.doneHowToFix') }}
+         n > 0 : l'une compte ce que le moteur a repéré, l'autre dit qu'il ne repère pas tout.
+         Refonte du bloc de réussite (lot du 23/09/2026) : le bloc « res » générique cède la
+         place à trois cartes empilées — bilan (vert), avertissement (ambre), bouton
+         d'action — plutôt qu'une seule carte à fond neutre. `savedSummary` (sections/
+         étapes/tailles/diagrammes, cf. summarizeImportedPattern) est posé par ensureSaved
+         en même temps que savedName — `&& savedSummary` ci-dessous est une garde
+         défensive : rien dans ce fichier ne pose savedId sans lui, mais la grille juste en
+         dessous lit `savedSummary.*` sans autre filet. -->
+    <section v-if="savedId != null && savedSummary" class="done mt3">
+      <div class="done__summary">
+        <div class="done__summary-head">
+          <span class="done__badge done__badge--ok"><AppIcon name="check" :size="16" /></span>
+          <h2 class="done__summary-title">{{ t('importLocal.summaryTitle') }}</h2>
+        </div>
+        <p class="done__name">« {{ savedName }} »</p>
+        <div class="done__grid">
+          <div class="done__tile">
+            <p class="done__tile-val">{{ savedSummary.sections }}</p>
+            <p class="done__tile-label">{{ t('importLocal.summary.sections', savedSummary.sections) }}</p>
+          </div>
+          <div class="done__tile">
+            <p class="done__tile-val">{{ savedSummary.steps }}</p>
+            <p class="done__tile-label">{{ t('importLocal.summary.steps', savedSummary.steps) }}</p>
+          </div>
+          <div class="done__tile">
+            <p class="done__tile-val">{{ savedSummary.singleSize ? 1 : savedSummary.sizes }}</p>
+            <p class="done__tile-label">
+              {{ savedSummary.singleSize ? t('importLocal.summary.singleSize') : t('importLocal.summary.sizes', savedSummary.sizes) }}
+            </p>
+          </div>
+          <!-- Tuile masquée à 0 diagramme (brief) : contrairement aux trois autres, un
+               patron SANS diagramme est le cas courant — l'annoncer partout alourdirait
+               inutilement la grille pour la majorité des imports. -->
+          <div v-if="savedSummary.charts > 0" class="done__tile">
+            <p class="done__tile-val">{{ savedSummary.charts }}</p>
+            <p class="done__tile-label">{{ t('importLocal.summary.charts', savedSummary.charts) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="done__caveat">
+        <div class="done__caveat-head">
+          <span class="done__badge done__badge--warn"><AppIcon name="warning" :size="15" /></span>
+          <div class="done__caveat-body">
+            <h2 class="done__caveat-title">{{ t('importLocal.caveatTitle') }}</h2>
+            <p class="done__caveat-text">{{ t('importLocal.caveatBody') }}</p>
+            <p v-if="savedWarnCount > 0" class="done__warncount">{{ t('importLocal.warnings', { n: savedWarnCount }) }}</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn--block done__howto" @click="howToFix">
+          {{ t('importLocal.doneHowToFix') }}
+        </button>
+      </div>
+
+      <!-- Bouton d'action principal : « Prévisualiser le patron » (mène au lecteur, cf.
+           previewPattern) sauf pour un patron sans section ni galerie, qui retombe sur
+           « Voir le patron » (viewPattern) — même condition que PatternView.vue pour son
+           propre bouton Prévisualiser, cf. savedPreviewable posé par ensureSaved. -->
+      <button v-if="savedPreviewable" type="button" class="btn btn--primary btn--block" @click="previewPattern">
+        {{ t('pattern.preview') }}
       </button>
-      <button type="button" class="btn btn--primary btn--block mt2" @click="viewPattern">
+      <button v-else type="button" class="btn btn--primary btn--block" @click="viewPattern">
         {{ t('importLocal.viewPattern') }}
       </button>
+
+      <p class="done__hint">{{ t('importLocal.nextHint') }}</p>
     </section>
 
     <!-- Bouton d'abandon : reachable dès qu'il y a quelque chose à annuler
@@ -424,9 +526,38 @@ function abortImport() {
 .muted { color: var(--ink-55); font-size: 13px; }
 .err { color: var(--danger); font-size: 14px; font-weight: 600; }
 .res { background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--clay-sm); padding: var(--sp-4); }
-.done__title { display: flex; align-items: center; gap: var(--sp-2); font-weight: 700; color: var(--success); margin: 0 0 var(--sp-2); }
-.done__name { font-size: 15px; margin: 0 0 var(--sp-2); }
-.done__caveat { display: flex; align-items: flex-start; gap: var(--sp-2); color: var(--ink-55); font-size: 13px; margin: var(--sp-2) 0; }
+/* Bloc de réussite (lot du 23/09/2026) : trois cartes empilées, pas de fond commun (.res
+   ne s'y applique plus). */
+.done { display: flex; flex-direction: column; gap: var(--sp-4); }
+.done__badge { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: var(--r-pill); flex-shrink: 0; color: var(--on-solid); }
+.done__badge--ok { background: var(--sage); }
+.done__badge--warn { background: var(--warning); }
+/* Carte bilan : vert doux du thème (même dégradé que les tuiles « métrique positive »
+   ailleurs dans l'app, cf. --sage-tile-bg dans tokens.css). Le titre y passe par
+   --sage-deep-strong, pas --sage-deep : sur ce dégradé, --sage-deep seul descend sous le
+   seuil AA en clair (mesuré, même raison que .corr-chip--on, cf. le commentaire du token). */
+.done__summary { background: var(--sage-tile-bg); border: 1px solid var(--sage-tile-line); border-radius: var(--r-lg); padding: var(--sp-4); }
+.done__summary-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.done__summary-title { font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--sage-deep-strong); margin: 0; }
+.done__name { font-size: 15px; color: var(--ink-70); margin: 0 0 var(--sp-3); }
+.done__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+.done__tile { background: var(--tile); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); }
+.done__tile-val { font-family: var(--font-display); font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink); margin: 0; }
+.done__tile-label { font-size: 13px; color: var(--ink-70); margin: 2px 0 0; }
+/* Encart d'avertissement : ambre doux du thème, même formule que .ypur__gap
+   (YarnPurchases.vue) — fond color-mix(--warning 12%, --tile), texte par défaut
+   --warning (icône + titre), le corps repasse en --ink-70 pour rester lisible. */
+.done__caveat { background: color-mix(in srgb, var(--warning) 12%, var(--tile)); border: 1px solid var(--warning); border-radius: var(--r-lg); padding: var(--sp-4); color: var(--warning); }
+.done__caveat-head { display: flex; align-items: flex-start; gap: var(--sp-3); }
+.done__caveat-body { flex: 1; min-width: 0; }
+.done__caveat-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; margin: 0 0 4px; }
+.done__caveat-text { font-size: 14px; line-height: 1.45; color: var(--ink-70); margin: 0; }
+.done__warncount { font-size: 13px; font-weight: 600; color: var(--ink-70); margin: var(--sp-2) 0 0; }
+/* Repasse le bouton `.btn` par défaut (fond --surface, prévu pour une carte neutre) en
+   fond clair + bordure/texte ambre : sur le fond déjà teinté de .done__caveat, --surface
+   tranchait (lavande sur ambre). Contraste mesuré ≥ 5.5:1 dans les deux thèmes. */
+.done__howto { margin-top: var(--sp-3); background: var(--tile); border-color: var(--warning); color: var(--warning); }
+.done__hint { text-align: center; color: var(--ink-70); font-size: 14px; line-height: 1.45; margin: calc(-1 * var(--sp-2)) 0 0; }
 .warn { color: var(--warning); font-size: 13.5px; margin: 0 0 var(--sp-3); }
 .block-reasons { margin: 0 0 var(--sp-2); padding-left: 1.1em; color: var(--ink-70); font-size: 13.5px; }
 .block-anyway { margin-top: var(--sp-2); }

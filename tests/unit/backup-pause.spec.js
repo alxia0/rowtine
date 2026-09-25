@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le prédicat unique qui met la sauvegarde automatique en pause
 // (2026-08-04, §3.1 ; avenant 04/08/2026). Depuis l'avenant, le critère n'est
 // plus `isDbRestorable()` mais une DÉCISION explicite (`hasBackupDecision`,

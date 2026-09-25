@@ -22,6 +22,8 @@ import { resolveOpenSyncTarget } from '@/utils/resolve-open-sync-target'
 import { syncPatronMdOnOpen } from '@/backup/sync-on-open'
 import { openPdfExternally } from '@/utils/open-pdf'
 import { SESSION_NO_SECTION } from '@/constants/session'
+import { NOTICE } from '@/constants/notice-queue'
+import { useNoticeSlot } from '@/composables/useNoticeSlot'
 import ReaderLine from '@/components/ReaderLine.vue'
 import StepImages from '@/components/StepImages.vue'
 import ReaderChart from '@/components/ReaderChart.vue'
@@ -33,6 +35,7 @@ import BackToTop from '@/components/BackToTop.vue'
 import ReaderFixOverlay from '@/components/ReaderFixOverlay.vue'
 import ReaderToc from '@/components/ReaderToc.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
+import ReaderTour from '@/components/ReaderTour.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,6 +103,19 @@ const ready = ref(false)
 const openedId = route.params.id
 let isMounted = true
 
+// Visite guidée (lot du 23/09/2026) : `?tour=1` sur le lecteur d'un PROJET. Lu UNE fois,
+// au montage, dans un ref local : la fin de visite le repasse à faux elle-même, sans
+// attendre que le `router.replace` qui retire `tour` de l'URL ait abouti (et un routeur
+// qui ne rafraîchirait pas la route ne relancerait pas la visite pour autant).
+const tourRequested = ref(ctx === 'project' && route.query.tour === '1')
+// La visite passe par la file des messages : un message plus urgent (rapport de synchro,
+// porte du dossier) la fait attendre. Perdre la file en cours de route démonte la
+// visite SANS la terminer : elle reprendra depuis le début quand la file la rappellera.
+const tourHasSlot = useNoticeSlot(
+  NOTICE.READER_TOUR,
+  computed(() => ready.value && tourRequested.value),
+)
+
 const st = reactive({ size: null, done: {}, counters: {}, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
 
 // Bandeau compact au défilement (P2/T2) : le gros titre + le surtitre (nom du projet,
@@ -159,6 +175,27 @@ async function loadProjectAndPattern() {
   const proj = await projectsStore.get(route.params.id)
   const pat = proj?.patternId != null ? await patternsStore.get(proj.patternId) : null
   return { project: proj, pattern: pat }
+}
+
+// Ouvre/poursuit le chrono du suivi de patron (contexte projet, chrono affiché). Partagée
+// entre l'ouverture du lecteur et la fin de la visite guidée (lot du 23/09/2026), qui la
+// diffère : même politique aux deux endroits.
+async function openReaderChrono(resumeRunning = false) {
+  if (ctx !== 'project' || !showTimer.value) return
+  // Ouvre/poursuit le chrono du suivi de patron (ne démarre PAS tout seul, comme la session).
+  // `openFor()` est idempotent sur le même couple (projet, sentinelle) : une session déjà
+  // ouverte — depuis la fiche projet, ou par un passage précédent ici — est poursuivie
+  // telle quelle. Sur un AUTRE couple, le store ferme SILENCIEUSEMENT l'ancien chrono en
+  // commettant son temps non écrit au journal de SON projet (chantier « séances live », 30/08) :
+  // rien à journaliser ici — l'écriture appartient au store. Cet écran ne FERME rien de
+  // visible non plus en sortie (chantier « chrono unifié ») : la fermeture avec snackbar
+  // appartient au garde « sortie de bulle » du routeur, qui décide sur la destination ; le
+  // concept de session « adoptée » (qu'on n'avait pas ouverte soi-même et qu'il fallait
+  // épargner en sortie) n'a donc plus d'objet ici.
+  await active.openFor(project.value.id, SESSION_NO_SECTION, 0)
+  // `openFor()` est idempotent sur le même couple : le temps accumulé avant le
+  // départ est intact. Il ne reste qu'à relancer si le chrono tournait.
+  if (resumeRunning) await active.play()
 }
 
 onMounted(async () => {
@@ -224,22 +261,10 @@ onMounted(async () => {
   // réutilisé au montage »). Le pire cas résiduel est bénin : une session restée
   // en pause, ce que fait déjà le bouton pause.
   const fromCorrection = !!relay && relay.projectId === Number(project.value.id)
-  if (ctx === 'project' && showTimer.value) {
-    // Ouvre/poursuit le chrono du suivi de patron (ne démarre PAS tout seul, comme la session).
-    // `openFor()` est idempotent sur le même couple (projet, sentinelle) : une session déjà
-    // ouverte — depuis la fiche projet, ou par un passage précédent ici — est poursuivie
-    // telle quelle. Sur un AUTRE couple, le store ferme SILENCIEUSEMENT l'ancien chrono en
-    // commettant son temps non écrit au journal de SON projet (chantier « séances live », 30/08) :
-    // rien à journaliser ici — l'écriture appartient au store. Cet écran ne FERME rien de
-    // visible non plus en sortie (chantier « chrono unifié ») : la fermeture avec snackbar
-    // appartient au garde « sortie de bulle » du routeur, qui décide sur la destination ; le
-    // concept de session « adoptée » (qu'on n'avait pas ouverte soi-même et qu'il fallait
-    // épargner en sortie) n'a donc plus d'objet ici.
-    await active.openFor(project.value.id, SESSION_NO_SECTION, 0)
-    // `openFor()` est idempotent sur le même couple : le temps accumulé avant le
-    // départ est intact. Il ne reste qu'à relancer si le chrono tournait.
-    if (fromCorrection && relay.chronoWasRunning) await active.play()
-  }
+  // Visite guidée demandée : le chrono n'est PAS ouvert tant qu'elle dure. `openFor()`
+  // écrit (réglage `activeSession`, et une ligne au journal s'il ferme le chrono d'un
+  // autre projet) ; la visite ne doit rien écrire. Il est ouvert à sa fin (finishTour).
+  if (!tourRequested.value) await openReaderChrono(fromCorrection && relay.chronoWasRunning)
   // Seconde garde : le bloc chrono ci-dessus attend openFor (une à deux écritures Dexie :
   // le commit de l'éventuel ancien slot, puis le persist). Un démontage pendant celles-ci
   // a DÉJÀ fait tourner onBeforeUnmount, donc ses removeEventListener sont passés AVANT
@@ -337,9 +362,15 @@ async function toggleTimerFromReader() {
 
 function loadState() {
   let saved
+  // Taille bornée aux tailles du patron : un index hérité d'un AUTRE patron (patron lié changé
+  // dans l'édition du projet, qui garde `readerState`) ferait compter toutes les répétitions
+  // comme faites (total[i] absent = 0). Hors bornes, il vaut « aucune » et le libellé
+  // `activeSize` reprend la main ci-dessous.
+  const nSizes = reader.value?.sizeLabels?.length ?? 0
+  const validSize = (i) => (Number.isInteger(i) && i >= 0 && i < nSizes ? i : null)
   if (ctx === 'project') {
     saved = project.value?.readerState || {}
-    if (saved.size == null && project.value?.activeSize) {
+    if (validSize(saved.size) == null && project.value?.activeSize) {
       const i = reader.value.sizeLabels.indexOf(project.value.activeSize)
       if (i >= 0) saved = { ...saved, size: i }
     }
@@ -350,7 +381,7 @@ function loadState() {
       saved = {}
     }
   }
-  st.size = typeof saved.size === 'number' ? saved.size : null
+  st.size = validSize(saved.size)
   st.done = saved.done || {}
   st.counters = saved.counters || {}
   // Copie neuve (jamais un alias du `readerState` vivant de Dexie/localStorage) : la
@@ -547,7 +578,16 @@ function bumpCounter(step, delta) {
   persist({ worked: true })
 }
 function chartRow(secId) {
-  return st.chartRows[secId] || 1
+  const row = st.chartRows[secId] || 1
+  if (!tourRequested.value) return row
+  // Visite guidée (retour device du 23/09/2026) : au rang 1 d'un projet neuf, la bulle du
+  // diagramme annonce des rangs grisés qui n'existent pas encore. Tant que la visite dure,
+  // la grille AFFICHE donc un rang d'exemple, un quart de la hauteur (6 sur 24 pour le
+  // bonnet), jamais en deçà du vrai rang. Affichage seul : st.chartRows, donc la
+  // progression enregistrée, n'est pas touché.
+  const sec = sections.value.find((s) => s.id === secId)
+  const rows = Number(sec && effectiveChart(sec)?.rows) || 0
+  return Math.max(row, Math.min(rows, Math.max(2, Math.round(rows / 4))))
 }
 function setChartRow(secId, r) {
   st.chartRows[secId] = r
@@ -568,7 +608,6 @@ function chartFrame(secId) {
   return st.chartFrames?.[secId] || null
 }
 function setChartFrame(secId, frame) {
-  if (!st.chartFrames) st.chartFrames = {}
   if (frame) st.chartFrames[secId] = frame
   else delete st.chartFrames[secId]
   persist()
@@ -577,7 +616,6 @@ function chartCurtain(secId) {
   return st.chartCurtains?.[secId] || null
 }
 function setChartCurtain(secId, curtain) {
-  if (!st.chartCurtains) st.chartCurtains = {}
   if (curtain) st.chartCurtains[secId] = curtain
   else delete st.chartCurtains[secId]
   // Le rideau matérialise le rang où l'on en est dans la grille : le bouger, c'est avancer.
@@ -653,6 +691,73 @@ function resume(behavior = 'smooth') {
 async function goToSection(id) {
   await router.push({ query: { ...route.query, section: id } })
   document.getElementById('rsec-' + id)?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
+}
+
+/* ── visite guidée (lot du 23/09/2026) ── */
+// Cibles des trois bulles, résolues au moment où la visite s'ouvre (le DOM du lecteur est
+// alors rendu). Une cible absente (patron sans tailles, sans diagramme) fait sauter la
+// bulle. Les ids d'étape portent un `#` (`bordure#0`) : getElementById, jamais un
+// querySelector nu.
+// Diagramme : la cible est la FENÊTRE de la grille (`.chart__viewport`), pas la carte
+// entière, trop haute pour partager l'écran avec la bulle ; elle y est recentrée sur la
+// bande du rang en cours (même calcul que ReaderChart au changement de rang, qui ne le
+// fait pas au montage), et cette bande est le `focus` à garder visible.
+function chartCard() {
+  const sec = visibleChartSections.value[0]
+  return sec ? document.getElementById('rchart-' + sec.id) : null
+}
+function centerChartBand(vp) {
+  const band = vp.querySelector('.chart__hl')
+  if (band) vp.scrollTop = band.offsetTop - vp.clientHeight / 2 + band.offsetHeight / 2
+}
+const tourSteps = [
+  { key: 'size', target: () => document.querySelector('.reader .szcard') },
+  {
+    key: 'steps',
+    target: () => {
+      const sec = sections.value.find((s) => s.steps.some(isRow))
+      return sec ? document.getElementById('rsec-' + sec.id) : null
+    },
+    // Section longue : c'est l'étape en cours qui doit rester visible à côté de la bulle.
+    focus: () => (currentStepId.value ? document.getElementById('rstep-' + currentStepId.value) : null),
+  },
+  {
+    key: 'chart',
+    target: () => {
+      // Deux volets : le diagramme est épinglé à droite, c'est lui qu'on montre.
+      if (splitMode.value) return document.querySelector('.reader .rpane')
+      const card = chartCard()
+      return card?.querySelector('.chart__viewport') || card
+    },
+    focus: () => (splitMode.value ? null : chartCard()?.querySelector('.chart__hl')),
+    prepare: (el) => {
+      if (el.classList.contains('chart__viewport')) centerChartBand(el)
+    },
+  },
+]
+// Retour du focus au bouton retour de l'en-tête (revue finale, lot du 23/09/2026, constat
+// mineur n°5) : `ReaderTour` (useDialogFocusReturn) ne sait restaurer le focus QU'AU
+// déclencheur d'OUVERTURE — introuvable quand la visite a été lancée depuis les Réglages ou
+// le Guide, puisque leur bouton a été démonté par la navigation qui a mené ici. Le focus
+// retombe alors sur <body>, sans repère clavier pour la suite. Cf. `finishTour` ci-dessous.
+const backBtn = ref(null)
+
+// Fin de visite (Passer, Échap ou Commencer) : la visite se ferme, l'URL perd `tour`
+// (un retour arrière ou un rechargement ne la relance pas) et le chrono, différé tant
+// qu'elle durait, est ouvert comme à une ouverture ordinaire du lecteur.
+async function finishTour() {
+  tourRequested.value = false
+  const { tour: _tour, ...query } = route.query
+  await router.replace({ query })
+  if (!isMounted) return
+  await openReaderChrono()
+  // Filet de focus (cf. le commentaire de `backBtn` ci-dessus) : `useDialogFocusReturn` a
+  // déjà eu sa chance à l'unmount de ReaderTour (flush 'post', avant cet `await`) — s'il
+  // n'a rien pu restaurer (déclencheur d'une autre page, démonté), le focus est encore sur
+  // <body> ici. On le pose alors explicitement sur le bouton retour de l'en-tête, plutôt
+  // que de laisser la visite se terminer sans aucun repère clavier.
+  await nextTick()
+  if (isMounted && document.activeElement === document.body) backBtn.value?.focus()
 }
 
 /* ── panneaux ── */
@@ -808,7 +913,7 @@ function onKey(e) {
 <template>
   <div v-if="ready" class="reader" :class="{ 'reader--split': splitMode }">
     <header class="rhdr" :class="{ 'rhdr--compact': scrolled }">
-      <button class="rhdr__back" :aria-label="t('common.back')" @click="leave()"><AppIcon name="chevronLeft" :size="22" /></button>
+      <button ref="backBtn" class="rhdr__back" :aria-label="t('common.back')" @click="leave()"><AppIcon name="chevronLeft" :size="22" /></button>
       <div class="rhdr__titles">
         <span class="rhdr__eyebrow">{{ ctx === 'project' ? project.name : t('reader.preview') }}</span>
         <h1 class="rhdr__title">{{ pattern.name }}</h1>
@@ -859,7 +964,7 @@ function onKey(e) {
            (readOnly) et si le patron a des sections à corriger. Réutilise la clé
            i18n correction.entry (même libellé que l'ancien bouton fiche). -->
       <button
-        v-if="readOnly && reader.sections?.length"
+        v-if="readOnly && (reader.sections?.length || pattern?.gallery?.length)"
         class="btn btn--block ro-correct"
         @click="router.push({ name: 'pattern-correct', params: { id: route.params.id } })"
       >
@@ -1195,6 +1300,10 @@ function onKey(e) {
       {{ pop.text }}
       <a v-if="pop.link" class="rpop__link" href="#" @click.prevent="popTechnique">{{ t('reader.seeTechnique') }} <AppIcon name="chevronRight" :size="14" /></a>
     </div>
+
+    <!-- Visite guidée (?tour=1) : en DERNIER, pour que toutes ses cibles soient déjà dans
+         le DOM quand elle se monte et les cherche. -->
+    <ReaderTour v-if="tourRequested && tourHasSlot" :steps="tourSteps" @done="finishTour" />
   </div>
   <!-- En attente (synchro MD ciblée à l'ouverture puis chargement) : évite un écran
        blanc pendant l'attente, forcément brève, de la synchro. -->

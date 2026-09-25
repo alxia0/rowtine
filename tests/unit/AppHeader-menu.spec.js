@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le menu burger d'AppHeader.vue est la SEULE navigation de l'app (décision design du
 // 28/06 : pas de barre basse). Il porte 9 entrées (Sessions depuis le 31/08), le lot du
 // 12/08 y ayant fait entrer Statistiques, Dépenses et le Guide utilisateur — ce dernier
@@ -6,21 +7,18 @@
 // mesurant aucune géométrie réelle.
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import i18n from '@/i18n'
 import AppHeader from '@/components/AppHeader.vue'
+import { createTestRouter } from './helpers/i18n-router'
 
 const ROUTES = ['home', 'stash', 'library', 'stats', 'sessions', 'expenses', 'guide', 'settings', 'about']
 
 function makeRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: ROUTES.map((name) => ({
-      path: `/${name === 'home' ? '' : name}`,
-      name,
-      component: { template: '<div/>' },
-    })),
-  })
+  return createTestRouter(ROUTES.map((name) => ({
+    path: `/${name === 'home' ? '' : name}`,
+    name,
+    component: { template: '<div/>' },
+  })))
 }
 
 // Le routeur est RENDU avec le wrapper, plutôt que relu via `wrapper.vm.$router` : c'est

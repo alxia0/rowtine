@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Fondations du popover de menu générique qui
 // remplacera plus tard les <select> Compteur/Section/Aide-mémoire de
 // la barre de requalification. Cette suite exerce le mécanisme SEUL — aucun

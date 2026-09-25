@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — collecte du snapshot de sauvegarde : lit `db`
 // (fake-indexeddb) et produit la forme attendue par `backupAll`.
 import { describe, it, expect, beforeEach } from 'vitest'

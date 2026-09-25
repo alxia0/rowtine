@@ -67,8 +67,12 @@ const SOUS_TITRE_RE = new RegExp(SOUS_TITRE_PREFIXE_RE.source + TITRE_CORPS)
 // `\s*` en tête : une image ancrée sous une étape est indentée (`  ![](…)`,
 // cf. serialize.js) — elle doit être reconnue comme image comme la galerie.
 const IMG_RE = /^\s*!\[[^\]]*\]\([^)]*\)\s*$/
-const NOTE_RE = /^>\s?/
-const BULLET_RE = /^-\s+(.*)$/
+// Exportées : md-retag.js recopiait ces deux-là à l'identique plutôt que de les
+// réutiliser (IMG_RE ci-dessus, elle, DIFFÈRE réellement là-bas — pas de `\s*` en
+// tête — donc reste propre à chaque fichier). Même mise en garde que TITLE_KIND_RE/
+// H2_RE plus haut : deux jeux de regex identiques dériveraient au premier ajustement.
+export const NOTE_RE = /^>\s?/
+export const BULLET_RE = /^-\s+(.*)$/
 const COUNTER_PREFIX_RE = /^\{(×|cadence)/
 
 // Titre NU d'un titre de niveau 2 (`## Corps {sleeve}` → `Corps`), ou `null` si
@@ -82,15 +86,22 @@ export function h2Title(line) {
   return tm ? tm[1] : m[1]
 }
 
+// Clé interne de rubrique portée par une ligne de titre, ou `null` si la ligne n'est
+// pas un bloc de référence — même désambiguïsation que le dispatch de blocs de
+// parse.js. Exportée pour que find-reference-block.js la réutilise au lieu de la
+// recopier (c'était le cas jusqu'ici, à l'identique) : même mise en garde que
+// TITLE_KIND_RE/H2_RE plus haut dans ce fichier, un seul endroit à faire évoluer.
+export function referenceKeyOfTitle(title) {
+  const tm = TITLE_KIND_RE.exec(title)
+  return tm ? (REF_TAG_TO_KEY[tm[2]] ?? null) : reservedKey(title)
+}
+
 export function lineType(line) {
   const l = String(line ?? '')
 
   const h2 = H2_RE.exec(l)
   if (h2) {
-    const title = h2[1]
-    const tm = TITLE_KIND_RE.exec(title)
-    if (tm) return REF_TAG_TO_KEY[tm[2]] ? 'reference' : 'section'
-    return reservedKey(title) ? 'reference' : 'section'
+    return referenceKeyOfTitle(h2[1]) ? 'reference' : 'section'
   }
 
   if (SOUS_TITRE_RE.test(l)) return 'sous-titre'

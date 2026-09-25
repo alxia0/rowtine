@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Sœur d'openNumberPrompt (cf. cm-number-prompt.spec.js)
 // pour PLUSIEURS champs à la fois : Cadence fusionne « Répéter tous les » et
 // « fois » dans une SEULE carte (`.cm-numprompt__card`, déjà réutilisée telle

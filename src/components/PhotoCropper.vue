@@ -24,10 +24,11 @@ const MIN = 40 // taille mini du cadre (px)
 
 // Calcule le rect d'affichage « contain » de l'image dans le stage, puis initialise le cadre
 // à ~80 % centré, pour que les poignées soient visibles d'emblée.
-function computeLayout() {
+// Rect « contain » de l'image dans le stage, ou null si rien n'est mesurable.
+function measureDisp() {
   const img = imgEl.value
   const st = stage.value
-  if (!img || !st || !img.naturalWidth) return
+  if (!img || !st || !img.naturalWidth) return null
   const sw = st.clientWidth
   const sh = st.clientHeight
   const ia = img.naturalWidth / img.naturalHeight
@@ -40,7 +41,13 @@ function computeLayout() {
     h = sh
     w = sh * ia
   }
-  disp.value = { x: (sw - w) / 2, y: (sh - h) / 2, w, h }
+  return { x: (sw - w) / 2, y: (sh - h) / 2, w, h }
+}
+function computeLayout() {
+  const d = measureDisp()
+  if (!d) return
+  disp.value = d
+  const { w, h } = d
   if (cropper.aspect) {
     rect.value = initialRectForAspect(disp.value, cropper.aspect)
     return
@@ -54,6 +61,22 @@ function computeLayout() {
   }
 }
 
+// Rotation de l'appareil (l'activité Android n'est PAS recréée, `configChanges` du
+// manifeste) : l'image se replace seule (`object-fit: contain`), mais `disp` et le cadre
+// restaient en pixels de l'ancienne mise en page : le cadre ne couvrait plus la zone que
+// `confirm()` découpe. On reporte le cadre à l'identique, en proportion de l'image (jamais
+// `computeLayout()`, qui le remettrait à 80 % et perdrait le réglage de l'utilisatrice).
+function onResize() {
+  const old = disp.value
+  const d = measureDisp()
+  if (!d || !old.w) return
+  onPointerUp() // un glissé en cours garde le rect du stage d'avant : on l'interrompt
+  const k = d.w / old.w
+  const r = rect.value
+  disp.value = d
+  rect.value = { x: d.x + (r.x - old.x) * k, y: d.y + (r.y - old.y) * k, w: r.w * k, h: r.h * k }
+}
+
 // Verrou de défilement via le compteur partagé (refermer ICI ne doit
 // plus déverrouiller le fond tant qu'une autre modale le tient). `verrouPose` : on ne
 // libère que ce qu'on a posé — le démontage ne décompte jamais le verrou d'un autre.
@@ -64,9 +87,13 @@ watch(
     if (v) {
       verrouPose = true
       lockBodyScroll()
-    } else if (verrouPose) {
-      verrouPose = false
-      unlockBodyScroll()
+      window.addEventListener('resize', onResize)
+    } else {
+      window.removeEventListener('resize', onResize)
+      if (verrouPose) {
+        verrouPose = false
+        unlockBodyScroll()
+      }
     }
     if (v) {
       await nextTick()
@@ -76,6 +103,7 @@ watch(
   },
 )
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize)
   if (verrouPose) {
     verrouPose = false
     unlockBodyScroll()

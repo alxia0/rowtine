@@ -7,6 +7,9 @@
 // bytesToB64/b64ToBytes sont partagées avec saf-storage.js (même algorithme,
 // mêmes contraintes) ET avec zip-import.js/PdfViewer.vue : voir src/utils/base64.js.
 import { bytesToBase64 as bytesToB64, base64ToBytes as b64ToBytes } from '@/utils/base64'
+// base64ByteLength partagée avec saf-storage.js (même algorithme, même contrainte :
+// mesurer ne doit jamais coûter une copie complète du contenu) — cf. naming.js.
+import { base64ByteLength } from './naming'
 const utf8ToB64 = (str) => bytesToB64(new TextEncoder().encode(str))
 const b64ToUtf8 = (b64) => new TextDecoder().decode(b64ToBytes(b64))
 
@@ -16,16 +19,6 @@ function norm(path) {
     .filter((p) => p && p !== '.')
   if (parts.includes('..')) throw new Error('chemin invalide (..)')
   return parts.join('/')
-}
-
-// Longueur en OCTETS d'un base64 canonique, SANS le décoder : 4 caractères valent
-// 3 octets, moins le remplissage final. Même algorithme que saf-storage.js (même
-// contrainte : mesurer ne doit jamais coûter une copie complète du contenu) — les
-// deux évoluent ensemble, comme les conversions partagées ci-dessus.
-function base64ByteLength(b64) {
-  if (!b64) return 0
-  const pad = b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0
-  return (b64.length / 4) * 3 - pad
 }
 
 export class MemoryBackupStorage {

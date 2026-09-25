@@ -15,7 +15,7 @@ import { W, WARNING_CODES } from './warning-codes'
 import { TITLE_KIND_RE, H2_RE } from './md-line-type'
 
 const IMG_RE = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/
-const CHART_ATTR_RE = /^(\d+)\s*m\s*×\s*(\d+)\s*rangs?(?:\s*·\s*forme\s+(radial-carré|radial-rond|tracé))?(?:\s*·\s*lecture\s+(.+?))?(?:\s*·\s*répéter\s+(\d+)\s*fois)?(?:\s*·\s*tailles\s+(.+?))?\s*$/
+const CHART_ATTR_RE = /^(\d+)\s*m\s*×\s*(\d+)\s*rangs?(?:\s*·\s*forme\s+(radial-carré|radial-rond|radial-hexagone|tracé))?(?:\s*·\s*lecture\s+(.+?))?(?:\s*·\s*répéter\s+(\d+)\s*fois)?(?:\s*·\s*tailles\s+(.+?))?\s*$/
 
 export function mdToPattern(md) {
   const warnings = []

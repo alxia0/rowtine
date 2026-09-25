@@ -19,7 +19,7 @@
 // un MD illisible/tronqué ou une entité DB introuvable ne doivent jamais interrompre
 // la synchro des autres dossiers ni écraser silencieusement l'état interne — chaque
 // écart est consigné dans le rapport renvoyé par `syncPatronMd`.
-import { hash8, parseEntryId } from './naming'
+import { hash8, parseEntryId, MAX_BACKUP_FILE_BYTES } from './naming'
 import { mdToPattern } from '@/utils/pattern-md'
 import { W, WARNING_CODES, isStructuredWarning } from '@/utils/pattern-md/warning-codes'
 import { resolveReaderAssets } from './resolve-reader-assets'
@@ -118,7 +118,12 @@ export function aggregateReconcileReports(list) {
 // Fichiers d'assets d'un dossier d'entrée : tout ce qui n'est ni un .json ni un .md
 // (donc ni `patron.json`/`patron.md`, ni un éventuel `projet.json` voisin) — lus en
 // base64, prêts pour `resolveReaderAssets`.
-async function readAssetFiles(storage, dir) {
+// LECTURE BORNÉE (correctif revue 1.3.2) : seuls les noms de `wanted` (les chemins
+// que le MD référence) sont lus, et aucun au-delà de MAX_BACKUP_FILE_BYTES. Un fichier
+// déposé à la main (vidéo, original.pdf que le MD ne cite pas) était lu en entier à
+// chaque synchro. Un fichier référencé mais trop gros n'est pas lu : il remonte dans
+// `missingAssets` du rapport, comme un fichier absent.
+async function readAssetFiles(storage, dir, wanted) {
   const entries = await storage.readdir(dir)
   // SANS PROTOTYPE : les clés sont des noms de fichiers lus sur le disque. Sur un objet
   // littéral, un fichier nommé `__proto__` verrait son contenu perdu en silence
@@ -140,6 +145,8 @@ async function readAssetFiles(storage, dir) {
     // cette ligne comme garde anti-régression — un import y casserait l'assertion
     // sans rien changer au comportement.
     if (/\.(part|tmp)$/i.test(entry.name)) continue
+    if (!wanted.has(entry.name)) continue
+    if (entry.size > MAX_BACKUP_FILE_BYTES) continue
     filesByName[entry.name] = await storage.readFile(`${dir}/${entry.name}`, { encoding: 'base64' })
   }
   return filesByName
@@ -299,7 +306,10 @@ async function processFolder(storage, dir, folderName, kind, deps, report) {
     warnings.push(W(WARNING_CODES.CHART_REPEAT_LABEL_LOST))
   }
 
-  const filesByName = await readAssetFiles(storage, dir)
+  // Chemins référencés par le MD : résolus contre un dossier vide, ils ressortent tous
+  // dans `missing`. Seuls ceux-là seront lus (cf. `readAssetFiles`).
+  const wanted = new Set(resolveReaderAssets(mdPattern, Object.create(null)).missing)
+  const filesByName = await readAssetFiles(storage, dir, wanted)
   const { entity: resolvedMdRaw, missing } = resolveReaderAssets(mdPattern, filesByName)
   // 4ᵉ porte d'entrée d'images (intent `quatrieme-porte-images-sans-plafond`) : cette
   // synchro injectait jusqu'ici une image déposée à la main dans le dossier de

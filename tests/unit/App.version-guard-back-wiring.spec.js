@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, garde-fou de version sur le retour Android et balayage de
 // bord. La fonction pure `versionGuardHandlesBack` est testée isolément dans
 // tests/unit/App.version-guard-back.spec.js, et la précédence d'autres couches

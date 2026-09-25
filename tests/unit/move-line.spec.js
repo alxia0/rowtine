@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // moveLineUp/moveLineDown (extraites de ReaderTextEditor.vue vers
 // cm-editor/move-line.js pour être testables sans monter le composant Vue,
 // cf. reader-text-editor.spec.js qui mocke createCmEditor et ne peut donc PAS

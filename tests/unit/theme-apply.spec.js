@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { applyTheme, applyAccent, syncNativeChrome, STORAGE_KEY } from '@/theme/apply'
 import { generatePalette } from '@/theme/palette'

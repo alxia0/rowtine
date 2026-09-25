@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Thème EFFECTIF réactif (lot « mode sombre », 08/08).
 //
 // Aujourd'hui rien n'est réactif sur ce point : `resolveEffective` est une fonction pure et

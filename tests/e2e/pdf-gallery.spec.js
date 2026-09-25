@@ -18,8 +18,13 @@ test('le PDF importé est retenu et son image apparaît sous la bonne ligne', as
   // vers import-local et démarre l'import au montage.
   await openAddPatternSheet(page)
   await page.locator('.lib-import__input[accept*="pdf"]').setInputFiles(FIXTURE)
-  // (#4) : plus d'écran de revue intermédiaire — on tape le bouton pour naviguer.
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
+  // (#4) : plus d'écran de revue intermédiaire — on tape le bouton pour naviguer. Refonte
+  // du bilan (lot du 23/09/2026) : le fixture a des sections, le bouton principal est donc
+  // « Prévisualiser le patron » (mène au lecteur) plutôt que « Voir le patron » — un retour
+  // arrière ramène sur la fiche, qui a pris la place de l'écran d'import dans l'historique.
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+  await page.goBack()
   await expect(page).toHaveURL(/\/pattern\/\d+$/)
 
   // L'aperçu inline a été retiré de la fiche patron — l'image

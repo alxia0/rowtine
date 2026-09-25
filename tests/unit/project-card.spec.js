@@ -1,18 +1,21 @@
+// @vitest-environment jsdom
 // ProjectCard — statut rapide : le badge de statut ne doit jamais déclencher
 // l'ouverture du projet (carte = <button> distinct, badge = élément à part, cf. commentaire
 // du template). La sélection d'un statut met à jour le store (et donc la base).
 import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import ProjectCard from '@/components/ProjectCard.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import { useProjectsStore } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 async function mountCard() {
   await db.projects.clear()
@@ -195,26 +198,42 @@ describe('ProjectCard — statut rapide', () => {
   // status === 'done' ET finishedAt non vide. Un projet abandonné peut porter une date de fin
   // (le statut « Abandonné » n'efface jamais la date) : l'afficher dirait
   // « Terminé le… » sur un projet qui ne l'est pas.
+  describe('note en étoiles', () => {
+    // Protège : une note hors bornes déjà en base s'affiche plafonnée à 5 étoiles, sans lever.
+    it('plafonne l’affichage à 5 étoiles', async () => {
+      const w = await mountCardWith({ stars: 50 })
+      expect(w.findAll('.pcard__stars > *')).toHaveLength(5)
+    })
+
+    it('une note non entière n’empêche pas le rendu', async () => {
+      const w = await mountCardWith({ stars: 2.5 })
+      expect(w.findAll('.pcard__stars > *')).toHaveLength(3)
+    })
+  })
+
   describe('date de fin', () => {
+    // « Terminé le {date} » : phrase complète pour le cas affiché, son préfixe (date vide)
+    // pour vérifier qu'aucune date de fin n'apparaît.
+    const finiLe = (date) => tk('project.finishedOn', { date }).trim()
     it('un projet Terminé AVEC date l’affiche dans la ligne meta', async () => {
       const w = await mountCardWith({ status: 'done', finishedAt: '2026-07-15' })
-      expect(w.find('.pcard__meta').text()).toContain('Terminé le 15/07/2026')
+      expect(w.find('.pcard__meta').text()).toContain(finiLe('15/07/2026'))
     })
 
     it('un projet Terminé SANS date n’affiche rien de plus', async () => {
       const w = await mountCardWith({ status: 'done', finishedAt: '' })
-      expect(w.find('.pcard__meta').text()).not.toContain('Terminé le')
+      expect(w.find('.pcard__meta').text()).not.toContain(finiLe(''))
     })
 
     it('un projet ABANDONNÉ portant une date ne l’affiche PAS', async () => {
       // La tuile dirait « Terminé le… » sur un projet qui ne l'est pas.
       const w = await mountCardWith({ status: 'abandoned', finishedAt: '2026-07-15' })
-      expect(w.find('.pcard__meta').text()).not.toContain('Terminé le')
+      expect(w.find('.pcard__meta').text()).not.toContain(finiLe(''))
     })
 
     it('un projet En cours portant une date ne l’affiche pas non plus', async () => {
       const w = await mountCardWith({ status: 'wip', finishedAt: '2026-07-15' })
-      expect(w.find('.pcard__meta').text()).not.toContain('Terminé le')
+      expect(w.find('.pcard__meta').text()).not.toContain(finiLe(''))
     })
   })
 

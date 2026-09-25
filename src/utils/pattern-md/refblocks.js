@@ -5,6 +5,7 @@
 import { slug, isSingleSize } from '../reader'
 import { REF_TO_EN } from './dialect'
 import { W, WARNING_CODES } from './warning-codes'
+import { SCALAR_TEXT_KEYS } from './scalar-keys'
 
 // PROTOTYPE NUL (`Object.create(null)`) — pas une coquetterie : un titre de patron est une
 // chaîne LIBRE, et `RESERVED['constructor']` sur un objet littéral remonte la chaîne de
@@ -265,13 +266,17 @@ export function parseReservedBlock(key, lines, { n = 0, warnings = [], title = '
     return { leftover: [bare, ...lines.map((l) => l.trim()).filter(Boolean)] }
   }
 
-  const text = lines.filter((l) => l.trim() !== '').join('\n')
-  if (key === 'gauge') return { gauge: text }
-  if (key === 'yarn') return { yarn: text }
-  if (key === 'needles') return { needles: text }
-  if (key === 'materials') return { materials: lines.map((l) => l.replace(/^\s*-\s+/, '').trim()).filter(Boolean) }
-  // Bloc Conseils : même forme (puces) que matériel juste au-dessus.
-  if (key === 'tips') return { tips: lines.map((l) => l.replace(/^\s*-\s+/, '').trim()).filter(Boolean) }
+  // gauge/yarn/needles : même ensemble SCALAR_TEXT_KEYS que reference-merge.js et
+  // selection-to-reference.js (scalar-keys.js) — une seule clé de sortie, celle du
+  // dispatch lui-même, plutôt que trois branches identiques à un nom près.
+  if (SCALAR_TEXT_KEYS.has(key)) {
+    const text = lines.filter((l) => l.trim() !== '').join('\n')
+    return { [key]: text }
+  }
+  // materials/tips : même forme (puces), même sortie sous la clé du dispatch.
+  if (key === 'materials' || key === 'tips') {
+    return { [key]: lines.map((l) => l.replace(/^\s*-\s+/, '').trim()).filter(Boolean) }
+  }
   if (key === 'techniques') {
     const techniques = []
     for (const l of lines) {

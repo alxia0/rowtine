@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, le patron libre naît dans la langue CHOISIE à l'accueil, jamais
 // seulement DEVINÉE de l'appareil (correctif task C4-fix2, 31/07, trouvé en revue).
 //

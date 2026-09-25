@@ -16,7 +16,9 @@
 //       forme que la partie après la virgule d'une data URL).
 
 import { MIME_TO_EXT } from './naming'
+import { EXCLUDED_SETTINGS_KEYS } from './serialize'
 import { sanitizeUrl } from '../utils/safe-url'
+import { clampStars } from '../utils/project-stars'
 
 // Dérivée par inversion de MIME_TO_EXT (naming.js), pour que les deux tables ne
 // puissent pas diverger (ajouter un type mime supporté ne se fait qu'à un seul
@@ -159,6 +161,9 @@ export function deserializeProject(projetJson, filesByName = {}, missing = []) {
   const json = projetJson && typeof projetJson === 'object' && !Array.isArray(projetJson) ? projetJson : {}
   const { photos, sections, counters, sessions, diagrams, ...rest } = json
   const project = { ...rest, photos: photosFromNames(photos, filesByName, missing) }
+  // `stars` pilote un `v-for` à l'affichage : borné à un entier 0..5. Réécrit seulement si la
+  // clé existe, pour garder le round-trip.
+  if ('stars' in project) project.stars = clampStars(project.stars)
 
   let instancePattern = null
   const patronText = lookupFile(filesByName, 'patron.json')
@@ -223,5 +228,11 @@ export function deserializeSettings(json) {
   // fichier édité à la main. Tout ce qui n'est pas un objet simple vaut « pas de
   // réglages » — la fusion de `writeSnapshotToDb` préserve alors ceux déjà en base.
   const obj = json && typeof json === 'object' && !Array.isArray(json) ? json : {}
-  return Object.entries(obj).map(([key, value]) => ({ key, value }))
+  // Les clés exclues à l'écriture le sont aussi à la lecture : un reglages.json retouché
+  // à la main ne doit pas imposer l'identité de l'appareil, la décision de sauvegarde ou
+  // une session en cours. Absentes du snapshot, elles gardent leur valeur locale à la
+  // fusion de `writeSnapshotToDb`.
+  return Object.entries(obj)
+    .filter(([key]) => !EXCLUDED_SETTINGS_KEYS.includes(key))
+    .map(([key, value]) => ({ key, value }))
 }

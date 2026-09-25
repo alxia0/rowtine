@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Titre d'un bloc référence (Aide-mémoire) en vue enrichie de l'éditeur : le texte
 // SOURCE (## Aiguilles {needles}, etc.) est TOUJOURS canonique/FR (cf.
 // referenceBlocksToMd, prompt IA, round-trip) — seul l'AFFICHAGE doit suivre la

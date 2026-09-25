@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LE VERROU DE DÉFILEMENT À COMPTEUR (deux modales successives, fond
 // déverrouillé). Deux étages :
 //   1. le module `src/utils/body-scroll-lock.js` lui-même (comptage, sécurité au
@@ -11,16 +12,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import { defineComponent, h } from 'vue'
-import fr from '@/i18n/fr.json'
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/body-scroll-lock'
 import SyncReportDialog from '@/components/SyncReportDialog.vue'
 import RestoreErrorDialog from '@/components/RestoreErrorDialog.vue'
 import { useSyncReportStore } from '@/stores/sync-report'
 import { useRestoreErrorStore } from '@/stores/restore-error'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 beforeEach(() => {
   // Le verrou s'écrit sur `document.body`, partagé par tout le fichier : sans cette

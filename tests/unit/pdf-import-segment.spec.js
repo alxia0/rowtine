@@ -131,6 +131,11 @@ describe('segmentSections', () => {
     expect(kindForTitle('INFO ET CONSEILS')).toBe('infos')
     expect(kindForTitle('INFO UND TIPPS')).toBe('infos')
   })
+  // « \b » ne borne pas une lettre accentuée : « Tył » (pl) doit garder son kind.
+  it('mot-clé finissant par une lettre accentuée : « Tył » → corps', () => {
+    expect(kindForTitle('Tył')).toBe('corps')
+    expect(kindForTitle('TYŁ')).toBe('corps')
+  })
   it('un rang « Fila » (espagnol, à plat) referme un bloc abréviations comme « Vuelta » (Memory Game)', () => {
     // Memory Game (ES, crochet, corpus réel) : « Fila » manquait à ROW_START_RE → un rang
     // « Fila 1: … » collé sous ABREVIATURAS restait avalé dans la section abbr au lieu
@@ -566,6 +571,17 @@ describe('segmentSections', () => {
     ]]
     const secs = segmentSections(pages)
     expect(secs.map((s) => s.title)).toContain('Préparation')
+  })
+  // En page 0, une mini-section n'est pas versée dans une section d'abréviations (jetée en aval hors glossaire).
+  it('page 0 : ne rétrograde pas une mini-section dans les abréviations', () => {
+    const kept = (secs) => secs.filter((s) => !s.noise && s.ref !== 'abbr').flatMap((s) => s.lines.map((l) => l.text))
+    const abbr = segmentSections([[
+      L('ABBREVIATIONS', { bold: true, size: 14, y: 800 }),
+      L('sc = single crochet', { y: 780 }), L('ch = chain', { y: 765 }), L('st = stitch', { y: 750 }),
+      L('Good to know', { bold: true, size: 12, y: 720 }),
+      L('Gently wash by hand in cold water.', { y: 700 }),
+    ]])
+    expect(kept(abbr)).toContain('Gently wash by hand in cold water.')
   })
   it('ne promeut PAS par simple espacement une ligne de continuation dans un bloc référence déjà ouvert (Umber Cloud gauge)', () => {
     // Umber Cloud Sweater (EN, corpus réel) : dans le bloc GAUGE (échantillon) déjà ouvert,

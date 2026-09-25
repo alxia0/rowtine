@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — YarnCard : la carte suit le système d'unités choisi.
 // Piège central : deux profils différents sur la même ligne — le métrage est celui
 // d'UNE pelote (profil detail, jamais de bascule km), le poids est le CUMUL du lot
@@ -6,11 +7,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import YarnCard from '@/components/YarnCard.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const USAGE = { state: 'free', used: 0, total: 0 }
 const YARN = { id: 1, brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu', quantity: 10, lengthM: 100, grams: 50 }
 

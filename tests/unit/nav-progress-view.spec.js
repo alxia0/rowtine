@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/nav-progress-view.spec.js
 // Unitaire — la barre est présente dans le DOM ssi navActive est vrai.
 import { describe, it, expect, afterEach } from 'vitest'

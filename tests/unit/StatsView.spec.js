@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Front (composant) — écran de statistiques de temps tricoté (grille calendaire du temps,
 // 10-11/08). Le sélecteur ne choisit plus une granularité de barre mais
 // une FENÊTRE D'OBSERVATION à laquelle tout l'écran se soumet (§4) : ce fichier remplace
@@ -15,6 +16,9 @@ import { useSessionsStore } from '@/stores/sessions'
 import { useProjectsStore } from '@/stores/projects'
 import { useSettingsStore } from '@/stores/settings'
 import EmptyStateArt from '@/components/EmptyStateArt.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
@@ -175,11 +179,19 @@ describe('StatsView — la fenêtre gouverne tout l’écran', () => {
     // locale de l'instance, pas une valeur écrite en dur dans le composant.
     i18n.global.locale.value = 'fr'
     const w = await mountAndLoad([])
-    expect(w.text()).toContain('Coche un rang, avance un compteur de projet ou lance le chrono en suivant un patron : ta progression s\'affichera ici.')
+    expect(w.text()).toContain(tk('stats.emptyHint'))
   })
 })
 
 describe('StatsView — barres par jour de semaine et tuiles', () => {
+  it('libellé de semaine : jour et mois au format de la langue active (07.09. en allemand)', async () => {
+    i18n.global.locale.value = 'de'
+    const w = await mountAndLoad(withToday())
+    await verRythme(w)
+    const labels = w.findAll('#stats-panel-rhythm > .bars > .bar .bar__label').map((l) => l.text())
+    expect(labels).toContain(tk('stats.weekOf', { date: '29.06.' }))
+  })
+
   it('sept barres, lundi en premier', async () => {
     const w = await mountAndLoad(withToday())
     await verRythme(w)
@@ -414,7 +426,7 @@ describe('StatsView — le filtre tricot / crochet gouverne tout l’écran', ()
   it('le filtre n’est PAS persisté : il revient à « Tout » en remontant l’écran', async () => {
     const w = await mountAndLoad(SESSIONS_MIXTES, PROJECTS_MIXTES)
     await w.findAll('.toggle')[1].findAll('.toggle__opt')[2].trigger('click') // Crochet
-    expect(w.findAll('.toggle')[1].findAll('.toggle__opt').find((o) => o.classes('toggle__opt--on')).text()).toBe('Crochet')
+    expect(w.findAll('.toggle')[1].findAll('.toggle__opt').find((o) => o.classes('toggle__opt--on')).text()).toBe(tk('technique.crochet'))
     w.unmount() // quitter l'écran : le filtre vit dans un `ref()` LOCAL au composant, pas dans
     // un store ni le localStorage — le détruire doit l'effacer.
     // Un nouveau montage (= revenir sur l'écran) : le filtre repart à « Tout ».
@@ -564,8 +576,8 @@ describe('StatsView — la liste des projets du jour sélectionné suit le store
     const w = await mountAndLoad(SESSIONS_MEME_JOUR, PROJETS_MEME_JOUR)
     await w.find('[data-day="2026-07-13"]').trigger('click')
     const lignes = w.findAll('.hm__day-project').map((li) => li.text())
-    expect(lignes).toContain('Pull — 1:00:00')
-    expect(lignes).toContain('Écharpe — 10:00')
+    expect(lignes).toContain(tk('stats.heatmap.projectLine', { name: 'Pull', duration: '1:00:00' }))
+    expect(lignes).toContain(tk('stats.heatmap.projectLine', { name: 'Écharpe', duration: '10:00' }))
   })
 
   it('le filtre technique s’applique À LA LISTE — sous « Crochet », Pull disparaît de ce jour-là', async () => {
@@ -574,7 +586,7 @@ describe('StatsView — la liste des projets du jour sélectionné suit le store
     expect(w.findAll('.hm__day-project')).toHaveLength(2)
     await w.findAll('.toggle')[1].findAll('.toggle__opt')[2].trigger('click') // Crochet
     const lignes = w.findAll('.hm__day-project').map((li) => li.text())
-    expect(lignes).toEqual(['Écharpe — 10:00']) // Pull (tricot) a disparu, pas juste masqué
+    expect(lignes).toEqual([tk('stats.heatmap.projectLine', { name: 'Écharpe', duration: '10:00' })]) // Pull (tricot) a disparu, pas juste masqué
   })
 })
 

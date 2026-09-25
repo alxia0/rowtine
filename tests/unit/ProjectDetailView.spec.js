@@ -1,17 +1,23 @@
+// @vitest-environment jsdom
 // Composant — ProjectDetailView (vue lourde) : onglets, infos, sections, taille active.
 // vue-router mocké ; enfants lourds stubbés ; base Dexie réelle.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { db } from '@/db/db'
+import fr from '@/i18n/fr.json'
+import { db, setSetting } from '@/db/db'
 import i18n from '@/i18n'
 import { SESSION_NO_SECTION } from '@/constants/session'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
 const nav = vi.hoisted(() => ({
   route: { params: {}, query: {} },
   router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() },
 }))
 vi.mock('vue-router', () => ({ useRoute: () => nav.route, useRouter: () => nav.router }))
+
+// Même objet que la route du mock hoisté ci-dessus (vue-router mocké).
+const route = nav.route
 
 // Menu ⋮ — « Voir le PDF original » : on prouve QUI est appelé, pas le détail
 // natif/web du module (déjà couvert par open-pdf.spec.js).
@@ -23,6 +29,9 @@ import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { useCropperStore } from '@/stores/cropper'
+import { useSettingsStore } from '@/stores/settings'
+
+const tk = makeTk(i18n)
 
 async function seedProject(extra = {}) {
   const pid = await db.projects.add({
@@ -176,6 +185,21 @@ describe('ProjectDetailView', () => {
     expect(w.vm.showBadgeComposer).toBe(false) // recadreur refermé : le composeur se ferme normalement
   })
 
+  // Le retour ferme d'abord la visionneuse photo locale, sans changer d'onglet derrière elle.
+  it('handleBackPressed() : ferme la visionneuse photo avant la logique d’onglet', async () => {
+    await seedProject({ photos: ['data:image/png;base64,A'] })
+    const w = mountDetail()
+    await flushPromises()
+    await w.vm.changeTab('photos')
+    await w.vm.$nextTick()
+    await w.find('.pthumb__open').trigger('click')
+    expect(w.vm.viewerIdx).toBe(0)
+
+    expect(w.vm.handleBackPressed()).toBe(true)
+    expect(w.vm.viewerIdx).toBe(null)
+    expect(w.vm.tab).toBe('photos')
+  })
+
   it('onglet Stats : agrège les séances du projet, les pelotes utilisées et affiche la mini-heatmap', async () => {
     const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '' })
     await db.sessions.add({
@@ -195,17 +219,17 @@ describe('ProjectDetailView', () => {
     const w = mountDetail()
     await flushPromises()
 
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
 
     const panel = w.find('#panel-stats')
     expect(panel.exists()).toBe(true)
-    expect(panel.text()).toContain('2 sessions')
-    expect(panel.text()).toContain('3 pelotes')
+    expect(panel.text()).toContain(tk('project.stats.sessionsValue', 2))
+    expect(panel.text()).toContain(tk('project.stats.ballsValue', 3))
     expect(panel.text()).toContain('300 m')
     // Projet EN COURS : phrase dédiée, pas « 05/01/2026 au en cours » ; dates localisées,
     // jamais l'ISO brut (mêmes règles que la ligne « période » du badge).
-    expect(panel.text()).toContain('Depuis le 05/01/2026')
+    expect(panel.text()).toContain(tk('project.stats.periodOngoing', { from: '05/01/2026' }))
     expect(panel.text()).not.toContain('2026-01-05')
     expect(w.findComponent({ name: 'StatsHeatmap' }).exists()).toBe(true)
   })
@@ -218,10 +242,10 @@ describe('ProjectDetailView', () => {
     })
     const w = mountDetail()
     await flushPromises()
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
 
-    expect(w.find('#panel-stats').text()).toContain('05/01/2026 au 06/01/2026')
+    expect(w.find('#panel-stats').text()).toContain(tk('project.stats.periodValue', { from: '05/01/2026', to: '06/01/2026' }))
   })
 
   it('onglet Stats : état vide sans exception pour un projet sans séance', async () => {
@@ -229,7 +253,7 @@ describe('ProjectDetailView', () => {
     const w = mountDetail()
     await flushPromises()
 
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
 
     expect(w.find('#panel-stats').exists()).toBe(true)
@@ -240,10 +264,10 @@ describe('ProjectDetailView', () => {
     const w = mountDetail()
     await flushPromises()
 
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
 
-    expect(w.find('#panel-stats').text()).toContain('Aucune session enregistrée')
+    expect(w.find('#panel-stats').text()).toContain(tk('project.stats.empty'))
     await w.find('[data-test="open-badge-composer"]').trigger('click')
     await flushPromises()
 
@@ -258,7 +282,7 @@ describe('ProjectDetailView', () => {
     })
     const w = mountDetail()
     await flushPromises()
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
 
     await w.find('[data-test="open-badge-composer"]').trigger('click')
@@ -294,7 +318,7 @@ describe('ProjectDetailView', () => {
     const w = mountDetail()
     await flushPromises()
 
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
     await w.find('[data-test="open-badge-composer"]').trigger('click')
     await flushPromises()
@@ -313,7 +337,7 @@ describe('ProjectDetailView', () => {
     })
     const w = mountDetail()
     await flushPromises()
-    await w.findAll('[role="tab"]').find((b) => b.text() === 'Stats').trigger('click')
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
     await flushPromises()
     await w.find('[data-test="open-badge-composer"]').trigger('click')
     await flushPromises()
@@ -424,7 +448,7 @@ describe('ProjectDetailView', () => {
     await flushPromises()
 
     await w.find('.phdr__kebab').trigger('click')
-    await w.findAll('.menu__item').find((b) => b.text() === 'Modifier le projet').trigger('click')
+    await w.findAll('.menu__item').find((b) => b.text() === tk('project.edit')).trigger('click')
 
     expect(nav.router.push).toHaveBeenCalledWith({ name: 'project-edit', params: { id: String(pid) } })
   })
@@ -561,7 +585,10 @@ describe('ProjectDetailView', () => {
 
       // La cascade de suppression (Dexie) retombe sur plusieurs micro-tâches : on attend
       // le résultat plutôt qu'un seul flushPromises (même motif que le test « taille active »).
-      await vi.waitFor(async () => expect(await db.projects.get(pid)).toBeUndefined(), { timeout: 10000 })
+      await vi.waitFor(async () => {
+        expect(await db.projects.get(pid)).toBeUndefined()
+        expect(await db.trash.count()).toBe(1)
+      }, { timeout: 10000 })
       expect(nav.router.replace).toHaveBeenCalledWith({ name: 'home' })
       // Passe bien par softDelete : le projet est récupérable depuis la corbeille (annulable).
       expect(await db.trash.count()).toBe(1)
@@ -576,7 +603,10 @@ describe('ProjectDetailView', () => {
       await w.find('.phdr__kebab').trigger('click')
       await w.findAll('.menu__item').find((b) => b.text() === i18n.global.t('project.delete')).trigger('click')
 
-      await vi.waitFor(async () => expect(await db.projects.get(pid)).toBeUndefined(), { timeout: 10000 })
+      await vi.waitFor(async () => {
+        expect(await db.projects.get(pid)).toBeUndefined()
+        expect(await db.trash.count()).toBe(1)
+      }, { timeout: 10000 })
       expect(nav.router.replace).toHaveBeenCalledWith({ name: 'home' })
       const y = await db.yarns.get(yid)
       expect(y.reservations).toEqual({}) // la réservation revient au pool
@@ -912,6 +942,20 @@ describe('ProjectDetailView', () => {
       expect(menuLabels(w)).not.toContain(i18n.global.t('project.correctPattern'))
     })
 
+    it('patron créé manuellement (pas de sections, une galerie) : l’item « Corriger le patron » est présent et route vers l’éditeur', async () => {
+      const patId = await db.patterns.add({ name: 'SABAI', gallery: [{ src: 'data:image/png;base64,GAL', page: 0, w: 10, h: 10 }] })
+      await seedProject({ patternId: patId })
+      const w = mountDetail()
+      await flushPromises()
+      await openMenu(w)
+
+      const item = w.findAll('.menu__item').find((b) => b.text() === i18n.global.t('project.correctPattern'))
+      expect(item).toBeTruthy()
+      await item.trigger('click')
+
+      expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-correct', params: { id: patId } })
+    })
+
     it('échec de l’ouverture du PDF : ferme quand même le menu et avertit sans planter', async () => {
       openPdfExternally.mockRejectedValueOnce(new Error('boom'))
       const patId = await db.patterns.add({ name: 'SABAI', pdf: 'data:application/pdf;base64,AAAA' })
@@ -926,5 +970,300 @@ describe('ProjectDetailView', () => {
 
       expect(useSnackbarStore().message).toBe(i18n.global.t('patternExtras.openError'))
     })
+  })
+})
+
+// ── Fiche projet montée avec l'i18n français seul (prix du patron, coût du projet) ────────
+// Instance dédiée : les assertions de ces deux blocs lisent des chaînes françaises et le
+// format « 8,50 », que l'i18n de l'application ne garantit pas sous jsdom (locale en-US).
+const i18nFr = createTestI18n()
+
+// La fiche projet AFFICHE le prix du patron, en lecture seule (lot 07/08). Elle ne l'édite
+// pas : la saisie est dans le formulaire du projet et sur la fiche du patron.
+//
+// Trois états à distinguer, et c'est tout l'enjeu :
+//   prix renseigné -> le montant ;  prix « 0 » -> « Gratuit » ;  prix vide -> AUCUNE LIGNE
+// (pas une ligne vide : une étiquette sans valeur est du bruit).
+describe('fiche projet — prix du patron', () => {
+  async function monterAvecPrix(over) {
+    const patId = await db.patterns.add({ name: 'Sabai', type: 'knitting', ...over })
+    const projectId = await db.projects.add({ name: 'Bonnet', patternId: patId })
+    route.params = { id: String(projectId) }
+    // Correction de fixture : .patron-source vit dans le panneau « Infos », pas dans l'onglet
+    // par défaut (« Sections », cf. ProjectDetailView.vue:59 `tab = ref(route.query.tab ||
+    // 'sections')`). Sans ce query, le bloc n'est jamais monté — pour une raison étrangère
+    // au prix du patron.
+    route.query = { tab: 'infos' }
+    const w = mount(ProjectDetailView, { global: { plugins: [i18nFr], stubs: { AppHeader: true } } })
+    // Correction de fixture (héritée d'un correctif antérieur) : un seul flushPromises() ne vide pas la
+    // chaîne Dexie de loadAll() (project → linkedPattern → Promise.all des 4 stores). `loading`
+    // reste `true` un tour de plus que `linkedPattern`, et le template masque TOUT derrière
+    // <SkeletonScreen v-else-if="loading">, y compris le bloc .patron-source — attendre le
+    // signal de fin réel plutôt qu'un délai fixe.
+    await flushPromises()
+    await vi.waitFor(() => expect(w.vm.loading).toBe(false))
+    return w
+  }
+
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await db.delete()
+    await db.open()
+  })
+
+  it('1. prix renseigné ⇒ le montant s’affiche', async () => {
+    // CHF plutôt que le EUR d'origine : EUR est DEFAULT_CURRENCY, et la
+    // seule assertion de montant ne regarde de toute façon jamais la devise — l'ajout de
+    // `toContain('CHF')` ci-dessous est ce qui rend `p.priceCurrency` (et non un repli codé
+    // en dur) réellement exercé.
+    const w = await monterAvecPrix({ price: '8,50', priceCurrency: 'CHF' })
+    const ligne = w.find('[data-test="project-pattern-price"]')
+    expect(ligne.exists()).toBe(true)
+    expect(ligne.text()).toContain('8,50')
+    expect(ligne.text()).toContain('CHF')
+  })
+
+  it('2. prix « 0 » ⇒ « Gratuit », pas « 0,00 € »', async () => {
+    const w = await monterAvecPrix({ price: '0', priceCurrency: 'EUR' })
+    const ligne = w.find('[data-test="project-pattern-price"]')
+    expect(ligne.exists()).toBe(true)
+    expect(ligne.text()).toContain(fr.pattern.priceFree)
+    // `not.toContain('0,00')` (tel quel) ne peut jamais rougir : le profil
+    // « detail » de formatMoney omet les centimes sur un montant rond (« 0 € », jamais
+    // « 0,00 € ») — même si la branche « Gratuit » disparaissait, ce texte n'apparaîtrait
+    // toujours pas. On vérifie l'absence de tout chiffre à la place : ça mord sur la vraie
+    // mutation (M1, plus bas), qui ferait apparaître « 0 € ».
+    expect(ligne.text()).not.toMatch(/\d/)
+  })
+
+  it('3. prix VIDE ⇒ AUCUNE ligne (pas une ligne vide)', async () => {
+    const w = await monterAvecPrix({ price: '' })
+    expect(w.find('[data-test="project-pattern-price"]').exists()).toBe(false)
+  })
+})
+
+// La fiche projet affiche le COÛT du projet (lot 08/08) : le prix des laines qu'il a
+// réservées ou déjà tricotées. Lecture seule — la saisie des prix vit sur les fiches laine.
+//
+// Fixture : trois points MESURÉS avant écriture du plan, ne pas les retirer —
+//  1. `route.query = { tab: 'infos' }` : la tuile vit dans le panneau « Détails », qui n'est
+//     PAS l'onglet par défaut (ProjectDetailView.vue:59) ;
+//  2. `vi.waitFor(loading === false)` : un seul flushPromises() laisse le squelette masquer
+//     tout le panneau ;
+//  3. `setSetting('currency') + settings.load()` : la devise des laines vient du réglage
+//     global. EUR étant DEFAULT_CURRENCY, tester en EUR ne prouverait rien.
+//
+// LIMITE ASSUMÉE de cette fixture : parce qu'elle charge le magasin `settings` AVANT le
+// montage, le filet `if (!settings.loaded) settings.load()` de la vue n'est exercé par
+// AUCUN test de ce bloc. Il reproduit à l'identique le motif de StashView.vue:86 et
+// d'ExpensesView — à ne pas compter comme couvert lors de la revue.
+describe('fiche projet — coût du projet (laines)', () => {
+  // Monte la fiche d'un projet neuf. `yarns` : laines à créer (le projet leur est injecté via
+  // `reserved` / `knitted`). `pattern` : champs du patron lié (omis = projet sans patron).
+  // `currency` : le réglage global, qui pilote la devise des LAINES (jamais celle du patron).
+  async function monter({ yarns = [], pattern = null, currency = 'CHF' } = {}) {
+    // `patternId` n'est POSÉ que s'il y a un patron : écrire `patternId: undefined` sur un
+    // projet libre le ferait passer pour un projet dont le patron a été supprimé
+    // (`patternMissing`, ProjectDetailView.vue:111) — un autre écran, un autre test.
+    const projectId = pattern
+      ? await db.projects.add({
+          name: 'Bonnet',
+          patternId: await db.patterns.add({ name: 'Sabai', type: 'knitting', ...pattern }),
+        })
+      : await db.projects.add({ name: 'Bonnet' })
+    for (const y of yarns) {
+      const { reserved = 0, knitted = 0, ...rest } = y
+      await db.yarns.add({
+        brand: 'Drops', quantity: 10, ...rest,
+        reservations: reserved ? { [projectId]: reserved } : {},
+        consumed: knitted ? { [projectId]: knitted } : {},
+      })
+    }
+    await setSetting('currency', currency)
+    await useSettingsStore().load()
+    route.params = { id: String(projectId) }
+    route.query = { tab: 'infos' }
+    const w = mount(ProjectDetailView, { global: { plugins: [i18nFr], stubs: { AppHeader: true } } })
+    await flushPromises()
+    await vi.waitFor(() => expect(w.vm.loading).toBe(false))
+    return w
+  }
+
+  const tuile = (w) => w.find('[data-test="project-total-cost"]')
+
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await db.delete()
+    await db.open()
+  })
+
+  it('1. ni laine ni prix de patron ⇒ AUCUNE tuile (pas une tuile vide)', async () => {
+    const w = await monter()
+    expect(tuile(w).exists()).toBe(false)
+  })
+
+  it('2. laines réservées et tricotées ⇒ le montant, dans la devise du RÉGLAGE', async () => {
+    const w = await monter({
+      currency: 'CHF',
+      yarns: [
+        { price: '4,50', reserved: 3 }, // 13,50
+        { price: '2', knitted: 2 },     //  4
+      ],
+    })
+    const txt = tuile(w).text()
+    // 17,50 : valeur à CENTIMES à dessein — sur un montant rond, formatMoney profil
+    // « detail » n'écrit aucune décimale, et le format ne serait pas réellement exercé.
+    expect(txt).toContain('17,50')
+    // CHF et non EUR : EUR est DEFAULT_CURRENCY, l'assertion passerait sur un repli codé
+    // en dur. C'est CE `toContain` qui prouve que `settings.currency` est lu.
+    expect(txt).toContain('CHF')
+  })
+
+  it('3. des pelotes mais AUCUN prix connu ⇒ « — », jamais « 0 € »', async () => {
+    const w = await monter({ yarns: [{ price: '', reserved: 4 }] })
+    const txt = tuile(w).text()
+    expect(tuile(w).exists()).toBe(true)
+    // Aucun chiffre de MONTANT : afficher « 0 » ferait passer une ignorance pour une
+    // gratuité. (`not.toContain('0,00')` ne pourrait jamais rougir — formatMoney n'écrit
+    // pas les centimes d'un montant rond.)
+    expect(txt).toContain('—')
+  })
+
+  it('4. laine réservée par un AUTRE projet ⇒ elle ne compte pas ici', async () => {
+    const autre = await db.projects.add({ name: 'Écharpe' })
+    await db.yarns.add({ brand: 'Katia', quantity: 9, price: '100', reservations: { [autre]: 5 }, consumed: {} })
+    const w = await monter({ yarns: [{ price: '4,50', reserved: 3 }] })
+    // Prémisse ASSERTÉE, pas supposée : tout ce test repose sur le fait que les deux projets
+    // ont des ids différents. Si un changement d'ordre de création dans `monter` les faisait
+    // coïncider, le test deviendrait un no-op qui passe toujours.
+    expect(autre).not.toBe(w.vm.project.id)
+    const txt = tuile(w).text()
+    // `toContain('13,50')` seul ne mord pas : sous la fuite entre projets (tout le stock
+    // compté), le montant devient 513,50 CHF — cette chaîne CONTIENT « 13,50 » ET NE
+    // CONTIENT PAS « 500 », donc les deux assertions passeraient quand même (constat de
+    // revue, 08/08). `\b` ne mord pas non plus ici : les deux spans (`itile__k` puis
+    // `itile__v`) sont collés sans espace dans le rendu (« ...projet13,50 CHF »), et entre
+    // « t » et « 1 » il n'y a AUCUNE frontière de mot (lettre et chiffre sont tous deux
+    // `\w`). Le lookbehind négatif sur un chiffre distingue vraiment les deux cas : rien
+    // (ou une lettre) précède « 13,50 » dans le bon montant, un « 5 » le précède dans la fuite.
+    expect(txt).toMatch(/(?<!\d)13,50/)
+    expect(txt).not.toContain('500')
+  })
+
+  it('5. prix du patron ⇒ entre parenthèses, dans SA propre devise', async () => {
+    // Laines en CHF (réglage), patron en EUR (devise propre du patron) : ce cas EXISTE dans
+    // la vraie vie. C'est la seule assertion qui interdit qu'un jour les deux montants
+    // soient additionnés — une somme unique ne pourrait pas porter deux devises.
+    const w = await monter({
+      currency: 'CHF',
+      yarns: [{ price: '4,50', reserved: 3 }],
+      pattern: { price: '18,90', priceCurrency: 'EUR' },
+    })
+    const txt = tuile(w).text()
+    expect(txt).toContain('13,50')
+    expect(txt).toContain('CHF')
+    expect(txt).toContain('18,90')
+    expect(txt).toContain('€')
+    expect(txt).toContain('patron')
+  })
+
+  it('6. patron sans prix noté ⇒ AUCUNE parenthèse', async () => {
+    const w = await monter({ yarns: [{ price: '4,50', reserved: 3 }], pattern: { price: '' } })
+    expect(tuile(w).text()).not.toContain('(')
+  })
+
+  it('7. patron à « 0 » ⇒ « patron : Gratuit », jamais un montant', async () => {
+    const w = await monter({
+      yarns: [{ price: '4,50', reserved: 3 }],
+      pattern: { price: '0', priceCurrency: 'EUR' },
+    })
+    const txt = tuile(w).text()
+    expect(txt).toContain(fr.pattern.priceFree)
+    // Le montant des LAINES reste, celui du patron ne devient pas « 0 € ».
+    expect(txt).toContain('13,50')
+  })
+
+  it('8. laine sans prix parmi des laines chiffrées ⇒ le total le DIT', async () => {
+    const w = await monter({
+      currency: 'CHF',
+      yarns: [{ price: '4,50', reserved: 3 }, { price: '', reserved: 2 }, { price: '', knitted: 1 }],
+    })
+    const txt = tuile(w).text()
+    expect(txt).toContain('13,50') // le total ne compte que ce qui est connu
+    // Deux LAINES sans prix (et non trois pelotes) : la mention compte des fiches.
+    expect(txt).toContain(fr.project.costUnknownPrices.replace('{n}', '2'))
+  })
+
+  it('9. laine réservée ⇒ la liste affiche RÉSERVÉ / STOCK, pas le stock seul', async () => {
+    // Constat de revue (08/08) : `×{{ y.quantity }}` seul affichait le STOCK (10 pelotes),
+    // jamais ce que la tuile de coût, juste en dessous, facture (1 pelote réservée par
+    // défaut) — « ×10 » suivi d'un coût pour 1 pelote se lisait comme un total cassé.
+    const w = await monter({ yarns: [{ price: '4,50', reserved: 1 }] }) // quantity: 10 (défaut de `monter`)
+    const txt = w.find('.yarnlist').text()
+    // Doit distinguer vraiment « 1 / 10 » de « 10 » seul : sous la mutation qui remet
+    // `y.quantity` seul, la ligne redevient « ×10 » et ce test doit rougir.
+    expect(txt).toMatch(/×1\s*\/\s*10/)
+    expect(txt).not.toMatch(/×10(?!\s*\/)/)
+  })
+})
+
+describe('fiche projet — rectifier une séance', () => {
+  async function openEdit(durationSec) {
+    const pid = await seedProject()
+    const sid = await db.sessions.add({ projectId: pid, sectionId: null, date: '2026-08-10T10:00:00.000Z', durationSec, rowsDone: 0, manual: true })
+    const w = mountDetail()
+    await flushPromises()
+    await w.find('#tab-sessions').trigger('click')
+    await flushPromises()
+    await w.find('.ses-row__edit').trigger('click')
+    return { w, sid }
+  }
+  const save = async (w) => {
+    await w.find('.addform .btn--primary').trigger('click')
+    await flushPromises()
+  }
+
+  // Deux appuis rapprochés sur Enregistrer n'ajoutent qu'une séance manuelle.
+  it('ajout manuel, double appui : une seule séance', async () => {
+    const pid = await seedProject()
+    const w = mountDetail()
+    await flushPromises()
+    await w.find('#tab-sessions').trigger('click')
+    await flushPromises()
+    await w.find('.sessions-tab .btn--block').trigger('click')
+    await w.find('#sm').setValue('30')
+    const btn = w.find('.addform .btn--primary')
+    btn.trigger('click')
+    btn.trigger('click')
+    await flushPromises()
+    await new Promise((r) => setTimeout(r, 20))
+    await flushPromises()
+    expect(await db.sessions.where('projectId').equals(pid).count()).toBe(1)
+  })
+
+  // Une durée vidée ou illisible n'est jamais enregistrée comme 0.
+  it('durée vidée : la séance garde sa durée', async () => {
+    const { w, sid } = await openEdit(1800)
+    await w.find(`#esm-${sid}`).setValue('')
+    await save(w)
+    expect((await db.sessions.get(sid)).durationSec).toBe(1800)
+  })
+
+  // Rectifier la date seule ne réécrit pas une durée arrondie à la minute.
+  it('date seule modifiée : la durée à la seconde près est conservée', async () => {
+    const { w, sid } = await openEdit(610)
+    await w.find('.addform input[type="date"]').setValue('2026-08-11')
+    await save(w)
+    const row = await db.sessions.get(sid)
+    expect(row.durationSec).toBe(610)
+    expect(row.date.slice(0, 10)).toBe('2026-08-11')
+  })
+
+  // Un champ date vidé ne déplace pas la séance à aujourd'hui.
+  it('date vidée : la séance garde sa date', async () => {
+    const { w, sid } = await openEdit(600)
+    await w.find('.addform input[type="date"]').setValue('')
+    await save(w)
+    expect((await db.sessions.get(sid)).date).toBe('2026-08-10T10:00:00.000Z')
   })
 })

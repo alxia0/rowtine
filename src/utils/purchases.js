@@ -19,6 +19,7 @@ export function emptyPurchase() {
     currency: '',
     date: '',
     bain: '',
+    purchasedFrom: '', // boutique / lieu d'achat, alimenté notamment par « Purchased at » (import Ravelry)
     reconstructed: false,
     // Catégorie de dépense (lot « prix du patron », 07/08). Explicite sur les lignes NEUVES ;
     // les lignes déjà en base n'ont pas ce champ et n'ont pas à être réécrites — `categoryOf`
@@ -34,7 +35,7 @@ export function isPriceUnknown(line) {
 export function lineAmount(line) {
   if (!line || line.kind === 'gift') return 0
   const price = parseDecimal(line.unitPrice) || 0
-  const qty = Number(line.quantity) || 0
+  const qty = parseDecimal(line.quantity) || 0
   return price * qty
 }
 
@@ -52,7 +53,7 @@ export function totalsByCurrency(lines) {
 }
 
 export function totalSkeins(lines) {
-  return (lines || []).reduce((a, l) => a + (Number(l.quantity) || 0), 0)
+  return (lines || []).reduce((a, l) => a + (parseDecimal(l.quantity) || 0), 0)
 }
 
 // Ce que l'état du stock sous-entend avoir été acquis : les pelotes restantes PLUS

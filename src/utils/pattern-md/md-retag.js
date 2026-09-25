@@ -4,11 +4,12 @@
 import { emitStepCounter, parseStepCounter, parseSectionRepeat } from './counters.js'
 import { DEFAULT_KIND } from '../section-kinds.js'
 import { kindToEn } from './dialect.js'
-import { TITLE_KIND_RE, H2_RE } from './md-line-type.js'
+// NOTE_RE/BULLET_RE réutilisées depuis md-line-type.js (même syntaxe, recopiée à
+// l'identique jusqu'ici) : IMG_RE, elle, diffère réellement là-bas (`\s*` en tête
+// pour reconnaître une image indentée) et reste donc propre à ce fichier.
+import { TITLE_KIND_RE, H2_RE, NOTE_RE, BULLET_RE } from './md-line-type.js'
 
 const IMG_RE = /^!\[[^\]]*\]\([^)]*\)\s*$/
-const NOTE_RE = /^>\s?/
-const BULLET_RE = /^-\s+(.*)$/
 const LEGACY_REP_RE = /^×\s*/
 
 // Retire tout balisage Rowtine-MD d'une ligne pour en obtenir le texte nu.

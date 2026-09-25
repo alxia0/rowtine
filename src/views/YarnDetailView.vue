@@ -6,6 +6,7 @@ import AppIcon from '@/components/AppIcon.vue'
 import ThumbImage from '@/components/ThumbImage.vue'
 import SkeletonScreen from '@/components/SkeletonScreen.vue'
 import { useYarnsStore } from '@/stores/yarns'
+import { useTrashStore } from '@/stores/trash'
 import { useProjectsStore } from '@/stores/projects'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
@@ -17,7 +18,9 @@ import { useCropperStore } from '@/stores/cropper'
 import { useLightboxStore } from '@/stores/lightbox'
 import { pickAndCropImage } from '@/utils/photo'
 import { photosOf, coverPhotoOf } from '@/utils/yarn-photos'
-import { formatLength, formatWeight, currencySymbol } from '@/utils/units'
+import { formatLength, formatWeight, formatAmount, currencySymbol } from '@/utils/units'
+import { formatLocalDate } from '@/utils/date-format'
+import { parseDecimal } from '@/utils/decimal'
 import { latestPurchaseDate, bainsOf } from '@/utils/purchases'
 import { orderedLabels } from '@/constants/yarn-labels'
 import { deduceOrigin } from '@/constants/fiber-origin'
@@ -31,6 +34,7 @@ const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const yarnsStore = useYarnsStore()
+const trashStore = useTrashStore()
 const projectsStore = useProjectsStore()
 const settings = useSettingsStore()
 const purchasesStore = usePurchasesStore()
@@ -69,6 +73,7 @@ const rows = computed(() => {
   push('yarn.colorName', y.colorName)
   push('yarn.colorType', y.colorType && y.colorType !== 'uni' ? t(`yarn.colorTypes.${y.colorType}`) : '')
   push('yarn.colorNotes', y.colorNotes)
+  push('yarn.storedIn', y.storedIn)
   push('yarn.weight', y.weight ? t(`yarn.weights.${y.weight}`) : '')
   const imperial = settings.unitSystem === 'imperial'
   const opts = { locale: locale.value, system: settings.unitSystem, profile: 'detail' }
@@ -77,14 +82,17 @@ const rows = computed(() => {
   const wgt = y.grams ? formatWeight(y.grams, opts) : null
   push(imperial ? 'yarn.ounces' : 'yarn.grams', wgt ? wgt.text : '')
   push('yarn.quantity', y.quantity)
-  push('yarn.priceWithSymbol', Number.isFinite(y.price) ? String(y.price).replace('.', ',') : y.price)
+  // Une saisie illisible comme nombre reste affichée telle quelle (jamais perdre d'info).
+  const priceOk = y.price !== '' && y.price != null && Number.isFinite(parseDecimal(y.price))
+  push('yarn.priceWithSymbol', priceOk ? formatAmount(y.price, { locale: locale.value }) : y.price)
   const lines = purchaseLines.value
   if (lines.length) {
     push('yarn.purchasesCount', lines.length)
     push('yarn.bain', bainsOf(lines))
-    push('yarn.lastPurchaseDate', latestPurchaseDate(lines))
+    push('yarn.lastPurchaseDate', formatLocalDate(latestPurchaseDate(lines), locale.value))
   }
   push('yarn.composition', compositionText(y.composition, t))
+  push('yarn.notes', y.notes)
   return out
 })
 const labels = computed(() => orderedLabels(yarn.value?.labels))
@@ -158,9 +166,12 @@ function edit() {
 async function remove() {
   menuOpen.value = false
   const id = yarn.value.id
-  const y = await yarnsStore.remove(id)
+  // Retrait et mise en corbeille dans une même transaction (cf. trash.js `moveToTrash`).
+  const trashId = await trashStore.moveToTrash('yarn', id)
+  await yarnsStore.load()
   router.replace({ name: 'stash' })
-  await softDelete('yarn', y, { message: t('yarn.deleted'), reload: yarnsStore.load })
+  if (trashId == null) return
+  await softDelete('yarn', null, { message: t('yarn.deleted'), reload: yarnsStore.load, trashId })
 }
 </script>
 

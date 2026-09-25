@@ -5,7 +5,7 @@
 // Tant qu'une valeur est vide, le bloc correspondant de l'écran À propos ne se rend PAS :
 // un bloc « Contact : » vide serait pire pour l'utilisatrice que pas de bloc du tout
 // (AboutView.vue, `v-if="CONTACT_EMAIL"`). Le rappel qu'il faut les remplir AVANT diffusion
-// vit dans tests/unit/app-links-todo.spec.js, pas ici. La rangée « Site web » n'a plus ce
+// vivait dans tests/unit/app-links.spec.js, pas ici. La rangée « Site web » n'a plus ce
 // garde depuis le 12/08/2026 : `websiteUrlFor` ci-dessous (comme `guideUrlFor`) retombe
 // toujours sur l'anglais et ne peut donc plus rendre une adresse vide — voir plus bas.
 
@@ -39,7 +39,7 @@ export const GITHUB_ISSUES_URL = 'https://github.com/alxia0/rowtine/issues'
 // Le SITE répond depuis le 12/08/2026 : une vérification en ligne a tranché la question.
 // Ce n'est donc PLUS « toujours vide » — la rangée « Site web » d'À
 // propos se rend de nouveau. Comme prévu par le commentaire d'origine, renseigner cette
-// adresse a fait passer au ROUGE l'`it.fails` de tests/unit/app-links-todo.spec.js (un succès
+// adresse a fait passer au ROUGE l'`it.fails` de tests/unit/app-links.spec.js (un succès
 // devenu échec) : converti là-bas en une vraie vérification de format, pas simplement
 // supprimé.
 //

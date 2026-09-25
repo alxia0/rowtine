@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 
 // Helpers purs uniquement : on mocke pdfjs-dist (comme pdf-resolve-image-obj.spec.js)

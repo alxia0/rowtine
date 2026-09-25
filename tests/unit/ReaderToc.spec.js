@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Sommaire du lecteur : rangée horizontale défilante de puces TOUJOURS visible
 // (T2, depuis le 31/08 au soir — plus de bouton dépliant ni d'état open), masquée si ≤ 1
 // section, clic → émission de l'id de section (la vue parente gère l'ancre `?section=`).
@@ -5,6 +6,9 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import i18n from '@/i18n'
 import ReaderToc from '@/components/ReaderToc.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const MANY = [
   { id: 'presentation', title: 'Présentation' },
@@ -22,7 +26,7 @@ function mountToc(props = {}) {
 describe('ReaderToc', () => {
   it('affiche une rangée de puces toujours visible, sans bouton ni aria-expanded', () => {
     const w = mountToc()
-    expect(w.find('nav').attributes('aria-label')).toBe('Sommaire')
+    expect(w.find('nav').attributes('aria-label')).toBe(tk('reader.toc'))
     // Plus de bouton dépliant : la rangée est le seul contenu du nav.
     expect(w.find('.rtoc__btn').exists()).toBe(false)
     expect(w.html()).not.toContain('aria-expanded')

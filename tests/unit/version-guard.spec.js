@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Garde-fou de démarrage (nettoyage avant la 1.0, 13/08/2026) : une base
 // IndexedDB PLUS RÉCENTE que ce que le code déclare doit se voir, jamais disparaître en
 // silence. Trois cas : base plus récente (⇒ alerte), base identique (⇒ rien), aucune

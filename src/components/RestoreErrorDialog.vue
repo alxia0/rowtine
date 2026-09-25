@@ -39,6 +39,7 @@ import {
   composeBackupFailureReport,
   RESTORE_FAILURE_REPORT_TITLE,
   RESTORE_UNOWNED_REPORT_TITLE,
+  RESTORE_PARTIAL_REPORT_TITLE,
 } from '@/backup/failure-report'
 import { copyToClipboard } from '@/utils/copy-to-clipboard'
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/body-scroll-lock'
@@ -92,8 +93,24 @@ onBeforeUnmount(() => {
 
 // Titre et phrase courte selon la variante — la publication a posé `kind`.
 const isUnowned = computed(() => store.report?.kind === 'unowned')
-const title = computed(() => (isUnowned.value ? t('restoreFailure.unownedTitle') : t('restoreFailure.errorTitle')))
-const body = computed(() => (isUnowned.value ? t('restoreFailure.unownedBody') : t('restoreFailure.errorBody')))
+// Restauration incomplète : `runRestore` renvoie `owned: false` AVEC des écarts, et ne
+// tente plus l'appropriation dans ce cas. Des `details` non vides en variante unowned
+// désignent donc toujours une restauration partielle, que la phrase doit dire.
+const isPartial = computed(() => isUnowned.value && (store.report?.details?.length ?? 0) > 0)
+const title = computed(() =>
+  isPartial.value
+    ? t('restoreFailure.partialTitle')
+    : isUnowned.value
+      ? t('restoreFailure.unownedTitle')
+      : t('restoreFailure.errorTitle'),
+)
+const body = computed(() =>
+  isPartial.value
+    ? t('restoreFailure.partialBody')
+    : isUnowned.value
+      ? t('restoreFailure.unownedBody')
+      : t('restoreFailure.errorBody'),
+)
 
 // Le détail affiché EST le rapport copié — une seule source, jamais deux textes
 // qui divergeraient entre l'écran et le presse-papiers. Titre A1 choisi par
@@ -102,7 +119,11 @@ const body = computed(() => (isUnowned.value ? t('restoreFailure.unownedBody') :
 // sont repris tels que publiés, le compositeur gérant lui-même les null.
 const reportText = computed(() =>
   composeBackupFailureReport({
-    title: isUnowned.value ? RESTORE_UNOWNED_REPORT_TITLE : RESTORE_FAILURE_REPORT_TITLE,
+    title: isPartial.value
+      ? RESTORE_PARTIAL_REPORT_TITLE
+      : isUnowned.value
+        ? RESTORE_UNOWNED_REPORT_TITLE
+        : RESTORE_FAILURE_REPORT_TITLE,
     error: store.report?.error,
     path: store.report?.path,
     at: store.report?.at,

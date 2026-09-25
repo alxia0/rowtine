@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Mécanisme global de remontée du champ actif au-dessus du clavier virtuel (retour
 // terrain 29/07, cf. src/utils/keyboard-avoidance.js pour le raisonnement complet).
 // Généralise et remplace les copies par écran de NeedleGaugeView.vue et

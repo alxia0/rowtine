@@ -12,19 +12,45 @@ import { clusterPathBoxes, splitRegionGuarded, classifyGridStrict } from './pdf-
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
 
+// Plafond de décodage d'une image embarquée, en pixels : au-delà, pdf.js ne la décode pas.
+// Un PDF reçu peut déclarer une image démesurée (bombe de décompression) qui épuiserait la
+// mémoire du WebView. 8192² (67 Mpx) laisse passer un scan A4 à 600 dpi ou A3 à 300 dpi.
+const MAX_IMAGE_SIZE = 8192 * 8192
+
+// Seul point d'ouverture d'un PDF : toute option de sûreté vit ici, une fois.
+function openPdf(data) {
+  return pdfjs.getDocument({ data, maxImageSize: MAX_IMAGE_SIZE })
+}
+
+// Libère un document ouvert par `getDocument` : sans cela pdf.js garde le PDF entier dans son
+// worker, et la visionneuse (PdfViewer.vue) en rouvre un à chaque page feuilletée, pression
+// mémoire qui s'accumule (Nexus 7). Best-effort, n'interrompt jamais l'appelant.
+async function releasePdf(task) {
+  try {
+    await task?.destroy()
+  } catch {
+    /* déjà détruit ou worker parti : rien à libérer */
+  }
+}
+
 // Extraction structurée : une liste de lignes typées { text, size, bold, y } par page.
 // Base de l'import local (segmentation par mise en page).
 export async function extractPages(file, onPage) {
   const data = await file.arrayBuffer()
-  const doc = await pdfjs.getDocument({ data }).promise
-  const pages = []
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i)
-    const content = await page.getTextContent()
-    pages.push(itemsToLines(content.items, content.styles, { pageWidth: page.view?.[2] || 595 }))
-    onPage?.(i, doc.numPages)
+  const task = openPdf(data)
+  try {
+    const doc = await task.promise
+    const pages = []
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i)
+      const content = await page.getTextContent()
+      pages.push(itemsToLines(content.items, content.styles, { pageWidth: page.view?.[2] || 595 }))
+      onPage?.(i, doc.numPages)
+    }
+    return pages
+  } finally {
+    await releasePdf(task)
   }
-  return pages
 }
 
 // Fiche d'identité du PDF (doc.getMetadata().info.Title). Sert à recoller un titre de
@@ -33,12 +59,16 @@ export async function extractPages(file, onPage) {
 // absente/illisible → chaîne vide (jamais bloquant pour l'import). Consommée côté app
 // par src/utils/pdf-import/index.js, qui la passe à buildReaderFromPages en docMetaTitle.
 export async function extractDocMetaTitle(file) {
+  let task
   try {
     const data = await file.arrayBuffer()
-    const doc = await pdfjs.getDocument({ data }).promise
+    task = openPdf(data)
+    const doc = await task.promise
     return (await doc.getMetadata())?.info?.Title || ''
   } catch {
     return ''
+  } finally {
+    await releasePdf(task)
   }
 }
 
@@ -46,30 +76,39 @@ export async function extractDocMetaTitle(file) {
 // photo « objet fini » directement depuis le PDF (cf. import IA). `pageNumber` est 1-indexé.
 export async function renderPdfPageToDataUrl(file, pageNumber = 1, maxWidth = 1100) {
   const data = await file.arrayBuffer()
-  const doc = await pdfjs.getDocument({ data }).promise
-  const n = Math.min(Math.max(1, pageNumber || 1), doc.numPages)
-  const page = await doc.getPage(n)
-  const base = page.getViewport({ scale: 1 })
-  let scale = Math.min(2.5, Math.max(0.5, maxWidth / base.width))
-  scale = clampRenderScale(base.width, base.height, scale) // filet de sécurité pages grand format
-  const viewport = page.getViewport({ scale })
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.ceil(viewport.width)
-  canvas.height = Math.ceil(viewport.height)
-  const ctx = canvas.getContext('2d')
-  await page.render({ canvasContext: ctx, viewport }).promise
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
-  // Libère le buffer du canvas offscreen dès l'extraction faite (cf. RENDER_MAX_DIM).
-  canvas.width = 0
-  canvas.height = 0
-  return dataUrl
+  const task = openPdf(data)
+  try {
+    const doc = await task.promise
+    const n = Math.min(Math.max(1, pageNumber || 1), doc.numPages)
+    const page = await doc.getPage(n)
+    const base = page.getViewport({ scale: 1 })
+    let scale = Math.min(2.5, Math.max(0.5, maxWidth / base.width))
+    scale = clampRenderScale(base.width, base.height, scale) // filet de sécurité pages grand format
+    const viewport = page.getViewport({ scale })
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.ceil(viewport.width)
+    canvas.height = Math.ceil(viewport.height)
+    const ctx = canvas.getContext('2d')
+    await page.render({ canvasContext: ctx, viewport }).promise
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
+    // Libère le buffer du canvas offscreen dès l'extraction faite (cf. RENDER_MAX_DIM).
+    canvas.width = 0
+    canvas.height = 0
+    return dataUrl
+  } finally {
+    await releasePdf(task)
+  }
 }
 
 // Nombre de pages d'un PDF. Sert à la navigation de la visionneuse in-app.
 export async function pdfPageCount(file) {
   const data = await file.arrayBuffer()
-  const doc = await pdfjs.getDocument({ data }).promise
-  return doc.numPages
+  const task = openPdf(data)
+  try {
+    return (await task.promise).numPages
+  } finally {
+    await releasePdf(task)
+  }
 }
 
 // Taille AFFICHÉE d'une image dans le PDF (px CSS), déduite de sa CTM. L'image est un
@@ -335,9 +374,11 @@ export function resolveImageObj(page, name, timeoutMs = 4000) {
 // Best-effort : toute erreur (worker, décodage) est absorbée, on renvoie ce qu'on a.
 export async function extractImages(file) {
   const candidates = []
+  let task
   try {
     const data = await file.arrayBuffer()
-    const doc = await pdfjs.getDocument({ data }).promise
+    task = openPdf(data)
+    const doc = await task.promise
     for (let p = 1; p <= doc.numPages; p++) {
       const page = await doc.getPage(p)
       let ops
@@ -365,6 +406,8 @@ export async function extractImages(file) {
     return filterGalleryImages(candidates)
   } catch {
     return []
+  } finally {
+    await releasePdf(task)
   }
 }
 
@@ -373,9 +416,11 @@ export async function extractImages(file) {
 // bas-gauche). `w`/`h` = dimensions intrinsèques (px) pour le filtre taille. Best-effort → [].
 export async function extractImagesWithPos(file, onPage) {
   const candidates = []
+  let task
   try {
     const data = await file.arrayBuffer()
-    const doc = await pdfjs.getDocument({ data }).promise
+    task = openPdf(data)
+    const doc = await task.promise
     for (let p = 1; p <= doc.numPages; p++) {
       const page = await doc.getPage(p)
       let ops
@@ -449,6 +494,8 @@ export async function extractImagesWithPos(file, onPage) {
     return filterGalleryImages(candidates)
   } catch {
     return []
+  } finally {
+    await releasePdf(task)
   }
 }
 
@@ -615,9 +662,11 @@ export async function extractVectorRegions(file, onPage, opts = {}) {
       }
     }).filter((r) => r.src)
   }
+  let task
   try {
     const data = await file.arrayBuffer()
-    const doc = await pdfjs.getDocument({ data }).promise
+    task = openPdf(data)
+    const doc = await task.promise
     const allBoxes = []
     const pageDims = {}
     for (let p = 1; p <= doc.numPages; p++) {
@@ -708,5 +757,7 @@ export async function extractVectorRegions(file, onPage, opts = {}) {
     return out
   } catch {
     return []
+  } finally {
+    await releasePdf(task)
   }
 }

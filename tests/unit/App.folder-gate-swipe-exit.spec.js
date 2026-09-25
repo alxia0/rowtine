@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, le balayage de bord quitte l'app quand la porte du dossier est
 // visible (correctif de revue, 09/08/2026). Le code initial de la tache 3 faisait passer
 // `null` a la place du plugin @capacitor/app sur ce chemin (`onBack`), en le qualifiant a

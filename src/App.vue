@@ -340,6 +340,21 @@ function interceptBackupPrompt() {
   return true
 }
 
+// Ferme l'overlay bloquant du plus haut rang (plein écran diagramme > visionneuse photo >
+// pop-up sélecteur de couleur > dialogue de consommation), par ordre de priorité — même
+// échelle utilisée par les DEUX chaînes de retour (onBack ci-dessous ET le handler
+// backButton natif plus bas, cf. leurs commentaires respectifs). Renvoie `true` si un
+// overlay a été fermé (le retour s'arrête là), `false` sinon (aucun overlay ouvert, la
+// chaîne continue).
+function closeTopOverlay() {
+  if (chartZoom.open) chartZoom.close()
+  else if (lightbox.open) lightbox.close()
+  else if (colorPicker.open) colorPicker.close()
+  else if (projectConsumption.open) projectConsumption.close()
+  else return false
+  return true
+}
+
 function onBack() {
   // Le garde-fou de version passe AVANT MÊME la porte du dossier (correction
   // finale, 13/08) : `versionGuardState` PRIME sur elle (cf. src/db/version-guard.js,
@@ -356,17 +371,14 @@ function onBack() {
   // planter.
   if (folderGateHandlesBack(folderGateRef.value, capacitorApp)) return
   if (interceptBackupPrompt()) return
-  if (chartZoom.open) chartZoom.close()
-  else if (lightbox.open) lightbox.close()
-  else if (colorPicker.open) colorPicker.close()
-  else if (projectConsumption.open) projectConsumption.close()
+  if (closeTopOverlay()) return
   // La vue routée courante (Task 3, lot intents 20/09) : cf. commentaire de
   // `currentViewRef` ci-dessus. Placée en DERNIER recours, après tous les pop-up — elle
   // ne doit intercepter QUE le cas où aucun overlay bloquant n'est ouvert ; sinon un
   // dialogue « combien de pelotes ? » ouvert depuis un onglet non par défaut ne se
   // fermerait plus jamais au retour, régression sur une décision produit déjà actée
   // (cf. commentaire de tête de `onBack()`, « Back n'échappe pas à la question »).
-  else if (!currentViewRef.value?.handleBackPressed?.()) smartBack()
+  if (!currentViewRef.value?.handleBackPressed?.()) smartBack()
 }
 
 // Geste « retour » : balayage depuis le bord gauche (utile en navigation à 3 boutons) ET
@@ -385,14 +397,11 @@ if (typeof window !== 'undefined') {
         if (versionGuardHandlesBack(versionGuardState)) return
         if (folderGateHandlesBack(folderGateRef.value, App)) return
         if (interceptBackupPrompt()) return
-        if (chartZoom.open) chartZoom.close()
-        else if (lightbox.open) lightbox.close()
-        else if (colorPicker.open) colorPicker.close()
-        else if (projectConsumption.open) projectConsumption.close()
+        if (closeTopOverlay()) return
         // Même ajout que dans onBack() ci-dessus, à la même position de précédence — cf.
         // commentaire de `currentViewRef` : dernier recours, après tous les pop-up.
-        else if (currentViewRef.value?.handleBackPressed?.()) return
-        else if (canGoBack || window.history.state?.back != null) smartBack()
+        if (currentViewRef.value?.handleBackPressed?.()) return
+        if (canGoBack || window.history.state?.back != null) smartBack()
         else App.exitApp()
       })
       // Sauvegarde automatique : à chaque mise en arrière-plan de l'app,

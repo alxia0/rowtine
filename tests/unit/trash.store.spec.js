@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 // Unitaire — corbeille : envoi, restauration (simple + bundle projet en cascade), purge.
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import { useTrashStore } from '@/stores/trash'
@@ -41,6 +42,47 @@ describe('store trash', () => {
     expect(await db.sections.get(10)).toMatchObject({ name: 'Dos' })
     expect(await db.sessions.get(20)).toBeTruthy()
     expect((await db.yarns.get(30)).reservations).toEqual({ 1: 2 })
+  })
+
+  // Protège un patron ou une laine supprimés : jamais retirés de la base sans leur entrée de corbeille.
+  it('moveToTrash retire et met en corbeille d’un seul tenant ; un échec de corbeille laisse l’élément en place', async () => {
+    const store = useTrashStore()
+    await db.patterns.add({ id: 7, name: 'Anders' })
+    await db.yarns.add({ id: 8, brand: 'Drops' })
+
+    const panne = vi.spyOn(db.trash, 'add').mockRejectedValue(new Error('quota'))
+    try {
+      await expect(store.moveToTrash('pattern', 7)).rejects.toThrow('quota')
+    } finally {
+      panne.mockRestore()
+    }
+    expect(await db.patterns.get(7)).toMatchObject({ name: 'Anders' })
+
+    const tid = await store.moveToTrash('yarn', 8)
+    expect(await db.yarns.get(8)).toBeUndefined()
+    expect(store.items).toEqual([expect.objectContaining({ id: tid, type: 'yarn', name: 'Drops' })])
+    await store.restore(tid)
+    expect(await db.yarns.get(8)).toMatchObject({ brand: 'Drops' })
+  })
+
+  // Protège la corbeille d'une restauration à moitié écrite : tout ou rien.
+  it('restauration de projet en échec au milieu : rien n’est écrit, l’entrée reste en corbeille', async () => {
+    const store = useTrashStore()
+    const bundle = {
+      project: { id: 1, name: 'Pull' },
+      sections: [{ id: 10, projectId: 1, name: 'Dos' }],
+      sessions: [{ id: 20, projectId: 1, durationSec: 60 }],
+    }
+    const tid = await store.add('project', bundle)
+    const panne = vi.spyOn(db.sessions, 'bulkPut').mockRejectedValue(new Error('quota'))
+    try {
+      await expect(store.restore(tid)).rejects.toThrow('quota')
+    } finally {
+      panne.mockRestore()
+    }
+    expect(await db.projects.get(1)).toBeUndefined()
+    expect(await db.sections.get(10)).toBeUndefined()
+    expect(await db.trash.get(tid)).toBeTruthy()
   })
 
   it('signale un manque quand la restauration alloue moins que demandé (pelotes reprises entre-temps)', async () => {
@@ -111,6 +153,20 @@ describe('store trash', () => {
     const y = await db.yarns.get(30)
     expect(y.consumed).toEqual({ 1: 2 })
     expect(y.quantity).toBe(3) // rien ne revient : les pelotes ont VRAIMENT été tricotées
+  })
+
+  it('restaure l’instance patron dédiée du projet (bundle produit par projects.remove)', async () => {
+    const { useProjectsStore } = await import('@/stores/projects')
+    const pid = await db.projects.add({ name: 'P', patternId: 0 })
+    const instId = await db.patterns.add({ name: 'P', ownerProjectId: pid, reader: { sizeLabels: [], sections: [] } })
+    await db.projects.update(pid, { patternId: instId })
+    const bundle = await useProjectsStore().remove(pid)
+    const store = useTrashStore()
+    const tid = await store.add('project', bundle)
+
+    await store.restore(tid)
+    expect(await db.projects.get(pid)).toMatchObject({ patternId: instId })
+    expect(await db.patterns.get(instId)).toMatchObject({ name: 'P', ownerProjectId: pid })
   })
 
   it('empty vide toute la corbeille', async () => {

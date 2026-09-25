@@ -56,6 +56,12 @@ export function displayEntryName(folderName) {
 // Table de correspondance mime → extension de fichier. Exportée : deserialize.js
 // en dérive EXT_TO_MIME par inversion, pour que les deux tables ne puissent pas
 // diverger.
+// Taille maximale d'un fichier lu depuis le dossier de sauvegarde (restauration et
+// synchro MD) : au-delà, le fichier n'est pas lu et l'écart est signalé. Large exprès,
+// un PDF de patron peut peser plusieurs dizaines de Mo ; il protège la WebView d'un
+// fichier démesuré déposé à la main (cf. restore.js, `isReadEntry`).
+export const MAX_BACKUP_FILE_BYTES = 64 * 1024 * 1024
+
 export const MIME_TO_EXT = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -74,6 +80,19 @@ export function parseDataUrl(dataUrl) {
   const base64 = m[2]
   const ext = MIME_TO_EXT[mime] || 'bin'
   return { mime, ext, base64 }
+}
+
+// Longueur en OCTETS d'une chaîne base64 CANONIQUE, SANS la décoder : 4 caractères
+// valent 3 octets, moins le remplissage final. Décoder pour MESURER coûterait une
+// copie complète du contenu — exactement ce que les deux appelants (memory-storage.js,
+// saf-storage.js) veulent éviter sur un gros fichier. Reprise ici, à un seul endroit,
+// après avoir vécu recopiée à l'identique dans les deux : même algorithme, même
+// contrainte, à tenir synchronisés à la main sinon (cf. `bytesToBase64`/`base64ToBytes`,
+// déjà partagées via src/utils/base64.js).
+export function base64ByteLength(b64) {
+  if (!b64) return 0
+  const pad = b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0
+  return (b64.length / 4) * 3 - pad
 }
 
 // Hash non-cryptographique à 2 mots de 32 bits (variante cyrb53). Utilisé uniquement

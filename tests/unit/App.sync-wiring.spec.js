@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, câblage de la synchro MD aux frontières.
 // On vérifie : (1) au lancement, `runPatronMdSync` est appelé quand AUCUNE
 // restauration n'a été proposée sur ce lancement ; (2) il n'est PAS appelé quand

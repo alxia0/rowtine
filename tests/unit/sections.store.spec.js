@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — store sections : machine à états, bornage des rangs, agrégation de progression.
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'

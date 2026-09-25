@@ -1,16 +1,16 @@
+// @vitest-environment jsdom
 // Restrictions d'un projet Terminé : patron/compteur/case à cocher gelés, rétablis
 // dès que le statut change.
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // seedCounters : mêmes compteurs qu'un projet standalone (cf. mountStandalone) — permet
 // de vérifier les trois restrictions (patron, compteur, case) sur UN SEUL projet monté,
@@ -20,10 +20,10 @@ async function mountWithPattern(status = 'wip', sections = [{ name: 'Corps', ins
   const pid = await db.patterns.add({ name: 'Écharpe', sections })
   const prj = await db.projects.add({ name: 'Mon écharpe', patternId: pid, status, readerState: {} })
   for (const c of seedCounters) await db.counters.add({ projectId: prj, name: c.name, value: c.value ?? 0 })
-  const router = createRouter({ history: createMemoryHistory(), routes: [
+  const router = createTestRouter([
     { path: '/project/:id', name: 'project', component: ProjectDetailView },
     { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-  ] })
+  ])
   router.push(`/project/${prj}?tab=sections`); await router.isReady()
   const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, createPinia()] } })
   return { w, router, pid: prj }
@@ -33,9 +33,9 @@ async function mountStandalone(status = 'wip', seedCounters = []) {
   await db.projects.clear(); await db.counters.clear()
   const prj = await db.projects.add({ name: 'Pull torsadé', technique: 'knitting', status })
   for (const c of seedCounters) await db.counters.add({ projectId: prj, name: c.name, value: c.value ?? 0 })
-  const router = createRouter({ history: createMemoryHistory(), routes: [
+  const router = createTestRouter([
     { path: '/project/:id', name: 'project', component: ProjectDetailView },
-  ] })
+  ])
   router.push(`/project/${prj}`); await router.isReady()
   const w = mount(ProjectDetailView, {
     global: { plugins: [router, i18n, createPinia()], stubs: { StatusBadge: true, CounterCard: true, CounterForm: true } },

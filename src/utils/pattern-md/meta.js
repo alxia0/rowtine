@@ -7,7 +7,7 @@
 // corpus, mesure du 13/08). Une clé FR reçue aujourd'hui pousse
 // l'avertissement META_UNKNOWN_KEY puis est ignorée — même traitement que
 // `tricoche` depuis le 16/08.
-import { frontmatterKeyToEn, frontmatterKeyToFr } from './dialect'
+import { frontmatterKeyToEn, frontmatterKeyToFr, FRONTMATTER_TO_EN } from './dialect'
 import { W, WARNING_CODES } from './warning-codes'
 
 export const MD_VERSION = 1
@@ -18,6 +18,18 @@ export const MD_VERSION = 1
 export const VERSION_KEY = 'rowtine'
 const SEP = ' · '
 const SPLIT_RE = /\s*·\s*/
+
+// Une valeur émise tient sur UNE ligne : un saut de ligne dans un nom ou un titre ouvrirait
+// une nouvelle clé de front-matter, un nouveau titre `##` ou une nouvelle puce à la relecture.
+export function mdScalar(value) {
+  return String(value ?? '').replace(/[\r\n]+/g, ' ')
+}
+
+// Libellé de taille : sur une ligne, et sans `·`, que la relecture prend pour le séparateur
+// (SPLIT_RE) et qui ferait d'une taille deux tailles.
+export function mdSizeLabel(label) {
+  return mdScalar(label).replace(/·/g, '-')
+}
 
 export function emitFrontMatter(pattern) {
   const r = pattern?.reader || {}
@@ -32,15 +44,15 @@ export function emitFrontMatter(pattern) {
   // aucun patron en ancienne clé, sur 22 fichiers au total. La réécriture du
   // corpus archivé, elle, n'est pas encore faite.
   const lines = ['---', `${VERSION_KEY}: ${MD_VERSION}`]
-  if (pattern?.name) lines.push(`${frontmatterKeyToEn('titre')}: ${pattern.name}`)
-  if (pattern?.author) lines.push(`${frontmatterKeyToEn('auteur')}: ${pattern.author}`)
-  if (pattern?.authorUrl) lines.push(`${frontmatterKeyToEn('lien')}: ${pattern.authorUrl}`)
-  if (r.sizeLabels?.length) lines.push(`${frontmatterKeyToEn('tailles')}: ${r.sizeLabels.join(SEP)}`)
+  if (pattern?.name) lines.push(`${frontmatterKeyToEn('titre')}: ${mdScalar(pattern.name)}`)
+  if (pattern?.author) lines.push(`${frontmatterKeyToEn('auteur')}: ${mdScalar(pattern.author)}`)
+  if (pattern?.authorUrl) lines.push(`${frontmatterKeyToEn('lien')}: ${mdScalar(pattern.authorUrl)}`)
+  if (r.sizeLabels?.length) lines.push(`${frontmatterKeyToEn('tailles')}: ${r.sizeLabels.map(mdSizeLabel).join(SEP)}`)
   if (r.sizeSub?.length) {
-    const label = r.sizeSubLabel ? ` (${r.sizeSubLabel})` : ''
-    lines.push(`${frontmatterKeyToEn('sous-tailles')}: ${r.sizeSub.join(SEP)}${label}`)
+    const label = r.sizeSubLabel ? ` (${mdScalar(r.sizeSubLabel)})` : ''
+    lines.push(`${frontmatterKeyToEn('sous-tailles')}: ${r.sizeSub.map(mdSizeLabel).join(SEP)}${label}`)
   }
-  if (r.easeHint) lines.push(`${frontmatterKeyToEn('aisance')}: ${r.easeHint}`)
+  if (r.easeHint) lines.push(`${frontmatterKeyToEn('aisance')}: ${mdScalar(r.easeHint)}`)
   lines.push('---', '')
   return lines.join('\n')
 }
@@ -49,10 +61,10 @@ export function emitFrontMatter(pattern) {
 // (emitFrontMatter ci-dessus) n'écrit qu'elles. Les clés FR héritées (titre,
 // auteur, lien, tailles, sous-tailles, aisance) ne sont plus reconnues depuis
 // le 07/09/2026 : elles tombent dans le contrôle « clé inconnue » ci-dessous.
-const KNOWN = new Set([
-  'rowtine',
-  'title', 'author', 'link', 'sizes', 'subsizes', 'ease',
-])
+// Dérivée de VERSION_KEY + FRONTMATTER_TO_EN (dialect.js, déjà importé ici) plutôt
+// que recopiée en dur : les six valeurs y étaient déjà, un second littéral aurait
+// pu diverger silencieusement à un futur ajout de clé de front-matter.
+const KNOWN = new Set([VERSION_KEY, ...Object.values(FRONTMATTER_TO_EN)])
 
 export function parseFrontMatter(md) {
   const src = String(md ?? '').replace(/\r\n/g, '\n')

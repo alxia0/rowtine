@@ -117,6 +117,53 @@ describe('buildProjectWindow', () => {
     )
     expect(win.startDay).toBe('2026-01-03')
   })
+
+  it('date de fin mal formée (sauvegarde retouchée) : fenêtre bornée, jamais de boucle infinie', () => {
+    const win = buildProjectWindow({ startedAt: '2026-01-05', finishedAt: '2026-01-19T00:00:00.000Z' }, [], new Date(2026, 0, 25))
+    expect(win.endDay).toBe('2026-01-19')
+    expect(win.mondayDays).toHaveLength(3)
+  })
+})
+
+describe('buildProjectWindow : dates aberrantes (sauvegarde retouchée)', () => {
+  // Protège : une date déclarée ou une séance d'année hors plage ne produit jamais une fenêtre démesurée.
+  it('finishedAt en 9999 et startedAt en l’an 1000 sont ignorées', () => {
+    const win = buildProjectWindow({ startedAt: '1000-01-01', finishedAt: '9999-12-31' }, [], new Date(2026, 0, 15))
+    expect(win.startDay).toBe('2026-01-15')
+    expect(win.endDay).toBe('2026-01-15')
+  })
+
+  it('une séance datée 9999 n’étend pas la fenêtre', () => {
+    const win = buildProjectWindow({ startedAt: '2026-01-05' }, [{ date: '9999-06-01T10:00:00.000Z' }], new Date(2026, 0, 15))
+    expect(win.endDay).toBe('2026-01-15')
+  })
+
+  it('une fenêtre de plus d’un siècle est plafonnée en semaines', () => {
+    const win = buildProjectWindow({ startedAt: '1901-01-01' }, [], new Date(2026, 0, 15))
+    expect(win.mondayDays.length).toBeLessThanOrEqual(520)
+    expect(win.mondayDays.at(-1)).toBe('2026-01-12')
+  })
+})
+
+// Toute séance du projet compte dans le temps total, même hors des dates déclarées.
+describe('séances hors des dates déclarées du projet', () => {
+  it('séance antidatée avant startedAt, séance après finishedAt (projet rouvert) : comptées', () => {
+    const stats = aggregateProjectStats(
+      { id: 1, startedAt: '2026-09-20', finishedAt: '2026-09-22' },
+      [
+        { date: '2026-09-12T10:00:00.000Z', durationSec: 5400 },
+        { date: '2026-09-21T10:00:00.000Z', durationSec: 1800 },
+        { date: '2026-09-24T10:00:00.000Z', durationSec: 3600 },
+      ],
+      [],
+      null,
+      new Date(2026, 8, 25),
+    )
+    expect(stats.totalSeconds).toBe(5400 + 1800 + 3600)
+    expect(stats.activeDaysCount).toBe(3)
+    expect(stats.startDay).toBe('2026-09-12')
+    expect(stats.endDay).toBe('2026-09-24')
+  })
 })
 
 describe('formatDuration', () => {

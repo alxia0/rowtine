@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — budget laine cumulé : `achats.json` dans la sauvegarde et
 // la restauration. L'historique d'achat n'existe QUE dans la base : s'il ne part pas
 // dans la sauvegarde, il est perdu au premier changement d'appareil. Et une

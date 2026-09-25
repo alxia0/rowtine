@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — l'écran Statistiques compte l'UNION « journal des jours actifs + jours de séance »
 // (§7ter + décisions D1/D2 du 11/08). Un chantier antérieur avait posé la frontière : `stats-grid.js`
 // reçoit un ENSEMBLE DE JOURS et ne va jamais chercher les séances lui-même — ce fichier vérifie
@@ -14,6 +15,9 @@ import EmptyStateArt from '@/components/EmptyStateArt.vue'
 import {
   currentStreak, longestStreakInWindow, activeDays, averageSecondsPerActiveDay, sessionsByDay,
 } from '@/utils/stats-grid'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const WIN = { startDay: '2026-08-01', endDay: '2026-08-11' }
 
@@ -81,7 +85,7 @@ describe('union journal + séances — l’écran', () => {
     // sur la forme LOCALISÉE complète (« {active} sur {elapsed} ») — pas seulement le chiffre :
     // fenêtre trimestre par défaut, du 2026-05-18 (13 semaines avant, lundi) au 2026-08-11
     // (aujourd'hui inclus) ⇒ 86 jours écoulés, lus sur `elapsed`, pas supposés.
-    expect(w.find('[data-stat="activeDays"]').text()).toContain('2 sur 86')
+    expect(w.find('[data-stat="activeDays"]').text()).toContain(tk('stats.tiles.activeDaysValue', { active: 2, elapsed: 86 }))
     // D1 (décision produit, 11/08) : la tuile 7 divise le total des SÉANCES (3600 s, la seule séance
     // d'aujourd'hui) par les jours actifs de l'UNION (2 : aujourd'hui + hier via le journal),
     // pas par les seuls jours de séance (1, qui donnerait 1:00:00). 3600 ÷ 2 = 1800 s.
@@ -268,7 +272,7 @@ describe("moyenne par jour actif — le tiret sous filtre technique", () => {
     // journée de tricot — n'y figure pas sous « Crochet ». Restent le 05/08 (séance de crochet) et
     // le 10/08 (journal, que le filtre ne peut pas réduire). C'est exactement ce mélange qui rend
     // la moyenne bancale, et c'est pourquoi elle seule prend le tiret.
-    expect(w.find('[data-stat="activeDays"]').text()).toContain('2 sur 86')
+    expect(w.find('[data-stat="activeDays"]').text()).toContain(tk('stats.tiles.activeDaysValue', { active: 2, elapsed: 86 }))
     // Série : aujourd'hui (11/08) n'est pas dans l'union sous « Crochet », donc le bord
     // d'aujourd'hui recule à hier (10/08, présent au journal) et la série vaut 1 — au singulier.
     expect(w.find('[data-stat="streak"]').text()).toContain('1 jour')

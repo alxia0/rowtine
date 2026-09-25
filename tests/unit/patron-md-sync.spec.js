@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — orchestration impure de la synchro MD→DB. Storage en
 // mémoire (`MemoryBackupStorage`) + DB/stores FAKES (maps en mémoire, API alignée sur
 // Dexie réel : `.get`, `.filter(fn).toArray()`, store `.update(id, patch)`). Les
@@ -426,6 +427,46 @@ describe('syncPatronMd', () => {
     // La perte documentée est RÉELLE : le reader fusionné n'a plus le libellé (l'affichage
     // le reconstruit via chartMotifLabel, src/utils/reader.js).
     expect(patterns.get(30).reader.chart.repeat).toBe('')
+  })
+
+  // Protège la synchro d'un gros fichier déposé à la main : seuls les fichiers référencés par le MD sont lus, sous plafond.
+  it('ne lit que les images référencées par le MD, et aucune au-delà du plafond', async () => {
+    const storage = new MemoryBackupStorage()
+    const dir = 'Patrons/demo-de [31]'
+    const img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+    const build = (steps, chartImg) => {
+      const sections = [sec('corps', 'Corps', steps)]
+      return { ...pat(31, 'Demo', sections), reader: { sizeLabels: ['T'], sections, chart: { rows: 2, cols: 2, img: chartImg, readDir: '' } } }
+    }
+    const original = build([st('monter'), { chart: true }], img)
+    await seedFolder(storage, dir, original)
+    await editMdOnDisk(storage, dir, build([st('monter'), { chart: true }, st('NOUVEAU')], img))
+    await storage.writeFile(`${dir}/film.mp4`, 'AAAA', { encoding: 'base64' })
+    await storage.writeFile(`${dir}/original.pdf`, 'AAAA', { encoding: 'base64' })
+
+    const lus = []
+    const baseRead = storage.readFile.bind(storage)
+    storage.readFile = async (path, opts) => {
+      lus.push(String(path))
+      return baseRead(path, opts)
+    }
+    const { db, patternsStore, projectsStore, patterns } = makeFakeDb([original], [])
+    const report = await syncPatronMd(storage, { db, patternsStore, projectsStore })
+
+    expect(report.merged).toHaveLength(1)
+    expect(patterns.get(31).reader.chart.img).toMatch(/^data:image\/png;base64,/)
+    expect(lus.filter((p) => /film\.mp4$|original\.pdf$/.test(p))).toEqual([])
+
+    // Même dossier, image référencée annoncée au-delà du plafond : non lue, signalée manquante.
+    const chartFile = (await storage.readdir(dir)).find((e) => /\.png$/.test(e.name)).name
+    const baseReaddir = storage.readdir.bind(storage)
+    storage.readdir = async (p) =>
+      (await baseReaddir(p)).map((e) => (e.name === chartFile ? { ...e, size: 64 * 1024 * 1024 + 1 } : e))
+    await editMdOnDisk(storage, dir, build([st('monter'), { chart: true }, st('ENCORE')], img))
+    lus.length = 0
+    const second = await syncPatronMd(storage, { db, patternsStore, projectsStore })
+    expect(lus.filter((p) => p.endsWith(chartFile))).toEqual([])
+    expect(second.merged[0].missingAssets).toContain(chartFile)
   })
 
   it('fusion refusée (MD tronqué) → AUCUN avertissement repeatLabelLost (interne conservé, rien n’est perdu)', async () => {

@@ -1,21 +1,52 @@
 # {app}-Leitfaden
 
-## Was {app} ausmacht
+## {app} in 4 Schritten
 
-![„Willkommen bei {app}“, und darunter „Deine Strick- und Häkelprojekte im Zeitverlauf“: Deutsch, Stricken, System, Metrisch (m, g) und EUR bereits ausgewählt, und unten die Schaltfläche „Bereit? Fang an zu stricken!“](images/de/00-bienvenue.webp)
+{app} ist kein PDF-Ordner. Es ist ein interaktiver Lesemodus, der dich
+durch deine Anleitung führt: Er zeigt dir nur die Zahlen deiner Größe
+und merkt sich jeden Schritt, den du schon gemacht hast. Du
+importierst deine Anleitung einmal und strickst oder häkelst danach,
+ohne je wieder das PDF zu öffnen.
 
-*Der allererste Start: Vorname, Technik, Sprache und Erscheinungsbild.*
+### 1. Importiere deine Anleitung
 
-{app} hilft dir dabei, alle deine Strick- und Häkelprojekte an einem Ort zu
-sammeln: dein Garn, deine an deine Größe angepassten Anleitungen und
-deinen Fortschritt. Die App ist **kostenlos und quelloffen, und sie funktioniert
-offline**: Deine Daten bleiben auf deinem Gerät, nicht auf einem
-Server. Nichts geht aus Versehen verloren: Alles, was du löschst, landet
-im Papierkorb.
+Wähle aus deiner Bibliothek ein PDF. {app} liest es für dich:
+Abschnitte, Reihen, Größen, Abkürzungen und Diagramme. Alles
+geschieht auf deinem Gerät. Siehe Kapitel 4.
+
+### 2. Erstelle ein Projekt und wähle deine Größe
+
+Auf der Anleitungskarte: „Projekt aus dieser Anleitung erstellen“. Im
+Lesemodus wählst du deine Größe: Jedes „88 (96) 104“ passt sich an
+und zeigt nur deine Zahl.
+
+Eine importierte Anleitung dient so oft, wie du willst: eine grüne
+Strickjacke in L für dich, eine rote in M für deine Schwester. Jedes
+Projekt behält seine eigene Größe, sein Garn und seinen Fortschritt,
+und der Preis der Anleitung wird nur einmal gezählt. Siehe Kapitel 2.
+
+### 3. Stricke oder häkle mit dem Lesemodus
+
+Hier passiert alles. Hake jeden erledigten Schritt ab: Der Fortschritt
+bewegt sich vorwärts, und dank „Zu meinem Schritt“ machst du genau
+dort weiter, wo du aufgehört hast. Das Diagramm folgt deiner Reihe,
+und die Definitionen der Abkürzungen erscheinen, wenn du die
+unterstrichenen Begriffe im Text berührst. Siehe Kapitel 3.
+
+### 4. Behalte den Überblick
+
+Der Timer zeichnet deine Sitzungen auf, der Reiter Fotos sammelt die
+Bilder der Anleitung und deine eigenen Fotos, die Statistik fasst
+deine Aktivität im Projekt zusammen, und ein Abzeichen wird mit einer
+Geste geteilt. Siehe Kapitel 2 und 7.
+
+Um es gleich auszuprobieren: Die Schaltfläche „Geführte Tour erneut
+ansehen“, direkt darunter und in den Einstellungen, öffnet die
+Beispielmütze im Lesemodus mit Erklärblasen.
 
 ## 1. Start: deine Übersicht
 
-![Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt das Projekt Wintermütze bei 0 Prozent, dann die Übersicht (1 in Arbeit, die Zeit dieser Woche, die letzte Sitzung mit dem heutigen Datum, das ausgegebene Budget) und die Werkzeuge Zähler, Rechner und Nadeln](images/de/01-accueil.webp)
+![Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt die Zopfmütze, gestrickte Größe M, die Kacheln In Arbeit 1 und Diese Woche 0 h, unter Letzte Sitzungen die Wintermütze von heute (0:06), dann die Werkzeuge Zähler, Rechner und Nadeln](images/de/01-accueil.webp)
 
 *Start: Die Kachel „Fortsetzen“ bringt dich zurück zu dem Werkstück, an dem du zuletzt gearbeitet hast, die Übersicht fasst das Wichtigste bis hin zu den letzten Sitzungen zusammen, und die drei Werkzeuge sind in Griffweite.*
 
@@ -25,26 +56,9 @@ Beim Öffnen der App findest du:
   wirklich um das Projekt, an dem du **zuletzt tatsächlich gestrickt oder
   gehäkelt** hast (deine letzte Sitzung), nicht einfach um das zuletzt
   bearbeitete, und es zeigt dir die aktuelle Reihe an.
-- Eine **Zusammenfassung**: wie viele Projekte gerade in Arbeit sind, die
+- Eine **Zusammenfassung**: wie viele Projekte gerade in Arbeit sind, und die
   Zeit, die du diese Woche mit Stricken oder Häkeln verbracht hast (mit
-  Details unter **Statistik**), und dein **ausgegebenes Budget**: die
-  Summe von allem, was du für Garn bezahlt hast, seit du die App nutzt, in
-  der von dir gewählten Währung. Diese Zahl sinkt nie von selbst: Wenn du
-  ein Knäuel verbrauchst oder ein Projekt abschließt, sinkt sie nicht (nur
-  ein neuer Kauf lässt sie steigen); sie kann nur sinken, wenn du
-  selbst eine Kaufzeile im Block „Käufe und Geschenke“ einer Garnkarte
-  löschst oder korrigierst (Punkt 5). (Hast du mehrere Währungen
-  verwendet, hat jede ihre eigene Summe: Die App vermischt sie nie, da
-  sie keinen Wechselkurs kennt.) Tippst du auf diese Zahl, öffnest du den
-  Bildschirm **Ausgaben**, beschrieben in Punkt 5. Diese Kachel erscheint
-  nicht, solange du noch keinen Kauf erfasst hast (zum Beispiel bei einer
-  brandneuen Installation); jederzeit bleibt der Bildschirm über das Menü
-  erreichbar.
-- Diese Zahl unterscheidet sich von deinem **Vorratswert**, angezeigt im
-  Bildschirm **Garnvorrat** (Punkt 5): Der zeigt, was aktuell in
-  deinem Schrank liegt, und sinkt, wenn du ein Knäuel verbrauchst. Beide
-  Zahlen gibt es bewusst nebeneinander: Die eine zeigt, was du
-  ausgegeben hast, die andere, was dir noch übrig bleibt.
+  Details unter **Statistik**).
 - Die **letzten Sitzungen**: Sobald du mindestens einmal gestrickt oder
   gehäkelt hast, listet eine Kachel deine zwei jüngsten Sitzungen auf: der
   Name des Projekts, der Tag („Gestern“, „Vor 3 Tagen“…) und die Dauer. Ein
@@ -95,7 +109,7 @@ Projekt die „Freie Anleitung“, erscheint dieses Feld gar nicht erst: Sie
 ist allen deinen Projekten ohne Anleitung gemeinsam und kann deshalb nie
 einen eigenen Preis haben.
 
-![Das Formular Neues Projekt für die Wintermütze: unter der Anleitung Zopfmütze steht im Feld Preis der Anleitung (€) eine 12, daneben die Schaltfläche Kostenlos, als Kaufdatum der 12/08/2026 und als Status Offen.](images/de/02b-projet-prix-patron.webp)
+![Das Formular Neues Projekt für die Wintermütze: unter der Anleitung Zopfmütze steht im Feld Preis der Anleitung (€) eine 12, daneben die Schaltfläche Kostenlos, als Kaufdatum der 24/09/2026, als Status Offen und der Schalter „Timer anzeigen“ ist eingeschaltet.](images/de/02b-projet-prix-patron.webp)
 
 *Unter der Anleitungswahl: ihr Preis, eine Schaltfläche „Kostenlos“ und das Kaufdatum, vorausgefüllt mit heute.*
 
@@ -137,7 +151,7 @@ Schaltfläche auf der Projektseite, in welchem Reiter auch immer, und im Lesemod
 Ein Chevron auf der Schaltfläche öffnet ein kleines Menü mit dem Eintrag „Timer
 ausblenden“; zurück kommt sie über das Menü **Aktionen** (senkrechtes
 Dreipunkt-Symbol) der Projektseite oder
-das Kontrollkästchen „Timer“ im Bearbeitungsformular.
+den Schalter „Timer anzeigen“ im Bearbeitungsformular.
 - Ein Timer pro Projekt, und er **startet nie von selbst**: Du tippst ihn an, um
   ihn zu starten, und tippst erneut, um ihn bei einer Unterbrechung zu pausieren
   (die Schaltfläche zeigt dann **Fortsetzen** mit der bereits gezählten Zeit).
@@ -172,8 +186,8 @@ jüngsten bis zur ältesten: der Name des Projekts, dann Datum und Dauer. Ein
 Antippen auf eine Zeile öffnet die Seite des betroffenen Projekts.
 
 Dieser Bildschirm dient nur dem Nachlesen: Auf der Projektseite, in ihrem
-Reiter Sitzungen, wird eine Sitzung berichtigt oder gelöscht. Kein Filter,
-keine Gruppierung: Das ist eine erste Version, bewusst einfach gehalten.
+Reiter Sitzungen, wird eine Sitzung berichtigt oder gelöscht. Der Bildschirm
+ist bewusst einfach gehalten, ohne Filter und ohne Gruppierung.
 
 ### Ein Abzeichen deines Projekts teilen
 
@@ -309,14 +323,16 @@ gespeichert, nicht mit der Anleitung selbst. Beginnst du also ein
 zweites Projekt aus derselben Anleitung, musst du sie einmal für das
 neue Projekt wiederholen (der Vorgang dauert nur wenige Sekunden).
 
-**Und runde oder eckige Diagramme?** Granny-Raster, rund oder eckig,
-richten sich nicht mit zwei Linien aus: Dieselbe Schaltfläche
+**Und runde, eckige oder sechseckige Diagramme?** Granny-Raster, rund,
+eckig oder sechseckig, richten sich nicht mit zwei Linien aus: Dieselbe Schaltfläche
 **Ausrichten** öffnet dann einen **geführten Assistenten**, denn die Form
 des Diagramms (ihr Typ, gewählt bei der Korrektur, Abschnitt 4)
 entscheidet. Sie lässt dich die beiden Grenzen des Motivs nacheinander
 setzen: die erste, die den unteren Rand der ersten Reihe markiert, dann
-die Außenseite der letzten Reihe. Jede wird als **Rund** oder **Eckig**
-erklärt und lässt sich verschieben und anpassen (Schaltflächen
+die Außenseite der letzten Reihe. Jede wird als **Rund**, **Eckig** oder
+**Sechseckig** erklärt (bei einem Sechseck legen zwei weitere
+Schaltflächen seine Ausrichtung fest: **Flache Seite oben** oder **Spitze
+oben**) und lässt sich verschieben und anpassen (Schaltflächen
 **Verschieben** und **Vergrößern/Verkleinern**), während das Bild
 durchläuft und unter einer festen Lupe wächst. Haben die beiden Grenzen
 nicht dieselbe Form, fragt
@@ -328,7 +344,7 @@ Diagramm nicht ausgerichtet ist, bietet dir eine Schaltfläche im Fluss des
 Lesemodus, „Platziere die Mitte und die Radien des Motivs“, an, dorthin
 zu gehen.
 
-![Derselbe Assistent zum Ausrichten von Granny-Diagrammen, diesmal ist die Grenze als rund erklärt: die runde Lupe, mit demselben Kreuz markiert, umkreist dieselbe zentrale Blüte des Quadrats mit unscharfen Maschen, die Schaltflächen Rund und Eckig (Rund aktiv), dann Verschieben, ebenfalls aktiv, Vergrößern/Verkleinern, und unten Zurücksetzen, Abbrechen und Bestätigen](images/de/03h-calage-granny-rond.webp)
+![Derselbe Assistent zum Ausrichten von Granny-Diagrammen, diesmal ist die Grenze als rund erklärt: die runde Lupe, mit demselben Kreuz markiert, umkreist die zentrale Blüte des Quadrats mit unscharfen Maschen, die Schaltflächen Rund, Eckig und Sechseckig (Rund aktiv), dann Verschieben, ebenfalls aktiv, Vergrößern/Verkleinern, und unten Zurücksetzen, Abbrechen und Bestätigen](images/de/03h-calage-granny-rond.webp)
 
 *Die als rund erklärte Grenze: Die Lupe folgt der gewählten Form, und die Schaltflächen Rund und Eckig bestimmen sie bei jedem Schritt.*
 
@@ -396,11 +412,11 @@ Statistik-Bildschirm.
 
 ![Der zweispaltige Lesemodus auf dem Tablet: links die Zopfmütze, der Abschnitt Bündchen bei 0/3 und der Schritt Mit der Rundstricknadel Nr. 4 96 M anschlagen; rechts Diagramm · 8 M × 24 Reihen bei Reihe 7 von 24.](images/de/03e-tablette-lecteur.webp)
 
-*Auf einem quer gehaltenen Tablet: deine Anleitung links, das Diagramm dauerhaft rechts, ohne dass du noch zwischen beiden scrollen musst.*
+*Auf einem quer gehaltenen Tablet: deine Anleitung links, das Diagramm dauerhaft rechts, ohne dass du zwischen beiden scrollen musst.*
 
 Strickst du auf einem quer gehaltenen Tablet, stellt sich der Reader von
 selbst auf **zwei Spalten** um: deine Anleitung links, ein dauerhaft
-angezeigtes Diagramm rechts. Du musst nicht mehr zwischen beiden hin- und
+angezeigtes Diagramm rechts. Du musst nicht zwischen beiden hin- und
 herscrollen. Du behältst die Kontrolle:
 
 - Bei jedem anderen Diagramm der Anleitung bringt dir die Schaltfläche
@@ -415,14 +431,14 @@ herscrollen. Du behältst die Kontrolle:
 
 Diese Einstellung gilt nur für deine aktuelle Sitzung: Öffnest du die
 Anleitung erneut, erscheint das Feld wieder mit dem ersten Diagramm. Auf
-dem Smartphone (oder einem hochkant gehaltenen Tablet) bleibt der Reader
-einspaltig, wie zuvor. Eine Anleitung ohne Diagramm hat gar kein
+dem Smartphone (oder einem hochkant gehaltenen Tablet) zeigt der Reader
+eine einzige Spalte. Eine Anleitung ohne Diagramm hat gar kein
 Seitenfeld. Das Inhaltsverzeichnis des Lesemodus bleibt dagegen oben in
 der Spalte der Anleitung: dieselben Punkte, dieselbe Geste.
 
-**Die Statistik, mit viel Platz.**
+**Die Statistik, in voller Breite.**
 
-![Die Statistik mit viel Platz auf dem Tablet: das Kalendergitter reicht am Stück von Mär bis Sep, darunter reihen sich die Kacheln zu zweit: Gesamtzeit 119:40:06, Aktive Tage 127 von 181, Aktuelle Serie 6 Tage.](images/de/03f-tablette-stats.webp)
+![Die Statistik mit viel Platz auf dem Tablet: das Kalendergitter reicht am Stück von Mär bis Sep, darunter reihen sich die Kacheln zu zweit: Gesamtzeit 116:40:06, Aktive Tage 125 von 179, Aktuelle Serie 6 Tage, Längste Serie 12 Tage.](images/de/03f-tablette-stats.webp)
 
 *Die Statistik auf einem quer gehaltenen Tablet, im Fenster Halbjahr: das Kalendergitter zeigt die letzten sechs Monate auf einen Blick, während du auf dem Handy dafür zur Seite wischen musst, und die Zahlenkacheln reihen sich darunter zu zweit auf.*
 
@@ -438,7 +454,7 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
 
 *Der Bildschirm „Anleitungen“, mit den drei beim ersten Start mitgelieferten Beispielen.*
 
-![Die Anleitung Zopfmütze, darunter die Zeile Stricken, Accessoires, S, M, L, die Zeile Am 12.8.2026 für 12 € gekauft und ein Foto der Zopfmütze auf einem Holzbrett; die beiden Schaltflächen heißen Projekt aus dieser Anleitung erstellen und Anleitung ansehen.](images/de/04b-fiche-patron.webp)
+![Die Anleitung Zopfmütze, darunter die Zeile Stricken, Accessoires, S, M, L, die Zeile Am 24.9.2026 für 12 € gekauft und ein Foto der Zopfmütze auf einem Holzbrett; die beiden Schaltflächen heißen Projekt aus dieser Anleitung erstellen und Anleitung ansehen.](images/de/04b-fiche-patron.webp)
 
 *Eine Anleitungskarte, bewusst schlicht gehalten: ein Projekt erstellen oder eine Vorschau ansehen. (Die Korrektur des Imports erreichst du über die Vorschau oder über das Menü eines laufenden Projekts, das diese Anleitung verwendet.)*
 
@@ -452,8 +468,27 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   so oft du willst, und genau dieser Durchgang macht den Unterschied
   zwischen einer ungefähr richtigen Anleitung und einem Projekt, das die
   richtigen Zahlen und die richtigen Erklärungen anzeigt.
+  Gleich am Ende des Imports zählt eine Bilanz „Deine Anleitung ist
+  importiert“ auf, was die App gefunden hat (Abschnitte, abzuhakende
+  Schritte, Größen, Diagramme), erinnert dich daran, die Anleitung vor dem
+  Start durchzulesen, und die Schaltfläche **Anleitung ansehen** bringt
+  dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen.
   (Das Lesen erkennt auch die runden und eckigen Raster von
   Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)
+- **Im {app}-Format importieren**: Unter „Anleitung hinzufügen“ nimmt diese
+  Option eine **.rowtine**-Datei an, also eine Anleitung, die
+  schon im {app}-Format vorbereitet ist (Text und Bilder). Sie kommt
+  unverändert in deine Anleitungen, ohne dass ein PDF gelesen wird, und
+  weiterhin offline.
+- **Eine Anleitung von Hand anlegen**: Unter „Anleitung hinzufügen“ öffnet
+  die Wahl **Manuell erstellen** einen eigenen Bildschirm (Name, Typ,
+  Kategorie, Größen, Quelle, Autor…) mit einer einzigen Rubrik **Fotos**
+  für ihre Bilder. Auf der Anleitungskarte macht ein Stern auf jedem Foto
+  unter „Fotos der Anleitung“ es zum **Cover**: Dieses Foto zeigt die
+  Anleitung in der Bibliothek. (Eine importierte Anleitung behält das Cover
+  aus ihrem PDF.) Und sobald sie ein Foto hat, erscheint die Schaltfläche
+  **Anleitung ansehen**: Dort kannst du ein Bild wie ein Diagramm
+  verfolgen, genau wie bei einer importierten Anleitung.
 - **Eine Anleitung wiederfinden**: Die Kategorie-Schaltflächen oben im
   Bildschirm „Anleitungen“ zeigen dir **die Anzahl der Anleitungen** je
   Kategorie, um auf einen Blick zu wissen, wo du suchen musst.
@@ -591,8 +626,8 @@ umgewandelten Fotos. Die Zahl in Klammern, zum Beispiel „Diagramme (2)“,
 zählt all diese Abschnitte, Fotos mitgerechnet: sie sagt nicht, wie viele
 Diagramme schon verfolgt werden. Bei einem noch nicht umgewandelten
 Bild öffnet die Schaltfläche **Als Diagramm verfolgen** eine Typauswahl,
-jeweils klar erklärt: Standardreihen, radial quadratisch, radial rund oder
-Pfad, um sie an die tatsächliche Form deines Motivs anzupassen (ein
+jeweils klar erklärt: Standardreihen, radial quadratisch, radial rund, radial
+sechseckig oder Pfad, um sie an die tatsächliche Form deines Motivs anzupassen (ein
 Granny-Square liest sich nicht wie Standardreihen). Bei einem Bild, das
 bereits als Diagramm verfolgt wird, nennt eine Kennzeichnung **Interaktives
 Diagramm** den aktuellen Stand, daneben eine Schaltfläche **Typ ändern**
@@ -601,7 +636,7 @@ Schaltfläche **Nur ein Bild**, um zu einem einfachen Foto zurückzukehren,
 praktisch, falls der Import ein Diagramm übersehen hat oder umgekehrt
 ein einfaches Foto ein einfaches Foto bleiben soll.
 
-**Bilder hinzufügen: drei Türen.** In der Galerie einer Anleitung, von
+**Bilder hinzufügen: drei Türen.** In den Fotos einer Anleitung, von
 ihrer Karte oder aus dem Korrektur-Editor, bietet die Schaltfläche
 **Bild hinzufügen** drei Quellen: **Kamera oder Galerie** (ein Blatt
 lässt dich wählen, ob du ein Foto aufnimmst oder aus deinen Bildern
@@ -609,14 +644,14 @@ nimmst), **Dateien durchsuchen** (die Dateiauswahl deines Geräts, für
 ein Bild, das anderswo liegt), und **Aus dem PDF der Anleitung**, wenn
 es eines gibt: Dort wählst du die Seite, und die App lässt sie dich
 zuschneiden. Das ist die einzige Quelle, die durch diesen Zuschnitt
-geht. Jedes Bild landet in der Galerie der Anleitung, bereit zum Einfügen oder
+geht. Jedes Bild landet in den Fotos der Anleitung, bereit zum Einfügen oder
 Verfolgen.
 
 **Das Menü eines Bildes.** Im Text des Editors öffnet ein Antippen auf
 ein Bild ein kleines Direktmenü: es **als Diagramm verfolgen**, falls es
 noch keins ist, sonst seinen **Typ ändern**, es auf ein bloßes Bild
-zurückstufen (**Nur ein Bild**), oder es **in die Galerie der Anleitung
-schicken**. Im Band „Galerie der Anleitung“ lässt sich jedes Bild
+zurückstufen (**Nur ein Bild**), oder es **in die Fotos der Anleitung
+schicken**. Im Band „Fotos der Anleitung“ lässt sich jedes Bild
 löschen, in den Text einfügen oder als Diagramm verfolgen: die drei
 Gesten an einem Ort.
 
@@ -631,7 +666,7 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
 
 ## 5. Dein Garnvorrat
 
-![10 Knäuel, 1,932 km, 500 Gramm und 31 € ausgegeben oben, das Feld „Garn suchen…“ und die Schaltflächen Filtern und Sortieren, dann Drops · Moutarde, ×4 · 165 Meter · 200 Gramm, mit einem kleinen Blatt darunter, und Hobbii · Sauge, ×6 · 212 Meter · 300 Gramm, beide frei](images/de/05-stock.webp)
+![10 Knäuel, 1,932 km, 500 g und 31 € ausgegeben oben, das Feld „Garn suchen…“, die Schaltflächen Filtern und Sortieren, darunter Garn hinzufügen und Von Ravelry importieren untereinander, dann Drops · Moutarde, ×4 · 165 m · 200 g, mit einem kleinen Blatt markiert, und Hobbii · Sauge, ×6 · 212 m · 300 g, beide frei](images/de/05-stock.webp)
 
 *Der Vorrat: die Summen oben (Knäuel, Länge, Gewicht, Wert), dann eine Karte pro Garn mit ihrem Status, frei oder für ein Projekt reserviert.*
 
@@ -642,12 +677,15 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
   gewählt, mit eigenem Farbwähler bei Bedarf), Menge, Preis, Länge und
   Gewicht je Knäuel, sowie Kaufdatum und Färbebadnummer.
   **Sobald du speicherst, erfasst die App sofort den entsprechenden
-  Kauf**, und dein ausgegebenes Budget (Punkt 1) steigt um den
+  Kauf**, und die Summe im Bildschirm **Ausgaben** steigt um den
   angegebenen Betrag. Als Datum wird dir der heutige Tag vorgeschlagen:
   Hast du dieses Garn schon früher gekauft, kannst du das direkt im
   Formular korrigieren. (Diese beiden Felder erscheinen nur bei der
   Erstellung. Bei einer bereits gespeicherten Karte übernimmt der Block
   **Käufe und Geschenke**, mit einer Zeile pro Erwerb.)
+- **Wo es liegt, was du davon hältst**: zwei freie Felder,
+  **Aufbewahrungsort** („Regal 2, blauer Korb“) und **Notizen**, erscheinen
+  danach auf der Karte des Garns.
 - **Garn, das nicht einfarbig ist**: Ein Feld **Farbtyp** (uni,
   Farbverlauf, selbststreifend, gesprenkelt, handgefärbt) und ein Feld
   **Beschreibung der Farbstellung** („blau, grün, gelb gesprenkelt mit
@@ -675,7 +713,7 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
     des Vorrats (das Kriterium „Label“) und in der Textsuche wieder.
   - Diese Eigenschaften erscheinen auch im **Tabellenexport**.
 
-![Die Karte legt sich über den Garnvorrat mit 10 Knäuel, 1,932 km, 500 Gramm und 31 €: gelber Punkt Moutarde, Marke Drops, 165 m Lauflänge, 50 g je Knäuel, Menge 4 zu je 3,20 €, letzter Kauf am 2026-08-12](images/de/05b-fiche-laine.webp)
+![Die Vollbildkarte von Drops · Moutarde: Marke Drops, Lauflänge 165 m, 50 g je Knäuel, Menge 4 zu je 3,20 €, ein erfasster Kauf, der letzte am 24.9.2026, Material Baumwolle, dann Pflanzliche Faser, die Etiketten Vegan und Biologische Fasern (GOTS), der Zustand Frei und die Schaltfläche Foto hinzufügen](images/de/05b-fiche-laine.webp)
 
 *Die Karte eines Garns: seine Zusammensetzung, der Hinweis „Pflanzliche Faser“ und seine beiden Kennzeichnungen „Vegan“ und „Biologische Fasern (GOTS)“.*
 
@@ -684,17 +722,17 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
   sobald die Summen groß werden), sowie der Gesamtwert deines Vorrats.
 - **Suchen, filtern, sortieren**: ein Suchfeld und die Schaltflächen
   **Filtern** und **Sortieren** oben im Vorrat. Filtern öffnet ein Fenster
-  mit zwei Ebenen: die Liste der sechs Kriterien (**Marke**, **Label**,
-  **Stärke**, **Gewicht pro Knäuel**, **Farbe**, **Material**) und dann, für
+  mit zwei Ebenen: die Liste der sieben Kriterien (**Marke**, **Label**,
+  **Stärke**, **Gewicht pro Knäuel**, **Farbe**, **Material**, **Status**:
+  frei, reserviert oder verwendet) und dann, für
   das angetippte Kriterium, seine Werte. Eine Wahl je Kriterium, aber die
   Kriterien lassen sich kombinieren; eine Markierung an der Schaltfläche
   Filtern zählt die aktiven Filter, und **Zurücksetzen** löscht sie mit
   einer Geste. Sortieren bietet **Marke** (der Standard), **Stärke** oder
   **Kaufdatum**. Nichts davon wird gemerkt: Jede Rückkehr zum Vorrat beginnt
-  ohne Filter, sortiert nach Marke. Liste oder visuelles Raster, wie du
-  willst.
-- **Bearbeiten, duplizieren oder löschen** einer Karte über das Menü
-  **Aktionen** (senkrechtes Dreipunkt-Symbol) auf ihrer Karte.
+  ohne Filter, sortiert nach Marke.
+- **Bearbeiten, duplizieren oder löschen** eines Garns über das Menü
+  **Aktionen** (senkrechtes Dreipunkt-Symbol) oben auf seiner Karte.
   „Duplizieren“ ist praktisch für dasselbe Garn in einer anderen
   Farbstellung: alles wird übernommen, du musst nur noch die Farbe
   ändern.
@@ -706,21 +744,27 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
   Papierkorb deine Garnreservierungen infrage stellt. Das Projekt kommt
   trotzdem zurück, aber mit einer verringerten Reservierung und einer
   Meldung, die es dir erklärt.
-- **Detailkarte eines Garns**: eine vollständige Übersicht (Knäuel,
-  Meter, Projekte, die es verwenden), und ein Block **Käufe und
-  Geschenke**, der jeden Erwerb dieses Garns für dich nachhält:
+- **Die Karte eines Garns**: Ein Tipp auf seine Kachel öffnet sie im
+  Vollbild. Sie versammelt alles, was du notiert hast (Marke, Farbe,
+  Aufbewahrungsort, Lauflänge, Menge, Preis, Käufe, Material, Notizen),
+  seine Eigenschaften, seinen Status (frei, reserviert, verwendet) und
+  seine **Fotos**: Du kannst mehrere hinzufügen und mit einem Tipp auf
+  den Stern festlegen, welches als Cover dient.
+- **Käufe und Geschenke**: Im Bildschirm **Bearbeiten** eines Garns
+  hält dieser Block jeden Erwerb für dich nach:
   - Jede Zeile trägt eine Menge, einen Preis, ein Datum und ein
     Färbebad und gibt an, ob es sich um einen **Kauf** oder ein
-    **Geschenk** handelte (ein Geschenk zählt nie zu deinem
-    ausgegebenen Budget). Die drei jüngsten Zeilen siehst du sofort,
+    **Geschenk** handelte (ein Geschenk zählt nie zu deinen
+    Ausgaben). Ein Feld **Gekauft bei** hält zusätzlich den Namen des
+    Geschäfts fest. Die drei jüngsten Zeilen siehst du sofort,
     den Rest klappst du mit einer Geste auf.
   - Eine Zeile kannst du jederzeit **hinzufügen, bearbeiten oder
     löschen**.
-  - **Erhöhst du die Menge** über die Garnkarte, bietet dir die App an,
-    den entsprechenden Kauf zu erfassen, datiert auf heute: Du kannst
-    ihn übernehmen, als Geschenk kennzeichnen oder verwerfen, falls du
+  - **Erhöhst du beim Bearbeiten die Menge** eines Garns, bietet dir
+    die App an, den entsprechenden Kauf zu erfassen, datiert auf heute:
+    Du kannst ihn übernehmen, als Geschenk kennzeichnen oder verwerfen, falls du
     ihn nicht behalten willst. **Eine Menge zu verringern rührt dagegen
-    nie an dein ausgegebenes Budget**: Nur eine Erhöhung kann einen
+    nie an deine Ausgaben**: Nur eine Erhöhung kann einen
     Kauf anlegen.
   - Stimmt die Knäuelanzahl der Karte nicht mit dem im Verlauf
     Erfassten überein (etwa nach einer manuellen Vorratskorrektur),
@@ -731,18 +775,51 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
     endgültig löschst: kein Garnkauf verschwindet, er bleibt im
     Bildschirm **Ausgaben** sichtbar.
 
+### Deinen Vorrat aus Ravelry importieren
+
+Führst du deinen Vorrat schon auf Ravelry, musst du nicht alles neu
+eingeben: Die Schaltfläche **Von Ravelry importieren** oben im
+Garnvorrat legt auf einen Schlag die Karten für das Garn an, das du dort
+schon hast.
+
+1. Öffne auf Ravelry „Notizbuch“ („my notebook“ auf Englisch) und dann
+   den Reiter „Vorrat“ („Stash“).
+2. Klicke oben rechts über der Liste auf „Export“: eine .xls-Datei wird
+   heruntergeladen.
+3. Komm zurück in {app}, wähle diese Datei aus und dann **Datei
+   analysieren**.
+
+Bevor irgendetwas angelegt wird, zeigt dir die App eine Zusammenfassung:
+wie viele Zeilen sie gelesen hat, wie viele Garne sie anlegen wird, wie
+viele **bereits im Bestand** sind (sie werden übersprungen: ein erneuter
+Import legt keine Duplikate an) und wie viele bei Ravelry nicht mehr im
+Vorrat sind („Aufgebraucht“, „Zum Verkauf/Tausch stehend“,
+„Vertauscht/Verkauft/Verschenkt“), die ebenfalls übersprungen werden.
+Nichts wird gespeichert, solange du nicht auf die Schaltfläche „…
+Garn(e) importieren“ getippt hast.
+
+Marke, Modell, Farbe, Stärke, Lauflänge und Gewicht, Anzahl der Knäuel,
+Aufbewahrungsort, Notizen sowie Preis, Datum und Geschäft des Kaufs
+stammen aus der Datei; die Farbmarkierung wird nach der Farbfamilie
+gewählt, die Ravelry angibt. Das Foto fügst du weiterhin von Hand hinzu.
+Alles geschieht auf deinem Gerät: {app} liest die Datei, die du ihr
+gibst, und verbindet sich nie mit Ravelry.
+
 ### Der Ausgaben-Bildschirm
 
 ![Unter dem großen 43 € ausgegeben, aufgeteilt in Garn 30,50 € und Anleitungen 12 €, und der Zeile Seit Beginn kommt 2026 auf 42,50 €, ebenso der August: ×6 Hobbii · Sauge für 17,70 € und ×4 Drops · Moutarde für 12,80 €, beide mit dem Abzeichen Garn und je einem Kreuz zum Löschen, danach Wolkenschal mit Anleitung und Kostenlos sowie Zopfmütze mit Anleitung und 12 €](images/de/05c-depenses.webp)
 
 *Die Menüs Jahr und Art oben, die Gesamtsumme mit ihrer Aufteilung Garn / Anleitungen, dann die Aufschlüsselung nach Monat.*
 
-Erreichbar, indem du das ausgegebene Budget auf dem Startbildschirm
-antippst (Punkt 1), fasst dir dieser Bildschirm alles zusammen, was du
+Erreichbar über das Menü der App, fasst dir dieser Bildschirm alles zusammen, was du
 für dein Stricken oder Häkeln bezahlt hast, **Garn** und
 **Anleitungen**:
-- Die **Gesamtausgabe**, nach Währung, falls du mehrere verwendet hast.
-  Solange du keinen Anleitungspreis eingetragen hast, bleibt diese Summe
+- Die **Gesamtausgabe**, nach Währung, falls du mehrere verwendet hast
+  (die App vermischt sie nie, da sie keinen Wechselkurs kennt). Diese
+  Summe sinkt nie von selbst: Wenn du ein Knäuel verbrauchst oder ein
+  Projekt abschließt, sinkt sie nicht. Sie unterscheidet sich von deinem
+  **Vorratswert**, oben im Bildschirm **Garnvorrat**, der zeigt, was dir
+  noch bleibt, und sinkt, wenn du ein Knäuel verbrauchst. Solange du keinen Anleitungspreis eingetragen hast, bleibt diese Summe
   genau wie gewohnt; sobald eine Anleitung darin auftaucht, wird sie in
   zwei Unterzeilen aufgeteilt: was in Garn und was in Anleitungen ging.
 - Zwei Menüs oben: **Jahr** zeigt dir nur das gewählte Jahr an (oder
@@ -811,11 +888,11 @@ zu sein, erreichbar vom Start aus:
 
 ## 7. Statistik
 
-![Der Bildschirm Statistik, der Reiter Quartal ist aktiv neben Monat, Halbjahr und Jahr: vom 15.6.2026 bis 12.9.2026, im Zeitraum 73:00:06, darunter Kalender statt Rhythmus, ein Raster von Juni bis September, abgestuft von weniger bis mehr, und die Karten Gesamtzeit 73:00:06 und Aktive Tage 71 von 90.](images/de/07-statistiques.webp)
+![Der Bildschirm Statistik, der Reiter Quartal ist aktiv neben Monat, Halbjahr und Jahr: vom 29.6.2026 bis 24.9.2026, im Zeitraum 72:40:06, darunter Kalender statt Rhythmus, ein Raster von Jun bis Sep, abgestuft von weniger bis mehr, und die Karten Gesamtzeit 72:40:06 und Aktive Tage 69 von 88.](images/de/07-statistiques.webp)
 
 *Der Auswähler oben legt ein Beobachtungsfenster fest (Monat, Quartal, Halbjahr oder Jahr), und der ganze Bildschirm richtet sich danach; hier das Fenster Quartal. Der Reiter „Kalender“, standardmäßig angezeigt, zeigt das Gitter und die neun Zahlenkacheln.*
 
-Der Auswähler oben auf dem Bildschirm legt nicht mehr nur eine
+Der Auswähler oben auf dem Bildschirm legt nicht nur eine
 Anzeigedauer fest: Er legt ein **Beobachtungsfenster** fest (Monat,
 Quartal, Halbjahr oder Jahr), und alles, was folgt, richtet sich danach,
 von der Gesamtzeit bis zu den neun Zahlenkacheln. Direkt darunter
@@ -844,7 +921,7 @@ werden):
   Wochentag, und ein Satz, der deinen beständigsten Tag über deine ganze
   Historie nennt.
 
-![Die Statistik in der Ansicht Rhythmus: die Wochen vom 18/05 bis 29/06 als Balken, von 1:10:00 bis 10:50:00, dann Nach Wochentag von Mo bis So, und ganz unten der Satz Über die gesamte Zeit ist Mittwoch dein aktivster Tag.](images/de/07b-stats-rythme.webp)
+![Die Statistik in der Ansicht Rhythmus: die Wochen vom 29.06. bis 07.09. als Balken, von 1:10:00 bis 12:10:00, dann Nach Wochentag von Mo bis So, und ganz unten der Satz Über die gesamte Zeit ist Donnerstag dein aktivster Tag.](images/de/07b-stats-rythme.webp)
 
 *Der Reiter „Rhythmus“: die Balken der verbrachten Zeit nach Zeitraum, die sieben Balken nach Wochentag und der Satz, der deinen beständigsten Tag nennt.*
 
@@ -860,7 +937,7 @@ Stufen: nichts, weniger als 30 Minuten, 30 Minuten bis 1 Stunde, 1 bis
 auch in einem ruhigeren Quartal als sonst. Ein kräftigerer Rahmen umschließt
 die Spalten desselben Monats, damit du sie auf einen Blick erkennst.
 
-![Ein ganzes Jahr des Kalendergitters, von Aug bis Aug: eine Spalte pro Woche, ein Kästchen pro Tag, am linken Rand die Buchstaben M D M D F S S, ein kräftigerer Rahmen um jeden Monat und die Legende weniger bis mehr in fünf Stufen.](images/de/07c-stats-annee.webp)
+![Ein ganzes Jahr des Kalendergitters, von Sep bis Sep: eine Spalte pro Woche, ein Kästchen pro Tag, am linken Rand die Buchstaben M D M D F S S, ein kräftigerer Rahmen um jeden Monat und die Legende weniger bis mehr in fünf Stufen.](images/de/07c-stats-annee.webp)
 
 *Das Gitter im Fenster Jahr: ein ganzes Jahr auf einen Blick, eine Spalte pro Woche und ein Kästchen pro Tag, mit den Rahmen, die die Monate trennen. Tippe auf das Bild, um es zu vergrößern und im Detail zu lesen.*
 
@@ -933,6 +1010,9 @@ Aktion.
     einem Tablet aus zu benutzen, ist es nicht: Jedes Gerät würde die
     Arbeit des anderen löschen. Ein zweites Gerät braucht seinen eigenen
     Ordner.
+- **Hilfe**: „Geführte Tour erneut ansehen“ öffnet die Beispielmütze
+  wieder im Lesemodus mit ihren Erklärblasen, und legt sie neu an, falls
+  du sie gelöscht hast.
 - **Mitwirken**: ein Link zum Quellcode (die App ist quelloffen), und zwei
   weitere Links im selben Block der Einstellungen:
   - **{app} unterstützen** führt zu einer Spendenseite, **freiwillig**:
@@ -943,17 +1023,31 @@ Aktion.
 
 ### Was beim allerersten Start passiert
 
+![„Willkommen bei {app}“, und darunter „Deine Strick- und Häkelprojekte im Zeitverlauf“: Deutsch, Stricken, System, Metrisch (m, g) und EUR bereits ausgewählt, und unten die Schaltfläche „Bereit? Fang an zu stricken!“](images/de/00-bienvenue.webp)
+
+*Der allererste Start: Vorname, Technik, Sprache und Erscheinungsbild.*
+
 Der Reihe nach, wenn du {app} das erste Mal öffnest: Der Willkommensbildschirm
 fragt nach deinem Vornamen, deiner Technik, deiner Sprache, deinem
-Erscheinungsbild, deinen Einheiten und deiner Währung; dann kommt der
-Bildschirm für den Sicherungsordner, der direkt darüber beschrieben ist.
-Danach begrüßen dich drei kleine Meldungen, **jeweils genau einmal**: Du
-siehst sie danach nicht wieder.
+Erscheinungsbild, deinen Einheiten und deiner Währung; auf Android folgt
+danach der Bildschirm für den Sicherungsordner, der direkt darüber
+beschrieben ist. Danach begrüßen dich ein paar kleine Dinge, jeweils
+**genau einmal**: Du siehst sie danach nicht wieder (außer der geführten
+Tour, die du jederzeit erneut ansehen kannst).
 
-- Ein **Willkommensgruß**, mitten auf dem Startbildschirm, sobald dein
-  Sicherungsordner steht: Er sagt dir, dass alles bereit ist, und lädt dich
-  ein, die Beispielprojekte und -anleitungen zu öffnen, um dich einzufinden.
-  Seine Schaltfläche schließt ihn, und er kommt nicht wieder.
+- Ein **Willkommensgruß**, mitten auf dem Startbildschirm: Er sagt dir,
+  dass alles bereit ist, und lädt dich ein, die Beispielprojekte und
+  -anleitungen zu öffnen, um dich einzufinden. Zwei Schaltflächen schließen
+  ihn: „Den Leser entdecken“ startet sofort die geführte Tour weiter unten,
+  „Später“ schließt ihn ohne die Tour. So oder so kommt er nicht wieder.
+- Hast du „Den Leser entdecken“ gewählt, öffnet sich sofort eine
+  **geführte Tour durch den Lesemodus** anhand der Beispielmütze, mit drei
+  Erklärblasen: deine Größe, einen Schritt abhaken und das Diagramm, das
+  deiner Reihe folgt. Du kannst sie jederzeit erneut ansehen: Die
+  Schaltfläche „Geführte Tour erneut ansehen“ steht am Ende des ersten
+  Abschnitts dieser Anleitung (weiter oben) und im Block **Hilfe** der
+  Einstellungen; Letzterer erstellt die Beispielmütze neu, falls du sie
+  gelöscht hast.
 - Ein **Hinweis zu importierten Anleitungen**, wenn du zum ersten Mal deine
   Anleitungen öffnest: Er erinnert dich daran, dass die App deine PDF ganz
   allein liest und sich manchmal irrt (eine übersprungene Reihe, zwei
@@ -972,7 +1066,7 @@ siehst sie danach nicht wieder.
 ## 9. Unter der Haube: was {app} dir garantiert
 
 - **Standardmäßig offline**: Keine deiner Daten verlässt jemals dein
-  Gerät, außer dem Sicherungsordner, den **du selbst wählst**.
+  Gerät.
 - **Kein Konto, keine Bezahlschranke**: Alle oben genannten Funktionen
   sind kostenlos, ohne gesperrte Kernfunktion.
 - **Nichts geht aus Versehen verloren**: Jedes Löschen kannst du sofort
@@ -987,7 +1081,7 @@ siehst sie danach nicht wieder.
   Stapels, und der Reader kann das Diagramm neben dem Text behalten.
   Die App berücksichtigt die reservierten Bereiche deines Bildschirms
   (Statusleiste, Notch, Navigationsleiste): Inhalte schieben sich nicht
-  mehr darunter.
+  darunter.
 - **Eine Datenschutzerklärung in klaren Worten**: Vom Bildschirm „Info“ aus
   sagt sie, wo deine Daten leben, was dein Telefon verlassen kann und in
   welchen Fällen, was beim Deinstallieren der App geschieht, und wer dafür

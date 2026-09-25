@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — « aujourd'hui » se calcule en heure LOCALE, jamais en UTC.
 //
 // Défaut connu : entre minuit
@@ -20,9 +21,6 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { ymdLocal } from '@/utils/time-periods'
 import { useSettingsStore } from '@/stores/settings'
@@ -30,8 +28,9 @@ import { useProjectsStore } from '@/stores/projects'
 import { usePurchasesStore } from '@/stores/purchases'
 import YarnEditView from '@/views/YarnEditView.vue'
 import YarnPurchases from '@/components/YarnPurchases.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // 11 août 2026 à 01 h UTC = 10 août à 18 h à Los Angeles. UTC dit « le 11 », le calendrier de
 // l'utilisatrice dit « le 10 ». Instant repris de tests/unit/journal-jours-actifs.spec.js:73,
@@ -76,13 +75,10 @@ describe('la date d’achat proposée à la création d’une laine (YarnEditVie
   it('propose le jour LOCAL, pas le jour UTC', async () => {
     await db.open()
     await Promise.all(db.tables.map((t) => t.clear()))
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/stash', name: 'stash', component: { template: '<div />' } },
-        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/stash', name: 'stash', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+    ])
     router.push('/stash/new')
     await router.isReady()
     const pinia = createPinia()

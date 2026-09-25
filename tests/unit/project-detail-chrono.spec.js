@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // La pastille chrono FLOTTANTE de la fiche projet (lot « chrono unifié », 2026-08-30).
 // Elle remplace deux choses : le bloc « Temps de travail » en bas de l'onglet Sections (le
 // temps de travail n'est pas une propriété de cet onglet — on tricote aussi depuis les
@@ -11,8 +12,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import fr from '@/i18n/fr.json'
@@ -23,8 +22,9 @@ import { useActiveSessionStore } from '@/stores/activeSession'
 import { useProjectsStore } from '@/stores/projects'
 import { useSnackbarStore } from '@/stores/snackbar'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const T0 = 1_700_000_000_000
 const atTime = (ms) => Date.now.mockReturnValue(ms)
 
@@ -46,13 +46,10 @@ async function mountView(pattern = FREE, projectPatch = {}, tab = 'sections', ex
   })
   const pinia = createPinia()
   setActivePinia(pinia)
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/project/:id', name: 'project', component: ProjectDetailView },
-      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/project/:id', name: 'project', component: ProjectDetailView },
+    { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+  ])
   router.push(`/project/${prj}?tab=${tab}`)
   await router.isReady()
   // `extraGlobal` : option de montage ponctuelle (p. ex. `config.errorHandler` pour capturer
@@ -363,13 +360,10 @@ describe('ProjectDetailView — chrono ouvert sur un AUTRE projet', () => {
     await active.play()
     atTime(T0 + 5000)
 
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/project/:id', name: 'project', component: ProjectDetailView },
-        { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/project/:id', name: 'project', component: ProjectDetailView },
+      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+    ])
     router.push(`/project/${mien}?tab=sections`)
     await router.isReady()
     const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, pinia] } })

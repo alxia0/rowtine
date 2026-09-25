@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — la progression émise par le moteur (2026-08-04, §4.2).
 // Stockage en mémoire, vrai orchestrateur, vraie lecture : on vérifie la SÉQUENCE
 // des événements, pas seulement qu'il y en a.

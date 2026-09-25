@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // YarnConsumptionDialog — question posée à la clôture d'un projet (K2) : « combien de
 // pelotes as-tu réellement utilisées ? ». Piège UX (décision produit) : PAS de bouton
 // Annuler — fermer la question (croix, scrim, Échap) consomme TOUT le réservé (défaut =
@@ -5,11 +6,13 @@
 // tricoté », le reliquat retourne au stock.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 const stubs = { AppIcon: true }
 
 const yarns = [
@@ -33,9 +36,9 @@ describe('YarnConsumptionDialog', () => {
     const rows = w.findAll('.ycn__row')
     expect(rows).toHaveLength(2)
     expect(rows[0].text()).toContain('Drops · Bleu')
-    expect(rows[0].text()).toContain('3 réservée(s)')
+    expect(rows[0].text()).toContain(tk('project.consumeReserved', { n: 3 }))
     expect(rows[1].text()).toContain('Katia · Écru')
-    expect(rows[1].text()).toContain('1 réservée(s)')
+    expect(rows[1].text()).toContain(tk('project.consumeReserved', { n: 1 }))
     const inputs = w.findAll('.ycn__input')
     expect(inputs).toHaveLength(2)
     expect(inputs[0].element.value).toBe('3')
@@ -78,6 +81,16 @@ describe('YarnConsumptionDialog', () => {
     await w.findAll('.ycn__input')[0].setValue(99)
     await w.find('.ycn__confirm').trigger('click')
     expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 3 })
+  })
+
+  // Protège : le champ montre toujours la valeur qui sera enregistrée (borne comprise).
+  it('une saisie bornée est réécrite dans le champ, même si la valeur retenue ne change pas', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue(99) // retenu : 3, déjà la valeur courante
+    expect(champ.element.value).toBe('3')
+    await champ.setValue(-5)
+    expect(champ.element.value).toBe('0')
   })
 
   it('un nombre négatif ou illisible retombe à 0', async () => {

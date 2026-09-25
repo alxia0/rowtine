@@ -1,14 +1,15 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, it, expect } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import StashView from '@/views/StashView.vue'
 import { useSettingsStore } from '@/stores/settings'
+import { createTestI18n, createTestRouter, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 // Le séparateur de milliers français d'Intl est U+202F, pas une espace tapée.
 const FR_GROUP = new Intl.NumberFormat('fr').format(1000).replace(/\d/g, '')
@@ -16,10 +17,7 @@ const FR_GROUP = new Intl.NumberFormat('fr').format(1000).replace(/\d/g, '')
 async function mountStash(yarns) {
   await db.yarns.clear()
   for (const y of yarns) await db.yarns.add(y)
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'stash', component: StashView }],
-  })
+  const router = createTestRouter([{ path: '/', name: 'stash', component: StashView }])
   router.push('/')
   await router.isReady()
   const pinia = createPinia()
@@ -81,8 +79,8 @@ describe('StashView — récap', () => {
     // 25 × 497 m = 12 425 m = 13 588 yd ; 25 × 98 g = 2 450 g = 5,401 lb
     const w = await mountStash([{ brand: 'A', colorName: 'Rouge', quantity: 25, lengthM: 497, grams: 98 }])
     const [, longueur, poids] = tiles(w)
-    expect(longueur.lbl).toBe('yards')
-    expect(poids.lbl).toBe('livres')
+    expect(longueur.lbl).toBe(tk('yarn.unit.yd'))
+    expect(poids.lbl).toBe(tk('yarn.unit.lb'))
     expect(poids.num).toBe('5,401')
   })
 

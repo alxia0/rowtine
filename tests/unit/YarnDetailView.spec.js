@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran — YarnDetailView (remplace le tiroir YarnDetailDialog.vue, cf. plan « refonte fiche
 // laine »). Ce fichier consolide les assertions de tests/unit/yarn-detail-dialog.spec.js
 // (contenu affiché — sauf role="dialog"/Escape/focus-trap, sans objet pour un écran routé) et
@@ -23,17 +24,21 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { db } from '@/db/db'
 import fr from '@/i18n/fr.json'
 import de from '@/i18n/de.json'
+import en from '@/i18n/en.json'
 import YarnDetailView from '@/views/YarnDetailView.vue'
 import { usePurchasesStore } from '@/stores/purchases'
-import { useYarnsStore } from '@/stores/yarns'
 import { useTrashStore } from '@/stores/trash'
 import { photosOf } from '@/utils/yarn-photos'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 // Instance dédiée à une régression connue : locale allemande, pour prouver que la ligne
 // « Composition » traduit dans la langue ACTIVE plutôt que de pousser la clé française
 // stockée en base (portée depuis yarn-detail-dialog.spec.js).
 const i18nDe = createI18n({ legacy: false, locale: 'de', messages: { de } })
+const i18nEn = createI18n({ legacy: false, locale: 'en', messages: { en } })
 
 function makeRouter(id) {
   const router = createRouter({
@@ -98,10 +103,17 @@ beforeEach(async () => {
 })
 
 describe('YarnDetailView', () => {
-  it('affiche le prix avec la virgule française, pas le point JS', async () => {
+  it('affiche le prix au format de la langue, centimes compris (3,20 et non 3,2)', async () => {
     const { w } = await mountView({ ...BASE_YARN })
     // Devise par défaut EUR (settings.js) : le libellé attendu porte donc « € ».
-    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('3,2')
+    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('3,20')
+  })
+
+  it('affiche le prix au format de la langue active, pas la virgule française figée', async () => {
+    const { w } = await mountView({ ...BASE_YARN }, { i18nInstance: i18nDe })
+    expect(fieldValue(w, de.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('3,20')
+    const { w: wEn } = await mountView({ ...BASE_YARN }, { i18nInstance: i18nEn })
+    expect(fieldValue(wEn, en.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('3.20')
   })
 
   it('le kebab ouvre un menu avec Modifier / Dupliquer / Supprimer', async () => {
@@ -132,24 +144,27 @@ describe('YarnDetailView', () => {
 
   it('« Supprimer » supprime la laine, déclenche la suppression douce et revient à stash', async () => {
     const { w, id, pinia } = await mountView({ ...BASE_YARN })
-    const yarnsStore = useYarnsStore(pinia)
     const trashStore = useTrashStore(pinia)
     await w.find('.phdr__kebab').trigger('click')
     await w.findAll('.menu__item')[2].trigger('click')
     await flushPromises()
-    // `remove()` enchaîne plusieurs allers-retours Dexie réels (yarnsStore.remove →
-    // softDelete → trash.add, chacun un tour d'IndexedDB) : un seul `flushPromises()` ne
+    // `remove()` enchaîne plusieurs allers-retours Dexie réels (trash.moveToTrash →
+    // yarnsStore.load → softDelete, chacun un tour d'IndexedDB) : un seul `flushPromises()` ne
     // suffit pas toujours à tout vider (même piège que la course décrite en tête de
     // fichier) — `vi.waitFor` attend l'effet final plutôt qu'un nombre de tours arbitraire,
     // même motif que tests/unit/project-detail-*.spec.js.
-    await vi.waitFor(() => expect(trashStore.add).toHaveBeenCalled())
+    await vi.waitFor(() => expect(trashStore.moveToTrash).toHaveBeenCalled())
 
-    expect(yarnsStore.remove).toHaveBeenCalledWith(id)
-    // La laine supprimée part bien en corbeille (suppression douce, jamais perdue), sous le
-    // type 'yarn' et avec le bon enregistrement.
-    expect(trashStore.add).toHaveBeenCalledWith('yarn', expect.objectContaining({ id, brand: 'DROPS' }))
+    // Retrait et mise en corbeille d'un seul tenant (trash.js `moveToTrash`), sous le type
+    // 'yarn' : la laine supprimée part bien en corbeille, jamais perdue.
+    expect(trashStore.moveToTrash).toHaveBeenCalledWith('yarn', id)
+    await vi.waitFor(async () =>
+      expect(await db.trash.toArray()).toEqual([
+        expect.objectContaining({ type: 'yarn', payload: expect.objectContaining({ id, brand: 'DROPS' }) }),
+      ]),
+    )
     // Retour à la liste : plus de fiche à afficher sur cette route.
-    expect(w.vm.$router.currentRoute.value.name).toBe('stash')
+    await vi.waitFor(() => expect(w.vm.$router.currentRoute.value.name).toBe('stash'))
     // Suppression réelle en base (même moteur que le reste du fichier : vraies actions,
     // vrai Dexie) — la fiche a bien disparu, pas seulement l'affichage.
     expect(await db.yarns.get(id)).toBeUndefined()
@@ -160,7 +175,7 @@ describe('YarnDetailView', () => {
   it('affiche tous les champs saisis, bain et date d’achat compris via le registre (jamais perdre d’info)', async () => {
     const { w } = await mountView({ ...BASE_YARN }, { purchases: [{ bain: 'LOT42', date: '2026-06-01' }] })
     const txt = w.text()
-    for (const v of ['DROPS', 'Baby Merino', 'Bleu ciel', '175', '50', '5', 'LOT42', '2026-06-01', 'Laine']) {
+    for (const v of ['DROPS', 'Baby Merino', 'Bleu ciel', '175', '50', '5', 'LOT42', '01/06/2026', 'Laine']) {
       expect(txt).toContain(v)
     }
   })
@@ -177,7 +192,8 @@ describe('YarnDetailView', () => {
     // `forYarn` renvoie les lignes plus récentes d'abord : bainsOf dédoublonne dans CET
     // ordre — B03 (04/05) et A12 (20/02) avant le doublon A12 (10/01).
     expect(fieldValue(w, fr.yarn.bain)).toBe('B03 · A12')
-    expect(fieldValue(w, fr.yarn.lastPurchaseDate)).toBe('2026-05-04')
+    // Date affichée au format de la langue, pas l'ISO stocké.
+    expect(fieldValue(w, fr.yarn.lastPurchaseDate)).toBe('04/05/2026')
   })
 
   it('aucune ligne d’achat pour cette laine : pas de récapitulatif affiché', async () => {
@@ -204,9 +220,9 @@ describe('YarnDetailView', () => {
   it('affiche l’origine déduite et les caractéristiques cochées', async () => {
     const { w } = await mountView({ ...BASE_YARN, composition: ['alpaga'], labels: ['vegan', 'rws'] })
     const txt = w.text()
-    expect(txt).toContain('Fibre animale')
-    expect(txt).toContain('Vegan')
-    expect(txt).toContain('Bien-être des moutons (RWS)')
+    expect(txt).toContain(tk('yarn.origin.animale'))
+    expect(txt).toContain(tk('yarn.labels.vegan'))
+    expect(txt).toContain(tk('yarn.labels.rws'))
   })
 
   it('n’affiche PAS de ligne d’origine quand la composition est vide', async () => {
@@ -216,24 +232,24 @@ describe('YarnDetailView', () => {
 
   it('dit « Origine incomplète » dès qu’une fibre n’est pas classée', async () => {
     const { w } = await mountView({ ...BASE_YARN, composition: ['mérinos', 'zzz-fibre-inconnue'], labels: [] })
-    expect(w.text()).toContain('Origine incomplète')
+    expect(w.text()).toContain(tk('yarn.origin.incomplete'))
   })
 
   it('affiche les caractéristiques dans l’ordre canonique de YARN_LABELS, jamais l’ordre de cochage', async () => {
     const { w } = await mountView({ ...BASE_YARN, composition: ['alpaga'], labels: ['rws', 'vegan'] })
     const items = w.findAll('.ydet__labels li').map((li) => li.text())
-    expect(items).toEqual(['Vegan', 'Bien-être des moutons (RWS)'])
+    expect(items).toEqual([tk('yarn.labels.vegan'), tk('yarn.labels.rws')])
   })
 
   it('juxtapose les libellés d’origine pour un mélange autre qu’animal + végétal', async () => {
     const { w } = await mountView({ ...BASE_YARN, composition: ['laine', 'acrylique'], labels: [] })
-    expect(w.text()).toContain('Fibre animale · Fibre synthétique')
-    expect(w.text()).not.toContain('Mélange animal et végétal')
+    expect(w.text()).toContain(`${tk('yarn.origin.animale')} · ${tk('yarn.origin.synthetique')}`)
+    expect(w.text()).not.toContain(tk('yarn.origin.melange'))
   })
 
   it('affiche « Mélange animal et végétal » pour une composition animale + végétale', async () => {
     const { w } = await mountView({ ...BASE_YARN, composition: ['laine', 'coton'], labels: [] })
-    expect(w.text()).toContain('Mélange animal et végétal')
+    expect(w.text()).toContain(tk('yarn.origin.melange'))
   })
 
   it('traduit la composition dans la langue active au lieu d’afficher la clé française brute', async () => {
@@ -328,5 +344,38 @@ describe('YarnDetailView — état introuvable', () => {
     await backBtn.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('stash')
+  })
+})
+
+// Lieu de rangement et notes libres, champs ajoutés au modèle laine (Task 1, plan import Ravelry).
+describe('YarnDetailView, Notes et Lieu de rangement', () => {
+  it('affiche les deux champs quand ils sont renseignés', async () => {
+    const id = await db.yarns.add({
+      brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu', storedIn: 'Étagère 2', notes: 'Douce, pour bébé',
+      composition: [], labels: [], reservations: {}, consumed: {}, photos: [],
+    })
+    const router = makeRouter(id)
+    await router.isReady()
+    const w = mount(YarnDetailView, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false }), i18n, router], stubs: { AppIcon: true, ThumbImage: true } },
+    })
+    await flushPromises()
+    expect(w.text()).toContain('Étagère 2')
+    expect(w.text()).toContain('Douce, pour bébé')
+  })
+
+  it("n'affiche pas les lignes quand les champs sont vides", async () => {
+    const id = await db.yarns.add({
+      brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu',
+      composition: [], labels: [], reservations: {}, consumed: {}, photos: [],
+    })
+    const router = makeRouter(id)
+    await router.isReady()
+    const w = mount(YarnDetailView, {
+      global: { plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false }), i18n, router], stubs: { AppIcon: true, ThumbImage: true } },
+    })
+    await flushPromises()
+    expect(w.text()).not.toContain(fr.yarn.storedIn)
+    expect(w.text()).not.toContain(fr.yarn.notes)
   })
 })

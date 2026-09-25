@@ -1,40 +1,23 @@
-// Export CSV du stock (SettingsView::exportYarns) — extrait en fonction pure `yarnExportTable`
-// pour être testable seul (suit le précédent matchesQuery/sortYarns de ce même module).
-// La règle du projet est « jamais perdre d'info » : un futur ajout de colonne qui décale
-// en-têtes et valeurs (colonne ajoutée d'un côté seulement, deux valeurs interverties) doit
-// faire rougir un test — c'est tout l'enjeu de ce fichier. Revue « Stock de laines »
-// (modèle + date d'achat) 17/07.
-//
-// Le passage multilingue (29/07) : le booléen `en` a disparu de la signature — les en-têtes
-// passent TOUS par `t(key)`. Le test qui suit vérifie donc que chaque position d'en-tête
-// demande la BONNE CLÉ (via le `t` factice `(key) => [key]`), plutôt que de comparer des
-// chaînes françaises/anglaises figées — c'est la seule façon de couvrir 4 langues (et les
-// suivantes) sans dupliquer un test par langue.
-//
-// Les travaux sur le budget (01/08) : bain et date d'achat ne sont plus des champs de la laine —
-// ce sont des dérivés des lignes du registre d'achats, fournies à `yarnExportTable` via
-// `linesFor(yarnId)`. Les fixtures portent donc un `id` et les lignes vivent à côté, dans
-// `linesFor`, plutôt que sur l'objet laine lui-même.
+// Export CSV du stock (`yarnExportTable`, fonction pure) : un ajout de colonne qui décale
+// en-têtes et valeurs doit faire rougir un test (règle « jamais perdre d'info »). Les en-têtes
+// passent par `t(key)` : on vérifie la BONNE CLÉ à chaque position, ce qui couvre toutes les
+// langues. Bain et date d'achat viennent des lignes d'achat (`linesFor(yarnId)`), pas de la laine.
 import { describe, it, expect } from 'vitest'
-import { createI18n } from 'vue-i18n'
 import { yarnExportTable } from '@/utils/yarn-filter'
-import fr from '@/i18n/fr.json'
+import { createTestI18n } from './helpers/i18n-router'
 
 // `t` factice : renvoie la clé elle-même entre crochets — suffit à vérifier QUELLE clé est
 // demandée à quelle position, sans dépendre de vue-i18n ni d'un fichier de langue réel.
 const t = (key) => `[${key}]`
 
-// Caractéristiques : contrairement aux tests de position ci-dessus, celui des
-// libellés de caractéristiques doit comparer un texte RÉEL (« Vegan, Fibres biologiques
-// (GOTS) »), pas une clé entre crochets — le `t` factice ne peut donc pas servir ici. On
-// verrouille la locale sur `fr` (pas `i18n` global de l'app, dont la locale dépend de
-// l'appareil) pour un résultat déterministe.
-const realT = createI18n({ legacy: false, locale: 'fr', messages: { fr } }).global.t
+// Libellés de caractéristiques : texte RÉEL, donc pas de `t` factice ; locale verrouillée sur
+// `fr` (celle de l'app dépend de l'appareil) pour un résultat déterministe.
+const realT = createTestI18n().global.t
 
 const laineComplete = {
   id: 1, brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu glacier', weight: 'dk',
   lengthM: 210, quantity: 3, price: 4.5, composition: ['Laine', 'Alpaga'],
-  // pas de champ `bain` ni `purchasedAt` : retirés du formulaire précédemment.
+  // pas de champ `bain` ni `purchasedAt` : ils viennent des lignes d'achat.
 }
 const laineMinimale = {
   id: 2, brand: 'Katia', colorName: 'Écru', quantity: 1,
@@ -66,16 +49,9 @@ describe('yarnExportTable', () => {
     expect(rows[0][11]).toBe('2026-01-15')
   })
 
-  // Point 5 : plusieurs lignes d'achat pour la MÊME laine ne doivent
-  // perdre ni un bain, ni la date la plus récente — l'export les agrège, il ne choisit
-  // pas laquelle garder. Bains et dates du jeu d'essai tous distincts.
-  //
-  // Ordre du jeu d'essai (revue, 01/08) : `linesFor` en production, c'est
-  // `usePurchasesStore().forYarn`, qui rend TOUJOURS les lignes plus récentes d'abord
-  // (byRecentFirst, stores/purchases.js) — jamais l'ordre de saisie. Un fixture en ordre
-  // croissant de date ne décrirait pas ce que l'app produit réellement ; celui-ci est
-  // pré-trié plus récent d'abord, comme le vrai store (même modèle que
-  // yarn-detail-dialog.spec.js, qui passe par le vrai store).
+  // Plusieurs lignes d'achat pour la MÊME laine ne perdent ni un bain, ni la date la plus
+  // récente : l'export agrège. Jeu pré-trié plus récent d'abord, comme le vrai
+  // `usePurchasesStore().forYarn` (byRecentFirst), jamais l'ordre de saisie.
   it('agrège les bains dédoublonnés et la date la plus récente, sans rien perdre (jamais perdre d’info)', () => {
     const linesMulti = (id) => (id === 1 ? [
       { bain: 'B03', date: '2026-05-04' },
@@ -121,26 +97,8 @@ describe('yarnExportTable', () => {
     expect(rows[0][11]).toBe('')
   })
 
-  // SUPPRIMÉ le 29/07 (revue du passage multilingue) : un cas « locale: 'de' » qui NE POUVAIT
-  // PAS ROUGIR. Il construisait la table avec `locale: 'de'` puis affirmait
-  // `expect(head[0]).not.toBe('Marque')` — or `yarnExportTable` bâtit ses en-têtes à
-  // l'identique quelle que soit la locale (elle ne s'en sert que pour le séparateur décimal
-  // et le symbole de devise), et le `t` factice de ce fichier renvoie toujours '[clé]'. Les
-  // deux `.not.toBe(...)` étaient donc vrais par construction, indépendamment du code testé :
-  // exactement le défaut récurrent documenté de ce projet.
-  //
-  // Rien n'est perdu en couverture :
-  //   - la seule assertion utile du cas (`head[0]` demande bien la clé « brand ») est reprise
-  //     dans le test des positions ci-dessus ;
-  //   - `head[6]` (clé de longueur) est déjà couvert par yarn-export-units.spec.js ;
-  //   - le VRAI garde-fou d'une locale tierce est dans yarn-export-units.spec.js :
-  //     `expect(rows[0][6]).toBe('229,66')` pour `locale: 'de'`. Celui-là rougirait pour de
-  //     bon si le séparateur décimal redevenait conditionné au seul français — il porte sur
-  //     une VALEUR calculée par le code, pas sur une chaîne que le test fabrique lui-même.
-
-  // Le 05/08 : `yarnExportTable` liste ses colonnes une par une (yarn-filter.js) —
-  // sans ajout explicite, les caractéristiques ne sortiraient jamais de l'export, sans le
-  // moindre message. Ces deux tests couvrent la colonne « Caractéristiques ».
+  // `yarnExportTable` liste ses colonnes une par une : sans ajout explicite, les
+  // caractéristiques ne sortiraient jamais de l'export, sans le moindre message.
   it('exporte une colonne « Caractéristiques » avec les libellés traduits', () => {
     const { head, rows } = yarnExportTable([{ brand: 'Drops', labels: ['vegan', 'gots'] }], { t: realT })
     expect(head).toContain('Caractéristiques')
@@ -153,13 +111,8 @@ describe('yarnExportTable', () => {
     expect(rows[0][head.indexOf('Caractéristiques')]).toBe('')
   })
 
-  // Revue finale (correction 1, 06/08/2026) : le test ci-dessus (`['vegan', 'gots']`) ne
-  // pouvait pas tomber si l'export retombait sur l'ordre de COCHAGE au lieu de l'ordre
-  // CANONIQUE (YARN_LABELS) — les deux ordres coïncident sur cette paire. Ici l'ordre de
-  // cochage est délibérément inversé par rapport au canonique : mesuré, avant correction,
-  // l'export sortait « Fibres biologiques (GOTS), Vegan » (ordre de cochage) alors que la
-  // fiche détaillée affichait déjà « Vegan, Fibres biologiques (GOTS) » (ordre canonique).
-  // Seule une lecture qui respecte YARN_LABELS fait apparaître Vegan avant GOTS ici.
+  // Ordre de cochage délibérément inverse de l'ordre canonique (YARN_LABELS) : seule une
+  // lecture qui respecte YARN_LABELS met Vegan avant GOTS, comme la fiche détaillée.
   it('exporte les caractéristiques dans l’ordre canonique de YARN_LABELS, jamais l’ordre de cochage', () => {
     const { head, rows } = yarnExportTable([{ brand: 'Drops', labels: ['gots', 'vegan'] }], { t: realT })
     expect(rows[0][head.indexOf('Caractéristiques')]).toBe('Vegan, Fibres biologiques (GOTS)')

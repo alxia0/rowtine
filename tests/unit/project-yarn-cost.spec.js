@@ -27,7 +27,7 @@ describe('projectYarnCost', () => {
   it('3. additionne réservé ET tricoté sur la MÊME laine, sans laisser fuir une laine d\'un AUTRE projet', () => {
     // Constat de revue (08/08) : aucun test n'exerçait réservé + tricoté + un AUTRE projet
     // dans le même appel — l'isolation entre projets ne tenait que sur le test 4, dont
-    // l'assertion de la fiche (project-detail-total-cost.spec.js) s'est révélée morte.
+    // l'assertion de la fiche (ProjectDetailView.spec.js, bloc « coût du projet ») s'est révélée morte.
     const r = projectYarnCost(
       [
         { price: '2', reservations: { [PID]: 1 }, consumed: { [PID]: 4 } },

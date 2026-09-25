@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // (P2, audit UX 17/07) — CounterForm utilise désormais AppCheckbox (case
 // maison) pour « suivre les augm./dim. » et « suivre les répétitions », au lieu de
 // <input type="checkbox"> natif. Ce test verrouille le câblage : cocher révèle bien

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le faux titre résiduel (constaté le 20/08/2026 sur le Huawei, patron réel
 // `Harlow_Sweater_FR`). Quand l'import a laissé un intitulé en TEXTE BRUT (« Abréviations »,
 // « Conseils »…) suivi de son contenu, sélectionner le CONTENU et le taguer créait bien le

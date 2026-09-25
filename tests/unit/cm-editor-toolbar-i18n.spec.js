@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // B6 (barre d'outils ENTIÈREMENT localisée) — buildToolbarHtml codait en dur
 // en français TOUS les libellés hors menu Section (Étape/Note/Texte,
 // sous-choix Compteur, placeholders, 7 libellés d'aide-mémoire, aria-label).

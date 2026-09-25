@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — COUVERTURE des quatre sites qui arment `lastWorkedAt`. Le journal des
 // jours actifs est instrumenté en UN SEUL endroit (`projectsStore.update()`) : ce fichier prouve
 // que les gestes d'interface passent bien par là. Le site 1 (`markWorked()` direct) est couvert
@@ -13,16 +14,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { allActiveDays } from '@/db/active-days'
 import { ymdLocal } from '@/utils/time-periods'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import CounterCard from '@/components/CounterCard.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const AUJOURDHUI = () => ymdLocal(new Date())
 
 // M2 (revue, correction) : UNE seule instance pinia — celle active devient aussi celle
@@ -51,13 +50,10 @@ async function monterFiche(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 
   const patternId = await db.patterns.add({ name: 'Écharpe', sections })
   const pid = await db.projects.add({ name: 'Mon écharpe', patternId, status: 'wip', readerState: {} })
   if (avecCompteur) await db.counters.add({ projectId: pid, name: 'Rangs', value: 7 })
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/project/:id', name: 'project', component: ProjectDetailView },
-      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/project/:id', name: 'project', component: ProjectDetailView },
+    { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+  ])
   router.push(`/project/${pid}?tab=sections`)
   await router.isReady()
   const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, pinia] } })

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // reader-view.spec.js — dégradation ReaderView pour readers simples
 // Vérifie qu'un reader sans tailles ni aide-mémoire ne génère pas d'erreur
 // et que les étapes s'affichent correctement.

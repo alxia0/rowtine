@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/purchases-reprise.spec.js
 // Unitaire — reconstruction de l'historique des fiches existantes. Deux exigences
 // opposées se rencontrent ici : reconstruire ce qui existe AU PREMIER lancement, et

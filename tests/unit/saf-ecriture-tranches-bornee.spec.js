@@ -1,24 +1,11 @@
-// Verrou du CRITÈRE D'ACCEPTATION du correctif mémoire du pont, SENS ÉCRITURE :
+// Écriture par tranches du pont SAF : le pic mémoire côté natif est borné par une
+// CONSTANTE, pas par la taille du fichier. Miroir de la lecture, en fin de fichier.
+// Les invariants vivent dans le Java, sans harnais de test JVM : on verrouille la SOURCE.
 //
-//   « Le pic mémoire côté natif est borné par une CONSTANTE, pas par la taille
-//     du fichier. »
-//
-// Miroir de saf-lecture-tranches-bornee.spec.js. Ce que ces assertions protègent ne
-// peut pas être prouvé par un test JavaScript ordinaire : les invariants vivent dans
-// le Java, et le dépôt n'a pas de harnais de test JVM pour le plugin (android/app/
-// src/test ne contient que les stubs du gabarit Capacitor) — la consigne du lot
-// interdit par ailleurs de construire l'APK. On verrouille donc la SOURCE Java
-// directement, faute d'autre moyen.
-//
-// ⚠️ HONNÊTETÉ SUR CE QUE LE NATIF PEUT ET NE PEUT PAS : la trace du plantage place
-// l'allocation refusée dans `com.getcapacitor.Bridge.callPluginMethod`, qui
-// sérialise les ARGUMENTS entrants (`call.getData().toString()`, Bridge.java:834-835)
-// AVANT d'invoquer la méthode du plugin. Aucun code écrit dans RowtineSafPlugin ne
-// peut donc empêcher cet OutOfMemoryError : la prévention, c'est le découpage côté
-// JavaScript. Ce que le natif apporte — et que ce fichier verrouille — c'est que la
-// borne soit NON OPTIONNELLE : il refuse toute charge utile hors borne, donc un
-// appelant distrait échoue partout et toujours, au lieu de « marcher » sur les
-// appareils au gros tas et de céder sur une Nexus 7 selon la fragmentation.
+// Le Bridge Capacitor sérialise les arguments AVANT d'invoquer le plugin : seul le découpage
+// côté JavaScript prévient l'OutOfMemoryError. Le natif rend la borne NON OPTIONNELLE en
+// refusant toute charge hors borne, pour qu'un appelant distrait échoue partout, et pas
+// seulement sur une tablette au petit tas.
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -221,16 +208,11 @@ describe('écriture par tranches : la borne mémoire du pont est structurelle', 
   })
 
   it('la tranche tient LARGEMENT dans le tas de 16 Mo de la Nexus 7', () => {
-    // Borne ABSOLUE, répétée ici exprès : sans elle, ce fichier ne verrouille que du
-    // RELATIF (« l'app ne demande pas plus que le natif »), et MAX_CHUNK_BYTES =
-    // 12582912 passerait — un entier positif, multiple de 3, qui ferait retomber la
-    // tablette dans l'OutOfMemoryError exact que ce lot corrige. Le fichier LECTURE
-    // porte déjà cette borne ; s'il disparaissait, plus rien ne la tiendrait, et ce
-    // fichier-ci resterait vert.
-    // 384 Kio retenus (393 216 = 3 × 131 072) : la pire allocation unitaire du pont
-    // (char[] du JSONStringer, pessimiste 2 octets/char au doublement) reste ~2 Mo,
-    // sous l'allocation de 3,18 Mo qui a tué la tablette le 13/08. La borne de ce
-    // test doit mordre AVANT ce seuil : 576 Kio (589 824) = 1,5× la valeur retenue.
+    // Borne ABSOLUE, répétée exprès : sans elle, ce fichier ne verrouille que du RELATIF, et un
+    // MAX_CHUNK_BYTES de 12582912 (entier positif, multiple de 3) passerait en ramenant
+    // l'OutOfMemoryError. 384 Kio retenus (393 216 = 3 × 131 072) : la pire allocation du pont
+    // (char[] du JSONStringer, 2 octets/char au doublement) reste ~2 Mo, sous les 3,18 Mo qui
+    // ont tué la tablette. Le seuil du test mord avant : 576 Kio (589 824) = 1,5× la valeur.
     expect(
       maxChunk,
       'la tranche dépasse le budget mémoire du pont : la Nexus 7 replanterait',
@@ -238,16 +220,10 @@ describe('écriture par tranches : la borne mémoire du pont est structurelle', 
   })
 
   it('la purge du cache de dossiers PRÉCÈDE la résolution de la racine, comme avant les tranches', () => {
-    // RESTAURÉ : ce verrou existait en 968009c8 et une réécriture de bloc l'a emporté
-    // sans que rien ne le dise — la suite est restée verte, exactement le mode d'échec
-    // qu'il sert lui-même à décrire.
-    //
-    // Le cache de dossiers du plugin garde des handles DocumentFile ; son propre
-    // commentaire prévient qu'« un handle périmé après rename/remove écrirait au
-    // mauvais endroit ». La version d'avant les tranches purgeait en toute première
-    // instruction de writeFile. Purger APRÈS `treeRoot()` capturerait la racine périmée
-    // puis viderait le cache derrière elle — et AUCUN test ne peut le voir : le mock de
-    // plugin n'a pas de cache de dossiers du tout.
+    // Le cache de dossiers du plugin garde des handles DocumentFile, qu'un rename/remove rend
+    // périmés : writeFile le purge en toute première instruction. Purger APRÈS `treeRoot()`
+    // capturerait la racine périmée, et aucun autre test ne le verrait (le mock de plugin n'a
+    // pas de cache de dossiers).
     const purge = CORPS_WRITE.indexOf('clearDirCache()')
     const racine = CORPS_WRITE.indexOf('treeRoot()')
     expect(purge, 'la purge du cache a disparu de writeFile').toBeGreaterThan(-1)
@@ -258,11 +234,9 @@ describe('écriture par tranches : la borne mémoire du pont est structurelle', 
   })
 
   it('la synchro des .md ignore elle aussi les résidus d’écriture', () => {
-    // Ajouté au-delà de la revue : `readAssetFiles` ne saute que `.json` et `.md`, si
-    // bien que `patron.md.part` atterrissait dans les ASSETS DU LECTEUR — même trou
-    // que celui refermé dans restore.js, sur le fichier d'à côté. L'atomicité désormais
-    // universelle le rend atteignable pour TOUT fichier, plus seulement les lourds.
-    // Verrou sur la source, faute de pouvoir provoquer un résidu depuis ces tests.
+    // `readAssetFiles` ne saute que `.json` et `.md` : un résidu `patron.md.part` atterrirait
+    // dans les assets du lecteur, et l'atomicité universelle le rend atteignable pour tout
+    // fichier. Verrou sur la source, faute de pouvoir provoquer un résidu depuis ces tests.
     const SYNC = fs.readFileSync(path.join(ROOT, 'src/backup/patron-md-sync.js'), 'utf-8')
     const corps = SYNC.slice(SYNC.indexOf('async function readAssetFiles'))
     expect(
@@ -280,5 +254,92 @@ describe('écriture par tranches : la borne mémoire du pont est structurelle', 
     expect(JS_CODE, 'le spread est revenu dans la conversion octets → base64').not.toMatch(
       /fromCharCode\s*\(\s*\.\.\.|fromCharCode\s*\.\s*apply/,
     )
+  })
+})
+
+// Verrou du CRITÈRE D'ACCEPTATION du correctif mémoire du pont natif :
+//
+//   « Le pic mémoire côté natif est borné par une CONSTANTE, pas par la taille
+//     du fichier. »
+//
+// Ce que ce test protège ne peut pas être prouvé par un test JavaScript ordinaire :
+// la borne vit dans le Java, et seul l'écrêtage CÔTÉ NATIF la rend structurelle —
+// si c'était l'application qui choisissait seule la taille des tranches, un appelant
+// distrait (ou un vieux bundle) redemanderait le fichier entier et ferait retomber
+// la Nexus 7 (16 Mo de tas) dans l'OutOfMemoryError de call.resolve().
+//
+// Le dépôt n'a pas de harnais de test JVM pour le plugin (android/app/src/test ne
+// contient que les stubs du gabarit Capacitor) et la consigne du lot interdit de
+// construire l'APK : on verrouille donc les invariants sur la SOURCE Java
+// directement, faute d'autre moyen.
+describe('lecture par tranches : la borne mémoire du pont est structurelle', () => {
+  it('le plugin natif déclare une taille de tranche maximale', () => {
+    expect(
+      Number.isInteger(maxChunk),
+      'MAX_CHUNK_BYTES a disparu du Java : plus rien ne borne le pic mémoire du pont',
+    ).toBe(true)
+    expect(maxChunk).toBeGreaterThan(0)
+  })
+
+  it('cette taille tient LARGEMENT dans le tas de 16 Mo de la Nexus 7', () => {
+    // Sans cette borne haute, le fichier ne verrouillerait que la FORME de la
+    // constante, pas la borne : MAX_CHUNK_BYTES = 12582912 est un entier positif
+    // multiple de 3, laisserait toute la suite verte, et ferait retomber la
+    // tablette dans l'OutOfMemoryError exact que ce lot corrige.
+    //
+    // 1 Mio de tranche = ~1,4 Mio de caractères base64, dont le StringBuilder de
+    // JSONStringer fait un char[] de ~2,8 Mio — déjà au-delà de ce qui restait
+    // (2 505 Kio) au point d'échec relevé dans logcat. La valeur retenue (384 Kio)
+    // donne une pire allocation unitaire de ~2 Mo, sous l'allocation fatale de
+    // 3,18 Mo — marge ~1,6× (même arithmétique que le Java et la spec écriture).
+    expect(
+      maxChunk,
+      'la tranche dépasse le budget mémoire du pont : la Nexus 7 replanterait',
+    ).toBeLessThanOrEqual(1 << 20)
+  })
+
+  it('cette taille est un MULTIPLE DE 3 — sans quoi la concaténation des tranches base64 est invalide', () => {
+    // 3 octets → 4 caractères base64. Une tranche non multiple de 3 se termine par
+    // du remplissage « = » ; concaténée à la suivante, elle produit un fichier
+    // silencieusement corrompu.
+    expect(maxChunk % 3, `MAX_CHUNK_BYTES = ${maxChunk} n'est pas un multiple de 3`).toBe(0)
+  })
+
+  it('le natif ÉCRÊTE la longueur demandée : un appelant ne peut pas réclamer le fichier entier', () => {
+    expect(
+      JAVA,
+      'sans écrêtage natif, la borne redevient une simple convention côté application',
+    ).toMatch(/want\s*>\s*MAX_CHUNK_BYTES\)\s*want\s*=\s*MAX_CHUNK_BYTES/)
+    // Et une longueur quelconque est ramenée à un multiple de 3.
+    expect(JAVA, "l'alignement base64 n'est plus garanti côté natif").toMatch(/want\s*-=\s*want\s*%\s*3/)
+  })
+
+  it('le tampon natif est PRÉ-DIMENSIONNÉ à la tranche, sans accumulateur qui grossit', () => {
+    expect(
+      JAVA,
+      'ByteArrayOutputStream est revenu : le tampon redevient proportionnel au fichier',
+    ).not.toContain('ByteArrayOutputStream')
+    expect(JAVA, 'le tampon doit être alloué une fois, à la taille de la tranche').toContain('new byte[want]')
+  })
+
+  it('le décalage est atteint par une BOUCLE : un skip() court ne peut pas décaler la lecture', () => {
+    // InputStream.skip peut sauter MOINS que demandé sans lever d'exception. Un seul
+    // in.skip(offset) rendrait alors les mauvais octets, en silence, et la
+    // restauration écrirait un fichier corrompu sans qu'aucune erreur ne remonte.
+    expect(JAVA, 'la boucle de rattrapage du décalage a disparu').toMatch(
+      /while\s*\(\s*skipped\s*<\s*offset\s*\)/,
+    )
+    // Repli lorsque skip() ne progresse pas du tout : avancer d'un octet lu.
+    expect(JAVA, 'sans repli, un skip() qui rend 0 boucle indéfiniment').toMatch(
+      /in\.read\(\)\s*==\s*-1/,
+    )
+  })
+
+  it("la taille de tranche de l'application respecte la borne du natif", () => {
+    expect(CHUNK_BYTES % 3, 'la tranche demandée doit être un multiple de 3').toBe(0)
+    expect(
+      CHUNK_BYTES,
+      'demander plus que la borne native ferait écrêter en silence à chaque tranche',
+    ).toBeLessThanOrEqual(maxChunk)
   })
 })

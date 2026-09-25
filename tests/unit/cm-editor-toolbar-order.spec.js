@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Retour device 28/07 : les 6 contrôles étaient alternés (bouton, menu, bouton, menu…),
 // ce qui donnait sur téléphone un enchaînement « petit bouton + grand menu » peu lisible.
 // Nouvel ordre : les 2 boutons + le menu le plus large, puis les 2 autres menus + 1 bouton.

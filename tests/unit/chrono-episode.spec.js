@@ -1,22 +1,17 @@
-// Unitaire — les TROIS décisions pures de « la séance visible dès la pause » (plan du
-// 30/08, règle 8) : chunk à committer, adoption de la ligne de fusion, split — ce dernier
-// lu sur le `null` de l'adoption depuis le retrait d'`isSplit`, son double devenu mort
-// (fonctionnalité laissée de côté). Aucune base
-// ici : le store chrono (activeSession) consomme ce module, les tests l'éprouvent sans
-// Dexie. Chaque garde porte en commentaire LA mutation qu'elle doit faire passer au rouge
-// (cahier des charges du lot) — c'est le seul langage d'un test de décision pure.
+// Décisions pures de « la séance visible dès la pause » : chunk à committer, adoption de la
+// ligne de fusion, split (lu sur le `null` de l'adoption). Sans Dexie. Chaque garde nomme en
+// commentaire LA mutation qu'elle doit faire passer au rouge.
 import { describe, it, expect } from 'vitest'
 import { SESSION_MERGE_GAP_MS, chunkToCommit, adoptMergeTarget } from '@/utils/chrono-episode'
 
 const H = 3_600_000 // une heure en ms, pour lire les écarts comme des heures
-// Repère fixe et injecté (aucun Date.now() non contrôlé) : 2026-08-30T12:00:00.000Z, un
-// dimanche à midi — jour du design, choisit pour rien d'autre que d'être fixe.
+// Repère fixe et injecté (aucun Date.now() non contrôlé) : 2026-08-30T12:00:00.000Z.
 const NOW = Date.UTC(2026, 7, 30, 12, 0, 0)
 const iso = (ms) => new Date(ms).toISOString()
 
 // Ligne de journal écrite par le chrono, forme Dexie : `manual` ABSENT (une saisie à la
 // main porte `manual: true`), `date` = naissance de la ligne, `lastWriteAt` = dernier
-// commit chrono (champ nouveau de ce lot — les lignes anciennes n'en ont pas).
+// commit chrono (absent des lignes anciennes).
 const chronoLine = (over = {}) => ({
   id: 42,
   projectId: 7,
@@ -30,8 +25,8 @@ const chronoLine = (over = {}) => ({
 
 describe('SESSION_MERGE_GAP_MS', () => {
   it('vaut exactement deux heures', () => {
-    // Mutation interceptée : changer la constante (1 h, 90 min...) — la règle métier
-    // « fusion si pause < 2 h » vient de l'entrée intend du lot, pas d'un goût du jour.
+    // Mutation interceptée : changer la constante (1 h, 90 min...). Règle métier
+    // « fusion si pause < 2 h ».
     expect(SESSION_MERGE_GAP_MS).toBe(2 * 60 * 60 * 1000)
   })
 })
@@ -117,15 +112,15 @@ describe('adoptMergeTarget(lastLine, now)', () => {
   it('mesure sur lastWriteAt, pas sur date : née il y a 3 h, touchée il y a 10 min -> adoption', () => {
     // Mutation interceptée : mesurer l'écart sur `date` -> 3 h >= GAP -> null. `date`
     // est l'acte de naissance de la ligne, pas son dernier contact : la mèche des 2 h
-    // redémarre à CHAQUE commit du chrono (règle 2 du plan).
+    // redémarre à CHAQUE commit du chrono.
     const ligne = chronoLine({ date: iso(NOW - 3 * H), lastWriteAt: iso(NOW - 10 * 60_000) })
     expect(adoptMergeTarget(ligne, NOW)).toBe(42)
   })
 
   it('repli sur date pour une ligne ancienne sans lastWriteAt (touchée il y a 30 min -> adoption)', () => {
     // Mutation interceptée : mesurer sur `lastWriteAt` seul (sans repli `|| date`) ->
-    // âge illisible -> null. `lastWriteAt` naît avec CE lot : toutes les lignes déjà en
-    // base n'en ont pas, et doivent pourtant pouvoir fusionner.
+    // âge illisible -> null. Les lignes anciennes n'ont pas `lastWriteAt` et doivent
+    // pourtant pouvoir fusionner.
     const ancienne = { id: 42, projectId: 7, sectionId: 3, date: iso(NOW - 30 * 60_000), durationSec: 900, rowsDone: 2 }
     expect(adoptMergeTarget(ancienne, NOW)).toBe(42)
   })
@@ -148,11 +143,8 @@ describe('adoptMergeTarget(lastLine, now)', () => {
   })
 })
 
-// Le split (repartir à zéro) n'a plus de fonction propre : `isSplit`, double de l'adoption,
-// a été retiré (fonctionnalité laissée de côté). Vu du play(), l'épisode
-// est neuf EXACTEMENT quand `adoptMergeTarget(lastLine, now) === null` — on rejoue ici les
-// mêmes cas sous cet angle, pour que la règle du split survive à la disparition de son
-// ancien nom (une divergence entre les deux describes doit être impossible : même fonction).
+// Le split n'a pas de fonction propre : l'épisode est neuf EXACTEMENT quand
+// `adoptMergeTarget(lastLine, now) === null`. On rejoue les mêmes cas sous cet angle.
 describe('split (vu du store) — adoptMergeTarget(lastLine, now) === null', () => {
   it('reprise sous la fenêtre -> non null : l épisode continue dans sa ligne', () => {
     // Mutation interceptée : un split à tort (règle lue inversée) remettrait le triplet à

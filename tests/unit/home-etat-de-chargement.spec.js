@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — l'accueil ne dit JAMAIS « aucun projet » avant d'avoir lu la base.
 //
 // Défaut connu, photographié deux fois sur appareil (16/08 puis 17/08 à 20 h 39, Nexus 7) :

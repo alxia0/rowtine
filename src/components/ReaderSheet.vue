@@ -3,9 +3,10 @@
 // (paragraphes, listes, tableau de tailles, valeurs par taille, tuto vidéo, ouverture diagramme).
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatSizes, isBlankCount, sizeLabelText } from '@/utils/reader'
+import { formatSizes, isBlankCount, pickCount, sizeLabelText } from '@/utils/reader'
 import AppIcon from '@/components/AppIcon.vue'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
+import { sanitizeUrl } from '@/utils/safe-url'
 
 const props = defineProps({
   reference: { type: Object, required: true }, // { tabs, abbrFull, ... }
@@ -25,8 +26,11 @@ const current = computed(() => tabs.value.find((x) => x.id === props.activeTab) 
 // de clé et ressort donc tel quel, dans la langue source).
 const lbl = (o, keyField, fallbackField) => (o && o[keyField] ? t(o[keyField]) : o?.[fallbackField])
 
+// Même repli que ReaderLine.vue (`countText`) : une taille mémorisée hors du vecteur (patron
+// qui a perdu des tailles, `st.size` restauré sans borne) affichait « undefined cm ».
 const perSizeText = (row) => {
-  const v = props.sizeIndex == null ? formatSizes(row.values) : row.values[props.sizeIndex]
+  const picked = pickCount(row.values, props.sizeIndex)
+  const v = picked == null ? formatSizes(row.values) : picked
   return v + ' ' + (row.unit || '')
 }
 
@@ -99,7 +103,8 @@ useDialogFocusReturn(() => props.open)
             </template>
           </dl>
 
-          <a v-if="b.yt" class="rs__yt" :href="b.yt.url" target="_blank" rel="noopener"><AppIcon name="play" :size="16" aria-hidden="true" /> {{ b.yt.label }}</a>
+          <!-- `yt.url` vient tel quel d'un patron.json : liste blanche http/https, un lien refusé n'est pas rendu -->
+          <a v-if="b.yt && sanitizeUrl(b.yt.url)" class="rs__yt" :href="sanitizeUrl(b.yt.url)" target="_blank" rel="noopener"><AppIcon name="play" :size="16" aria-hidden="true" /> {{ b.yt.label }}</a>
           <button v-if="b.openChart" class="rs__yt" type="button" @click="emit('open-chart')"><AppIcon name="chart" :size="17" /> {{ $t('reader.chart.open') }}</button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — service de sauvegarde runtime (bascule SAF seule incluse) :
 // sélection du stockage SAF, permission, orchestration
 // (collecte + backupAll), et horodatage. Toutes les dépendances externes sont

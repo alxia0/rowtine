@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Cible d'ouverture de l'écran de correction : le curseur se pose sur la ligne
 // désignée par le lecteur. ReaderTextEditor est mocké — la commande CM6 réelle
 // est prouvée par reveal-line.spec.js.
@@ -30,6 +31,9 @@ vi.mock('@/components/ReaderTextEditor.vue', () => ({
 }))
 
 import CorrectionView from '@/views/CorrectionView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 const READER = {
   sizeLabels: ['S', 'M', 'L'],
@@ -202,7 +206,7 @@ describe('CorrectionView — cible d’ouverture', () => {
     }
     await w.find('.chart-strip__toggle').trigger('click')
     await flushPromises()
-    const goTo = w.findAll('button').find((b) => b.text().includes('Voir dans le texte'))
+    const goTo = w.findAll('button').find((b) => b.text().includes(tk('correction.brokenDiagramGoTo')))
     await goTo.trigger('click')
     const md = w.findComponent({ name: 'ReaderTextEditor' }).props('md')
     expect(revealed.calls).toHaveLength(1)

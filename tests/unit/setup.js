@@ -1,3 +1,6 @@
+// Chargé dans les deux environnements de test : `node` (par défaut) et jsdom (specs qui le
+// déclarent, cf. vitest.config.js). Chaque accès au DOM reste donc derrière un garde `typeof`.
+//
 // Installe une implémentation IndexedDB en mémoire AVANT tout import de Dexie,
 // pour que les stores (@/db/db) s'ouvrent contre une base jetable.
 import 'fake-indexeddb/auto'
@@ -59,6 +62,9 @@ if (typeof globalThis.localStorage === 'undefined') {
   if (globalThis.window) globalThis.window.localStorage = ls
 }
 
+// Sous `node`, `globalThis.navigator` existe aussi (Node >= 21) : la surcharge ci-dessous
+// vaut pour les deux environnements.
+//
 // Langue du poste de test fixée en français (tâche A2, 30/07 — même correctif que
 // `playwright.config.js` (locale: 'fr-FR') pour la suite e2e, tâche A3).
 //

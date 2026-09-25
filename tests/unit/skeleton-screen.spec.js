@@ -1,14 +1,16 @@
+// @vitest-environment jsdom
 // SkeletonScreen — squelette de chargement réutilisable (présentationnel pur).
 // Couvre : structure par variant + annonce accessible (role="status" + libellé
 // visuellement masqué), seule preuve automatisée que l'état de chargement reste
 // perceptible pour un lecteur d'écran (le squelette lui-même est décoratif).
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import SkeletonScreen from '@/components/SkeletonScreen.vue'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 const mountIt = (props) => mount(SkeletonScreen, { props, global: { plugins: [i18n] } })
 
 describe('SkeletonScreen', () => {
@@ -19,7 +21,7 @@ describe('SkeletonScreen', () => {
 
     const status = w.find('[role="status"]')
     expect(status.exists()).toBe(true)
-    expect(status.text()).toBe('Chargement…')
+    expect(status.text()).toBe(tk('reader.loading'))
 
     // Barre de titre, ligne eyebrow, rangée de pastilles, 2 blocs de section.
     expect(w.find('.skel__bar').exists()).toBe(true)
@@ -34,7 +36,7 @@ describe('SkeletonScreen', () => {
 
     const status = w.find('[role="status"]')
     expect(status.exists()).toBe(true)
-    expect(status.text()).toBe('Chargement…')
+    expect(status.text()).toBe(tk('reader.loading'))
 
     expect(w.find('.skel__bar').exists()).toBe(true)
     expect(w.find('.skel__tabs').exists()).toBe(true)

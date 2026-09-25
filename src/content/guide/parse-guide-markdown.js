@@ -198,14 +198,22 @@ export function parseGuideMarkdown(markdown) {
     return parseInlineSpans(text)
   }
 
-  function collectContinuation(startIndex) {
-    let text = lines[startIndex].trim()
-    let j = startIndex + 1
+  // `initialText` est déjà le texte de la 1re ligne (débarrassé d'un éventuel préfixe, cf.
+  // parseList ci-dessous) ; `from` est l'index de la ligne suivante à examiner. Factorisée
+  // (revue) : même boucle « avale tant que ça continue » utilisée ici pour un paragraphe et
+  // dans parseList pour un item de liste — seul le texte de départ diffère.
+  function collectContinuationFrom(initialText, from) {
+    let text = initialText
+    let j = from
     while (j < lines.length && isContinuation(lines[j])) {
       text += ' ' + lines[j].trim()
       j++
     }
     return { text, next: j }
+  }
+
+  function collectContinuation(startIndex) {
+    return collectContinuationFrom(lines[startIndex].trim(), startIndex + 1)
   }
 
   // Une liste (à puces ou numérotée) à partir de la ligne `start`, avec jusqu'à 2 niveaux
@@ -223,12 +231,7 @@ export function parseGuideMarkdown(markdown) {
       // Le texte de la 1re ligne vient du marqueur (déjà débarrassé de son préfixe "- "/"N. ") ;
       // les lignes de continuation (repli sans marqueur, plus indentées que la puce) s'y
       // ajoutent telles quelles.
-      let itemText = marker.text
-      let next = j + 1
-      while (next < lines.length && isContinuation(lines[next])) {
-        itemText += ' ' + lines[next].trim()
-        next++
-      }
+      const { text: itemText, next } = collectContinuationFrom(marker.text, j + 1)
       // Sous-liste : même forme que le bloc `list` au niveau supérieur ({ordered, items}),
       // pas juste un tableau — sinon une sous-liste NUMÉROTÉE (aucune dans ce guide
       // aujourd'hui, mais rien ne l'interdit) perdrait son type au rendu.

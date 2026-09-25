@@ -25,9 +25,11 @@ import { applyTheme, applyAccent, syncNativeChrome } from '@/theme/apply'
 import { generatePalette, hueGradientCss, presetHuesFor } from '@/theme/palette'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import { ymdLocal } from '@/utils/time-periods'
+import { useStartTour } from '@/composables/useStartTour'
 
 const { t } = useI18n()
 const settings = useSettingsStore()
+const { startTour } = useStartTour()
 const effectiveTheme = useEffectiveTheme()
 const hueGradient = computed(() => hueGradientCss(effectiveTheme.value))
 // Nuancier PAR THÈME (08/09) : la liste suit le thème effectif. Listes distinctes
@@ -175,6 +177,13 @@ async function exportPatterns() {
   const { head, rows } = patternExportTable(patternsStore.libraryPatterns, { t })
   downloadCsv(`rowtine-patrons-${today()}.csv`, toCsv(head, rows))
   snackbar.show(t('settings.exportDone'))
+}
+
+// Vider la corbeille est définitif (aucune annulation) : une confirmation avant d'effacer.
+const confirmEmptyTrash = ref(false)
+async function doEmptyTrash() {
+  confirmEmptyTrash.value = false
+  await trash.empty()
 }
 
 async function restoreTrash(id) {
@@ -365,7 +374,7 @@ function fmtDate(iso) {
           <button class="link" @click="restoreTrash(it.id)">{{ t('settings.restoreItem') }}</button>
         </div>
         <p v-if="!trash.items.length" class="muted small">{{ t('settings.trashEmpty') }}</p>
-        <button v-if="trash.items.length" class="btn btn--block mt2 danger" @click="trash.empty()">{{ t('settings.emptyTrash') }}</button>
+        <button v-if="trash.items.length" class="btn btn--block mt2 danger" @click="confirmEmptyTrash = true">{{ t('settings.emptyTrash') }}</button>
       </div>
     </section>
 
@@ -374,6 +383,19 @@ function fmtDate(iso) {
          « Sauvegarder »/« Restaurer ». Le composant affiche lui-même l'état de
          synchro (dernière sauvegarde, « Synchroniser maintenant » en secours). -->
     <SafFolderSection />
+
+    <!-- Aide (lot « visite guidée », 23/09/2026) : relance à la demande de la visite
+         guidée du lecteur, sur le projet d'exemple retrouvé ou recréé au besoin par
+         `useStartTour`. Bouton SECONDAIRE (`btn btn--block`, jamais
+         `btn--primary`) : cf. tests/e2e/settings-single-primary.spec.js, un seul bouton
+         plein par écran (déjà pris par « Enregistrer » dans le bloc Profil). -->
+    <section class="block">
+      <h2 class="block__title">{{ t('settings.help.title') }}</h2>
+      <button class="btn btn--block" data-test="replay-tour" @click="startTour">
+        {{ t('settings.help.replayTour') }}
+      </button>
+      <p class="muted small mt2">{{ t('settings.help.replayTourHint') }}</p>
+    </section>
 
     <!-- Contribuer -->
     <section class="block">
@@ -428,6 +450,16 @@ function fmtDate(iso) {
       :cancel-label="t('common.cancel')"
       @confirm="confirmCurrency"
       @cancel="cancelCurrency"
+    />
+    <ConfirmDialog
+      :open="confirmEmptyTrash"
+      :title="t('settings.emptyTrashTitle')"
+      :message="t('settings.emptyTrashMessage')"
+      :confirm-label="t('settings.emptyTrash')"
+      :cancel-label="t('common.cancel')"
+      danger
+      @confirm="doEmptyTrash"
+      @cancel="confirmEmptyTrash = false"
     />
   </main>
 </div>

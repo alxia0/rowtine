@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — ImportProgress + KnittingLoader (les travaux de finition de l'interface).
 // L'animation d'attente vient EN PLUS de la barre de progression, jamais à sa place :
 // le test le plus important ici est la NON-RÉGRESSION (test 2) — il prouve que les
@@ -7,12 +8,13 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import ImportProgress from '@/components/ImportProgress.vue'
 import { useSettingsStore } from '@/stores/settings'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 function mountIt(props, technique) {
   const pinia = createTestingPinia({ createSpy: () => () => {} })
@@ -34,7 +36,7 @@ describe('ImportProgress — animation d\'attente', () => {
     expect(w.text()).toContain('42 %')
     expect(w.text()).toContain('Assemblage du patron')
     expect(w.text()).toContain('12 s')
-    expect(w.text()).toContain('page 2 / 10')
+    expect(w.text()).toContain(tk('import.pageOf', { n: 2, total: 10 }))
   })
 
   it('suit la technique par défaut du profil : crochet ⇒ dessin crochet, tricot ⇒ dessin tricot', () => {

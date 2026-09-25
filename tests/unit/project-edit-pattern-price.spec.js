@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/project-edit-pattern-price.spec.js
 // Le prix du patron, saisi depuis le FORMULAIRE DU PROJET (lot 07/08). Toute la difficulté :
 // la saisie vit dans l'écran du projet, mais écrit dans la fiche du PATRON.
@@ -7,15 +8,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { usePatternsStore } from '@/stores/patterns'
 import { useProjectsStore } from '@/stores/projects'
 import { useSettingsStore } from '@/stores/settings'
 import ProjectEditView from '@/views/ProjectEditView.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // Routeur minimal : cet écran lit route.params/route.query et appelle router.replace.
 const route = { params: {}, query: {} }

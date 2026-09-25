@@ -44,6 +44,25 @@ const CHROME_GAP = 3
 // jamais une couleur resynthétisée. Réutilisé tel quel par la légende (mêmes couleurs que les cases).
 const LEVEL_LIGHTNESS = [null, 30, 45, 60, 78]
 
+// Case de niveau d'activité, carrée, côté `size`, coin (x, y) : liseré (niveau 0, opacité
+// `strokeAlpha`) ou carré plein à la teinte du badge (niveaux 1-4) — même rendu pour la
+// grille et pour la légende (`drawCalendar` ci-dessous), qui ne diffèrent que par la taille
+// du carré et l'opacité du liseré (grille : cases collées, liseré discret ; légende : petites
+// pastilles isolées, liseré plus marqué pour rester lisible).
+function drawLevelSwatch(ctx, x, y, size, level, hue, s, textColor, strokeAlpha) {
+  const l = LEVEL_LIGHTNESS[level] ?? null
+  if (l == null) {
+    ctx.strokeStyle = textColor
+    ctx.globalAlpha = strokeAlpha
+    ctx.lineWidth = 1
+    ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1)
+    ctx.globalAlpha = 1
+  } else {
+    ctx.fillStyle = hslCss(hue, s, l)
+    ctx.fillRect(x, y, size, size)
+  }
+}
+
 // Choisit les dernières `maxCols` semaines (colonnes) d'une grille — `buildGrid` (stats-grid.js)
 // range la plus ANCIENNE en premier, l'activité récente est donc en fin de tableau et plus
 // pertinente à montrer qu'un historique tronqué au début pour un projet de plusieurs mois/ans.
@@ -191,17 +210,7 @@ export function drawCalendar(ctx, area, columns, hue, s, textColor, locale = 'fr
       if (day.future) return
       const x = startX + ci * (cell + CELL_GAP)
       const y = startY + ri * (cell + CELL_GAP)
-      const l = LEVEL_LIGHTNESS[day.level] ?? null
-      if (l == null) {
-        ctx.strokeStyle = textColor
-        ctx.globalAlpha = 0.25
-        ctx.lineWidth = 1
-        ctx.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1)
-        ctx.globalAlpha = 1
-      } else {
-        ctx.fillStyle = hslCss(hue, s, l)
-        ctx.fillRect(x, y, cell, cell)
-      }
+      drawLevelSwatch(ctx, x, y, cell, day.level, hue, s, textColor, 0.25)
     })
   })
 
@@ -248,17 +257,7 @@ export function drawCalendar(ctx, area, columns, hue, s, textColor, locale = 'fr
       lx += wordW(legend.less) + swatchGap
     }
     for (let n = 0; n <= 4; n++) {
-      const l = LEVEL_LIGHTNESS[n]
-      if (l == null) {
-        ctx.strokeStyle = textColor
-        ctx.globalAlpha = 0.4
-        ctx.lineWidth = 1
-        ctx.strokeRect(lx + 0.5, ly - swatch / 2 + 0.5, swatch - 1, swatch - 1)
-        ctx.globalAlpha = 1
-      } else {
-        ctx.fillStyle = hslCss(hue, s, l)
-        ctx.fillRect(lx, ly - swatch / 2, swatch, swatch)
-      }
+      drawLevelSwatch(ctx, lx, ly - swatch / 2, swatch, n, hue, s, textColor, 0.4)
       lx += swatch + swatchGap
     }
     if (legend.more) {

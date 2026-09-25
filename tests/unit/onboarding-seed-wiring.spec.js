@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — revue (04/08/2026), constat Mineur 3 : aucun test ne couvrait
 // le câblage OnboardingView → recordSeededSamples avant ce fichier. C'est le maillon PORTEUR
 // des travaux sur la restauration inatteignable : `isDbRestorable` (src/backup/restore-service.js)
@@ -19,27 +20,22 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
-import { db } from '@/db/db'
+import { db, getSetting } from '@/db/db'
 import OnboardingView from '@/views/OnboardingView.vue'
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import { getSeededSampleIds } from '@/utils/seeded-samples'
 import { loadDemoContent, DEMO_PATTERN_IDEA_ID } from '@/constants/demo'
 import { resolveCover } from '@/utils/project-cover'
 import { ymdLocal } from '@/utils/time-periods'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 async function mountOnboarding() {
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'onboarding', component: OnboardingView },
-      { path: '/home', name: 'home', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/', name: 'onboarding', component: OnboardingView },
+    { path: '/home', name: 'home', component: { template: '<div/>' } },
+  ])
   router.push('/')
   await router.isReady()
   const w = mount(OnboardingView, { global: { plugins: [router, i18n, createPinia()] } })
@@ -56,16 +52,13 @@ async function mountOnboarding() {
 // dont on attend l'apparition : attendre l'en-tête ne suffirait pas, `loadAll()` publie le
 // projet avant le patron lié et l'assertion pourrait lire un rendu intermédiaire.
 async function mountProjectDetail(projectId, tab, ancre) {
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/project/:id', name: 'project', component: ProjectDetailView },
-      { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
-      { path: '/project/:id/edit', name: 'project-edit', component: { template: '<div/>' } },
-      { path: '/pattern/:id/correct', name: 'pattern-correct', component: { template: '<div/>' } },
-      { path: '/home', name: 'home', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/project/:id', name: 'project', component: ProjectDetailView },
+    { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
+    { path: '/project/:id/edit', name: 'project-edit', component: { template: '<div/>' } },
+    { path: '/pattern/:id/correct', name: 'pattern-correct', component: { template: '<div/>' } },
+    { path: '/home', name: 'home', component: { template: '<div/>' } },
+  ])
   router.push(`/project/${projectId}?tab=${tab}`)
   await router.isReady()
   const w = mount(ProjectDetailView, { global: { plugins: [router, i18n, createPinia()] } })
@@ -115,6 +108,18 @@ describe('OnboardingView → recordSeededSamples : câblage réel du semis (mail
     expect(new Set(seeded.projects)).toEqual(new Set(projectsInDb.map((p) => p.id)))
     expect(seeded.patterns).toHaveLength(3)
     expect(seeded.projects).toHaveLength(2)
+  })
+
+  // Lot du 23/09/2026 : `ensureTourProject` a besoin de retrouver le projet « en cours »
+  // sans un aller-retour de recherche à chaque lancement de la visite — l'écran
+  // l'enregistre donc dès le semis, une fois son id connu.
+  it('enregistre tourProjectId sur le projet « en cours » qu’il vient de semer', async () => {
+    const w = await mountOnboarding()
+    await clickStart(w)
+
+    const wip = (await db.projects.toArray()).find((p) => p.status === 'wip')
+    expect(wip, 'le projet « en cours » doit exister').toBeTruthy()
+    expect(await getSetting('tourProjectId')).toBe(wip.id)
   })
 
   // Complète le test ci-dessus par le CONSOMMATEUR réel de ce câblage : si le semis

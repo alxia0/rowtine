@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // (retour terrain Nexus 7) — deuxième root cause : en rouvrant le
 // popover Section/Aide-mémoire sur une ligne déjà taguée, aucun des items n'indiquait lequel
 // était actuellement actif pour cette ligne (les 17 items de Section étaient rendus

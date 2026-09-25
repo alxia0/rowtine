@@ -1,27 +1,25 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, it, expect } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import LibraryView from '@/views/LibraryView.vue'
+import { createTestI18n, createTestRouter, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 const EMPTY_READER = { sizeLabels: [], sections: [] }
 
 async function mountLib(patterns) {
   await db.patterns.clear()
   for (const p of patterns) await db.patterns.add({ reader: EMPTY_READER, ...p })
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'library', component: LibraryView },
-      { path: '/pattern/:id', name: 'pattern', component: { template: '<div/>' } },
-      { path: '/project/new', name: 'project-new', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/', name: 'library', component: LibraryView },
+    { path: '/pattern/:id', name: 'pattern', component: { template: '<div/>' } },
+    { path: '/project/new', name: 'project-new', component: { template: '<div/>' } },
+  ])
   router.push('/')
   await router.isReady()
   const w = mount(LibraryView, { global: { plugins: [router, i18n, createPinia()] } })
@@ -36,7 +34,8 @@ async function mountLib(patterns) {
   return w
 }
 
-const chip = (w, label) => w.findAll('.chip').find((b) => b.text().startsWith(label))
+// Pastille repérée par la clé i18n de son libellé (`pattern.all`, `pattern.categories.*`).
+const chip = (w, key) => w.findAll('.chip').find((b) => b.text().startsWith(tk(key)))
 
 describe('LibraryView — compteurs sur les pastilles', () => {
   beforeEach(async () => {
@@ -49,7 +48,7 @@ describe('LibraryView — compteurs sur les pastilles', () => {
       { name: 'B', category: 'socks' },
       { name: 'C', category: '' },
     ])
-    expect(chip(w, 'Tous').text()).toBe('Tous (3)')
+    expect(chip(w, 'pattern.all').text()).toBe(`${tk('pattern.all')} (3)`)
   })
 
   it('chaque catégorie porte son propre nombre', async () => {
@@ -58,20 +57,20 @@ describe('LibraryView — compteurs sur les pastilles', () => {
       { name: 'B', category: 'clothing' },
       { name: 'C', category: 'socks' },
     ])
-    expect(chip(w, 'Vêtements').text()).toContain('(2)')
-    expect(chip(w, 'Chaussettes').text()).toContain('(1)')
+    expect(chip(w, 'pattern.categories.clothing').text()).toContain('(2)')
+    expect(chip(w, 'pattern.categories.socks').text()).toContain('(1)')
   })
 
   it('une catégorie vide affiche « (0) » et reste présente', async () => {
     const w = await mountLib([{ name: 'A', category: 'clothing' }])
     // La bande ne doit pas se réorganiser au fil des ajouts : décision produit du 25/07.
-    expect(chip(w, 'Amigurumi').text()).toContain('(0)')
+    expect(chip(w, 'pattern.categories.amigurumi').text()).toContain('(0)')
   })
 
   it('un patron sans catégorie compte dans « Tous » mais dans aucune pastille', async () => {
     const w = await mountLib([{ name: 'A', category: 'clothing' }, { name: 'B', category: '' }])
-    expect(chip(w, 'Tous').text()).toBe('Tous (2)')
-    expect(chip(w, 'Vêtements').text()).toContain('(1)')
+    expect(chip(w, 'pattern.all').text()).toBe(`${tk('pattern.all')} (2)`)
+    expect(chip(w, 'pattern.categories.clothing').text()).toContain('(1)')
   })
 
   it('n’inclut pas les instances de projet dans les compteurs', async () => {
@@ -82,7 +81,7 @@ describe('LibraryView — compteurs sur les pastilles', () => {
       { name: 'Gabarit', category: 'clothing' },
       { name: 'Instance', category: 'clothing', ownerProjectId: 3 },
     ])
-    expect(chip(w, 'Tous').text()).toBe('Tous (1)')
-    expect(chip(w, 'Vêtements').text()).toContain('(1)')
+    expect(chip(w, 'pattern.all').text()).toBe(`${tk('pattern.all')} (1)`)
+    expect(chip(w, 'pattern.categories.clothing').text()).toContain('(1)')
   })
 })

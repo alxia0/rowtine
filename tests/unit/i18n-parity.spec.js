@@ -115,6 +115,7 @@ const IDENTICAL_VALUE_ALLOWED = {
     'technique.crochet', // "Crochet"
     'project.sectionDates', // "Dates & notes"
     'project.notes', // "Notes"
+    'yarn.notes', // "Notes", même cognat fr/en que project.notes
     'project.tab.sections', // "Sections"
     'project.tab.sessions', // "Sessions"
     'project.tab.stats', // "Stats" — même cognat fr/en que les deux ci-dessus (allemand "Statistik", espagnol "Estadísticas")
@@ -143,6 +144,10 @@ const IDENTICAL_VALUE_ALLOWED = {
     'correction.help.cat.section', // "Section"
     'correction.help.cat.image', // "Image"
     'photo.title', // "Photos"
+    // Renommage « Galerie » → « Photos » (22/09) : cognat fr/en seulement —
+    // "Fotos" en allemand ET en espagnol, donc PAS reconduit dans le
+    // compartiment '*'.
+    'project.tab.photos', // "Photos"
     'common.actions', // "Actions"
     'reader.reference.tech.label', // "Techniques"
     'warnings.blockName.techniques', // "Techniques"

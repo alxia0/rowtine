@@ -1,13 +1,13 @@
+// @vitest-environment jsdom
 // Unitaire — ouvrir le guide directement sur une section (19/08/2026, §4.4).
 // La pop-up d'avertissement d'import et le bloc de réussite de l'import y mènent tous deux.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
 import { LANGUAGES } from '@/constants/languages'
 import { resolveGuideContent } from '@/content/guide'
+import { createTestI18n } from './helpers/i18n-router'
 
 const nav = vi.hoisted(() => ({
   route: { name: 'guide', params: {}, query: {} },
@@ -20,7 +20,7 @@ vi.mock('vue-router', () => ({
 
 import GuideView from '@/views/GuideView.vue'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 beforeEach(() => {
   setActivePinia(createPinia())

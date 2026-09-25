@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — une séance saisie AU JOUR désigne un JOUR LOCAL, pas un instant (§9).
 // Forme de bascule de fuseau reprise TELLE QUELLE de tests/unit/date-format.spec.js:26-47
 // (mesurée le 08/08) : `process.env.TZ` prend effet à chaud dans ce Node quand il est posé

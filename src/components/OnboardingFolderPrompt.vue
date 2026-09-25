@@ -431,9 +431,10 @@ function closeFromBack() {
 //   - result.ok && owned === false : la restauration a RÉUSSI mais
 //     l'appropriation du dossier n'a pas pu être confirmée — variante « reprise
 //     du dossier non confirmée », pas un échec ;
-//   - result.ok && errors non vide SANS problème d'appropriation : PAS de modale
-//     (aucune nouvelle variante visuelle décidée) ; les écarts rejoignent
-//     seulement le rapport copiable quand une modale est ouverte à l'occasion.
+//   - result.ok && errors non vide : restauration INCOMPLÈTE. `runRestore` renvoie
+//     alors toujours `owned: false` (dossier volontairement non repris, sauvegarde en
+//     pause) : la branche ci-dessus publie la modale, qui choisit sa formulation
+//     « restaurées en partie » d'après les écarts joints (`details`).
 // Les refus (`skipped`) restent sans publication : ce ne sont pas des erreurs
 // techniques, et la garde venait d'être consultée avec succès.
 //

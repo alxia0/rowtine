@@ -66,6 +66,17 @@ function pickGalleryFile() {
 // devant un cadre de recadrage vide sans explication. Détection sur le type MIME d'abord,
 // repli sur l'extension du nom de fichier si le type est vide (certains sélecteurs Android
 // ne renseignent pas le type MIME des fichiers HEIC).
+// Notifie l'utilisatrice d'un échec de sélection (décodage natif ou HEIC non supporté) —
+// import dynamique du snackbar/i18n, jamais chargés au niveau du module (mêmes contraintes
+// que `usePhotoSourceStore()` ci-dessous : aucune instance Pinia/i18n exigée à l'import).
+async function notifyPhotoFailure(key) {
+  const [{ useSnackbarStore }, { default: i18n }] = await Promise.all([
+    import('@/stores/snackbar'),
+    import('@/i18n'),
+  ])
+  useSnackbarStore().show(i18n.global.t(key))
+}
+
 function isHeicFile(file) {
   const type = (file.type || '').toLowerCase()
   if (type === 'image/heic' || type === 'image/heif') return true
@@ -138,11 +149,7 @@ export async function pickImage(extraLabel = null) {
         // par l'OS, fichier corrompu) : contrairement à une annulation, on le signale.
         // Sans ce message, l'utilisatrice se retrouve devant un geste sans effet visible,
         // sans comprendre pourquoi (bug remonté par Anne-Sophie, 21/09/2026).
-        const [{ useSnackbarStore }, { default: i18n }] = await Promise.all([
-          import('@/stores/snackbar'),
-          import('@/i18n'),
-        ])
-        useSnackbarStore().show(i18n.global.t('photo.importFailed'))
+        await notifyPhotoFailure('photo.importFailed')
         return null
       }
       // Android 7/8 (API < 28) : le décodage natif n'existe pas. On repli sur le chemin
@@ -155,11 +162,7 @@ export async function pickImage(extraLabel = null) {
     if (isHeicFile(file)) {
       // Cf. isHeicFile ci-dessus : la WebView ne décode pas le HEIC/HEIF, avertir plutôt
       // que de tenter un import qui aboutirait à un cadre de recadrage vide silencieux.
-      const [{ useSnackbarStore }, { default: i18n }] = await Promise.all([
-        import('@/stores/snackbar'),
-        import('@/i18n'),
-      ])
-      useSnackbarStore().show(i18n.global.t('photo.heicNotSupported'))
+      await notifyPhotoFailure('photo.heicNotSupported')
       return null
     }
     const dataUrl = await fileToDataUrl(file)

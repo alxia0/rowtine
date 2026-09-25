@@ -1,9 +1,9 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import fr from '@/i18n/fr.json'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
 // Stub du moteur : renvoie un résultat bloqué (colonnes).
 vi.mock('@/utils/pdf-import', () => ({
@@ -11,7 +11,7 @@ vi.mock('@/utils/pdf-import', () => ({
     pattern: { name: 'P', reader: { sizeLabels: ['Taille unique'] } },
     reader: { sizeLabels: ['Taille unique'] },
     warnings: [], confidence: { global: 80, level: 'high' }, stats: {},
-    scanned: false, blocking: { blocked: true, reasons: ['columns'] },
+    scanned: false, blocking: { blocked: true, reasons: ['columns'] }, rejected: null,
   })),
 }))
 
@@ -20,8 +20,8 @@ import { useImportHandoff } from '@/stores/import-handoff'
 import { usePatternsStore } from '@/stores/patterns'
 import { parsePdfLocally } from '@/utils/pdf-import'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
-const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', name: 'library', component: { template: '<div/>' } }, { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } }] })
+const i18n = createTestI18n()
+const router = createTestRouter([{ path: '/', name: 'library', component: { template: '<div/>' } }, { path: '/p/:id', name: 'pattern', component: { template: '<div/>' } }])
 
 describe('LocalPdfImportView — blocage réversible', () => {
   beforeEach(() => setActivePinia(createPinia()))
@@ -54,7 +54,7 @@ describe('LocalPdfImportView — blocage réversible', () => {
     await flushPromises()
     // « Importer quand même » enregistre, mais ne navigue pas tout seul.
     expect(replace).not.toHaveBeenCalled()
-    expect(w.text()).toContain(fr.importLocal.doneTitle)
+    expect(w.text()).toContain(fr.importLocal.summaryTitle)
     // Le bloc « Import risqué » et son bouton doivent avoir disparu : sans ça, il resterait
     // affiché à côté du bloc de réussite, un mensonge d'interface (trouvé à la relecture,
     // 18/08 — cf. le correctif qui ajoute `&& savedId == null` à sa condition).
@@ -74,7 +74,7 @@ describe('LocalPdfImportView — blocage réversible', () => {
       pattern: { name: 'P', reader: { sizeLabels: ['taille unique'] } },
       reader: { sizeLabels: ['taille unique'] },
       warnings: [], confidence: { global: 80, level: 'high' }, stats: {},
-      scanned: false, blocking: { blocked: true, reasons: ['columns'] },
+      scanned: false, blocking: { blocked: true, reasons: ['columns'] }, rejected: null,
     })
     const pinia = createPinia(); setActivePinia(pinia)
     const handoff = useImportHandoff(); handoff.set(new File(['x'], 'a.pdf', { type: 'application/pdf' }))
@@ -84,5 +84,21 @@ describe('LocalPdfImportView — blocage réversible', () => {
     await w.find('.block-anyway').trigger('click')
     await flushPromises()
     expect(add).toHaveBeenCalledWith(expect.objectContaining({ sizes: [] }))
+  })
+
+  it('variante A : plusieurs patrons → refus net, message réécrit, rien d’enregistré, pas de forçage', async () => {
+    parsePdfLocally.mockResolvedValueOnce({
+      pattern: null, reader: null, warnings: [], confidence: null, stats: null, blocking: null,
+      scanned: false, notPattern: false, notPatternReason: null, rejected: { reason: 'multiPattern', detail: null },
+    })
+    const pinia = createPinia(); setActivePinia(pinia)
+    const handoff = useImportHandoff(); handoff.set(new File(['x'], 'a.pdf', { type: 'application/pdf' }))
+    const add = vi.spyOn(usePatternsStore(), 'add').mockResolvedValue(1)
+    const w = mount(LocalPdfImportView, { global: { plugins: [pinia, i18n, router], stubs: { AppHeader: true, AppIcon: true, ImportProgress: true } } })
+    await flushPromises()
+    expect(w.text()).toContain(fr.importLocal.blockMultiPattern)
+    expect(w.text()).not.toContain(fr.importLocal.blockTitle)
+    expect(w.find('.block-anyway').exists()).toBe(false)
+    expect(add).not.toHaveBeenCalled()
   })
 })

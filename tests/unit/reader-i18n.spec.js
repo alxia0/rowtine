@@ -1,3 +1,218 @@
+// @vitest-environment jsdom
+// Traduction à l'AFFICHAGE dans le lecteur : la donnée garde la chaîne FR gelée, seule sa
+// présentation suit la langue courante. Trois sujets :
+// - « Taille unique » (tâche T2, lot 3b) : la chaîne gelée `'Taille unique'` reste le code
+//   interne en donnée (isSingleSize, reader.js), rendue par sizeLabelText. Deux garanties :
+//   le rendu dans les quatre langues (sur ReaderSheet) et qu'un changement de langue ne
+//   modifie JAMAIS la donnée en base (reader.sizeLabels reste strictement ['Taille unique']).
+// - les libellés RÉSERVÉS de l'aide-mémoire (ReaderSheet), voir le bloc dédié.
+// - « Présentation » (tâche T3, lot 3b), voir l'en-tête des blocs T3.
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import { setActivePinia, createPinia } from 'pinia'
+import { db } from '@/db/db'
+import fr from '@/i18n/fr.json'
+import en from '@/i18n/en.json'
+import de from '@/i18n/de.json'
+import es from '@/i18n/es.json'
+import i18n from '@/i18n'
+import ReaderSheet from '@/components/ReaderSheet.vue'
+import { buildReference } from '@/utils/reader-reference'
+import { mdToPattern } from '@/utils/pattern-md/parse'
+import { patternToMd } from '@/utils/pattern-md/serialize'
+
+// Même approche que reader-view.spec.js : mock vue-router pour éviter la complexité du vrai
+// routeur et les leaks async.
+const nav = vi.hoisted(() => ({
+  route: { name: 'project-read', params: {}, query: {} },
+  router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() },
+}))
+vi.mock('vue-router', () => ({
+  useRoute: () => nav.route,
+  useRouter: () => nav.router,
+}))
+
+import ReaderView from '@/views/ReaderView.vue'
+
+function mountSheetWithSizeTable(locale, messages) {
+  const localeI18n = createI18n({ legacy: false, locale, messages })
+  const reference = {
+    abbrFull: [],
+    tabs: [
+      {
+        id: 'tailles',
+        label: 'Tableau des tailles',
+        blocks: [{ h3: 'Tailles', sizeTable: { rows: [{ label: 'Tour de poitrine (cm)', values: ['90'] }] } }],
+      },
+    ],
+  }
+  return mount(ReaderSheet, {
+    props: { reference, sizeLabels: ['Taille unique'], sizeIndex: null, open: true, activeTab: 'tailles' },
+    global: { plugins: [localeI18n] },
+  })
+}
+
+describe('ReaderSheet — « Taille unique » traduite à l’affichage dans les quatre langues', () => {
+  it('FR : en-tête de colonne rend « Taille unique » (chaîne gelée, identité)', () => {
+    const w = mountSheetWithSizeTable('fr', { fr })
+    expect(w.find('.rs__sizes thead th:last-child').text()).toBe('Taille unique')
+  })
+  it('EN : en-tête de colonne rend « One size », pas le français en dur', () => {
+    const w = mountSheetWithSizeTable('en', { en })
+    expect(w.find('.rs__sizes thead th:last-child').text()).toBe('One size')
+  })
+  it('DE : en-tête de colonne rend « Einheitsgröße »', () => {
+    const w = mountSheetWithSizeTable('de', { de })
+    expect(w.find('.rs__sizes thead th:last-child').text()).toBe('Einheitsgröße')
+  })
+  it('ES : en-tête de colonne rend « Talla única »', () => {
+    const w = mountSheetWithSizeTable('es', { es })
+    expect(w.find('.rs__sizes thead th:last-child').text()).toBe('Talla única')
+  })
+  it('une vraie taille nommée (contenu du patron) n’est JAMAIS traduite, dans aucune langue', () => {
+    const reference = {
+      abbrFull: [],
+      tabs: [{ id: 'tailles', label: 'Tableau des tailles', blocks: [{ h3: 'Tailles', sizeTable: { rows: [] } }] }],
+    }
+    const localeI18n = createI18n({ legacy: false, locale: 'es', messages: { es } })
+    const w = mount(ReaderSheet, {
+      props: { reference, sizeLabels: ['M'], sizeIndex: null, open: true, activeTab: 'tailles' },
+      global: { plugins: [localeI18n] },
+    })
+    expect(w.find('.rs__sizes thead th:last-child').text()).toBe('M')
+  })
+})
+
+// Reader en taille unique, pour le test de non-régression de donnée ci-dessous.
+const SINGLE_SIZE_READER = {
+  sizeLabels: ['Taille unique'],
+  sections: [{ id: 'corps', icon: '🧶', title: 'Corps', steps: [{ t: 'Monter 80 mailles' }] }],
+}
+
+async function seedSingleSizeProject() {
+  const patternId = await db.patterns.add({ name: 'Écharpe', type: 'knitting', reader: SINGLE_SIZE_READER })
+  const projectId = await db.projects.add({ name: 'P', technique: 'knitting', patternId })
+  nav.route = { name: 'project-read', params: { id: String(projectId) }, query: {} }
+  return { patternId, projectId }
+}
+
+const wrappers = []
+function mountReader() {
+  const w = mount(ReaderView, { global: { plugins: [createPinia(), i18n] } })
+  wrappers.push(w)
+  return w
+}
+
+// Même stratégie que reader-view.spec.js : laisse l'onMounted async se vider.
+async function settle() {
+  for (let i = 0; i < 4; i++) {
+    await flushPromises()
+    await new Promise((r) => setTimeout(r))
+  }
+  await flushPromises()
+}
+
+describe('ReaderView — changement de langue : la donnée « Taille unique » ne bouge jamais', () => {
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    nav.router.push.mockClear()
+    nav.router.replace.mockClear()
+    localStorage.clear()
+    await db.open()
+    await Promise.all(db.tables.map((t) => t.clear()))
+    i18n.global.locale.value = 'fr'
+  })
+  afterEach(() => {
+    while (wrappers.length) wrappers.pop().unmount()
+    i18n.global.locale.value = 'fr'
+  })
+
+  it('après passage en espagnol, l’affichage change mais reader.sizeLabels reste ["Taille unique"] en base', async () => {
+    const { patternId } = await seedSingleSizeProject()
+    const w = mountReader()
+    await settle()
+    // Repli initial (langue de l'appareil détectée avant la restauration) : on force ES
+    // explicitement pour ce test, sur le modèle documenté dans src/i18n/index.js.
+    i18n.global.locale.value = 'es'
+    await flushPromises()
+
+    // Affichage : la pastille de taille est traduite.
+    expect(w.find('.szpill').text()).toContain('Talla única')
+
+    // Donnée : rien n'a été réécrit. Vérifié à la source (IndexedDB), pas seulement en mémoire.
+    const stored = await db.patterns.get(patternId)
+    expect(stored.reader.sizeLabels).toEqual(['Taille unique'])
+  })
+
+  it('en français (langue d’origine), la pastille de taille reste littéralement « Taille unique »', async () => {
+    await seedSingleSizeProject()
+    const w = mountReader()
+    await settle()
+    expect(w.find('.szpill').text()).toContain('Taille unique')
+  })
+})
+
+// ReaderSheet (aide-mémoire) : libellés RÉSERVÉS (onglet/tuile/h3) localisés
+// dans la langue de l'utilisateur (directive produit : « vocabulaire hors patron = langue
+// locale »). Le tag balise reste EN (identité stable, cf. reader-reference.js) ; SEULS les
+// libellés fixes émis par buildReference (labelKey/h3Key) doivent suivre la locale — les h3
+// du tab tech (contenu du patron, ref.techniques[].title) ne portent PAS de clé et restent
+// dans la langue source, non testés ici.
+function mountLocale(locale, messages, reference, activeTab) {
+  const localeI18n = createI18n({ legacy: false, locale, messages })
+  return mount(ReaderSheet, {
+    props: { reference, sizeLabels: [], sizeIndex: null, open: true, activeTab },
+    global: { plugins: [localeI18n] },
+  })
+}
+
+describe('ReaderSheet — libellés réservés localisés', () => {
+  it('locale EN : label de tuile/onglet ET h3 traduits en anglais, pas le FR figé', () => {
+    const reference = buildReference({
+      gauge: '20 sts x 28 rows = 10cm',
+      yarn: 'Silk Mohair, 2 strands',
+    })
+    const w = mountLocale('en', { en }, reference, 'materiel')
+
+    expect(w.find('.rs__tab').text()).toBe('Materials & gauge')
+    expect(w.findAll('h3').map((h) => h.text())).toEqual(['Gauge', 'Yarn'])
+  })
+
+  it('locale FR : le chemin par clé rend les libellés FR d’origine (byte-identique)', () => {
+    // Chaque libellé réservé porte désormais une clé (labelKey/h3Key) — même en FR, le
+    // rendu passe par t(clé) → fr.json, PLUS par le repli brut (qui ne joue que si la
+    // clé est absente, cf. h3 du tab tech). Sans ce test, une valeur fr.json mal
+    // recopiée romprait le comportement FR par défaut sans qu'aucun test ne le voie.
+    const reference = buildReference({
+      gauge: '20 m x 28 rgs',
+      yarn: 'Silk Mohair',
+    })
+    const w = mountLocale('fr', { fr }, reference, 'materiel')
+
+    expect(w.find('.rs__tab').text()).toBe('Matériel & échantillon')
+    expect(w.findAll('h3').map((h) => h.text())).toEqual(['Échantillon', 'Fil'])
+  })
+
+  // Bloc Conseils : sa propre tuile/onglet, sur le modèle exact de tech/abbr,
+  // localisée de la même façon (labelKey/h3Key résolus par `t()`, jamais le repli FR figé).
+  it('locale EN : la tuile/onglet Conseils (tips) est traduite en anglais', () => {
+    const reference = buildReference({ tips: ['Conseils', 'Voir la vidéo de montage.'] })
+    const w = mountLocale('en', { en }, reference, 'tips')
+    expect(w.find('.rs__tab').text()).toBe('Tips')
+    expect(w.find('h3').text()).toBe('Tips')
+  })
+
+  it('locale FR : la tuile/onglet Conseils (tips) rend le FR d’origine', () => {
+    const reference = buildReference({ tips: ['Conseils', 'Voir la vidéo de montage.'] })
+    const w = mountLocale('fr', { fr }, reference, 'tips')
+    expect(w.find('.rs__tab').text()).toBe('Conseils')
+    expect(w.find('h3').text()).toBe('Conseils')
+  })
+})
+
+// En-tête des blocs T3 (les renvois « en-tête du fichier » ci-dessous visent ce commentaire,
+// écrit quand ces blocs formaient reader-section-intro-i18n.spec.js).
 // Tâche T3 (lot 3b) : traduction à l'AFFICHAGE de « Présentation » — la présentation à
 // l'écran suit la langue courante (sectionTitleLabel, reader.js). Depuis le lot « clé
 // stable » (2026-09-12), le titre FRAIS que `parseIntro` (parse.js) pose en donnée pour
@@ -7,7 +222,7 @@
 // quand l'id n'est pas encore 'presentation') et pour l'import PDF (assemble.js, hors
 // périmètre de ce lot, qui pose encore ce titre littéral).
 //
-// CORRECTIF (revue finale du 01/08) : ce fichier affirmait à tort qu'un des trois blocs
+// CORRECTIF (revue finale du 01/08) : cet en-tête affirmait à tort qu'un des trois blocs
 // ci-dessous « démontrait que traduire l'affichage n'a pas changé l'identifiant ». Faux —
 // vérifié par mutation (neutraliser sectionTitleLabel fait rougir l'assertion d'AFFICHAGE,
 // jamais celle sur `#rsec-presentation`) : `id: 'presentation'` est un littéral semé à la
@@ -28,25 +243,6 @@
 //    avec l'application en espagnol, puis relit la base BRUTE — c'est la seule preuve qui
 //    rougirait si une traduction fuyait un jour dans ce chemin d'écriture (vérifié par
 //    mutation, voir son commentaire).
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
-import { setActivePinia, createPinia } from 'pinia'
-import { db } from '@/db/db'
-import { mdToPattern } from '@/utils/pattern-md/parse'
-import { patternToMd } from '@/utils/pattern-md/serialize'
-import i18n from '@/i18n'
-
-const nav = vi.hoisted(() => ({
-  route: { name: 'project-read', params: {}, query: {} },
-  router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() },
-}))
-vi.mock('vue-router', () => ({
-  useRoute: () => nav.route,
-  useRouter: () => nav.router,
-}))
-
-import ReaderView from '@/views/ReaderView.vue'
-
 const PATTERN_WITH_INTRO = {
   name: 'Mini',
   author: 'A',
@@ -123,22 +319,6 @@ async function seedProjectWithIntro() {
   nav.route = { name: 'project-read', params: { id: String(projectId) }, query: {} }
   return { patternId, projectId }
 }
-
-const wrappers = []
-function mountReader() {
-  const w = mount(ReaderView, { global: { plugins: [createPinia(), i18n] } })
-  wrappers.push(w)
-  return w
-}
-
-async function settle() {
-  for (let i = 0; i < 4; i++) {
-    await flushPromises()
-    await new Promise((r) => setTimeout(r))
-  }
-  await flushPromises()
-}
-
 describe('T3 — rendu DOM : id posé et affichage traduit en espagnol (ne garde rien, cf. en-tête du fichier — la vraie garantie est le bloc suivant)', () => {
   beforeEach(async () => {
     setActivePinia(createPinia())
@@ -179,14 +359,14 @@ describe('T3 — rendu DOM : id posé et affichage traduit en espagnol (ne garde
   })
 })
 
-// ── La garantie qui compte réellement (cf. en-tête du fichier) ────────────────────────────
+// ── La garantie qui compte réellement (cf. en-tête des blocs T3) ──────────────────────────
 //
 // ReaderView.requestRows (ReaderView.vue:503) est le seul chemin d'écriture qui persiste le
 // reader ENTIER (donc `sec.title`) en base : la tricoteuse renseigne le nombre de rangs d'une
 // grille importée (rows:0 → sentinel « à renseigner »), et `patternsStore.update(id, {
 // reader: reader.value })` réécrit tout l'objet dans IndexedDB. Si une traduction fuyait un
 // jour dans ce chemin (ex. un dev « corrige » l'affichage en réassignant `sec.title` avant
-// persistance), c'est le SEUL test de ce fichier qui la détecterait : il monte le Lecteur en
+// persistance), c'est le SEUL test des blocs T3 qui la détecterait : il monte le Lecteur en
 // espagnol, déclenche réellement ce chemin d'écriture via l'UI (clic sur le bouton du
 // diagramme, comme le ferait la tricoteuse), puis relit la base BRUTE (pas le state Vue en
 // mémoire, potentiellement traduit côté affichage) pour vérifier ce qui a été écrit.

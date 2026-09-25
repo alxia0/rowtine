@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Test d'intégration reporté (createCmEditor + opts.sizeLabels) : le
 // câblage complet menu « Aide mémoire » -> applyRetag -> retagSelection n'était couvert par
 // AUCUN test — on pouvait supprimer le passage des tailles sans faire tomber la suite

@@ -1,12 +1,12 @@
 // Orchestrateur navigateur de l'import PDF local (voie par défaut) :
-// extraction pdfjs → cœur pur (assemble) → images best-effort depuis le PDF de
-// l'utilisatrice. Détecte les PDF scannés (→ l'UI propose la voie IA).
+// extraction pdfjs → refus nets (reject.js : scanné, pas un patron, plusieurs patrons) →
+// cœur pur (assemble) → images best-effort depuis le PDF de l'utilisatrice.
 import { extractPages, extractDocMetaTitle, renderPdfPageToDataUrl, extractImagesWithPos, extractVectorRegions, readFileAsDataUrl } from '@/utils/pdf'
 import { buildReaderFromPages } from './assemble'
 import { associateImages } from './associate'
 import { promoteGridSections } from './promote-grids'
+import { detectRejection } from './reject'
 
-const SCANNED_CHARS_PER_PAGE = 50
 const CHART_HINT_RE = /diagramme|chart|grille|legend|légende/i
 // Auto-détection d'un compteur de répétition de diagramme : « répéter le diagramme/motif N fois »
 // / « repeat the chart/diagram N times ». Best-effort — appelé sur le texte de la page du
@@ -51,6 +51,26 @@ function fallbackResult(file) {
     confidence: { global: 0, level: 'low', bySection: {} },
     stats: null,
     scanned: false,
+    notPattern: false,
+    notPatternReason: null,
+    rejected: null,
+  }
+}
+
+// Résultat d'un refus : aucun patron. Les vues ne lisent que `rejected` ; `scanned`,
+// `notPattern` et `notPatternReason` restent posés pour la compatibilité et la spec §4.1.
+function rejectedResult(rejected) {
+  return {
+    pattern: null,
+    reader: null,
+    warnings: [],
+    confidence: null,
+    stats: null,
+    blocking: null,
+    scanned: rejected.reason === 'scanned',
+    notPattern: rejected.reason === 'notPattern',
+    notPatternReason: rejected.reason === 'notPattern' ? rejected.detail : null,
+    rejected,
   }
 }
 
@@ -73,10 +93,8 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
     return fb
   }
 
-  const chars = pages.reduce((a, p) => a + p.reduce((b, l) => b + l.text.length, 0), 0)
-  if (!pages.length || chars / pages.length < SCANNED_CHARS_PER_PAGE) {
-    return { pattern: null, reader: null, warnings: [], confidence: null, stats: null, scanned: true }
-  }
+  const rejected = detectRejection(pages)
+  if (rejected) return rejectedResult(rejected)
 
   onProgress?.({ phase: 'parse' })
   // Fiche d'identité du PDF (best-effort, jamais bloquant) : sert à recoller un titre de
@@ -154,5 +172,5 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
     }
   }
 
-  return { ...out, scanned: false }
+  return { ...out, scanned: false, notPattern: false, notPatternReason: null, rejected: null }
 }

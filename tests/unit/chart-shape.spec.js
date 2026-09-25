@@ -1,15 +1,16 @@
 // Forme d'un diagramme non-linéaire (radial ou par tracé) : nouveauté du 23/08/2026, donc
 // AUCUN patron existant ne porte cette valeur — contrairement à `readDir` (chart-readdir.spec.js),
 // pas besoin d'un double mot+tag pour préserver une phrase héritée : absent = linéaire
-// (comportement historique, inchangé), un mot suffit pour les 3 nouvelles valeurs.
+// (comportement historique, inchangé), un mot suffit pour les 4 formes non-linéaires.
 import { describe, it, expect } from 'vitest'
 import { chartShapeToMd, chartShapeFromMd } from '@/utils/pattern-md/dialect'
 import { patternToMd, mdToPattern } from '@/utils/pattern-md'
 
 describe('chartShapeToMd / chartShapeFromMd (dialecte Rowtine-MD)', () => {
-  it('traduit les 3 formes vers un mot lisible', () => {
+  it('traduit les 4 formes vers un mot lisible', () => {
     expect(chartShapeToMd('radial-square')).toBe('radial-carré')
     expect(chartShapeToMd('radial-circle')).toBe('radial-rond')
+    expect(chartShapeToMd('radial-hexagon')).toBe('radial-hexagone')
     expect(chartShapeToMd('path')).toBe('tracé')
   })
 
@@ -21,6 +22,7 @@ describe('chartShapeToMd / chartShapeFromMd (dialecte Rowtine-MD)', () => {
   it('le mot redonne le code exact (bijection)', () => {
     expect(chartShapeFromMd('radial-carré')).toBe('radial-square')
     expect(chartShapeFromMd('radial-rond')).toBe('radial-circle')
+    expect(chartShapeFromMd('radial-hexagone')).toBe('radial-hexagon')
     expect(chartShapeFromMd('tracé')).toBe('path')
   })
 
@@ -55,8 +57,8 @@ describe('chart.shape — fidélité du format Rowtine-MD (serialize ↔ parse)'
     expect(md).toContain('5 m × 5 rangs · forme radial-carré')
   })
 
-  it('round-trip : les 3 formes survivent intactes', () => {
-    for (const shape of ['radial-square', 'radial-circle', 'path']) {
+  it('round-trip : les 4 formes survivent intactes', () => {
+    for (const shape of ['radial-square', 'radial-circle', 'radial-hexagon', 'path']) {
       const { md } = patternToMd(chartPattern(shape))
       const { pattern: reparsed, warnings } = mdToPattern(md)
       expect(warnings).toEqual([])

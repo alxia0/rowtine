@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le JOURNAL DES JOURS ACTIFS (lot 2, §7ter). `lastWorkedAt` est écrasé à chaque
 // geste : cette table est le SEUL historique des jours où une action a eu lieu.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'

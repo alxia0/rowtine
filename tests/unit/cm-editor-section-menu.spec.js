@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le menu Section de la barre de
 // balisage (`.cm-retag-section`) était une liste plate de 18 entrées, avec
 // des libellés codés en dur en français (import statique de fr.json dans

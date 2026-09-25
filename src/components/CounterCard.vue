@@ -20,9 +20,11 @@ function bump(d) {
 // annulation, alors que cet écran exige un bouton « Remise à zéro » explicite pour ce geste.
 // On refuse donc la saisie et on remet le compte affiché (Vue ne re-rendrait pas : l'état
 // n'a pas changé). `onTarget` peut, lui, retomber sur 0 : 0 y signifie « pas d'objectif ».
+// Même refus pour un négatif (le store le ramène à 0 : même effacement silencieux) et pour
+// une décimale (un compte de rangs est entier).
 function onValue(e) {
   const n = Number(e.target.value)
-  if (e.target.value === '' || !Number.isFinite(n)) {
+  if (e.target.value === '' || !Number.isInteger(n) || n < 0) {
     e.target.value = val(props.counter)
     return
   }

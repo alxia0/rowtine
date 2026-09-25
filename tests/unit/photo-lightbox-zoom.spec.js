@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le zoom de la visionneuse photo (lot du 09/08/2026).
 //
 // La visionneuse savait déjà s'ouvrir, se fermer et naviguer ; seul le pincement manquait.

@@ -5,7 +5,7 @@
 // à raison — vers les notes.
 //
 // Module PUR, sans DOM ni CM6 : chargeable tel quel par Vitest et par le banc corpus.
-import { REF_TAG_TO_KEY } from './refblocks'
+import { REF_TAG_TO_KEY, isTableSep, isPipeLine, splitCells } from './refblocks'
 import { SCALAR_TEXT_KEYS } from './scalar-keys'
 import { applySizeVectors } from '../pdf-import/sizes'
 import { fitSizeRowValues } from '../reader'
@@ -27,15 +27,18 @@ const BULLET_KEYS = new Set(['materials', 'tips'])
 // mesures — une ligne parasite à chaque fusion. Même règle structurelle que `parseTableBlock`
 // (refblocks.js) : l'en-tête est la ligne qui précède IMMÉDIATEMENT la séparatrice, et les
 // deux sont de la mise en forme, jamais du contenu.
-const TABLE_SEP_RE = /^\|[\s:|-]+\|$/
-const isPipeLine = (l) => /^\|.*\|$/.test(l)
-const splitCells = (l) => l.slice(1, -1).split('|').map((x) => x.trim())
+// `isTableSep`/`isPipeLine`/`splitCells` réutilisées depuis refblocks.js (même
+// import que REF_TAG_TO_KEY ci-dessus) plutôt que recopiées ici : c'était une
+// seconde version, divergente au détail près (pas de coercition/trim), du type de
+// duplication que ce fichier de dialecte met justement en garde ailleurs — les
+// lignes reçues ici sont déjà trimées (cf. `trimmed` dans `selectionToFlat`), donc
+// aucun changement de comportement.
 
 function stripTableChrome(lines) {
   const out = []
   for (let i = 0; i < lines.length; i++) {
-    if (TABLE_SEP_RE.test(lines[i])) continue
-    if (isPipeLine(lines[i]) && TABLE_SEP_RE.test(lines[i + 1] || '')) continue
+    if (isTableSep(lines[i])) continue
+    if (isPipeLine(lines[i]) && isTableSep(lines[i + 1] || '')) continue
     out.push(lines[i])
   }
   return out

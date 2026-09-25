@@ -3,21 +3,40 @@
 // module impose des paliers de semaines fixes (mois/trimestre/…) ancrés sur « aujourd'hui »,
 // inadaptés à la durée réelle d'un projet — buildProjectWindow() construit donc son propre
 // objet `win` (mêmes champs : startDay/endDay/mondayDays), borné à la vie du projet.
-import { dayKeyOf, sessionsByDay, buildGrid, totalSeconds, activeDays, longestStreakInWindow } from '@/utils/stats-grid'
+import { dayKeyOf, sessionsByDay, buildGrid, totalSeconds, activeDays, longestStreakInWindow, isPlausibleDay, MAX_WINDOW_WEEKS } from '@/utils/stats-grid'
 import { startOfWeek, ymdLocal, addDays } from '@/utils/time-periods'
 import { localDayToDate } from '@/utils/date-format'
 import { reservationsOf, consumedOf } from '@/utils/yarn-usage'
 import { parseDecimal } from '@/utils/decimal'
 import { readerProgress, patternToReader } from '@/utils/reader'
 
+// Jour AAAA-MM-JJ d'une date déclarée, ou null. Une valeur longue (« …T00:00:00.000Z », venue
+// d'une sauvegarde retouchée) est ramenée à son jour : non reconnue, `lastMonday` vaudrait
+// « NaN-NaN-NaN », toujours > à un jour « 2… » en ordre de chaînes, et la boucle ne finirait pas.
+// Une année hors plage (9999, 1000) est ignorée de même (cf. `isPlausibleDay`).
+function declaredDay(value) {
+  const m = /^\d{4}-\d{2}-\d{2}/.exec(String(value || ''))
+  return m && isPlausibleDay(m[0]) && !Number.isNaN(localDayToDate(m[0]).getTime()) ? m[0] : null
+}
+
 export function buildProjectWindow(project, sessions, refDate, firstDay = 1) {
   const sessionDays = (sessions || []).map(dayKeyOf).filter(Boolean).sort()
-  const startDay = project?.startedAt || sessionDays[0] || ymdLocal(refDate)
-  const endDay = project?.finishedAt || ymdLocal(refDate)
+  // Élargie aux séances hors des dates déclarées (séance antidatée avant `startedAt`, projet
+  // rouvert qui garde son `finishedAt`) : sinon leur temps disparaît du total et des jours
+  // actifs, alors que `sessionsCount` les compte.
+  const firstSession = sessionDays[0]
+  const lastSession = sessionDays[sessionDays.length - 1]
+  let startDay = declaredDay(project?.startedAt) || firstSession || ymdLocal(refDate)
+  let endDay = declaredDay(project?.finishedAt) || ymdLocal(refDate)
+  if (firstSession && firstSession < startDay) startDay = firstSession
+  if (lastSession && lastSession > endDay) endDay = lastSession
   const firstMonday = ymdLocal(startOfWeek(localDayToDate(startDay), firstDay))
   const lastMonday = ymdLocal(startOfWeek(localDayToDate(endDay), firstDay))
   const mondayDays = []
+  // Au plus MAX_WINDOW_WEEKS semaines, les plus récentes (cf. stats-grid.js).
   let cursor = localDayToDate(firstMonday)
+  const floor = addDays(localDayToDate(lastMonday), -7 * (MAX_WINDOW_WEEKS - 1))
+  if (cursor < floor) cursor = floor
   while (ymdLocal(cursor) <= lastMonday) {
     mondayDays.push(ymdLocal(cursor))
     cursor = addDays(cursor, 7)

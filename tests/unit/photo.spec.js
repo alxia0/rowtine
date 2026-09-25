@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Décision produit du 04/09/2026, option (a) : pickImage() ne passe PLUS par le prompt
 // natif CameraSource.Prompt du plugin @capacitor/camera. Cause racine (mesurée sur le
 // Huawei le 04/09) : sur le chemin galerie, LegacyCameraFlow.java (v8.2.2) ré-encode TOUT

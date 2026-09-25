@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le JOURNAL DES JOURS ACTIFS survit à un aller-retour de sauvegarde (§7ter).
 // Sans ce fichier, réinstaller l'application remettrait la série à ce que les seules séances
 // racontent, alors que le guide promet « tu redésignes ce dossier, tout revient comme avant ».

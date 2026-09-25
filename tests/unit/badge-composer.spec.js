@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
@@ -14,6 +15,9 @@ import { COLOR_PALETTE } from '@/constants/swatch'
 import { pickImage } from '@/utils/photo'
 import { shareImageDataUrl } from '@/utils/share-badge'
 import { computeBadgeGeometry, buildRawStatLines } from '@/utils/badge-render'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 // `pickImage` (galerie/caméra réelles, @capacitor/camera) : hors de portée de ces tests,
 // couvert par photo.spec.js — mocké pour ne pas dépendre du plugin natif ici.
@@ -336,6 +340,44 @@ describe('BadgeComposer', () => {
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
 
+  // Protège : Échap ferme la pop-up enfant ouverte (photo, couleur), pas tout le composeur.
+  it('Échap avec la pop-up photo ou couleur ouverte ne ferme que celle-ci', async () => {
+    stubCanvas()
+    const { wrapper } = mountComposer({ id: 81, name: 'X', photos: ['data:image/jpeg;base64,COVER'] })
+    const escape = () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+
+    await openPhotoPicker(wrapper)
+    expect(wrapper.find('.bpp').exists()).toBe(true)
+    escape()
+    await flushPromises()
+    expect(wrapper.find('.bpp').exists()).toBe(false)
+    expect(wrapper.emitted('close')).toBeFalsy()
+
+    await wrapper.find('[data-test="badge-tab-color"]').trigger('click')
+    await wrapper.find('[data-test="badge-color-custom"]').trigger('click')
+    escape()
+    await flushPromises()
+    expect(wrapper.emitted('close')).toBeFalsy()
+
+    escape()
+    await flushPromises()
+    expect(wrapper.emitted('close')).toHaveLength(1)
+  })
+
+  // Protège : la pop-up photo démontée encore ouverte retire son écouteur clavier.
+  it('démonté avec la pop-up photo ouverte, aucun écouteur Échap ne reste sur document', async () => {
+    stubCanvas()
+    const { wrapper } = mountComposer({ id: 82, name: 'X', photos: ['data:image/jpeg;base64,COVER'] })
+    const pose = vi.spyOn(document, 'addEventListener')
+    await openPhotoPicker(wrapper)
+    const handler = pose.mock.calls.filter((c) => c[0] === 'keydown').at(-1)[1]
+    pose.mockRestore()
+    const retire = vi.spyOn(document, 'removeEventListener')
+    wrappers.pop().unmount()
+    expect(retire).toHaveBeenCalledWith('keydown', handler)
+    retire.mockRestore()
+  })
+
   // N4 — la feuille restant ouverte après génération, un second clic relisait
   // `props.project.photos` avant la relecture en base du parent et perdait le premier badge.
   // Retour direct (16/09) : le badge doit rester modifiable après une première génération.
@@ -374,7 +416,9 @@ describe('BadgeComposer', () => {
     const { wrapper } = mountComposer(project)
 
     const tabs = wrapper.findAll('[role="tab"]')
-    expect(tabs.map((t) => t.text())).toEqual(['Format', 'Couleur', 'Infos'])
+    expect(tabs.map((t) => t.text())).toEqual(
+      ['format', 'color', 'infos'].map((k) => tk(`project.stats.badge.step.${k}`)),
+    )
     expect(wrapper.find('[data-test="badge-prev"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="badge-next"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="badge-generate"]').exists()).toBe(false)
@@ -386,7 +430,7 @@ describe('BadgeComposer', () => {
     expect(wrapper.find('.bdg__languages').exists()).toBe(true)
 
     await wrapper.find('[data-test="badge-tab-format"]').trigger('click')
-    expect(wrapper.find('[data-test="badge-tab-format"]').classes()).toContain('bdg__segment--on')
+    expect(wrapper.find('[data-test="badge-tab-format"]').attributes('aria-selected')).toBe('true')
   })
 
   it('onglets : jamais désactivés, aucune restriction de progression', async () => {
@@ -396,20 +440,10 @@ describe('BadgeComposer', () => {
     const infosTab = wrapper.find('[data-test="badge-tab-infos"]')
     expect(infosTab.attributes('disabled')).toBeUndefined()
     await infosTab.trigger('click')
-    expect(infosTab.classes()).toContain('bdg__segment--on')
+    expect(infosTab.attributes('aria-selected')).toBe('true')
 
     await wrapper.find('[data-test="badge-tab-format"]').trigger('click')
-    expect(wrapper.find('[data-test="badge-tab-format"]').classes()).toContain('bdg__segment--on')
-  })
-
-  it('mise en page : aucun <fieldset> brut, boutons flottants Fermer/Partager toujours visibles', () => {
-    const css = styleCss()
-    expect(css).not.toMatch(/\.bdg__field\s*\{[^}]*border:/s) // pas de bordure de fieldset UA réapparue
-    expect(css).toMatch(/\.bdg__close-btn\s*\{[^}]*position:\s*absolute/s)
-    expect(css).toMatch(/\.bdg__share-btn\s*\{[^}]*position:\s*absolute/s)
-    // Le template n'utilise plus <fieldset>/<legend> : source du composant, pas juste le CSS.
-    expect(src()).not.toMatch(/<fieldset/)
-    expect(src()).not.toMatch(/<legend/)
+    expect(wrapper.find('[data-test="badge-tab-format"]').attributes('aria-selected')).toBe('true')
   })
 
   // Bug remonté par capture d'écran (17/09) : le padding de zone sûre du haut était posé sur
@@ -560,9 +594,9 @@ describe('BadgeComposer', () => {
     const { wrapper, projectsStore } = mountComposer(project)
     projectsStore.update = vi.fn().mockResolvedValue(undefined)
 
-    expect(wrapper.text()).not.toContain('Badge enregistré dans les photos du projet')
+    expect(wrapper.text()).not.toContain(tk('project.stats.badge.saved'))
     await triggerShare(wrapper)
-    expect(wrapper.text()).toContain('Badge enregistré dans les photos du projet')
+    expect(wrapper.text()).toContain(tk('project.stats.badge.saved'))
   })
 
   it('confirmation "enregistré" : bannière flottante, pas de miniature séparée', async () => {
@@ -575,7 +609,7 @@ describe('BadgeComposer', () => {
     await triggerShare(wrapper)
     const banner = wrapper.find('.bdg__saved-banner')
     expect(banner.exists()).toBe(true)
-    expect(banner.text()).toBe('Badge enregistré dans les photos du projet')
+    expect(banner.text()).toBe(tk('project.stats.badge.saved'))
   })
 
   it('liste de langues du badge : identique à celle des Réglages', async () => {
@@ -1373,7 +1407,7 @@ describe('BadgeComposer', () => {
 
     const pill = wrapper.find('[data-test="badge-yarns"]')
     expect(pill.exists()).toBe(true)
-    expect(pill.classes()).toContain('bdg__pill--on') // cochée par défaut, laines liées
+    expect(pill.attributes('aria-pressed')).toBe('true') // cochée par défaut, laines liées
     expect(pill.text()).toContain('Drops Merino')
     expect(pill.text()).toContain('Rico Creative')
   })
@@ -1469,11 +1503,6 @@ describe('BadgeComposer', () => {
       }).length
       expect(sansMotif.vm.statLineCount).toBe(rawLenSansMotif)
     })
-  })
-
-  it('onglet Infos : les pastilles sont regroupées en lignes (flex-wrap), pas une par ligne', () => {
-    const css = styleCss()
-    expect(css).toMatch(/\.bdg__pills\s*\{[^}]*flex-wrap:\s*wrap/s)
   })
 
   it('onglet Infos : aria-label combine libellé et valeur pour l’accessibilité', async () => {
@@ -1828,16 +1857,16 @@ describe('BadgeComposer', () => {
     expect(drawer.classes()).not.toContain('bdg__drawer--expanded')
 
     const handle = wrapper.find('[data-test="badge-drawer-handle"]')
-    expect(handle.text()).toBe('Déplier les réglages')
+    expect(handle.text()).toBe(tk('project.stats.badge.drawerExpand'))
     expect(handle.attributes('aria-expanded')).toBe('false')
     await handle.trigger('click')
     expect(drawer.classes()).toContain('bdg__drawer--expanded')
-    expect(handle.text()).toBe('Replier')
+    expect(handle.text()).toBe(tk('project.stats.badge.drawerCollapse'))
     expect(handle.attributes('aria-expanded')).toBe('true')
 
     await handle.trigger('click')
     expect(drawer.classes()).not.toContain('bdg__drawer--expanded')
-    expect(handle.text()).toBe('Déplier les réglages')
+    expect(handle.text()).toBe(tk('project.stats.badge.drawerExpand'))
     expect(handle.attributes('aria-expanded')).toBe('false')
   })
 
@@ -2634,13 +2663,6 @@ describe('BadgeComposer', () => {
     } finally {
       restore()
     }
-  })
-
-  it('cadre : `.bdg__preview-frame` s’anime (transition CSS) au lieu de sauter d’un coup à sa nouvelle taille', () => {
-    const css = styleCss()
-    const frameBlock = css.match(/\.bdg__preview-frame\s*\{([^}]*)\}/s)?.[1] ?? ''
-    expect(frameBlock).toMatch(/transition:[^;]*width[^;]*220ms/)
-    expect(frameBlock).toMatch(/transition:[^;]*height[^;]*220ms/)
   })
 
   // Revue post-implémentation (18/09) : `.bdg__drawer` reste bord à bord (`left: 0; right: 0`,

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — BackupDecisionPrompt.vue (avenant 04/08/2026, §A.4).
 // Le bandeau bloquant qui porte les DEUX gestes qui acquittent un dossier : le
 // premier des quatre chemins de destruction du 04/08 était précisément un bandeau à
@@ -264,6 +265,26 @@ describe('BackupDecisionPrompt', () => {
       expect(restoreService.runRestore).not.toHaveBeenCalled()
       expect(backupService.runBackup).not.toHaveBeenCalled()
     })
+
+    // Protège : ni le retour ni Échap ne ferment le bandeau pendant une restauration en cours.
+    it('cas bloqué, restauration en cours : handleBackPressed() et Échap ne ferment rien', async () => {
+      restoreService.isDbRestorable.mockResolvedValue(false)
+      let finish
+      restoreService.runRestore.mockReturnValue(new Promise((r) => (finish = r)))
+      const w = mountIt()
+      await flushPromises()
+      await w.find('[data-test="prompt-restore"]').trigger('click')
+      await flushPromises()
+
+      w.vm.handleBackPressed()
+      await w.find('[role="dialog"]').trigger('keydown', { key: 'Escape' })
+      await flushPromises()
+      expect(w.emitted('resolved')).toBeFalsy()
+
+      finish({ ok: true, decided: true })
+      await flushPromises()
+      w.unmount()
+    })
   })
 
   describe('bouton « Restaurer »', () => {
@@ -417,6 +438,23 @@ describe('BackupDecisionPrompt', () => {
       expect(restoreError.report).toMatchObject({ kind: 'unowned' })
       expect(snackbar.message).toBe(fr.saf.decisionNotSaved)
       expect(w.emitted('resolved')).toBeFalsy()
+    })
+
+    // Protège la sortie non destructrice après une restauration incomplète (sauvegarde en pause).
+    it('restauration avec écarts : modale avec le détail, « Plus tard » offert, ni decisionNotSaved ni resolved', async () => {
+      const ecarts = [{ where: 'Projets/Marisol [3]', error: 'Unexpected end of JSON input' }]
+      restoreService.runRestore.mockResolvedValue({ ok: true, decided: false, owned: false, errors: ecarts })
+      const w = mountIt()
+      const snackbar = useSnackbarStore()
+      const restoreError = useRestoreErrorStore()
+
+      await w.find('[data-test="prompt-restore"]').trigger('click')
+      await flushPromises()
+
+      expect(restoreError.report).toMatchObject({ kind: 'unowned', details: ecarts })
+      expect(snackbar.message).not.toBe(fr.saf.decisionNotSaved)
+      expect(w.emitted('resolved')).toBeFalsy()
+      expect(w.find('[data-test="later"]').exists()).toBe(true)
     })
   })
 

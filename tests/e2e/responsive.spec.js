@@ -211,7 +211,7 @@ test.describe('petit téléphone', () => {
     await page.getByRole('button', { name: 'Enregistrer' }).click()
     await expect(page).toHaveURL(/\/project\/\d+/)
 
-    await page.getByRole('tab', { name: 'Galerie' }).click()
+    await page.getByRole('tab', { name: 'Photos', exact: true }).click()
     await setCameraPhoto(page)
     for (let i = 0; i < 4; i += 1) {
       await page.getByRole('button', { name: 'Ajouter une photo' }).click()

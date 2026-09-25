@@ -18,6 +18,30 @@ describe('extractReference', () => {
   // l'entrée disparaissait du tableau Abréviations (texte survivant mais sans étiquette,
   // noyé dans l'intro). Plafond élargi 24→40 (même geste que le plafond auteur 40→70,
   // palier 6).
+  // Une clé déjà définie ne fait pas disparaître une ligne qui la redéfinit autrement : elle part en note.
+  it('une ligne « clé = déf » dont la clé est déjà prise avec une autre définition est recueillie en note', () => {
+    const { reference, notes } = extractReference([
+      sec('ABRÉVIATIONS', 'abbr', ['M = marqueur', 'M = milieu', 'ms = maille serrée']),
+      sec('Dos', null, ['M = milieu du dos, placer ici'], 'work'),
+    ], { n: 1 })
+    expect(reference.abbr.M).toBe('marqueur')
+    expect(notes).toContain('M = milieu')
+    expect(notes).toContain('M = milieu du dos, placer ici')
+  })
+  // Un bloc « clé: déf » qui répète une clé est une suite de rangs, pas un glossaire : il reste au travail.
+  it('un bloc de rangs « Envers: … / Endroit: … » à clés répétées n’est pas aspiré dans le glossaire', () => {
+    const rangs = [
+      'Envers: tricoter 16 m, placer un marqueur, tourner,',
+      'Endroit: j, tricoter au point brioche.',
+      'Envers: tricoter au point brioche jusqu’à ce qu’il reste 2 m avant le marqueur, tourner,',
+      'Endroit: j, tricoter au point brioche.',
+    ]
+    const dos = sec('Dos', null, rangs, 'work')
+    const { reference, notes } = extractReference([dos], { n: 1 })
+    expect(reference.abbr?.Envers).toBeUndefined()
+    expect(dos.lines.every((l) => !l.consumed)).toBe(true)
+    expect(notes).toEqual([])
+  })
   it('capte une clé d’abréviation de 25-40 caractères (plafond élargi 24→40)', () => {
     const abbrSec = sec('ABBREVIATIONS', 'abbr', [
       'Spike double crochet stitches = made by inserting the hook into a stitch ( or a space) the row (or several rows ) below the row currently being worked.',
@@ -417,6 +441,14 @@ describe('extractReference', () => {
     expect(needleText).toContain('Aiguilles 6 mm')
     expect(needleText).not.toContain('Aiguilles 7 mm')
     expect(matBlock.p).toContain('Aiguilles 7 mm')
+  })
+  // Au plafond des fils (8 qualités), une ligne-fil d'une section materiel retombe au Matériel.
+  it("jamais perdre d'info : au plafond des Fils (section materiel), une ligne-fil excédentaire retombe au Matériel", () => {
+    const lignes = Array.from({ length: 10 }, (_, i) => `Laine Qualité${i + 1} 50 g`)
+    const { reference } = extractReference([sec('MATÉRIEL', 'materiel', lignes)], { n: 1 })
+    const all = JSON.stringify(reference.tabs)
+    expect(all).toContain('Laine Qualité9 50 g')
+    expect(all).toContain('Laine Qualité10 50 g')
   })
   it('tableau des tailles depuis les mesures « label : vecteur »', () => {
     const { reference } = extractReference([sec('MESURES', 'mesures', ['a. Tour de buste : 102 (112) 122 cm', 'b. Longueur : 50 (51) 53 cm'])], { n: 3 })
@@ -2667,6 +2699,23 @@ describe('bloc mesures — libellé sur la ligne PRÉCÉDENTE (Mia Cardigan, PDF
     const tab = reference.tabs.find((t) => t.id === 'tailles')
     const rows = tab ? tab.blocks.flatMap((b) => b.sizeTable?.rows || []) : []
     expect(rows.find((r) => /Tension over pattern/i.test(r.label))).toBeUndefined()
+  })
+
+  // Un libellé en attente qu'aucune ligne suivante ne consomme finit en note, jamais jeté.
+  it('un libellé en attente jamais consommé (écrasé, supplanté ou en fin de section) est recueilli en note', () => {
+    const { reference, notes } = extractReference([
+      sec('Mesures', 'mesures', [
+        'Choisir la taille la plus proche du tour de poitrine.',
+        'Mesures prises à plat',
+        'Bust: 80 (90) 100 cm',
+        'Laver à la main',
+      ]),
+    ], { n: 3 })
+    const rows = reference.tabs.find((t) => t.id === 'tailles').blocks.flatMap((b) => b.sizeTable?.rows || [])
+    expect(rows.find((r) => r.label === 'Bust').values).toEqual(['80', '90', '100'])
+    expect(notes).toContain('Choisir la taille la plus proche du tour de poitrine.')
+    expect(notes).toContain('Mesures prises à plat')
+    expect(notes).toContain('Laver à la main')
   })
 })
 

@@ -1,9 +1,21 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { unzipToPattern, resolvePatternImagesFromZip, bytesToBase64 } from '@/utils/zip-import'
 import { WARNING_CODES } from '@/utils/pattern-md/warning-codes'
 
 vi.mock('@/utils/image-resize', () => ({ resizeDataUrl: async (dataUrl) => dataUrl }))
+
+// Compte les appels au filtre de `unzipSync` : mesure combien d'entrées fflate a parcourues.
+const filterCalls = vi.hoisted(() => ({ n: 0 }))
+vi.mock('fflate', async (importOriginal) => {
+  const real = await importOriginal()
+  return {
+    ...real,
+    unzipSync: (data, opts) =>
+      real.unzipSync(data, opts?.filter ? { ...opts, filter: (f) => (filterCalls.n++, opts.filter(f)) } : opts),
+  }
+})
 
 // 1x1 PNG transparent (base64) → octets, pour une image réelle référencée par le MD.
 const PNG_1x1 =
@@ -48,6 +60,12 @@ describe('unzipToPattern', () => {
 
   it('promeut cover.jpg en photos[0]', async () => {
     const { pattern } = await unzipToPattern(buildZip({ 'cover.png': pngBytes() }))
+    expect(pattern.photos[0]).toMatch(/^data:image\/png;base64,/)
+  })
+
+  it('kit compressé avec son dossier : la couverture à côté du patron est promue', async () => {
+    const zip = zipSync({ 'kit/patron.md': strToU8(MD), 'kit/img/chart.png': pngBytes(), 'kit/cover.png': pngBytes() })
+    const { pattern } = await unzipToPattern(zip)
     expect(pattern.photos[0]).toMatch(/^data:image\/png;base64,/)
   })
 
@@ -122,6 +140,18 @@ describe('unzipToPattern', () => {
     // La couverture ET l'image de section doivent toutes deux avoir été SOUMISES au plafond —
     // si le branchement disparaît, `calls` reste vide et ce test rougit.
     expect(calls.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('unzipToPattern : trop d’entrées', () => {
+  // Protège : un zip au-delà du plafond d'entrées est refusé dès le plafond, sans parcourir le reste (compte EOCD falsifiable).
+  it('lève zip-too-big et arrête l’itération au plafond', async () => {
+    const many = {}
+    for (let i = 0; i < 5000; i++) many[`f${i}.txt`] = new Uint8Array(0)
+    const zip = buildZip(many)
+    filterCalls.n = 0
+    await expect(unzipToPattern(zip)).rejects.toMatchObject({ code: 'zip-too-big' })
+    expect(filterCalls.n).toBeLessThanOrEqual(4097)
   })
 })
 

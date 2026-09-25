@@ -1,12 +1,14 @@
+// @vitest-environment jsdom
 // Statut rapide : le popover de StatusBadge éditable liste les 5 statuts,
 // marque le statut courant, émet `change` au choix — et n'émet rien si on reclique le même.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import StatusBadge from '@/components/StatusBadge.vue'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 function mountBadge(props) {
   return mount(StatusBadge, { global: { plugins: [i18n] }, props })
@@ -16,7 +18,7 @@ describe('StatusBadge — statut rapide', () => {
   it('non éditable : rendu statique inchangé (pas de bouton)', () => {
     const w = mountBadge({ status: 'wip' })
     expect(w.find('button').exists()).toBe(false)
-    expect(w.text()).toContain('En cours')
+    expect(w.text()).toContain(tk('status.wip'))
   })
 
   it('éditable : le popover liste les 6 statuts et marque le courant', async () => {

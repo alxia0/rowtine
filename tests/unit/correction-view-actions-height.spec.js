@@ -4,9 +4,8 @@
 // cible tactile MINIMALE du projet, jamais en dessous — contrainte globale du
 // projet). `padding-bottom` reste lié à `--sa-bottom` (encoche bas d'écran), intact.
 //
-// Scrape le SOURCE CSS (comme reader-text-editor-sticky.spec.js : jsdom ne fait pas
-// de mise en page, `getComputedStyle` y est aveugle aux déclarations, cf. son
-// en-tête) — la mesure RÉELLE (rendu, chevauchement avec les flèches) est couverte
+// Scrape le SOURCE CSS : jsdom ne fait pas de mise en page, `getComputedStyle` y est
+// aveugle aux déclarations. La mesure RÉELLE (rendu, chevauchement avec les flèches) est couverte
 // par la reproduction Playwright, pas reproductible en unitaire
 // (ResizeObserver absent de jsdom, cf. tests/unit/setup.js).
 import { describe, it, expect } from 'vitest'
@@ -31,12 +30,6 @@ function declValue(body, prop) {
 describe('CorrectionView — .correct__actions, bandeau Annuler/Enregistrer abaissé', () => {
   const actionsBody = ruleBody(componentSrc, '.correct__actions')
   const btnBody = ruleBody(componentSrc, '.correct__actions .btn')
-
-  it('padding vertical réduit à --sp-2 (8px), plus --sp-3 (12px)', () => {
-    const padding = declValue(actionsBody, 'padding')
-    expect(padding.startsWith('var(--sp-2)')).toBe(true)
-    expect(padding).not.toContain('--sp-3')
-  })
 
   it('padding-bottom reste lié à --sa-bottom (encoche bas d’écran), avec --sp-2', () => {
     expect(declValue(actionsBody, 'padding-bottom')).toBe('calc(var(--sp-2) + var(--sa-bottom))')

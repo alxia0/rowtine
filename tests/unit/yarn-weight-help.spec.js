@@ -1,11 +1,12 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import YarnWeightHelp from '@/components/YarnWeightHelp.vue'
 import { YARN_WEIGHTS } from '@/constants/catalog'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppIcon: true }
 
 function mountHelp(open) {

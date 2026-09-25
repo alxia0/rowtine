@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — SettingsView : le bloc « Sauvegarde (dossier
 // natif) » et ses boutons explicites (Sauvegarder maintenant / Restaurer une
 // sauvegarde / Activer la sauvegarde) ont disparu — l'état de synchro vit
@@ -64,6 +65,27 @@ describe('SettingsView', () => {
     await flushPromises()
     expect(w.text()).toMatch(/export tableur/i)
     expect(w.text()).toMatch(/corbeille/i)
+  })
+
+  it('vider la corbeille demande confirmation : Annuler garde tout, Vider efface', async () => {
+    await db.trash.add({ type: 'yarn', label: 'Laine test', deletedAt: new Date().toISOString(), payload: {} })
+    const w = mountView()
+    await flushPromises()
+    await w.get('.trash-toggle').trigger('click')
+    const emptyBtn = () => w.findAll('button').find((b) => b.text() === i18n.global.t('settings.emptyTrash'))
+
+    await emptyBtn().trigger('click')
+    await flushPromises()
+    expect(await db.trash.count()).toBe(1)
+    await w.get('[data-test="confirm-cancel"]').trigger('click')
+    await flushPromises()
+    expect(await db.trash.count()).toBe(1)
+
+    await emptyBtn().trigger('click')
+    await flushPromises()
+    await w.get('[data-test="confirm-ok"]').trigger('click')
+    await flushPromises()
+    expect(await db.trash.count()).toBe(0)
   })
 
   it('bloc Apparence : cliquer sur Sombre enregistre le thème', async () => {

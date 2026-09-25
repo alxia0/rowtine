@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/db-schema-unique.spec.js
 // GARDE PERMANENTE du schéma unique (ex-db-fusion-v3-mesure.spec.js, promu le 13/08/2026
 // à la fusion des trois `db.version()` de src/db/db.js en une seule).

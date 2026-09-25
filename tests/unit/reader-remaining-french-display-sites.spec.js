@@ -1,6 +1,7 @@
+// @vitest-environment jsdom
 // Correctifs de revue du lot 3b (T1/T2/T3) : sites d'affichage supplémentaires montraient
 // encore du français en dur, en dehors du Lecteur déjà couvert par
-// reader-single-size-i18n.spec.js et reader-section-intro-i18n.spec.js.
+// reader-i18n.spec.js (« Taille unique » et « Présentation »).
 //
 // IMPORTANT (revue) : un 4e chemin écrit « Taille unique » dans `pattern.sizes` en base —
 // parse.js:101 (`sizes: [...sizeLabels]`) et merge-pattern-md.js:41 (`merged.sizes = md.sizes`,

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // `vi.hoisted` : le factory de `vi.mock` est hoisté au-dessus des déclarations top-level

@@ -32,6 +32,7 @@ export function emptyPattern() {
     photos: [], // data URLs ; la 1re sert de vignette d'aperçu
     pdf: '', // PDF original uploadé (data URL application/pdf) ; '' si absent
     gallery: [], // images extraites du PDF : [{ src, page, w, h }]
+    coverIndex: 0, // index de la photo de couverture dans `gallery` (repli sur 0 si absent/hors bornes, cf. pattern-cover.js)
     // sections : [{ name, instructions, isDiagram, bySize: { [taille]: instructions } }]
     // `instructions` = texte commun / par défaut ; `bySize` = variantes par taille (optionnel).
     sections: [],
@@ -54,7 +55,8 @@ export const usePatternsStore = defineStore('patterns', () => {
   // La migration paresseuse ci-dessous rappelle `load()` : ce rechargement imbriqué prend un
   // jeton PLUS RÉCENT, donc l'extérieur ne réassignera plus rien après lui. Pas d'interblocage
   // possible — l'imbriqué n'attend jamais l'extérieur, l'attente ne remonte que vers le plus
-  // récent, et la migration s'arrête au second passage (tous les patrons ont alors un reader).
+  // récent, et la migration s'arrête au second passage (tous les patrons ont alors un reader
+  // et un coverIndex).
   const loadGuard = createLoadGuard()
   function load() {
     return loadGuard.run(async (isCurrent) => {
@@ -64,8 +66,11 @@ export const usePatternsStore = defineStore('patterns', () => {
       loaded.value = true
       const bi = rows.find((p) => p.builtin)
       if (bi) freePatternId.value = bi.id
-      // Migration paresseuse : ne fait rien si tous les patrons ont déjà un reader.
-      if (rows.some((p) => !p.reader)) {
+      // Migration paresseuse : ne fait rien si tous les patrons ont déjà un reader ET un
+      // coverIndex numérique — sans ce second critère, une base déjà migrée pour `reader`
+      // (donc tous ses patrons dotés d'un `reader`) ne relancerait jamais `coverIndex` en
+      // arrivant sur cette version : le champ resterait absent pour la Task 4 (bouton étoile).
+      if (rows.some((p) => !p.reader || typeof p.coverIndex !== 'number')) {
         await migrateReadersIfNeeded()
       }
     })
@@ -141,7 +146,7 @@ export const usePatternsStore = defineStore('patterns', () => {
   }
 
   // Migration idempotente : garantit un champ `reader` sur chaque patron (unification Lot A).
-  // Backfille aussi `pdf` et `gallery` sur les patrons anciens.
+  // Backfille aussi `pdf`, `gallery` et `coverIndex` sur les patrons anciens.
   async function migrateReadersIfNeeded() {
     const all = await db.patterns.toArray()
     let n = 0
@@ -150,6 +155,7 @@ export const usePatternsStore = defineStore('patterns', () => {
       if (!p.reader) patch.reader = patternToReader(p)
       if (typeof p.pdf !== 'string') patch.pdf = ''
       if (!Array.isArray(p.gallery)) patch.gallery = []
+      if (typeof p.coverIndex !== 'number') patch.coverIndex = 0
       if (Object.keys(patch).length) {
         await db.patterns.update(p.id, patch)
         n++

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le COMPORTEMENT PROPRE de l'astuce de navigation (drapeau, affichage,
 // acquittement), indépendant de l'écran qui la monte. Le placement (Bibliothèque, Stock,
 // fiche projet — jamais la fiche patron, décision produit du 19/08/2026) est prouvé à

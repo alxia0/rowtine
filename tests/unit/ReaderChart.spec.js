@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // ReaderChart : barre de répétition + roll-over + bouton manuel
 // TDD : RED → GREEN. Réplique tests du banc, adaptés au montage i18n réel de l'app.
 import { describe, it, expect } from 'vitest'
@@ -15,6 +16,7 @@ import { patternToMd, mdToPattern } from '@/utils/pattern-md'
 const chart = { img: 'x', cols: 4, rows: 3, readDir: 'd', repeat: '4 m × 3 rangs', reps: 5 }
 const CHART_RADIAL_SQUARE = { img: 'g.png', rows: 5, shape: 'radial-square' }
 const CHART_RADIAL_CIRCLE = { img: 'g.png', rows: 5, shape: 'radial-circle' }
+const CHART_RADIAL_HEXAGON = { img: 'g.png', rows: 5, shape: 'radial-hexagon' }
 const CHART_PATH = { img: 'g.png', rows: 3, shape: 'path' }
 const PATH_FRAME = { points: [{ x: 20, y: 30 }, { x: 80, y: 30 }], spacing: 5 }
 
@@ -95,6 +97,24 @@ describe('ReaderChart — anneau radial (lecture)', () => {
     const hl = w.find('ellipse.chart__ring--hl')
     expect(Number(hl.attributes('rx'))).toBeCloseTo(25)
     expect(Number(hl.attributes('ry'))).toBeCloseTo(77.75)
+  })
+
+  it('un motif radial-hexagon rend un polygon (6 sommets), pas de rect ni ellipse', () => {
+    const w = mountChart({ chart: CHART_RADIAL_HEXAGON, modelValue: 3, readOnly: false })
+    expect(w.find('polygon.chart__ring--hl').exists()).toBe(true)
+    expect(w.find('rect').exists()).toBe(false)
+    expect(w.find('ellipse').exists()).toBe(false)
+    const pts = w.find('polygon.chart__ring--hl').attributes('points').trim().split(' ')
+    expect(pts).toHaveLength(6)
+  })
+
+  it("frame.hexOrientation 'pointy' : un sommet exactement au-dessus du centre", () => {
+    const frame = { cx: 50, cy: 50, r0: 0, r1: 50, r0Shape: 'hexagon', r1Shape: 'hexagon', hexOrientation: 'pointy' }
+    const w = mountChart({ chart: CHART_RADIAL_HEXAGON, modelValue: 3, readOnly: false, frame })
+    const pts = w.find('polygon.chart__ring--hl').attributes('points').trim().split(' ').map((p) => p.split(',').map(Number))
+    const top = pts.find(([x]) => Math.abs(x - 50) < 1e-6)
+    expect(top).toBeTruthy()
+    expect(top[1]).toBeLessThan(50)
   })
 
   // Retour terrain 26/08 (après l'assistant à loupe fixe) : voir le commentaire jumeau dans
@@ -393,7 +413,7 @@ describe('ReaderChart — ordre et numérotation des étapes', () => {
 // Revue coordinateur (31/07) : aucun test n'exerçait le texte RÉELLEMENT rendu de
 // `.chart__read` — une régression vers l'ancienne interpolation brute (`dir: chart.readDir`,
 // le bug d'origine de la tâche C3) serait passée inaperçue de toute la suite. Montage avec
-// locale EXPLICITE (comme reader-sheet-i18n.spec.js), pas la locale par défaut de l'app
+// locale EXPLICITE (comme reader-i18n.spec.js), pas la locale par défaut de l'app
 // (dépendante du device détecté, donc non déterministe en test).
 function mountChartLocale(locale, messages, chartProps) {
   const localeI18n = createI18n({ legacy: false, locale, messages })

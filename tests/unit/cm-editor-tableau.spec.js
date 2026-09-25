@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Un bloc de tableau Markdown doit s'afficher en VRAI tableau en vue enrichie.
 // Avant ce correctif, `lineType` classait `| mesure | S | M |` en `'texte'` (aucun test ne
 // matchait le tuyau), donc l'écran « Corriger le patron » montrait le tableau des tailles
@@ -14,6 +15,7 @@
 import { describe, it, expect } from 'vitest'
 import { createCmEditor } from '@/components/cm/cm-editor'
 import { moveLineUp, moveLineDown } from '@/components/cm/move-line'
+import { runScopeHandlers } from '@codemirror/view'
 
 function mount(value) {
   const host = document.createElement('div')
@@ -504,6 +506,19 @@ describe('flèches monter/descendre dans un bloc de tableau', () => {
     // du texte : elle porte sa propre `.cm-line.md-tableau`.
     const lignes = [...view.contentDOM.querySelectorAll('.cm-line.md-tableau')]
     expect(lignes.map((l) => l.textContent)).toContain(RANGEE_2)
+    host.remove()
+  })
+})
+
+// Protège : Retour-arrière / Suppr avec le curseur posé DANS un tableau (clic sur une cellule) n'efface pas de rangées.
+describe('tableau : Retour-arrière et Suppr depuis une rangée', () => {
+  const touche = (view, key) => runScopeHandlers(view, new KeyboardEvent('keydown', { key, cancelable: true }), 'editor')
+
+  it.each(['Backspace', 'Delete'])('%s sur une rangée intérieure ne supprime aucune ligne du tableau', (key) => {
+    const { view, host, editor } = mount(DOC_BIEN_FORME)
+    putCursorOnLine(view, 5) // RANGEE_1, strictement à l'intérieur du bloc
+    touche(view, key)
+    expect(editor.getValue()).toBe(DOC_BIEN_FORME)
     host.remove()
   })
 })

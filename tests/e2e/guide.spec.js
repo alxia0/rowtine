@@ -170,8 +170,13 @@ test('guide — en réglage « Système », les captures suivent la préférence
   // fichier) : sans cette ouverture, la 1re image reste masquée par l'UA stylesheet et
   // `toBeVisible()` échoue sur un timeout n'ayant rien à voir avec le thème (constaté : Playwright
   // résout bien l'élément mais le rapporte "hidden").
-  await page.locator('.section summary').first().click()
-  const premiere = page.locator('figure.figure img').first()
+  // La section 0 (« {app} en 4 étapes ») n'a plus d'image depuis le lot « visite
+  // guidée » (23/09/2026, image `00-bienvenue` déplacée au chapitre 8) : on ouvre la
+  // PREMIÈRE section qui en porte une, plutôt qu'un index fixe qui casserait à nouveau si le
+  // contenu du guide bouge encore.
+  const section = page.locator('.section').filter({ has: page.locator('figure.figure img') }).first()
+  await section.locator('summary').click()
+  const premiere = section.locator('figure.figure img').first()
   await expect(premiere).toBeVisible()
   const clair = await premiere.getAttribute('src')
 

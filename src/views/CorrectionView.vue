@@ -140,7 +140,6 @@ const chartsOpen = ref(false) // bande « Diagrammes de ce patron » repliée pa
 const galleryOpen = ref(false) // bande « Galerie du patron », repliée par défaut, même convention que chartsOpen
 const editorRef = ref(null)
 const chartStripRef = ref(null) // section .chart-strip (bouton + liste) : cible du scrollIntoView au dépli, cf. toggleCharts
-const galleryStripRef = ref(null) // section .gallery-strip : pas de scroll-rattrapage dédié pour l'instant (liste courte, pas de barre d'action recouvrante mesurée à ce jour)
 const actionsRef = ref(null) // barre .correct__actions : sa hauteur MESURÉE pilote scrollMarginBottom, cf. toggleCharts
 
 // Tailles du patron, éditables ICI parce que c'est le seul écran où l'utilisatrice voit le
@@ -183,6 +182,7 @@ onMounted(async () => {
   baseReader.value = pattern.value.reader || { sections: [] }
   workingReader.value = JSON.parse(JSON.stringify(baseReader.value))
   draftGallery.value = [...(pattern.value.gallery || [])]
+  draftCoverIndex.value = pattern.value.coverIndex ?? 0
   // Champ VIDE sur un patron mono-taille (correctif revue finale) : la sentinelle
   // « Taille unique » est une CHAÎNE FR GELÉE EN DONNÉE (isSingleSize, reader.js), pas un
   // libellé d'interface — l'afficher dans un champ de saisie invitait à la traduire. Une
@@ -274,6 +274,21 @@ onMounted(async () => {
 // persisté avant l'Enregistrer (cf. onSave). Initialisé une fois `pattern` chargé — cf.
 // l'ajout ci-dessous dans onMounted.
 const draftGallery = ref([])
+// Couverture brouillon (pattern.coverIndex) : recalée EN MÊME TEMPS que `draftGallery` par
+// tout retrait d'image (removeGalleryImage, promoteGalleryImage), même motif que
+// `coverIndexAfterRemoval` dans ProjectDetailView.vue/YarnDetailView.vue. Écrite dans la
+// MÊME transaction Dexie que `gallery` à l'Enregistrer (cf. onSave) — jamais un appel
+// séparé, pour ne jamais laisser une fenêtre où `gallery` a changé sans `coverIndex`.
+const draftCoverIndex = ref(0)
+// Recalage pur de l'index de couverture après retrait de l'image `idx` : 0 si c'est elle la
+// couverture, décrémenté d'un cran si elle la précédait dans le tableau, inchangé sinon —
+// même logique que ProjectDetailView.vue/YarnDetailView.vue (jamais d'index qui pointe sur
+// une image décalée ou disparue).
+function coverIndexAfterRemoval(idx, ci) {
+  if (idx === ci) return 0
+  if (idx < ci) return ci - 1
+  return ci
+}
 
 const galleryRows = computed(() =>
   draftGallery.value.map((g, idx) => ({ idx, src: g.src, page: g.page }))
@@ -307,6 +322,7 @@ function promoteGalleryImage(idx, shape) {
   const added = next.sections[next.sections.length - 1]
   if (added?.id) newSectionIds.value = new Set(newSectionIds.value).add(added.id)
   workingReader.value = next
+  draftCoverIndex.value = coverIndexAfterRemoval(idx, draftCoverIndex.value)
   draftGallery.value = draftGallery.value.filter((_, i) => i !== idx)
 }
 
@@ -347,10 +363,11 @@ async function onGalleryPdfPagePicked(pageDataUrl) {
 }
 
 function removeGalleryImage(idx) {
+  draftCoverIndex.value = coverIndexAfterRemoval(idx, draftCoverIndex.value)
   draftGallery.value = draftGallery.value.filter((_, i) => i !== idx)
 }
 
-async function toggleGallery() {
+function toggleGallery() {
   galleryOpen.value = !galleryOpen.value
 }
 
@@ -728,6 +745,7 @@ const CHART_SHAPES = [
   { uiValue: 'standard', shape: undefined, i18nKey: 'standard' },
   { uiValue: 'radial-square', shape: 'radial-square', i18nKey: 'radialSquare' },
   { uiValue: 'radial-circle', shape: 'radial-circle', i18nKey: 'radialCircle' },
+  { uiValue: 'radial-hexagon', shape: 'radial-hexagon', i18nKey: 'radialHexagon' },
   { uiValue: 'path', shape: 'path', i18nKey: 'path' },
 ]
 
@@ -1053,7 +1071,21 @@ function onDiscardCancel() {
   showDiscard.value = false
 }
 
+// Garde anti double appui : deux sauvegardes concurrentes faisaient deux `router.back()`
+// (sortie au-delà du lecteur), et une 2e passée après le rechargement des stores
+// réconciliait des readerStates DÉJÀ recalés contre l'ancien `baseReader`. Réarmée
+// seulement si la sauvegarde n'a pas abouti (échec : le brouillon reste affiché).
+let saving = false
 async function onSave() {
+  if (saving) return
+  saving = true
+  try {
+    await saveCorrection()
+  } finally {
+    if (!confirmedLeave.value) saving = false
+  }
+}
+async function saveCorrection() {
   // Les tailles du champ descendent JUSQU'AU parseur (correctif revue finale) : sans
   // elles, le reparse relisait la table au nombre de colonnes d'ORIGINE (baseReader) alors
   // que l'éditeur venait de l'émettre au NOUVEAU — la table tout juste reconstruite était
@@ -1109,6 +1141,12 @@ async function onSave() {
   const projectPatches = []
   for (const project of linkedProjects()) {
     const { state, report } = reconcileReaderState(baseReader.value, project.readerState || {}, readerWithSizes)
+    // Aucune taille retenue dans le suivi : la réconciliation la lit comme l'index 0 et
+    // poserait la 1re taille, que ReaderView prendrait ensuite au lieu de `activeSize`.
+    if (typeof project.readerState?.size !== 'number') {
+      state.size = null
+      report.sizeReset = false
+    }
     reports.push(report)
     projectPatches.push({ projectId: project.id, readerState: state })
   }
@@ -1159,6 +1197,10 @@ async function onSave() {
         reader: readerWithSizes,
         sizes: isSingleSize(readerWithSizes.sizeLabels) ? [] : [...readerWithSizes.sizeLabels],
         gallery: finalGallery,
+        // Même écriture que `gallery`, jamais une transaction séparée (cf. draftCoverIndex
+        // ci-dessus) : un retrait d'image recale déjà les deux en mémoire, cette ligne les
+        // fait atterrir ensemble en base.
+        coverIndex: draftCoverIndex.value,
       }))
     })
   } catch (e) {
@@ -1321,7 +1363,7 @@ function onCancel() {
         </div>
       </section>
 
-      <section ref="galleryStripRef" class="gallery-strip card">
+      <section class="gallery-strip card">
         <button
           type="button"
           class="gallery-strip__toggle"

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — déclencheur de la synchro MD aux frontières de l'app.
 // Toutes les dépendances impures sont mockées (Capacitor, backup-service,
 // syncPatronMd, stores Pinia) : ce test vérifie UNIQUEMENT le câblage des gardes

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Les photos de laine vivent dans leur propre dossier `Laines/` (demande produit du
 // 16/08/2026, arbitrée le 21/08 : « l'app doit classer les photos des laines dans leur
 // propre dossier par défaut »).

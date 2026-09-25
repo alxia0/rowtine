@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/yarn-purchases.spec.js
 // Bloc « Achats et cadeaux » d'une fiche de laine : liste repliable, total, alerte
 // d'écart. Les nombres attendus sont écrits à la main.
@@ -10,14 +11,14 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import { db } from '@/db/db'
 import fr from '@/i18n/fr.json'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useSnackbarStore } from '@/stores/snackbar'
 import YarnPurchases from '@/components/YarnPurchases.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 const YARN_ID = 1
 const YARN_LABEL = 'DROPS · Bleu ciel'
@@ -179,6 +180,19 @@ describe('YarnPurchases', () => {
     expect(added).toBeTruthy()
     expect(added.kind).toBe('gift')
     expect(added.unitPrice).toBe('')
+  })
+
+  // Protège : un prix réduit à un séparateur (« , ») est enregistré comme inconnu, pas comme 0.
+  it('5d-bis. un prix unitaire « , » seul est enregistré vide', async () => {
+    await addLine({ kind: 'buy', quantity: 12, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12, consumed: { 1: 3 } } })
+    const store = usePurchasesStore()
+    await w.find('[data-test="purchases-correct"]').trigger('click')
+    await w.find('[data-test="purchases-correct-add"]').trigger('click')
+    await w.find('#ypur-price').setValue(',')
+    await w.find('[data-test="purchases-form-save"]').trigger('click')
+    await vi.waitFor(() => expect(store.purchases).toHaveLength(2), { timeout: 10000 })
+    expect(store.purchases.find((l) => l.quantity === 3).unitPrice).toBe('')
   })
 
   // Correctif final (revue de branche) : un écart NÉGATIF (l'historique dépasse déjà le

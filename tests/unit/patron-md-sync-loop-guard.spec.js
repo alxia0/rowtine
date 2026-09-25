@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Intégration — preuve BOUT EN BOUT de l'anti-régénération
 // (Trap 2, cf. contraintes globales). `syncPatronMd` (N2) écrit en DB
 // (transaction projects/patterns + refresh de stores) quand elle fusionne un

@@ -47,8 +47,7 @@ describe('photos de démonstration', () => {
     it(`${name} : data URL WebP affichable dans une <img>`, () => {
       // La FORME compte autant que le contenu : ces chaînes partent dans `photos[0]` de la
       // fiche patron, donc dans les sauvegardes et l'export .zip. Un chemin de fichier y
-      // survivrait à l'écriture et deviendrait une image cassée à la restauration sur un
-      // autre appareil — c'est arrivé trois fois sur ce projet.
+      // deviendrait une image cassée à la restauration sur un autre appareil.
       expect(src.startsWith('data:image/webp;base64,')).toBe(true)
       // Une data-URL tronquée commence bien mais n'affiche rien : on exige un corps réel.
       expect(src.length).toBeGreaterThan(10_000)
@@ -56,16 +55,10 @@ describe('photos de démonstration', () => {
   }
 
   it('tout ce que le module généré embarque pèse ensemble moins de 320 Ko', () => {
-    // GARDE DE L'APK. Les photos des vrais patrons ont été retirées le 30/07 parce
-    // qu'elles pesaient 989 Ko ; celles-ci en pèsent 275 (mesuré, base64 compris). Le
-    // plafond laisse ~16 % de marge et interdit qu'on y revienne sans s'en apercevoir :
-    // ces octets sont dans l'APK de chaque utilisatrice, qu'elle ouvre les exemples ou non.
-    //
-    // La garde pèse TOUS LES EXPORTS de @/generated/demo-photos, et non la somme des trois
-    // DEMO_SKETCH_* de demo-visuals.js (revue finale du 12/08) : ceux-ci ne sont que des
-    // ré-exports. Une quatrième photo ajoutée au module généré et consommée directement
-    // échappait au plafond — la garde bornait les ré-exports, pas ce qui part vraiment
-    // dans l'APK. Elle est désormais solidaire du fichier réellement embarqué.
+    // GARDE DE L'APK : ces octets sont dans l'APK de chaque utilisatrice, qu'elle ouvre les
+    // exemples ou non (275 Ko mesurés, base64 compris ; plafond avec ~16 % de marge). On pèse
+    // TOUS LES EXPORTS de @/generated/demo-photos, pas les seuls ré-exports DEMO_SKETCH_* :
+    // une photo ajoutée au module généré et consommée directement échapperait au plafond.
     const embarque = Object.values(demoPhotos).filter((v) => typeof v === 'string')
     // Un module devenu vide (ou dont les exports auraient changé de forme) rendrait la
     // somme nulle et la garde vacuously verte : on exige d'abord qu'il y ait quelque chose

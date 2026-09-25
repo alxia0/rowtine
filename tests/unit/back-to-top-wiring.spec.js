@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Bouton « retour en haut » (BackToTop.vue) posé sur les écrans longs de l'app (revue
 // du 02/08 : ajout de l'écran Licences, jusque-là seul écran long du projet à en
 // être dépourvu — 211 blocs dépliables, 484 Ko de texte dans le DOM).
@@ -233,15 +234,14 @@ describe('BackToTop — lecteur : même câblage document, collision d’appui r
 // `.rpane` (le volet diagramme, z-index 35) est lui aussi calé, à un z-index de bouton
 // (40) supérieur : sans correctif, le bouton flotterait AU-DESSUS du diagramme.
 // `vitest.config.js` a `css: false` (styles non injectés dans jsdom) : un test à base de
-// `getComputedStyle` serait aveugle ici (cf. reader-text-editor-sticky.spec.js pour le
-// même constat). On lit donc le SOURCE brut du composant, comme ce fichier de tests.
+// `getComputedStyle` serait aveugle ici. On lit donc le SOURCE brut du composant, comme ce fichier de tests.
 // Le rendu visuel réel (bouton bien décalé, pas de chevauchement à l'écran) reste un gate
 // DEVICE — non couvert ici.
 describe('BackToTop — aperçu bibliothèque en deux volets : le bouton flottant ne passe plus sous le diagramme', () => {
   const readerSrc = readFileSync(resolve(process.cwd(), 'src/views/ReaderView.vue'), 'utf8')
 
-  // Échappe TOUS les métacaractères regex du sélecteur (le `[.[\]]` d'un précédent copié
-  // dans reader-text-editor-sticky.spec.js ne suffirait pas ici : `:deep(.btt)` contient
+  // Échappe TOUS les métacaractères regex du sélecteur (un simple `[.[\]]` ne suffirait
+  // pas ici : `:deep(.btt)` contient
   // des parenthèses, qui seraient interprétées comme un groupe de capture plutôt que du
   // texte littéral, et la règle ne serait alors jamais trouvée).
   function escapeRegExp(s) {

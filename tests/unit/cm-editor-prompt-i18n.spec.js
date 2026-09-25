@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Passage multilingue (29/07) — le mini-dialogue de saisie numérique
 // (openNumberPrompt, cm-editor.js) codait en dur en français ses 3 messages
 // (cadence X, cadence N, répétition N) et son bouton Annuler. Ils passent

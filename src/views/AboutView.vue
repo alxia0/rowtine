@@ -82,7 +82,7 @@ function note(text) {
            donc plus rendre de valeur vide — un `v-if` sur une fonction qui rend toujours une
            adresse ne protège plus rien (même constat que la rangée du guide en ligne de
            GuideView.vue, jamais gardée par `v-if` pour la même raison).
-           tests/unit/app-links-todo.spec.js gardait un rappel actif tant que l'une des deux
+           tests/unit/app-links.spec.js gardait un rappel actif tant que l'une des deux
            valeurs manquait (`it.fails`, rapporté comme réussi tant que la valeur restait
            vide) ; les deux sont désormais de vraies vérifications de format. -->
       <!-- « Nous contacter » RESTE le client mail (décision produit, après un aller-retour).

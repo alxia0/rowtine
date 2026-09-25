@@ -3,6 +3,8 @@
 // (dézip en mémoire, quasi instantané). La vue possède l'horloge et appelle
 // ces fonctions ; ici, que des maths.
 
+import { clamp } from '@/utils/badge-calendar'
+
 // Bandes de phase [lo, hi] en % global + clé i18n du libellé.
 export const LOCAL_PHASES = [
   { key: 'extract', lo: 0, hi: 40, labelKey: 'import.phase.extract' },
@@ -22,10 +24,6 @@ export const ZIP_PHASES = [
 
 export function phaseByKey(phases, key) {
   return phases.find((p) => p.key === key) || null
-}
-
-function clamp(v, min, max) {
-  return Math.min(max, Math.max(min, v))
 }
 
 // Progression asymptotique dans une bande : approche `hi` sans jamais l'atteindre

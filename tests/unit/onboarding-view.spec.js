@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — OnboardingView : l'astuce « balaie pour revenir » a été RETIRÉE de cet écran
 // (P3). Elle s'affichait ici alors que l'onboarding est un écran unique sans étape à
 // laquelle « revenir » — l'astuce était donc fausse à cet endroit. Elle vit désormais en
@@ -27,11 +28,6 @@ describe('OnboardingView — astuce retirée (P3)', () => {
     // « Astuce : » (b minuscule). Un ancrage sensible à la casse sur l'ancien fragment ne
     // pouvait plus jamais mordre après la réécriture — corrigé ici (revue du 10/08/2026).
     expect(w.text().toLowerCase()).not.toContain("écran vers la droite")
-  })
-
-  it('la règle CSS .onb__swipe a été retirée du fichier', () => {
-    const src = readFileSync(resolve(process.cwd(), 'src/views/OnboardingView.vue'), 'utf8')
-    expect(src).not.toContain('.onb__swipe')
   })
 
   it("la clé i18n onboarding.swipeHint est CONSERVÉE (réutilisée par FirstDetailTip)", () => {

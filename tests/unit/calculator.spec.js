@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Front (composant) — la répartition d'augmentations/diminutions du calculateur.
 // On teste l'algorithme à travers l'UI réelle (montage + i18n), pas une copie.
 import { describe, it, expect, afterEach } from 'vitest'
@@ -5,6 +6,9 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import CalculatorView from '@/views/CalculatorView.vue'
 import i18n from '@/i18n'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 function mountCalc() {
   return mount(CalculatorView, {
@@ -24,7 +28,7 @@ async function fill(wrapper, current, target, rows) {
 describe('CalculatorView — répartition', () => {
   it('invite à remplir tant que les champs sont vides', () => {
     const w = mountCalc()
-    expect(w.text()).toContain('Remplis les champs')
+    expect(w.text()).toContain(tk('calc.fillIn'))
   })
 
   it('répartit régulièrement quand ça tombe juste (60→80 sur 40 rangs)', async () => {
@@ -64,14 +68,14 @@ describe('CalculatorView — répartition', () => {
 
   it('bascule sur Diminutions (80→60) via le sélecteur', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     await fill(w, 80, 60, 40)
     expect(w.text()).toContain('Répartis 20 diminutions')
   })
 
   it('bascule En rond → répartition en tours (60→80 sur 40 tours)', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'En rond').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.round')).trigger('click')
     await fill(w, 60, 80, 40)
     expect(w.text()).toContain('tous les 2 tours × 20')
   })
@@ -194,7 +198,7 @@ describe('CalculatorView — mailles à chaque fois', () => {
   // se sont réellement manifestés — pas seulement dans la fonction pure.
   it('ne plante pas quand perTime ≥ mailles actuelles en diminutions (5 → 3, 5 mailles à chaque fois)', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     await fill(w, 5, 3, 40)
     await w.find('#calc-per-time').setValue('5')
     const txt = w.text()
@@ -205,7 +209,7 @@ describe('CalculatorView — mailles à chaque fois', () => {
 
   it('même repli côté « nombre de rangs », avec le nombre de rangs à 0 et non « null » (5 → 3, 5 mailles à chaque fois)', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     await fillLength(w, 5, 3, 2)
     await w.find('#calc-per-time').setValue('5')
     const txt = w.text()
@@ -252,7 +256,7 @@ describe('CalculatorView — mailles à chaque fois', () => {
   // traite ce cas explicitement (seul n === 1 est singulier).
   it('le repli « 0 fois » reste au pluriel anglais (pas de « 0 time » au singulier)', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     await fill(w, 5, 3, 40)
     await w.find('#calc-per-time').setValue('5')
     i18n.global.locale.value = 'en'
@@ -266,7 +270,7 @@ describe('CalculatorView — mailles à chaque fois', () => {
 
 // Bascule sur le sens « nombre de rangs » et renseigne la cadence.
 async function fillLength(wrapper, current, target, cadence) {
-  await wrapper.findAll('.toggle__opt').find((b) => b.text() === 'Nombre de rangs').trigger('click')
+  await wrapper.findAll('.toggle__opt').find((b) => b.text() === tk('calc.solveLength')).trigger('click')
   await wrapper.find('#calc-current').setValue(String(current))
   await wrapper.find('#calc-target').setValue(String(target))
   await wrapper.find('#calc-cadence').setValue(String(cadence))
@@ -303,7 +307,7 @@ describe('CalculatorView — sens « combien de rangs »', () => {
 
   it('en diminutions, la phrase suit le mode', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     await fillLength(w, 80, 60, 2)
     const txt = w.text()
     expect(txt).toContain('20 diminutions en tout')
@@ -323,7 +327,7 @@ describe('CalculatorView — sens « combien de rangs »', () => {
 
   it('invite à remplir tant que la cadence manque', async () => {
     const w = mountCalc()
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Nombre de rangs').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.solveLength')).trigger('click')
     await w.find('#calc-current').setValue('60')
     await w.find('#calc-target').setValue('80')
     // « Remplis les champs » seul est le préfixe commun à calc.fillIn et
@@ -336,7 +340,7 @@ describe('CalculatorView — sens « combien de rangs »', () => {
     const w = mountCalc()
     expect(w.find('#calc-rows').exists()).toBe(true)
     expect(w.find('#calc-cadence').exists()).toBe(false)
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Nombre de rangs').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.solveLength')).trigger('click')
     expect(w.find('#calc-rows').exists()).toBe(false)
     expect(w.find('#calc-cadence').exists()).toBe(true)
   })
@@ -379,7 +383,7 @@ describe('CalculatorView — accord au singulier (lot du 03/08)', () => {
   it('en rond, la même cadence dit « à chaque tour », jamais « rang » (60 → 61, tous les 1 tour)', async () => {
     const w = mountCalc()
     await fillLength(w, 60, 61, 1)
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'En rond').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.round')).trigger('click')
     const txt = w.text()
     expect(txt).toContain('Il te faut 1 tour')
     expect(txt).toContain('à chaque tour')
@@ -567,7 +571,7 @@ describe('CalculatorView — le champ « à chaque fois » suit augmentations/di
 
   it('après bascule sur Diminutions, le libellé parle de diminutions', async () => {
     const w = mount(CalculatorView, { global: { plugins: [i18n], stubs: { AppHeader: true } } })
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
     expect(w.text()).toContain('Diminutions à chaque fois')
   })
 
@@ -575,7 +579,7 @@ describe('CalculatorView — le champ « à chaque fois » suit augmentations/di
     const w = mount(CalculatorView, { global: { plugins: [i18n], stubs: { AppHeader: true } } })
     // Sens « Nombre de rangs » : c'est celui où le champ cadence (#calc-cadence)
     // existe, comme dans `fillLength`/`texteEnRond` plus haut.
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Nombre de rangs').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.solveLength')).trigger('click')
     expect(w.find('#calc-cadence').exists()).toBe(true)
     // Le champ cadence est le dernier FieldHelp du gabarit dans ce sens
     // (current, target, per-time, cadence) : son bouton ⓘ est donc le dernier
@@ -583,7 +587,7 @@ describe('CalculatorView — le champ « à chaque fois » suit augmentations/di
     const boutonsAide = w.findAll('.fh__btn')
     await boutonsAide[boutonsAide.length - 1].trigger('click') // déplie l'aide de la cadence
     expect(w.text()).toContain('8 augmentations tous les 2 rangs') // à plat, forme par défaut
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'En rond').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.round')).trigger('click')
     expect(w.text()).toContain('tous les 2 tours')
   })
 
@@ -593,8 +597,8 @@ describe('CalculatorView — le champ « à chaque fois » suit augmentations/di
   // Diminutions : l'exemple doit parler de diminutions, jamais d'augmentations.
   it('en mode Diminutions, l’aide de la cadence donne l’exemple de diminutions', async () => {
     const w = mount(CalculatorView, { global: { plugins: [i18n], stubs: { AppHeader: true } } })
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Diminutions').trigger('click')
-    await w.findAll('.toggle__opt').find((b) => b.text() === 'Nombre de rangs').trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.dec')).trigger('click')
+    await w.findAll('.toggle__opt').find((b) => b.text() === tk('calc.solveLength')).trigger('click')
     expect(w.find('#calc-cadence').exists()).toBe(true)
     const boutonsAide = w.findAll('.fh__btn')
     await boutonsAide[boutonsAide.length - 1].trigger('click') // déplie l'aide de la cadence

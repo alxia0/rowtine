@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/pattern-price-fields.spec.js
 // Saisie du prix d'un patron (07/08), partagée par la fiche patron et le formulaire projet.
 // Le composant ne connaît NI la base NI les magasins : il présente et remonte, rien d'autre.
@@ -7,11 +8,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const monter = (props = {}) =>
   mount(PatternPriceFields, {
     props: { modelValue: { price: '', purchasedAt: '' }, ...props },
@@ -64,6 +65,16 @@ describe('PatternPriceFields', () => {
     const w = monter({ modelValue: { price: '8,50', purchasedAt: '' } })
     await w.find('[data-test="pattern-price"]').setValue('')
     expect(w.emitted('update:modelValue').at(-1)[0].purchasedAt).toBe('')
+  })
+
+  // Protège : un séparateur seul (« , ») ne quitte jamais le champ comme prix (il s'afficherait « Gratuit »).
+  it('6b. un séparateur décimal seul est vidé en quittant le champ', async () => {
+    const w = monter()
+    const champ = w.find('[data-test="pattern-price"]')
+    await champ.setValue(',')
+    await champ.trigger('change')
+    expect(w.emitted('update:modelValue').at(-1)[0].price).toBe('')
+    expect(champ.element.value).toBe('')
   })
 
   it('7. hiddenReason « builtin » : aucun champ, une explication à la place', () => {
@@ -144,8 +155,11 @@ describe('PatternForm — le prix ressort dans la charge utile', () => {
     await w.find('#pat-name').setValue('Sabai (relu)')
     await w.find('.btn--primary').trigger('click')
     const payload = w.emitted('submit').at(-1)[0]
-    expect(payload.price).toBe('8,50')
-    expect(payload.priceCurrency).toBe('CHF')
+    // Ni prix ni devise dans la charge utile : inchangés, la fusion de `patternsStore.update`
+    // garde ceux de la base (CHF), jamais la devise des réglages.
+    expect(payload.name).toBe('Sabai (relu)')
+    expect('price' in payload).toBe(false)
+    expect('priceCurrency' in payload).toBe(false)
   })
 
   it('14. effacer le prix d’un patron déjà acheté vide aussi sa devise', async () => {

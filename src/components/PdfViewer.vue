@@ -36,11 +36,23 @@ const img = ref('')
 const loading = ref(true)
 let file = null
 
+// `renderSeq` : seul le DERNIER rendu demandé écrit `img`. `go()` ne l'attend pas, deux
+// « Suivant » rapides lançaient deux rendus dont le plus lent gagnait, et « Utiliser cette
+// page » pouvait partir avec l'image d'une autre page que celle du compteur. Rendu en échec :
+// plus d'image (elle ne correspondrait pas au compteur) et plus de « Chargement » figé.
+let renderSeq = 0
 async function render() {
   if (!file) return
+  const seq = ++renderSeq
   loading.value = true
-  img.value = await renderPdfPageToDataUrl(file, page.value, 1400)
-  loading.value = false
+  try {
+    const url = await renderPdfPageToDataUrl(file, page.value, 1400)
+    if (seq === renderSeq) img.value = url
+  } catch {
+    if (seq === renderSeq) img.value = ''
+  } finally {
+    if (seq === renderSeq) loading.value = false
+  }
 }
 
 function go(delta) {
@@ -51,7 +63,7 @@ function go(delta) {
 }
 
 function pick() {
-  if (img.value) emit('pick', img.value)
+  if (img.value && !loading.value) emit('pick', img.value)
 }
 
 async function load() {
@@ -80,7 +92,7 @@ watch(() => props.pdf, load)
         {{ t('pdfViewer.next') }} <AppIcon name="chevronRight" :size="18" />
       </button>
     </div>
-    <button v-if="pickable" type="button" class="btn btn--primary pdfv__pick" data-test="pick" :disabled="!img" @click="pick">
+    <button v-if="pickable" type="button" class="btn btn--primary pdfv__pick" data-test="pick" :disabled="!img || loading" @click="pick">
       {{ t('patternExtras.pdfPickerUse') }}
     </button>
   </div>

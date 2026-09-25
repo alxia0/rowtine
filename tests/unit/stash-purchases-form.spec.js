@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — YarnEditView : le formulaire de laine écrit et propose des lignes d'achat
 // (les travaux sur le budget laine, 01/08). Base réelle (Dexie) + Pinia réel : ces comportements
 // traversent DEUX stores (yarns, purchases) et le point clé — l'id de la fiche qui vient de
@@ -12,16 +13,14 @@ import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { ymdLocal } from '@/utils/time-periods'
 import YarnEditView from '@/views/YarnEditView.vue'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { YarnWeightHelp: true, ColorPickerDialog: true }
 
 function todayISO() {
@@ -40,15 +39,12 @@ async function seedDb({ yarns = [], purchases = [] } = {}) {
 }
 
 function makeRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/stash', name: 'stash', component: { template: '<div />' } },
-      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
-      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-      { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
-    ],
-  })
+  return createTestRouter([
+    { path: '/stash', name: 'stash', component: { template: '<div />' } },
+    { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+    { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+    { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
+  ])
 }
 
 // Monte YarnEditView à la route voulue (création, édition d'une fiche existante, ou

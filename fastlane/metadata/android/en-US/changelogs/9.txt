@@ -1,0 +1,1 @@
+Import your yarn stash from a Ravelry export (.xlsx): status, colour, purchases, notes, storage location, and "bought at" on each purchase. Various display fixes.

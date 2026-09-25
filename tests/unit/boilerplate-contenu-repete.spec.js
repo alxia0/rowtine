@@ -316,3 +316,50 @@ describe('stripBoilerplate — « teil » : partage (de) vs « Teil(e) » = piè
     expect(textes(stripBoilerplate(pages))).toHaveLength(0)
   })
 })
+
+// Un verbe de partage en tête de ligne ne suffit pas : « Partager les mailles… » est une consigne.
+describe('stripBoilerplate — partage (fr/en/nl/sv) vs consigne de répartition', () => {
+  it('garde les consignes de répartition qui commencent par le verbe', () => {
+    const consignes = [
+      "Partager le travail en deux pour l'encolure.",
+      'Partager les mailles sur 2 aiguilles.',
+      'Share the stitches evenly over 4 needles.',
+      'Deel de steken over 2 naalden.',
+      'Dela maskorna på 2 stickor.',
+    ]
+    const pages = [consignes.map((text, i) => ({ text, y: 700 - i * 20 }))]
+    expect(textes(stripBoilerplate(pages))).toEqual(consignes)
+  })
+
+  it('filtre toujours les appels au partage', () => {
+    const appels = [
+      'Partage ta création avec #rowtine',
+      'Partagez vos photos sur Instagram',
+      'Share your finished project with us!',
+      'Deel je werk met ons',
+      'Comparte tu labor con nosotros',
+      'Condividi il tuo lavoro',
+    ]
+    const pages = [appels.map((text, i) => ({ text, y: 700 - i * 20 }))]
+    expect(textes(stripBoilerplate(pages))).toHaveLength(0)
+  })
+})
+
+// « Side N » seul est aussi un intertitre anglais (face d'un coussin) : seul « Side N af/av M » est un folio sûr.
+describe('stripBoilerplate — « Side N » : folio (da/no) vs intertitre (en)', () => {
+  it('garde les intertitres « Side 1 » / « Side 2 » au milieu de la page', () => {
+    const pages = [[
+      { text: 'Side 1', y: 600 },
+      { text: 'Round 1: 6 sc in a magic ring.', y: 580 },
+      { text: 'Side 2', y: 400 },
+      { text: 'Round 1: 6 sc in a magic ring.', y: 380 },
+    ]]
+    expect(textes(stripBoilerplate(pages))).toContain('Side 1')
+    expect(textes(stripBoilerplate(pages))).toContain('Side 2')
+  })
+
+  it('filtre toujours le folio « Side 2 af 5 »', () => {
+    const pages = [[{ text: 'Side 2 af 5', y: 10 }]]
+    expect(textes(stripBoilerplate(pages))).toHaveLength(0)
+  })
+})

@@ -92,6 +92,13 @@ export const COLOR_PALETTE = [
   'vert', 'sauge', 'kaki', 'emeraude', 'turquoise', 'bleu', 'marine', 'ciel', 'lavande', 'violet', 'prune', 'mauve',
 ].map((key) => ({ key, hsl: hsl(NAMED[key]) }))
 
+// Nom de couleur auto-rempli quand on choisit une pastille (« rouge » → « Rouge »). Partagé
+// par YarnEditView.vue et l'import Ravelry : une fiche importée se comporte alors comme si la
+// pastille avait été touchée à la main (re-toucher la pastille efface bien ce nom).
+export function paletteColorLabel(key) {
+  return key.charAt(0).toUpperCase() + key.slice(1)
+}
+
 // [h,s,l] numériques extraits d'une chaîne « hsl(h s% l%) ». null si la forme ne correspond pas.
 // Regex partagée par tonesFromColor, hslToHex et hslStringToHsv : les trois lisent le même format.
 function parseHsl(str) {

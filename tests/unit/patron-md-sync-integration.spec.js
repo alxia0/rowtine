@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Intégration : preuve BOUT EN BOUT du scénario
 // « éditer le patron.md sur PC → relancer l'app ». Contrairement à
 // `patron-md-sync.spec.js` (DB/stores FAKES, fixtures construites à la main),

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — util copie presse-papiers (05/09/2026). Contrat : un
 // booléen, JAMAIS d'exception ; voie primaire `navigator.clipboard.writeText`
 // (contexte sécurisé Capacitor + clic = user activation), repli historique

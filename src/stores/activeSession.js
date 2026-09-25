@@ -167,27 +167,21 @@ export const useActiveSessionStore = defineStore('activeSession', () => {
     let targetId
     await db.transaction('rw', [db.sessions, db.settings], async () => {
       targetId = mergeIntoId.value
-      if (targetId != null) {
-        const target = await db.sessions.get(targetId)
-        if (target) {
-          // UPDATE PARTIEL, volontairement réduit à durationSec et lastWriteAt. La cible a
-          // pu être éditée inline depuis sa naissance (rangs corrigés…) : un put complet
-          // écraserait ces champs ; `date` est l'acte de naissance de la ligne — le mentir
-          // déplacerait le tricot sur un autre jour ; `sectionId` dit où il a eu lieu.
-          await db.sessions.update(targetId, {
-            durationSec: (target.durationSec || 0) + chunk,
-            lastWriteAt: nowIso,
-          })
-        } else {
-          // Cible disparue de la base (ligne supprimée à la main pendant l'épisode) :
-          // l'épisode poursuit dans une ligne neuve plutôt que de crasher — l'update sur
-          // un id absent est un no-op silencieux chez Dexie, il faut le détecter ou le
-          // temps s'évapore sans erreur.
-          targetId = await db.sessions.add({
-            projectId: pid, sectionId: sid, date: nowIso, lastWriteAt: nowIso,
-            durationSec: chunk,
-          })
-        }
+      // `target` : la ligne à mettre à jour, ou `null` si aucune cible n'était posée OU si
+      // la cible a disparu de la base (ligne supprimée à la main pendant l'épisode) — les
+      // deux cas convergent sur la même écriture ci-dessous : ouvrir une ligne neuve plutôt
+      // que de crasher (l'update sur un id absent est un no-op silencieux chez Dexie, il
+      // faut le détecter ou le temps s'évapore sans erreur).
+      const target = targetId != null ? await db.sessions.get(targetId) : null
+      if (target) {
+        // UPDATE PARTIEL, volontairement réduit à durationSec et lastWriteAt. La cible a
+        // pu être éditée inline depuis sa naissance (rangs corrigés…) : un put complet
+        // écraserait ces champs ; `date` est l'acte de naissance de la ligne — le mentir
+        // déplacerait le tricot sur un autre jour ; `sectionId` dit où il a eu lieu.
+        await db.sessions.update(targetId, {
+          durationSec: (target.durationSec || 0) + chunk,
+          lastWriteAt: nowIso,
+        })
       } else {
         targetId = await db.sessions.add({
           projectId: pid, sectionId: sid, date: nowIso, lastWriteAt: nowIso,

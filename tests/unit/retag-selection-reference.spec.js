@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // LE test qui manquait : le geste complet « sélectionner des lignes, cliquer une catégorie
 // Aide mémoire » doit peupler l'onglet correspondant. Avant cela, il renvoyait le
 // texte en notes dans le patron (retour terrain, 19/08/2026).

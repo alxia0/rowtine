@@ -5,6 +5,12 @@ import { db, plain } from '@/db/db'
 import { createLoadGuard } from '@/stores/load-guard'
 import { useProjectsStore } from '@/stores/projects'
 
+// Plus récent d'abord ; les lignes sans date trient en dernier (même convention que
+// `loadForProject` et `recentSessions`, qui partagent ce tri).
+function byDateDesc(a, b) {
+  return (b.date || '').localeCompare(a.date || '')
+}
+
 export const useSessionsStore = defineStore('sessions', () => {
   const sessions = ref([])
   const projectId = ref(null)
@@ -18,7 +24,7 @@ export const useSessionsStore = defineStore('sessions', () => {
     return loadGuard.run(async (isCurrent) => {
       const rows = await db.sessions.where('projectId').equals(Number(pid)).toArray()
       if (!isCurrent()) return
-      sessions.value = rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+      sessions.value = rows.sort(byDateDesc)
     })
   }
   async function reload() {
@@ -77,7 +83,7 @@ export const useSessionsStore = defineStore('sessions', () => {
     if (!projectsStore.loaded) await projectsStore.load()
     const names = new Map(projectsStore.projects.map((p) => [p.id, p.name]))
     const rows = await db.sessions.toArray()
-    rows.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    rows.sort(byDateDesc)
     const capped = Number.isFinite(limit) ? rows.slice(0, Math.max(0, limit)) : rows
     return capped.map((s) => ({ ...s, projectName: names.get(s.projectId) ?? '' }))
   }

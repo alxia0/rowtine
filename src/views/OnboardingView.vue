@@ -10,7 +10,7 @@ import { defaultsForLocale } from '@/utils/locale-defaults'
 import { LANGUAGES } from '@/constants/languages'
 import { CURRENCIES } from '@/constants/currencies'
 import { currencySymbol } from '@/utils/units'
-import { getSetting } from '@/db/db'
+import { getSetting, setSetting } from '@/db/db'
 import { detectDeviceLocale } from '@/utils/app-locale'
 import { recordSeededSamples } from '@/utils/seeded-samples'
 
@@ -180,6 +180,14 @@ async function seedExamples() {
       content.projects,
       ideaDemo,
     )
+
+    // Identité du projet sur lequel lancer la visite guidée du lecteur (lot du
+    // 23/09/2026) : le projet « en cours » qu'on vient de semer, celui lié au bonnet.
+    // `ensureTourProject`
+    // (src/utils/tour-sample.js) sait le retrouver — ou le recréer — même sans cette
+    // écriture (installations antérieures à cette fonctionnalité), mais l'enregistrer dès
+    // le semis évite un aller-retour Dexie superflu au premier lancement de la visite.
+    if (seededProjects?.wipId != null) await setSetting('tourProjectId', seededProjects.wipId)
 
     // Le patron libre reste créé ici (il sert de repli à toute création de projet sans
     // patron, cf. ProjectEditView), mais les DEUX projets semés portent désormais leur

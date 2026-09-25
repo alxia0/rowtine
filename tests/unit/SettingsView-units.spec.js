@@ -1,23 +1,19 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db, getSetting } from '@/db/db'
 import SettingsView from '@/views/SettingsView.vue'
 import { useSettingsStore } from '@/stores/settings'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 async function mountSettings(yarns = []) {
   await db.settings.clear()
   await db.yarns.clear()
   for (const y of yarns) await db.yarns.add(y)
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'settings', component: SettingsView }],
-  })
+  const router = createTestRouter([{ path: '/', name: 'settings', component: SettingsView }])
   router.push('/')
   await router.isReady()
   const pinia = createPinia()

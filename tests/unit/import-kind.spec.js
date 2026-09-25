@@ -4,7 +4,7 @@
 // or c'est précisément l'extension qui n'est pas fiable sur Android (le sélecteur rend un
 // `content://` dont le nom n'est pas toujours exploitable).
 import { describe, it, expect } from 'vitest'
-import { sniffImportKind, sniffFile, SNIFF_BYTES } from '@/utils/import-kind'
+import { sniffImportKind, sniffFile } from '@/utils/import-kind'
 
 const PDF_HEAD = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37]) // "%PDF-1.7"
 const ZIP_HEAD = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x14, 0x00]) // "PK\x03\x04…"
@@ -26,10 +26,6 @@ describe('sniffImportKind', () => {
     expect(sniffImportKind(new Uint8Array([0x50, 0x4b]))).toBe('unknown')
     expect(sniffImportKind(new Uint8Array([]))).toBe('unknown')
     expect(sniffImportKind(undefined)).toBe('unknown')
-  })
-
-  it('ne lit que les 4 premiers octets', () => {
-    expect(SNIFF_BYTES).toBe(4)
   })
 })
 

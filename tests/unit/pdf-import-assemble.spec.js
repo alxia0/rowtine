@@ -500,6 +500,15 @@ describe('buildReaderFromPages — auteur capté depuis un pied de page copyrigh
     expect(allText).not.toMatch(/Copyright/)
     expect(allText).not.toMatch(/Sys Fredens/)
   })
+
+  // Un auteur trouvé sur les pages brutes n'est pas écrasé par une consigne « Conception : … », qui reste au corps.
+  it('une consigne « Conception : … » ne remplace pas l’auteur du pied de page et reste dans le corps', () => {
+    const pages = PAGES_METORIT.map((p) => p.map((l) => ({ ...l })))
+    pages[1].splice(1, 0, L('Conception : tricoter le dos et le devant séparément.', { y: 500 }))
+    const { pattern, reader } = buildReaderFromPages(pages, { fileName: 'metorit.pdf' })
+    expect(pattern.author).toBe('Sys Fredens | Hobbii Design')
+    expect(JSON.stringify(reader.sections)).toContain('tricoter le dos et le devant séparément')
+  })
 })
 
 // Bug PDF réel « Knitted Crown Headband » (es, hobbii, palier 8/8) : 3e variante

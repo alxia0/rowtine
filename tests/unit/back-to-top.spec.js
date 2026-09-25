@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Bouton « retour en haut ». Le test central est le n°3 : avec une cible fournie, le
 // clic doit remonter LA CIBLE et ne pas toucher à window — le bug qu'il prévient rendrait
 // le bouton inerte sur N'IMPORTE QUEL écran auquel on donnerait un jour un volet interne
@@ -6,11 +7,11 @@
 // mais la prop `target` reste testée ici pour que le composant reste honnête si ça change.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import BackToTop from '@/components/BackToTop.vue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const mountWith = (props = {}) => mount(BackToTop, { props, global: { plugins: [i18n] } })
 
 // Faux conteneur défilant : un objet qui se comporte comme un élément pour ce dont le

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — ConfirmDialog : dialogue de confirmation générique (titre + message + 1 ou 2
 // boutons). Étendu au P3 pour servir aussi de pop-up « à un seul bouton » (astuce
 // d'accueil) : cancelLabel devient optionnel — s'il est omis, un seul bouton (confirmLabel)
@@ -269,5 +270,25 @@ describe('ConfirmDialog — piège à focus + restitution au déclencheur (dette
     } finally {
       trigger.remove()
     }
+  })
+})
+
+// Protège : pendant le fondu de fermeture, la carte encore visible n'émet plus rien (double-tap).
+describe('ConfirmDialog : rien n’est émis une fois fermé', () => {
+  it('un appui sur un bouton pendant le fondu de fermeture n’émet pas une seconde fois', async () => {
+    wrapper = mount(ConfirmDialog, {
+      props: { open: true, title: 'T', message: 'M', confirmLabel: 'OK', cancelLabel: 'Annuler' },
+      attachTo: document.body,
+      global: { stubs: { transition: false } },
+    })
+    await wrapper.find('[data-test="confirm-ok"]').trigger('click')
+    await wrapper.setProps({ open: false })
+    const ok = document.querySelector('[data-test="confirm-ok"]')
+    const cancel = document.querySelector('[data-test="confirm-cancel"]')
+    expect(ok).not.toBeNull()
+    ok.click()
+    cancel.click()
+    expect(wrapper.emitted('confirm')).toHaveLength(1)
+    expect(wrapper.emitted('cancel')).toBeUndefined()
   })
 })

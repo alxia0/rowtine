@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran Licences tierces. Exigence légale (MIT/Apache/BSD
 // exigent la reproduction de leur mention) : le contenu vient du fichier GÉNÉRÉ
 // (src/generated/third-party-licenses.json, cf. scripts/gen-third-party-licenses.mjs), pas

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — la décision de sauvegarder sur CE dossier (avenant du 04/08/2026).
 // Le réveil de la
 // sauvegarde automatique devient une décision explicite, plus une conséquence

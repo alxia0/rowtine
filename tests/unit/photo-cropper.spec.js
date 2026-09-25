@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LE RECADEUR IN-APP (PhotoCropper.vue). Cible le durcissement du 04/09/2026 :
 // confirm() peint un fond blanc AVANT drawImage, même règle que resizeDataUrl
 // (image-resize.js) et cropCanvas (pdf.js). Ce remplissage protège tout chemin où une
@@ -9,12 +10,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import PhotoCropper from '@/components/PhotoCropper.vue'
 import { useCropperStore } from '@/stores/cropper'
+import { createTestI18n, makeTk } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
+
+const tk = makeTk(i18n)
 
 // Même technique que image-resize.spec.js : createElement espionné qui ne remplace QUE
 // le canvas — le rendu Vue doit continuer à créer ses vrais éléments DOM.
@@ -69,7 +71,7 @@ describe('PhotoCropper.confirm() — fond blanc avant recadrage', () => {
     // Scène 1080×2100, image carrée → affichée 1080×1080 ; cadre par défaut à 80 %
     // → 864 px affichés, ×(1280/1080) en pixels source = 1024 — la géométrie mesurée
     // sur l'appareil le 04/09.
-    await wrapper.findAll('button').filter((b) => b.text() === 'Recadrer').at(0).trigger('click')
+    await wrapper.findAll('button').filter((b) => b.text() === tk('photo.crop')).at(0).trigger('click')
     await expect(settled).resolves.toBe('data:image/jpeg;base64,ZZ')
 
     expect(fake.width).toBe(1024)
@@ -91,7 +93,7 @@ describe('PhotoCropper.confirm() — fond blanc avant recadrage', () => {
 
     const settled = cropper.crop('data:image/png;base64,AA==')
     await flushPromises()
-    await wrapper.findAll('button').filter((b) => b.text() === 'Annuler').at(0).trigger('click')
+    await wrapper.findAll('button').filter((b) => b.text() === tk('common.cancel')).at(0).trigger('click')
     await expect(settled).resolves.toBeNull()
     expect(calls).toEqual([])
   })
@@ -126,7 +128,7 @@ describe('PhotoCropper — ratio imposé (badge)', () => {
     expect(frame.style.left).toBe('0px')
     expect(frame.style.top).toBe('645px')
 
-    await wrapper.findAll('button').filter((b) => b.text() === 'Recadrer').at(0).trigger('click')
+    await wrapper.findAll('button').filter((b) => b.text() === tk('photo.crop')).at(0).trigger('click')
     await expect(settled).resolves.toBe('data:image/jpeg;base64,ZZ')
     // Sortie au ratio 4:3 (1280×960), preuve que le ratio a survécu jusqu'au canvas final.
     expect(calls).toContainEqual(['toDataURL', 'image/jpeg', 0.85])
@@ -174,5 +176,44 @@ describe('PhotoCropper — image non décodable (@error)', () => {
 
     await expect(settled).resolves.toBeNull()
     expect(cropper.open).toBe(false)
+  })
+})
+
+// Protège : tourner l'appareil pendant un recadrage garde le cadre sur la même zone de l'image.
+describe('PhotoCropper : rotation pendant le recadrage', () => {
+  it('au redimensionnement, le cadre suit l’image et la découpe reste celle choisie', async () => {
+    const { fake, calls } = stubCanvas()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const cropper = useCropperStore()
+    const wrapper = mount(PhotoCropper, { global: { plugins: [i18n, pinia] } })
+    const settled = cropper.crop('data:image/png;base64,AA==')
+    await flushPromises()
+    const img = wrapper.find('img.cr__img').element
+    Object.defineProperty(img, 'naturalWidth', { value: 1280, configurable: true })
+    Object.defineProperty(img, 'naturalHeight', { value: 1280, configurable: true })
+    const stage = wrapper.find('.cr__stage').element
+    Object.defineProperty(stage, 'clientWidth', { value: 1080, configurable: true })
+    Object.defineProperty(stage, 'clientHeight', { value: 2100, configurable: true })
+    await wrapper.find('img.cr__img').trigger('load')
+    await flushPromises()
+
+    // Portrait → paysage : l'image carrée passe de (0, 510, 1080×1080) à (510, 0, 1080×1080).
+    Object.defineProperty(stage, 'clientWidth', { value: 2100, configurable: true })
+    Object.defineProperty(stage, 'clientHeight', { value: 1080, configurable: true })
+    window.dispatchEvent(new Event('resize'))
+    await flushPromises()
+    const frame = wrapper.find('.cr__frame').element.style
+    expect(frame.left).toBe('618px') // 510 + 10 % de 1080
+    expect(frame.top).toBe('108px')
+    expect(frame.width).toBe('864px')
+
+    await wrapper.findAll('button').filter((b) => b.text() === tk('photo.crop')).at(0).trigger('click')
+    await expect(settled).resolves.toBe('data:image/jpeg;base64,ZZ')
+    expect(fake.width).toBe(1024)
+    const draw = calls.find((c) => c[0] === 'drawImage')
+    expect(Math.round(draw[2])).toBe(128) // sx : même zone source qu'avant la rotation
+    expect(Math.round(draw[3])).toBe(128)
+    wrapper.unmount()
   })
 })

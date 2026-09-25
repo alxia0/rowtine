@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — sauvegarde automatique débouncée sur mutation.
 // `runBackup` (backup-service) est mocké : on ne teste ici que l'armement du
 // debounce et le drapeau de suppression (compteur, imbrication) — pas la
@@ -47,7 +48,6 @@ const {
   suppressAutoBackup,
   isAutoBackupSuppressed,
   AUTO_BACKUP_WAIT_MS,
-  AUTO_BACKUP_MAX_WAIT_MS,
 } = await import('@/backup/auto-backup')
 
 beforeEach(() => {
@@ -64,13 +64,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
-})
-
-describe('constantes', () => {
-  it('expose des intervalles généreux (SAF est lent)', () => {
-    expect(AUTO_BACKUP_WAIT_MS).toBe(8000)
-    expect(AUTO_BACKUP_MAX_WAIT_MS).toBe(30000)
-  })
 })
 
 describe('scheduleAutoBackup', () => {

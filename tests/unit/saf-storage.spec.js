@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock-plugin : traduit les appels « plugin » (objets {path,...}) vers un
@@ -31,7 +32,7 @@ vi.mock('@/backup/saf-plugin', async () => {
   const { fileURLToPath } = await import('node:url')
   // Le plafond du mock est LU dans la source Java, pas recopié à la main : si le
   // natif change sa constante, le mock suit. Un littéral dupliqué ici dériverait
-  // sans qu'aucun test ne le dise (saf-lecture-tranches-bornee.spec.js verrouille
+  // sans qu'aucun test ne le dise (saf-ecriture-tranches-bornee.spec.js verrouille
   // le Java et CHUNK_BYTES, pas les copies éparpillées dans les tests).
   const ROOT = nodePath.resolve(nodePath.dirname(fileURLToPath(import.meta.url)), '../..')
   const JAVA = readFileSync(

@@ -1,5 +1,5 @@
-// Générateur EXÉCUTABLE (contrairement à make-vector-pdf.mjs / make-multigrid-pdf.mjs, qui ne
-// sont que la doc du script fitz joué UNE FOIS à la main) : `node tests/fixtures/make-vector-title-pdf.mjs`
+// Générateur EXÉCUTABLE (contrairement à make-vector-pdf.mjs, qui n'est que la doc du script
+// fitz joué UNE FOIS à la main ; make-multigrid-pdf.mjs l'est aussi depuis le 2026-09-24) : `node tests/fixtures/make-vector-title-pdf.mjs`
 // écrit RÉELLEMENT les deux PDF ci-dessous, en pilotant PyMuPDF (Python/fitz, dispo sur ce
 // poste) via un sous-processus — mêmes primitives de tracé que les fixtures modèles
 // (draw_line/draw_rect/insert_text), pdf-lib n'étant pas une dépendance du projet.
@@ -62,6 +62,11 @@ p.insert_text((60, 40), "Pull titre inter grilles", fontsize=14, fontname="helv"
 p.insert_text((60, 60),
               "Corps  Rang 1 endroit  Rang 2 envers  Repeter 8 fois pour former le motif",
               fontsize=10, fontname="helv")
+# Texte de patron (2026-09-24) : sans lui, le refus net « pas un patron » (craft-detect.js,
+# score 0 sur la seule ligne ci-dessus) arrete l'import avant l'assemblage. Au-dessus des
+# grilles (fitz y < 120) : aucune gouttiere ni le pont ne bougent.
+p.insert_text((60, 74), "Monter 104 m. avec des aiguilles 4 mm.", fontsize=10, fontname="helv")
+p.insert_text((60, 88), "Rang 1 : tricoter a l'endroit. Rang 2 : tricoter a l'envers.", fontsize=10, fontname="helv")
 grille(p, 90, 120, 20, 9)                 # grille du haut (fitz y 120 -> 246)
 p.insert_text((90, 268), "Diagramme dos", fontsize=10, fontname="helv")  # titre dans la bande
 grille(p, 90, 290, 20, 9)                 # grille du bas  (fitz y 290 -> 416)

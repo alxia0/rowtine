@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Plancher --sa-top de measureStickyTopHeight (retour terrain, 31/08/2026 : sur
 // l'onboarding, le champ « Prénom » passait DERRIÈRE la barre d'état quand le clavier
 // s'ouvrait — la vue n'a AUCUN bandeau collant en haut, la mesure revenait à 0 et le

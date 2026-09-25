@@ -735,10 +735,15 @@ public class RowtineSafPlugin extends Plugin {
     public void remove(PluginCall call) {
         clearDirCache();
         String path = call.getString("path");
-        if (path == null || path.isEmpty()) { call.resolve(); return; } // jamais la racine
         if (isUnsafe(path)) { call.reject("chemin invalide (..)"); return; }
+        // Jamais la racine : la garde porte sur les SEGMENTS, pas sur la chaîne. "/", "."
+        // ou "./" ne sont pas vides mais n'ont aucun segment, et locate() rendrait alors la
+        // racine effective, que delete() effacerait récursivement (le dossier choisi par
+        // l'utilisatrice lui-même quand la base est vide).
+        String[] segs = segments(path);
+        if (segs.length == 0) { call.resolve(); return; }
         DocumentFile root = treeRoot();
-        DocumentFile f = root == null ? null : locate(root, segments(path));
+        DocumentFile f = root == null ? null : locate(root, segs);
         // DocumentFile.delete est récursif ; absent → no-op (idempotent, pas d'erreur)
         if (f != null && !f.delete()) { call.reject("suppression impossible : " + path); return; }
         call.resolve();
@@ -755,6 +760,9 @@ public class RowtineSafPlugin extends Plugin {
         DocumentFile root = treeRoot();
         if (root == null) { call.reject("aucun dossier désigné"); return; }
         String[] fromSegs = segments(from), toSegs = segments(to);
+        // Même garde que remove() : "/" ou "." désigneraient la racine (source), ou
+        // feraient lire toSegs[-1] (destination).
+        if (fromSegs.length == 0 || toSegs.length == 0) { call.reject("chemin vide"); return; }
         DocumentFile src = locate(root, fromSegs);
         if (src == null) { call.reject("source introuvable : " + from); return; }
         DocumentFile toParent = resolveDir(root, toSegs, toSegs.length - 1, true);

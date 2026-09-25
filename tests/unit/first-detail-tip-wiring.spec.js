@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — CÂBLAGE de l'astuce sur les écrans où elle vit désormais (décision produit
 // du 19/08/2026, prise en cours des travaux sur « avertissement d'import et file des messages »
 // : l'astuce « n'a rien à voir avec l'étape d'import d'un patron »). Avant ce

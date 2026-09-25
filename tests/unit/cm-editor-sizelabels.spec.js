@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // La conversion du bouton « Tailles » a besoin du nombre de tailles pour emettre le bon
 // nombre de colonnes. Ce test verrouille le passage de la valeur de bout en bout, AVANT
 // que quiconque la consomme — un cablage muet se casse sans bruit.

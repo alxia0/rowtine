@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // vi.mock est hoisté en tête de fichier : les mocks référencés dans ses factories doivent

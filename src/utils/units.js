@@ -214,3 +214,15 @@ export function formatMoney(amount, { locale, currency, profile = 'total' } = {}
     symbol: currencySymbol(currency, locale),
   }
 }
+
+// Montant NU, sans symbole : pour un champ dont le libellé porte déjà la devise (prix d'une
+// pelote sur la fiche laine). Même règle de centimes que le profil 'detail' de `formatMoney` :
+// un montant rond sans décimales, sinon deux décimales (« 3,20 », jamais « 3,2 »).
+export function formatAmount(amount, { locale } = {}) {
+  const v = num(amount)
+  const digits = Number.isInteger(v) ? 0 : 2
+  return new Intl.NumberFormat(locale || 'fr', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: 2,
+  }).format(v)
+}

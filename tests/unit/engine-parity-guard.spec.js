@@ -1,20 +1,6 @@
-// Garde « moteur unique » — REMPLACE l'ancien `tools/check-engine-parity.mjs`
-// (convergence du 2026-07-08). Ce script diffait BYTE À BYTE deux copies du moteur entre
-// deux WORKTREES (`lab/md-bench` / `lab/md-editor`) ; il a été retiré à la
-// convergence mono-branche du 2026-07-12
-// car il n'y a plus de second worktree avec lequel diverger.
-//
-// Dans le monde mono-dépôt actuel, le risque de divergence n'est plus
-// "deux copies différent" mais "une copie fantôme réapparaît sous
-// l'ancien chemin de l'éditeur Markdown de dev" (le banc réimporte/recopie un fichier déjà promu dans src/,
-// au lieu d'importer depuis src/). Cette garde vérifie donc :
-//   1. chaque fichier promu (en deux vagues) existe UNIQUEMENT sous son
-//      nouveau chemin src/ ;
-//   2. aucun fichier de même nom n'existe encore sous son ancien chemin
-//      dans l'éditeur Markdown de dev (pas de copie divergente réintroduite).
-//
-// Si ce test échoue après un futur refactor, c'est probablement qu'un fichier
-// moteur a été recopié dans l'ancien chemin de l'éditeur Markdown de dev au lieu d'être importé depuis src/.
+// Garde « moteur unique » : chaque fichier moteur promu dans src/ n'existe que là, sans
+// copie fantôme réapparue sous son ancien chemin de l'éditeur Markdown de dev (tools/mdedit),
+// qui divergerait en silence au lieu d'importer depuis src/.
 import { describe, it, expect } from 'vitest'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'

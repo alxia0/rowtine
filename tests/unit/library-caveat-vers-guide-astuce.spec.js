@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — « Comment corriger » NE BRÛLE PAS l'astuce de balayage (revue du 19/08/2026,
 // critique 1).
 //
@@ -18,8 +19,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import fr from '@/i18n/fr.json'
 import { db, getSetting } from '@/db/db'
 import { useSettingsStore } from '@/stores/settings'
@@ -28,21 +27,19 @@ import { NOTICE } from '@/constants/notice-queue'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
 import LibraryView from '@/views/LibraryView.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // Coquille minimale du guide : ce test ne dit rien du contenu du guide, seulement du fait
 // qu'on y arrive et que la Bibliothèque est démontée en partant.
 const GuideStub = { name: 'GuideStub', template: '<div class="guide-stub" />' }
 
 function creerRouteur() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/library', name: 'library', component: LibraryView },
-      { path: '/guide', name: 'guide', component: GuideStub },
-    ],
-  })
+  return createTestRouter([
+    { path: '/library', name: 'library', component: LibraryView },
+    { path: '/guide', name: 'guide', component: GuideStub },
+  ])
 }
 
 const App = { template: '<RouterView />' }

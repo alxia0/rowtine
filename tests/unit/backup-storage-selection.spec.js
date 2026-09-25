@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — sélection de backend dans `getBackupStorage()` (bascule SAF seule) : SAF si un dossier est désigné, sinon
 // `null` (natif sans dossier désigné, ou web/dev — le repli MANAGE hérité a
 // été retiré, MANAGE reste présent mais inutilisé). Toutes les dépendances

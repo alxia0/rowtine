@@ -636,3 +636,12 @@ describe('segmentSections — grilles appariées (V2a-T2) : une rangée pairedRo
     )
   })
 })
+
+// Une phrase allemande coupée après « über » n'est pas un titre (même règle que « unter »).
+describe('isSpacedTitle — mot-outil allemand accentué en fin de ligne', () => {
+  it('« Den Faden über » en attente de son nom n’est pas promu titre', () => {
+    const suite = L('Maschen stricken')
+    expect(isSpacedTitle(L('Den Faden unter'), 30, 12, suite, 12, true)).toBe(false)
+    expect(isSpacedTitle(L('Den Faden über'), 30, 12, suite, 12, true)).toBe(false)
+  })
+})

@@ -54,3 +54,20 @@ export function compositionLabel(item, t) {
 export function compositionText(value, t) {
   return normalizeComposition(value).map((item) => compositionLabel(item, t)).join(', ')
 }
+
+// Répartition { matière: pourcentage } d'une composition, SIBLING de `composition`
+// (tableau de matières, inchangé) : ce champ ne remplace ni ne recoupe
+// `matchesComposition`/`compositionText`/l'export tableur, qui continuent de lire
+// UNIQUEMENT `composition`. Accepte null/undefined/tout non-objet → {} ; écarte les clés
+// vides et les valeurs non numériques finies plutôt que de les stocker telles quelles.
+export function normalizeCompositionPercents(value) {
+  if (value == null || typeof value !== 'object') return {}
+  const out = {}
+  for (const [material, percent] of Object.entries(value)) {
+    const key = String(material || '').trim()
+    const n = Number(percent)
+    if (!key || !Number.isFinite(n)) continue
+    out[key] = n
+  }
+  return out
+}

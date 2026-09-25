@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le formulaire de projet (ProjectEditView.vue) était strictement
 // plat (aucun <section>/<fieldset>/carte) : ce fichier prouve qu'il est désormais
 // regroupé en <section class="card"> titrées, que chaque champ est dans le BON bloc, et

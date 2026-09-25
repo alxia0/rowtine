@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Dette de juillet (audit UX) — plus AUCUN glyphe « + » / « − » typographique
 // dans l'UI : la règle du dépôt est « jamais de glyphe dans l'UI » (cf. tête de
 // src/utils/icons.js), et les steppers moitié glyphe moitié icône duraient depuis

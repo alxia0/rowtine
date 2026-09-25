@@ -4,19 +4,27 @@
       "id": "section-0",
       "title": [
         {
-          "text": "The spirit of {app}",
+          "text": "{app} in 4 steps",
           "bold": false,
           "italic": false
         }
       ],
       "blocks": [
         {
-          "type": "image",
-          "src": "00-bienvenue",
-          "alt": "Welcome to {app}, and under it Your knitting and crochet projects over time: English, Knitting, System, Imperial (yd, oz) and USD already picked, with Ready? Start knitting! pinned to the bottom",
-          "caption": [
+          "type": "paragraph",
+          "spans": [
             {
-              "text": "The very first launch: first name, craft, language and theme.",
+              "text": "{app} isn't a binder of PDFs. It's an interactive reader that walks you through your pattern: it shows only the numbers for your size and remembers every step you've done. You import your pattern once, then knit or crochet without ever reopening the PDF.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "1. Import your pattern",
               "bold": false,
               "italic": false
             }
@@ -26,17 +34,87 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "{app} helps you keep all your knitting and crochet projects in one place: your yarn, your patterns adjusted to your size, and your progress. It's ",
+              "text": "From the library, pick a PDF. {app} reads it for you: sections, rows, sizes, abbreviations and charts. Everything happens on your device. See chapter 4.",
               "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
             {
-              "text": "free, open-source and works offline",
-              "bold": true,
+              "text": "2. Create a project and pick your size",
+              "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
             {
-              "text": ": your data stays on your device, not on a server. Nothing is ever lost by mistake: everything you delete ends up in a trash bin.",
+              "text": "On the pattern's page, \"Create a project from this pattern\". In the reader, pick your size: every \"88 (96) 104\" adapts to show only your number.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "A pattern you've imported once can be used as many times as you like: a green cardigan in L for you, a red one in M for your sister. Each project keeps its own size, yarn and progress, and the pattern's price is only counted once. See chapter 2.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "3. Knit or crochet with the reader",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "This is where it all happens. Tick off each step as you go: your progress moves forward, and \"Back to my step\" brings you right back where you left off. The chart follows your row, and tapping an underlined term in the text shows its definition. See chapter 3.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "4. Keep track",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The timer logs your sessions, the Photos tab keeps the pattern's images and your own photos, statistics sum up your activity on the project, and a badge is shared in one tap. See chapters 2 and 7.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "To try it right away: the \"Replay the guided tour\" button, just below and in Settings, opens the sample hat in the reader with explanation bubbles.",
               "bold": false,
               "italic": false
             }
@@ -57,7 +135,7 @@
         {
           "type": "image",
           "src": "01-accueil",
-          "alt": "{app}'s home screen: \"Hello Camille!\", the Resume tile holding the Winter Beanie project at 0 %, then the dashboard (1 in progress, this week's time, the latest session dated today, the money spent) and the Counter, Calculator and Needles tools",
+          "alt": "{app}'s home screen: \"Hello Camille!\", the Resume tile on Cable Beanie knitted size M, the tiles 1 in progress and 0 h this week, the latest session on Winter Beanie today (0:06), then the Counter, Calculator and Needles tools",
           "caption": [
             {
               "text": "Home: the \"Resume\" tile jumps back to the last piece you worked on, the dashboard sums up the essentials, recent sessions included, and the three tools are within thumb's reach.",
@@ -128,7 +206,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": how many projects you have in progress, the time you've spent knitting or crocheting this week (with details in ",
+                  "text": ": how many projects you have in progress, and the time you've spent knitting or crocheting this week (with details in ",
                   "bold": false,
                   "italic": false
                 },
@@ -138,57 +216,7 @@
                   "italic": false
                 },
                 {
-                  "text": "), and your ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "money spent",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ": the total of everything you've paid for yarn since you started using the app, in the currency you chose. This figure never goes down by itself: using up a skein or finishing a project doesn't lower it (only a new purchase raises it); it can only go down if you delete or correct a purchase line yourself in the \"Purchases and gifts\" block of a yarn's page (point 5). (If you've used more than one currency, each keeps its own total: the app never mixes them, since it has no exchange rate to rely on.) Tapping this figure opens the ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Expenses",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": " screen, described in point 5. This tile doesn't appear until you've recorded at least one purchase (for example on a brand-new install); the screen stays reachable from the menu at any time.",
-                  "bold": false,
-                  "italic": false
-                }
-              ],
-              "children": null
-            },
-            {
-              "spans": [
-                {
-                  "text": "This figure is different from your ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "stash value",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ", shown in the ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Yarn stash",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": " screen (point 5): that one tracks what's currently on your shelves and drops when you use a skein. The two figures live side by side on purpose: one tells you what you've spent, the other what you have left.",
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }
@@ -459,7 +487,7 @@
         {
           "type": "image",
           "src": "02b-projet-prix-patron",
-          "alt": "The New project form on Winter Beanie: under the Cable Beanie pattern, Pattern price ($) reads 12 next to the Free button, Purchase date holds 12/08/2026, and Status sits on To do",
+          "alt": "The New project form on Winter Beanie: under the Cable Beanie pattern, Pattern price ($) reads 12 next to the Free button, Purchase date holds 24/09/2026, Status sits on To do and the Show the timer switch is on",
           "caption": [
             {
               "text": "Below the pattern choice: its price, a \"Free\" button and the purchase date, pre-filled to today.",
@@ -525,7 +553,7 @@
             {
               "spans": [
                 {
-                  "text": "Gallery",
+                  "text": "Photos",
                   "bold": true,
                   "italic": false
                 },
@@ -623,7 +651,7 @@
               "italic": false
             },
             {
-              "text": " menu (vertical three-dot icon) on the project sheet or the \"Timer\" checkbox in the edit form brings it back.",
+              "text": " menu (vertical three-dot icon) on the project sheet or the \"Show the timer\" switch in the edit form brings it back.",
               "bold": false,
               "italic": false
             }
@@ -789,7 +817,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "This screen is for viewing only: it's on the project sheet, in its Sessions tab, that a session gets corrected or erased. No filters, no grouping: it's a first version, deliberately simple.",
+              "text": "This screen is for viewing only: it's on the project sheet, in its Sessions tab, that a session gets corrected or erased. The screen is deliberately simple, with no filters and no grouping.",
               "bold": false,
               "italic": false
             }
@@ -1027,12 +1055,12 @@
               "italic": false
             },
             {
-              "text": "Gallery",
+              "text": "Photos",
               "bold": true,
               "italic": false
             },
             {
-              "text": ", then opens your phone's share menu. You can close that menu without sending anything: the badge stays in the gallery. And if you change a setting then share again, the previous badge from that same visit to the composer is replaced, not duplicated.",
+              "text": ", then opens your phone's share menu. You can close that menu without sending anything: the badge stays in the photos. And if you change a setting then share again, the previous badge from that same visit to the composer is replaced, not duplicated.",
               "bold": false,
               "italic": false
             }
@@ -1397,12 +1425,12 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "And round or square charts?",
+              "text": "And round, square or hexagonal charts?",
               "bold": true,
               "italic": false
             },
             {
-              "text": " Granny grids, round or square, don't get aligned with two lines: the same ",
+              "text": " Granny grids, round, square or hexagonal, don't get aligned with two lines: the same ",
               "bold": false,
               "italic": false
             },
@@ -1432,7 +1460,7 @@
               "italic": false
             },
             {
-              "text": " or ",
+              "text": ", ",
               "bold": false,
               "italic": false
             },
@@ -1442,7 +1470,37 @@
               "italic": false
             },
             {
-              "text": ", moved and adjusted (",
+              "text": " or ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Hexagon",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (for a hexagon, two more buttons set its orientation: ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Flat side on top",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " or ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Point on top",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "), moved and adjusted (",
               "bold": false,
               "italic": false
             },
@@ -1481,7 +1539,7 @@
         {
           "type": "image",
           "src": "03h-calage-granny-rond",
-          "alt": "The same granny alignment assistant, the boundary declared round this time: the round loupe, marked with the same cross, circling the same central flower of the blurred-stitch square, the Round and Square buttons (Round active), then Move, active as well, Resize, and at the bottom Reset, Cancel and Confirm",
+          "alt": "The same granny alignment assistant, the boundary declared round this time: the round loupe, marked with the same cross, circling the central flower of the blurred-stitch square, the Round, Square and Hexagon buttons (Round active), then Move, active as well, Resize, and at the bottom Reset, Cancel and Confirm",
           "caption": [
             {
               "text": "The boundary declared round: the loupe follows the chosen shape, and the Round and Square buttons set it at every step.",
@@ -1740,7 +1798,7 @@
           "alt": "The two-pane reader on a tablet: on the left the Cable Beanie, its Ribbed brim section at 0/3 and Cast on 96 sts on 4mm circular needles; on the right Chart · 8 sts × 24 rows, sitting at row 7 / 24",
           "caption": [
             {
-              "text": "On a tablet held sideways: your instructions on the left, the chart permanently on the right, with no more scrolling between the two.",
+              "text": "On a tablet held sideways: your instructions on the left, the chart permanently on the right, with no scrolling between the two.",
               "bold": false,
               "italic": false
             }
@@ -1760,7 +1818,7 @@
               "italic": false
             },
             {
-              "text": ", your instructions on the left and a chart displayed permanently on the right: no more scrolling back and forth between the two. You keep control:",
+              "text": ", your instructions on the left and a chart displayed permanently on the right: you do not have to scroll back and forth between the two. You keep control:",
               "bold": false,
               "italic": false
             }
@@ -1836,7 +1894,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "This setting only lasts for your current session: reopening the pattern brings back the panel with the first chart. On a phone (or a tablet held upright), the reader stays in a single column, as before. A pattern with no chart has no side panel at all. The reader's contents stay, for their part, at the top of the instructions column, same dots, same gesture.",
+              "text": "This setting only lasts for your current session: reopening the pattern brings back the panel with the first chart. On a phone (or a tablet held upright), the reader shows a single column. A pattern with no chart has no side panel at all. The reader's contents stay, for their part, at the top of the instructions column, same dots, same gesture.",
               "bold": false,
               "italic": false
             }
@@ -1846,7 +1904,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Statistics, with room to breathe.",
+              "text": "Statistics, full width.",
               "bold": true,
               "italic": false
             }
@@ -1855,7 +1913,7 @@
         {
           "type": "image",
           "src": "03f-tablette-stats",
-          "alt": "Statistics with room to breathe on a tablet: the calendar grid runs Mar to Sep in one piece, and the tiles line up two by two below it: Total time 119:40:06, Active days 127 of 181, Current streak 6 days",
+          "alt": "Statistics with room to breathe on a tablet: the calendar grid runs Mar to Sep in one piece, and the tiles line up two by two below it: Total time 116:40:06, Active days 125 of 179, Current streak 6 days, Longest streak 12 days",
           "caption": [
             {
               "text": "Statistics on a tablet held sideways, in the Half-year window: the calendar grid shows the last six months at a glance, where a phone makes you swipe sideways to see them, and the number tiles line up two by two below it.",
@@ -1911,7 +1969,7 @@
         {
           "type": "image",
           "src": "04b-fiche-patron",
-          "alt": "Cable Beanie, subtitled Knitting · Accessories · S, M, L, then the line Bought for $12 on 8/12/2026 and a photo of the cable hat resting on a wooden board, an edit pencil in the top corner, and the two buttons Create a project from this pattern and Preview the pattern",
+          "alt": "Cable Beanie, subtitled Knitting · Accessories · S, M, L, then the line Bought for $12 on 9/24/2026 and a photo of the cable hat resting on a wooden board, an edit pencil in the top corner, and the two buttons Create a project from this pattern and Preview the pattern",
           "caption": [
             {
               "text": "A pattern's page, deliberately spare: create a project, or preview. (Correcting the import is reached from the preview, or from the menu of an in-progress project that uses this pattern.)",
@@ -1972,7 +2030,97 @@
                   "italic": false
                 },
                 {
-                  "text": ", as many times as you like, and that pass is what makes the difference between a roughly-right pattern and a project that shows the right figures and the right explanations. (The reading also recognises the round and square grids of granny patterns, never perfectly: the read-through remains essential.)",
+                  "text": ", as many times as you like, and that pass is what makes the difference between a roughly-right pattern and a project that shows the right figures and the right explanations. As soon as the import finishes, a \"Your pattern is imported\" summary counts what the app found (sections, steps to tick off, sizes, charts), reminds you to read the pattern through before you start, and the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Preview the pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button takes you straight there to browse it, section by section. (The reading also recognises the round and square grids of granny patterns, never perfectly: the read-through remains essential.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Import in {app} format",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": in \"+ Add pattern\", this option takes a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": ".rowtine",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " file, that is a pattern already prepared in the {app} format (its text and images). It goes into your library as is, without reading any PDF, and still offline.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Create a pattern by hand",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": in \"+ Add pattern\", the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Create manually",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " choice opens a dedicated screen (name, type, category, sizes, source, author…) with a single ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Photos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " section for its images. On the pattern's page, a star on each photo in \"Pattern photos\" sets it as the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cover",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": that's the one that illustrates the pattern in the library. (An imported pattern keeps the cover taken from its PDF.) And as soon as it has a photo, the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Preview the pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button appears: you can then follow an image as a chart, exactly as for an imported pattern.",
                   "bold": false,
                   "italic": false
                 }
@@ -2728,7 +2876,7 @@
               "italic": false
             },
             {
-              "text": " button opens a choice of type, each explained in plain language: standard rows, radial square, radial round, or path, to match the real shape of your motif (a granny square doesn't read like standard rows). For an image already followed as a chart, an ",
+              "text": " button opens a choice of type, each explained in plain language: standard rows, radial square, radial round, radial hexagon or path, to match the real shape of your motif (a granny square doesn't read like standard rows). For an image already followed as a chart, an ",
               "bold": false,
               "italic": false
             },
@@ -2773,7 +2921,7 @@
               "italic": false
             },
             {
-              "text": " In a pattern's gallery, from its page or from the correction editor, the ",
+              "text": " In a pattern's photos, from its page or from the correction editor, the ",
               "bold": false,
               "italic": false
             },
@@ -2813,7 +2961,7 @@
               "italic": false
             },
             {
-              "text": " when it exists: you pick the page there and the app has you crop it, the only source that goes through that cropping. Every image joins the pattern's gallery, ready to be inserted or followed.",
+              "text": " when it exists: you pick the page there and the app has you crop it, the only source that goes through that cropping. Every image joins the pattern's photos, ready to be inserted or followed.",
               "bold": false,
               "italic": false
             }
@@ -2863,12 +3011,12 @@
               "italic": false
             },
             {
-              "text": "send it to the pattern's gallery",
+              "text": "send it to the pattern's photos",
               "bold": true,
               "italic": false
             },
             {
-              "text": ". In the \"Pattern gallery\" band, every image can be deleted, inserted into the text, or followed as a chart: the three gestures in the same place.",
+              "text": ". In the \"Pattern photos\" band, every image can be deleted, inserted into the text, or followed as a chart: the three gestures in the same place.",
               "bold": false,
               "italic": false
             }
@@ -2936,7 +3084,7 @@
         {
           "type": "image",
           "src": "05-stock",
-          "alt": "10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent across the top, the Search yarn… field and the Filter and Sort buttons, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf below it, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free",
+          "alt": "10 skeins, 1,932 yards, 31.25 pounds and 31 $ spent across the top, the Search yarn… field, the Filter and Sort buttons, then Add yarn and Import from Ravelry side by side, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free",
           "caption": [
             {
               "text": "The stash: totals up top (skeins, length, weight, value), then one card per yarn with its status, free or reserved by a project.",
@@ -2967,7 +3115,17 @@
                   "italic": false
                 },
                 {
-                  "text": ", and your money spent (point 1) goes up by the amount you entered. The date it suggests is today's: if you bought the yarn earlier, you can correct it directly in the form. (These two fields only appear when you create the entry. On an already-saved yarn page, the ",
+                  "text": ", and the total in the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Expenses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen goes up by the amount you entered. The date it suggests is today's: if you bought the yarn earlier, you can correct it directly in the form. (These two fields only appear when you create the entry. On an already-saved yarn page, the ",
                   "bold": false,
                   "italic": false
                 },
@@ -2978,6 +3136,41 @@
                 },
                 {
                   "text": " block takes over, with one line per acquisition.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Where it's stored, what you think of it",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": two free fields, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stored in",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (\"e.g. Shelf 2, blue basket\") and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Notes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", then show up on the yarn's page.",
                   "bold": false,
                   "italic": false
                 }
@@ -3158,7 +3351,7 @@
         {
           "type": "image",
           "src": "05b-fiche-laine",
-          "alt": "The page opens over the stash totals 10 skeins, 1,932 yards, 31.25 pounds and 31 dollars spent: a yellow dot for Moutarde, brand Drops, 165 yd, 50 oz a skein, quantity 4, price per skein 3,20, last purchase 2026-08-12",
+          "alt": "The full-screen page for Drops · Moutarde: brand Drops, length 165 yd, 50 oz a skein, quantity 4 at $3.20 a skein, one recorded purchase, the last on 9/24/2026, composition Cotton, then Plant fibre, the Vegan and Organic fibres (GOTS) tags, the Free state and the Add a photo button",
           "caption": [
             {
               "text": "A yarn's page: its fibre content, the \"Plant fibre\" note, and its two labels \"Vegan\" and \"Organic fibres (GOTS)\".",
@@ -3214,7 +3407,7 @@
                   "italic": false
                 },
                 {
-                  "text": " buttons at the top of the stash. Filter opens a two-level window: the list of six criteria (",
+                  "text": " buttons at the top of the stash. Filter opens a two-level window: the list of seven criteria (",
                   "bold": false,
                   "italic": false
                 },
@@ -3274,7 +3467,17 @@
                   "italic": false
                 },
                 {
-                  "text": "), then, for the criterion you tapped, its values. One choice per criterion, but criteria combine; a badge on the Filter button counts the active filters, and ",
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Status",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": free, reserved or used), then, for the criterion you tapped, its values. One choice per criterion, but criteria combine; a badge on the Filter button counts the active filters, and ",
                   "bold": false,
                   "italic": false
                 },
@@ -3314,7 +3517,7 @@
                   "italic": false
                 },
                 {
-                  "text": ". None of this is remembered: every return to the stash starts again with no filter, sorted by brand. List or visual grid, your choice.",
+                  "text": ". None of this is remembered: every return to the stash starts again with no filter, sorted by brand.",
                   "bold": false,
                   "italic": false
                 }
@@ -3329,7 +3532,7 @@
                   "italic": false
                 },
                 {
-                  "text": " an entry from its card's ",
+                  "text": " a yarn from the ",
                   "bold": false,
                   "italic": false
                 },
@@ -3339,7 +3542,7 @@
                   "italic": false
                 },
                 {
-                  "text": " menu (vertical three-dot icon). \"Duplicate\" is handy for the same yarn in a different colourway: everything carries over, you just need to change the colour.",
+                  "text": " menu (vertical three-dot icon) at the top of its page. \"Duplicate\" is handy for the same yarn in a different colourway: everything carries over, you just need to change the colour.",
                   "bold": false,
                   "italic": false
                 }
@@ -3384,22 +3587,47 @@
             {
               "spans": [
                 {
-                  "text": "A yarn's detail page",
+                  "text": "A yarn's page",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": ": a full summary (skeins, metres, projects using it), and a ",
+                  "text": ": tapping its card opens it full screen. It gathers everything you noted (brand, colourway, storage, length, quantity, price, purchases, composition, notes), its characteristics, its status (free, reserved, used) and its ",
                   "bold": false,
                   "italic": false
                 },
+                {
+                  "text": "photos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": you can add several and choose, with a tap on the star, the one used as the cover.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
                 {
                   "text": "Purchases and gifts",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": " block that keeps a record of every acquisition of that yarn for you:",
+                  "text": ": in a yarn's ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Edit",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen, this block keeps a record of every acquisition for you:",
                   "bold": false,
                   "italic": false
                 }
@@ -3430,7 +3658,17 @@
                         "italic": false
                       },
                       {
-                        "text": " (a gift never counts towards your money spent). The three most recent lines are visible right away, the rest unfolds with a tap.",
+                        "text": " (a gift never counts towards your expenses). A ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Bought at",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " field also keeps the name of the shop. The three most recent lines are visible right away, the rest unfolds with a tap.",
                         "bold": false,
                         "italic": false
                       }
@@ -3465,12 +3703,12 @@
                         "italic": false
                       },
                       {
-                        "text": " of a yarn from its page and the app offers to record the matching purchase, dated today: you can accept it, mark it as a gift, or ignore it if you don't want to keep it. ",
+                        "text": " of a yarn by editing it and the app offers to record the matching purchase, dated today: you can accept it, mark it as a gift, or ignore it if you don't want to keep it. ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "Decreasing a quantity, however, never touches your money spent",
+                        "text": "Decreasing a quantity, however, never touches your expenses",
                         "bold": true,
                         "italic": false
                       },
@@ -3531,6 +3769,112 @@
           "type": "subsection",
           "title": [
             {
+              "text": "Import your stash from Ravelry",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "If you already keep your stash on Ravelry, there's no need to type it all in again: the ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Import from Ravelry",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " button, at the top of the stash, creates the pages for the yarn you already have there, all at once.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "On Ravelry, open \"my notebook\", then the \"Stash\" tab.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Click \"Export\" at the top right of the list: an .xls file downloads.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Come back to {app}, pick that file, then ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Analyse the file",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Before creating anything at all, the app shows you a summary: how many rows it read, how many yarns it will create, how many are ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "already in your stock",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (they're skipped: running an import again doesn't create duplicates) and how many are no longer in stock on Ravelry (\"Used Up\", \"Will Trade Or Sell\", \"Traded/Sold/Gifted\"), skipped as well. Nothing is written until you tap the \"Import … yarn(s)\" button.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The brand, the name, the colour, the weight, the length and skein weight, the number of skeins, where it's stored, the notes, as well as the price, date and shop of the purchase come from the file; the colour swatch is picked from the colour family Ravelry gives. The photo, though, is still yours to add by hand. Everything happens on your device: {app} reads the file you give it, it never connects to Ravelry.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
               "text": "The Expenses screen",
               "bold": false,
               "italic": false
@@ -3553,7 +3897,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Reached by tapping the money spent on Home (point 1), this screen summarises everything you've paid for your knitting, ",
+              "text": "Reached from the app menu, this screen summarises everything you've paid for your knitting, ",
               "bold": false,
               "italic": false
             },
@@ -3596,7 +3940,27 @@
                   "italic": false
                 },
                 {
-                  "text": ", by currency if you've used more than one. As long as you haven't noted any pattern price, this total stays exactly as you know it; as soon as a pattern shows up in it, it breaks down into two sub-lines: what went to yarn, what went to patterns.",
+                  "text": ", by currency if you've used more than one (the app never mixes them, since it has no exchange rate to rely on). This total never goes down by itself: using up a skein or finishing a project doesn't lower it. It is different from your ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "stash value",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", at the top of the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Yarn stash",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen, which tracks what you have left and drops when you use a skein. As long as you haven't noted any pattern price, this total stays exactly as you know it; as soon as a pattern shows up in it, it breaks down into two sub-lines: what went to yarn, what went to patterns.",
                   "bold": false,
                   "italic": false
                 }
@@ -3889,7 +4253,7 @@
         {
           "type": "image",
           "src": "07-statistiques",
-          "alt": "The Quarter tab selected among Month, Half-year and Year, 6/15/2026 to 9/12/2026, the Over the period card reading 73:00:06, then Calendar rather than Rhythm, a grid from June to September graded from less to more, and the Total time 73:00:06 and Active days 71 of 90 cards",
+          "alt": "The Quarter tab selected among Month, Half-year and Year, 6/29/2026 to 9/24/2026, the Over the period card reading 72:40:06, then Calendar rather than Rhythm, a grid from Jun to Sep graded from less to more, and the Total time 72:40:06 and Active days 69 of 88 cards",
           "caption": [
             {
               "text": "The selector at the top picks an observation window (Month, Quarter, Half-year or Year), and the whole screen follows it; here, the Quarter window. The \"Calendar\" tab, shown by default, shows the grid and the nine number tiles.",
@@ -3902,7 +4266,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "The selector at the top of the screen no longer just picks a display span: it picks an ",
+              "text": "The selector at the top of the screen does not just pick a display span: it picks an ",
               "bold": false,
               "italic": false
             },
@@ -4027,7 +4391,7 @@
         {
           "type": "image",
           "src": "07b-stats-rythme",
-          "alt": "Statistics, Rhythm view: the weeks from 18/05 to 27/07 as bars, from 1:10:00 to 12:10:00, then By day of the week from Mon to Sun, and at the bottom Across all time, your most active day is Wednesday",
+          "alt": "Statistics, Rhythm view: the weeks from 06/29 to 09/07 as bars, from 1:10:00 to 12:10:00, then By day of the week from Mon to Sun, and at the bottom Across all time, your most active day is Thursday",
           "caption": [
             {
               "text": "The \"Rhythm\" tab: the bars of time spent per period, the seven bars per day of the week, and the sentence naming your most consistent day.",
@@ -4069,7 +4433,7 @@
         {
           "type": "image",
           "src": "07c-stats-annee",
-          "alt": "A whole year of the calendar grid, Aug to Aug: one column per week, one square per day, the M T W T F S S initials down the left margin, a heavier frame around each month, and a five-step less-to-more legend",
+          "alt": "A whole year of the calendar grid, Sep to Sep: one column per week, one square per day, the M T W T F S S initials down the left margin, a heavier frame around each month, and a five-step less-to-more legend",
           "caption": [
             {
               "text": "The grid in the Year window: a complete year at a single glance, one column per week and one square per day, with the outlines separating the months. Tap the image to enlarge it and read the detail.",
@@ -4456,6 +4820,21 @@
             {
               "spans": [
                 {
+                  "text": "Help",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": \"Replay the guided tour\" reopens the sample hat in the reader with its explanation bubbles, and recreates it if you've deleted it.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Contribute",
                   "bold": true,
                   "italic": false
@@ -4525,20 +4904,32 @@
           ]
         },
         {
+          "type": "image",
+          "src": "00-bienvenue",
+          "alt": "Welcome to {app}, and under it Your knitting and crochet projects over time: English, Knitting, System, Imperial (yd, oz) and USD already picked, with Ready? Start knitting! pinned to the bottom",
+          "caption": [
+            {
+              "text": "The very first launch: first name, craft, language and theme.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
           "type": "paragraph",
           "spans": [
             {
-              "text": "In order, the first time you open {app}: the welcome screen asks for your first name, your craft, your language, your theme, your units and your currency; then the backup folder screen, described just above. After that, three small messages greet you, ",
+              "text": "In order, the first time you open {app}: the welcome screen asks for your first name, your craft, your language, your theme, your units and your currency; on Android, the backup folder screen follows, described just above. After that, a few small things greet you, each ",
               "bold": false,
               "italic": false
             },
             {
-              "text": "once each",
+              "text": "once",
               "bold": true,
               "italic": false
             },
             {
-              "text": ": you won't see them again.",
+              "text": ": you won't see them again (except the guided tour, which you can replay whenever you like).",
               "bold": false,
               "italic": false
             }
@@ -4561,7 +4952,37 @@
                   "italic": false
                 },
                 {
-                  "text": ", set in the middle of the Home screen as soon as your backup folder is in place: it tells you everything is ready and invites you to open the sample projects and patterns to get your bearings. Its button closes it, and it doesn't come back.",
+                  "text": ", set in the middle of Home: it tells you everything is ready and invites you to open the sample projects and patterns to get your bearings. Two buttons close it: \"Explore the reader\" starts the guided tour below right away, \"Later\" closes it without the tour. Either way, it doesn't come back.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "If you picked \"Explore the reader\", a ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "guided tour of the reader",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " opens right away on the sample hat, with three explanation bubbles: your size, ticking off a step, and the chart following your row. You can replay it any time: the \"Replay the guided tour\" button sits at the bottom of the first section of this guide (above), and in the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Help",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " block of Settings; the latter recreates the sample hat if you've deleted it.",
                   "bold": false,
                   "italic": false
                 }
@@ -4644,17 +5065,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": none of your data ever leaves your device, except the backup folder ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "you choose yourself",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ".",
+                  "text": ": none of your data ever leaves your device.",
                   "bold": false,
                   "italic": false
                 }
@@ -4714,7 +5125,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": on a small phone, nothing overflows or gets cut off; on a tablet, the app makes use of the extra space: your lists of projects and patterns spread across several columns instead of one long stack, and the reader can keep the chart next to the text. The app accounts for your screen's reserved areas (status bar, notch, navigation bar): content no longer slides underneath them.",
+                  "text": ": on a small phone, nothing overflows or gets cut off; on a tablet, the app makes use of the extra space: your lists of projects and patterns spread across several columns instead of one long stack, and the reader can keep the chart next to the text. The app accounts for your screen's reserved areas (status bar, notch, navigation bar): content does not slide underneath them.",
                   "bold": false,
                   "italic": false
                 }

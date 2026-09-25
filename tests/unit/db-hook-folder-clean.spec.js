@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — hook Dexie `auto-backup-on-mutate` (src/db/db.js), volet lot
 // « restauration lourde » (06/09/2026) : à chaque mutation réussie, ce hook arme la
 // sauvegarde débouncée (couverte indirectement par toute la suite)

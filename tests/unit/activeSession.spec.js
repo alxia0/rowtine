@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le chrono JOURNALISANT (lot « la séance visible dès la pause », 30/08).
 // Avant ce lot, ce fichier ne testait que le formatage ; depuis, chaque pause commet son
 // temps AU JOURNAL (table sessions) et chaque reprise décide fusion ou split. Ces specs

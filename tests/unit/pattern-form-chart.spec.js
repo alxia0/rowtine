@@ -1,10 +1,11 @@
+// @vitest-environment jsdom
 // Task D2 — retrait de l'éditeur texte (ReaderMdEditor) du crayon PatternForm.
 // Avant ce lot, un diagramme pouvait être saisi via le textarea MD directement
 // dans PatternForm (ReaderMdEditor). Cette capacité est retirée : le diagramme
 // s'écrit désormais via l'écran de correction post-import (CorrectionView).
 // Ce test vérifie uniquement la non-régression : un diagramme déjà présent dans
-// `initial.reader` (import, ou correction antérieure) survit intact au submit,
-// porté par le spread `initial`, sans passer par normalizeReaderForSave.
+// `initial.reader` (import, ou correction antérieure) survit intact au submit : non
+// modifié, il n'est pas renvoyé et la fusion de `patternsStore.update` le garde en base.
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
@@ -52,7 +53,8 @@ describe('PatternForm — le diagramme survit à la sauvegarde (Task D2)', () =>
     setActivePinia(createPinia())
   })
 
-  it('un diagramme présent dans initial.reader est intact dans le payload submit (aucune re-normalisation)', async () => {
+  // Le formulaire n'édite pas le reader : il ne le renvoie pas, la fusion de `patternsStore.update` le garde tel quel en base.
+  it('un diagramme présent dans initial.reader n’est ni re-normalisé ni renvoyé au submit', async () => {
     const initial = makeInitial()
     const wrapper = mountForm(initial)
     await flushPromises()
@@ -64,7 +66,6 @@ describe('PatternForm — le diagramme survit à la sauvegarde (Task D2)', () =>
     expect(emitted).toBeTruthy()
     const payload = emitted[0][0]
 
-    expect(payload.reader).toEqual(initial.reader)
-    expect(payload.reader.sections[0].chart).toEqual(initial.reader.sections[0].chart)
+    expect('reader' in payload).toBe(false)
   })
 })

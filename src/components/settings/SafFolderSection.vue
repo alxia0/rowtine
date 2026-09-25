@@ -372,11 +372,13 @@ async function startFresh() {
          dossier il change. Pas de confirmation ici : la porte ET le sélecteur système
          en sont déjà une. Le clic ne fait que LEVER la demande ; c'est App.vue qui
          ouvre la porte (seul propriétaire de sa ref), via le pont
-         `stores/folder-change.js`. -->
+         `stores/folder-change.js`. Désactivé pendant « Repartir de zéro » : la fin de
+         cette écriture partirait sinon dans le NOUVEAU dossier, puis l'acquitterait. -->
     <button
       v-if="nativePlatform"
       class="btn btn--block mt"
       data-test="change-folder"
+      :disabled="folderBusy"
       @click="folderChange.requestChange()"
     >
       {{ t('saf.change') }}

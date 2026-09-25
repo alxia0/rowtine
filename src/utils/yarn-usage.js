@@ -110,7 +110,7 @@ export function consumeProjectReservation(yarn, pid, used) {
   const reservations = setProjectReservation(yarn, key, null)
   const before = consumedOf(yarn)
   const consumed = cleanReservations({ ...before, [key]: (before[key] || 0) + clamped })
-  const quantity = Math.max(0, Math.floor(Number(yarn?.quantity) || 0) - clamped)
+  const quantity = Math.max(0, (Number(yarn?.quantity) || 0) - clamped)
   return { reservations, consumed, quantity }
 }
 

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Le sous-titre `### Titre` d'une technique (émis par refblocks.js pour chaque
 // entrée d'un bloc `## Techniques {techniques}`) doit être masqué en vue enrichie, comme le
 // sont déjà `## `, `- `, `> `, etc. Avant ce correctif, `lineType` classait ces lignes en

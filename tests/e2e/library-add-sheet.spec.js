@@ -3,9 +3,9 @@
 // des 3 gros boutons empilés qui poussaient la liste très bas.
 // 19/07 : le choix « Import IA » est retiré, remplacé par « Importer un patron
 // (.zip) » (route import-zip, B2) — la feuille reste à 3 choix.
-// Porte de service (08/08) : la feuille passe à **2** choix (import PDF, ajout manuel).
-// L'import .zip n'a pas disparu — il est devenu une porte de service invisible, fondue dans
-// l'import PDF (cf. utils/import-kind.js) : plus aucun libellé, titre ni icône ne le nomme.
+// 08/08 : la feuille passe à 2 choix, l'import .zip devient une porte de service cachée.
+// 23/09 : il redevient visible, la feuille a **3** choix (import PDF, « Importer au format
+// Rowtine » pour un .rowtine ou un .zip, ajout manuel).
 //
 // Piège de cette tâche : le 1er choix (« Importer un patron PDF ») est un
 // <label class="btn"> enveloppant un <input type="file"> masqué — le sélecteur de
@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/library')
 })
 
-test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 2 choix', async ({ page }) => {
+test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 3 choix', async ({ page }) => {
   // Un seul bouton d'ajout au chargement.
   const trigger = page.getByRole('button', { name: 'Ajouter un patron' })
   await expect(trigger).toBeVisible()
@@ -38,17 +38,19 @@ test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 2 choix', a
   // ce test à tort.
   await expect(page.getByText('Importer un patron PDF')).toHaveCount(0)
   await expect(page.getByText('Importer un patron (.zip)')).toHaveCount(0)
+  await expect(page.getByText('Importer au format Rowtine')).toHaveCount(0)
   await expect(page.getByText(/Import IA/)).toHaveCount(0)
   await expect(page.getByText('Créer manuellement')).toHaveCount(0)
   await expect(page.getByRole('dialog')).toHaveCount(0)
 
   await trigger.click()
 
-  // La feuille est ouverte et porte les 2 choix, chacun une cible tactile ≥ 44 px. Aucun
-  // ne mentionne plus l'IA (retirée le 19/07) ni le zip (porte de service, 08/08).
+  // La feuille est ouverte et porte les 3 choix, chacun une cible tactile ≥ 44 px. Aucun
+  // ne mentionne plus l'IA (retirée le 19/07).
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expect(dialog).toContainText('Importer un patron PDF')
+  await expect(dialog).toContainText('Importer au format Rowtine')
   await expect(dialog).toContainText('Créer manuellement')
   // Le texte d'avertissement retiré ne doit plus apparaître dans la
   // feuille. Ancré sur un fragment stable du texte français, pas sur la clé JSON — un
@@ -57,25 +59,21 @@ test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 2 choix', a
   await expect(dialog).not.toContainText('ne sont pas reconnus')
   await expect(dialog).not.toContainText('IA')
 
-  // Porte de service (08/08) : la fonction .zip existe toujours, fondue dans l'import PDF,
-  // mais RIEN ne doit la nommer dans la feuille. Garde de discrétion.
-  await expect(dialog).not.toContainText('zip')
-  await expect(dialog).not.toContainText('.zip')
-
   const opts = dialog.locator('.pas__opt')
-  await expect(opts).toHaveCount(2)
-  for (let i = 0; i < 2; i++) {
+  await expect(opts).toHaveCount(3)
+  for (let i = 0; i < 3; i++) {
     const box = await opts.nth(i).boundingBox()
     expect(box.height).toBeGreaterThanOrEqual(44)
   }
 
-  // Un seul input fichier désormais (l'import PDF, qui accepte aussi le zip en sous-main),
-  // toujours focusable au clavier (WCAG 2.1.1).
+  // Deux inputs fichier (PDF et format Rowtine), tous deux focusables au clavier (WCAG 2.1.1).
   const inputs = page.locator('.lib-import__input')
-  await expect(inputs).toHaveCount(1)
-  await expect(inputs.first()).not.toHaveCSS('display', 'none')
-  await inputs.first().focus()
-  await expect(inputs.first()).toBeFocused()
+  await expect(inputs).toHaveCount(2)
+  for (let i = 0; i < 2; i++) {
+    await expect(inputs.nth(i)).not.toHaveCSS('display', 'none')
+    await inputs.nth(i).focus()
+    await expect(inputs.nth(i)).toBeFocused()
+  }
 
   // Échap ferme la feuille.
   await page.keyboard.press('Escape')
@@ -93,17 +91,26 @@ test('🚩 le tap sur « Importer un patron PDF » dans la feuille ouvre le VRAI
   // ex. si le label avait été remplacé par un <button @click="input.click()"> ou si le
   // <label>/<input> avaient été séparés en déplaçant le contenu dans la feuille.
   const chooserPromise = page.waitForEvent('filechooser')
-  // Un seul label `.lib-import` désormais dans la feuille (porte de service 08/08 : le
-  // choix .zip a disparu de l'interface, fondu dans l'import PDF) : le sélecteur n'a plus
-  // besoin d'être scopé par texte.
-  await page.locator('label.lib-import').click()
+  // Deux labels `.lib-import` dans la feuille (PDF et format Rowtine, 23/09) : on cible
+  // celui du PDF par son input.
+  await page.locator('label.lib-import').filter({ has: page.locator('.lib-import__input--pdf') }).click()
   const chooser = await chooserPromise
   expect(chooser.isMultiple()).toBe(false)
 
   // Bout en bout : fournir le fichier au chooser mène bien à l'écran d'import local,
   // exactement comme avant le déplacement du label (non-régression fonctionnelle) —
-  // puis à la fiche patron, une fois l'enregistrement terminé ET le bouton tapé.
+  // puis au lecteur, une fois l'enregistrement terminé ET le bouton tapé (le fixture a des
+  // sections, bouton principal « Prévisualiser le patron » depuis la refonte du bilan,
+  // lot du 23/09/2026).
   await chooser.setFiles(FIXTURE)
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
-  await expect(page).toHaveURL(/\/pattern\/\d+$/)
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+})
+
+test('le tap sur « Importer au format Rowtine » ouvre lui aussi le sélecteur natif', async ({ page }) => {
+  await openAddPatternSheet(page)
+  const chooserPromise = page.waitForEvent('filechooser')
+  await page.locator('label.lib-import').filter({ has: page.locator('.lib-import__input--rowtine') }).click()
+  const chooser = await chooserPromise
+  expect(chooser.isMultiple()).toBe(false)
 })

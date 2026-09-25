@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — restauration depuis l'arborescence de sauvegarde :
 // `readBackup` (arbo → dbSnapshot), `writeSnapshotToDb` (dbSnapshot → Dexie), et
 // `hasBackup`. Le test le plus important est le ROUND-TRIP DE BOUT EN BOUT :
@@ -9,7 +10,7 @@ import { db, setSetting } from '@/db/db'
 import { collectBackupData } from '@/backup/collect'
 import { backupAll } from '@/backup/orchestrator'
 import { MemoryBackupStorage } from '@/backup/memory-storage'
-import { hasBackup, readBackup, writeSnapshotToDb } from '@/backup/restore'
+import { hasBackup, readBackup, writeSnapshotToDb, MAX_BACKUP_FILE_BYTES } from '@/backup/restore'
 import { entryFolderName } from '@/backup/naming'
 
 const PHOTO_A = 'data:image/jpeg;base64,AAAA'
@@ -585,5 +586,38 @@ describe('les résidus d’écriture ne sont ni lus ni restaurés', () => {
     expect(snapshot.projects).toHaveLength(1)
     expect(snapshot.projects[0]).toMatchObject({ id: 1, name: 'Pull' })
     expect(lus.some((p) => /\.(part|tmp)$/i.test(p)), 'un résidu a été lu pour rien').toBe(false)
+  })
+
+  // Protège la restauration d'un fichier étranger ou démesuré déposé à la main (plantage WebView).
+  it('ne lit ni un fichier étranger (vidéo) ni un fichier au-delà du plafond, et consigne le second', async () => {
+    const storage = new MemoryBackupStorage()
+    await db.projects.bulkAdd([{ id: 1, name: 'Pull', technique: 'aiguilles', photos: [PHOTO_A] }])
+    await backupAll(storage, await collectBackupData())
+
+    const dir = `Projets/${entryFolderName('Pull', 1)}`
+    await storage.writeFile(`${dir}/film.mp4`, 'AAAA', { encoding: 'base64' })
+    await storage.writeFile(`${dir}/photo-geante.jpg`, 'AAAA', { encoding: 'base64' })
+    await storage.writeFile('Laines/film.mov', 'AAAA', { encoding: 'base64' })
+
+    const lus = []
+    const espion = {
+      ...storage,
+      // Taille annoncée par le stockage (readdir) : seule la photo géante dépasse le plafond.
+      readdir: async (p) =>
+        (await storage.readdir(p)).map((e) =>
+          e.name === 'photo-geante.jpg' ? { ...e, size: MAX_BACKUP_FILE_BYTES + 1 } : e,
+        ),
+      exists: (p) => storage.exists(p),
+      readFile: (p, o) => {
+        lus.push(p)
+        return storage.readFile(p, o)
+      },
+    }
+
+    const snapshot = await readBackup(espion)
+    expect(snapshot.projects).toHaveLength(1)
+    expect(snapshot.projects[0].photos).toEqual([PHOTO_A])
+    expect(lus.filter((p) => /film\.(mp4|mov)$|photo-geante/.test(p))).toEqual([])
+    expect(snapshot.errors).toEqual([expect.objectContaining({ where: dir, code: 'file-too-large', file: 'photo-geante.jpg' })])
   })
 })

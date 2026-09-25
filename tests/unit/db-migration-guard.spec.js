@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/db-migration-guard.spec.js
 // Filet de sécurité de l'unique déclaration de schéma (cf. src/db/db.js). La question
 // qu'il posait jusqu'au 13/08/2026 — « une base v1 monte-t-elle vers le schéma courant ? »

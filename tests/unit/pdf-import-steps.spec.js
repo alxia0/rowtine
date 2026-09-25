@@ -12,6 +12,24 @@ describe('linesToSteps', () => {
     const steps = linesToSteps([L('Répéter ce rang 8 (9) 10 fois.')], { kind: 'corps', n: 3 })
     expect(steps[0]).toMatchObject({ repeat: true, total: [8, 9, 10] })
   })
+  // Le seul vecteur de tailles d'une ligne n'est le total que s'il porte l'unité de répétition.
+  it('répétition à compte nu : un vecteur de mailles/cm sur la même ligne ne devient pas le total', () => {
+    const lignes = [
+      "Répéter 4 fois jusqu'à avoir 20 (22, 24) m",
+      'Repeat these 2 rows 5 times until work measures 30 (32, 34) cm',
+      '40 (44, 48) m. Répéter 3 fois.',
+    ]
+    const steps = linesToSteps(lignes.map(L), { kind: 'dos', n: 3 })
+    expect(steps.map((s) => s.total)).toEqual([[4, 4, 4], [5, 5, 5], [3, 3, 3]])
+    expect(steps.every((s) => s.repeat)).toBe(true)
+  })
+  // « 2 x 2 » (côtes) n'est pas un compte de répétitions.
+  it('« 2 x 2 rib » dans une répétition indéfinie ne fabrique pas de total', () => {
+    const [step] = linesToSteps([L('Repeat rows 1-4 in 2 x 2 rib until piece measures 10 cm')], { kind: 'dos', n: 3 })
+    expect(step.total).toBeUndefined()
+    const [ok] = linesToSteps([L('Repeat rows 1-4 3 x.')], { kind: 'dos', n: 1 })
+    expect(ok).toMatchObject({ repeat: true, total: [3] })
+  })
   it('répétition mono-taille → total diffusé', () => {
     const steps = linesToSteps([L('Repeat rows 1-2 six… repeat 6 times')], { kind: 'corps', n: 2 })
     expect(steps[0].total).toEqual([6, 6])

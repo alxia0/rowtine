@@ -59,6 +59,13 @@ export const REP_KW = String.raw`\b(?:times?|fois|gange?|ganger|g[åa]nger|kerta
 const MODIFIER_KW = String.raw`(?:autres?|more|additional|further|extra|supplémentaires?|nouvelles?)`
 export const REP_COUNT_VEC_RE = new RegExp(String.raw`\{\{(\d+)\}\}\s*(?:${MODIFIER_KW}\s*)?${REP_KW}`, 'i')
 export const REP_COUNT_SCALAR_RE = new RegExp(String.raw`(\d+)\s*(?:${MODIFIER_KW}\s*)?${REP_KW}`, 'i')
+// Unité « x » : VECTEUR seulement (« {{i}} x »), jamais nombre nu (collision « 110 x 110 cm »
+// ci-dessus). L'import PDF l'admet (REP_RE_UNIT_VECTOR_RE, pdf-import/steps.js) et pose
+// total = c[i] ; sans cette lecture, « Rep the last 4 (6) 8 rows 3 (4) 5 x. » retombait sur
+// c[0], la forme legacy était jugée non sûre, et le marqueur {×N} ne gardait que total[0]
+// (3 (4) 5 → 3 partout). Consulté APRÈS les unités explicites : rien de ce qu'elles
+// résolvaient déjà ne change.
+const REP_COUNT_VEC_X_RE = new RegExp(String.raw`\{\{(\d+)\}\}\s*(?:${MODIFIER_KW}\s*)?x\b`, 'i')
 
 export function legacyRepeatTotal(st, n) {
   const t = st?.t || ''
@@ -66,6 +73,8 @@ export function legacyRepeatTotal(st, n) {
   if (vecRep && st.c?.[Number(vecRep[1])]) return st.c[Number(vecRep[1])]
   const scalRep = REP_COUNT_SCALAR_RE.exec(t)
   if (scalRep) return broadcast(scalRep[1], Math.max(1, n))
+  const vecX = REP_COUNT_VEC_X_RE.exec(t)
+  if (vecX && st.c?.[Number(vecX[1])]) return st.c[Number(vecX[1])]
   if (st.c?.length) return st.c[0]
   const num = /\d+/.exec(t.replace(/\{\{\d+\}\}/g, ''))
   if (num) return broadcast(num[0], Math.max(1, n))

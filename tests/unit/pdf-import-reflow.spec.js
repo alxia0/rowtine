@@ -3,6 +3,24 @@ import { reflowLines } from '@/utils/pdf-import/reflow'
 
 const L = (text, y = 0, size = 10) => ({ text, y, size, bold: false })
 
+// Un mot finissant par une lettre accentuée (« modèle », « Fumée », « montaña ») n'est pas un mot-outil pendant.
+describe('reflowLines — fin de mot accentuée ≠ mot-outil pendant', () => {
+  it('ne recolle pas deux lignes quand la première finit sur « -èle », « -ée » ou « -ña »', () => {
+    const paires = [
+      ['Mesures du modèle', 'Tour de poitrine 90 cm'],
+      ['2 pelotes coloris Fumée', 'Aiguilles 4 mm'],
+      ['Hilo para la montaña', 'Drops Nepal'],
+    ]
+    for (const [a, b] of paires) expect(reflowLines([L(a, 700), L(b, 688)])).toHaveLength(2)
+    expect(reflowLines([L('Häkelnadel in passender Größe', 700), L('Maschenmarkierer', 688)], { isGerman: true })).toHaveLength(2)
+  })
+  // Une lettre majuscule isolée est un code couleur (fil E), pas la conjonction « e »/« o »/« y ».
+  it('ne recolle pas après un code couleur majuscule « E », recolle après la conjonction « e »', () => {
+    expect(reflowLines([L('2 pelotes fil E', 700), L('Aiguilles circulaires 4 mm', 688)])).toHaveLength(2)
+    expect(reflowLines([L('lavorare a maglia rasata e', 700), L('Diritto su tutti i ferri', 688)])).toHaveLength(1)
+  })
+})
+
 describe('reflowLines — span de répétition ouvert', () => {
   it('recolle un rang crochet coupé après « Répéter de * à * »', () => {
     // Cas réel : châle Classical Attitude (hobbii FR), rang 6 scindé par la colonne.

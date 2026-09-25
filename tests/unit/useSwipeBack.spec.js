@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — geste « retour » au balayage : géométrie du déclenchement.
 import { describe, it, expect, vi } from 'vitest'
 import { defineComponent, h } from 'vue'

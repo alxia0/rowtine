@@ -77,6 +77,13 @@ public class ImageDecodePlugin extends Plugin {
             call.resolve(ret);
             return;
         }
+        // Hors du fil UI : un @ActivityCallback s'exécute sur le fil principal, et décoder
+        // un HEIC de 12 Mpx puis compresser le JPEG peut y bloquer l'écran plusieurs
+        // secondes sur une tablette lente. Le fil des plugins du pont prend le relais.
+        getBridge().execute(() -> decodeAndResolve(call, uri));
+    }
+
+    private void decodeAndResolve(PluginCall call, Uri uri) {
         try {
             ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), uri);
             Bitmap decoded = ImageDecoder.decodeBitmap(source, (decoder, info, src) -> {

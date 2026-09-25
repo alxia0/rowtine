@@ -36,8 +36,10 @@ import { measureStickyTopHeight, RESPIRATION_SOUS_BANDEAUX } from '@/utils/stick
 // ne gouverne pas une valeur passée en argument JS, et un saut de section est l'affordance
 // de navigation principale de cet écran. Le piège est documenté au long dans le module.
 import { scrollBehavior } from '@/utils/scroll-behavior'
+import { useStartTour } from '@/composables/useStartTour'
 
 const { t, locale } = useI18n()
+const { startTour } = useStartTour()
 
 const guide = computed(() => resolveGuideContent(locale.value))
 // Adresse du guide EN LIGNE (celui qui se télécharge, sur le site) pour la LANGUE ACTIVE de
@@ -321,6 +323,20 @@ function ouvrirFigure(sectionId, blockIndex) {
             </template>
           </dl>
         </template>
+
+        <!-- Relance de la visite guidée (lot « visite guidée », 23/09/2026), à la fin de
+             la PREMIÈRE section seulement (« {app} en 4 étapes »), pas une par section,
+             une seule suffit à retrouver le chemin. Même bouton secondaire et même clé de
+             libellé que le bloc « Aide » des Réglages (SettingsView.vue). -->
+        <button
+          v-if="section.id === 'section-0'"
+          type="button"
+          class="btn btn--block section__replay"
+          data-test="guide-replay-tour"
+          @click="startTour"
+        >
+          {{ t('settings.help.replayTour') }}
+        </button>
       </div>
     </details>
 
@@ -446,6 +462,13 @@ function ouvrirFigure(sectionId, blockIndex) {
 }
 .section__body {
   padding-bottom: var(--sp-4);
+}
+/* Bouton de relance de la visite guidée (section-0 seulement, cf. script) : le dernier
+   bloc du contenu (paragraphe, liste…) porte déjà une marge basse (`var(--sp-3)`), une
+   marge haute supplémentaire l'en détache un peu plus, comme un bouton d'action plutôt
+   qu'un bloc de texte de plus. */
+.section__replay {
+  margin-top: var(--sp-2);
 }
 
 .subtitle {

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Intégration — LE test du lot : sur une base ne contenant que les exemples semés,
 // une sauvegarde ne doit PAS toucher à l'arborescence du dossier (2026-08-04, §5.1 ;
 // avenant 04/08/2026). Vrai orchestrateur, vraie base (fake-indexeddb), stockage en

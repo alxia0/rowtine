@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — PLACEMENT de l'astuce de balayage (décision produit du 19/08/2026, prise en
 // cours de chantier, après revue) : « l'astuce de balayage de l'écran ne doit
 // apparaître que la première fois qu'on ouvre un projet, qu'on va dans la bibliothèque de
@@ -11,16 +12,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db, getSetting } from '@/db/db'
 import { useSettingsStore } from '@/stores/settings'
 import FirstDetailTip from '@/components/FirstDetailTip.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { NOTICE } from '@/constants/notice-queue'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // Les 4 tests de placement montent les VRAIES vues (Bibliothèque, Stock, fiche projet,
 // fiche patron) : vue-router mocké, comme le fait déjà `first-detail-tip-wiring.spec.js`.

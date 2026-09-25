@@ -12,7 +12,7 @@ import { useProjectsStore } from '@/stores/projects'
 import { useSettingsStore } from '@/stores/settings'
 import { allActiveDays } from '@/db/active-days'
 import { aggregateByPeriod, ymdLocal, weekdayNames as pureWeekdayNames } from '@/utils/time-periods'
-import { formatLocalDate } from '@/utils/date-format'
+import { formatLocalDate, formatDayMonth } from '@/utils/date-format'
 import { generateHeatColors } from '@/theme/palette'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import {
@@ -265,17 +265,13 @@ const displayRows = computed(() => {
 })
 const maxSeconds = computed(() => Math.max(1, ...displayRows.value.map((r) => r.seconds)))
 
-function pad2(n) {
-  return String(n).padStart(2, '0')
-}
-
 // Libellé lisible d'une barre de période, selon la granularité de barre active (dérivée de la
 // fenêtre, jamais choisie directement : cf. barGranularity).
 function periodLabel(row) {
   if (!row) return ''
   if (barGranularity.value === 'week') {
     const d = row.startDate
-    return t('stats.weekOf', { date: `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}` })
+    return t('stats.weekOf', { date: formatDayMonth(d, locale.value) })
   }
   return row.startDate.toLocaleDateString(locale.value, { month: 'long', year: 'numeric' })
 }

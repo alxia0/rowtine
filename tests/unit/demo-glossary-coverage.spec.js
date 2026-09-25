@@ -1,33 +1,19 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
 import { loadDemoContent } from '@/constants/demo'
 import { tokenizeLine } from '@/utils/reader'
 
-// Verrou fonctionnel trouvé en revue de la tâche C5 : le glossaire anglais du Bonnet et de
-// l'Écharpe était fait de clés génériques (« k », « p », « tog », « st(s) ») qui ne
-// matchaient JAMAIS dans le texte réel des étapes, parce que la notation anglaise colle la
-// lettre au chiffre (« k2 », « p2 », « k2tog ») alors que le VRAI tokenizer de l'app
-// (tokenizeLine, src/utils/reader.js:31) exige des frontières de mot — un chiffre est un
-// caractère de mot, donc « k2 » ne contient nulle part la séquence isolée « k ». Rien
-// n'était perdu (l'onglet Abréviations liste tout), mais le bouton cliquable dans le texte
-// — l'interaction que le patron promet lui-même de montrer — ne se déclenchait jamais pour
-// ces clés. Corrigé (tâche C5) en déclarant les formes COMPACTES réellement écrites (k2,
-// p2, k2tog, k4, sts/st) plutôt qu'en dégradant la notation anglaise (qu'une tricoteuse
-// anglophone ne reconnaîtrait plus) ou en assouplissant le tokenizer partagé par toute
-// l'app, y compris les imports réels (hors du périmètre d'un lot de contenu de démo).
+// Le glossaire anglais des patrons de démo doit déclarer les formes COMPACTES réellement
+// écrites (k2, p2, k2tog...) : le VRAI tokenizer (tokenizeLine, src/utils/reader.js) exige des
+// frontières de mot, donc une clé générique « k » ne matche jamais dans « k2 », et le bouton
+// cliquable du texte ne se déclenche pas.
 //
-// Deux invariants, dans les DEUX sens, avec le VRAI tokenizer (jamais une regex
-// réinventée) :
-//   1) DÉCLARÉ → UTILISÉ : toute clé du glossaire d'un patron doit produire au moins un
-//      token cliquable quelque part dans le texte de ses étapes.
-//   2) UTILISÉ → DÉCLARÉ : toute notation « collée » compte+abréviation (k2, p2, k2tog…)
-//      trouvée dans le texte doit être une clé déclarée du glossaire.
-//
-// Le 2e sens ne peut pas se généraliser à toute abréviation imaginable sans dictionnaire —
-// il cible précisément la forme mesurée du défaut (lettre immédiatement suivie d'un
-// chiffre), absente par construction du fr/de/es (ces langues séparent toujours le compte
-// de l'unité par une espace : « 2 M », « 2 m. », « 2 p. ») : le test y est donc
-// non-vacueusement vrai en anglais, et trivialement vrai ailleurs — pas une garde qui ne
-// peut jamais rougir, cf. tests/unit/demo-glossary-coverage.spec.js § preuve par mutation.
+// Deux invariants, dans les DEUX sens, avec le vrai tokenizer (jamais une regex réinventée) :
+//   1) DÉCLARÉ → UTILISÉ : toute clé du glossaire d'un patron produit au moins un token
+//      cliquable dans le texte de ses étapes.
+//   2) UTILISÉ → DÉCLARÉ : toute notation collée compte+abréviation (lettre suivie d'un
+//      chiffre) trouvée dans le texte est une clé déclarée. Ce sens cible la forme du défaut,
+//      absente du fr/de/es (« 2 M », « 2 m. ») : non vacueux en anglais, trivial ailleurs.
 const LANGUES = ['fr', 'en', 'de', 'es']
 const GLUED_NOTATION_RE = /\b[a-zA-Z]+\d+[a-zA-Z]*\b/g
 

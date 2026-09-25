@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
@@ -6,6 +7,7 @@ import RadialCalibrationWizard from '@/components/RadialCalibrationWizard.vue'
 
 const CHART_CIRCLE = { img: 'g.png', shape: 'radial-circle', rows: 7 }
 const CHART_SQUARE = { img: 'g.png', shape: 'radial-square', rows: 7 }
+const CHART_HEXAGON = { img: 'g.png', shape: 'radial-hexagon', rows: 7 }
 const CHART_ONE_ROW = { img: 'g.png', shape: 'radial-circle', rows: 1 }
 
 const wrappers = []
@@ -58,6 +60,19 @@ describe('RadialCalibrationWizard — écran 1 (limite intérieure)', () => {
     expect(w.find('.rcw__guide').classes()).toContain('rcw__guide--square')
   })
 
+  it('chart.shape radial-hexagon → hexagone par défaut pour les deux limites', () => {
+    const w = mountWizard({ chart: CHART_HEXAGON })
+    expect(w.vm.draft.r0Shape).toBe('hexagon')
+    expect(w.vm.draft.r1Shape).toBe('hexagon')
+  })
+
+  it('la bascule vers hexagone change draft.r0Shape et la forme de la loupe fixe', async () => {
+    const w = mountWizard()
+    await w.findAll('.rcw__shapebtn')[2].trigger('click') // 3e bouton = Hexagone
+    expect(w.vm.draft.r0Shape).toBe('hexagon')
+    expect(w.find('.rcw__guide').classes()).toContain('rcw__guide--hexagon')
+  })
+
   it('mode Déplacer (par défaut) : glisser fait défiler le dessin sous la loupe fixe (delta pixel → % du contenu)', async () => {
     const w = mountWizard()
     forceViewportBox(w)
@@ -105,9 +120,42 @@ describe('RadialCalibrationWizard — écran 1 (limite intérieure)', () => {
     const w = mountWizard({ frame: { cx: 10, cy: 10, r0: 5, r1: 20, r0Shape: 'square', r1Shape: 'square' } })
     await w.find('.rcw__reset').trigger('click')
     expect(w.vm.step).toBe('inner')
-    expect(w.vm.draft).toEqual({ cx: 50, cy: 50, r0: 15, r1: 45, r0Shape: 'circle', r1Shape: 'circle', switchRound: null })
+    expect(w.vm.draft).toEqual({ cx: 50, cy: 50, r0: 15, r1: 45, r0Shape: 'circle', r1Shape: 'circle', switchRound: null, hexOrientation: 'flat' })
     expect(w.emitted('save')).toBeUndefined()
     expect(w.emitted('cancel')).toBeUndefined()
+  })
+})
+
+describe('RadialCalibrationWizard — orientation hexagonale', () => {
+  it("n'apparaît pas quand la forme courante n'est pas hexagone", () => {
+    const w = mountWizard()
+    expect(w.find('.rcw__orient').exists()).toBe(false)
+  })
+
+  it("apparaît quand la forme courante est hexagone, orientation 'flat' par défaut", async () => {
+    const w = mountWizard({ chart: CHART_HEXAGON })
+    expect(w.vm.draft.hexOrientation).toBe('flat')
+    const [flatBtn, pointyBtn] = w.findAll('.rcw__orientbtn')
+    expect(flatBtn.attributes('aria-pressed')).toBe('true')
+    expect(pointyBtn.attributes('aria-pressed')).toBe('false')
+  })
+
+  it("bascule vers 'pointy' change draft.hexOrientation", async () => {
+    const w = mountWizard({ chart: CHART_HEXAGON })
+    const [, pointyBtn] = w.findAll('.rcw__orientbtn')
+    await pointyBtn.trigger('click')
+    expect(w.vm.draft.hexOrientation).toBe('pointy')
+  })
+
+  it("Enregistrer inclut hexOrientation seulement si une limite est hexagonale", async () => {
+    const w = mountWizard({ chart: CHART_HEXAGON })
+    const [, pointyBtn] = w.findAll('.rcw__orientbtn')
+    await pointyBtn.trigger('click')
+    await w.find('.rcw__next').trigger('click')
+    await w.find('.rcw__next').trigger('click') // → review (mêmes formes, pas de switch)
+    await w.find('.rcw__save').trigger('click')
+    const saved = w.emitted('save').at(-1)[0]
+    expect(saved).toEqual({ cx: 50, cy: 50, r0: 15, r1: 45, r0Shape: 'hexagon', r1Shape: 'hexagon', hexOrientation: 'pointy' })
   })
 })
 
@@ -237,7 +285,7 @@ describe('RadialCalibrationWizard — écran récapitulatif et enregistrement', 
   it('pré-remplit depuis un frame existant (avec r0Shape/r1Shape/switchRound déjà posés)', () => {
     const frame = { cx: 30, cy: 70, r0: 8, r1: 40, r0Shape: 'circle', r1Shape: 'square', switchRound: 4 }
     const w = mountWizard({ chart: CHART_SQUARE, frame })
-    expect(w.vm.draft).toEqual(frame)
+    expect(w.vm.draft).toEqual({ ...frame, hexOrientation: 'flat' })
   })
 
   it("pré-remplit depuis un frame ancien (sans r0Shape/r1Shape) : forme dérivée de chart.shape pour les deux", () => {
@@ -351,5 +399,27 @@ describe('RadialCalibrationWizard — recentrage initial au relevé du ResizeObs
     expect(scrollTopSets).toEqual([50])
     expect(viewport.scrollLeft).toBe(100)
     expect(viewport.scrollTop).toBe(50)
+  })
+
+  // Protège : l'aperçu des écrans transition/récapitulatif se pose sur l'IMAGE (cx/cy/r sont en % de l'image), pas sur la boîte qui la contient.
+  it('canvas statique : le calque des formes épouse l’image contenue, pas la boîte (bandes vides exclues)', async () => {
+    const w = mountWizard()
+    const canvas = w.vm.$el.querySelector('.rcw__canvas')
+    const canvasRO = roInstances.find((ro) => ro.el === canvas)
+    expect(canvasRO).toBeTruthy()
+    // Boîte 400×100, diagramme carré 100×100 : « contain » le pose en 100×100, centré (bandes de 150 px).
+    canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 400, height: 100, right: 400, bottom: 100 })
+    const img = canvas.querySelector('img')
+    Object.defineProperty(img, 'naturalWidth', { configurable: true, value: 100 })
+    Object.defineProperty(img, 'naturalHeight', { configurable: true, value: 100 })
+    img.dispatchEvent(new Event('load'))
+    canvasRO.cb()
+    await nextTick()
+    const svg = canvas.querySelector('.rcw__overlay')
+    expect(svg.style.left).toBe('150px')
+    expect(svg.style.top).toBe('0px')
+    expect(svg.style.width).toBe('100px')
+    expect(svg.style.height).toBe('100px')
+    expect(w.vm.canvasAspect).toBe(1)
   })
 })

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/warmup.spec.js
 // Unitaire — préchauffe : exécute chaque tâche une fois, avale les échecs, idempotent,
 // et NE démarre PAS une tâche tant qu'une navigation est active (ne concurrence pas un tap).

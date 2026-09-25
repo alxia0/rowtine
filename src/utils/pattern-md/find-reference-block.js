@@ -9,15 +9,8 @@
 //    re-enclencherait la destruction que ce tag empêche) ;
 //  - `## Aiguilles {sleeve}` -> JAMAIS (kind de travail, pas une balise de référence).
 // Module pur, sans DOM ni CM6.
-import { reservedKey, REF_TAG_TO_KEY } from './refblocks'
-import { TITLE_KIND_RE, H2_RE } from './md-line-type'
-
-// Clé interne de rubrique portée par une ligne de titre, ou `null` si la ligne n'est pas
-// un bloc de référence. Même désambiguïsation que parse.js:59.
-function referenceKeyOfTitle(title) {
-  const tm = TITLE_KIND_RE.exec(title)
-  return tm ? (REF_TAG_TO_KEY[tm[2]] ?? null) : reservedKey(title)
-}
+import { REF_TAG_TO_KEY } from './refblocks'
+import { H2_RE, referenceKeyOfTitle } from './md-line-type'
 
 /**
  * @param {string} docText Texte complet du document.

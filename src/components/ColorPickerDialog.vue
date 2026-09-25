@@ -57,7 +57,11 @@ function initFrom(color) {
 }
 
 function onKey(e) {
-  if (e.key === 'Escape') emit('close')
+  if (e.key !== 'Escape') return
+  // Échap consommé : un hôte qui écoute plus haut (BadgeComposer, sur `window`) ne se
+  // ferme pas en même temps que ce sélecteur.
+  e.preventDefault()
+  emit('close')
 }
 
 // `keyboardOpen` ancre le pop-up en HAUT du viewport (au lieu du bas) et donne à la

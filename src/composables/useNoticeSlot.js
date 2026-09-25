@@ -1,9 +1,9 @@
 // LE BRANCHEMENT D'UN COMPOSANT SUR LA FILE DES MESSAGES.
 //
-// Sept RANGS, portés par SIX composants — `App.vue` en tient deux (le garde-fou de version
+// Huit RANGS, portés par SEPT composants — `App.vue` en tient deux (le garde-fou de version
 // et la décision de sauvegarde). Tous doivent faire la même chose : dire qu'ils veulent
 // l'écran quand leur propre condition est remplie, se retirer quand elle ne l'est plus, et
-// ne s'afficher que si la file les nomme. Écrit sept fois à la main, ce motif se serait
+// ne s'afficher que si la file les nomme. Écrit huit fois à la main, ce motif se serait
 // désaccordé au premier lot suivant. Écrit ici une fois, il se teste une fois.
 //
 // `wants` est la condition PROPRE du composant, inchangée par ce lot : le composant garde

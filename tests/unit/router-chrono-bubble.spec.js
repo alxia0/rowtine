@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Garde « sortie de bulle » du chrono (chantier « chrono unifié », 2026-08-30) : la séance ne se
 // ferme plus à la sortie du LECTEUR (défaut connu : « aller voir le patron ferme la
 // séance ») mais en SORTANT du projet, quel que soit l'écran d'où l'on part. La décision se
@@ -80,6 +81,18 @@ describe('router — garde chrono : sortir de la bulle du projet ferme la séanc
     const snackbar = useSnackbarStore()
     expect(snackbar.visible).toBe(true)
     expect(snackbar.message).toContain('0:05') // fmtDuration(5) — stable dans toutes les langues
+  })
+
+  // Une fermeture qui échoue (écriture refusée) ne doit pas murer la navigation hors du projet.
+  it('échec de la fermeture : la navigation aboutit quand même', async () => {
+    await armedPinia()
+    const active = await runningChronoOn(7)
+    await router.push('/project/7/read')
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(active, 'pause').mockRejectedValueOnce(new Error('écriture refusée'))
+    await router.push('/')
+    expect(router.currentRoute.value.path).toBe('/')
+    expect(err).toHaveBeenCalled()
   })
 
   it('ouvrir un AUTRE projet ferme la séance du premier et l’écrit SUR CE projet', async () => {

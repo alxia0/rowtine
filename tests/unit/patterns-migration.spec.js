@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, it, expect } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
@@ -21,11 +22,22 @@ describe('migrateReadersIfNeeded', () => {
 
   it('ne retouche pas un patron ayant déjà un reader (idempotent)', async () => {
     const reader = { sizeLabels: ['M'], sections: [] }
-    const id = await db.patterns.add({ name: 'X', reader, sections: [], pdf: '', gallery: [] })
+    const id = await db.patterns.add({ name: 'X', reader, sections: [], pdf: '', gallery: [], coverIndex: 0 })
     const store = usePatternsStore()
     expect(await store.migrateReadersIfNeeded()).toBe(0)
     const p = await db.patterns.get(id)
     expect(p.reader).toEqual(reader)
+  })
+
+  it('load() backfille coverIndex même quand tous les patrons ont déjà un reader', async () => {
+    const reader = { sizeLabels: ['M'], sections: [] }
+    const id = await db.patterns.add({ name: 'X', reader, sections: [], pdf: '', gallery: [] })
+    const store = usePatternsStore()
+    await store.load()
+    const p = await db.patterns.get(id)
+    expect(p.coverIndex).toBe(0)
+    // La migration ne se relance plus une fois tous les patrons dotés d'un coverIndex numérique.
+    expect(await store.migrateReadersIfNeeded()).toBe(0)
   })
 })
 

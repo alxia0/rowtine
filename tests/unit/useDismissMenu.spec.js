@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — a11y des menus : Escape ferme, focus géré à l’ouverture/fermeture.
 import { describe, it, expect } from 'vitest'
 import { defineComponent, h } from 'vue'

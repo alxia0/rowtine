@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — rapport de synchro MD, UI. Couvre la décision
 // d'affichage (`classifySyncReport`, pure — cf. src/backup/sync-report-decision.js)
 // ET le rendu de la modale `SyncReportDialog` : cas propre → PAS de modale (le

@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — le réglage `importCaveatDue` (avertissement d'import, 19/08/2026).
 //
 // Sens choisi : « À MONTRER », et non « déjà montré » — le même que `welcomeDue`, et pour la

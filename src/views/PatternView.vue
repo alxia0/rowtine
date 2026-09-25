@@ -18,6 +18,8 @@ import { warningText } from '@/utils/warning-i18n'
 import { patternPriceState } from '@/utils/pattern-price'
 import { formatLocalDate } from '@/utils/date-format'
 import { formatMoney } from '@/utils/units'
+import { patternCoverIndexOf } from '@/utils/pattern-cover'
+import { sanitizeUrl } from '@/utils/safe-url'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +29,9 @@ const snackbar = useSnackbarStore()
 const lightbox = useLightboxStore()
 const importReport = useImportReportStore()
 const pattern = ref(null)
+// Défense en profondeur : l'URL est déjà assainie à l'import et à la restauration, on la
+// refiltre à l'affichage pour une entité écrite en base avant ces gardes.
+const safeAuthorUrl = computed(() => sanitizeUrl(pattern.value?.authorUrl))
 const editing = ref(false)
 // Warnings d'un import qui a navigué DIRECTEMENT ici (plus d'écran de
 // revue post-conversion, cf. LocalPdfImportView). Consommés une seule
@@ -105,6 +110,11 @@ function onPhotoClick(i) {
   if (i === 0 && pattern.value.pdf) openExternal()
   else lightbox.show(pattern.value.photos, i)
 }
+async function setCover(idx) {
+  if (!pattern.value) return
+  await patternsStore.update(pattern.value.id, { coverIndex: idx })
+  pattern.value = await patternsStore.get(pattern.value.id)
+}
 </script>
 
 <template>
@@ -145,7 +155,7 @@ function onPhotoClick(i) {
         </p>
         <p v-if="pattern.author" class="author">
           {{ t('pattern.by') }} <strong>{{ pattern.author }}</strong>
-          <a v-if="pattern.authorUrl" :href="pattern.authorUrl" target="_blank" rel="noopener" class="author__link">{{ t('pattern.authorUrl') }} ↗</a>
+          <a v-if="safeAuthorUrl" :href="safeAuthorUrl" target="_blank" rel="noopener" class="author__link">{{ t('pattern.authorUrl') }} ↗</a>
         </p>
         <p v-if="pattern.source" class="source">{{ t('pattern.source') }} : {{ pattern.source }}</p>
         <p v-if="priceLine" class="price" data-test="pattern-price-line">{{ priceLine }}</p>
@@ -163,19 +173,28 @@ function onPhotoClick(i) {
         <p v-if="pattern.photos && pattern.photos.length && pattern.pdf" class="hint">{{ t('pattern.tapSourceOpensPdf') }}</p>
 
         <button class="btn btn--primary btn--block mt" @click="createProject"><AppIcon name="plus" :size="17" /> {{ t('pattern.createProject') }}</button>
+        <!-- Un patron créé manuellement sans section a quand même une galerie à
+             requalifier en diagramme : Prévisualiser y mène aussi (l'action « Corriger
+             le patron » vit dans cet écran, cf. reader-view-correct-entry.spec.js) — pas
+             seulement quand reader.sections est déjà peuplé. -->
         <button
-          v-if="pattern.reader?.sections?.length"
+          v-if="pattern.reader?.sections?.length || pattern.gallery?.length"
           class="btn btn--block mt"
           @click="preview"
         >
           <AppIcon name="eye" :size="18" /> {{ t('pattern.preview') }}
         </button>
-        <!-- État vide (préexistant) : un patron sans reader/sections
+        <!-- État vide (préexistant) : un patron sans reader/sections ni galerie
              (ex. créé manuellement, PatternForm ne compose plus de reader) n'a rien à
              prévisualiser — on le dit plutôt que de ne rien afficher. -->
         <p v-else class="muted mt">{{ t('pattern.noSections') }}</p>
 
-        <PatternGallery :images="pattern.gallery" />
+        <PatternGallery
+          :images="pattern.gallery"
+          :cover-index="patternCoverIndexOf(pattern)"
+          :editable="!pattern.photos?.length"
+          @set-cover="setCover"
+        />
 
         <!-- Les tailles proposées sont affichées dans la ligne d'infos ci-dessus ;
              le suivi taille par taille se fait dans un projet (« Suivre le patron »). -->

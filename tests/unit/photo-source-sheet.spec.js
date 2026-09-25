@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LA FEUILLE DE CHOIX DE SOURCE PHOTO (PhotoSourceSheet.vue), décision produit
 // du 04/09/2026 option (a) : elle remplace le prompt natif CameraSource.Prompt du plugin
 // @capacitor/camera (dont LegacyCameraFlow ré-encode tout en JPEG opaque fond noir côté
@@ -13,8 +14,11 @@ import fr from '@/i18n/fr.json'
 import en from '@/i18n/en.json'
 import PhotoSourceSheet from '@/components/PhotoSourceSheet.vue'
 import { usePhotoSourceStore } from '@/stores/photo-source'
+import { makeTk } from './helpers/i18n-router'
 
 const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr, en } })
+
+const tk = makeTk(i18n)
 
 beforeEach(() => {
   setActivePinia(createPinia())
@@ -62,7 +66,7 @@ describe('PhotoSourceSheet — rendu', () => {
     expect(overlay.attributes('aria-modal')).toBe('true')
     const labelledby = overlay.attributes('aria-labelledby')
     expect(labelledby).toBeTruthy()
-    expect(wrapper.find('#' + labelledby).text()).toBe('Ajouter une photo')
+    expect(wrapper.find('#' + labelledby).text()).toBe(tk('photo.add'))
     expect(p).toBeInstanceOf(Promise) // toujours en attente : rien n'a été cliqué
     store.settle(null) // nettoyage : referme la feuille ouverte par le test
     await flushPromises()

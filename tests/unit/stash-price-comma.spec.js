@@ -1,15 +1,15 @@
+// @vitest-environment jsdom
 // Unitaire — StashView : un tarif de pelote saisi avec une virgule décimale (clavier FR)
 // doit compter dans le total dépensé au même titre qu'un tarif saisi avec un point.
 // Retour terrain 21/07 : seul le point fonctionnait, la virgule cassait silencieusement le total.
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import StashView from '@/views/StashView.vue'
 import { useYarnsStore } from '@/stores/yarns'
+import { createTestI18n } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 const stubs = { AppHeader: true, AppIcon: true, ThumbImage: true, YarnWeightHelp: true, ColorPickerDialog: true, YarnDetailDialog: true }
 
 function mountView(yarns) {

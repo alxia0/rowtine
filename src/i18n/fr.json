@@ -22,8 +22,9 @@
     "swipeHint": "Balaie l'écran vers la droite pour revenir en arrière. Et quand une bande d'onglets ou de catégories dépasse de l'écran — dans un projet, dans la bibliothèque —, fais-la glisser du doigt, de droite à gauche.",
     "tipTitle": "Le sais-tu ?",
     "welcomeTitle": "Bienvenue dans Rowtine !",
-    "welcomeBody": "Tout est en place pour commencer. Deux projets et des patrons d'exemple t'attendent : ouvre-les pour voir comment l'app fonctionne, et range tes premières pelotes dans ton Stock de laines. Promène-toi dans les menus et les écrans pour te familiariser avec l'interface — ces exemples sont là pour ça.",
-    "welcomeStart": "C'est parti !",
+    "welcomeBody": "Tout est en place pour commencer. Deux projets et des patrons d'exemple t'attendent : ouvre-les pour voir comment l'app fonctionne, et range tes premières pelotes dans ton Stock de laines. Promène-toi dans les menus et les écrans pour te familiariser avec l'interface — ces exemples sont là pour ça. On commence par un petit tour du lecteur sur le bonnet d'exemple.",
+    "welcomeStart": "Découvrir le lecteur",
+    "welcomeLater": "Plus tard",
     "firstName": "Ton prénom (facultatif)",
     "firstNamePlaceholder": "Comment t'appelles-tu ?",
     "technique": "Ta technique préférée",
@@ -38,9 +39,9 @@
     "inProgress": "en cours",
     "thisWeek": "cette semaine",
     "thisMonth": "ce mois",
-    "budgetSpent": "budget dépensé",
     "resume": "Reprendre",
     "resumeRow": "rang {done} / {total}",
+    "resumeSize": "taille tricotée {size}",
     "wipSummary": "Tu as {n} ouvrage en cours. | Tu as {n} ouvrages en cours.",
     "lastProject": "Dernier projet",
     "noProjects": "Aucun projet pour l'instant. Crée ton premier projet pour commencer.",
@@ -52,7 +53,6 @@
     "toolCalc": "Calculateur",
     "toolNeedle": "Aiguilles",
     "statsLink": "Voir les statistiques de temps",
-    "expensesLink": "Voir les dépenses",
     "recentSessions": "Dernières sessions",
     "sessionsLink": "Voir toutes les sessions"
   },
@@ -340,7 +340,7 @@
     "tab": {
       "infos": "Détails",
       "sections": "Sections",
-      "photos": "Galerie",
+      "photos": "Photos",
       "sessions": "Sessions",
       "stats": "Stats"
     },
@@ -482,6 +482,7 @@
     "sortWeight": "Épaisseur",
     "sortPurchased": "Date d'achat",
     "add": "Ajouter une laine",
+    "importRavelry": "Import Ravelry",
     "edit": "Modifier la laine",
     "updated": "Laine modifiée.",
     "notFound": "Laine introuvable.",
@@ -506,6 +507,10 @@
     "quantity": "Quantité",
     "quantityBelowReserved": "Cette laine a déjà {n} pelote(s) réparties entre plusieurs projets — impossible de descendre en dessous. Réduisez d'abord ces réservations sur les projets concernés.",
     "bain": "N° de bain",
+    "storedIn": "Lieu de rangement",
+    "storedInPlaceholder": "ex. Étagère 2, panier bleu",
+    "notes": "Notes",
+    "notesPlaceholder": "Tes notes personnelles sur cette laine…",
     "purchasesCount": "Achats enregistrés",
     "lastPurchaseDate": "Dernier achat",
     "composition": "Composition",
@@ -603,6 +608,7 @@
     "all": "Tous",
     "add": "Ajouter un patron",
     "importPdf": "Importer un patron PDF",
+    "importRowtine": "Importer au format Rowtine",
     "importing": "Lecture du PDF…",
     "importDone": "PDF importé. Vérifie et complète les infos.",
     "addManual": "Créer manuellement",
@@ -672,6 +678,9 @@
   },
   "importLocal": {
     "title": "Importer un PDF",
+    "titleRowtine": "Importer au format Rowtine",
+    "leadRowtine": "Un patron déjà préparé au format Rowtine : texte et images sont importés tels quels, sur ton appareil, hors-ligne.",
+    "pickRowtine": "Choisir un fichier .rowtine ou .zip",
     "lead": "Le patron est analysé sur ton appareil : gratuit, hors-ligne, fidèle au PDF.",
     "leadNext": "Le patron est enregistré directement dans ta bibliothèque ; tu pourras corriger les sections ensuite si besoin.",
     "pick": "Choisir un fichier PDF",
@@ -679,20 +688,29 @@
     "parsing": "Analyse du PDF…",
     "confidence": "Confiance",
     "level": { "high": "élevée", "medium": "moyenne", "low": "faible" },
-    "summary": "{sections} section(s) · {steps} étape(s)",
+    "summaryTitle": "Ton patron est importé",
+    "summary": {
+      "sections": "section | section | sections",
+      "steps": "étape à cocher | étape à cocher | étapes à cocher",
+      "sizes": "taille | taille | tailles",
+      "singleSize": "taille unique",
+      "charts": "diagramme | diagramme | diagrammes"
+    },
     "sizes": "Tailles : {labels}",
     "correctHint": "Tu pourras corriger la catégorisation des sections en entrant dans le patron.",
     "scanned": "Ce PDF semble scanné : il ne contient aucun texte lisible, l'application ne peut donc rien en extraire. Saisis le patron à la main, ou écris-nous à {email} — on peut t'aider à le préparer.",
+    "notPattern": "Ce PDF ne ressemble pas à un patron de tricot ou de crochet : Rowtine ne sait lire que ceux-là. Si c'en est bien un, écris-nous à {email}, on regardera pourquoi il n'a pas été reconnu.",
     "cancelImport": "Interrompre l'import",
     "saved": "Patron importé dans la bibliothèque",
-    "doneTitle": "Patron importé",
-    "doneCaveat": "La conversion n'est jamais parfaite : relis le patron avant de le suivre. Tout se corrige dans l'app.",
-    "doneHowToFix": "Comment corriger",
+    "caveatTitle": "Relis le patron avant de commencer",
+    "caveatBody": "L'import n'est jamais parfait : vérifie les chiffres, les tailles et les répétitions, et corrige-les directement dans l'app.",
+    "doneHowToFix": "Comment corriger ?",
     "viewPattern": "Voir le patron",
     "warnings": "{n} point(s) à vérifier",
+    "nextHint": "Parcours-le d'abord section par section et corrige son contenu si besoin. Tu lanceras ton projet depuis le patron.",
     "blockTitle": "Import risqué",
     "blockColumns": "Ce PDF semble présenté sur plus de 2 colonnes : le texte extrait sera mélangé.",
-    "blockMultiPattern": "Ce fichier semble contenir plusieurs patrons (ou un livre) : un seul patron peut être importé à la fois.",
+    "blockMultiPattern": "Ce fichier semble contenir plusieurs patrons, ou un livre entier : Rowtine n'importe qu'un patron à la fois. Enregistre les pages du patron voulu dans un PDF à part, puis importe ce fichier.",
     "blockLead": "L'import automatique a été suspendu. Tu peux l'importer quand même, mais il demandera sans doute une correction importante.",
     "importAnyway": "Importer quand même"
   },
@@ -702,8 +720,8 @@
     "howToFix": "Comment corriger"
   },
   "importZip": {
-    "noMd": "Ce zip ne contient aucun fichier patron (.md). Vérifie le fichier.",
-    "badZip": "Ce fichier n'est pas un zip lisible. Vérifie le fichier.",
+    "noMd": "Ce fichier ne contient aucun patron (.md). Vérifie le fichier.",
+    "badZip": "Ce fichier n'est pas une archive Rowtine lisible (.rowtine ou .zip). Vérifie le fichier.",
     "failed": "L'import a échoué. Vérifie le fichier.",
     "phase": { "read": "Lecture du fichier…", "images": "Extraction des images…", "done": "Terminé" }
   },
@@ -718,14 +736,14 @@
     "isChart": "Diagramme interactif",
     "followAsChart": "Suivre comme diagramme",
     "justImage": "Juste une image",
-    "sendToGallery": "Envoyer vers la galerie",
+    "sendToGallery": "Envoyer vers les photos",
     "changeType": "Changer le type",
     "renameDiagram": "Renommer ce diagramme",
     "renameLabel": "Nom du diagramme",
     "renameConfirm": "Renommer",
     "renameProgressWarning": "Renommer remet à zéro la progression de ce diagramme dans les projets en cours.",
     "renameFailed": "Ce diagramme n'a pas pu être renommé : son titre a changé dans le texte.",
-    "galleryToggle": "Galerie du patron ({count})",
+    "galleryToggle": "Photos du patron ({count})",
     "insertIntoText": "Insérer dans le texte",
     "chartMenuIneligible": "Seule la première image de la section peut devenir un diagramme",
     "brokenDiagramLabel": "Diagramme incomplet",
@@ -743,6 +761,10 @@
       "radialCircle": {
         "label": "Radial-rond",
         "hint": "Un motif tricoté/crocheté en rond à partir du centre — ex. granny rond, empiècement circulaire"
+      },
+      "radialHexagon": {
+        "label": "Radial-hexagone",
+        "hint": "Un motif tricoté/crocheté en hexagone à partir du centre — ex. granny hexagonal"
       },
       "path": {
         "label": "Tracé",
@@ -799,8 +821,8 @@
       "steps3": "Enregistre.",
       "tagsTitle": "À quoi sert chaque catégorie",
       "stripsTitle": "Les bandes du bas de l'écran",
-      "stripDiagrams": "Diagrammes : la liste des diagrammes du patron. Tu peux y changer le type de calage d'un diagramme, le renommer, le ramener à une simple image ou l'envoyer dans la galerie.",
-      "stripGallery": "Galerie du patron : les images qui accompagnent le patron sans être dans le texte. Tu peux en ajouter (appareil photo, fichier, page du PDF), en supprimer, ou en transformer une en diagramme.",
+      "stripDiagrams": "Diagrammes : la liste des diagrammes du patron. Tu peux y changer le type de calage d'un diagramme, le renommer, le ramener à une simple image ou l'envoyer dans les photos.",
+      "stripGallery": "Photos du patron : les images qui accompagnent le patron sans être dans le texte. Tu peux en ajouter (appareil photo, fichier, page du PDF), en supprimer, ou en transformer une en diagramme.",
       "stripImageTap": "Dans le texte, tape sur une image pour la suivre comme diagramme, en changer le type, ou la ramener à une simple image.",
       "tagsCol1": "Catégorie",
       "tagsCol2": "Ce que ça donne dans ton projet",
@@ -879,10 +901,17 @@
     "restoreShortfall": "Projet restauré, mais certaines pelotes réservées avaient été reprises par un autre projet entre-temps — l'allocation a été réduite en conséquence.",
     "trashEmpty": "Corbeille vide.",
     "emptyTrash": "Vider la corbeille",
+    "emptyTrashTitle": "Vider la corbeille ?",
+    "emptyTrashMessage": "Tous les éléments de la corbeille seront supprimés définitivement. Cette action est irréversible.",
     "types": {
       "project": "Projet",
       "yarn": "Laine",
       "pattern": "Patron"
+    },
+    "help": {
+      "title": "Aide",
+      "replayTour": "Revoir la visite guidée",
+      "replayTourHint": "Rouvre le bonnet d'exemple dans le lecteur avec les bulles d'explication."
     },
     "contribute": "Contribuer",
     "suggest": "Suggérer une amélioration",
@@ -1000,6 +1029,8 @@
     "errorBody": "Une erreur technique a été rencontrée pendant la restauration des données. Le détail s'affiche ci-dessous ; tu peux le copier pour le faire remonter.",
     "unownedTitle": "Données restaurées",
     "unownedBody": "Données restaurées, mais la prise en compte du dossier n'a pas pu être confirmée : l'enregistrement des données de Rowtine reste en pause.",
+    "partialTitle": "Données restaurées en partie",
+    "partialBody": "Certains éléments du dossier n'ont pas pu être lus : ils manquent dans l'app, mais restent intacts dans le dossier. Pour ne rien effacer, l'enregistrement des données de Rowtine reste en pause. Le détail s'affiche ci-dessous ; tu peux le copier pour le faire remonter.",
     "copyAction": "Copier le rapport"
   },
   "common": {
@@ -1104,9 +1135,13 @@
       "wizardResize": "Agrandir·Rétrécir",
       "wizardShapeCircle": "Rond",
       "wizardShapeSquare": "Carré",
+      "wizardShapeHexagon": "Hexagone",
+      "wizardHexOrientationFlat": "Côté plat en haut",
+      "wizardHexOrientationPointy": "Pointe en haut",
       "wizardStepInnerHint": "Place la première limite du diagramme qui marque le bas du premier rang.",
       "wizardStepOuterHint": "Place la seconde limite du diagramme qui marque l'extérieur du dernier rang.",
       "wizardStepSwitchHintToSquare": "Choisis à partir de quel rang le motif devient carré.",
+      "wizardStepSwitchHintToHexagon": "Choisis à partir de quel rang le motif devient hexagonal.",
       "wizardStepSwitchHintToCircle": "Choisis à partir de quel rang le motif devient rond.",
       "wizardStepReviewHint": "Ajuste la position des repères par rapport au dessin si besoin.",
       "wizardBack": "Retour",
@@ -1232,7 +1267,7 @@
   "patternExtras": {
     "preview": "Aperçu",
     "openExternal": "Ouvrir",
-    "galleryTitle": "Galerie du patron",
+    "galleryTitle": "Photos du patron",
     "fromPage": "p. {n}",
     "addedImage": "Image ajoutée",
     "addImage": "Ajouter une image",
@@ -1326,6 +1361,30 @@
       "sizeMismatch": "taille incohérente pour {path} : {read} octets lus pour {expected} annoncés (fichier modifié pendant la lecture ?)"
     }
   },
+  "ravelryImport": {
+    "title": "Importer depuis Ravelry",
+    "lead1": "Récupère le fichier d'export de ton stock Ravelry pour créer d'un coup les fiches des laines que tu as déjà.",
+    "step1": "Sur Ravelry, ouvre « Mon espace » (« my notebook » en anglais) puis l'onglet « Stock » (« Stash »).",
+    "step2": "Clique « Export », en haut à droite de la liste : un fichier .xls se télécharge.",
+    "step3": "Reviens ici et choisis ce fichier ci-dessous.",
+    "lead2": "Seules les laines encore en stock sont importées, pas celles « Epuisé », « A échanger ou à vendre » ni « Echangé/Vendu/Offert » ; la couleur, le prix et la date d'achat viennent du fichier, la photo reste à ajouter à la main.",
+    "pick": "Choisir le fichier téléchargé",
+    "analyze": "Analyser le fichier",
+    "analyzing": "Analyse en cours…",
+    "confirming": "Importation en cours…",
+    "summaryTotal": "{n} ligne(s) lues dans le fichier.",
+    "summaryEmpty": "Ce fichier ne contient aucune ligne à importer.",
+    "summaryCreate": "{n} laine(s) seront créées.",
+    "summaryAlready": "{n} déjà présentes dans le stock, ignorées.",
+    "summaryExcluded": "{n} ignorées (plus en stock côté Ravelry).",
+    "summaryNoStatusColumn": "Statut introuvable dans ce fichier (ni colonne Status, ni onglets « In stash »…) : impossible de savoir quelles laines sont encore en stock.",
+    "summaryUnmapped": "Colonnes non reconnues : {list}.",
+    "parseError": "Impossible de lire ce fichier. Vérifie qu'il s'agit bien d'un export .xls, .xlsx ou .csv de Ravelry.",
+    "confirm": "Importer {n} laine(s)",
+    "pickAnother": "Choisir un autre fichier",
+    "doneTitle": "{n} laine(s) importée(s).",
+    "backToStash": "Retour au stock"
+  },
   "purchases": {
     "title": "Achats et cadeaux",
     "showMore": "Voir {n} de plus",
@@ -1335,6 +1394,7 @@
     "correctAdjustStock": "Ajuster la quantité en stock à {n}",
     "kindBuy": "Achat",
     "kindGift": "Cadeau",
+    "purchasedFrom": "Acheté chez",
     "reconstructedTag": "Reconstitué automatiquement",
     "priceUnknown": "Prix inconnu",
     "deleted": "Achat supprimé"
@@ -1387,5 +1447,26 @@
     "empty": "Aucune session pour l’instant.",
     "emptyHint": "Lance le chrono depuis un projet : les sessions s’inscriront ici.",
     "unknownProject": "Projet supprimé"
+  },
+  "tour": {
+    "size": {
+      "title": "Ta taille, une fois pour toutes",
+      "body": "Choisis-la ici : tous les chiffres du patron s’adaptent pour n’afficher que ceux de ta taille. Fini les « 88 (96) 104 »."
+    },
+    "steps": {
+      "title": "Coche ce que tu as fait",
+      "body": "Rowtine retient chaque étape. Demain ou dans un mois, tu reprendras exactement ici."
+    },
+    "chart": {
+      "title": "Le diagramme suit ton rang",
+      "body": "La bande mise en évidence marque le rang en cours, les rangs faits se grisent. Le PDF peut rester fermé."
+    },
+    "skip": "Passer",
+    "next": "Suivant",
+    "start": "Commencer",
+    "progress": "Étape {n} sur {total}",
+    "label": "Visite guidée du lecteur",
+    "unavailable": "Le projet d'exemple n'a pas pu être préparé.",
+    "recreated": "Le projet d'exemple a été recréé pour la visite."
   }
 }

@@ -115,9 +115,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 </script>
 
 <template>
+  <!-- `open &&` devant chaque émission : pendant le fondu de sortie, la carte reste
+       cliquable ; un double-tap émettait deux fois (CorrectionView reculait de deux écrans). -->
   <Transition name="fade">
     <div v-if="open" class="cfd" :class="{ 'cfd--centered': centered }">
-      <div class="cfd__scrim" @click="dismissOnScrim && emit(safeEmit)"></div>
+      <div class="cfd__scrim" @click="open && dismissOnScrim && emit(safeEmit)"></div>
       <div
         class="cfd__card"
         :class="{ 'cfd__card--centered': centered }"
@@ -129,13 +131,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
         <h2 :id="titleId" class="cfd__title">{{ title }}</h2>
         <p class="cfd__msg">{{ message }}</p>
         <div class="cfd__actions">
-          <button v-if="hasCancel" ref="cancelBtn" class="btn" data-test="confirm-cancel" @click="emit('cancel')">{{ cancelLabel }}</button>
+          <button v-if="hasCancel" ref="cancelBtn" class="btn" data-test="confirm-cancel" @click="open && emit('cancel')">{{ cancelLabel }}</button>
           <button
             ref="confirmBtn"
             class="btn"
             :class="danger ? 'cfd__go--danger' : 'btn--primary'"
             data-test="confirm-ok"
-            @click="emit('confirm')"
+            @click="open && emit('confirm')"
           >
             {{ confirmLabel }}
           </button>

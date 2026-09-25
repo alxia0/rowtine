@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — composable useProjectConsumption (K2) : logique partagée par les deux
 // points d'entrée qui peuvent clore un projet. Couvre spécifiquement le chemin qui NE
 // passe PAS par le dialogue : le Retour Android, qui ferme directement le store

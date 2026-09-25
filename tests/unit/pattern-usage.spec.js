@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Avant de supprimer un patron, il faut savoir combien de projets s'en servent.
 // Précédent : src/backup/patron-md-sync.js:163 filtre déjà sur p.patternId.
 import { describe, it, expect, beforeEach } from 'vitest'

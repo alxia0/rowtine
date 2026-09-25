@@ -203,13 +203,16 @@ export function chartBands(current, rows, frame) {
 }
 
 // Position d'un tour de diagramme radial (motif en tours concentriques, ex. granny square).
-// Forme ('circle'|'square') d'une limite (r0 ou r1) : celle posée dans le frame si valide,
-// sinon dérivée de `chartShape` ('radial-square' → 'square', tout le reste, y compris
-// absent → 'circle') — repli qui rend un calage déjà enregistré AVANT ce champ (ancien
-// calage à 3 poignées) bit-identique à son rendu d'hier, sans migration de données.
+// Forme ('circle'|'square'|'hexagon') d'une limite (r0 ou r1) : celle posée dans le frame si
+// valide, sinon dérivée de `chartShape` ('radial-square' → 'square', 'radial-hexagon' →
+// 'hexagon', tout le reste, y compris absent → 'circle') — repli qui rend un calage déjà
+// enregistré AVANT ce champ (ancien calage à 3 poignées) bit-identique à son rendu d'hier,
+// sans migration de données.
 function shapeFallback(shape, chartShape) {
-  if (shape === 'circle' || shape === 'square') return shape
-  return chartShape === 'radial-square' ? 'square' : 'circle'
+  if (shape === 'circle' || shape === 'square' || shape === 'hexagon') return shape
+  if (chartShape === 'radial-square') return 'square'
+  if (chartShape === 'radial-hexagon') return 'hexagon'
+  return 'circle'
 }
 
 // current 1..rows ; frame = { cx, cy, r0, r1 } en % de l'image (repli sur un anneau plein-cadre
@@ -244,6 +247,24 @@ export function chartRings(current, rows, frame, chartShape) {
     hlShape: shapeForRound(r),
     doneShape: shapeForRound(Math.max(1, r - 1)),
   }
+}
+
+// Sommets d'un hexagone régulier centré sur (cx, cy), pour le rendu SVG des anneaux en
+// <polygon> (même rôle géométrique que le <rect> des anneaux carrés). `r` est l'apothème
+// (distance centre→milieu de côté) — même convention que le carré, dont le demi-côté vaut r :
+// un hexagone et un carré de même r partagent donc le même bord plat au même rayon visuel,
+// pour que la bascule d'une forme à l'autre (switchRound) reste visuellement continue.
+// `orientation` 'flat' (côté plat en haut/bas, pointes à gauche/droite) ou 'pointy' (sommet
+// en haut/bas) ; toute autre valeur (dont absente) retombe sur 'flat'. `aspect` compense
+// UNIQUEMENT l'axe y, comme les <rect>/<ellipse> voisines (viewBox 100x100 étiré par
+// preserveAspectRatio="none").
+export function hexagonPoints(cx, cy, r, orientation, aspect = 1) {
+  const R = r / Math.cos(Math.PI / 6) // apothème → circonrayon (sommets)
+  const startAngle = orientation === 'pointy' ? -Math.PI / 2 : 0
+  return Array.from({ length: 6 }, (_, i) => {
+    const theta = startAngle + (i * Math.PI) / 3
+    return { x: cx + R * Math.cos(theta), y: cy + R * Math.sin(theta) * aspect }
+  })
 }
 
 // Point de référence utilisé UNE SEULE FOIS pour décider quel côté d'un tracé est "vers
@@ -361,20 +382,26 @@ function retractedCurtainX(side) {
   return side === 'left' ? 0 : 100
 }
 
+// Côté normalisé du rideau : toute valeur autre que 'left' (absente, invalide) vaut 'right',
+// le sens de lecture le plus courant en tricot (cf. commentaire ci-dessus).
+function curtainSide(curtain) {
+  return curtain?.side === 'left' ? 'left' : 'right'
+}
+
 export function curtainBand(curtain) {
-  const side = curtain?.side === 'left' ? 'left' : 'right'
+  const side = curtainSide(curtain)
   const rawX = Number(curtain?.x)
   const x = Number.isFinite(rawX) ? Math.max(0, Math.min(100, rawX)) : retractedCurtainX(side)
   return side === 'left' ? { left: 0, width: x } : { left: x, width: 100 - x }
 }
 
 export function retractCurtain(curtain) {
-  const side = curtain?.side === 'left' ? 'left' : 'right'
+  const side = curtainSide(curtain)
   return { x: retractedCurtainX(side), side }
 }
 
 export function flipCurtainSide(curtain) {
-  const side = curtain?.side === 'left' ? 'right' : 'left'
+  const side = curtainSide(curtain) === 'left' ? 'right' : 'left'
   return { x: retractedCurtainX(side), side }
 }
 

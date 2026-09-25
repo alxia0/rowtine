@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — HomeView, tuile « Reprendre » : elle doit pointer le dernier projet TRAVAILLÉ,
 // pas le dernier CRÉÉ (retour terrain 25/07). Le store `projects` renvoie la liste triée par id
 // décroissant ; un simple `find(p => p.status === 'wip')` y sélectionne donc structurellement le

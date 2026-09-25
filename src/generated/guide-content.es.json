@@ -4,19 +4,27 @@
       "id": "section-0",
       "title": [
         {
-          "text": "El espíritu de {app}",
+          "text": "{app} en 4 pasos",
           "bold": false,
           "italic": false
         }
       ],
       "blocks": [
         {
-          "type": "image",
-          "src": "00-bienvenue",
-          "alt": "«¡Te damos la bienvenida a {app}!», y debajo «Tus proyectos de punto y ganchillo a lo largo del tiempo»: Español, Punto, Sistema, Métrico (m, g) y EUR ya marcados, y abajo el botón «¿Todo listo? ¡Empieza a tejer!»",
-          "caption": [
+          "type": "paragraph",
+          "spans": [
             {
-              "text": "El primer inicio: nombre, técnica, idioma y tema.",
+              "text": "{app} no es una carpeta de PDF. Es un lector interactivo que te guía a través de tu patrón: solo te muestra las cifras de tu talla y recuerda cada paso que ya has hecho. Importas tu patrón una vez, y después tejes o haces ganchillo sin tener que volver a abrir el PDF.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "1. Importa tu patrón",
               "bold": false,
               "italic": false
             }
@@ -26,17 +34,87 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "{app} te ayuda a tener todos tus proyectos de punto y ganchillo en un solo sitio: tu lana, tus patrones adaptados a tu talla y tu progreso. Es ",
+              "text": "Desde la biblioteca, elige un PDF. {app} lo lee por ti: secciones, filas, tallas, abreviaturas y diagramas. Todo ocurre en tu dispositivo. Ver el capítulo 4.",
               "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
             {
-              "text": "gratuita, de código abierto y funciona sin conexión",
-              "bold": true,
+              "text": "2. Crea un proyecto y elige tu talla",
+              "bold": false,
               "italic": false
-            },
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
             {
-              "text": ": tus datos se quedan en tu dispositivo, no en un servidor. Nada se pierde nunca por error: todo lo que borras acaba en una papelera.",
+              "text": "En la ficha del patrón, «Crear un proyecto a partir de este patrón». En el lector, elige tu talla: cada «88 (96) 104» se adapta para mostrar solo tu cifra.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Un patrón importado sirve tantas veces como quieras: una chaqueta de punto verde en L para ti, una roja en M para tu hermana. Cada proyecto conserva su talla, su lana y su avance, y el precio del patrón solo se cuenta una vez. Ver el capítulo 2.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "3. Teje o haz ganchillo con el lector",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Aquí es donde ocurre todo. Marca cada paso hecho: el progreso avanza y retomas exactamente donde lo dejaste gracias a «Volver a mi paso». El diagrama sigue tu fila, y las definiciones de las abreviaturas aparecen al tocar los términos subrayados en el texto. Ver el capítulo 3.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "4. Guarda el rastro",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "El cronómetro registra tus sesiones, la pestaña Fotos guarda las imágenes del patrón y tus propias fotos, las estadísticas resumen tu actividad en el proyecto, y una insignia se comparte en un gesto. Ver los capítulos 2 y 7.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Para probarlo ahora mismo: el botón «Repetir la visita guiada», justo debajo y en Ajustes, abre el gorro de ejemplo en el lector con burbujas de explicación.",
               "bold": false,
               "italic": false
             }
@@ -57,7 +135,7 @@
         {
           "type": "image",
           "src": "01-accueil",
-          "alt": "El inicio de {app}: «¡Hola, Camille!», la ficha Continuar muestra el proyecto Gorro de invierno al 0 por ciento, y debajo el panel (1 en curso, el tiempo de la semana, la última sesión con fecha de hoy, el presupuesto gastado) y las herramientas Contador, Calculadora y Agujas",
+          "alt": "El inicio de {app}: «¡Hola, Camille!», la ficha Continuar sobre Gorro de Trenzas en talla tejida M, las fichas En curso 1 y Esta semana 0 h, la última sesión de Gorro de invierno hoy (0:06), y luego las herramientas Contador, Calculadora y Agujas",
           "caption": [
             {
               "text": "Inicio: la ficha «Continuar» te lleva a la última pieza en la que trabajaste, el panel resume lo esencial hasta las últimas sesiones, y las tres herramientas están a mano.",
@@ -128,7 +206,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": cuántos proyectos tienes en curso, el tiempo que has dedicado a tejer o ganchillar esta semana (con el detalle en ",
+                  "text": ": cuántos proyectos tienes en curso, y el tiempo que has dedicado a tejer o ganchillar esta semana (con el detalle en ",
                   "bold": false,
                   "italic": false
                 },
@@ -138,57 +216,7 @@
                   "italic": false
                 },
                 {
-                  "text": "), y tu ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "presupuesto gastado",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ": el total de todo lo que has pagado por lana desde que usas la app, en la moneda que elegiste. Esta cifra nunca baja sola: usar un ovillo o terminar un proyecto no la reduce (solo una compra nueva la aumenta); solo puede bajar si tú borras o corriges una línea de compra en el bloque «Compras y regalos» de una ficha de lana (punto 5). (Si has usado varias monedas, cada una tiene su propio total: la app nunca las mezcla, porque no conoce un tipo de cambio.) Al tocar esta cifra abres la pantalla ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Gastos",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ", descrita en el punto 5. Esta ficha no aparece hasta que hayas registrado al menos una compra (por ejemplo en una instalación recién hecha), pero la pantalla sigue siendo accesible desde el menú en todo momento.",
-                  "bold": false,
-                  "italic": false
-                }
-              ],
-              "children": null
-            },
-            {
-              "spans": [
-                {
-                  "text": "Esta cifra es distinta de tu ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "valor del stock",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ", mostrado en la pantalla ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "Stock de lana",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": " (punto 5): ese sigue lo que tienes actualmente en el armario y baja cuando usas un ovillo. Las dos cifras conviven a propósito: una cuenta lo que has gastado, la otra lo que te queda.",
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }
@@ -464,7 +492,7 @@
         {
           "type": "image",
           "src": "02b-projet-prix-patron",
-          "alt": "El formulario Nuevo proyecto sobre el Gorro de invierno: bajo el patrón Gorro de Trenzas, Precio del patrón (€) muestra 12 junto al botón Gratis, Fecha de compra marca 12/08/2026 y Estado está en Pendiente.",
+          "alt": "El formulario Nuevo proyecto sobre el Gorro de invierno: bajo el patrón Gorro de Trenzas, Precio del patrón (€) muestra 12 junto al botón Gratis, Fecha de compra marca 24/09/2026, Estado está en Pendiente y el interruptor Mostrar el cronómetro está activado.",
           "caption": [
             {
               "text": "Debajo de la elección del patrón: su precio, un botón «Gratis» y la fecha de compra, prerrellenada con hoy.",
@@ -530,7 +558,7 @@
             {
               "spans": [
                 {
-                  "text": "Galería",
+                  "text": "Fotos",
                   "bold": true,
                   "italic": false
                 },
@@ -628,7 +656,7 @@
               "italic": false
             },
             {
-              "text": " (icono vertical de tres puntos) de la ficha o a la casilla «Cronómetro» del formulario de edición.",
+              "text": " (icono vertical de tres puntos) de la ficha o a la interruptor «Mostrar el cronómetro» del formulario de edición.",
               "bold": false,
               "italic": false
             }
@@ -794,7 +822,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Esta pantalla solo sirve para consultar: es en la ficha del proyecto, en su pestaña Sesiones, donde se corrige o se borra una sesión. Sin filtros, sin agrupaciones: es una primera versión, deliberadamente sencilla.",
+              "text": "Esta pantalla solo sirve para consultar: es en la ficha del proyecto, en su pestaña Sesiones, donde se corrige o se borra una sesión. La pantalla es deliberadamente sencilla, sin filtros ni agrupaciones.",
               "bold": false,
               "italic": false
             }
@@ -1027,17 +1055,17 @@
               "italic": false
             },
             {
-              "text": ", arriba de la pantalla, genera la imagen, la guarda en la ",
+              "text": ", arriba de la pantalla, genera la imagen, la guarda en las ",
               "bold": false,
               "italic": false
             },
             {
-              "text": "Galería",
+              "text": "Fotos",
               "bold": true,
               "italic": false
             },
             {
-              "text": " del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo sin enviar nada: la insignia se queda en la galería. Y si cambias un ajuste y vuelves a compartir, la insignia anterior de esa misma apertura se sustituye, no se duplica.",
+              "text": " del proyecto y luego abre el menú de compartir de tu teléfono. Puedes cerrarlo sin enviar nada: la insignia se queda en las fotos. Y si cambias un ajuste y vuelves a compartir, la insignia anterior de esa misma apertura se sustituye, no se duplica.",
               "bold": false,
               "italic": false
             }
@@ -1392,12 +1420,12 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "¿Y los diagramas redondos o cuadrados?",
+              "text": "¿Y los diagramas redondos, cuadrados o hexagonales?",
               "bold": true,
               "italic": false
             },
             {
-              "text": " Las rejillas granny, redondas o cuadradas, no se calibran con dos líneas: el mismo botón ",
+              "text": " Las rejillas granny, redondas, cuadradas o hexagonales, no se calibran con dos líneas: el mismo botón ",
               "bold": false,
               "italic": false
             },
@@ -1427,7 +1455,7 @@
               "italic": false
             },
             {
-              "text": " o ",
+              "text": ", ",
               "bold": false,
               "italic": false
             },
@@ -1437,7 +1465,37 @@
               "italic": false
             },
             {
-              "text": ", se mueve y se ajusta (botones ",
+              "text": " o ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Hexágono",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (para un hexágono, dos botones más fijan su orientación: ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Lado plano arriba",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " o ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Punta arriba",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "), se mueve y se ajusta (botones ",
               "bold": false,
               "italic": false
             },
@@ -1476,7 +1534,7 @@
         {
           "type": "image",
           "src": "03h-calage-granny-rond",
-          "alt": "El mismo asistente de calibración del granny, con el límite declarado redondo esta vez: la lupa redonda, marcada con la misma cruz, rodea la misma flor central del cuadrado de puntos desenfocados, los botones Redondo y Cuadrado (Redondo activo), luego Mover, activo también, Ampliar/Reducir, y abajo Restablecer, Cancelar y Confirmar",
+          "alt": "El mismo asistente de calibración del granny, con el límite declarado redondo esta vez: la lupa redonda, marcada con la misma cruz, rodea la flor central del cuadrado de puntos desenfocados, los botones Redondo, Cuadrado y Hexágono (Redondo activo), luego Mover, activo también, Ampliar/Reducir, y abajo Restablecer, Cancelar y Confirmar",
           "caption": [
             {
               "text": "El límite declarado redondo: la lupa sigue la forma elegida, y los botones Redondo y Cuadrado la deciden en cada paso.",
@@ -1755,7 +1813,7 @@
               "italic": false
             },
             {
-              "text": ", tus instrucciones a la izquierda y un diagrama que queda mostrado de forma permanente a la derecha: ya no tienes que desplazarte entre los dos. Mantienes el control:",
+              "text": ", tus instrucciones a la izquierda y un diagrama que queda mostrado de forma permanente a la derecha: no tienes que desplazarte entre los dos. Mantienes el control:",
               "bold": false,
               "italic": false
             }
@@ -1831,7 +1889,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Este ajuste solo dura mientras consultas el patrón: al volver a abrirlo, aparece de nuevo el panel con el primer diagrama. En teléfono (o en una tableta sujeta en vertical), el lector se queda en una sola columna, como antes. Un patrón sin diagrama no tiene panel en absoluto. El índice del lector, por su parte, sigue arriba de la columna de las instrucciones, con los mismos puntos y el mismo gesto.",
+              "text": "Este ajuste solo dura mientras consultas el patrón: al volver a abrirlo, aparece de nuevo el panel con el primer diagrama. En teléfono (o en una tableta sujeta en vertical), el lector se muestra en una sola columna. Un patrón sin diagrama no tiene panel en absoluto. El índice del lector, por su parte, sigue arriba de la columna de las instrucciones, con los mismos puntos y el mismo gesto.",
               "bold": false,
               "italic": false
             }
@@ -1841,7 +1899,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Las estadísticas, con espacio.",
+              "text": "Las estadísticas, a todo lo ancho.",
               "bold": true,
               "italic": false
             }
@@ -1850,7 +1908,7 @@
         {
           "type": "image",
           "src": "03f-tablette-stats",
-          "alt": "Las estadísticas a sus anchas en tableta: la cuadrícula del calendario va de mar a sept y debajo las casillas se colocan de dos en dos: Tiempo total 119:40:06, Días activos 127 de 181, Racha actual 6 días.",
+          "alt": "Las estadísticas a sus anchas en tableta: la cuadrícula del calendario va de mar a sept de una sola pieza y debajo las casillas se colocan de dos en dos: Tiempo total 116:40:06, Días activos 125 de 179, Racha actual 6 días, Racha más larga 12 días.",
           "caption": [
             {
               "text": "Las estadísticas en una tableta sujeta en horizontal, en la ventana Semestre: la cuadrícula del calendario muestra los últimos seis meses de un vistazo, cuando en el teléfono hay que deslizarla con el dedo, y las casillas numéricas se colocan de dos en dos debajo.",
@@ -1906,7 +1964,7 @@
         {
           "type": "image",
           "src": "04b-fiche-patron",
-          "alt": "El patrón Gorro de Trenzas, con la línea Punto, Accesorios, S, M, L, la línea Comprado por 12 € el 12/8/2026 y una foto del gorro de trenzas sobre una tabla de madera; los dos botones se llaman Crear un proyecto a partir de este patrón y Previsualizar el patrón.",
+          "alt": "El patrón Gorro de Trenzas, con la línea Punto, Accesorios, S, M, L, la línea Comprado por 12 € el 24/9/2026 y una foto del gorro de trenzas sobre una tabla de madera, un lápiz de edición arriba a la derecha, y los dos botones Crear un proyecto a partir de este patrón y Previsualizar el patrón.",
           "caption": [
             {
               "text": "La ficha de un patrón, deliberadamente sencilla: crear un proyecto, o previsualizar. (La corrección del import se abre desde la vista previa, o desde el menú de un proyecto en curso que use este patrón.)",
@@ -1967,7 +2025,97 @@
                   "italic": false
                 },
                 {
-                  "text": ", tantas veces como quieras, y es ese repaso el que marca la diferencia entre un patrón más o menos correcto y un proyecto que muestra las cifras y las explicaciones correctas. (La lectura también reconoce las rejillas redondas y cuadradas de los patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)",
+                  "text": ", tantas veces como quieras, y es ese repaso el que marca la diferencia entre un patrón más o menos correcto y un proyecto que muestra las cifras y las explicaciones correctas. En cuanto termina el import, un resumen «Tu patrón está importado» cuenta lo que la app ha encontrado (secciones, pasos para marcar, tallas, diagramas), te recuerda que releas el patrón antes de empezar, y el botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Previsualizar el patrón",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " te lleva directamente a recorrerlo, sección por sección. (La lectura también reconoce las rejillas redondas y cuadradas de los patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Importar en formato {app}",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en «+ Añadir un patrón», esta opción acepta un archivo ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": ".rowtine",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", es decir, un patrón ya preparado en el formato de {app} (su texto y sus imágenes). Entra tal cual en tu biblioteca, sin leer ningún PDF, y siempre sin conexión.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Crear un patrón a mano",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en «+ Añadir un patrón», la opción ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Crear manualmente",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " abre una pantalla propia (nombre, tipo, categoría, tallas, fuente, autor…) con un único apartado ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Fotos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " para sus imágenes. En la ficha del patrón, una estrella en cada foto de «Fotos del patrón» la marca como ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "portada",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": es la que ilustra el patrón en la biblioteca. (Un patrón importado conserva la portada sacada de su PDF.) Y en cuanto tiene una foto, aparece el botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Previsualizar el patrón",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": puedes entonces seguir una imagen como diagrama, exactamente igual que en un patrón importado.",
                   "bold": false,
                   "italic": false
                 }
@@ -2723,7 +2871,7 @@
               "italic": false
             },
             {
-              "text": " abre una elección de tipo, cada uno explicado en lenguaje claro: filas estándar, radial cuadrado, radial redondo o trazado, para adaptarlo a la forma real de tu motivo (un granny cuadrado no se lee como filas estándar). Para una imagen que ya se sigue como diagrama, una etiqueta ",
+              "text": " abre una elección de tipo, cada uno explicado en lenguaje claro: filas estándar, radial cuadrado, radial redondo, radial hexagonal o trazado, para adaptarlo a la forma real de tu motivo (un granny cuadrado no se lee como filas estándar). Para una imagen que ya se sigue como diagrama, una etiqueta ",
               "bold": false,
               "italic": false
             },
@@ -2768,7 +2916,7 @@
               "italic": false
             },
             {
-              "text": " En la galería de un patrón, desde su ficha o desde el editor de corrección, el botón ",
+              "text": " En las fotos de un patrón, desde su ficha o desde el editor de corrección, el botón ",
               "bold": false,
               "italic": false
             },
@@ -2808,7 +2956,7 @@
               "italic": false
             },
             {
-              "text": " cuando existe: allí eliges la página, y la app te la hace recortar, la única fuente que pasa por ese recorte. Cada imagen se une a la galería del patrón, lista para insertarse o seguirse.",
+              "text": " cuando existe: allí eliges la página, y la app te la hace recortar, la única fuente que pasa por ese recorte. Cada imagen se une a las fotos del patrón, lista para insertarse o seguirse.",
               "bold": false,
               "italic": false
             }
@@ -2858,12 +3006,12 @@
               "italic": false
             },
             {
-              "text": "enviarla a la galería",
+              "text": "enviarla a las fotos",
               "bold": true,
               "italic": false
             },
             {
-              "text": " del patrón. En la banda «Galería del patrón», cada imagen se elimina, se inserta en el texto o se sigue como diagrama: los tres gestos en el mismo sitio.",
+              "text": " del patrón. En la banda «Fotos del patrón», cada imagen se elimina, se inserta en el texto o se sigue como diagrama: los tres gestos en el mismo sitio.",
               "bold": false,
               "italic": false
             }
@@ -2931,7 +3079,7 @@
         {
           "type": "image",
           "src": "05-stock",
-          "alt": "10 ovillos, 1,932 km, 500 gramos y 31 € gastados arriba, el campo Buscar una lana… y los botones Filtrar y Ordenar, luego Drops · Moutarde, ×4 · 165 metros · 200 gramos, marcada con una pequeña hoja, y Hobbii · Sauge, ×6 · 212 metros · 300 gramos, ambas libres",
+          "alt": "10 ovillos, 1,932 km, 500 g y 31 € gastados arriba, el campo Buscar una lana…, los botones Filtrar y Ordenar, debajo Añadir una lana e Importar de Ravelry uno encima del otro, luego Drops · Moutarde, ×4 · 165 m · 200 g, marcada con una pequeña hoja, y Hobbii · Sauge, ×6 · 212 m · 300 g, ambas libres",
           "caption": [
             {
               "text": "El stock: los totales arriba (ovillos, longitud, peso, valor), y luego una ficha por lana con su estado, libre o reservada por un proyecto.",
@@ -2962,7 +3110,17 @@
                   "italic": false
                 },
                 {
-                  "text": ", y tu presupuesto gastado (punto 1) sube por el importe indicado. La fecha que te propone es la de hoy: si compraste esa lana hace más tiempo, puedes corregirla directamente en el formulario. (Estos dos campos solo aparecen al crear la ficha. En una ficha ya guardada, es el bloque ",
+                  "text": ", y el total de la pantalla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Gastos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " sube por el importe indicado. La fecha que te propone es la de hoy: si compraste esa lana hace más tiempo, puedes corregirla directamente en el formulario. (Estos dos campos solo aparecen al crear la ficha. En una ficha ya guardada, es el bloque ",
                   "bold": false,
                   "italic": false
                 },
@@ -2973,6 +3131,41 @@
                 },
                 {
                   "text": " el que se encarga, con una línea por adquisición.)",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Dónde la guardas, lo que opinas de ella",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": dos campos libres, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Guardado en",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " («Estante 2, cesta azul») y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Notas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", se muestran luego en la ficha de la lana.",
                   "bold": false,
                   "italic": false
                 }
@@ -3153,7 +3346,7 @@
         {
           "type": "image",
           "src": "05b-fiche-laine",
-          "alt": "La ficha se abre sobre el stock y sus totales 10 ovillos, 1,932 km, 500 gramos y 31 € gastados: punto amarillo Moutarde, marca Drops, 165 m, 50 g por ovillo, cantidad 4 a 3,20 €, última compra 2026-08-12",
+          "alt": "La ficha a pantalla completa de Drops · Moutarde: marca Drops, 165 m, 50 g por ovillo, cantidad 4 a 3,20 €, una compra registrada, la última el 24/9/2026, composición Algodón, luego Fibra vegetal, las etiquetas Vegano y Fibras biológicas (GOTS), el estado Libre y el botón Añadir una foto",
           "caption": [
             {
               "text": "La ficha de una lana: su composición, la mención «Fibra vegetal», y sus dos etiquetas «Vegano» y «Fibras biológicas (GOTS)».",
@@ -3209,7 +3402,7 @@
                   "italic": false
                 },
                 {
-                  "text": " en la parte superior del stock. Filtrar abre una ventana de dos niveles: la lista de seis criterios (",
+                  "text": " en la parte superior del stock. Filtrar abre una ventana de dos niveles: la lista de siete criterios (",
                   "bold": false,
                   "italic": false
                 },
@@ -3269,7 +3462,17 @@
                   "italic": false
                 },
                 {
-                  "text": "), y luego, para el criterio tocado, sus valores. Una sola elección por criterio, pero los criterios se acumulan; una pastilla en el botón Filtrar cuenta los filtros activos, y ",
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Estado",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": libre, reservada o usada), y luego, para el criterio tocado, sus valores. Una sola elección por criterio, pero los criterios se acumulan; una pastilla en el botón Filtrar cuenta los filtros activos, y ",
                   "bold": false,
                   "italic": false
                 },
@@ -3309,7 +3512,7 @@
                   "italic": false
                 },
                 {
-                  "text": ". Nada de esto se memoriza: cada vuelta al stock parte sin filtro, ordenado por marca. Lista o cuadrícula visual, a elegir.",
+                  "text": ". Nada de esto se memoriza: cada vuelta al stock parte sin filtro, ordenado por marca.",
                   "bold": false,
                   "italic": false
                 }
@@ -3324,7 +3527,7 @@
                   "italic": false
                 },
                 {
-                  "text": " una ficha desde el menú ",
+                  "text": " una lana desde el menú ",
                   "bold": false,
                   "italic": false
                 },
@@ -3334,7 +3537,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (icono vertical de tres puntos) de su tarjeta. «Duplicar» te resulta útil para la misma lana en otro color: se copia todo, solo te queda cambiar el color.",
+                  "text": " (icono vertical de tres puntos) en la parte superior de su ficha. «Duplicar» te resulta útil para la misma lana en otro color: se copia todo, solo te queda cambiar el color.",
                   "bold": false,
                   "italic": false
                 }
@@ -3379,22 +3582,47 @@
             {
               "spans": [
                 {
-                  "text": "Ficha de detalle",
+                  "text": "La ficha de una lana",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": " de una lana: un resumen completo (ovillos, metros, proyectos que la usan), y un bloque ",
+                  "text": ": al tocar su tarjeta se abre a pantalla completa. Reúne todo lo que anotaste (marca, color, ubicación, metraje, cantidad, precio, compras, composición, notas), sus características, su estado (libre, reservada, usada) y sus ",
                   "bold": false,
                   "italic": false
                 },
+                {
+                  "text": "fotos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": puedes añadir varias y elegir, tocando la estrella, la que sirve de portada.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
                 {
                   "text": "Compras y regalos",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": " que guarda para ti el registro de cada adquisición de esa lana:",
+                  "text": ": en la pantalla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Editar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de una lana, este bloque guarda para ti el registro de cada adquisición:",
                   "bold": false,
                   "italic": false
                 }
@@ -3425,7 +3653,17 @@
                         "italic": false
                       },
                       {
-                        "text": " (un regalo nunca cuenta en tu presupuesto gastado). Las tres líneas más recientes las ves de inmediato, el resto se despliega con un gesto.",
+                        "text": " (un regalo nunca cuenta en tus gastos). Un campo ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Comprado en",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " guarda además el nombre de la tienda. Las tres líneas más recientes las ves de inmediato, el resto se despliega con un gesto.",
                         "bold": false,
                         "italic": false
                       }
@@ -3460,12 +3698,12 @@
                         "italic": false
                       },
                       {
-                        "text": " de una lana desde su ficha, la app te propone registrar la compra correspondiente, fechada hoy: puedes aceptarla, marcarla como regalo, o descartarla si no quieres conservarla. ",
+                        "text": " de una lana al editarla, la app te propone registrar la compra correspondiente, fechada hoy: puedes aceptarla, marcarla como regalo, o descartarla si no quieres conservarla. ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "Disminuir una cantidad, en cambio, nunca toca tu presupuesto gastado",
+                        "text": "Disminuir una cantidad, en cambio, nunca toca tus gastos",
                         "bold": true,
                         "italic": false
                       },
@@ -3526,6 +3764,112 @@
           "type": "subsection",
           "title": [
             {
+              "text": "Importar tu stock desde Ravelry",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Si ya llevas tu stock en Ravelry, no hace falta volver a escribirlo todo: el botón ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Importar de Ravelry",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", arriba del stock, crea de golpe las fichas de las lanas que ya tienes allí.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "En Ravelry, abre «Mi cuaderno» («my notebook» en inglés) y luego la pestaña «Reservas» («Stash»).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Haz clic en «Export», arriba a la derecha de la lista: se descarga un archivo .xls.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Vuelve a {app}, elige ese archivo y luego ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Analizar el archivo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Antes de crear nada, la app te muestra un resumen: cuántas filas ha leído, cuántas lanas va a crear, cuántas están ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "ya en tu stock",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " (se ignoran: repetir un import no crea duplicados) y cuántas ya no están en stock en Ravelry («Agotadas», «Vendo o intercambio», «Intercambiadas/Vendidas/Regaladas»), ignoradas también. No se escribe nada hasta que tocas el botón «Importar … hilo(s)».",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "La marca, el modelo, el color, el grosor, el metraje y el peso, el número de ovillos, el lugar donde la guardas, las notas, así como el precio, la fecha y la tienda de la compra vienen del archivo; la pastilla de color se elige según la familia de color que indica Ravelry. La foto, en cambio, la añades tú a mano. Todo ocurre en tu dispositivo: {app} lee el archivo que le das, nunca se conecta a Ravelry.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
               "text": "La pantalla Gastos",
               "bold": false,
               "italic": false
@@ -3548,7 +3892,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Accesible tocando el presupuesto gastado en el inicio (punto 1), esta pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la ",
+              "text": "Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la ",
               "bold": false,
               "italic": false
             },
@@ -3591,7 +3935,27 @@
                   "italic": false
                 },
                 {
-                  "text": ", por moneda si has usado más de una. Mientras no hayas anotado ningún precio de patrón, este total sigue siendo exactamente el que conoces; en cuanto aparece un patrón en él, se desglosa en dos sublíneas: lo que fue a lana, lo que fue a patrones.",
+                  "text": ", por moneda si has usado más de una (la app nunca las mezcla, porque no conoce un tipo de cambio). Este total nunca baja solo: usar un ovillo o terminar un proyecto no lo reduce. Es distinto del ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "valor de tu stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", arriba en la pantalla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stock de lana",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", que sigue lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón, este total sigue siendo exactamente el que conoces; en cuanto aparece un patrón en él, se desglosa en dos sublíneas: lo que fue a lana, lo que fue a patrones.",
                   "bold": false,
                   "italic": false
                 }
@@ -3884,7 +4248,7 @@
         {
           "type": "image",
           "src": "07-statistiques",
-          "alt": "La pantalla Estadísticas con la pestaña Trimestre activa junto a Mes, Semestre y Año: del 15/6/2026 al 12/9/2026, en el periodo 73:00:06, debajo Calendario en vez de Ritmo, una cuadrícula de junio a septiembre graduada de menos a más, y las tarjetas Tiempo total 73:00:06 y Días activos 71 de 90.",
+          "alt": "La pantalla Estadísticas con la pestaña Trimestre activa junto a Mes, Semestre y Año: del 29/6/2026 al 24/9/2026, en el periodo 72:40:06, debajo Calendario en vez de Ritmo, una cuadrícula de jun a sept graduada de menos a más, y las tarjetas Tiempo total 72:40:06 y Días activos 69 de 88.",
           "caption": [
             {
               "text": "El selector de arriba elige una ventana de observación (Mes, Trimestre, Semestre o Año), y toda la pantalla se ajusta a ella; aquí, la ventana Trimestre. La pestaña «Calendario», mostrada por defecto, muestra la cuadrícula y las nueve casillas numéricas.",
@@ -3897,7 +4261,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "El selector de la parte superior de la pantalla ya no elige simplemente una duración de visualización: elige una ",
+              "text": "El selector de la parte superior de la pantalla no elige simplemente una duración de visualización: elige una ",
               "bold": false,
               "italic": false
             },
@@ -4022,7 +4386,7 @@
         {
           "type": "image",
           "src": "07b-stats-rythme",
-          "alt": "Estadísticas, vista Ritmo: las semanas del 18/05 al 29/06 en barras, de 1:10:00 a 10:50:00, luego Por día de la semana de Lun a Dom, y abajo la frase En todo el historial, tu día más activo es el miércoles.",
+          "alt": "Estadísticas, vista Ritmo: las semanas del 29/6 al 7/9 en barras, de 1:10:00 a 12:10:00, luego Por día de la semana de Lun a Dom, y abajo la frase En todo el historial, tu día más activo es el jueves.",
           "caption": [
             {
               "text": "La pestaña «Ritmo»: las barras del tiempo dedicado por periodo, las siete barras por día de la semana y la frase que nombra tu día más constante.",
@@ -4064,7 +4428,7 @@
         {
           "type": "image",
           "src": "07c-stats-annee",
-          "alt": "Un año entero de cuadrícula del calendario, de ago a ago: una columna por semana, una casilla por día, las iniciales L M X J V S D en el margen izquierdo, un marco más marcado por mes y la leyenda de menos a más en cinco niveles.",
+          "alt": "Un año entero de cuadrícula del calendario, de sept a sept: una columna por semana, una casilla por día, las iniciales L M X J V S D en el margen izquierdo, un marco más marcado por mes y la leyenda de menos a más en cinco niveles.",
           "caption": [
             {
               "text": "La cuadrícula en la ventana Año: un año completo de un solo vistazo, una columna por semana y una casilla por día, con los marcos que separan los meses. Toca la imagen para ampliarla y leerla en detalle.",
@@ -4451,6 +4815,21 @@
             {
               "spans": [
                 {
+                  "text": "Ayuda",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": «Repetir la visita guiada» vuelve a abrir el gorro de ejemplo en el lector con sus burbujas de explicación, y lo vuelve a crear si lo has eliminado.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Contribuir",
                   "bold": true,
                   "italic": false
@@ -4520,20 +4899,32 @@
           ]
         },
         {
+          "type": "image",
+          "src": "00-bienvenue",
+          "alt": "«¡Te damos la bienvenida a {app}!», y debajo «Tus proyectos de punto y ganchillo a lo largo del tiempo»: Español, Punto, Sistema, Métrico (m, g) y EUR ya marcados, y abajo el botón «¿Todo listo? ¡Empieza a tejer!»",
+          "caption": [
+            {
+              "text": "El primer inicio: nombre, técnica, idioma y tema.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
           "type": "paragraph",
           "spans": [
             {
-              "text": "Por orden, la primera vez que abres {app}: la pantalla de bienvenida te pide tu nombre, tu técnica, tu idioma, tu tema, tus unidades y tu moneda; después llega la pantalla de la carpeta de copia de seguridad, descrita justo arriba. A continuación te saludan tres mensajitos, ",
+              "text": "Por orden, la primera vez que abres {app}: la pantalla de bienvenida te pide tu nombre, tu técnica, tu idioma, tu tema, tus unidades y tu moneda; en Android, después llega la pantalla de la carpeta de copia de seguridad, descrita justo arriba. A continuación, unos pocos detalles te reciben, cada uno ",
               "bold": false,
               "italic": false
             },
             {
-              "text": "una sola vez cada uno",
+              "text": "una sola vez",
               "bold": true,
               "italic": false
             },
             {
-              "text": ": no volverás a verlos.",
+              "text": ": no volverás a verlos (salvo la visita guiada, que puedes repetir cuando quieras).",
               "bold": false,
               "italic": false
             }
@@ -4556,7 +4947,37 @@
                   "italic": false
                 },
                 {
-                  "text": ", en el centro de la pantalla de inicio en cuanto tu carpeta de copia de seguridad está lista: te dice que todo está preparado y te invita a abrir los proyectos y los patrones de ejemplo para hacerte a la app. Su botón la cierra, y no vuelve.",
+                  "text": ", en el centro de la pantalla de inicio: te dice que todo está preparado y te invita a abrir los proyectos y los patrones de ejemplo para hacerte a la app. Dos botones la cierran: «Descubrir el lector» lanza enseguida la visita guiada de abajo, «Más tarde» la cierra sin ella. En los dos casos, no vuelve.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Si elegiste «Descubrir el lector», una ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "visita guiada del lector",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " se abre enseguida sobre el gorro de ejemplo, con tres burbujas de explicación: tu talla, marcar un paso y el diagrama que sigue tu fila. Puedes repetirla cuando quieras: el botón «Repetir la visita guiada» está al final de la primera sección de esta guía (más arriba), y en el bloque ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ayuda",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de Ajustes; este último recrea el gorro de ejemplo si lo has borrado.",
                   "bold": false,
                   "italic": false
                 }
@@ -4639,17 +5060,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": ningún dato tuyo sale nunca del dispositivo, salvo la carpeta de copia de seguridad que ",
-                  "bold": false,
-                  "italic": false
-                },
-                {
-                  "text": "tú eliges",
-                  "bold": true,
-                  "italic": false
-                },
-                {
-                  "text": ".",
+                  "text": ": ningún dato tuyo sale nunca del dispositivo.",
                   "bold": false,
                   "italic": false
                 }
@@ -4709,7 +5120,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": en un teléfono pequeño nada se sale ni se corta; en una tableta, la app aprovecha el espacio: tus listas de proyectos y patrones se reparten en varias columnas en lugar de una sola pila larga, y el lector puede mantener el diagrama junto al texto. La app tiene en cuenta las zonas reservadas de la pantalla (barra de estado, muesca, barra de navegación): el contenido ya no se desliza debajo de ellas.",
+                  "text": ": en un teléfono pequeño nada se sale ni se corta; en una tableta, la app aprovecha el espacio: tus listas de proyectos y patrones se reparten en varias columnas en lugar de una sola pila larga, y el lector puede mantener el diagrama junto al texto. La app tiene en cuenta las zonas reservadas de la pantalla (barra de estado, muesca, barra de navegación): el contenido no se desliza debajo de ellas.",
                   "bold": false,
                   "italic": false
                 }

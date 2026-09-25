@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Compteur est passé de <select class="cm-retag-counter">
 // à une puce qui ouvre un popover générique (openMenuPopover), même patron
 // que Section/Aide-mémoire (cf. cm-editor-section-menu.spec.js et

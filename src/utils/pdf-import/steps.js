@@ -69,7 +69,8 @@ const NUM_ROW_RE = /^\s*(?:\d+\s*(?:[.):]\s*(?:[-–]\s*\d+\s*[.):]?)?|[-–]\s*
 // total fabriqué quand la liste capturée ne correspond PAS à un vecteur reconnu (cf. steps.js
 // plus bas, non-invention : une liste de compte incohérent avec n reste verbatim, jamais
 // diffusée sur les tailles à partir du seul nombre isolé qui la précède).
-const REP_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|gjenta\b|upprepa\b|toista\b|wiederhol\w*|\bwdh\b|repit[ea]\w*|repetir\b|ripet\w+|herhaal\b|powt[óo]rz\w*)[^.]*?(\d+)\s*(?:\(\s*(?<vec>\d+(?:\s*[,;]\s*\d+){0,23})\s*\)\s*)?(?:fois|times|x|gange?|ganger|g[åa]nger|kertaa|mal\b|veces|volte|keer|razy)\b/i
+// Unité « x » non suivie d'un chiffre : « 2 x 2 rib » (côtes) n'est pas un compte de répétitions.
+const REP_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|gjenta\b|upprepa\b|toista\b|wiederhol\w*|\bwdh\b|repit[ea]\w*|repetir\b|ripet\w+|herhaal\b|powt[óo]rz\w*)[^.]*?(\d+)\s*(?:\(\s*(?<vec>\d+(?:\s*[,;]\s*\d+){0,23})\s*\)\s*)?(?:fois|times|x(?!\s*\d)|gange?|ganger|g[åa]nger|kertaa|mal\b|veces|volte|keer|razy)\b/i
 // Bug 2 (campagne 2026-08-27, mountaintop-pullover-es-b0cc556d) : une ligne de répétition
 // peut porter PLUSIEURS vecteurs multi-tailles (ex. « Rep las últimas 17 (11)… rdas 2 (5)…
 // veces » : durée en rangs PUIS nombre de répétitions). `c` (applySizeVectors) les liste
@@ -80,7 +81,7 @@ const REP_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|gjenta\b|upprep
 // quantité y est soit un placeholder {{i}} (vecteur reconnu → on veut son index i), soit un
 // chiffre nu resté tel quel (nombre non reconnu comme vecteur cohérent). Pas de duplication
 // du corps de REP_RE : seule la quantité change de forme (`\d+` → `\{\{(\d+)\}\}|\d+`).
-const REP_RE_UNIT_VECTOR_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|gjenta\b|upprepa\b|toista\b|wiederhol\w*|\bwdh\b|repit[ea]\w*|repetir\b|ripet\w+|herhaal\b|powt[óo]rz\w*)[^.]*?(?:\{\{(\d+)\}\}|\d+)\s*(?:fois|times|x|gange?|ganger|g[åa]nger|kertaa|mal\b|veces|volte|keer|razy)\b/i
+const REP_RE_UNIT_VECTOR_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|gjenta\b|upprepa\b|toista\b|wiederhol\w*|\bwdh\b|repit[ea]\w*|repetir\b|ripet\w+|herhaal\b|powt[óo]rz\w*)[^.]*?(?:\{\{(\d+)\}\}|\d+)\s*(?:fois|times|x(?!\s*\d)|gange?|ganger|g[åa]nger|kertaa|mal\b|veces|volte|keer|razy)\b/i
 // Plafond de longueur de ligne des deux motifs ci-dessus (même classe de parade que
 // `NEEDLE_SF_MAX_LEN`, reference.js) — cf. le commentaire au point d'appel, dans
 // `linesToSteps`, qui porte la mesure et le raisonnement sur le repli.
@@ -165,9 +166,15 @@ export function linesToSteps(lines, { kind = 'pelote', n = 1 } = {}) {
       } else {
         repVectorIndexAmbiguous = true
       }
+    } else if (c.length === 1 && rep) {
+      // Un SEUL vecteur n'est le compte que s'il porte l'unité (« 4 (5, 6) fois ») : devant
+      // un compte nu (« Répéter 4 fois jusqu'à avoir 20 (22, 24) m »), le vecteur est un
+      // nombre de mailles ou une mesure, et le total vient du nombre nu (rep[1]).
+      const onT = t.length <= REP_MAX_LEN ? REP_RE_UNIT_VECTOR_RE.exec(t) : null
+      if (onT && onT[1] === undefined) repVector = null
     }
     if (rep && !repVectorUnresolved && !repVectorIndexAmbiguous) {
-      const total = c.length
+      const total = repVector
         ? repVector.map(toNumber)
         : Array.from({ length: Math.max(1, n) }, () => Number(rep[1]) || 0)
       return { t: et, c, repeat: true, total }

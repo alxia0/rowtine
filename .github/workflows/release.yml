@@ -16,6 +16,9 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      # Secrets are not allowed in a step-level `if:`; expose their presence here.
+      HAS_PLAY_SA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -67,6 +70,16 @@ jobs:
       - name: Build signed release AAB (Google Play)
         working-directory: android
         run: ./gradlew bundleRelease
+
+      - name: Upload AAB to Google Play (alpha)
+        if: env.HAS_PLAY_SA == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.rowtine.app
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: completed
 
       - name: Attach APK and AAB to the GitHub Release
         env:

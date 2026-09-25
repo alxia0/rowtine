@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — désignation du dossier SAF (premier lancement simplifié, 09/08/2026 ;
 // adoption du dossier, 06/09/2026). La confirmation `window.confirm` a été RETIRÉE :
 // le sélecteur système est le seul geste demandé. Le label est désormais COMPOSÉ ici

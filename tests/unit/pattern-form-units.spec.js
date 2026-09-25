@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // PatternForm : le champ échantillon (mailles/rangs) suit le système
 // d'unités, exactement comme ProjectEditView (cf. tests/unit/ProjectEditView.spec.js pour
 // la garde anti-conversion — PatternForm partage le même v-model direct sans transformation,

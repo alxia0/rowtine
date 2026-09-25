@@ -349,6 +349,18 @@ describe('serializeSettings', () => {
     expect(written.firstName).toBe('Alexia')  // le reste passe toujours
   })
 
+  // Lot du 23/09/2026 : `tourProjectId`/`tourPatternId` (visite guidée) sont LOCAUX à
+  // cette base, comme `deviceId`/`safFolderLabel` ci-dessus — restaurés depuis un autre
+  // appareil, ils pointeraient vers n'importe quel projet/patron (voire aucun) sur
+  // celui-ci.
+  it('tourProjectId et tourPatternId ne partent JAMAIS dans reglages.json', () => {
+    const out = serializeSettings({ tourProjectId: 42, tourPatternId: 7, firstName: 'Alexia' })
+    const written = JSON.parse(out.data)
+    expect(written).not.toHaveProperty('tourProjectId')
+    expect(written).not.toHaveProperty('tourPatternId')
+    expect(written.firstName).toBe('Alexia')  // le reste passe toujours
+  })
+
   // Corollaire (lot du 19/08/2026, revue) : `importCaveatDue` DOIT partir
   // dans la sauvegarde — c'est l'exact inverse des deux tests ci-dessus. Ce drapeau n'a
   // rien de LOCAL ni de secret (contrairement à `deviceId`/`safFolderLabel`/les clés API) :

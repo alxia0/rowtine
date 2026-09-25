@@ -5,18 +5,20 @@ import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import BackToTop from '@/components/BackToTop.vue'
 import ThumbImage from '@/components/ThumbImage.vue'
-import PatternForm from '@/components/PatternForm.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import FirstDetailTip from '@/components/FirstDetailTip.vue'
 import { usePatternsStore } from '@/stores/patterns'
+import { useTrashStore } from '@/stores/trash'
 import { useProjectsStore } from '@/stores/projects'
 import { useSoftDelete } from '@/composables/useSoftDelete'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { PATTERN_CATEGORIES, patternCategoryLabel } from '@/constants/catalog'
 import { countByCategory } from '@/utils/pattern-counts'
 import { sizeLabelText } from '@/utils/reader'
+import { patternCoverOf } from '@/utils/pattern-cover'
 import AppIcon from '@/components/AppIcon.vue'
 import { useImportHandoff } from '@/stores/import-handoff'
+import { PDF_ACCEPT, ROWTINE_ACCEPT } from '@/utils/import-kind'
 import { EXAMPLE_PATTERN } from '@/constants/empty-samples'
 import { useSettingsStore } from '@/stores/settings'
 import { NOTICE } from '@/constants/notice-queue'
@@ -27,6 +29,7 @@ import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
 const router = useRouter()
 const { t } = useI18n()
 const patternsStore = usePatternsStore()
+const trashStore = useTrashStore()
 const projectsStore = useProjectsStore()
 const softDelete = useSoftDelete()
 const handoff = useImportHandoff()
@@ -70,18 +73,16 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onAddSheetKey))
 // utilisateur requis) ; au choix du fichier, on le pose dans le relais et on file à l'écran
 // d'import. Annuler le sélecteur (aucun fichier) ne navigue pas.
 //
-// Le filtre laisse aussi passer le .zip : porte de service (08/08) pour dépanner une
-// utilisatrice en lui retravaillant son patron. Le libellé ne parle que de PDF, à dessein —
-// c'est l'écran d'import qui reconnaît le fichier à son contenu (cf. utils/import-kind.js).
-// ⚠️ Ne pas « nettoyer » ce filtre en le restreignant au PDF : le sélecteur Android griserait
-// le fichier et la porte ne s'ouvrirait plus.
-function onImportFile(e) {
+// Deux portes (décision du 23/09, qui lève la porte de service cachée du 08/08) : l'import PDF,
+// et l'import au format de l'app (.rowtine ou .zip), passé à l'écran d'import par
+// `?format=rowtine`. L'écran reconnaît le fichier à son contenu (cf. utils/import-kind.js).
+function onImportFile(e, format) {
   const file = e.target.files?.[0]
   e.target.value = ''
   if (!file) return
   closeAddSheet()
   handoff.set(file)
-  router.push({ name: 'import-local' })
+  router.push(format ? { name: 'import-local', query: { format } } : { name: 'import-local' })
 }
 
 // AVERTISSEMENT « UN PATRON IMPORTÉ SE RELIT » (19/08/2026).
@@ -169,20 +170,11 @@ const chipsEl = ref(null)
 // jamais retombée. Même piège que documenté dans ProjectDetailView.vue (T8).
 const { active: chipsFadeActive } = useScrollFade(chipsEl)
 
-// Formulaire patron : vierge (saisie manuelle) ou pré-rempli depuis un PDF importé.
-const formOpen = ref(false)
-const draft = ref(null)
 const categoryLabel = (p) => patternCategoryLabel(p, t)
 
 function startManual() {
   closeAddSheet()
-  draft.value = null
-  formOpen.value = true
-}
-async function onCreate(data) {
-  await patternsStore.add(data)
-  formOpen.value = false
-  draft.value = null
+  router.push({ name: 'pattern-new' })
 }
 // Un patron utilisé par des projets, c'est une action LOURDE : on prévient (charte §3).
 // Sans projet lié, on garde le geste immédiat + « Annuler » (charte §2.11).
@@ -196,8 +188,11 @@ async function remove(id) {
 }
 
 async function doRemove(id) {
-  const p = await patternsStore.remove(id)
-  await softDelete('pattern', p, { message: t('pattern.deleted'), reload: patternsStore.load })
+  // Retrait et mise en corbeille dans une même transaction (cf. trash.js `moveToTrash`).
+  const trashId = await trashStore.moveToTrash('pattern', id)
+  await patternsStore.load()
+  if (trashId == null) return
+  await softDelete('pattern', null, { message: t('pattern.deleted'), reload: patternsStore.load, trashId })
 }
 
 async function confirmDelete() {
@@ -227,16 +222,13 @@ function open(id) {
       </button>
     </div>
 
-    <PatternForm v-if="formOpen" :initial="draft" @submit="onCreate" @cancel="formOpen = false" />
-    <template v-else>
-      <button type="button" class="btn btn--primary btn--block mt" @click="addSheetOpen = true">
-        <AppIcon name="plus" :size="17" /> {{ t('pattern.add') }}
-      </button>
-    </template>
+    <button type="button" class="btn btn--primary btn--block mt" @click="addSheetOpen = true">
+      <AppIcon name="plus" :size="17" /> {{ t('pattern.add') }}
+    </button>
 
     <div class="list">
       <div v-for="p in filtered" :key="p.id" class="pcard">
-        <ThumbImage class="pcard__thumb" :src="p.photos?.[0] || ''" kind="pattern" :seed="p.name" :alt="p.name" />
+        <ThumbImage class="pcard__thumb" :src="patternCoverOf(p)" kind="pattern" :seed="p.name" :alt="p.name" />
         <button class="pcard__main" @click="open(p.id)">
           <span class="pcard__name">{{ p.name }}</span>
           <span class="pcard__meta">{{ t(`technique.${p.type}`) }}<template v-if="p.category"> · {{ categoryLabel(p) }}</template><template v-if="p.sizes && p.sizes.length"> · {{ p.sizes.map((s) => sizeLabelText(s, t)).join(', ') }}</template></span>
@@ -301,7 +293,17 @@ function open(id) {
                      dit la même chose au bon moment — quand ça arrive vraiment, pas en
                      permanence sous un bouton. -->
               </span>
-              <input type="file" accept="application/pdf,.pdf,.zip,application/zip" class="lib-import__input" @change="onImportFile" />
+              <input type="file" :accept="PDF_ACCEPT" class="lib-import__input lib-import__input--pdf" @change="onImportFile($event)" />
+            </label>
+            <label class="pas__opt lib-import">
+              <AppIcon name="book" :size="20" />
+              <span class="pas__opt-body">{{ t('pattern.importRowtine') }}</span>
+              <input
+                type="file"
+                :accept="ROWTINE_ACCEPT"
+                class="lib-import__input lib-import__input--rowtine"
+                @change="onImportFile($event, 'rowtine')"
+              />
             </label>
             <button type="button" class="pas__opt" @click="startManual">
               <AppIcon name="edit" :size="20" /> {{ t('pattern.addManual') }}

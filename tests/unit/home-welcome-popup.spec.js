@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — la pop-up de bienvenue de l'accueil (lot 10/08/2026).
 //
 // Elle REMPLACE l'astuce « Le sais-tu ? », qui arrivait au pire moment : on expliquait
@@ -21,6 +22,15 @@ vi.mock('vue-router', () => ({
   useRoute: () => nav.route,
   useRouter: () => nav.router,
 }))
+
+// Depuis le lot « visite guidée » (23/09/2026), confirmer la bienvenue du semis enchaîne
+// sur `startTour()`, qui appelle `ensureTourProject` (recherche/recréation réelle du
+// projet d'exemple, plusieurs écritures Dexie). Ce fichier-ci teste l'AFFICHAGE et
+// l'ACQUITTEMENT de la pop-up (texte, drapeaux effacés, file des messages) — pas la
+// visite elle-même, déjà couverte en détail (et avec ce même mock) par
+// tests/unit/home-welcome-starts-tour.spec.js. La mocker ici évite d'exécuter cette
+// cascade Dexie pour rien à chaque `confirm`.
+vi.mock('@/utils/tour-sample', () => ({ ensureTourProject: vi.fn().mockResolvedValue({ id: 1, created: false }) }))
 
 import HomeView from '@/views/HomeView.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'

@@ -126,12 +126,18 @@ export async function unzipToPattern(zipBytes) {
   let refused = false
   let totalBytes = 0
   let entryCount = 0
+  // Le plafond d'entrées doit INTERROMPRE `unzipSync` : un refus ne fait que sauter l'entrée,
+  // et fflate itère jusqu'au compte annoncé par l'EOCD (uint32 en zip64, falsifiable) :
+  // un zip de quelques centaines d'octets gelait le fil principal des minutes. On lève donc
+  // une sentinelle depuis le filtre, reconnue ci-dessous.
+  const tooManyEntries = {}
   try {
     entries = unzipSync(zipBytes, {
       filter: (file) => {
         entryCount += 1
         const size = Number(file.originalSize) || 0
-        if (entryCount > MAX_ZIP_ENTRIES || size > MAX_ZIP_ENTRY_BYTES) {
+        if (entryCount > MAX_ZIP_ENTRIES) throw tooManyEntries
+        if (size > MAX_ZIP_ENTRY_BYTES) {
           refused = true
           return false
         }
@@ -143,10 +149,13 @@ export async function unzipToPattern(zipBytes) {
         return true
       },
     })
-  } catch {
-    const e = new Error('bad-zip')
-    e.code = 'bad-zip'
-    throw e
+  } catch (err) {
+    if (err === tooManyEntries) refused = true
+    else {
+      const e = new Error('bad-zip')
+      e.code = 'bad-zip'
+      throw e
+    }
   }
   if (refused) {
     // Code NOUVEAU, non traduit à dessein : `LocalPdfImportView.vue` traite tout code
@@ -192,7 +201,12 @@ export async function unzipToPattern(zipBytes) {
   warnings.push(...(await resolvePatternImagesFromZip(pattern, byPath, byBase)))
 
   // 5) Cover : cover.{jpg,jpeg,png,webp} à la racine → photos[0] (plafonnée), sinon [].
-  const coverName = names.find((n) => COVER_RE.test(n))
+  // Un kit compressé AVEC son dossier (« kit/patron.md ») a sa couverture à côté du patron,
+  // pas à la racine : on la cherche aussi dans le dossier du .md retenu.
+  const mdDir = mdName.slice(0, mdName.lastIndexOf('/') + 1)
+  const coverName =
+    names.find((n) => COVER_RE.test(n)) ||
+    (mdDir ? names.find((n) => n.startsWith(mdDir) && COVER_RE.test(n.slice(mdDir.length))) : undefined)
   pattern.photos = coverName
     ? [await resizeDataUrl(fileToDataUrl(coverName, bytesToBase64(entries[coverName])))]
     : []

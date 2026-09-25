@@ -51,6 +51,42 @@ export function emptyProject() {
   }
 }
 
+// Construit l'objet projet « en cours » lié au patron démo (ou générique selon la
+// technique, à défaut) — extrait de `seedExamplesIfEmpty` ci-dessous pour être réutilisé
+// ailleurs qu'au semis initial (cf. src/utils/tour-sample.js::ensureTourProject, qui
+// recrée ce même projet quand il a été supprimé). `now` : commun aux deux ids créés par
+// `seedExamplesIfEmpty` (idée + en cours) ; un appelant seul peut l'omettre, il vaudra
+// l'instant de l'appel.
+export function buildWipProject({ technique = 'knitting', demo = null, texts = {}, now = new Date().toISOString() } = {}) {
+  return demo
+    ? {
+        ...emptyProject(),
+        name: demo.name,
+        technique: 'knitting',
+        patternId: demo.patternId,
+        status: 'wip',
+        needles: [{ mm: '4', us: '' }],
+        sizes: demo.sizes || [],
+        activeSize: demo.activeSize || '',
+        startedAt: ymdLocal(new Date()),
+        notes: texts.wip?.notes || '',
+        createdAt: now,
+        updatedAt: now,
+      }
+    : {
+        ...emptyProject(),
+        name: technique === 'crochet' ? texts.fallbackCrochet : texts.fallbackKnitting,
+        technique: technique === 'crochet' ? 'crochet' : 'knitting',
+        status: 'wip',
+        needles: [{ mm: technique === 'crochet' ? '4' : '4.5', us: '' }],
+        sizes: ['S', 'M', 'L'],
+        activeSize: 'M',
+        notes: texts.fallbackNotes || '',
+        createdAt: now,
+        updatedAt: now,
+      }
+}
+
 // Réinjecte l'allocation d'UN projet dans chaque laine mémorisée par `remove()` ci-dessous,
 // sans jamais toucher celles des autres projets (setProjectReservation) — partagée par
 // `restore()` ci-dessous et par `trash.js` (restauration d'un projet depuis la corbeille,
@@ -74,7 +110,6 @@ export async function reinjectYarnLinks(yarnLinks, projectId, { collectShortfall
       await db.yarns.update(l.id, { consumed: nextConsumed })
       y = await db.yarns.get(l.id)
     }
-    if (l.qty == null) continue
     const key = projectId
     const qty = l.qty
     if (!qty || !key) continue
@@ -107,18 +142,16 @@ export const useProjectsStore = defineStore('projects', () => {
       if (!isCurrent()) return
       projects.value = rows
       // Migration aiguilles (scalaire → liste) pour les projets antérieurs, une seule fois.
+      // `toMigrate` ne garde que les projets sans liste `needles` : `needlesPatch` ne rend
+      // donc jamais `null` ici (il ne le fait que pour un projet DÉJÀ au format liste).
       const toMigrate = rows.filter((p) => !Array.isArray(p.needles))
-      if (toMigrate.length) {
-        for (const p of toMigrate) {
-          const patch = needlesPatch(p)
-          if (patch) {
-            // `undefined` supprime la clé côté Dexie → on retire les scalaires hérités.
-            await db.projects.update(p.id, { ...patch, needleMm: undefined, needleUs: undefined })
-            Object.assign(p, patch)
-            delete p.needleMm
-            delete p.needleUs
-          }
-        }
+      for (const p of toMigrate) {
+        const patch = needlesPatch(p)
+        // `undefined` supprime la clé côté Dexie → on retire les scalaires hérités.
+        await db.projects.update(p.id, { ...patch, needleMm: undefined, needleUs: undefined })
+        Object.assign(p, patch)
+        delete p.needleMm
+        delete p.needleUs
       }
       loaded.value = true
     })
@@ -159,13 +192,6 @@ export const useProjectsStore = defineStore('projects', () => {
     // vide) ne voit plus jamais la garde échouer en silence.
     if (patch.status === 'done' || patch.lastWorkedAt) {
       const before = await db.projects.get(Number(id))
-      // RÈGLE 1 — entrer dans « Terminé » date la clôture. Ici plutôt que dans les
-      // trois écrans qui changent le statut : écrire une date n'a aucun effet de bord, et un
-      // quatrième site futur en hériterait sans qu'on y pense.
-      // ⛔ La règle INVERSE (une date renseignée termine le projet) ne doit JAMAIS vivre ici :
-      // un statut passé à 'done' par effet de bord contournerait requestStatusChange, donc le
-      // dialogue des pelotes ne s'ouvrirait pas et le stock resterait faux en silence. Elle vit
-      // dans ProjectEditView.save(), seul écran qui porte un champ de date de fin.
       if (patch.status === 'done') Object.assign(patch, finishedAtPatch(before, patch, ymdLocal(new Date())) || {})
       // Première date de DÉBUT : posée au premier geste de progression si le projet n'en a
       // encore aucune — décision produit du 12/09 (une utilisatrice qui ne renseigne jamais
@@ -222,52 +248,63 @@ export const useProjectsStore = defineStore('projects', () => {
   // paramètre `consumed`.
   async function remove(id) {
     const pid = Number(id)
-    const project = await db.projects.get(pid)
-    const sections = await db.sections.where('projectId').equals(pid).toArray()
-    const diagrams = await db.diagrams.where('projectId').equals(pid).toArray()
-    const counters = await db.counters.where('projectId').equals(pid).toArray()
-    const sessions = await db.sessions.where('projectId').equals(pid).toArray()
-    // Pool : on retire l'allocation de CE projet dans chaque laine et on la mémorise
-    // pour l'annulation (les allocations des autres projets ne sont jamais touchées).
-    // On retire aussi sa TRACE de consommation (`consumed[pid]`, lot K3) : le projet
-    // n'existe plus, elle n'a plus de fiche où s'accrocher — mais `quantity` n'est
-    // JAMAIS touchée par ce retrait : ces pelotes ont VRAIMENT été tricotées à la
-    // clôture du projet, rien ne revient.
-    const allYarns = await db.yarns.toArray()
-    const yarnLinks = []
-    for (const y of allYarns) {
-      const qty = reservationsOf(y)[pid]
-      const consumedQty = consumedOf(y)[pid]
-      if (qty == null && consumedQty == null) continue
-      yarnLinks.push({ id: y.id, qty, consumedQty })
-      const patch = {}
-      if (qty != null) {
-        patch.reservations = setProjectReservation(y, pid, null)
-        patch.reservedFor = undefined
-        patch.reservedQty = undefined
-      }
-      if (consumedQty != null) {
-        const nextConsumed = { ...consumedOf(y) }
-        delete nextConsumed[pid]
-        patch.consumed = nextConsumed
-      }
-      await db.yarns.update(y.id, patch)
-    }
-    // Instance patron dédiée à ce projet (copy-on-write) : supprimée EN CASCADE avec lui.
-    const pat = project?.patternId != null ? await db.patterns.get(project.patternId) : null
-    const instancePattern = pat && pat.ownerProjectId === pid ? pat : null
-    await db.sections.where('projectId').equals(pid).delete()
-    await db.diagrams.where('projectId').equals(pid).delete()
-    await db.counters.where('projectId').equals(pid).delete()
-    await db.sessions.where('projectId').equals(pid).delete()
-    if (instancePattern) await db.patterns.delete(instancePattern.id)
-    await db.projects.delete(pid)
+    // UNE transaction pour toute la cascade : une écriture qui échoue en route (quota,
+    // appli tuée) annule tout, au lieu de laisser un projet vivant dont le pool de laines
+    // a déjà été vidé, ou des sections effacées sous un projet qui reste. Uniquement des
+    // appels Dexie et des fonctions pures dans le callback, sans quoi la zone se perd.
+    const bundle = await db.transaction(
+      'rw',
+      [db.projects, db.sections, db.diagrams, db.counters, db.sessions, db.yarns, db.patterns],
+      async () => {
+        const project = await db.projects.get(pid)
+        const sections = await db.sections.where('projectId').equals(pid).toArray()
+        const diagrams = await db.diagrams.where('projectId').equals(pid).toArray()
+        const counters = await db.counters.where('projectId').equals(pid).toArray()
+        const sessions = await db.sessions.where('projectId').equals(pid).toArray()
+        // Pool : on retire l'allocation de CE projet dans chaque laine et on la mémorise
+        // pour l'annulation (les allocations des autres projets ne sont jamais touchées).
+        // On retire aussi sa TRACE de consommation (`consumed[pid]`, lot K3) : le projet
+        // n'existe plus, elle n'a plus de fiche où s'accrocher — mais `quantity` n'est
+        // JAMAIS touchée par ce retrait : ces pelotes ont VRAIMENT été tricotées à la
+        // clôture du projet, rien ne revient.
+        const allYarns = await db.yarns.toArray()
+        const yarnLinks = []
+        for (const y of allYarns) {
+          const qty = reservationsOf(y)[pid]
+          const consumedQty = consumedOf(y)[pid]
+          if (qty == null && consumedQty == null) continue
+          yarnLinks.push({ id: y.id, qty, consumedQty })
+          const patch = {}
+          if (qty != null) {
+            patch.reservations = setProjectReservation(y, pid, null)
+            patch.reservedFor = undefined
+            patch.reservedQty = undefined
+          }
+          if (consumedQty != null) {
+            const nextConsumed = { ...consumedOf(y) }
+            delete nextConsumed[pid]
+            patch.consumed = nextConsumed
+          }
+          await db.yarns.update(y.id, patch)
+        }
+        // Instance patron dédiée à ce projet (copy-on-write) : supprimée EN CASCADE avec lui.
+        const pat = project?.patternId != null ? await db.patterns.get(project.patternId) : null
+        const instancePattern = pat && pat.ownerProjectId === pid ? pat : null
+        await db.sections.where('projectId').equals(pid).delete()
+        await db.diagrams.where('projectId').equals(pid).delete()
+        await db.counters.where('projectId').equals(pid).delete()
+        await db.sessions.where('projectId').equals(pid).delete()
+        if (instancePattern) await db.patterns.delete(instancePattern.id)
+        await db.projects.delete(pid)
+        return { project, sections, diagrams, counters, sessions, yarnLinks, instancePattern }
+      },
+    )
     await load()
     // La cascade vient de modifier des laines en base : si le stock est déjà chargé en
     // mémoire, il faut le rafraîchir, sinon le badge du stock reste périmé (il ne se
     // recharge pas tout seul : StashView ne charge que si `loaded` est faux).
     await refreshYarnsIfLoaded()
-    return { project, sections, diagrams, counters, sessions, yarnLinks, instancePattern }
+    return bundle
   }
 
   // Réinsère un projet supprimé EN CASCADE (annulation / corbeille), ids conservés.
@@ -339,33 +376,7 @@ export const useProjectsStore = defineStore('projects', () => {
       updatedAt: now,
     })
     // Projet « en cours » : lié au patron démo si fourni, sinon générique selon la technique.
-    const wip = demo
-      ? {
-          ...emptyProject(),
-          name: demo.name,
-          technique: 'knitting',
-          patternId: demo.patternId,
-          status: 'wip',
-          needles: [{ mm: '4', us: '' }],
-          sizes: demo.sizes || [],
-          activeSize: demo.activeSize || '',
-          startedAt: ymdLocal(new Date()),
-          notes: texts.wip?.notes || '',
-          createdAt: now,
-          updatedAt: now,
-        }
-      : {
-          ...emptyProject(),
-          name: technique === 'crochet' ? texts.fallbackCrochet : texts.fallbackKnitting,
-          technique: technique === 'crochet' ? 'crochet' : 'knitting',
-          status: 'wip',
-          needles: [{ mm: technique === 'crochet' ? '4' : '4.5', us: '' }],
-          sizes: ['S', 'M', 'L'],
-          activeSize: 'M',
-          notes: texts.fallbackNotes || '',
-          createdAt: now,
-          updatedAt: now,
-        }
+    const wip = buildWipProject({ technique, demo, texts, now })
     const wipId = await db.projects.add(wip)
     await load()
     // Les DEUX identifiants remontent : `recordSeededSamples` (OnboardingView) en a

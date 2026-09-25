@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // tests/unit/reader-view-pdf-tile.spec.js
 // Unitaire — bento « Voir le PDF original » dans l'aide-mémoire du suivi.
 // Harnais calqué sur tests/unit/reader-view.spec.js (mock router + vraie db).
@@ -20,6 +21,9 @@ vi.mock('vue-router', () => ({
 }))
 
 import ReaderView from '@/views/ReaderView.vue'
+import { makeTk } from './helpers/i18n-router'
+
+const tk = makeTk(i18n)
 
 // Reader AVEC aide-mémoire (reference.tiles) → la grille .amgrid est rendue.
 const READER_WITH_REF = {
@@ -51,7 +55,7 @@ async function settle() {
   await flushPromises()
 }
 function pdfTiles(w) {
-  return w.findAll('.amgrid button').filter((b) => b.text().includes('Voir le PDF original'))
+  return w.findAll('.amgrid button').filter((b) => b.text().includes(tk('reader.viewPdf')))
 }
 
 beforeEach(async () => {

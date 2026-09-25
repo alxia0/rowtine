@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — COUVERTURE du site 4/4 qui arme `lastWorkedAt` (§7ter), le suivi interactif
 // du lecteur (ReaderView, contexte `project-read`). Voir tests/unit/journal-jours-actifs-sites.spec.js
 // pour les sites 2 et 3 et l'explication du fichier séparé : le mock `vue-router` hoisté ci-dessous

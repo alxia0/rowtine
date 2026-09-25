@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Menu contextuel de catégorisation d'image (retour terrain, 24/08/2026, étendu 25/08/2026) :
 // quand createCmEditor reçoit opts.imageActions, le clic sur une image du texte (vignette ou
 // placeholder) ouvre un popover PRINCIPAL (openMenuPopover) au lieu de simplement

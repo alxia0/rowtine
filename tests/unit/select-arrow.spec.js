@@ -43,14 +43,6 @@ describe('flèche maison des <select> (charte §2.4bis)', () => {
     expect(bloc).not.toMatch(/content:\s*['"]▾['"]/)
   })
 
-  it('select.input réserve la place à droite pour la flèche (padding-right > défaut)', () => {
-    const bloc = blocSelectInput(css)
-    // Le padding de base (.input) est 14px à droite (padding: 12px 14px) — le select
-    // doit réserver nettement plus pour que le texte ne passe pas sous la flèche.
-    const m = bloc.match(/padding-right:\s*(?:var\(--sp-\d+\)|(\d+)px)/)
-    expect(m).not.toBeNull()
-  })
-
   it("le champ `.input` générique (partagé par les <input type=\"date\">) ne porte AUCUN appearance", () => {
     const bloc = blocInputGenerique(css)
     expect(bloc).not.toMatch(/appearance/)

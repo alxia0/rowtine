@@ -12,9 +12,9 @@ import {
 } from './restore-guard'
 import { hasBackup, readBackup, writeSnapshotToDb } from './restore'
 import { suppressAutoBackup } from './auto-backup'
-import { recordBackupDecision } from './backup-decision'
+import { clearBackupDecision, recordBackupDecision } from './backup-decision'
 import { writeManifest } from './backup-manifest'
-import { db, setSetting } from '@/db/db'
+import { db, getSetting, setSetting } from '@/db/db'
 import i18n from '@/i18n'
 import { detectDeviceLocale } from '@/utils/app-locale'
 import { getSeededSampleIds } from '@/utils/seeded-samples'
@@ -66,6 +66,8 @@ async function reloadStores() {
 // Succès avec appropriation non confirmée (cf. le bloc `writeManifest`)
 // → { ok:true, decided, owned:false } — même convention que `decided`/`errors` :
 // la clé n'existe QUE quand il y a quelque chose à dire.
+// Restauration incomplète (écarts consignés par `readBackup`) → { ok:true, decided:false,
+// owned:false, errors } : ni appropriation ni décision, la sauvegarde reste en pause.
 //
 // Anti-boucle : `readBackup` + `writeSnapshotToDb` + `reloadStores`
 // tournent TOUS sous `suppressAutoBackup` — pas seulement les deux derniers.
@@ -139,6 +141,17 @@ async function runRestoreInner({ onProgress, notifyRestored }) {
       // RAPPORT COPIABLE quand une variante de RestoreErrorDialog est ouverte à
       // l'occasion (cf. `details` dans failure-report.js).
       restoreErrors = snapshot.errors || []
+      // RESTAURATION INCOMPLÈTE = LE DOSSIER N'EST PAS PRIS EN CHARGE (correctif revue
+      // 1.3.2). Un dossier de projet ou de patron écarté, un fichier racine illisible
+      // (laines.json, achats.json...) : la base restaurée ne contient pas ce que le
+      // dossier contient. S'approprier le dossier et enregistrer la décision relancerait
+      // la sauvegarde, dont la réconciliation (orchestrator.js) supprimerait les dossiers
+      // absents de la base et réécrirait les fichiers racine vides : une restauration
+      // partielle deviendrait une perte définitive. On restaure donc ce qui a pu être lu,
+      // mais le dossier reste intact et la sauvegarde en pause ; l'appelant montre le
+      // rapport d'écarts (variante `owned: false`). Tout écart compte, photo manquante
+      // comprise : mieux vaut une pause de trop qu'un dossier effacé.
+      const partial = restoreErrors.length > 0
       // Phase courte (écriture en base + rechargement des stores) : pas de total,
       // elle dure une seconde — un dénominateur y serait du bruit.
       onProgress?.({ phase: 'write', done: 0, total: 0 })
@@ -179,7 +192,30 @@ async function runRestoreInner({ onProgress, notifyRestored }) {
       // pour basculer le contenu de la pop-up (clés `restore.*`) et l'efface à
       // l'acquittement avec `welcomeDue` (settings.js : `restoredDue`, jumeau du
       // présent geste).
-      await setSetting('restoredDue', !!notifyRestored)
+      // Restauration incomplète : pas de « tout a été retrouvé », le rapport d'écarts
+      // prend le relais.
+      await setSetting('restoredDue', !!notifyRestored && !partial)
+
+      // Projet et patron de la visite guidée (lot du 23/09/2026) : LOCAUX, exclus de la
+      // sauvegarde (EXCLUDED_SETTINGS_KEYS, serialize.js) donc PAS écrasés par le snapshot
+      // lors de la fusion ci-dessus — l'ancien id local survit tel quel, alors que
+      // `projects`/`patterns` (tables REMPLACÉES, pas fusionnées) peuvent désormais porter,
+      // au même id, un vrai projet ou patron importé de la sauvegarde. On les efface ICI,
+      // comme `welcomeDue`/`restoredDue` juste au-dessus : `ensureTourProject`
+      // (src/utils/tour-sample.js) traite `null` comme absent et retrouve — ou recrée — le
+      // bonnet de démonstration au prochain appel, sans jamais rouvrir la visite sur un
+      // projet de l'utilisatrice.
+      await setSetting('tourProjectId', null)
+      await setSetting('tourPatternId', null)
+      // Même danger pour `seededSampleIds` (seeded-samples.js), mais SEULEMENT quand la
+      // sauvegarde n'en porte pas (installation antérieure au 04/08/2026) : la valeur
+      // LOCALE survit alors à la fusion et désignerait comme « exemples » des ids que les
+      // tables remplacées attribuent désormais au travail de l'utilisatrice (voie b
+      // d'`ensureTourProject`, `findReusablePattern`, `isDbRestorable`). Portée par le
+      // snapshot, elle décrit les exemples restaurés avec lui : on la garde.
+      if (!(snapshot.settings || []).some((s) => s?.key === 'seededSampleIds')) {
+        await setSetting('seededSampleIds', null)
+      }
       await reloadStores()
 
       // RESTAURER, C'EST PRENDRE POSSESSION DU DOSSIER (06/08/2026).
@@ -253,6 +289,14 @@ async function runRestoreInner({ onProgress, notifyRestored }) {
       // et ne pose PAS le drapeau : on ne sait pas ce qui s'est passé, on ne prétend
       // donc pas le décrire. Convention de remontée identique à `decided`/`errors` :
       // absent du résultat nominal, présent seulement quand il y a quelque chose à dire.
+      if (partial) {
+        owned = false
+        // Une décision déjà présente pour ce dossier (re-désignation du même dossier,
+        // qui la préserve) laisserait la sauvegarde tourner : on l'efface pour que la
+        // pause soit certaine. Dans la fenêtre `suppressAutoBackup`, comme le reste.
+        await clearBackupDecision()
+        return
+      }
       try {
         if (!(await writeManifest(storage))) {
           // Second et dernier essai. Sa valeur décide désormais de `owned` : les deux
@@ -277,6 +321,9 @@ async function runRestoreInner({ onProgress, notifyRestored }) {
   // ne doit PAS faire renvoyer `{ ok: false }` sur une base intégralement restaurée
   // avec succès — `recordBackupDecision()` ne lève elle-même jamais (elle capture
   // en interne), le `try/catch` ci-dessous est une seconde ligne de défense.
+  // Restauration incomplète : aucune décision enregistrée, aucun dossier déclaré propre
+  // (cf. le bloc `partial` plus haut). La sauvegarde reste en pause.
+  if (restoreErrors.length) return { ok: true, decided: false, owned: false, errors: restoreErrors }
   let decided
   try {
     decided = await recordBackupDecision()
@@ -382,6 +429,14 @@ export async function isDbEmpty() {
   return true
 }
 
+// Id du projet de la visite guidée (réglage local `tourProjectId`), réduit aux entiers
+// strictement positifs comme `seededSampleIds`.
+async function tourProjectIds() {
+  const v = await getSetting('tourProjectId')
+  const n = Number(v)
+  return v !== null && v !== undefined && Number.isInteger(n) && n > 0 ? [n] : []
+}
+
 // Vrai si restaurer ne détruirait rien que l'utilisatrice ait créé : base
 // strictement vide, OU ne contenant QUE les exemples semés au 1er lancement.
 //
@@ -420,9 +475,29 @@ export async function isDbEmpty() {
 // (`texts.wip.notes`/`texts.idea.notes`, variable par langue) — sa seule
 // non-vacuité ne distingue donc pas le texte semé d'une modification réelle.
 export async function isDbRestorable() {
+  // Corbeille AVANT le raccourci `isDbEmpty` (qui l'ignore) : une utilisatrice qui a
+  // supprimé les exemples ET son propre travail a des tables vides mais une corbeille
+  // pleine — `writeSnapshotToDb` la viderait, et ces éléments ne sont pas dans la
+  // sauvegarde (dossiers listés dans `corbeille.json`, sautés par `readBackup`).
+  if ((await db.trash.count()) > 0) return false
   if (await isDbEmpty()) return true
 
-  const seeded = await getSeededSampleIds()
+  const semis = await getSeededSampleIds()
+  // Projet de la visite guidée : `recreateTourProject` (tour-sample.js) peut le recréer
+  // hors du semis, sans l'inscrire dans `seededSampleIds`. `tourProjectId` ne désigne
+  // jamais qu'un projet créé par l'app (semé, ou recréé par la visite) : on le tolère
+  // comme un exemple, et les contrôles de travail réel ci-dessous s'appliquent à lui
+  // comme aux projets semés.
+  // PAS `tourPatternId` : il suit le patron lié au projet de la visite, que
+  // l'utilisatrice peut relier à l'un de ses propres patrons (ProjectEditView). Le
+  // tolérer ferait effacer ce patron par la restauration. Un patron recréé par la
+  // visite garde donc la garde stricte (restauration refusée), le repli prudent.
+  // Nouveaux tableaux, jamais `push` : le repli de `getSeededSampleIds` partage ceux
+  // d'une constante de module.
+  const seeded = {
+    projects: [...semis.projects, ...(await tourProjectIds())],
+    patterns: semis.patterns,
+  }
   // Repli sûr : rien d'enregistré (installation antérieure, semis échoué) → on
   // s'en tient à la garde stricte, jamais plus permissif qu'avant.
   if (!seeded.patterns.length && !seeded.projects.length) return false

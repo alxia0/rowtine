@@ -26,9 +26,15 @@ test('import offline d’un PDF à diagramme vectoriel : au moins une grille est
   await openAddPatternSheet(page)
   await page.locator('.lib-import__input[accept*="pdf"]').setInputFiles(FIXTURE)
   // Pas de branche « PDF scanné » : le texte (Corps/Rang…) suffit à passer l'heuristique.
-  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton.
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
-  await expect(page).toHaveURL(/\/pattern\/\d+$/)
+  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton. Refonte du
+  // bilan (lot du 23/09/2026) : ce fixture a des sections (la grille promue), le bouton
+  // principal du bloc de réussite est donc « Prévisualiser le patron », qui mène
+  // directement au lecteur — plus de « Voir le patron » pour ce cas.
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+  // Fondu d'entrée (<Transition mode="out-in">, cf. le test suivant pour le détail) :
+  // attendre le lecteur monté avant tout comptage.
+  await page.locator('.rhdr').waitFor()
 
   // Au moins une des deux grilles vectorielles est rendue. #2-B : une région kind:'grid'
   // est désormais promue en diagramme INTERACTIF (ReaderChart), affichée
@@ -36,14 +42,8 @@ test('import offline d’un PDF à diagramme vectoriel : au moins une grille est
   // n'a plus d'aperçu inline. Une région kind:'reference' reste ancrée sous une instruction
   // (visible depuis un projet, hors de ce parcours) ou en galerie de la fiche patron. Les deux
   // issues restantes testées ici sont un succès : ce qui compte est qu'une grille existe et
-  // soit rendue.
-  const previewBtn = page.getByRole('button', { name: /Prévisualiser le patron/ })
-  let charts = 0
-  if (await previewBtn.count() > 0) {
-    await previewBtn.click()
-    await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
-    charts = await page.locator('.rstep__chart .chart__canvas img').count()
-  }
+  // soit rendue. On est déjà sur le lecteur (cf. clic ci-dessus) : compter directement.
+  const charts = await page.locator('.rstep__chart .chart__canvas img').count()
   if (charts > 0) {
     await expect(page.locator('.rstep__chart .chart__canvas img').first()).toBeVisible()
     return
@@ -74,31 +74,28 @@ test('import offline d’un PDF multi-grilles pontées : le raster sépare en 2 
   // vers import-local et démarre l'import au montage.
   await openAddPatternSheet(page)
   await page.locator('.lib-import__input[accept*="pdf"]').setInputFiles(MULTIGRID_FIXTURE)
-  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton.
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
-  await expect(page).toHaveURL(/\/pattern\/\d+$/)
+  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton. Refonte du
+  // bilan (lot du 23/09/2026) : ce fixture a des sections (les grilles promues), le bouton
+  // principal du bloc de réussite est donc « Prévisualiser le patron », qui mène
+  // directement au lecteur — plus de « Voir le patron » pour ce cas.
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
   // Fondu d'entrée des écrans : la vue montée par le routeur
   // n'existe dans le DOM qu'1-2 frames APRÈS la confirmation de navigation (<Transition
   // mode="out-in" démonte l'écran quitté avant de monter le suivant). Les `count()`
   // instantanés ci-dessous lisaient donc un DOM encore vide (0 image → faux échec) :
-  // attendre la fiche montée avant tout comptage — le fait observable, pas un délai
+  // attendre le lecteur monté avant tout comptage — le fait observable, pas un délai
   // arbitraire (doctrine du dépôt, cf. document.fonts.ready dans responsive.spec.js).
-  await page.locator('.phdr').waitFor()
+  await page.locator('.rhdr').waitFor()
 
   // Les 2 diagrammes issus de la séparation raster peuvent atterrir dans l'aperçu
   // Prévisualiser (.rstep__chart, plus d'aperçu inline sur la fiche) et/ou en
   // galerie (associateImages) : on additionne les deux, ce qui compte étant le nombre
   // total d'images de diagramme produites, pas leur emplacement précis. Le seuil ≥2 est
   // la preuve de la séparation : l'operator seul (1 région) n'aurait produit qu'1 image ;
-  // en obtenir 2 exige la phase 2.
-  const previewBtn = page.getByRole('button', { name: /Prévisualiser le patron/ })
-  let charts = 0
-  if (await previewBtn.count() > 0) {
-    await previewBtn.click()
-    await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
-    await page.locator('.rhdr').waitFor() // lecteur monté (fondu d'entrée)
-    charts = await page.locator('.rstep__chart .chart__canvas img').count()
-  }
+  // en obtenir 2 exige la phase 2. On est déjà sur le lecteur (cf. clic ci-dessus) :
+  // compter directement.
+  const charts = await page.locator('.rstep__chart .chart__canvas img').count()
   let gallery = 0
   if (charts < 2) {
     await page.goto('/library')
@@ -128,24 +125,21 @@ test('import offline d’un PDF multi-grilles pontées avec titre inter-grilles 
   // vers import-local et démarre l'import au montage.
   await openAddPatternSheet(page)
   await page.locator('.lib-import__input[accept*="pdf"]').setInputFiles(TITLE_MULTIGRID_FIXTURE)
-  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton.
-  await page.getByRole('button', { name: 'Voir le patron' }).click()
-  await expect(page).toHaveURL(/\/pattern\/\d+$/)
-  await page.locator('.phdr').waitFor() // fiche montée (fondu d'entrée — cf. 1er test)
+  // (#4) : plus d'écran de revue intermédiaire — il faut cliquer le bouton. Refonte du
+  // bilan (lot du 23/09/2026) : ce fixture a des sections (les grilles promues), le bouton
+  // principal du bloc de réussite est donc « Prévisualiser le patron », qui mène
+  // directement au lecteur — plus de « Voir le patron » pour ce cas.
+  await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
+  await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+  await page.locator('.rhdr').waitFor() // lecteur monté (fondu d'entrée — cf. 1er test)
 
   // Même logique de comptage (aperçu Prévisualiser + galerie) que le test pont sans titre
   // ci-dessus : ce qui compte est le nombre total d'images de diagramme produites par le
   // pipeline complet. Les diagrammes interactifs promus (ReaderChart) sont
   // comptés dans l'aperçu Prévisualiser (.rstep__chart, plus d'aperçu inline sur la fiche) ;
-  // galerie en repli seulement.
-  const previewBtn = page.getByRole('button', { name: /Prévisualiser le patron/ })
-  let charts = 0
-  if (await previewBtn.count() > 0) {
-    await previewBtn.click()
-    await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
-    await page.locator('.rhdr').waitFor() // lecteur monté (fondu d'entrée)
-    charts = await page.locator('.rstep__chart .chart__canvas img').count()
-  }
+  // galerie en repli seulement. On est déjà sur le lecteur (cf. clic ci-dessus) : compter
+  // directement.
+  const charts = await page.locator('.rstep__chart .chart__canvas img').count()
   let gallery = 0
   if (charts < 2) {
     await page.goto('/library')

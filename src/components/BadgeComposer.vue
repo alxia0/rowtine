@@ -17,6 +17,8 @@ import BadgePhotoPicker from '@/components/BadgePhotoPicker.vue'
 import { COLOR_PALETTE } from '@/constants/swatch'
 import { resolveCover } from '@/utils/project-cover'
 import { shareImageDataUrl } from '@/utils/share-badge'
+import { debounce } from '@/utils/debounce'
+import { clamp } from '@/utils/badge-calendar'
 import { isProjectVegan } from '@/utils/yarn-usage'
 
 // Configuration + génération du badge d'un projet. Monté localement (pas un store singleton
@@ -566,11 +568,7 @@ async function updatePreview() {
 // semblait figée »). Le premier rendu (`onMounted` plus bas) reste immédiat, non amorti — seul
 // CE watcher, déclenché à chaque frappe/réglage, passe par un amortissement de 200ms.
 const PREVIEW_DEBOUNCE_MS = 200
-let previewDebounceTimer = null
-function scheduleUpdatePreview() {
-  clearTimeout(previewDebounceTimer)
-  previewDebounceTimer = setTimeout(updatePreview, PREVIEW_DEBOUNCE_MS)
-}
+const scheduleUpdatePreview = debounce(updatePreview, PREVIEW_DEBOUNCE_MS)
 watch(
   [templateKey, badgeColor, selectedStats, photoDataUrl, photoDataUrl2, photoAspect, photoAspect2, badgeLocale, includeTechnique, badgeText, includeCalendar],
   scheduleUpdatePreview,
@@ -695,9 +693,11 @@ useDialogFocusReturn()
 // remontait jusqu'ici, le parent démontait le composeur pendant que `cropper.crop()`
 // attendait encore, et toute la configuration en cours (gabarit, teinte, stats) partait sans
 // un mot, recadreur orphelin à l'écran.
+// `defaultPrevented` : Échap déjà consommé par une pop-up enfant (BadgePhotoPicker,
+// ColorPickerDialog, écouteurs `document` atteints avant ce `window`) : il ne ferme qu'elle.
 function onKey(e) {
   if (cropper.open) return
-  if (e.key !== 'Escape') return
+  if (e.key !== 'Escape' || e.defaultPrevented) return
   emit('close')
 }
 onMounted(() => {
@@ -725,7 +725,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   previewResizeObserver?.disconnect()
   drawerResizeObserver?.disconnect()
-  clearTimeout(previewDebounceTimer)
+  scheduleUpdatePreview.cancel()
   // Filet de sécurité si un glisser de la poignée est en cours au démontage (ex. Échap pendant
   // un geste) : ces listeners sont normalement retirés en paire dans `onDrawerHandlePointerUp`,
   // `removeEventListener` sur un listener déjà absent ne fait rien.
@@ -834,8 +834,6 @@ async function generate() {
 // `pointercancel`) : sans cela, les écouteurs globaux `onDrawerHandlePointerMove`/`Up` (posés
 // sur `window`, filtrés par AUCUN `pointerId`) continueraient de lire la position du PREMIER
 // doigt pendant que le second pince, faussant `dragHeight`.
-const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v))
-
 const activePreviewPointers = new Map()
 
 function onPreviewPointerDown(e) {

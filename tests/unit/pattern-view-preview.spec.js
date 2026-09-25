@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // pattern-view-preview.spec.js (#2/#3d) : la fiche patron est
 // épurée (plus d'aperçu inline des sections/étapes/diagrammes) ; le bouton
 // « Prévisualiser le patron » est restauré et mène au Lecteur en lecture seule
@@ -9,6 +10,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import i18n from '@/i18n'
+import { makeTk } from './helpers/i18n-router'
 
 // Mock vue-router : même approche que ProjectDetailView.spec.js / reader-view.spec.js
 const nav = vi.hoisted(() => ({
@@ -21,6 +23,8 @@ vi.mock('vue-router', () => ({
 }))
 
 import PatternView from '@/views/PatternView.vue'
+
+const tk = makeTk(i18n)
 
 async function seedPattern() {
   const id = await db.patterns.add({
@@ -92,6 +96,52 @@ describe('PatternView — fiche épurée + Prévisualiser', () => {
     await seedPattern()
     const w = mountView()
     await settle()
-    expect(w.text()).not.toContain('Corriger le patron')
+    expect(w.text()).not.toContain(tk('correction.entry'))
+  })
+
+  it('patron créé manuellement (sections vides, une galerie) : affiche quand même « Prévisualiser le patron » qui navigue vers pattern-read', async () => {
+    const id = await db.patterns.add({
+      name: 'Test',
+      type: 'knitting',
+      reader: { sizeLabels: [], sections: [] },
+      gallery: [{ src: 'data:image/png;base64,GAL', page: 0, w: 10, h: 10 }],
+    })
+    nav.route.params = { id: String(id) }
+    nav.route.query = {}
+    const w = mountView()
+    await settle()
+    const btn = w.findAll('button').find((b) => b.text().includes('Prévisualiser'))
+    expect(btn).toBeTruthy()
+    await btn.trigger('click')
+    expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-read', params: { id } })
+  })
+
+  it('patron créé manuellement sans galerie ni section : le message « aucune section » reste affiché', async () => {
+    const id = await db.patterns.add({ name: 'Test', type: 'knitting' })
+    nav.route.params = { id: String(id) }
+    nav.route.query = {}
+    const w = mountView()
+    await settle()
+    expect(w.findAll('button').find((b) => b.text().includes('Prévisualiser'))).toBeFalsy()
+    expect(w.text()).toContain(i18n.global.t('pattern.noSections'))
+  })
+})
+
+describe('PatternView — lien vers le site de l’auteur', () => {
+  // Protège : un authorUrl non http(s) déjà en base ne devient jamais un href exécutable.
+  it('masque le lien si l’URL n’est pas en http(s)', async () => {
+    const id = await db.patterns.add({ name: 'Test', type: 'knitting', author: 'A', authorUrl: 'javascript:alert(1)' })
+    nav.route.params = { id: String(id) }
+    const w = mountView()
+    await settle()
+    expect(w.find('a.author__link').exists()).toBe(false)
+  })
+
+  it('garde le lien pour une URL https', async () => {
+    const id = await db.patterns.add({ name: 'Test', type: 'knitting', author: 'A', authorUrl: 'https://example.org' })
+    nav.route.params = { id: String(id) }
+    const w = mountView()
+    await settle()
+    expect(w.find('a.author__link').attributes('href')).toBe('https://example.org')
   })
 })

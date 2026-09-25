@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — les trois champs de PRIX n'acceptent que des chiffres et un séparateur décimal.
 //
 // Défaut connu : un prix tapé « 18,90 € » (avec le symbole) donnait NaN, puis 0, puis
@@ -19,9 +20,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import { filtrerSaisieDecimale } from '@/utils/decimal'
 import { useSettingsStore } from '@/stores/settings'
@@ -29,8 +27,9 @@ import { usePurchasesStore } from '@/stores/purchases'
 import YarnEditView from '@/views/YarnEditView.vue'
 import YarnPurchases from '@/components/YarnPurchases.vue'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 describe('filtrerSaisieDecimale — la règle, isolée', () => {
   it('laisse passer un prix déjà propre, virgule comme point', () => {
@@ -76,13 +75,10 @@ describe('le prix d’une laine (YarnEditView, #yarn-price)', () => {
   it('refuse le symbole de devise à la frappe', async () => {
     await db.open()
     await Promise.all(db.tables.map((t) => t.clear()))
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [
-        { path: '/stash', name: 'stash', component: { template: '<div />' } },
-        { path: '/stash/new', name: 'stash-new', component: YarnEditView },
-      ],
-    })
+    const router = createTestRouter([
+      { path: '/stash', name: 'stash', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+    ])
     router.push('/stash/new')
     await router.isReady()
     const pinia = createPinia()

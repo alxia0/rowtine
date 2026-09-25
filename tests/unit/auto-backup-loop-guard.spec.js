@@ -1,40 +1,25 @@
-// Intégration — preuve BOUT EN BOUT de l'anti-boucle (Trap 1,
-// cf. Contraintes globales). `runBackup` (backup-service) écrit
-// `setSetting('lastBackupAt')`, qui est elle-même une mutation DB vue par le
-// hook Dexie global (`src/db/db.js`). Sans la suppression (`suppressAutoBackup`
-// enveloppant tout le corps de `runBackup`), cette écriture armerait un second
-// backup débouncé qui, une fois déclenché, rappellerait `backupAll` — boucle
-// infinie. Ce test exerce le VRAI pipeline (vrai `db`, vrai hook Dexie, vrai
-// `auto-backup`, vrai `runBackup`) ; seules les dépendances d'IO (sélection de
-// stockage, collecte, écriture réelle) sont mockées — même esprit que
-// `backup-service.spec.js`, mais avec les fake timers pour observer l'ABSENCE
-// de second déclenchement après `wait`+`maxWait`.
+// @vitest-environment jsdom
+// Anti-boucle de bout en bout : l'écriture `setSetting('lastBackupAt')` de `runBackup` est une
+// mutation vue par le hook Dexie global ; sans `suppressAutoBackup` autour de `runBackup`, elle
+// armerait un second backup, puis un autre, sans fin. Vrai `db`, vrai hook, vrai `auto-backup`,
+// vrai `runBackup` ; seules les IO sont mockées. Fake timers pour observer l'ABSENCE de second
+// déclenchement après `wait` + `maxWait`.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AUTO_BACKUP_MAX_WAIT_MS, AUTO_BACKUP_WAIT_MS } from '@/backup/auto-backup'
 import { db } from '@/db/db'
 import { runBackup } from '@/backup/backup-service'
-// `runBackup` fait un `await import('./patron-md-sync')` paresseux (garde
-// anti-sync, correctif revue finale). Ce module doit être chargé AVANT
-// `vi.useFakeTimers()` : le tout premier chargement d'un module ES demande un
-// tour réel de la boucle d'événements que les fake timers gèleraient (→ timeout).
-// On force le chargement ici (timers réels) pour que l'`import()` de prod tape
-// ensuite le cache instantanément.
+// `runBackup` fait un `await import('./patron-md-sync')` paresseux. Le premier chargement d'un
+// module ES demande un tour réel de la boucle d'événements, que les fake timers gèleraient
+// (timeout) : on le charge ici, timers réels, pour que l'`import()` tape ensuite le cache.
 import '@/backup/patron-md-sync'
-// Même piège pour `./backup-pause` (garde anti-écrasement, avenant 04/08/2026) :
-// `runBackup` en fait désormais aussi un `await import('./backup-pause')`
-// paresseux. `restore.js` et `backup-decision.js`, que `backup-pause.js`
-// importe à son tour dynamiquement, n'ont pas besoin du même traitement : ils
-// sont déjà importés STATIQUEMENT par `backup-service.js` ci-dessus (donc déjà
-// en cache avant `vi.useFakeTimers()`) — seul le tout premier chargement d'un
-// module pose problème, pas une résolution depuis le cache.
+// Même piège pour `./backup-pause`. `restore.js` et `backup-decision.js`, qu'il importe à son
+// tour, sont déjà en cache via les imports statiques de `backup-service.js`.
 import '@/backup/backup-pause'
 
 const isNativePlatform = vi.hoisted(() => vi.fn())
-// `registerPlugin` (correctif du 06/08/2026) : désormais, `backup-service`
-// importe `backup-manifest`, qui importe `device-identity`, qui importe `saf-plugin` —
-// lequel appelle `registerPlugin('RowtineSaf')` À L'ÉVALUATION du module. Sans cet
-// export, ce fichier entier cessait de se charger : « 0 test », donc AUCUN rouge, donc
-// une garde anti-boucle qu'on croyait couverte et qui ne tournait plus du tout.
+// `registerPlugin` : la chaîne backup-service → backup-manifest → device-identity → saf-plugin
+// l'appelle À L'ÉVALUATION. Sans cet export, le fichier ne se charge plus (« 0 test », aucun
+// rouge) et la garde cesse de tourner en silence.
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: (...a) => isNativePlatform(...a) },
   registerPlugin: () => ({}),
@@ -45,23 +30,11 @@ vi.mock('@/backup/saf-folder', () => ({
   hasFolder: (...a) => hasFolder(...a),
 }))
 
-// Depuis la garde anti-écrasement (avenant 04/08/2026), `runBackup` appelle
-// `isBackupPaused(storage)` → `hasBackup(storage)` → `storage.exists(...)`
-// avant d'écrire. Une classe vide fait échouer l'appel à `exists` (méthode
-// absente), et la garde se referme prudemment (`isBackupPaused` → `true`) —
-// ce test ne porte pas sur cette garde (il est antérieur à elle) : `exists`
-// renvoie `false` sur les quatre noms testés par `hasBackup`, donc « dossier
-// vide, rien à protéger », donc la garde laisse passer, comme avant son
-// introduction. Ce dossier « vide » fait aussi emprunter le chemin
-// `recordBackupDecision` dans `runBackup` (folderWasEmpty === true) — vérifié
-// sans conséquence pour CE test (espionnage temporaire de `db.settings.put`,
-// retiré après coup) : `folderKey` n'est pas exporté par le mock de
-// `@/backup/saf-folder` ci-dessous, donc `recordBackupDecision` échoue et
-// n'écrit rien. Mais même si une version future du mock l'exportait,
-// l'argument tiendrait quand même : tout `runBackup` tourne sous
-// `suppressAutoBackup` (cf. auto-backup.js), qui couvre TOUTE écriture faite
-// pendant son exécution, `lastBackupAt` comme une éventuelle
-// `backupDecision` — aucune des deux ne peut réarmer le debounce.
+// `runBackup` passe par `isBackupPaused(storage)` → `storage.exists(...)`. Une classe vide
+// ferait refermer cette garde (hors sujet ici) : `exists` renvoie `false`, « dossier vide »,
+// donc elle laisse passer. Le chemin `recordBackupDecision` qui en découle n'écrit rien (pas de
+// `folderKey` dans le mock), et même s'il écrivait, `suppressAutoBackup` couvre toute écriture
+// faite pendant `runBackup`.
 vi.mock('@/backup/saf-storage', () => ({
   SafBackupStorage: class {
     async exists() {
@@ -80,12 +53,9 @@ vi.mock('@/backup/orchestrator', () => ({
   backupAll: (...a) => backupAll(...a),
 }))
 
-// `runBackup` importe désormais dynamiquement `patron-md-sync` (garde d'exclusion
-// mutuelle backup↔sync, correctif revue finale #2). On le mocke ici pour deux
-// raisons : (1) éviter que l'`await import()` du vrai module — avec sa chaîne de
-// dépendances et le cycle backup-service↔patron-md-sync — ne se résolve jamais
-// sous fake timers ; (2) le guard n'est pas le sujet de CE test (Trap 1). Aucune
-// synchro en cours → la garde est un no-op, le comportement observé est inchangé.
+// Mock de `patron-md-sync` : l'`await import()` du vrai module (et le cycle
+// backup-service↔patron-md-sync) ne se résoudrait pas sous fake timers, et la garde
+// d'exclusion avec la synchro n'est pas le sujet ici (aucune synchro en cours : no-op).
 vi.mock('@/backup/patron-md-sync', () => ({
   isSyncRunning: () => false,
   whenSyncIdle: () => Promise.resolve(),
@@ -116,11 +86,24 @@ describe('Lot N3 — anti-boucle (Trap 1)', () => {
     expect(result).toEqual({ ok: true })
     expect(backupAll).toHaveBeenCalledTimes(1)
 
-    // Sans `suppressAutoBackup` enveloppant runBackup, l'écriture `lastBackupAt`
-    // ci-dessus aurait armé le hook Dexie → après `wait` puis `maxWait`, un
-    // second `runBackup` (donc un second `backupAll`) aurait fini par se
-    // déclencher tout seul. Avec la suppression en place, rien ne se réarme.
+    // Sans `suppressAutoBackup`, l'écriture `lastBackupAt` aurait armé le hook Dexie et un
+    // second `backupAll` serait parti après `wait` puis `maxWait`.
     await vi.advanceTimersByTimeAsync(AUTO_BACKUP_WAIT_MS + AUTO_BACKUP_MAX_WAIT_MS)
     expect(backupAll).toHaveBeenCalledTimes(1)
+  })
+
+  // Protège : une écriture de l'utilisatrice PENDANT la sauvegarde (après la collecte) en arme une suivante.
+  it("une mutation faite pendant l'écriture de la sauvegarde arme un nouveau passage", async () => {
+    backupAll.mockClear()
+    backupAll.mockImplementationOnce(async () => {
+      await db.projects.add({ name: 'Rang 42 coché pendant l’écriture' })
+    })
+    const resultPromise = runBackup()
+    await vi.advanceTimersByTimeAsync(50)
+    expect(await resultPromise).toEqual({ ok: true })
+    expect(backupAll).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(AUTO_BACKUP_WAIT_MS + AUTO_BACKUP_MAX_WAIT_MS)
+    expect(backupAll).toHaveBeenCalledTimes(2)
   })
 })

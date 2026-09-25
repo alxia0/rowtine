@@ -854,6 +854,12 @@ const BEFORE_AFTER_BLOCKING_RE = /^(?:antes|despu[ée]s)\s+de\s+(?:lavar(?:\s+y\
 // (« Hoe haak je 4-stokjes-samen », gate ainsa-bandana-nl) se scinderait à tort en 2.
 const TECH_LABEL_RE = /^([^:]{1,24}?)\s*:\s+(\S.*)$/
 
+// G4b : fallback « label + exactement n nombres séparés par des ESPACES » (cf. commentaire
+// au point d'appel, dans extractReference). Sortie du balayage par ligne — ce motif ne
+// dépend ni de `t` ni de `n`, seulement recompilé à chaque ligne avant ce correctif.
+const G4B_NUM = String.raw`\d+(?:[.,]\d+)?(?:-\d+(?:[.,]\d+)?)?`
+const G4B_LABEL_NUMS_RE = new RegExp(String.raw`^(.*?\S)\s+(${G4B_NUM}(?:\s+${G4B_NUM})*)$`)
+
 export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [], preNotes = [] } = {}) {
   const abbr = []
   // Lignes non-glossaire routées en note visible (cf. formRejectedAbbrLine ci-dessus).
@@ -861,10 +867,16 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
   // dans assemble.js) : ces phrases (NOTE, légende…) n'ont pas de section à rejoindre,
   // elles sont donc déjà routées ici par l'appelant.
   const notes = [...preNotes]
-  const seen = new Set()
-  const addAbbr = (key, def) => {
+  const seen = new Map()
+  const normDef = (d) => d.replace(/\s+/g, ' ').trim().toLowerCase()
+  // `raw` : ligne verbatim d'origine. Une clé déjà prise avec une AUTRE définition ne peut
+  // pas rejoindre le glossaire (la première occurrence gagne) : la ligne part alors en note
+  // au lieu de disparaître (l'appelant la consomme, ou sa section est écartée du travail).
+  const addAbbr = (key, def, raw) => {
     const k = key.trim()
-    if (k && !seen.has(k)) { seen.add(k); abbr.push({ key: k, def: def.trim() }) }
+    if (!k) return
+    if (!seen.has(k)) { seen.set(k, normDef(def)); abbr.push({ key: k, def: def.trim() }); return }
+    if (raw && seen.get(k) !== normDef(def)) notes.push(raw)
   }
   // Entrées pré-extraites par readColumnGlossary : injectées AVANT tout
   // balayage de section, même dédoublonnage par clé que ci-dessus (la première
@@ -984,6 +996,15 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
     // JAMAIS fuir d'une section à l'autre — remis à '' à chaque nouvelle section, qu'il
     // ait été consommé ou non par la section précédente.
     let pendingMeasureLabel = ''
+    // Ligne verbatim du libellé en attente : s'il n'est jamais apparié (écrasé par un autre
+    // libellé, supplanté par une ligne qui ne le reprend pas, ou fin de section), il part en
+    // note plutôt que de disparaître (la section « mesures » est écartée du travail en aval).
+    let pendingMeasureRaw = ''
+    const dropPendingMeasure = () => {
+      if (pendingMeasureLabel) notes.push(pendingMeasureRaw)
+      pendingMeasureLabel = ''
+      pendingMeasureRaw = ''
+    }
     // Index label(normalisé) → position dans sizeTable, pour fusionner les sous-mesures
     // d'une même rangée transposée vues sur des lignes de tailles successives (G4c).
     // Déclaré ICI, en tête de boucle SECTION (et non une seule fois pour tout le
@@ -1018,8 +1039,11 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         if (!kv[i]) continue
         let j = i
         while (j < kv.length && kv[j]) j++
-        if (j - i >= 3) {
-          for (let k = i; k < j; k++) { addAbbr(kv[k][1], kv[k][2]); sec.lines[k].consumed = true }
+        // Un vrai glossaire ne répète pas une clé : un bloc « Envers: … / Endroit: … /
+        // Envers: … » est une suite de rangs (rangs raccourcis), il reste dans le travail.
+        const runKeys = kv.slice(i, j).map((m) => m[1].trim())
+        if (j - i >= 3 && new Set(runKeys).size === runKeys.length) {
+          for (let k = i; k < j; k++) { addAbbr(kv[k][1], kv[k][2], sec.lines[k].text); sec.lines[k].consumed = true }
         }
         i = j
       }
@@ -1208,7 +1232,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         if (bareBlock === 'abbr') {
           const m = execAbbrLine(t)
           if (m) {
-            addAbbr(m[1], m[2])
+            addAbbr(m[1], m[2], t)
             // Le libellé d'ouverture (« Abréviations ») n'a pas de « tête de bloc » où se
             // recopier : contrairement à Fil/Aiguilles/Matériel (des blocs de PROSE, une
             // liste de lignes), le glossaire est une table clé→définition — il n'existe
@@ -1555,7 +1579,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
       const m = execAbbrLine(t)
       if (m) {
         // Section dédiée : tout « X = déf » / « X : déf » / « X – déf » est une abréviation.
-        if (sec.ref === 'abbr') { addAbbr(m[1], m[2]); continue }
+        if (sec.ref === 'abbr') { addAbbr(m[1], m[2], t); continue }
         // Balayage global (hors section dédiée) : seule une clé courte sans espace compte.
         // Gardes anti-fragment-de-rang (venetien-shawl) : la clé doit commencer par une
         // LETTRE (« (= env… » a la clé « ( ») et la définition ne doit pas commencer par un
@@ -1574,7 +1598,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
           !sec.ref && m[1].trim().length <= 8 && !/\s/.test(m[1].trim()) &&
           eqAt !== -1 && eqAt <= m[1].trim().length + 2 &&
           /^\p{L}/u.test(m[1].trim()) && !looksLikeBareCountDef(m[2])
-        ) { addAbbr(m[1], m[2]); line.consumed = true; continue }
+        ) { addAbbr(m[1], m[2], t); line.consumed = true; continue }
       } else if (sec.ref === 'abbr' && execNotationLegendLine(t)) {
         // Légende de notation (« [ ] indique que… », cf. commentaire d'execNotationLegendLine
         // ci-dessus) : une vraie entrée de glossaire, juste sans séparateur ni ponctuation
@@ -1582,7 +1606,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // en tête de document : la légende n'a de sens que lue à côté des symboles qu'elle
         // explique).
         const lg = execNotationLegendLine(t)
-        addAbbr(lg[1], lg[2])
+        addAbbr(lg[1], lg[2], t)
         line.consumed = true
         continue
       } else if (sec.ref === 'abbr' && formRejectedAbbrLine(t)) {
@@ -1718,7 +1742,13 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // Optimisation perf — borne AVANT isYarnLine (YARN_RE, lookahead non ancré, coûteux) :
         // réutilise NEEDLE_SF_MAX_LEN. Le second filet (quantité de pelotes) reste sans
         // borne : alternation simple, sans lookahead, coût linéaire.
-        if ((String(t).length <= NEEDLE_SF_MAX_LEN && isYarnLine(t)) || /\d\s*(?:pelotes?|skeins?|balls?|kn[äa]uel|n[øo]gler?|nystan|ker[äa][äa]?|ovillos?|gomitoli|bollen|motk[iów]+)\b/i.test(t)) { pushYarn(t); continue }
+        // Même repli que la branche `fil` : au plafond de `pushYarn`, la ligne retombe au Matériel.
+        if ((String(t).length <= NEEDLE_SF_MAX_LEN && isYarnLine(t)) || /\d\s*(?:pelotes?|skeins?|balls?|kn[äa]uel|n[øo]gler?|nystan|ker[äa][äa]?|ovillos?|gomitoli|bollen|motk[iów]+)\b/i.test(t)) {
+          const before = yarns.length
+          pushYarn(t)
+          if (yarns.length === before) materials.push(t)
+          continue
+        }
         // Même garde « jamais perdre d'info » qu'au bloc ci-dessus : le plafond
         // d'aiguilles ne doit jamais faire disparaître une ligne, seulement la
         // reclasser au Matériel.
@@ -1778,6 +1808,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         if (vecs.length) {
           let last = 0
           let pushed = false
+          let usedPending = false
           for (const v of vecs) {
             let label = t.slice(last, v.start).replace(/[\s:]+$/, '').trim()
             // Libellé porté par la ligne PRÉCÉDENTE (PDF réel Mia Cardigan :
@@ -1786,11 +1817,11 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
             // qu'au PREMIER vecteur de la ligne (last === 0) : un second vecteur sur la
             // même ligne (ci-dessus) porte toujours son propre libellé intercalé,
             // jamais celui de la ligne d'avant.
-            if (!label && last === 0 && pendingMeasureLabel) label = pendingMeasureLabel
+            if (!label && last === 0 && pendingMeasureLabel) { label = pendingMeasureLabel; usedPending = true }
             if (label) { sizeTable.push({ label, values: v.values }); pushed = true }
             last = v.end
           }
-          pendingMeasureLabel = ''
+          if (usedPending) { pendingMeasureLabel = ''; pendingMeasureRaw = '' } else dropPendingMeasure()
           if (pushed) continue
         }
         // Ligne à VALEUR UNIQUE, identique pour toutes les tailles
@@ -1822,6 +1853,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
           if (single && !/\d/.test(t.slice(single[0].length))) {
             sizeTable.push({ label: pendingMeasureLabel, values: Array(n).fill(single[1]) })
             pendingMeasureLabel = ''
+            pendingMeasureRaw = ''
             continue
           }
         }
@@ -1833,10 +1865,12 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // mesure taille unique disparaissait (régression mesurée : 3 témoins G4e existants
         // viraient au rouge).
         if (!rawVecs.length && !/\d/.test(t) && n > 1) {
+          dropPendingMeasure()
           pendingMeasureLabel = t.replace(/[\s:]+$/, '').trim()
+          pendingMeasureRaw = t
           continue
         }
-        pendingMeasureLabel = ''
+        dropPendingMeasure()
         const kv3 = /^(.{2,40}?)\s*:\s*(\S.*)$/.exec(t)
         if (kv3 && n === 1) { sizeTable.push({ label: kv3[1].trim(), values: [kv3[2].trim()] }); continue }
         // G4b : fallback « label + exactement n nombres séparés par des ESPACES »
@@ -1845,10 +1879,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // Conditions STRICTES : n > 1, trailing = exactement n nombres, pour ne pas
         // aspirer une instruction chiffrée (« Monter 90 100 110 mailles »).
         if (n > 1) {
-          const NUM = String.raw`\d+(?:[.,]\d+)?(?:-\d+(?:[.,]\d+)?)?`
-          const mSp = new RegExp(String.raw`^(.*?\S)\s+(${NUM}(?:\s+${NUM})*)$`).exec(
-            t.replace(/\s*cm\s*$/i, ''),
-          )
+          const mSp = G4B_LABEL_NUMS_RE.exec(t.replace(/\s*cm\s*$/i, ''))
           if (mSp) {
             const values = mSp[2].split(/\s+/)
             if (values.length === n) { sizeTable.push({ label: mSp[1].trim(), values }); continue }
@@ -2043,6 +2074,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         }
       }
     }
+    dropPendingMeasure()
   }
 
   // M1 — fusion de la réserve fragment, en tout dernier, SEULEMENT si le champ

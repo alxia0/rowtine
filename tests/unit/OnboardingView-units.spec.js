@@ -1,13 +1,12 @@
+// @vitest-environment jsdom
 import { beforeEach, describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
 import OnboardingView from '@/views/OnboardingView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // `prefill` : réglages à écrire en base AVANT le montage, pour simuler un retour sur l'écran
 // après un premier passage (ex. app tuée en cours d'onboarding, juste après avoir touché le
@@ -20,13 +19,10 @@ async function mountOnboarding(navLang = 'fr-FR', prefill = null) {
     }
   }
   vi.spyOn(navigator, 'language', 'get').mockReturnValue(navLang)
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'onboarding', component: OnboardingView },
-      { path: '/home', name: 'home', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/', name: 'onboarding', component: OnboardingView },
+    { path: '/home', name: 'home', component: { template: '<div/>' } },
+  ])
   router.push('/')
   await router.isReady()
   const w = mount(OnboardingView, { global: { plugins: [router, i18n, createPinia()] } })

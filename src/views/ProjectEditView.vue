@@ -23,6 +23,8 @@ import AppToggle from '@/components/AppToggle.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
 import { priceOwnerId } from '@/utils/pattern-price'
+import { patternToReader } from '@/utils/reader'
+import { MIN_YEAR } from '@/utils/stats-grid'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +40,9 @@ const projectConsumption = useProjectConsumption()
 const isEdit = computed(() => !!route.params.id)
 const pid = computed(() => (isEdit.value ? Number(route.params.id) : null))
 const form = reactive(emptyProject())
+// Même plage d'années que celle retenue par les statistiques (isPlausibleDay, stats-grid.js).
+const dateMin = `${MIN_YEAR}-01-01`
+const dateMax = `${new Date().getFullYear() + 1}-12-31`
 const nameInput = ref(null) // pour focus auto si erreur de validation
 const nameError = ref('') // message d'erreur inline sous le champ Nom
 // Plus de champ visible ici (11/09) : sizesText n'est plus alimenté QUE par le patron lié
@@ -91,11 +96,19 @@ function loadPatternPrice() {
 const isCrochet = computed(() => form.technique === 'crochet')
 const sizeLabel = computed(() => (isCrochet.value ? t('project.activeSizeCrochet') : t('project.activeSize')))
 const sizeHint = computed(() => (isCrochet.value ? t('project.activeSizeCrochetHint') : t('project.activeSizeHint')))
+// Saisie libre des tailles ("S, M, L" → ['S', 'M', 'L']) — même parsing utilisé EN DIRECT
+// par sizeOptions ci-dessous et à l'enregistrement (saveProject), d'où la factorisation.
+const parsedSizes = computed(() =>
+  sizesText.value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+)
 // Options du menu « taille tricotée » : parse EN DIRECT la saisie libre des tailles
 // (form.sizes n'est calculé qu'à l'enregistrement) + on garde la valeur courante même si
 // elle n'y figure pas, pour ne jamais l'écraser en éditant un projet existant.
 const sizeOptions = computed(() => {
-  const list = sizesText.value.split(',').map((s) => s.trim()).filter(Boolean)
+  const list = [...parsedSizes.value]
   if (form.activeSize && !list.includes(form.activeSize)) list.push(form.activeSize)
   return list
 })
@@ -299,10 +312,7 @@ async function saveProject() {
     return
   }
   nameError.value = ''
-  form.sizes = sizesText.value
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
+  form.sizes = [...parsedSizes.value]
   // Champ « Tailles » retiré de cet écran (11/09) : les tailles vivent désormais sur le
   // patron, corrigées depuis SON écran. `form.sizes` ne peut donc plus qu'être vide ou hérité
   // du patron — la garde ne doit effacer la taille tricotée que si une VRAIE liste existe et
@@ -340,6 +350,18 @@ async function saveProject() {
   // Ne vaut que dans le sens « renseigner » : effacer une date ne dé-termine pas un projet.
   const avant = isEdit.value ? await projectsStore.get(route.params.id) : null
   if (shouldDeriveDone(avant, payload)) payload.status = 'done'
+  // Suivi du lecteur : ce formulaire ne l'édite pas. Renvoyer celui lu à l'ouverture écraserait
+  // un readerState recalé entre-temps (synchro patron.md au retour dans l'app). Seule
+  // exception, la taille tricotée : c'est l'INDEX `readerState.size` qui pilote le lecteur
+  // (cf. ProjectDetailView.setActiveSize), réécrit ici depuis l'état frais `avant`.
+  if (isEdit.value) {
+    delete payload.readerState
+    if (avant && !patternChanged && payload.activeSize && payload.activeSize !== avant.activeSize) {
+      const pat = patternsStore.patterns.find((p) => p.id === newPatternId)
+      const i = pat ? (patternToReader(pat)?.sizeLabels || []).indexOf(payload.activeSize) : -1
+      if (i >= 0) payload.readerState = { ...avant.readerState, size: i }
+    }
+  }
   // Un chrono qui tourne sur CE projet peut survivre à cet écran : `project-edit` reste
   // dans la « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que
   // l'id ne change pas — et `finishSave` ci-dessus renvoie justement vers `project` avec
@@ -536,11 +558,11 @@ async function saveProject() {
       <div class="row">
         <div class="col">
           <label class="field-label" for="start">{{ t('project.startedAt') }}</label>
-          <input id="start" v-model="form.startedAt" class="input" type="date" />
+          <input id="start" v-model="form.startedAt" class="input" type="date" :min="dateMin" :max="dateMax" />
         </div>
         <div class="col">
           <label class="field-label" for="end">{{ t('project.finishedAt') }}</label>
-          <input id="end" v-model="form.finishedAt" class="input" type="date" />
+          <input id="end" v-model="form.finishedAt" class="input" type="date" :min="dateMin" :max="dateMax" />
         </div>
       </div>
 

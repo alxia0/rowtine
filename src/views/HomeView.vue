@@ -14,16 +14,13 @@ import { fmtDuration } from '@/stores/activeSession'
 import { useSectionsStore } from '@/stores/sections'
 import { useYarnsStore } from '@/stores/yarns'
 import { usePatternsStore } from '@/stores/patterns'
-import { usePurchasesStore } from '@/stores/purchases'
 import { readerProgress, patternToReader } from '@/utils/reader'
 import { STATUS_ORDER } from '@/constants/status'
 import { startOfWeek } from '@/utils/time-periods'
 import { relativeDayLabel } from '@/utils/date-format'
-import { formatMoney } from '@/utils/units'
-import { totalsByCurrency } from '@/utils/purchases'
-import { patternExpenseLines } from '@/utils/pattern-price'
 import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
+import { useStartTour } from '@/composables/useStartTour'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -33,7 +30,7 @@ const sessionsStore = useSessionsStore()
 const sectionsStore = useSectionsStore()
 const yarnsStore = useYarnsStore()
 const patternsStore = usePatternsStore()
-const purchasesStore = usePurchasesStore()
+const { startTour } = useStartTour()
 
 // L'accueil a-t-il FINI de lire la base ? (photographié les 16 et 17/08 sur la
 // Nexus 7 : pendant 8 secondes, l'écran affirmait « Aucun projet pour l'instant » sur un
@@ -71,10 +68,21 @@ const showWelcome = ref(false)
 // par `runRestore`, qui vient précisément d'effacer `welcomeDue` en base (cf.
 // restore-service.js) — le message du semis décrirait alors des exemples qui
 // n'existent plus, c'est donc lui qui ne doit JAMAIS fuiter sur l'autre.
+// `cancel` (lot « visite guidée », 23/09/2026) : présent SEULEMENT côté semis — c'est
+// la seule des deux issues où confirmer lance en plus la visite guidée (cf.
+// `onWelcomeConfirm` plus bas), donc la seule où « Plus tard » a un sens (fermer sans la
+// visite). Côté restauration, `cancel` reste absent : ConfirmDialog ne rend son bouton
+// secondaire que si `cancelLabel` est fourni (`hasCancel`), ce mode garde donc son
+// unique bouton, comportement INCHANGÉ.
 const welcomeTexts = computed(() =>
   settings.restoredDue
     ? { title: t('restore.welcomeTitle'), message: t('restore.welcomeBody'), confirm: t('restore.welcomeStart') }
-    : { title: t('onboarding.welcomeTitle'), message: t('onboarding.welcomeBody'), confirm: t('onboarding.welcomeStart') },
+    : {
+        title: t('onboarding.welcomeTitle'),
+        message: t('onboarding.welcomeBody'),
+        confirm: t('onboarding.welcomeStart'),
+        cancel: t('onboarding.welcomeLater'),
+      },
 )
 // File des messages (19/08/2026). `showWelcome` reste la condition PROPRE de la bienvenue :
 // les DEUX points d'entrée depuis le 10/08 (le `onMounted` et le `watch` sur `welcomeDue`)
@@ -101,6 +109,22 @@ async function dismissWelcome() {
   await Promise.all([settings.clearWelcomeDue(), settings.clearRestoredDue()])
 }
 
+// Lancement de la visite guidée depuis la bienvenue (lot du 23/09/2026). Confirmer la
+// bienvenue du SEMIS enchaîne sur la visite ; confirmer celle de la RESTAURATION n'en
+// lance aucune (comportement inchangé, cf. commentaire de `welcomeTexts`) — la
+// distinction se lit AVANT `dismissWelcome()`, qui efface justement `welcomeDue`.
+async function onWelcomeConfirm() {
+  const launchTour = settings.welcomeDue && !settings.restoredDue
+  await dismissWelcome()
+  if (launchTour) await startTour()
+}
+
+// « Plus tard » (semis uniquement, cf. `welcomeTexts`) : ferme la bienvenue comme un
+// acquittement normal, sans lancer la visite.
+async function onWelcomeCancel() {
+  await dismissWelcome()
+}
+
 // CORRECTIF (ordre des pop-ups, 10/08/2026) : `HomeView` est monté DERRIÈRE la
 // porte du dossier (OnboardingFolderPrompt.vue, frère de `<RouterView/>` dans App.vue) —
 // même piège que celui déjà corrigé là-bas (cf. son commentaire, 09/08). Au tout premier
@@ -123,61 +147,6 @@ watch(
   },
 )
 
-// Budget laine CUMULÉ (les travaux sur le budget) : lu depuis le registre d'achats, pas depuis
-// l'état courant du stock. `Σ quantité × prix` sur les fiches (l'ancien calcul, encore
-// utilisé par StashView pour SA valeur de stock à elle) BAISSE quand une laine est
-// consommée et EFFACE la dépense quand une fiche est supprimée — aucun libellé ne pouvait
-// rendre ce calcul honnête. Ici, une laine tombée à 0 en stock, ou supprimée définitivement
-// (ligne orpheline, `yarnId: null`), compte toujours dans ce total : c'est tout l'enjeu de
-// ce chantier.
-// Depuis le 07/08, les patrons payants sont une dépense au même titre que la laine.
-// Cette tuile n'est plus le seul chemin vers l'écran Dépenses (le menu ☰ y mène aussi,
-// depuis le 12/08), mais elle en reste le raccourci le plus direct : elle doit
-// donc compter exactement ce que compte l'écran, sous peine de le contredire à un appui
-// de doigt.
-const purchaseLines = computed(() => [
-  ...(purchasesStore.purchases || []),
-  ...patternExpenseLines(patternsStore.patterns || []),
-])
-// Condition d'affichage : l'EXISTENCE d'au moins une ligne, jamais « total > 0 ».
-// Cette tuile est un RACCOURCI vers l'écran Dépenses, plus son seul chemin : depuis le
-// 12/08, le menu ☰ y mène en permanence (AppHeader.vue). C'est ce qui permet de
-// garder ici la condition `hasPurchases` — une tuile « budget dépensé : 0 € » n'apprend
-// rien, alors que l'écran, lui, doit rester joignable même sur une app neuve. Un
-// historique de cadeaux, de lignes reconstruites sans prix, ou d'achats chiffrés
-// supprimés ne laissant que des cadeaux, rend un total à 0 alors que des lignes
-// existent bel et bien. Un patron déclaré GRATUIT (prix `'0'`, depuis le 07/08) relève
-// exactement du même cas : `isPricedPattern` le compte comme une ligne (cf. pattern-price.js),
-// qui ne pèse rien dans le total. La refermer sur `total > 0` rendrait ces lignes-là
-// inatteignables pour toujours (cas 4). `Object.keys(totals).length` serait le
-// même défaut sous un autre nom : `totalsByCurrency` omet toute devise dont le montant vaut
-// 0 (cf. son commentaire), donc un historique tout en cadeaux y rendrait `{}` lui aussi.
-const hasPurchases = computed(() => purchaseLines.value.length > 0)
-// { devise: montant } — jamais un nombre unique (cf. utils/purchases.js) : l'app ne connaît
-// aucun taux de change et n'additionne donc jamais deux devises entre elles.
-const budgetTotals = computed(() => totalsByCurrency(purchaseLines.value))
-// La devise des réglages est TOUJOURS en tête (0 affiché si aucune ligne n'y est libellée) ;
-// les autres devises rencontrées dans l'historique suivent, à part, jamais fondues dans le
-// même chiffre (cas 5).
-const otherCurrencies = computed(() => Object.keys(budgetTotals.value).filter((c) => c !== settings.currency))
-// Profil 'detail' (jamais de bascule d'unité) : le montant complet, symbole de devise inclus
-// dans `text`, tient sur cette tuile large. Le cumul est ARRONDI
-// avant d'être passé à `formatMoney` (décision produit, revue du 26/07) : `formatMoney` elle-même
-// n'arrondit jamais en profil 'detail' (règle générale, cf. son commentaire) — c'est à
-// l'appelant de décider si SON cumul doit être rond. Ce chiffre n'a plus rien à voir avec
-// celui de StashView (valeur du stock AU JOUR DIT, jamais rétroactive) : les deux cohabitent
-// sciemment, chacun sur son écran — ce n'est plus la même donnée à arrondir
-// pareil « pour rester cohérent », c'est deux questions différentes qui se répondent chacune
-// avec sa propre règle d'arrondi.
-function moneyFor(currency) {
-  return formatMoney(Math.round(budgetTotals.value[currency] || 0), { locale: locale.value, currency, profile: 'detail' })
-}
-const spentStat = computed(() => moneyFor(settings.currency))
-
-function goToExpenses() {
-  router.push({ name: 'expenses' })
-}
-
 onMounted(async () => {
   try {
     // Le garde de route (router/index.js) charge déjà settings AVANT d'entrer sur l'accueil en
@@ -189,11 +158,9 @@ onMounted(async () => {
     showWelcome.value = settings.welcomeDue || settings.restoredDue
     if (!projectsStore.loaded) await projectsStore.load()
     if (!yarnsStore.loaded) yarnsStore.load()
-    // Déjà chargé au démarrage de l'app en usage réel (App.vue, comme ExpensesView.vue) ;
-    // ce filet couvre le montage direct du composant, même motif que `yarnsStore` ci-dessus.
-    if (!purchasesStore.loaded) purchasesStore.load()
-    // Même filet, pour la même raison : la tuile budget (ci-dessous) lit désormais aussi
-    // patternsStore.patterns (depuis le 07/08).
+    // Filet pour le montage direct du composant (tests, ou tout futur point d'entrée
+    // qui court-circuiterait le chargement au démarrage de l'app) : patternFor() ci-dessous
+    // lit patternsStore.patterns pour le repli « reader » de la progression.
     if (!patternsStore.loaded) patternsStore.load()
     progressMap.value = await sectionsStore.progressByProject()
     // Repli « reader » (#7) : les patrons structurés suivent la progression via
@@ -316,7 +283,7 @@ const heroWhere = computed(() => {
       parts.push(t('home.resumeRow', { done: heroSection.value.rowsDone || 0, total: heroSection.value.rowsTotal }))
     }
   }
-  if (lp.activeSize) parts.push(t('project.activeSize').toLowerCase() + ' ' + lp.activeSize)
+  if (lp.activeSize) parts.push(t('home.resumeSize', { size: lp.activeSize }))
   return parts.join(' · ')
 })
 
@@ -419,18 +386,6 @@ function createProject() {
         <AppIcon class="tile__chevron" name="chevronRight" :size="16" aria-hidden="true" />
         <span class="sr-only">{{ t('home.sessionsLink') }}</span>
       </button>
-      <button v-if="hasPurchases" type="button" class="tile tile--wide tile--link" data-test="home-spent" @click="goToExpenses">
-        <span class="tile__k">{{ t('home.budgetSpent') }}</span>
-        <span class="tile__v">{{ homeReady ? spentStat.text : '—' }}</span>
-        <span v-if="otherCurrencies.length" class="tile__extra">
-          <span v-for="cur in otherCurrencies" :key="cur" class="tile__extra-item">{{ moneyFor(cur).text }}</span>
-        </span>
-        <AppIcon class="tile__chevron" name="chevronRight" :size="16" aria-hidden="true" />
-        <!-- Nom accessible = contenu visible (libellé + montant(s)) + l'action ; PAS d'aria-label,
-             qui écraserait le(s) montant(s) lu(s) par les lecteurs d'écran (même règle que la
-             tuile « cette semaine » ci-dessus, cf. WCAG 2.5.3). -->
-        <span class="sr-only">{{ t('home.expensesLink') }}</span>
-      </button>
     </div>
 
     <!-- Outils -->
@@ -489,7 +444,9 @@ function createProject() {
       :title="welcomeTexts.title"
       :message="welcomeTexts.message"
       :confirm-label="welcomeTexts.confirm"
-      @confirm="dismissWelcome"
+      :cancel-label="welcomeTexts.cancel"
+      @confirm="onWelcomeConfirm"
+      @cancel="onWelcomeCancel"
     />
   </main>
 </div>
@@ -590,10 +547,6 @@ html[data-theme='dark'] .tile--accent {
 .tile__row { display: block; margin-top: 6px; }
 .tile__row-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 14.5px; color: var(--ink); }
 .tile__row-sub { display: block; margin-top: 1px; font-size: 13px; color: var(--ink-55); font-variant-numeric: tabular-nums; }
-/* devise(s) autre(s) que celle des réglages (cas 5) : jamais fondues dans
-   .tile__v, toujours listées à part, jamais additionnées entre elles ni à la devise en tête. */
-.tile__extra { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
-.tile__extra-item { font-size: 12.5px; font-weight: 600; color: var(--ink-55); }
 /* Visuellement masqué mais lu par les lecteurs d'écran (motif standard, cf. .file-pick__input). */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 

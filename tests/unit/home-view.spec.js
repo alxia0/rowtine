@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — HomeView : la pop-up de BIENVENUE survit à un vrai relancement de l'app.
 //
 // Ce fichier testait l'astuce « balaie pour revenir » (P3) ; ce lot (10/08/2026) la
@@ -21,6 +22,15 @@ const nav = vi.hoisted(() => ({
   router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() },
 }))
 vi.mock('vue-router', () => ({ useRouter: () => nav.router }))
+
+// Depuis le lot « visite guidée » (23/09/2026), confirmer la bienvenue du semis enchaîne
+// sur `startTour()` (cf. tests/unit/home-welcome-starts-tour.spec.js, qui couvre CE
+// comportement en détail, mocké de la même façon). Ce fichier-ci ne teste QUE la
+// persistance du drapeau à travers un vrai relancement — `ensureTourProject` (recherche/
+// recréation réelle du projet d'exemple, plusieurs écritures Dexie) n'a rien à y faire, et
+// l'exécuter pour de vrai ici n'ajouterait que de la charge asynchrone non pertinente à la
+// preuve recherchée.
+vi.mock('@/utils/tour-sample', () => ({ ensureTourProject: vi.fn().mockResolvedValue({ id: 1, created: false }) }))
 
 import HomeView from '@/views/HomeView.vue'
 

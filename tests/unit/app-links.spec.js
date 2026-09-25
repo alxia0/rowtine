@@ -1,25 +1,10 @@
-// Adresses du guide EN LIGNE (celui qui se télécharge, sur le site), une par langue de
-// l'interface. VÉRIFIÉES EN LIGNE le 12/08/2026 — les quatre répondent HTTP 200
-// avec le bon titre par langue, PDF téléchargeable côté français. ⚠️ `curl` nu reçoit 403
-// sur tout le domaine (un pare-feu bloque son agent par
-// défaut) : ce n'est pas une preuve de mesure ici, la vérification a été faite avec un agent
-// de navigateur.
-//
-// Les 5 assertions ci-dessous comparent à des CHAÎNES LITTÉRALES, jamais à `GUIDE_URLS`
-// réimporté : itérer sur la table testée par elle-même ne rougirait jamais si une seule
-// adresse était cassée dans app-links.js — exactement le piège déjà documenté dans ce dépôt
-// (AboutView.spec.js, test sur APP_CREATOR : « l'assertion ne peut PAS échouer sur un
-// changement de créateur, elle compare l'écran à la constante qu'il affiche »).
+// Adresses du site et du guide en ligne, une par langue de l'interface. Comparées à des
+// CHAÎNES LITTÉRALES, jamais à la table réimportée : itérer sur la table testée par elle-même
+// ne rougirait pas si une adresse était cassée dans app-links.js.
 import { describe, it, expect } from 'vitest'
-import { guideUrlFor, websiteUrlFor } from '@/constants/app-links'
+import { CONTACT_EMAIL, guideUrlFor, websiteUrlFor } from '@/constants/app-links'
 
-// Adresses du SITE (page d'accueil), une par langue de l'interface — VÉRIFIÉES EN LIGNE
-// le 12/08/2026 (HTTP 200, titre propre à chaque langue). Remplace l'ancienne
-// `WEBSITE_URL` unique : celle-ci redirigeait selon la langue du NAVIGATEUR (mesuré :
-// `Accept-Language: fr` → `/fr/`, `en` → `/en/`), pas celle de l'app.
-//
-// Mêmes 5 assertions à CHAÎNES LITTÉRALES que le bloc guide ci-dessous, pour la même raison :
-// itérer sur `WEBSITE_URLS` réimportée ne rougirait jamais si une seule adresse était cassée.
+// Le site suit la langue de l'APP (une adresse par langue), pas celle du navigateur.
 describe('app-links — adresses du site web (une par langue, VÉRIFIÉES 12/08/2026)', () => {
   it('fr → https://rowtine.app/fr/', () => {
     expect(websiteUrlFor('fr')).toBe('https://rowtine.app/fr/')
@@ -54,11 +39,22 @@ describe('app-links — adresses du guide en ligne (une par langue, VÉRIFIÉES 
     expect(guideUrlFor('es')).toBe('https://rowtine.app/es/guide/')
   })
 
-  // Filet 5e langue future (même doctrine que src/content/guide/index.js) : une langue
-  // inconnue ne doit JAMAIS produire une adresse cassée. Repli sur l'anglais — même choix que
-  // `fallbackLocale` de src/i18n/index.js et le premier maillon de `FALLBACK_ORDER` dans
-  // src/content/guide/index.js, pas un 3e choix de repli inventé ici.
+  // Une langue inconnue ne produit JAMAIS une adresse cassée : repli sur l'anglais, même choix
+  // que `fallbackLocale` (src/i18n/index.js) et `FALLBACK_ORDER` (src/content/guide/index.js).
   it("langue inconnue ('xx') : repli explicite sur l'anglais, jamais une adresse cassée", () => {
     expect(guideUrlFor('xx')).toBe('https://rowtine.app/en/guide/')
+  })
+})
+
+// Une adresse mal formée (espace, accolade de gabarit non substituée, virgule à la place du
+// point) produirait un lien `mailto:` que le téléphone n'ouvrirait pas, et rien d'autre dans la
+// suite ne regarde cette valeur (les vues l'affichent telle quelle).
+describe('app-links : adresse de contact', () => {
+  it("l'adresse de contact est renseignée et bien formée", () => {
+    expect(CONTACT_EMAIL).not.toBe('')
+    // Volontairement strict plutôt qu'exhaustif : on ne cherche pas à valider la RFC 5322,
+    // seulement à interdire ce qui casserait un `mailto:` (espace, chevrons, virgule) et à
+    // exiger un domaine avec extension.
+    expect(CONTACT_EMAIL).toMatch(/^[^\s<>,@]+@[^\s<>,@]+\.[a-z]{2,}$/i)
   })
 })

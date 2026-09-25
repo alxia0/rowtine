@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Écran À propos. Couvre les points les plus fragiles des exigences :
 //   - le nom de l'app n'est JAMAIS écrit en dur (120 occurrences existent déjà ailleurs,
 //     un renommage est un chantier à part) ;
@@ -13,7 +14,6 @@ import { describe, it, expect } from 'vitest'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { mount } from '@vue/test-utils'
-import { createRouter, createMemoryHistory } from 'vue-router'
 import i18n from '@/i18n'
 import AboutView from '@/views/AboutView.vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -24,17 +24,15 @@ import { RELEASE_NOTES_EN } from '@/content/release-notes.en'
 import { RELEASE_NOTES_DE } from '@/content/release-notes.de'
 import { RELEASE_NOTES_ES } from '@/content/release-notes.es'
 import { withAppName } from '@/utils/app-name-token'
+import { createTestRouter } from './helpers/i18n-router'
 
 function makeRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'home', component: { template: '<div/>' } },
-      { path: '/guide', name: 'guide', component: { template: '<div/>' } },
-      { path: '/about/privacy', name: 'about-privacy', component: { template: '<div/>' } },
-      { path: '/about/licenses', name: 'about-licenses', component: { template: '<div/>' } },
-    ],
-  })
+  return createTestRouter([
+    { path: '/', name: 'home', component: { template: '<div/>' } },
+    { path: '/guide', name: 'guide', component: { template: '<div/>' } },
+    { path: '/about/privacy', name: 'about-privacy', component: { template: '<div/>' } },
+    { path: '/about/licenses', name: 'about-licenses', component: { template: '<div/>' } },
+  ])
 }
 
 async function mountAbout(locale = 'fr') {

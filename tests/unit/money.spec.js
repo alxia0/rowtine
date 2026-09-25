@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatMoney, currencySymbol } from '@/utils/units'
+import { formatMoney, formatAmount, currencySymbol } from '@/utils/units'
 import { CURRENCIES } from '@/constants/currencies'
 
 describe('formatMoney — aucune conversion', () => {
@@ -119,5 +119,19 @@ describe('currencySymbol', () => {
     expect(() => currencySymbol('EURO', 'fr')).not.toThrow()
     expect(currencySymbol('EURO', 'fr')).toBe('EURO')
     expect(() => currencySymbol('', 'fr')).not.toThrow()
+  })
+})
+
+describe('formatAmount', () => {
+  // Montant nu (le symbole vit dans le libellé) : même règle de centimes que le profil detail.
+  it('garde deux décimales à un montant à centimes, dans le format de la langue', () => {
+    expect(formatAmount(3.2, { locale: 'fr' })).toBe('3,20')
+    expect(formatAmount(3.2, { locale: 'en' })).toBe('3.20')
+    expect(formatAmount(3.2, { locale: 'de' })).toBe('3,20')
+    expect(formatAmount('3,5', { locale: 'en' })).toBe('3.50')
+  })
+
+  it('écrit un montant rond sans centimes', () => {
+    expect(formatAmount(25, { locale: 'fr' })).toBe('25')
   })
 })

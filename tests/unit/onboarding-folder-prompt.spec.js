@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — LA PORTE du dossier (lot « premier lancement simplifié », 09/08/2026).
 // Remplace l'ancienne invite non bloquante : plus de « Plus tard », plus d'Échap.
 // Elle n'apparaît qu'APRÈS l'écran de bienvenue (`onboarded` persisté) — avant ce lot
@@ -11,9 +12,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createI18n } from 'vue-i18n'
 import fr from '@/i18n/fr.json'
 import { useSettingsStore } from '@/stores/settings'
+import { createTestI18n } from './helpers/i18n-router'
 
 const {
   isNativePlatform, safFolder, designate, dbApi,
@@ -49,7 +50,7 @@ import { useFolderChangeStore } from '@/stores/folder-change'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { NOTICE } from '@/constants/notice-queue'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 let wrapper
 // Pinia RECRÉÉE à chaque test (beforeEach) — le composant appelle `useSettingsStore()` au
 // setup, il lui faut donc un Pinia actif dès le montage. Un seul Pinia créé ET activé,
@@ -1031,22 +1032,17 @@ describe('publication de l’incident de restauration au store restore-error', (
     expect(store.report).toBeNull()
   })
 
-  // L'appropriation a réussi mais la base a été lue AVEC des écarts : PAS de
-  // variante visuelle supplémentaire — pas de publication, les
-  // écarts ne rejoignent le rapport copiable que si une modale est ouverte.
-  it('succès avec écarts (errors) mais appropriation OK : pas de modale', async () => {
+  // Protège l'affichage d'une restauration incomplète : dossier non repris, rapport d'écarts publié.
+  it('restauration avec écarts (dossier non repris) : modale unowned portant les écarts', async () => {
     designationDossierPlein()
-    restoreService.runRestore.mockResolvedValue({
-      ok: true,
-      decided: true,
-      errors: [{ where: 'Dossier illisible', error: 'EACCES' }],
-    })
+    const ecarts = [{ where: 'Dossier illisible', error: 'EACCES' }]
+    restoreService.runRestore.mockResolvedValue({ ok: true, decided: false, owned: false, errors: ecarts })
     const { host } = await mountWithClosedLog()
     const store = useRestoreErrorStore()
 
     await accepteLOffre(host)
 
-    expect(store.report).toBeNull()
+    expect(store.report).toMatchObject({ kind: 'unowned', details: ecarts })
   })
 
   // VERROU DE DÉFILEMENT, LA SUCCESSION COMPLÈTE (revue du 05/09) : la porte pose le verrou à l'ouverture ;

@@ -15,7 +15,10 @@ const TERMINAL_RE = /[.!?:…]\s*$/
 // (25/27/31/35/37/39/43cm or » / « 10/11/12/14/15/16/17' » — conjonction de coordination
 // exactement comme « and »/« und »/« og » déjà dans la liste ; les 9 occurrences de fin de
 // ligne du corpus Retours-banc (vagues 4-7) sont toutes des conjonctions pendantes réelles.
-const DANGLING_RE = /(?:[,;]|\b(?:de|du|des|d'|la|le|les|un|une|et|au|aux|of|the|and|or|to|in|on|for|with|og|i|med|på|til|af|und|zu|die|der|das|den|dem|ein|eine|einer|einem|einen|eines|mit|für|von|im|y|e|o|el|los|las|con|para|di|da|il|lo|per|van|het|een|op|voor|met|w|z|na|do|ja|att|för|som|eller|-)\s*)$/i
+// Frontière de tête `(?<![\wÀ-ž])` et non `\b` : sans drapeau u, `\b` voit une lettre
+// accentuée comme un séparateur (« modèle » finissait sur « le », « Größe » sur « e »).
+// Le tiret garde `\b-` (mot coupé « Mo- » en fin de ligne).
+const DANGLING_RE = /(?:[,;]|(?<![\wÀ-ž])(?:de|du|des|d'|la|le|les|un|une|et|au|aux|of|the|and|or|to|in|on|for|with|og|i|med|på|til|af|und|zu|die|der|das|den|dem|ein|eine|einer|einem|einen|eines|mit|für|von|im|el|los|las|con|para|di|da|il|lo|per|van|het|een|op|voor|met|na|do|ja|att|för|som|eller)\s*|\b-\s*)$/i
 // « Change to Color »/« Change to Colour » (convention Hobbii anglaise) : cette phrase EXACTE
 // annonce TOUJOURS un nom de couleur propre qui suit, capitalisé — la règle de continuation par
 // minuscule (plus bas) ne peut donc jamais prendre le relais. Restreint à la PHRASE COMPLÈTE
@@ -35,7 +38,10 @@ const CHANGE_TO_COLOR_RE = /\bchange to colou?r\s*$/i
 // l'article anglais — qui n'apparaît jamais en majuscule isolée dans le corpus. Sans cette
 // séparation, DANGLING_RE (testé avant NEW_ITEM_RE dans shouldJoin) matchait à tort « fil A »
 // et avalait le Tour 1 qui suit (bug sara-doll-fr).
-const DANGLING_EN_ARTICLE_RE = /\b(?:a|an)\s*$/
+const DANGLING_EN_ARTICLE_RE = /(?<![\wÀ-ž])(?:a|an)\s*$/
+// Conjonctions d'une lettre (es « y », it « e/o », pl « i/w/z ») : même garde en minuscule
+// stricte que « a » — une majuscule isolée en fin de ligne est un code couleur (« fil E »).
+const DANGLING_SINGLE_LETTER_RE = /(?<![\wÀ-ž])[yeoiwz]\s*$/
 // Préposition française « à » : sortie du bloc DANGLING_RE ci-dessus et testée à part, car
 // \b en JavaScript SANS le drapeau /u se calcule sur [A-Za-z0-9_] — « à » n'en fait jamais
 // partie, donc \bà ne matche JAMAIS (à gauche COMME à droite, « à » est toujours classé
@@ -673,7 +679,7 @@ function shouldJoin(prevText, nextText, isGerman = false) {
   if (EN_DASH_KV_RE.test(p) && EN_DASH_KV_RE.test(nt)) return false
   // Un mot pendant (« … dans les ») raccorde même une suite commençant par un chiffre nu
   // (« 63 prochaines m ») : la coupure de colonne tombe où elle veut.
-  if (DANGLING_RE.test(p) || DANGLING_EN_ARTICLE_RE.test(p) || DANGLING_FR_A_RE.test(p) || DANGLING_DASH_RE.test(p) || CHANGE_TO_COLOR_RE.test(p)) return true
+  if (DANGLING_RE.test(p) || DANGLING_EN_ARTICLE_RE.test(p) || DANGLING_SINGLE_LETTER_RE.test(p) || DANGLING_FR_A_RE.test(p) || DANGLING_DASH_RE.test(p) || CHANGE_TO_COLOR_RE.test(p)) return true
   // Après NEW_ITEM_RE : un « 7. … » (nouveau rang) n'est jamais avalé, même si la
   // ligne précédente ouvre un span de répétition. Ne recolle que la continuation d'un
   // compte pendant (« 10 fois au total »).

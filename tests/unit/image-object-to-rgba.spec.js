@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest'
 
 // Mocke pdfjs-dist pour éviter l'import réel (DOMMatrix absent en jsdom) — cf. pdf-crop-margin.spec.js

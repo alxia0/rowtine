@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Composant — App.vue, câblage de la reprise du budget au lancement (les travaux sur le
 // budget, 31/07). Ce test couvre le CÂBLAGE (la reprise part-elle au montage, avec la bonne
 // devise, une seule fois ?), pas le calcul lui-même (couvert par purchases-reprise.spec.js).

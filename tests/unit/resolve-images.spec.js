@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'vitest'
 import { resolveReaderImages, buildImageMap, assetImagePath } from '@/utils/pattern-md/resolve-images'
 import { photoFileName } from '@/backup/naming.js'
+import { resolveReaderByBasename } from '../../tools/mdedit/md-images.js'
 
 describe('assetImagePath', () => {
   it('même formule que buildImageMap (img/photo-<hash>.<ext>), réutilisable par un appelant externe', () => {
@@ -124,5 +125,18 @@ describe('resolveReaderImages — extraImages (repli galerie)', () => {
     const dst = { sections: [{ steps: [{ imgs: [STEP_PATH] }] }] }
     expect(() => resolveReaderImages(dst, makeSrcReader())).not.toThrow()
     expect(dst.sections[0].steps[0].imgs[0]).toBe(DATA_URL_STEP)
+  })
+})
+
+// Banc mdedit (flux .md + images) : la 2e grille d'un patron multi-diagrammes est résolue aussi.
+describe('resolveReaderByBasename — diagramme par section (multi-grilles)', () => {
+  it('résout sec.chart.img de chaque section, pas seulement reader.chart', () => {
+    const chartA = { img: 'p02-1.png' }
+    const chartB = { img: 'p03-1.png' }
+    const reader = { chart: chartA, sections: [{ chart: chartA, steps: [] }, { chart: chartB, steps: [] }] }
+    const map = new Map([['p02-1.png', 'data:image/png;base64,AAAA'], ['p03-1.png', 'data:image/png;base64,BBBB']])
+    resolveReaderByBasename(reader, map)
+    expect(reader.sections[1].chart.img).toBe('data:image/png;base64,BBBB')
+    expect(reader.chart.img).toBe('data:image/png;base64,AAAA')
   })
 })

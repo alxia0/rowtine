@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
@@ -1172,6 +1173,28 @@ describe('SafFolderSection', () => {
       await flushPromises()
 
       expect(w.find('[data-test="start-fresh"]').attributes('disabled')).toBeDefined()
+    })
+
+    // Protège : pas de changement de dossier pendant que « Repartir de zéro » écrit encore
+    // (la fin de l'écriture partirait dans le nouveau dossier, puis l'acquitterait).
+    it('« Changer de dossier » porte l’attribut `disabled` pendant que l’écriture est en cours', async () => {
+      api.hasFolder.mockResolvedValue(true)
+      api.folderName.mockResolvedValue('Rowtine')
+      dbApi.getSetting.mockResolvedValue(null)
+      backupService.getBackupStorage.mockResolvedValue({})
+      restoreApi.hasBackup.mockResolvedValue(true)
+      restoreService.isDbRestorable.mockResolvedValue(true)
+      backupDecision.hasBackupDecision.mockResolvedValue(false)
+      backupService.runBackup.mockImplementation(() => new Promise(() => {})) // ne se résout jamais
+
+      const w = mount(SafFolderSection, { global: { plugins: [i18n] } })
+      await flushPromises()
+      expect(w.find('[data-test="change-folder"]').attributes('disabled')).toBeUndefined()
+
+      await w.find('[data-test="start-fresh"]').trigger('click')
+      await flushPromises()
+
+      expect(w.find('[data-test="change-folder"]').attributes('disabled')).toBeDefined()
     })
   })
 

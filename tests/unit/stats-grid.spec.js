@@ -7,7 +7,7 @@ import {
   currentStreak, longestStreakInWindow,
   weekdayTotals, bestWeekdayAllTime, totalSeconds, activeDays, bestDay, averageSecondsPerActiveDay,
   topProject, finishedInWindow, wipCount, filterByTechnique, filterProjectsByTechnique,
-  monthGroups, sessionsByDayAndProject, showTechniqueFilter,
+  monthGroups, sessionsByDayAndProject, showTechniqueFilter, dayKeyOf, MAX_WINDOW_WEEKS,
 } from '@/utils/stats-grid'
 
 // Mercredi 15 juillet 2026, 10 h locales. Semaine du lundi 13/07.
@@ -538,5 +538,34 @@ describe('sessionsByDayAndProject — détail par projet', () => {
 
   it('un jour sans aucune séance n’a pas d’entrée', () => {
     expect(sessionsByDayAndProject([sess('2026-07-13', 600, 7)]).get('2026-07-14')).toBeUndefined()
+  })
+})
+
+describe('dates aberrantes (sauvegarde retouchée)', () => {
+  // Protège : une séance datée d'une année hors plage n'entre dans aucun calcul de jour.
+  it('dayKeyOf ignore une année hors 1900..année suivante', () => {
+    expect(dayKeyOf({ date: '9999-12-31T12:00:00.000Z' })).toBeNull()
+    expect(dayKeyOf({ date: '1000-01-01T12:00:00.000Z' })).toBeNull()
+    expect(dayKeyOf(sess('2026-07-15', 60))).toBe('2026-07-15')
+  })
+
+  // Protège : une fenêtre démesurée est parcourue sur au plus MAX_WINDOW_WEEKS semaines.
+  it('longestStreakInWindow borne le parcours aux dernières semaines', () => {
+    const days = new Set(['1950-01-01', '1950-01-02', '1950-01-03', '1950-01-04', '2026-07-14', '2026-07-15'])
+    expect(longestStreakInWindow(days, { startDay: '1950-01-01', endDay: '2026-07-15' })).toBe(2)
+  })
+
+  it('totalSeconds et activeDays bornés de la même façon', () => {
+    const byDay = sessionsByDay([sess('2026-07-15', 60)])
+    const win = { startDay: '1950-01-01', endDay: '2026-07-15' }
+    expect(totalSeconds(win, byDay)).toBe(60)
+    expect(activeDays(win, byDay).elapsed).toBeLessThanOrEqual(MAX_WINDOW_WEEKS * 7)
+  })
+
+  it('buildGrid garde au plus MAX_WINDOW_WEEKS colonnes, les plus récentes', () => {
+    const mondayDays = Array.from({ length: MAX_WINDOW_WEEKS + 50 }, (_, i) => `2026-07-${String((i % 28) + 1).padStart(2, '0')}`)
+    const grid = buildGrid({ mondayDays, endDay: '2026-07-15' }, new Map())
+    expect(grid.columns).toHaveLength(MAX_WINDOW_WEEKS)
+    expect(grid.columns.at(-1).monday).toBe(mondayDays.at(-1))
   })
 })

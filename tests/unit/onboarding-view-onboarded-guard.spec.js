@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — correctif des bloquants avant diffusion (01/08) : sur une base
 // RESTAURÉE depuis une sauvegarde, l'écran d'accueil de première ouverture peut rester monté
 // (le routeur ne se ré-évalue que sur un CHANGEMENT de navigation, pas sur le passage réactif
@@ -14,14 +15,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { createRouter, createMemoryHistory } from 'vue-router'
-import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/fr.json'
 import { useSettingsStore } from '@/stores/settings'
 import { usePatternsStore } from '@/stores/patterns'
 import OnboardingView from '@/views/OnboardingView.vue'
+import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
-const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr } })
+const i18n = createTestI18n()
 
 // Un seul pinia créé ET activé ICI, puis passé tel quel au montage — sinon le composant
 // résoudrait un store DIFFÉRENT de celui sur lequel on a posé `onboarded` et espionné les
@@ -40,13 +39,10 @@ async function mountAlreadyOnboarded() {
   const patternsStore = usePatternsStore()
   const seedSamplesIfEmpty = vi.spyOn(patternsStore, 'seedSamplesIfEmpty').mockResolvedValue({})
 
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'onboarding', component: OnboardingView },
-      { path: '/home', name: 'home', component: { template: '<div/>' } },
-    ],
-  })
+  const router = createTestRouter([
+    { path: '/', name: 'onboarding', component: OnboardingView },
+    { path: '/home', name: 'home', component: { template: '<div/>' } },
+  ])
   router.push('/')
   await router.isReady()
   const w = mount(OnboardingView, { global: { plugins: [router, i18n, pinia] } })

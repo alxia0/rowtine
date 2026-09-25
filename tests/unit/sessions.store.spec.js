@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Unitaire — store sessions : tri par date, filtrage par projet, cumul de temps,
 // dernière ligne chrono d'un projet (décision fusion/split du store activeSession),
 // garde « l'édition inline n'est pas un contact chrono ».
