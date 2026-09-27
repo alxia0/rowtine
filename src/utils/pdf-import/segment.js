@@ -14,7 +14,7 @@ import { sectionHasActionableProse, hasActionableVerb } from './actionable-prose
 // régression, aucune erreur d'initialisation).
 import { execAbbrLine, looksLikeBareCountDef } from './reference'
 import { readColumnGlossary } from './glossary-columns'
-import { isLetterSpaced, despace, restoreWords } from './spaced-title'
+import { isLetterSpaced, findSpacedTitle, restoreSpacedTitle } from './spaced-title'
 // sizes.js n'importe que text-norm (vérifié : /usr/bin/grep "^import"
 // src/utils/pdf-import/sizes.js), donc pas de cycle NEUF ajouté par cet import (le seul
 // cycle du fichier reste segment.js <-> reference.js ci-dessus, déjà vérifié inoffensif).
@@ -595,7 +595,7 @@ const BARE_ITEM_RE = /^\s*\d{1,3}[.)]\s+\S/
 // cf. hasRowLine ci-dessous) et la reclassification post-hoc (une section repliée sur
 // `pelote` faute de mot-clé, mais porteuse d'un vrai rang, est du travail mal titré — pas
 // une section non-actionable). Un seul détecteur : deux copies divergeraient en silence.
-function sectionHasRowLine(sec) {
+export function sectionHasRowLine(sec) {
   return sec.lines.some((l) => {
     const t = l.text.trim()
     return ROW_START_RE.test(t) || BARE_ITEM_RE.test(t)
@@ -745,6 +745,12 @@ const YARN_COLOR_ANNOUNCEMENT_RE = /^In\s+\p{L}[\p{L}\s]{1,24}$/u
 // un futur PDF où la même consigne serait grasse — n'a encore rien changé sur le corpus gate.
 export function isTitleLine(line, bodySize) {
   const t = line.text
+  // Ligne OBLIQUE (drapeau `oblique`, itemsToLines/lines.js) : un badge de couverture pivoté
+  // (« Nombreuses couleurss » à 35-38°, dizaines de PDF Go handmade) partage souvent le
+  // gras/majuscule/grande police d'un vrai titre — sans cette garde, il ouvre une fausse
+  // section (« ## couleurss ») quel que soit le signal qui l'aurait sinon promu. Rejet
+  // IMMÉDIAT, avant tout autre critère, même symétrie que le rejet ROW_START_RE plus bas.
+  if (line.oblique) return false
   if (looksLikeTableRow(t)) return false
   if (t.length < 3 || t.length > 42) return false
   if (/[.!?]\s*$/.test(t)) return false
@@ -1041,6 +1047,10 @@ const SIZE_VARIANT_TITLE_RE =
 // only », sans parenthèses) doivent continuer à matcher tels quels.
 const SIZE_VARIANT_GROUP_RE = /\(\s*[\w-]{1,4}(?:\s*,\s*[\w-]{1,4}){1,}\s*\)/
 export function isSpacedTitle(line, gap, modalGap, nextLine, nextGap, isGerman = false) {
+  // Ligne OBLIQUE (cf. isTitleLine) : jamais promue en titre par le repli faible non plus,
+  // même avec un grand blanc devant elle (un badge pivoté suit rarement le rythme
+  // normal des paragraphes, mais la garde doit tenir quel que soit le gap mesuré).
+  if (line.oblique) return false
   if (looksLikeTableRow(line.text)) return false
   if (isGlossaryEntryTitle(line.text)) return false
   if (isClosingFormula(line.text)) return false
@@ -1874,6 +1884,51 @@ export function segmentSections(pages, { isGerman = false, onMerge = null } = {}
       sec.kind = 'autre'
     }
   }
+  // Un titre « Tailles 1-2 ans: »/« Tailles 4 (8) ans » (PDF Classic Sweater Soft Double) —
+  // une variante de taille RÉELLE, pas un tableau de cotes — reste classée 'mesures' par
+  // kindForTitle (même collision non ancrée que sectionHasWorkRow ci-dessus), faute d'aucun
+  // vrai rang détectable par ce garde. Sans vecteur ni rang, ces notes filent en intro via le
+  // filet de secours de reference.js (`notes.push`, « LIMITE ASSUMÉE ») au lieu de rejoindre
+  // la section de travail qui les introduisait (ici ## DIAGRAMME). Mesuré sur le corpus :
+  // 112 replis sur 34 PDF, 111 sur 132 envoyaient 100 % de leur contenu en intro.
+  const SIZE_VARIANT_LABEL_RE = new RegExp(
+    '^' + SIZE_WORD_RE.source + String.raw`\s*\(?\s*(?:\d|(?:\d?X{0,3}[SL]|M)\b)`,
+    'i',
+  )
+  for (let i = 1; i < out.length; i++) {
+    const sec = out[i]
+    if (sec.ref !== 'mesures' || sec.noise || !sec.titleLine) continue
+    // Un titre nu sans chiffre/code de taille immédiatement accolé (« Tailles: », « TAILLE »
+    // seuls) ne matche jamais ce motif : une vraie section mesures générique n'est jamais
+    // concernée par ce repli, quel que soit son contenu.
+    if (!SIZE_VARIANT_LABEL_RE.test(sec.title.trim())) continue
+    // CORPS seul (hors titre lui-même, parfois présent en tête de `sec.lines`) : le titre
+    // d'une variante peut légitimement porter sa propre notation papier (« Tailles 4 (8)
+    // ans ») — la lire comme une ligne de contenu ferait rejeter à tort une vraie variante
+    // (son propre titre ressemblant alors à un vecteur de mesures).
+    const body = sec.lines[0] === sec.titleLine ? sec.lines.slice(1) : sec.lines
+    if (!body.length) continue
+    // looksLikeTableRow seul ne reconnaît pas un vecteur de tailles parenthésé (« 80 (88)
+    // 96 (104) cm ») : ses nombres ne sont pas de simples tokens séparés par des espaces en
+    // fin de ligne. Sans findSizeVectors, une vraie section mesures avec ce genre de rangée
+    // disparaissait, fondue dans la section de travail précédente.
+    if (body.some((l) => looksLikeTableRow(l.text) || findSizeVectors(l.text).length)) continue
+    const prev = out[i - 1]
+    if (!prev || prev.ref || prev.intro || prev.noise || prev.kind === 'pelote') continue
+    // Sœurs : la précédente est ELLE-MÊME une variante de taille (déjà rendue au travail,
+    // ici ou par sectionHasWorkRow ci-dessus) — deux répartitions par taille distinctes ne
+    // doivent jamais se retrouver mélangées sous un seul titre. `sec` devient une section de
+    // travail à part entière, du même kind que sa sœur, sans fusion ni suppression.
+    if (SIZE_VARIANT_LABEL_RE.test(String(prev.title).trim())) {
+      sec.ref = null
+      sec.kind = prev.kind
+      continue
+    }
+    const head = sec.lines[0] === sec.titleLine ? [] : [sec.titleLine]
+    prev.lines.push(...head, ...sec.lines)
+    out.splice(i, 1)
+    i -= 1
+  }
   // Défaut 2 — bandeau boutique « ACHETEZ VOTRE FIL ICI »… classé fil : on le route
   // en bruit (ref null → son ancre ne fuit plus dans ## Fil) UNIQUEMENT si une VRAIE
   // section fil sœur existe. Sinon (le bandeau est la seule source fil, il porte la
@@ -2068,6 +2123,55 @@ export function segmentSections(pages, { isGerman = false, onMerge = null } = {}
   // ce commit vient de fermer, cette fois sur le contenu plutôt que sur le titre. Aucune
   // occurrence de ce cas dans le corpus mesuré (vagues 1-6) au moment de ce correctif —
   // à instruire par un signalement réel si un tel amigurumi apparaît, pas par anticipation.
+
+  // Bloc « tension » sans mesure n'est pas un Échantillon (PDF Classic Sweater Soft Double,
+  // Go handmade FR) : le mot-clé nu `tension\b` (famille `echantillon` ci-dessus) classe
+  // aussi un TITRE de rubrique générale qui se contente de MENTIONNER la tension sans en
+  // donner la valeur (« Bon à savoir / Taille des aiguilles & tension » suivi de deux
+  // phrases de conseil, aucun chiffre de jauge) — reference.js range alors tout ce texte
+  // dans ## Échantillon, une carte qui n'en est pas une. Mesuré sur le corpus : 9 sections
+  // sur 277, toutes ce même boilerplate de l'éditeur.
+  //
+  // Discriminant : une VRAIE section Échantillon porte toujours au moins une mesure
+  // chiffrée quelque part dans son texte — titre ou corps. Trois formes indépendantes,
+  // aucune ne cherche un mot (rien à ajouter langue par langue) :
+  //  - une unité de longueur non ambiguë accolée à un chiffre (cm/in/inch/po/pouces/
+  //    guillemet). « mm » en est volontairement ABSENT ici : un diamètre d'aiguille nu
+  //    (« aiguilles 2,0 mm ») s'écrit à l'identique et NE DOIT PAS compter comme preuve
+  //    (sans quoi ce correctif ne rétrograderait plus jamais rien) ;
+  //  - un compte de mailles/rangs suivi d'un signe égal puis d'un nombre (« 22 m et
+  //    30 rgs = 10 », unité présente ou non après le signe égal) : cette forme couvre
+  //    AUSSI la jauge en mm, sans jamais matcher un diamètre d'aiguille nu (qui ne porte
+  //    jamais de « = ») ;
+  //  - un carré chiffre × chiffre (« 10 x 10 », « 10x10 ») : convention universelle du
+  //    gabarit, avec ou sans unité déclarée juste après.
+  // Exemption : un titre qui n'est QUE le libellé nu de jauge (« Tension », « Echantillon: »,
+  // « Gauge »…) reste une vraie section même sans mesure visible sur cette seule page (elle
+  // peut suivre sur une autre) — réutilise l'alternance MULTILINGUE déjà en place pour
+  // `echantillon` dans KIND_KEYWORDS plutôt que d'en dupliquer un sous-ensemble (qui
+  // dériverait des 11 langues au premier mot ajouté là-bas et pas ici).
+  //
+  // Limite connue et assumée : le titre chapeau réel de ce bloc chez Go handmade
+  // (« Bon à savoir ») est une section à 0 ligne de corps ailleurs dans le document —
+  // jamais rendue par le pipeline (une section sans ligne ne produit aucune sortie), donc
+  // jamais recouvrée ici. Ce bloc redevient autonome sous SON PROPRE titre (« Taille des
+  // aiguilles & tension »), pas sous « Bon à savoir » : défaut préexistant et distinct,
+  // non traité par ce correctif.
+  const GAUGE_EVIDENCE_RE = new RegExp(
+    '\\d\\s*(?:cm|in\\b|inch|po\\b|pouces?|["”″])' +
+    '|\\d+\\s*(?:m(?:ailles)?|sts?|pts?)\\b[^\\n]*=\\s*\\d' +
+    '|\\d+\\s*[x×]\\s*\\d+',
+    'i',
+  )
+  const ECHANTILLON_KEYWORD_RE = KIND_KEYWORDS.find(([key]) => key === 'echantillon')[1]
+  const BARE_GAUGE_LABEL_RE = new RegExp(`^(?:${ECHANTILLON_KEYWORD_RE.source})\\s*:?$`, 'i')
+  for (const sec of out) {
+    if (sec.ref !== 'echantillon') continue
+    if (BARE_GAUGE_LABEL_RE.test((sec.title || '').trim())) continue
+    const txt = [sec.title, ...sec.lines.map((l) => l.text)].join('\n')
+    if (!GAUGE_EVIDENCE_RE.test(txt)) { sec.ref = null; sec.kind = 'pelote' }
+  }
+
   return out
 }
 
@@ -2088,6 +2192,48 @@ export function segmentSections(pages, { isGerman = false, onMerge = null } = {}
 // couverture peut être RENDU plus petit que du texte de liste) — hors périmètre de ce
 // correctif, qui ne traite que « un candidat sans lettre ne doit jamais gagner ».
 const HAS_LETTER_RE = /\p{L}/u
+
+// Libellé NU de couverture (« Patron », « Opskrift »…, PDF Classic Sweater Soft Double,
+// Go handmade FR) : un badge de gabarit reprend le mot générique « patron/pattern » dans
+// une police plus grande que le VRAI titre du document qui le suit — `detectTitle` le
+// retenait alors comme titre principal, ou l'agrafait en sous-titre du vrai titre
+// (« Patron Classic Sweater »), selon la géométrie. Liste anchrée sur la ligne ENTIÈRE
+// (jamais un préfixe : un vrai titre qui commencerait PAR ce mot, comme « Patronage »,
+// n'est pas concerné), deux-points final optionnel. Chaque mot est celui réellement
+// écrit sur une page de couverture, jamais une racine élargie à toute une famille de
+// mots : « Monster » (sans tréma, mot anglais « monstre ») N'EST PAS « Mönster »
+// (suédois, patron) — accents PORTÉS par la liste, jamais pliés (pas de repli ASCII qui
+// confondrait les deux). fr/da/no/nl : Patron, Opskrift, Oppskrift, Patroon — attestés sur
+// un premier balayage corpus (18/500 documents) ayant motivé ce correctif. « Pattern »
+// (en) : équivalent direct de « Patron », même construction de couverture chez le même
+// éditeur multilingue (Go handmade), ajouté à côté. es/it/de/pl/sv : Patrón, Schema,
+// Anleitung, Wzór, Mönster — ajoutés après balayage COMPLET du corpus (3123 PDF) : chacun
+// réellement écrit, seul sur sa ligne, en couverture ou
+// en tête de section (« MÖNSTER: », « Anleitung », « wzór »…). Aucune forme fléchie
+// (pluriel, article) ajoutée sans preuve : seul le mot NU
+// réellement écrit est couvert.
+export const GENERIC_COVER_TITLE_RE =
+  /^(?:patron|pattern|opskrift|oppskrift|patroon|patrón|schema|anleitung|wzór|mönster)\s*:?$/iu
+
+// Garde-fous d'un sous-titre de couverture candidat, partagés par les deux chemins qui en
+// cherchent un dans detectTitle ci-dessous : la ligne qui suit directement le titre
+// principal (agrafage classique), et celle qui suit un libellé générique repêché par
+// position. Un bandeau d'éditeur/collection à tiret ou puce en tête (« - Litt le One's &
+// Tweens ») n'est jamais un sous-titre légitime : les deux chemins l'agrafaient à tort
+// avant ce garde-fou (PDF réels hooded-jacket, stripe-raglan-sweater-little-one-s-tweens).
+function isSubtitleCandidate(line, ref) {
+  return !!line &&
+    line.text.length <= 40 &&
+    line.size >= Math.max(15, ref.size * 0.34) &&
+    ref.y - line.y <= 2.2 * line.size &&
+    !/[.!?:]$/.test(line.text) &&
+    !/^no\.?\s*\d|^\d|^by\b|^af\b|^von\b|^par\b|^de\b|design|conception|\||^[-–•]/i.test(line.text.trim()) &&
+    !isLetterSpaced(line.text) &&
+    HAS_LETTER_RE.test(line.text) &&
+    !GENERIC_COVER_TITLE_RE.test(line.text.trim()) &&
+    !line.oblique
+}
+
 export function detectTitle(pages, { metaTitle = '' } = {}) {
   // Filtrées AVANT tout calcul : une ligne sans lettre ne doit ni devenir candidate au
   // titre, ni contaminer `maxNormalSize` (qui sert de plancher pour les vrais titres
@@ -2106,20 +2252,44 @@ export function detectTitle(pages, { metaTitle = '' } = {}) {
   const maxNormalSize = two.reduce(
     (m, l) => (!isLetterSpaced(l.text) && (l.size || 0) > m ? l.size || 0 : m), 0,
   )
+  // Ligne OBLIQUE (itemsToLines) écartée des candidats au titre du DOCUMENT — même garde
+  // que isTitleLine/isSpacedTitle ci-dessus, ici pour le titre principal plutôt
+  // qu'un titre de section : un badge pivoté ne doit jamais gagner le tri par taille,
+  // quelle que soit sa police.
   const cand = two.filter(
-    (l) => l.text.length <= 60 && (!isLetterSpaced(l.text) || (l.size || 0) > maxNormalSize),
+    (l) => l.text.length <= 60 && (!isLetterSpaced(l.text) || (l.size || 0) > maxNormalSize) && !l.oblique,
   )
   cand.sort((a, b) => b.size - a.size)
-  const main = cand[0]
+  // Libellé générique de couverture (GENERIC_COVER_TITLE_RE) écarté du choix du titre
+  // PRINCIPAL : un badge « Patron »/« Pattern »… ne doit jamais gagner face au
+  // vrai titre qui le suit, même plus grand que lui. Repli sur la liste NON filtrée si
+  // elle ne laisse plus rien (page de couverture qui ne porte QUE ce mot, sans titre
+  // distinct ailleurs) : mieux vaut rendre le libellé générique que rien du tout.
+  const candWithoutGeneric = cand.filter((l) => !GENERIC_COVER_TITLE_RE.test(l.text.trim()))
+  let main = (candWithoutGeneric.length ? candWithoutGeneric : cand)[0]
+  // Repêchage POSITIONNEL : écarter le libellé générique puis retrier par taille perd le
+  // lien de POSITION avec la ligne qui le suit directement sur la page — le nouveau plus
+  // grand candidat restant peut être n'importe où ailleurs sur la couverture (un tampon de
+  // marque, un fragment de double-frappe), pas forcément le nom du modèle. PDF réels
+  // mesurés (moss-stitch-basket-round-fr, cardigan-cable-fr, stripe-raglan-sweater-little-
+  // one-s-tweens-boys-fr) : « Patron » suivi immédiatement du nom du modèle donnait « Go
+  // handmade© 2018 »/« Go handmade »/du texte de double-frappe une fois « Patron »
+  // simplement retiré du tri par taille. Le vrai titre reste, dans ces 3 cas, LA LIGNE QUI
+  // SUIT « Patron » SUR LA PAGE — retenue via les mêmes garde-fous que le sous-titre `next`
+  // plus bas (isSubtitleCandidate).
+  if (cand[0] && GENERIC_COVER_TITLE_RE.test(cand[0].text.trim())) {
+    const genericPage = (pages || []).find((p) => p.includes(cand[0])) || []
+    const afterGeneric = genericPage[genericPage.indexOf(cand[0]) + 1]
+    if (isSubtitleCandidate(afterGeneric, cand[0])) {
+      main = afterGeneric
+    }
+  }
   if (!main) return ''
   // Recolle le résultat final si la ligne retenue est interlettrée : le PDF n'encode PAS
-  // la coupure entre les mots, on ne la retrouve que si la fiche d'identité porte les
-  // mêmes lettres. Sinon on garde la ligne VERBATIM — jamais « MIACARDIGAN » collé, qui
-  // serait une invention.
-  const finish = (t) => {
-    if (!isLetterSpaced(t)) return t
-    return restoreWords(despace(t), metaTitle) || t
-  }
+  // la coupure entre les mots, on ne la retrouve que si la fiche d'identité ou une autre
+  // ligne des deux premières pages porte les mêmes lettres. Sinon les lettres sont collées.
+  const texts = two.map((l) => l.text)
+  const finish = (t) => restoreSpacedTitle(t, { metaTitle, texts })
   // Sous-titre : la ligne suivante immédiate, presque aussi grande, courte, sans
   // ponctuation finale ni numéro de patron (« Berenjena » + « Comida de juguete »).
   const page = (pages || []).find((p) => p.includes(main)) || []
@@ -2128,13 +2298,10 @@ export function detectTitle(pages, { metaTitle = '' } = {}) {
   // enfant » : ~20 pt) est plus petit qu'un titre en très grande police (41-50 pt),
   // donc `main.size * 0.5` le rejetait à tort. Un plancher absolu 15 pt sépare les
   // vrais sous-titres (display, ≥ ~18 pt) des taglines / lignes « Design: » (12-14 pt).
-  if (
-    next && next.text.length <= 40 && next.size >= Math.max(15, main.size * 0.34) &&
-    main.y - next.y <= 2.2 * next.size && !/[.!?:]$/.test(next.text) &&
-    !/^no\.?\s*\d|^\d|^by\b|^af\b|^von\b|^par\b|^de\b|design|conception|\|/i.test(next.text.trim()) &&
-    !isLetterSpaced(next.text) && HAS_LETTER_RE.test(next.text)
-  ) {
-    return finish(`${main.text} ${next.text}`)
+  if (isSubtitleCandidate(next, main)) {
+    // Le couple d'abord (la fiche d'identité peut porter les deux) ; sinon le titre seul, le
+    // sous-titre en clair ne se recolle jamais avec les lettres du titre (« Meias de La Roja »).
+    return findSpacedTitle(`${main.text} ${next.text}`, { metaTitle, texts }) || `${finish(main.text)} ${next.text}`
   }
   return finish(main.text)
 }

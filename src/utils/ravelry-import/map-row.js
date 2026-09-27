@@ -1,6 +1,7 @@
 import { YARN_BRANDS } from '@/constants/catalog'
 import { COLOR_PALETTE, paletteColorLabel } from '@/constants/swatch'
 import { M_PER_YD } from '@/utils/units'
+import { roundSkeins } from '@/utils/yarn-usage'
 
 // Valeur `Weight` Ravelry (« Worsted (9 wpi) », « Super Bulky »…) → clé YARN_WEIGHTS, par
 // mot-clé dans la valeur normalisée. « superbulky » AVANT « bulky » : sinon « super bulky »
@@ -134,12 +135,12 @@ export function mapRow(row) {
     weight: mapWeight(row.weight),
     grams: toNumber(row.gramsPerSkein) ?? '',
     lengthM,
-    quantity: toNumber(row.remainingSkeins) ?? 0,
+    quantity: roundSkeins(toNumber(row.remainingSkeins) ?? 0),
     storedIn: trimmed(row.storedIn),
     notes: notesParts.join('\n'),
   }
   const purchase = {
-    quantity: skeins ?? 0,
+    quantity: roundSkeins(skeins ?? 0),
     bain: trimmed(row.dyeLot),
     date: purchaseDate,
     unitPrice,

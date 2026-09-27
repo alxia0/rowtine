@@ -4,6 +4,9 @@
 // de début de phrase), multilingues.
 
 const TERMINAL_RE = /[.!?:…]\s*$/
+// Une abréviation de tricot pointée (« m. », « tric. »…) en fin de ligne n'est pas une fin de
+// phrase : cf. le point d'appel dans shouldJoin, juste avant le refus dur de TERMINAL_RE.
+const ABBR_DOT_END_RE = /(?:^|[\s(])(?:m|tric|end|env|ens|rép|aig|dern|sts?)\.\s*$/iu
 // « ein »/« eine » (nominatif) couvraient déjà l'article indéfini allemand, mais pas ses
 // formes déclinées au datif/accusatif/génitif (« einer », « einem », « einen », « eines »).
 // Cas réel martha-blouse-with-lace-pattern-de : « … cm misst. Schließe mit einer » /
@@ -169,7 +172,7 @@ function isNumericAbbrKeyLine(t) {
 const DANGLING_WORD_EXACT_RE =
   /^(?:de|du|des|d['’]|la|le|les|un|une|et|au|aux|of|the|and|or|to|in|on|for|with|og|i|med|på|til|af|und|zu|die|der|das|den|dem|ein|eine|einer|einem|einen|eines|mit|für|von|im|y|e|o|el|los|las|con|para|di|da|il|lo|per|van|het|een|op|voor|met|w|z|na|do|ja|att|för|som|eller|a|an)$/i
 const GERMAN_DANGLING_WORD_EXACT_RE =
-  /^(?:dass|weil|wenn|als|ob|während|bevor|nachdem|auf|an|bei|vor|unter|durch|ohne|um|gegen|zwischen|nach|aus|bis|seit|beide|beiden)$/i
+  /^(?:dass|weil|wenn|als|ob|während|bevor|nachdem|auf|an|bei|vor|unter|durch|ohne|um|gegen|zwischen|nach|aus|bis|seit|beide|beiden|zum|zur|vom|am|beim|ins|ans|aufs|fürs|durchs|ums|übers|unters|vors|hinterm|unterm|vorm|pro|je|hinter|neben|außer)$/i
 function endsOnDanglingWord(p, isGerman) {
   const m = /(\S+)\s*$/.exec(p)
   if (!m) return false
@@ -418,10 +421,10 @@ function kvShortCircuitsMinuscule(p, nt) {
 //    coup par coup (comme ici) est la seule voie déjà validée par la mesure ; deviner la classe
 //    grammaticale ne l'est pas et ne peut pas l'être sans un nouveau passage de gate complet
 //    (hors du périmètre d'un correctif d'un seul défaut signalé).
-// Reste non couvert par CE correctif (identifié en vague 4, non corrigé, à traiter à part
-// — chacun est un ajout d'UN token à une liste existante, pas une nouvelle mécanique) :
-// « … ab » / « Nadel » → ajouter « ab » à GERMAN_DANGLING_RE ; « einen größeren » / « Schal »
-// → étendre le groupe de suffixes de GERMAN_ADJ_RE.
+// [26/09] Ce passage de gate complet a eu lieu : une règle par catégorie de prépositions a été
+// retenue (GERMAN_PREP_CATEGORY_RE plus bas), qui traite aussi « … ab » / « Nadel ».
+// Reste non couvert : « einen größeren » / « Schal » → étendre le groupe de suffixes de
+// GERMAN_ADJ_RE.
 // [Un arbitrage, 03/09/2026 — reporté à post-1.0, chantier dédié « BARE_COUNT »] : la
 // famille des continuations à TÊTE CHIFFRÉE ou mot-unité complet reste scindée — vagues 4-7 :
 // pascal-unisex-slipover-de (« …hast du jetzt 184 (204) 224 (240) / 260 M. », « …insgesamt
@@ -456,8 +459,8 @@ const GERMAN_DANGLING_UBER_RE = /(?<![\p{L}\p{N}_])über\s*$/iu
 // « …vernähen, wenn du am ersten » / « Maschenmarkierer bist. » (l.183-184) et « …dass dein
 // Top mit der linken » / « Seite nach außen liegt. » (l.208-209). « am ersten » exige en
 // OUTRE l'article CONTRACTÉ « am » (an+dem) dans le groupe d'articles : seul token ajouté,
-// même discipline — il ne déclenche rien sans un radical de la liste derrière lui (contre-
-// test « Wir treffen uns am » / « Nachmittag. » dans la spec). Corpus contrôlé : les seules
+// même discipline — il ne déclenche rien sans un radical de la liste derrière lui (depuis le
+// 26/09, « am » seul recolle aussi, mais par GERMAN_PREP_CATEGORY_RE). Corpus contrôlé : les seules
 // autres fins de ligne matchées sont « die erste » (stanley-the-knitting-bear-de, l.281) et
 // « von der ersten » (knit-domino-shawl-de, l.80), toutes deux de vraies continuations.
 const GERMAN_ADJ_RE = /\b(?:der|die|das|den|dem|des|ein|eine|einen|einem|einer|eines|am)\s+(?:gesamt|restlich|übrig|folgend|nächst|letzt|ganz|ander|gleich|erst|link)(?:e|en|em|er|es)?\s*$/i
@@ -472,6 +475,72 @@ const GERMAN_ADJ_RE = /\b(?:der|die|das|den|dem|des|ein|eine|einen|einem|einer|e
 // dans ## Matériel (la ligne de mesure fait encore partie de la section « Material: » au
 // moment où reflowLines s'exécute, avant l'extraction des champs par reference.js).
 const GERMAN_MORE_OR_LESS_RE = /\bmehr\s+oder\s+weniger\s*$/i
+// Comparatif de mesure « … cm mehr » / « … cm weniger » en fin de ligne devant « Maschen » :
+// phrase d'échantillon DROPS (« Wenn Sie auf 10 cm mehr » / « Maschen als oben genannt
+// haben, … »), 8 coupures dans 5 patrons à la mesure du 26/09. Le nom quantifié est exigé sur
+// la ligne suivante : « Stricke dann 5 cm mehr » / « Nähe … » clôt bien une proposition.
+const GERMAN_CM_COMPARATIVE_RE = /\bcm\s+(?:mehr|weniger)\s*$/i
+const GERMAN_STITCH_NOUN_HEAD_RE = /^Maschen\b/
+
+// Préposition allemande en fin de ligne : règle par CATÉGORIE, qui clôt le « mot par mot » du
+// LEDGER ci-dessus (décision du 26/09 ; mesure : 65 coupures dans 42 patrons sur les 129 PDF allemands du corpus,
+// dont 43 sur zum/am/vom). Ce n'est PAS le bypass Piste 1 retiré pour -0,39 : lui recollait
+// toute suite capitalisée SANS signal sur p (lignes de mesure, fins de phrase non ponctuées,
+// titres) ; ici p doit finir sur une préposition, et une préposition ne termine jamais une
+// phrase allemande correcte. Même position que GERMAN_DANGLING_RE dans shouldJoin, donc
+// après TERMINAL_RE, KV_RE, isNumericAbbrKeyLine, NEW_ITEM_RE et les gardes de glossaire.
+// Casse ignorée : « (Am » / « Ende solltest du 49 M haben.) », « Zum » / « Schluss ».
+// Liste retenue (les prépositions simples in, mit, für, von, zu, im, auf, an, bei, vor, über,
+// unter, durch, ohne, um, gegen, zwischen, nach, aus, bis, seit sont déjà dans DANGLING_RE ou
+// GERMAN_DANGLING_RE) :
+// - contractions préposition + article (zum, zur, vom, am, beim, ins, ans, aufs, fürs, durchs,
+//   ums, übers, unters, vors, hinterm, unterm, vorm) : l'article fondu attend son nom, elles ne
+//   sont jamais particule verbale. Témoins corpus : zum 24, am 12, vom 6, zur 1 ;
+// - pro (« 14 M pro Nadel », 2 témoins) et je (« je 1 M rechts verschränkt », 1 témoin, suite
+//   chiffrée) : prépositions distributives ;
+// - hinter, neben, außer : prépositions qui ne sont ni particule séparable ni postposition.
+// Écartées : entlang et gegenüber (postposées, « den Rand entlang » clôt une proposition),
+// wegen et gemäß (postposables), et « ab » nu, traité à part ci-dessous.
+const GERMAN_PREP_CATEGORY_RE =
+  /(?<![\p{L}\p{N}_])(?:zum|zur|vom|am|beim|ins|ans|aufs|fürs|durchs|ums|übers|unters|vors|hinterm|unterm|vorm|pro|je|hinter|neben|außer)\s*$/iu
+// « ab » est aussi une particule verbale en fin de proposition (« Masche … ab » pour abheben,
+// « Maschen ab » pour abketten) : 4 faux positifs mesurés, dont « vor der Arbeit ab » /
+// « Stricke nun … » qu'aucune garde existante ne bloque. Préposition seulement derrière une
+// unité ou une maille qui pose le point de départ (« 4 Lftm ab Nadel », « 40 cm ab Unterarm »,
+// « 103. Reihe ab Beginn ») : les 4 témoins corpus ont tous cette forme. « M »/« Maschen »
+// exclus, ce sont précisément les objets de la particule.
+const GERMAN_AB_PREP_RE = /(?<![\p{L}\p{N}_])(?:cm|mm|Lm|Lftm|Luftmaschen?|Reihe|Runde)\s+ab\s*$/iu
+// PDF multilingue que detectGerman ne classe pas allemand (fir-bloomers-de, flamingo-love-
+// blanket-de : 4 coupures) : seules des prépositions sans homographe dans les autres langues du
+// corpus y valent signal, même raisonnement que GERMAN_SIZE_WORD_END_RE. « am » (anglais),
+// « bis » (français « 12 bis »), « pro », « je », « ab » restent sous isGerman.
+const GERMAN_ONLY_PREP_RE = /(?<![\p{L}\p{N}_])(?:zum|zur|vom|beim|auf)\s*$/iu
+// Suite qui commence par une lettre ou un chiffre (nom, « 1 M », « 94 »…), pas un symbole.
+const WORD_OR_NUMBER_HEAD_RE = /^[\p{L}\d]/u
+function endsOnGermanPreposition(p, isGerman) {
+  if (GERMAN_ONLY_PREP_RE.test(p)) return true
+  return isGerman && (GERMAN_PREP_CATEGORY_RE.test(p) || GERMAN_AB_PREP_RE.test(p))
+}
+// « Reihe/Runde N » COMPLÉMENT de nom après préposition ou article (« den Rand von » /
+// « Runde 13 an der Praline festnähen », « die Augen zwischen » / « Runde 6 und 7 mit … »,
+// « auf der » / « Reihe. 1 hStb … ») : NEW_ITEM_RE y voit une tête de rang et bloquait
+// (9 coupures, 8 patrons). Une vraie tête de rang porte une ponctuation après son numéro ou sa
+// plage (« Runde 3: », « Reihe 2 (LS): », « Reihe 1 – », « Reihe 6-14: ») ; le complément
+// enchaîne sur un mot. Mot entier exigé : « Rd. 3-7: » (abréviation pointée) est toujours une
+// tête. Garde en plus : aucun « : » dans les 40 premiers caractères (« Reihe 5 und alle
+// folgenden Hinreihen: »). Relevé sur les 129 PDF allemands : aucune tête de rang sans
+// ponctuation derrière une préposition ou un article final. Les ordinaux nus restent exclus
+// (« Mitte des » / « 3. Reihe: » est un vrai item).
+const GERMAN_ROW_COMPLEMENT_PREV_RE =
+  /(?<![\p{L}\p{N}_])(?:von|vom|zwischen|bis|zum|zur|ab|nach|vor|seit|in|im|an|am|auf|aus|bei|beim|mit|für|über|unter|um|durch|gegen|ohne|der|die|das|den|dem|des)\s*$/iu
+const ROW_COMPLEMENT_HEAD_RE = /^(?:Reihe|Runde)(?:\.\s+\d|\s+\d+(?:\s+(?:und|bis)\s+\d+)?\s+[\p{L}[])/u
+// Hors isGerman (PDF multilingue) : prépositions sans homographe hors allemand, plus « von »
+// (témoin fir-bloomers-de, « Am Ende von » / « Reihe 50 [52, 54, 54] hast Du dann »).
+const GERMAN_ONLY_ROW_PREV_RE = /(?<![\p{L}\p{N}_])(?:von|zum|zur|vom|beim|auf)\s*$/iu
+function isGermanRowComplement(p, nt, isGerman) {
+  if (!ROW_COMPLEMENT_HEAD_RE.test(nt) || nt.slice(0, 40).includes(':')) return false
+  return isGerman ? GERMAN_ROW_COMPLEMENT_PREV_RE.test(p) : GERMAN_ONLY_ROW_PREV_RE.test(p)
+}
 
 // Chiffre nu OU vecteur de tailles fermé en fin de ligne, devant une abréviation/nom allemand
 // de maille en MAJUSCULE (« Lm », « Maschen ») : signal d'attente isolé au crochet carré-par-
@@ -493,10 +562,34 @@ const GERMAN_MORE_OR_LESS_RE = /\bmehr\s+oder\s+weniger\s*$/i
 // TERMINAL_RE comme une fin de phrase, bloc dur contourné par cette seule exception), « …(Insgesamt:
 // 12 » / « Stb, 12 RStb-v). » (bernadette-tote-bag-de l.81-82), « …umschlagen, durch 2 » /
 // « Schlaufen ziehen » (sunburst l.101-102), « …du solltest nur an 1 » / « Seite des
-// Quadrats… » (sunburst l.156-157). Runden/Reihen restent EXCLUS : têtes de rang déjà
-// captées par NEW_ITEM_RE (testé avant), les y ajouter n'apporterait rien et élargirait le
-// risque de faux positif sans preuve.
+// Quadrats… » (sunburst l.156-157). Runden/Reihen restent EXCLUS de cette liste : têtes de
+// rang déjà captées par NEW_ITEM_RE (testé avant) quand un chiffre suit. Seule exception,
+// GERMAN_BARE_ROW_UNIT_RE ci-dessous.
 const GERMAN_UNIT_RE = /^(?:Lm|Maschen|Km|M|Stb|Schlaufen|Seite)\b/
+// L'unité « Reihen »/« Runden » SEULE sur sa ligne, après un chiffre final : cas réel
+// stanley-the-knitting-bear-de, « Maschenprobe: 1 x 1 cm = 3 Maschen x 3 » / « Reihen ».
+// NEW_ITEM_RE ne la capte pas (aucun chiffre ne suit) et la ligne entière n'est que l'unité :
+// aucun rang ni phrase ne peut commencer ainsi. Ligne ENTIÈRE exigée, jamais un préfixe.
+const GERMAN_BARE_ROW_UNIT_RE = /^(?:Reihen|Runden)\.?$/
+// Libellé de mesures allemand SEUL sur sa ligne (« MAßE »), suivi d'une ligne qui commence
+// par sa valeur chiffrée (« Ca. 26 x 36 cm ») : cas réel easter-kitchen-towel-de, sous-titre
+// non gras de la même taille que le texte. Ligne entière exigée des deux côtés du signal :
+// le libellé seul, et une valeur en tête (chiffre, éventuellement après « ca. »).
+const GERMAN_MEASURE_LABEL_LINE_RE = /^ma(?:ß|ẞ|ss)e$/i
+const MEASURE_VALUE_HEAD_RE = /^(?:ca\.\s*)?\d/i
+// Nom « Größe » en fin de ligne devant un code de taille lettré (S, M, L, XS, XL, XXL…) en
+// tête de la suivante : cas réel fir-bloomers-de, « … die zweite für Größe » / « M, die
+// dritte für Größe L … ». Le code de taille doit être un mot entier (suivi d'une
+// ponctuation, d'un espace ou de la fin de ligne) : « Maschenprobe » ne passe pas. Sans
+// garde isGerman : le mot « Größe » suffit à situer la langue, et le témoin est un PDF
+// multilingue (allemand, polonais, anglais) que detectGerman ne classe pas allemand.
+const GERMAN_SIZE_WORD_END_RE = /(?<![\wÀ-ž])Gr(?:ö|oe)(?:ß|ss)e\s*$/
+const SIZE_CODE_HEAD_RE = /^X{0,3}[SML](?=[\s,.;)]|$)/
+// Unité d'âge « Jahre) » qui referme un vecteur de tailles resté ouvert sur un nombre :
+// cas réel picnic-children-s-top-de, « 2 Jahre (4 Jahre, 6 Jahre, 8 Jahre) (10 Jahre, 12 »
+// / « Jahre) ». Exige une parenthèse encore ouverte ET un chiffre final sur la ligne
+// précédente, et la parenthèse fermante collée à l'unité.
+const GERMAN_AGE_UNIT_CLOSE_RE = /^Jahre\)/
 function trailingNumberOrVector(s) {
   return /\d\s*$/.test(s) || (/\)\s*$/.test(s) && !trailingClosedParenHasNoDigit(s))
 }
@@ -591,7 +684,79 @@ const ALTERNATING_VECTOR_HEAD_RE = /^\d+\s*\(/
 // doit pas pouvoir matcher par accident ; seules les formes de bandeau observées sont visées.
 const COPYRIGHT_HEAD_RE = /^(?:©|\(c\)\s|Copyright\b)/i
 
-function shouldJoin(prevText, nextText, isGerman = false) {
+// Continuation numérique après un mot d'aiguille ou de mesure (corpus Classic Sweater Soft
+// Double) : « … m sur aig » / « 2,5 mm. » et « … la manche mesure » / « 20 (24) …
+// cm incl. les côtes » — un chiffre nu en tête de continuation n'a AUCUN signal positif
+// existant (récidive du chantier BARE_COUNT ouvert plus haut, LEDGER du 03/09), donc ces deux
+// coupures tombaient sur le `return false` final. Liste de mots-outils VOLONTAIREMENT étroite
+// (aiguille/mesure), pas un « chiffre nu recolle toujours » générique : une liste large créerait
+// des faux positifs dans les glossaires et listes de matériel. Testée à la même position que
+// GERMAN_UNIT_RE ci-dessus (après NEW_ITEM_RE) : une suite qui matche l'une de ces deux formes
+// ne commence jamais par un marqueur de liste, l'ordre n'a donc ici aucun effet observable.
+// - `aig`/`aiguilles`/`needles` en fin de ligne devant un diamètre `mm` explicite ;
+// - `mesure`/`mesurer`/`measures`/`misura`/`environ`/`approx` en fin de ligne devant un
+//   chiffre nu : la ligne annonce explicitement la valeur qui suit.
+// Un en-tête nu de liste de matériel (« Aiguilles » / « 3 mm
+// circulaires ») ou un libellé court de tableau de mesures (« Tour de poitrine mesure » /
+// « 92 (96) 100 (104) cm ») finissent aussi sur ces mots, sans être une phrase d'instruction en
+// train d'être coupée par la colonne — ces deux mots-outils y jouent le rôle d'une ÉTIQUETTE,
+// pas d'une annonce de valeur pendante. Un libellé n'a structurellement que peu de mots avant
+// son mot-clé ; une phrase d'instruction en a toujours plusieurs (verbe, complément(s), objet).
+// Discriminant retenu, le plus simple qui sépare les deux paires réelles des deux contre-
+// exemples : `p` compte au moins `MIN_INSTRUCTION_WORDS` mots (séparés par un blanc).
+// Comptes mesurés sur les quatre témoins ci-dessus : 10 mots (« Monter 160 … sur aig ») et
+// 7 mots (« Tricoter jusqu’à … la manche mesure ») pour les deux vraies continuations, contre
+// 1 mot (« Aiguilles ») et 4 mots (« Tour de poitrine mesure ») pour les deux étiquettes — le
+// seuil est fixé juste au-dessus du plus long des deux faux positifs.
+const NEEDLE_WORD_END_RE = /\b(?:aig|aiguilles?|needles?)\s*$/i
+const NEEDLE_MM_HEAD_RE = /^\d+(?:[.,]\d+)?\s?mm\b/
+const MEASURE_WORD_END_RE = /\b(?:mesure|mesurer|measures?|misura|environ|approx)\s*$/i
+const DIGIT_HEAD_RE = /^\d/
+const MIN_INSTRUCTION_WORDS = 5
+function wordCount(s) {
+  return s.trim().split(/\s+/).filter(Boolean).length
+}
+
+// Incise à tiret annoncée sans ponctuation finale (corpus Classic Sweater Soft Double) :
+// « Tricoter côtes en rond: 1 end, 1 env » / « - pour 12 (12) 14 (14) 16 (16) r. » —
+// NEW_ITEM_RE (testé juste après dans shouldJoin) prend le tiret de tête pour une puce et
+// bloque la fusion, alors qu'ici « - pour » introduit une incise qui complète la phrase
+// précédente, pas un nouvel élément de liste. Distingué d'une VRAIE liste à tirets par trois
+// gardes :
+// - `p` ne finit PAS sur une ponctuation terminale ([.!?:;)]) — une phrase déjà close n'attend
+//   pas d'incise (contre-exemple : « Rabattre toutes les m. » / « - pour la suite… » reste
+//   scindé) ;
+// - `p` LUI-MÊME n'est pas déjà une puce à tiret — deux puces consécutives restent deux
+//   éléments distincts (contre-exemple : « - Avec fil A » / « - avec fil B »). Classe
+//   restreinte à `-`/`•`/`–` (la forme réellement observée en tête de puce dans ce corpus),
+//   PAS la classe complète de NEW_ITEM_RE (`[-•*›>«"(]`) : celle-ci inclut aussi la
+//   parenthèse ouvrante et les guillemets, qui ouvrent une continuation de phrase ordinaire
+//   (remarque parenthésée, citation), pas une liste — paire relevée sur le même PDF : « (ou
+//   la longueur désirée qui doit être ajustée ici » / « - il est à noter que pour des
+//   manches plus courtes, » : `p` commence par « ( », ce n'est pas une puce, la fusion doit
+//   rester possible ;
+// - la ligne SUIVANT `nt` (`nn`) n'ouvre pas elle-même une nouvelle puce à tiret : une vraie
+//   liste à tirets annoncée sans « : » a son PREMIER élément non
+//   précédé d'une puce sur `p` — seul un « regard en avant » sur l'élément suivant distingue ce
+//   premier élément d'une véritable incise. Sans cette garde, « Tricoter en jersey » / « - avec
+//   fil A » fusionnerait à tort (le garde `p` non-puce ne s'applique qu'à CE tour de boucle),
+//   puis la ligne fusionnée « … - avec fil A » ne commençant plus par une puce, la fusion
+//   continuerait avec « - avec fil B », etc. : toute la liste s'effondrerait en une seule ligne.
+//   `nn` peut être absent (fin de section) : aucune puce ne suit alors, la fusion reste permise.
+// Testée AVANT NEW_ITEM_RE : sans quoi son alternative `[-•*›>«"(]` matcherait systématiquement
+// le tiret de tête et bloquerait cette fusion avant qu'elle ait sa chance.
+const DASH_INCISE_HEAD_RE = /^- \p{Ll}/u
+const TERMINAL_PUNCT_END_RE = /[.!?:;)]\s*$/
+const DASH_BULLET_HEAD_RE = /^[-•–]\s/
+function isDashIncise(p, nt, nn) {
+  if (!DASH_INCISE_HEAD_RE.test(nt)) return false
+  if (TERMINAL_PUNCT_END_RE.test(p)) return false
+  if (!/[\p{L}\d]\s*$/u.test(p)) return false
+  if (DASH_BULLET_HEAD_RE.test(p)) return false
+  return !nn || !DASH_BULLET_HEAD_RE.test(nn.trim())
+}
+
+function shouldJoin(prevText, nextText, isGerman = false, nextNextText) {
   const p = prevText.trim()
   const nt = nextText.trim()
   if (!p || !nt) return false
@@ -616,6 +781,11 @@ function shouldJoin(prevText, nextText, isGerman = false) {
   // couvre les clés comptées à token numérique qui échappent à KV_RE — mêmes détecteurs,
   // mêmes ports, que les gardes « glossaire » du corps de shouldJoin plus bas.
   if (isGerman && GERMAN_PREP_ORDINAL_RE.test(p) && !NEW_ITEM_RE.test(nt) && !KV_RE.test(nt) && !EN_DASH_KV_RE.test(nt) && !isNumericAbbrKeyLine(nt)) return true
+  // Le point d'une abréviation de tricot pointée (« m. », « tric. »…) n'est pas une fin de
+  // phrase : la suite en minuscule qui n'est ni un nouvel élément ni une clé/valeur (mêmes
+  // gardes de glossaire que le chemin minuscule générique plus bas : EN_DASH_KV_RE,
+  // ASCII_DASH_KV_RE et isNumericAbbrKeyLine) continue.
+  if (ABBR_DOT_END_RE.test(p) && /^\p{Ll}/u.test(nt) && !NEW_ITEM_RE.test(nt) && !KV_RE.test(nt) && !EN_DASH_KV_RE.test(nt) && !ASCII_DASH_KV_RE.test(nt) && !isNumericAbbrKeyLine(nt)) return true
   if (TERMINAL_RE.test(p) && !(COLON_THEN_PAREN_RE.test(p) && nt.startsWith('('))) return false
   if (KV_RE.test(nt) && !kvShortCircuitsMinuscule(p, nt)) return false
   // Clé de glossaire à compte nu (« s 1 p », « 2 ms ens. ») — cf. commentaire d'
@@ -657,12 +827,25 @@ function shouldJoin(prevText, nextText, isGerman = false) {
   // une note indépendante qui commence par « * » sur la ligne suivante (faux positif trouvé en
   // revue, cf. commentaire détaillé sur REPEAT_VERB_RE).
   if (/^[*⋆]/.test(nt) && REPEAT_VERB_RE.test(p) && /[*⋆]/.test(p)) return true
+  // « Reihe/Runde N » complément de nom après préposition/article, cf. isGermanRowComplement.
+  if (isGermanRowComplement(p, nt, isGerman)) return true
+  // Incise à tiret sans ponctuation finale (cf. isDashIncise ci-dessus) : testée AVANT
+  // NEW_ITEM_RE, dont l'alternative `[-•*›>«"(]` matcherait sinon systématiquement le tiret de
+  // tête et bloquerait cette fusion.
+  if (isDashIncise(p, nt, nextNextText)) return true
   if (NEW_ITEM_RE.test(nt)) return false
+  // Continuation numérique après un mot d'aiguille ou de mesure (cf. NEEDLE_WORD_END_RE/
+  // MEASURE_WORD_END_RE ci-dessus).
+  if (NEEDLE_WORD_END_RE.test(p) && NEEDLE_MM_HEAD_RE.test(nt) && wordCount(p) >= MIN_INSTRUCTION_WORDS) return true
+  if (MEASURE_WORD_END_RE.test(p) && DIGIT_HEAD_RE.test(nt) && wordCount(p) >= MIN_INSTRUCTION_WORDS) return true
   // Chiffre nu ou vecteur fermé devant une unité de maille allemande (cf. GERMAN_UNIT_RE) :
   // testé APRÈS NEW_ITEM_RE, comme le reste des signaux positifs allemands, pour qu'un
   // nouveau rang (« Rd 6: … ») ne soit jamais avalé même quand la ligne précédente se termine
   // par un chiffre nu.
-  if (isGerman && trailingNumberOrVector(p) && GERMAN_UNIT_RE.test(nt)) return true
+  if (isGerman && trailingNumberOrVector(p) && (GERMAN_UNIT_RE.test(nt) || GERMAN_BARE_ROW_UNIT_RE.test(nt))) return true
+  if (isGerman && GERMAN_MEASURE_LABEL_LINE_RE.test(p) && MEASURE_VALUE_HEAD_RE.test(nt)) return true
+  if (GERMAN_SIZE_WORD_END_RE.test(p) && SIZE_CODE_HEAD_RE.test(nt)) return true
+  if (isGerman && hasOpenParen(p) && /\d\s*$/.test(p) && GERMAN_AGE_UNIT_CLOSE_RE.test(nt)) return true
   // Deux entrées de glossaire à tiret cadratin/en dash CONSÉCUTIVES (p ET nt matchent toutes
   // les deux EN_DASH_KV_RE) ne fusionnent jamais entre elles — testé ICI, AVANT DANGLING_RE,
   // contrairement à ASCII_DASH_KV_RE plus bas (qui ne teste que nt) : une définition courte
@@ -692,6 +875,9 @@ function shouldJoin(prevText, nextText, isGerman = false) {
   // seuls les noms communs allemands capitalisés rendaient ce test peu fiable, pas TOUS
   // les mots en minuscule (bug trouvé à la jauge finale).
   if (/^\p{Ll}/u.test(nt) || (isGerman && (GERMAN_DANGLING_RE.test(p) || GERMAN_DANGLING_UBER_RE.test(p) || GERMAN_ADJ_RE.test(p) || GERMAN_MORE_OR_LESS_RE.test(p)))) return true
+  // Préposition allemande en fin de ligne (règle par catégorie, cf. GERMAN_PREP_CATEGORY_RE).
+  if (endsOnGermanPreposition(p, isGerman) && WORD_OR_NUMBER_HEAD_RE.test(nt)) return true
+  if (isGerman && GERMAN_CM_COMPARATIVE_RE.test(p) && GERMAN_STITCH_NOUN_HEAD_RE.test(nt)) return true
   // Suite d'un vecteur de tailles compact (agnes-sweater-en-4f1102bf, cf.
   // ALTERNATING_VECTOR_HEAD_RE ci-dessus) : la ligne précédente se termine sur un TOTAL
   // (trailingNumberOrVector — chiffre nu, ou parenthèse fermée contenant un chiffre) et la
@@ -746,7 +932,9 @@ function isOpenUrlTail(p, nt) {
 export function reflowLines(lines, { para = false, isGerman = false } = {}) {
   const out = []
   let lastY = null
-  for (const l of lines || []) {
+  const arr = Array.from(lines || [])
+  for (let i = 0; i < arr.length; i++) {
+    const l = arr[i]
     const prev = out[out.length - 1]
     const gap = prev && lastY != null ? lastY - (l.y ?? 0) : null
     const sameParagraph =
@@ -762,7 +950,7 @@ export function reflowLines(lines, { para = false, isGerman = false } = {}) {
     // COPYRIGHT_HEAD_RE en condition NÉGATIVE du `if` lui-même, pas dans shouldJoin :
     // sameParagraph (2e chemin du OU) court-circuite tous les gardes de shouldJoin —
     // cf. commentaire de COPYRIGHT_HEAD_RE (cas Cortina p.2).
-    if (prev && !COPYRIGHT_HEAD_RE.test(l.text.trim()) && (shouldJoin(prev.text, l.text, isGerman) || sameParagraph)) {
+    if (prev && !COPYRIGHT_HEAD_RE.test(l.text.trim()) && (shouldJoin(prev.text, l.text, isGerman, arr[i + 1]?.text) || sameParagraph)) {
       prev.text = `${prev.text.replace(/\s+$/, '')} ${l.text.trim()}`
       prev.bold = prev.bold || l.bold // une fusion garde le gras de l'une ou l'autre
       prev.parts = undefined // le texte a changé : les positions ne correspondent plus

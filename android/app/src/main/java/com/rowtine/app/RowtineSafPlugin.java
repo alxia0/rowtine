@@ -398,9 +398,8 @@ public class RowtineSafPlugin extends Plugin {
     //          last   (derniere tranche, defaut true),
     //          total  (taille finale annoncee, facultatif, controlee a la publication).
     //
-    // offset == 0 && last  -> ecriture DIRECTE sous le nom final, en un seul appel
-    //                         (chemin d'origine, inchange : un petit fichier ne paie
-    //                         ni tranche, ni fichier temporaire, ni renommage).
+    // offset == 0 && last  -> fichier entier en un seul appel : ecrit dans `<nom>.part`
+    //                         puis renomme (un petit fichier ne paie pas de tranche).
     // sinon                -> tranche : ecrite dans `<nom>.part`, publiee au dernier appel.
     @PluginMethod
     public void writeFile(PluginCall call) {

@@ -336,7 +336,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (Maschenrechner, freier Zähler, Nadel-/Häkelnadelhilfe) und die Schaltfläche ",
+                  "text": " (Maschenrechner, freier Zähler, Nadel-/Häkelnadelhilfe), die Schaltfläche ",
                   "bold": false,
                   "italic": false
                 },
@@ -346,7 +346,47 @@
                   "italic": false
                 },
                 {
-                  "text": ".",
+                  "text": " und die Schaltfläche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "PDF importieren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", die deine ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Anleitungen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " direkt beim Hinzufügen einer Anleitung öffnet.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Ganz am Anfang, solange die App nur die Beispiele enthält, beschränkt sich der Start auf das Wesentliche: Eine Karte ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "PDF-Anleitung importieren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ersetzt die Kachel Fortsetzen und die Übersicht. Beides kehrt zurück, sobald du dein erstes Projekt erstellt oder deine erste Anleitung importiert hast.",
                   "bold": false,
                   "italic": false
                 }

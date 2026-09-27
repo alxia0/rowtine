@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest'
 import { renderBadge, BADGE_TEMPLATES, computeBadgeGeometry, wrapText, statValue, createBadgeCanvas, buildRawStatLines, drawTechniqueBadge } from '@/utils/badge-render'
 import { calendarRealHeight, drawCalendar } from '@/utils/badge-calendar'
+import { createTestI18n } from './helpers/i18n-router'
 
 // Largeur FICTIVE : 20 « px » par caractère, déterministe. Ce stub n'a pas de moteur de
 // métriques de police (et le dépôt s'interdit toute dépendance npm de rendu canvas) : ces
@@ -226,6 +227,17 @@ describe('renderBadge', () => {
     expect(lines[0]).toBe(nbsp('Drops · 4 pelotes'))
     expect(lines[1]).toBe(nbsp('Rico · 1 pelote'))
     expect(lines.some((s) => s.includes('undefined'))).toBe(false)
+  })
+
+  // `t` réel (pas la maquette du fichier), pour prouver que le nombre inséré dans
+  // « N pelotes » est bien formaté à la locale, pas le nombre JS brut.
+  it("statLine 'yarns' : nombre de pelotes décimal affiché avec la virgule (2,5 pelotes)", () => {
+    const realT = createTestI18n().global.t
+    const lines = buildRawStatLines(['yarns'], {
+      stats, t: realT, locale: 'fr', project: { name: 'X' }, customText: '',
+      yarnUsage: [{ yarn: { brand: 'Drops', model: '' }, balls: 2.5 }],
+    })
+    expect(lines[0]).toBe(nbsp('Drops · 2,5 pelotes'))
   })
 
   // Marque ET modèle vides : atteignable (le `<select>` de marque de StashView.vue ouvre sur
@@ -2586,5 +2598,65 @@ describe('Horizontal : la photo suit la hauteur du canevas (Tâche 1, 20/09)', (
       const g = computeBadgeGeometry('horizontal', ratio, statLineCount, 1, includeCalendar)
       expect(g.statsArea.h).toBe(g.canvas.h)
     }
+  })
+})
+
+describe('renderBadge : onGeometry', () => {
+  const gridStats = {
+    ...stats,
+    grid: { columns: [{ monday: '2026-01-05', monthStart: true, cells: [{ day: 'd0', level: 1, future: false }] }] },
+  }
+  const longText = 'Tricoté pendant les longues soirées de janvier au coin du feu'
+  const img = { naturalWidth: 1600, naturalHeight: 900 }
+  const drawnRects = (calls) => calls.filter((c) => c[0] === 'drawImage').map((c) => {
+    const [x, y, w, h] = c.slice(-4)
+    return { x, y, w, h }
+  })
+  const rect = ({ x, y, w, h }) => ({ x, y, w, h })
+
+  // Protège la zone cliquable de la prévisu : la géométrie remontée est celle de la photo dessinée, pas la prédiction à texte nul.
+  it('Horizontal + calendrier + texte long : le slot remonté est celui dessiné, pas celui prédit sans mesure du texte', () => {
+    const { canvas, calls } = stubCanvas()
+    let geometry = null
+    const url = renderBadge(canvas, {
+      templateKey: 'horizontal', color: 'hsl(230 70% 45%)', photoRatio: 16 / 9,
+      statKeys: ['totalTime', 'sessionsCount'], stats: gridStats, photoImg: img,
+      project: { name: 'X' }, t, generatedAt: new Date(2026, 0, 20), locale: 'fr',
+      includeCalendar: true, customText: longText, onGeometry: (g) => { geometry = g },
+    })
+    expect(url).toBe('data:image/jpeg;base64,BADGE')
+    const predicted = computeBadgeGeometry('horizontal', 16 / 9, 2, 1, true, 0, 1, 2, 1)
+    expect(geometry.photoSlot).not.toEqual(predicted.photoSlot)
+    expect(drawnRects(calls)).toEqual([rect(geometry.photoSlot)])
+    expect(geometry.canvas).toEqual({ w: canvas.width, h: canvas.height })
+  })
+
+  // Protège la zone cliquable du gabarit Deux images : ses deux slots remontés sont ceux dessinés.
+  it('Deux images + texte long : les deux slots remontés sont ceux dessinés', () => {
+    const { canvas, calls } = stubCanvas()
+    let geometry = null
+    renderBadge(canvas, {
+      templateKey: 'double', color: 'hsl(230 70% 45%)', photoRatio: [1, 1],
+      statKeys: ['totalTime', 'sessionsCount'], stats, photoImg: img, photoImg2: img,
+      project: { name: 'Un titre de projet vraiment très long pour élargir le badge' }, t,
+      generatedAt: new Date(2026, 0, 20), locale: 'fr', customText: longText,
+      onGeometry: (g) => { geometry = g },
+    })
+    const predicted = computeBadgeGeometry('double', [1, 1], 2, 1, false, 0, 1, 2)
+    expect(geometry.photoSlots).not.toEqual(predicted.photoSlots)
+    expect(drawnRects(calls)).toEqual(geometry.photoSlots.map(rect))
+  })
+
+  // Protège la prévisu sous jsdom (sans contexte 2D) : la géométrie remonte quand même, alignée sur le canevas dimensionné.
+  it('sans contexte 2D : la géométrie remonte quand même et renderBadge renvoie null', () => {
+    const canvas = { width: 0, height: 0, getContext: () => null }
+    let geometry = null
+    const url = renderBadge(canvas, {
+      templateKey: 'horizontal', color: 'hsl(230 70% 45%)', statKeys: [], stats,
+      project: { name: 'X' }, t, generatedAt: new Date(), onGeometry: (g) => { geometry = g },
+    })
+    expect(url).toBeNull()
+    expect(geometry.canvas).toEqual({ w: canvas.width, h: canvas.height })
+    expect(geometry.photoSlot).toBeTruthy()
   })
 })

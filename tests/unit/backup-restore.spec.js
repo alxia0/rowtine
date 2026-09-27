@@ -261,6 +261,28 @@ describe('readBackup — photo manquante à la restauration : signalée, jamais 
     expect(dbSnapshot.patterns.find((p) => p.id === 1).photos).toEqual([])
     expect(dbSnapshot.errors).toContainEqual({ where: dir, code: 'missing-asset', file: photoFile.name })
   })
+
+  // Protège la même règle pour la galerie de laine que pour une photo de patron ci-dessus.
+  it('photo de galerie de laine manquante : consignée dans errors (Laines), laine restaurée sans elle', async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, {
+      projects: [],
+      libraryPatterns: [],
+      yarns: [{ id: 1, brand: 'Katia', photos: [PHOTO_A, PHOTO_B] }],
+      independentCounters: [],
+      settings: {},
+      keepIds: { projects: [], patterns: [] },
+    })
+
+    const laines = JSON.parse(await mem.readFile('laines.json'))
+    const missingName = laines[0].photos[0]
+    await mem.remove(`Laines/${missingName}`)
+
+    const dbSnapshot = await readBackup(mem)
+
+    expect(dbSnapshot.yarns[0].photos).toHaveLength(1)
+    expect(dbSnapshot.errors).toContainEqual({ where: 'Laines', code: 'missing-asset', file: missingName })
+  })
 })
 
 describe('readBackup — corbeille (items supprimés dont le dossier est conservé) — RÉGRESSION résurrection', () => {

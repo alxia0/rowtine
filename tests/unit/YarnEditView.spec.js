@@ -79,6 +79,14 @@ describe('YarnEditView', () => {
     const { w } = await mountView({ routeParams: { id: '3' }, existingYarns: [source] })
     expect(w.find('#yarn-model').element.value).toBe('Baby Merino')
   })
+
+  // Protège : `formatSkeins('')` rend « 0 » — sans garde, une fiche ancienne à quantité vide
+  // préremplirait le champ à « 0 » au lieu de vide, cassant le plancher à 1 de normalizedQuantity.
+  it('édition d’une fiche ancienne à quantité vide : le champ se pré-remplit vide, pas « 0 »', async () => {
+    const source = { id: 3, brand: 'Drops', model: 'Baby Merino', colorName: 'Bleu', composition: [], quantity: '' }
+    const { w } = await mountView({ routeParams: { id: '3' }, existingYarns: [source] })
+    expect(w.find('#yarn-quantity').element.value).toBe('')
+  })
 })
 
 // ── Porté de tests/unit/stash-price-comma.spec.js ────────────────────────────────────────
@@ -104,6 +112,19 @@ describe('YarnEditView — prix saisi en virgule décimale', () => {
   })
 })
 
+describe('YarnEditView — « ajuster le stock » (YarnPurchases) réaffiche le champ quantité', () => {
+  // Protège : `onAdjustQuantity` réaffiche le nombre émis par YarnPurchases avec la virgule, jamais le point JS.
+  it('quantité décimale émise par « Ajuster le stock » : affichée avec la virgule, jamais le point JS', async () => {
+    const { w } = await mountView({
+      routeParams: { id: '6' },
+      existingYarns: [{ id: 6, brand: 'Drops', colorName: 'Bleu', quantity: 14, composition: [], reservations: {}, consumed: {} }],
+    })
+    await w.findComponent({ name: 'YarnPurchases' }).vm.$emit('update:quantity', 6.1)
+    await flushPromises()
+    expect(w.find('#yarn-quantity').element.value).toBe('6,1')
+  })
+})
+
 // ── Porté de tests/unit/stash-quantity-floor.spec.js ─────────────────────────────────────
 describe('YarnEditView — plancher de quantité sous le total réservé', () => {
   const SOURCE = { id: 1, brand: 'Drops', colorName: 'Bleu', composition: [], quantity: 5, reservations: { 2: 3, 3: 2 } }
@@ -116,6 +137,18 @@ describe('YarnEditView — plancher de quantité sous le total réservé', () =>
 
     expect(useYarnsStore(pinia).update).not.toHaveBeenCalled()
     expect(useSnackbarStore(pinia).show).toHaveBeenCalledWith(fr.yarn.quantityBelowReserved.replace('{n}', '5'))
+  })
+
+  // Plancher décimal : le nombre inséré dans le message suit la locale (virgule), pas le point JS.
+  it('refuse une quantité sous un total réservé décimal, message avec la virgule', async () => {
+    const DECIMAL_SOURCE = { id: 9, brand: 'Drops', colorName: 'Bleu', composition: [], quantity: 5.5, reservations: { 2: 3, 3: 2.5 } }
+    const { w, pinia } = await mountView({ routeParams: { id: '9' }, existingYarns: [DECIMAL_SOURCE] })
+    await w.find('#yarn-quantity').setValue('2')
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+
+    expect(useYarnsStore(pinia).update).not.toHaveBeenCalled()
+    expect(useSnackbarStore(pinia).show).toHaveBeenCalledWith(fr.yarn.quantityBelowReserved.replace('{n}', '5,5'))
   })
 
   // Une quantité à virgule (« 4,5 ») est lue comme un nombre : plancher appliqué, jamais 1 en silence.
@@ -611,6 +644,19 @@ describe('YarnEditView — la navigation n’a lieu qu’une fois la ligne d’a
     expect(router.currentRoute.value.name).toBe('stash-item')
     expect(router.currentRoute.value.params.id).toBe('4')
   })
+
+  // Protège : sans arrondi, 2,3 - 2,1 vaut 0.19999999999999973 en JS, pas « 0,2 ».
+  it('hausse décimale : 2,1 portée à 2,3 propose un achat de 0,2 exactement', async () => {
+    const { w } = await mountReal({
+      routeParams: { id: '4' },
+      yarns: [{ id: 4, brand: 'Katia', colorName: 'Rouge', quantity: 2.1, price: '17,70', composition: [], reservations: {}, consumed: {} }],
+    })
+    await w.find('#yarn-quantity').setValue('2,3')
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await tours()
+    // Le nombre inséré dans le message est formaté à la locale, pas le nombre JS brut.
+    expect(w.find('[data-test="qty-increase-prompt"]').text()).toContain(tk('yarn.purchasePrompt.message', { n: '0,2' }))
+  })
 })
 
 // ── Porté de tests/unit/StashView-form-units.spec.js ─────────────────────────────────────
@@ -875,6 +921,25 @@ describe('YarnEditView — formulaire (unités, prix) avec store + Dexie réels'
       const inputs = w.findAll('.addform input')
       const priceInput = inputs.find((i) => i.attributes('id') === 'yarn-price')
       expect(priceInput.element.value).toBe('9,5')
+    })
+
+    // Même parade que le prix, pour la quantité : `quantity` est un nombre JS.
+    it('réaffiche une quantité décimale avec la virgule française à la réouverture', async () => {
+      await setupDb()
+      const yarnId = await db.yarns.add({ brand: 'Maison', colorName: 'Rouge', quantity: 2.5 })
+      const w = await mountReal({ routeParams: { id: String(yarnId) } })
+      expect(w.find('#yarn-quantity').element.value).toBe('2,5')
+    })
+
+    // Protège contre le séparateur de milliers : groupé (« 1 200 »), parseDecimal ne le lirait plus au save.
+    it('réaffiche une quantité à quatre chiffres sans séparateur de milliers, et la ré-enregistre inchangée', async () => {
+      await setupDb()
+      const yarnId = await db.yarns.add({ brand: 'Maison', colorName: 'Rouge', quantity: 1200 })
+      const w = await mountReal({ routeParams: { id: String(yarnId) } })
+      expect(w.find('#yarn-quantity').element.value).toBe('1200')
+      await saveForm(w)
+      const saved = await db.yarns.get(yarnId)
+      expect(saved.quantity).toBe(1200)
     })
   })
 })

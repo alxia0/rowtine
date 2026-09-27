@@ -20,7 +20,7 @@ import { usePurchasesStore } from '@/stores/purchases'
 import { useYarnsStore } from '@/stores/yarns'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSnackbarStore } from '@/stores/snackbar'
-import { formatMoney } from '@/utils/units'
+import { formatMoney, formatSkeins } from '@/utils/units'
 import {
   groupByPeriod, lineAmount, totalsByCurrency, isPriceUnknown, yearsOf, filterByYear,
   categoryOf, filterByCategory, totalsByCategory,
@@ -261,7 +261,7 @@ function openPattern(line) {
             <li v-for="line in m.lines" :key="line.id" class="exp__line" :data-test="`expenses-line-${line.id}`">
               <div class="exp__line-main">
                 <!-- Pas de quantité sur un patron : « ×1 » n'y veut rien dire. -->
-                <span v-if="!isPattern(line)" class="exp__line-qty">×{{ line.quantity }}</span>
+                <span v-if="!isPattern(line)" class="exp__line-qty">×{{ formatSkeins(line.quantity, { locale }) }}</span>
                 <span class="exp__line-label">{{ lineLabel(line) }}</span>
                 <!-- La garde de CATÉGORIE fait tout le travail : la ligne de patron n'a pas de
                      `yarnId`, mais `undefined == null` est VRAI en JavaScript — sans elle,

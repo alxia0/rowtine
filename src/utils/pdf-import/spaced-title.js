@@ -10,7 +10,7 @@
 // D'où restoreWords() : on cherche la suite de lettres dans la fiche d'identité du PDF
 // (doc.getMetadata().info.Title, ici « Microsoft Word - Mia Cardigan (English) v1.1.docx »)
 // et on reprend SA découpe en mots. Rien n'est inventé : la fiche n'est acceptée que si
-// les lettres correspondent EXACTEMENT.
+// les lettres correspondent EXACTEMENT. Sans aucune source, les lettres sont collées.
 
 // Même critère que l'ancien isSpacedStamp de segment.js (déplacé ici, source unique).
 export function isLetterSpaced(text) {
@@ -54,4 +54,33 @@ export function restoreWords(despaced, metaTitle) {
     }
   }
   return null
+}
+
+// Découpe en mots d'un titre interlettré : la fiche d'identité d'abord, puis les autres lignes
+// du PDF (`texts`). Un titre de marque revient souvent en toutes lettres ailleurs dans le
+// document (Katia Merino Aran : fiche vide, mais « MERINO ARAN (100 gr.) » dans le matériel).
+// Même règle que restoreWords : les lettres doivent correspondre EXACTEMENT. null sans source.
+export function findSpacedTitle(raw, { metaTitle = '', texts = [] } = {}) {
+  const text = String(raw ?? '')
+  if (!isLetterSpaced(text)) return null
+  const letters = despace(text)
+  const fromMeta = restoreWords(letters, metaTitle)
+  if (fromMeta) return fromMeta
+  const want = key(letters)
+  for (const t of texts) {
+    // Préfiltre bon marché avant la recherche O(L³) de restoreWords ; une ligne interlettrée
+    // (le titre lui-même, ou sa répétition) ne porte aucune découpe en mots.
+    if (!t || isLetterSpaced(t) || !key(t).includes(want)) continue
+    const found = restoreWords(letters, t)
+    if (found) return found
+  }
+  return null
+}
+
+// Titre interlettré lisible : sa découpe en mots si une source la donne, sinon les lettres
+// collées (« MIACARDIGAN » plutôt que « M I A C A R D I G A N », choix de Julien du 26/09).
+export function restoreSpacedTitle(raw, opts) {
+  const text = String(raw ?? '')
+  if (!isLetterSpaced(text)) return text
+  return findSpacedTitle(text, opts) || despace(text)
 }

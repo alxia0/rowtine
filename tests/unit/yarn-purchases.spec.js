@@ -88,6 +88,13 @@ describe('YarnPurchases', () => {
     expect(lineRows(w)).toHaveLength(5)
   })
 
+  it('3-bis. total de pelotes décimal affiché avec la virgule (2,5, pas 2.5)', async () => {
+    await addLine({ kind: 'buy', quantity: 2.5, unitPrice: '5', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp()
+    expect(w.find('.ypur__line-qty').text()).toBe('×2,5')
+    expect(w.findAll('.ypur__num').map((n) => n.text())).toContain('2,5')
+  })
+
   it('3. total : 4×5,50 (achat) + 1 cadeau de 2 pelotes ⇒ « 22 » et « 6 pelotes »', async () => {
     await addLine({ kind: 'buy', quantity: 4, unitPrice: '5,50', currency: 'EUR', date: '2026-01-01' })
     // unitPrice non vide À DESSEIN sur ce cadeau : preuve que le total ignore le prix
@@ -112,6 +119,14 @@ describe('YarnPurchases', () => {
     // Correctif final (revue de branche) : l'alerte apparaît APRÈS le rendu (pas dans le
     // HTML initial), un lecteur d'écran ne la verrait donc jamais sans rôle d'annonce.
     expect(alert.attributes('role')).toBe('status')
+  })
+
+  it('4a-bis. écart avec des pelotes décimales : la virgule remplace le point dans le message', async () => {
+    await addLine({ kind: 'buy', quantity: 12.5, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12.5, consumed: { 1: 3.5 } } })
+    const alert = w.find('[data-test="purchases-gap"]')
+    // stock = 12,5 + 3,5 = 16 ; historique = 12,5.
+    expect(alert.text()).toContain(fr.purchases.gapMessage.replace('{stock}', '16').replace('{history}', '12,5'))
   })
 
   it('4b. écart : historique 15 ⇒ AUCUNE alerte rendue', async () => {
@@ -139,6 +154,50 @@ describe('YarnPurchases', () => {
     expect(w.find('#ypur-qty').element.value).toBe('3')
     expect(form.text()).toContain(fr.purchases.kindBuy)
     expect(form.text()).toContain(fr.purchases.kindGift)
+  })
+
+  // Décimalisation : la quantité d'une ligne d'achat accepte la virgule, normalisée en nombre.
+  it('5b-bis. « 2,5 » tapé dans la quantité est enregistré comme le nombre 2.5', async () => {
+    await addLine({ kind: 'buy', quantity: 12, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12, consumed: { 1: 3 } } })
+    const store = usePurchasesStore()
+    await w.find('[data-test="purchases-correct"]').trigger('click')
+    await w.find('[data-test="purchases-correct-add"]').trigger('click')
+    await w.find('#ypur-qty').setValue('2,5')
+    await w.find('[data-test="purchases-form-save"]').trigger('click')
+    await vi.waitFor(() => expect(store.purchases).toHaveLength(2), { timeout: 10000 })
+    const added = store.purchases.find((l) => l.quantity === 2.5)
+    expect(added).toBeTruthy()
+  })
+
+  // Protège : une quantité vide ou illisible ne doit jamais s'enregistrer en 0 ou en NaN.
+  it('5b-ter. quantité vide ou « , » seul : le save est bloqué, rien n’est enregistré', async () => {
+    await addLine({ kind: 'buy', quantity: 12, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12, consumed: { 1: 3 } } })
+    const store = usePurchasesStore()
+    await w.find('[data-test="purchases-correct"]').trigger('click')
+    await w.find('[data-test="purchases-correct-add"]').trigger('click')
+
+    // Vérifie l'ABSENCE d'écriture après un délai, pas seulement juste après le clic (même
+    // motif que le test 6 ci-dessus) : une écriture en vol passerait une assertion trop tôt.
+    await w.find('#ypur-qty').setValue('')
+    await w.find('[data-test="purchases-form-save"]').trigger('click')
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(store.purchases).toHaveLength(1)
+
+    await w.find('#ypur-qty').setValue(',')
+    await w.find('[data-test="purchases-form-save"]').trigger('click')
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(store.purchases).toHaveLength(1)
+  })
+
+  // Protège : un écart décimal préremplit le champ avec la virgule, pas le point JS (« 3.5 »).
+  it('5b-quater. écart décimal : « ajouter la ligne manquante » préremplit « 3,5 », pas « 3.5 »', async () => {
+    await addLine({ kind: 'buy', quantity: 12, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12, consumed: { 1: 3.5 } } }) // stock 15,5, historique 12, écart 3,5
+    await w.find('[data-test="purchases-correct"]').trigger('click')
+    await w.find('[data-test="purchases-correct-add"]').trigger('click')
+    expect(w.find('#ypur-qty').element.value).toBe('3,5')
   })
 
   it('5c. soumettre « ajouter la ligne manquante » écrit une nouvelle ligne (pas de collision d’id après une édition annulée)', async () => {
@@ -221,6 +280,26 @@ describe('YarnPurchases', () => {
     expect(w.find('[data-test="purchases-correct-adjust"]').exists()).toBe(true)
   })
 
+  // Protège : le bouton reflète la même garde que submitForm, sans double-tap possible sur
+  // une quantité qui serait de toute façon refusée à l'enregistrement.
+  it('5g. bouton « Enregistrer » désactivé tant que la quantité saisie n’est pas un nombre > 0', async () => {
+    await addLine({ kind: 'buy', quantity: 12, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 12, consumed: { 1: 3 } } })
+    await w.find('[data-test="purchases-correct"]').trigger('click')
+    await w.find('[data-test="purchases-correct-add"]').trigger('click')
+    const saveBtn = w.find('[data-test="purchases-form-save"]')
+    expect(saveBtn.attributes('disabled')).toBeUndefined() // préremplie à l'écart (3), valide
+
+    await w.find('#ypur-qty').setValue('')
+    expect(w.find('[data-test="purchases-form-save"]').attributes('disabled')).toBeDefined()
+
+    await w.find('#ypur-qty').setValue('0')
+    expect(w.find('[data-test="purchases-form-save"]').attributes('disabled')).toBeDefined()
+
+    await w.find('#ypur-qty').setValue('2,5')
+    expect(w.find('[data-test="purchases-form-save"]').attributes('disabled')).toBeUndefined()
+  })
+
   it('6. « ajuster le stock » émet l’historique MOINS la consommation (pas le total acquis), et n’écrit rien en base', async () => {
     // Nombres discriminants (revue, constat C1) : 14 restantes + 6 déjà tricotées
     // (stock-implied = 20), historique = 11. La bonne valeur émise est 11 - 6 = 5, distincte
@@ -244,6 +323,27 @@ describe('YarnPurchases', () => {
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(addSpy).not.toHaveBeenCalled()
     expect(updateSpy).not.toHaveBeenCalled()
+  })
+
+  // Protège : « ajuster le stock » propose et émet un nombre à 2 décimales au plus (roundSkeins), avec la virgule.
+  it('6-bis. « ajuster le stock » arrondit à 2 décimales et affiche la virgule', async () => {
+    await addLine({ kind: 'buy', quantity: 12.4, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp({ yarn: { id: YARN_ID, quantity: 14, consumed: { 1: 6.3 } } })
+    const correctToggle = w.find('[data-test="purchases-correct"]')
+    await correctToggle.trigger('click')
+    const adjustBtn = w.find('[data-test="purchases-correct-adjust"]')
+    // historique 12,4 - consommé 6,3 = 6,1000000000000005 sans roundSkeins.
+    expect(adjustBtn.text()).toContain('6,1')
+    await adjustBtn.trigger('click')
+    expect(w.emitted('update:quantity')).toEqual([[6.1]])
+  })
+
+  // Une ligne créée à une quantité décimale se réaffiche en édition avec la virgule, pas « 2.5 ».
+  it('openEdit réaffiche une quantité décimale avec la virgule', async () => {
+    await addLine({ kind: 'buy', quantity: 2.5, unitPrice: '4', currency: 'EUR', date: '2026-01-01' })
+    const w = mountComp()
+    await w.find('.ypur__line-btn').trigger('click')
+    expect(w.find('#ypur-qty').element.value).toBe('2,5')
   })
 
   it('7. supprimer une ligne la retire du store et propose l’annulation (snackbar)', async () => {

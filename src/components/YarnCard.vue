@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import ThumbImage from '@/components/ThumbImage.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { useSettingsStore } from '@/stores/settings'
-import { formatLength, formatWeight } from '@/utils/units'
+import { formatLength, formatWeight, formatSkeins } from '@/utils/units'
 import { parseDecimal } from '@/utils/decimal'
 import { coverPhotoOf } from '@/utils/yarn-photos'
 import { ENGAGEMENTS, LABEL_ICONS, orderedLabels } from '@/constants/yarn-labels'
@@ -47,7 +47,7 @@ const engagements = computed(() => {
 // ou entièrement consommé.
 const usageDetail = computed(() =>
   props.usage.state !== 'free' && props.usage.used < props.usage.total
-    ? ` · ${props.usage.used}/${props.usage.total}`
+    ? ` · ${formatSkeins(props.usage.used, { locale: locale.value })}/${formatSkeins(props.usage.total, { locale: locale.value })}`
     : '',
 )
 </script>
@@ -68,7 +68,7 @@ const usageDetail = computed(() =>
       <div class="ycard__meta">
         <span v-if="yarn.weight" class="tag">{{ weightLabel(yarn.weight) }}</span>
         <span v-if="yarn.colorType && yarn.colorType !== 'uni'" class="tag">{{ t(`yarn.colorTypes.${yarn.colorType}`) }}</span>
-        <span>×{{ yarn.quantity }}<template v-if="lengthText"> · {{ lengthText.text }} {{ t(lengthText.unitKey) }}</template><template v-if="weightText"> · {{ weightText.text }} {{ t(weightText.unitKey) }}</template></span>
+        <span>×{{ formatSkeins(yarn.quantity, { locale }) }}<template v-if="lengthText"> · {{ lengthText.text }} {{ t(lengthText.unitKey) }}</template><template v-if="weightText"> · {{ weightText.text }} {{ t(weightText.unitKey) }}</template></span>
         <span class="tag" :class="`tag--${usage.state}`">{{ t(`yarn.usage.${usage.state}`) }}{{ usageDetail }}</span>
       </div>
     </button>

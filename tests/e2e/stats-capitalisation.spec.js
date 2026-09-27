@@ -13,7 +13,7 @@
 // déménagé dans l'onglet « Rythme », qui n'est plus affiché par défaut — un clic sur l'onglet
 // est désormais nécessaire avant de les chercher. `.range` reste commun aux deux onglets, lui.
 import { test, expect } from '@playwright/test'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome } from './helpers'
 
 test('les libellés de période ne capitalisent que la première lettre', async ({ page }) => {
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
@@ -23,8 +23,7 @@ test('les libellés de période ne capitalisent que la première lettre', async 
   // `.range`, lui, s'affiche dans tous les cas (hors du `v-if="hasAnyActivity"`) — mais on
   // enregistre quand même une vraie session via le chrono du lecteur, comme session.spec.js,
   // pour que `.bar__label` (testé plus bas) soit lui aussi visible.
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  await openDemoProjectFromHome(page)
   await page.getByRole('button', { name: /Suivre le patron/ }).click()
   await expect(page).toHaveURL(/\/project\/\d+\/read/)
   await page.locator('.chrono-fab__body').click() // démarre le chrono

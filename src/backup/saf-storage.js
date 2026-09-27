@@ -109,8 +109,8 @@ export class SafBackupStorage {
   // writeFile(path, data, { encoding }) écrit le fichier entier et rend une promesse.
   //
   // Un fichier qui tient dans une tranche part EN UN SEUL aller-retour, charge utile
-  // strictement inchangée : ni conversion, ni fichier temporaire, ni renommage — un
-  // reglages.json coûte exactement ce qu'il coûtait.
+  // strictement inchangée, sans conversion (le natif l'écrit en `.part` puis le renomme,
+  // comme toute écriture).
   //
   // Au-delà, il part par tranches, toujours en base64 (découper de l'UTF-8 à un
   // octet arbitraire couperait un caractère accentué en deux). L'entrée déjà en

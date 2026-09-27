@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatLength, formatWeight } from '@/utils/units'
+import { formatLength, formatWeight, formatSkeins } from '@/utils/units'
 
 // En français, Intl sépare les milliers par U+202F (espace insécable étroite), PAS par une
 // espace ordinaire. On extrait le vrai séparateur du formateur plutôt que de le taper : une
@@ -90,3 +90,32 @@ describe('formatWeight', () => {
 // (`formatMoney(amount, { locale, currency, profile })`) : ses tests vivent désormais dans
 // tests/unit/money.spec.js, qui couvre le même comportement (arrondi, séparateur de milliers,
 // pas de bascule d'unité, 0 pour une valeur absente) et davantage (devise, symbole).
+
+describe('formatSkeins', () => {
+  it('affiche la virgule décimale en français', () => {
+    expect(formatSkeins(2.5, { locale: 'fr' })).toBe('2,5')
+  })
+
+  it('affiche le point décimal en anglais', () => {
+    expect(formatSkeins(2.5, { locale: 'en' })).toBe('2.5')
+  })
+
+  it('n’affiche aucune décimale pour un entier', () => {
+    expect(formatSkeins(3, { locale: 'fr' })).toBe('3')
+  })
+
+  it('tolère une saisie à virgule (fiche ancienne)', () => {
+    expect(formatSkeins('2,5', { locale: 'fr' })).toBe('2,5')
+  })
+
+  it('groupe les milliers par défaut, comme les autres formateurs du fichier', () => {
+    expect(formatSkeins(1000, { locale: 'fr' })).toBe(`1${FR_GROUP}000`)
+  })
+
+  // Protège : un champ modifiable ne doit jamais recevoir de séparateur de milliers (parseDecimal ne le lit pas).
+  it('n’ajoute aucun séparateur de milliers quand grouping: false, quelle que soit la locale', () => {
+    expect(formatSkeins(1000, { locale: 'fr', grouping: false })).toBe('1000')
+    expect(formatSkeins(1000, { locale: 'de', grouping: false })).toBe('1000')
+    expect(formatSkeins(1000, { locale: 'en', grouping: false })).toBe('1000')
+  })
+})

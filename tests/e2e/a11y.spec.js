@@ -3,7 +3,7 @@
 // inférieurs (best-practice/moderate) sont tolérés pour ne pas figer le design.
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { completeOnboarding, openDemoReaderWithChart, attendreFinFondu } from './helpers'
+import { completeOnboarding, openDemoReaderWithChart, attendreFinFondu, openDemoProjectFromHome } from './helpers'
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
 
@@ -68,8 +68,7 @@ test('suivi lecteur (ex-session de tricot) — sans violation a11y bloquante', a
   // Lot A : « Reprendre » va maintenant sur la fiche projet (/project/{id}),
   // plus sur l'ancienne SessionView (/section/). L'audit porte sur la vue reader.
   await completeOnboarding(page, { firstName: 'Alex' })
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  await openDemoProjectFromHome(page)
   await page.getByRole('button', { name: /Suivre le patron/ }).click()
   await expect(page).toHaveURL(/\/project\/\d+\/read/)
   expect(await audit(page)).toEqual([])

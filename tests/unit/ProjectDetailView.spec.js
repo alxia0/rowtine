@@ -234,6 +234,23 @@ describe('ProjectDetailView', () => {
     expect(w.findComponent({ name: 'StatsHeatmap' }).exists()).toBe(true)
   })
 
+  it('onglet Stats : pelotes utilisées décimales affichées avec la virgule (2,5, pas 2.5)', async () => {
+    const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '' })
+    await db.sessions.add({
+      projectId: pid, sectionId: SESSION_NO_SECTION, date: '2026-01-05T10:00:00.000Z',
+      durationSec: 1800, manual: true,
+    })
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2.5 } })
+    const w = mountDetail()
+    await flushPromises()
+
+    await w.findAll('[role="tab"]').find((b) => b.text() === tk('project.tab.stats')).trigger('click')
+    await flushPromises()
+
+    const panel = w.find('#panel-stats')
+    expect(panel.text()).toContain(tk('project.stats.ballsValue', { count: '2,5' }, 2.5))
+  })
+
   it('onglet Stats : projet terminé, période bornée avec deux dates localisées', async () => {
     const pid = await seedProject({ startedAt: '2026-01-05', finishedAt: '2026-01-06' })
     await db.sessions.add({
@@ -531,6 +548,18 @@ describe('ProjectDetailView', () => {
       expect(items[0].text()).not.toContain(i18n.global.t('project.yarnKnitted', { n: 2 }))
     })
 
+    it('laine réservée : affiche « ×réservé / stock » avec des décimales à la virgule', async () => {
+      const pid = await seedProject()
+      await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5.5, reservations: { [pid]: 2.5 } })
+      const w = mountDetail()
+      await flushPromises()
+      await flushPromises()
+      await w.find('#tab-infos').trigger('click')
+      await flushPromises()
+
+      expect(w.find('.yarnlist li').text()).toContain('×2,5 / 5,5')
+    })
+
     it('projet terminé dont les pelotes ont été consommées (plus aucune réservation) : la laine reste visible, « n pelotes tricotées »', async () => {
       const pid = await seedProject({ status: 'done' })
       await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 3, reservations: {}, consumed: { [pid]: 2 } })
@@ -545,6 +574,17 @@ describe('ProjectDetailView', () => {
       expect(items).toHaveLength(1)
       expect(items[0].text()).toContain('Drops')
       expect(items[0].text()).toContain(i18n.global.t('project.yarnKnitted', { n: 2 }))
+    })
+
+    it('pelotes tricotées décimales : la virgule remplace le point (2,5, pas 2.5)', async () => {
+      const pid = await seedProject({ status: 'done' })
+      await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 3, reservations: {}, consumed: { [pid]: 2.5 } })
+      const w = mountDetail()
+      await flushPromises()
+      await w.find('#tab-infos').trigger('click')
+      await flushPromises()
+
+      expect(w.find('.yarnlist li').text()).toContain(i18n.global.t('project.yarnKnitted', { n: '2,5' }))
     })
 
     it('une laine réservée par ce projet ET une autre consommée par lui apparaissent toutes les deux', async () => {

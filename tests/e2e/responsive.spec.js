@@ -73,9 +73,9 @@ test.describe('tablette en paysage', () => {
     // franchi), ce qui rétrécit intentionnellement le fil pour laisser la place au volet —
     // cas déjà couvert par tests/e2e/reader-split.spec.js. Ici on veut l'invariant général
     // (les 4 bandes du lecteur restent alignées ET élargies au plafond tablette), qui ne
-    // concerne que le lecteur SANS volet. Le projet démo (tuile « Reprendre ») est
+    // concerne que le lecteur SANS volet. Le projet démo (sa carte sur l'accueil) est
     // maintenant lié à « Bonnet Torsade », qui A un diagramme — on passe donc par
-    // « Écharpe Nuage » (bibliothèque), seedée sans diagramme, plutôt que par la tuile.
+    // « Écharpe Nuage » (bibliothèque), seedée sans diagramme, plutôt que par sa carte.
     await page.goto('/library')
     await page.getByRole('button', { name: 'Écharpe Nuage' }).click()
     await expect(page).toHaveURL(/\/pattern\/\d+/)
@@ -162,11 +162,14 @@ test.describe('petit téléphone', () => {
     // ne soit montée (goto() recharge complètement, ce n'est pas une navigation SPA), auquel
     // cas scrollWidth === clientWidth trivialement et l'assertion ne mesure rien — même
     // piège que window.innerWidth signalé en tête de fichier, sous une autre forme.
-    const ANCRES = { '/': '.bento', '/stash': 'main.screen' }
+    // `.greet` existe sur les deux accueils (allégé et complet) ; il se rend avant la réponse
+    // de la base, d'où l'attente de la fin du chargement juste après.
+    const ANCRES = { '/': '.greet', '/stash': 'main.screen' }
 
     for (const route of ['/', '/stash']) {
       await page.goto(route)
       await expect(page.locator(ANCRES[route])).toBeVisible()
+      if (route === '/') await expect(page.locator('[data-test="home-loading"]')).toHaveCount(0)
       const { contenu, fenetre } = await page.evaluate(() => ({
         // document.documentElement.clientWidth, pas window.innerWidth : sous émulation
         // mobile, innerWidth s'aligne silencieusement sur le contenu qui déborde et rend
@@ -186,13 +189,35 @@ test.describe('petit téléphone', () => {
   // déjà indépendamment de .bento, ce qui rendrait un test plein écran non discriminant.
   // On isole donc le conteneur lui-même via addStyleTag, technique déjà utilisée dans
   // stash-recap-overflow.spec.js pour forcer une tension réelle sans dépendre du viewport.
-  test('.bento ne déborde pas même si son conteneur devient plus étroit que 150px', async ({ page }) => {
+  // Même test, second volet : la rangée « Créer un projet / Importer un PDF » de l'accueil
+  // complet passe à la ligne sans déborder à 320 px (spec accueil-import-pdf, 26/09).
+  test('.bento ne déborde pas même si son conteneur devient plus étroit que 150px, ni la rangée Créer / Importer à 320px', async ({ page }) => {
     await completeOnboarding(page)
+    // Un projet à soi : sur une base d'exemples seulement, l'accueil est allégé (ni tuiles
+    // ni rangée de deux boutons).
+    await page.locator('[data-test="home-create"]').click()
+    await page.locator('#name').fill('Test accueil complet')
+    await page.getByRole('button', { name: 'Enregistrer' }).click()
+    await expect(page).toHaveURL(/\/project\/\d+/)
+    await page.goto('/')
     await expect(page.locator('.bento')).toBeVisible()
     await page.addStyleTag({ content: '.bento { width: 100px; }' })
 
     const overflow = await page.locator('.bento').evaluate((el) => el.scrollWidth - el.clientWidth)
     expect(overflow).toBeLessThanOrEqual(0)
+
+    await page.setViewportSize({ width: 320, height: 640 })
+    const rangee = page.locator('.create-row')
+    await expect(rangee).toBeVisible()
+    const { deborde, depassements } = await rangee.evaluate((el) => {
+      const droite = el.getBoundingClientRect().right
+      return {
+        deborde: el.scrollWidth - el.clientWidth,
+        depassements: [...el.children].map((c) => c.getBoundingClientRect().right - droite),
+      }
+    })
+    expect(deborde).toBeLessThanOrEqual(0)
+    for (const d of depassements) expect(d).toBeLessThanOrEqual(0.5)
   })
 
   // Preuve dédiée de la correction du plancher de .pgrid (revue finale, point 1) : à 360px de

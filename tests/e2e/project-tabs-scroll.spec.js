@@ -8,14 +8,13 @@
 // Piège de mesure de ce chantier : `not.toBeVisible()` ignore l'opacité/le masque → on lit
 // le style calculé (`getComputedStyle().maskImage`), pas la visibilité Playwright.
 import { test, expect } from '@playwright/test'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome } from './helpers'
 
 test('un indice de dégradé signale que les onglets défilent, seulement quand ça déborde vraiment', async ({
   page,
 }) => {
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  await openDemoProjectFromHome(page)
 
   // --- écran étroit (360px) : la bande de 4 onglets déborde réellement (mesuré : 13px) ---
   //

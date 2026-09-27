@@ -8,6 +8,8 @@ import i18n from '@/i18n'
 import BadgeComposer from '@/components/BadgeComposer.vue'
 import { useProjectsStore } from '@/stores/projects'
 import { useCropperStore } from '@/stores/cropper'
+import { useSnackbarStore } from '@/stores/snackbar'
+import SnackBar from '@/components/SnackBar.vue'
 import { LANGUAGES } from '@/constants/languages'
 import ColorPickerDialog from '@/components/ColorPickerDialog.vue'
 import { useSettingsStore } from '@/stores/settings'
@@ -892,24 +894,10 @@ describe('BadgeComposer', () => {
   // reconstruction de `computeBadgeGeometry` est vrai QUELLE QUE SOIT la valeur produite par
   // `currentTemplate` — un test qui ne peut jamais être rouge n'est pas un test.
   //
-  // Le SEUL effet observable de `currentTemplate` ailleurs dans ce composant est le
-  // NUMÉRATEUR de `previewFixStyle` (position du bouton « Modifier », `tpl.photoSlot`) — et
-  // seul le gabarit Horizontal (`orientation: 'landscape'`) y est sensible : son `photoSlot.y`
-  // dépend de la hauteur totale du canevas (`(canvasH - slot.h) / 2`, badge-render.js:480).
-  // Vertical/Deux images ancrent leur photo à une position FIXE (`{x: MARGIN, y: MARGIN}`),
-  // indépendante de `statLineCount`/`freeTextLineCount` : AUCUNE conséquence observable en DOM
-  // n'existe pour ces deux gabarits, quoi que fasse `currentTemplate`.
-  //
-  // Preuve DOM indépendante possible : UNIQUEMENT pour Horizontal (clic sur la prévisu, cf.
-  // test dédié plus bas — vérifié par la même expérience de réintroduction du bug : bouton
-  // absent avec le bug, présent une fois corrigé). Pour Vertical/minimal/double, faute de
-  // canal observable, ces tests lisent `wrapper.vm.currentTemplate` (accessible malgré
-  // l'absence de `defineExpose` sur ce composant `<script setup>`, vérifié empiriquement) —
-  // SANS précédent ailleurs dans ce fichier, où tout le reste passe par le DOM. Si un futur
-  // lecteur se demande pourquoi CES tests-ci dérogent à cette convention : ce n'est pas un
-  // raccourci de confort, c'est qu'aucune alternative DOM n'existe pour ces trois gabarits
-  // (revue du 19/09, tranchée après vérification empirique ci-dessus — ne pas « corriger » en
-  // repassant par le canevas DOM, ça ferait REGRESSER ces tests vers une preuve vide de sens).
+  // Le bouton « Modifier » suit désormais la géométrie remontée par `renderBadge` (`onGeometry`),
+  // `currentTemplate` n'y sert plus que de repli avant le premier rendu : aucun canal DOM ne
+  // l'observe, d'où la lecture de `wrapper.vm.currentTemplate` (sans `defineExpose`, vérifié
+  // empiriquement), exception assumée à la convention DOM de ce fichier.
   describe('freeTextLineCount : `currentTemplate` réserve le bloc "texte libre" comme le vrai rendu (Task 6)', () => {
     it('Vertical + texte libre : `currentTemplate` réserve une ligne à part, `statLineCount` exclut le texte libre', async () => {
       stubCanvas()
@@ -964,22 +952,8 @@ describe('BadgeComposer', () => {
       expect(wrapper.vm.currentTemplate).toEqual(attendu)
     })
 
-    // Preuve DOM INDÉPENDANTE (sans lire `currentTemplate`) — possible UNIQUEMENT pour
-    // Horizontal (cf. commentaire de tête) : `previewFixStyle` positionne le bouton « Modifier »
-    // au centre de `currentTemplate.photoSlot`, rapporté aux dimensions RÉELLES du canevas
-    // (`onPreviewClick`) — si `currentTemplate` prédit une position DIFFÉRENTE de celle où la
-    // photo est VRAIMENT dessinée, un clic sur le VRAI centre de la photo peut retomber HORS de
-    // la zone prédite et le bouton ne pas apparaître. Vérifié par expérience (bug réintroduit
-    // temporairement : ce test échoue, bouton absent).
-    // Discriminant : la TAILLE du slot (`h`/`w`), plus sa POSITION (`x`/`y`), depuis la Tâche 1
-    // (« badge-horizontal-photo-hauteur », 20/09, retour Julien) — la photo Horizontal occupe
-    // désormais TOUJOURS toute la hauteur disponible entre les deux marges (`photoSlot.y` vaut
-    // systématiquement `MARGIN`, `photoSlot.x` aussi), donc les deux géométries reconstruites
-    // ci-dessous partagent la MÊME origine (coin haut-gauche) quel que soit leur contenu ; seule
-    // leur taille diffère encore. Le plus grand slot des deux contient alors TOUJOURS le plus
-    // petit (même origine) : le point qui discrimine est celui qui tombe dans le plus grand MAIS
-    // hors du plus petit (son coin bas-droit, à 2 px près) — jamais un point choisi par avance
-    // dans `correcte`, dont on ne sait plus a priori s'il est le plus grand des deux.
+    // Preuve DOM : le bouton « Modifier » suit la photo dessinée. Les deux géométries partagent
+    // la même origine (`MARGIN`) : le point discriminant est le coin bas-droit du plus grand slot.
     it('Horizontal + texte libre : le bouton « Modifier » suit la VRAIE position de la photo (preuve DOM indépendante de `wrapper.vm`)', async () => {
       stubCanvas()
       const project = { id: 76, name: 'X', photos: ['data:image/jpeg;base64,COVER'] }
@@ -995,10 +969,8 @@ describe('BadgeComposer', () => {
 
       const statKeys = ['totalTime', 'startedOn', 'bestStreak', 'sessionsCount']
       const n = buildRawStatLines(statKeys, { stats, t: i18n.global.t, locale: 'fr', project, yarnUsage: [] }).length
-      // Géométrie CORRECTE (ce que `currentTemplate` doit produire après cette tâche) et
-      // géométrie D'AVANT la Task 6 (`customText` mélangé aux stats, `freeTextLineCount`
-      // jamais transmis) — toutes deux reconstruites via le VRAI `computeBadgeGeometry`, pour
-      // retrouver la VRAIE taille du slot photo prédite dans chacun des deux cas.
+      // Géométrie réellement dessinée (sans contexte 2D en jsdom) et géométrie d'avant la Task 6
+      // (`customText` compté comme une stat).
       const correcte = computeBadgeGeometry('horizontal', 1, n, 1, false, 0, 1, n) // pairCount = n, cf. Task 9
       const avantTask6 = computeBadgeGeometry('horizontal', 1, n + 1, 1, false) // +1 : customText compté comme une stat
       // Sanity : le bug a un effet réel sur la TAILLE du slot (`h`, donc `w` aussi ici — ratio 1
@@ -1038,13 +1010,10 @@ describe('BadgeComposer', () => {
 
       await canvas.trigger('click', { clientX: clickX, clientY: clickY })
       if (correcteEstPlusGrand) {
-        // Ce point n'est DANS un slot que si `currentTemplate` utilise bien la géométrie
-        // CORRECTE (la plus grande ici) : preuve suffisante à elle seule.
+        // Ce point n'est dans un slot que si la zone suit la géométrie correcte (la plus grande ici).
         expect(wrapper.find('[data-test="badge-preview-fix"]').exists()).toBe(true)
       } else {
-        // Inversement : ce point tombe dans le slot D'AVANT la Task 6 (le plus grand ici) mais
-        // hors du VRAI slot (le plus petit) — le bouton ne doit PAS apparaître si `currentTemplate`
-        // reflète bien la géométrie correcte.
+        // Inversement : ce point est hors du vrai slot (le plus petit ici), pas de bouton.
         expect(wrapper.find('[data-test="badge-preview-fix"]').exists()).toBe(false)
         // Deuxième clic, au centre du VRAI slot cette fois : preuve positive que le bouton
         // apparaît bien quand on retombe dedans (le clic précédent n'a pas laissé
@@ -1054,6 +1023,57 @@ describe('BadgeComposer', () => {
         await canvas.trigger('click', { clientX: cx, clientY: cy })
         expect(wrapper.find('[data-test="badge-preview-fix"]').exists()).toBe(true)
       }
+    })
+
+    // Protège la zone cliquable de la prévisu : elle suit la photo réellement dessinée (texte mesuré), pas la prédiction de `currentTemplate`.
+    it('Horizontal + calendrier + texte long mesuré : « Modifier » suit la photo dessinée, pas la prédiction', async () => {
+      const calls = []
+      const ctx = {
+        fillStyle: '', font: '', textBaseline: '', strokeStyle: '', lineWidth: 0, globalAlpha: 1,
+        measureText: (s) => ({ width: String(s).length * 20 }),
+        createLinearGradient: () => ({ addColorStop() {} }),
+        fillRect() {}, strokeRect() {}, lineTo() {}, quadraticCurveTo() {}, translate() {}, scale() {},
+        fillText(...a) { calls.push(['fillText', ...a]) },
+        drawImage(...a) { calls.push(['drawImage', ...a]) },
+        save() {}, restore() {}, beginPath() {}, moveTo() {}, arcTo() {}, closePath() {}, clip() {}, stroke() {},
+      }
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx)
+      const gridStats = {
+        ...stats,
+        grid: { columns: [{ monday: '2026-01-05', monthStart: true, cells: [{ day: 'd0', level: 1, future: false }] }] },
+      }
+      const project = { id: 77, name: 'X', photos: ['data:image/jpeg;base64,COVER'] }
+      const { wrapper } = mountComposer(project, { stats: gridStats })
+      await flushPromises()
+      await wrapper.findAll('.bdg__tpl')[1].trigger('click') // TEMPLATE_KEYS[1] === 'horizontal'
+      await wrapper.find('[data-test="badge-tab-infos"]').trigger('click')
+      await wrapper.find('[data-test="badge-text"]').setValue('Tricoté pendant les longues soirées de janvier au coin du feu')
+      await flushPromises()
+      calls.length = 0
+      await waitForPreview()
+      await flushPromises()
+
+      // Garde : le rendu a bien été mené jusqu'au bout (`updatePreview` avale les exceptions).
+      expect(calls.some((c) => c[0] === 'fillText' && c[1] === 'rowtine.app')).toBe(true)
+      const drawn = calls.filter((c) => c[0] === 'drawImage').at(-1).slice(-4)
+      const real = { x: drawn[0], y: drawn[1], w: drawn[2], h: drawn[3] }
+      const predicted = wrapper.vm.currentTemplate.photoSlot
+      const px = predicted.x + predicted.w - 2
+      const py = predicted.y + predicted.h - 2
+      expect(px > real.x + real.w || py > real.y + real.h).toBe(true)
+
+      const canvas = wrapper.find('.bdg__preview')
+      const realW = canvas.element.width
+      const realH = canvas.element.height
+      canvas.element.getBoundingClientRect = () => ({ left: 0, top: 0, width: realW, height: realH })
+      await canvas.trigger('click', { clientX: px, clientY: py })
+      expect(wrapper.find('[data-test="badge-preview-fix"]').exists()).toBe(false)
+
+      await canvas.trigger('click', { clientX: real.x + real.w / 2, clientY: real.y + real.h / 2 })
+      const fix = wrapper.find('[data-test="badge-preview-fix"]')
+      expect(fix.exists()).toBe(true)
+      expect(parseFloat(fix.element.style.left)).toBeCloseTo(((real.x + real.w / 2) / realW) * 100, 3)
+      expect(parseFloat(fix.element.style.top)).toBeCloseTo(((real.y + real.h / 2) / realH) * 100, 3)
     })
 
     it('Vertical SANS texte libre : `freeTextLineCount` reste à 0 (pas de réservation superflue)', async () => {
@@ -1221,6 +1241,46 @@ describe('BadgeComposer', () => {
     expect(renderBadgeSpy.mock.calls.at(-1)[1].photoImg.src).toBe('data:image/jpeg;base64,DEVICE-CROPPED')
   })
 
+  // Protège : un message de snackbar émis sous le composeur (plein écran opaque) s'affiche DANS lui, une seule fois.
+  it('snackbar : un échec de pickImage() s\'affiche dans le composeur, la snackbar globale reprend à sa fermeture', async () => {
+    stubCanvas()
+    const project = { id: 261, name: 'X', photos: ['data:image/jpeg;base64,COVER'] }
+    const { wrapper, pinia } = mountComposer(project)
+    const globalBar = mount(SnackBar, { global: { plugins: [i18n, pinia] } })
+    wrappers.push(globalBar)
+    pickImage.mockImplementationOnce(async () => {
+      useSnackbarStore().show(tk('photo.importFailed'))
+      return null
+    })
+
+    await openPhotoPicker(wrapper)
+    await wrapper.find('[data-test="photo-picker-device"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="status"]').text()).toBe(tk('photo.importFailed'))
+    expect(globalBar.find('[role="status"]').exists()).toBe(false)
+
+    wrappers.splice(wrappers.indexOf(wrapper), 1)
+    wrapper.unmount()
+    await flushPromises()
+    expect(globalBar.find('[role="status"]').text()).toBe(tk('photo.importFailed'))
+  })
+
+  // Protège : l'action d'un message de snackbar reste utilisable depuis le composeur.
+  it("snackbar : l'action du message est cliquable dans le composeur", async () => {
+    stubCanvas()
+    const { wrapper } = mountComposer({ id: 262, name: 'X', photos: [] })
+    const onAction = vi.fn()
+    useSnackbarStore().show(tk('photo.importFailed'), { actionLabel: tk('common.undo'), onAction })
+    await flushPromises()
+
+    const action = wrapper.find('[role="status"] button')
+    expect(action.text()).toBe(tk('common.undo'))
+    await action.trigger('click')
+    expect(onAction).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('[role="status"]').exists()).toBe(false)
+  })
+
   it('gabarit Deux images : chaque encart cible son propre emplacement', async () => {
     stubCanvas()
     const project = {
@@ -1300,9 +1360,8 @@ describe('BadgeComposer', () => {
 
   // `computeBadgeGeometry` dimensionne maintenant le canevas des gabarits à photo à partir du
   // nombre de lignes de stats (cf. badge-render.js) : `currentTemplate` DOIT recevoir le même
-  // nombre que celui réellement transmis à `renderBadge`, sinon `previewFixStyle` (qui se
-  // repère en pourcentage de `currentTemplate.value.canvas`) décale le bouton « Modifier » par
-  // rapport à la photo RÉELLEMENT dessinée (bug découvert en revue du correctif du canevas).
+  // nombre que celui réellement transmis à `renderBadge` ; le bouton « Modifier » se repère,
+  // lui, en pourcentage du canevas RÉEL.
   it('bouton « Modifier » : positionné selon la hauteur RÉELLE du canevas dessiné, pas un défaut à 0 ligne de stats', async () => {
     stubCanvas()
     const project = { id: 30, name: 'X', photos: ['data:image/jpeg;base64,COVER'] } // pas de technique : 4 stats par défaut (yarns décoché, yarnUsage vide)

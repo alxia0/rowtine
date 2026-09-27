@@ -70,7 +70,12 @@ Opening the app, you'll find:
   a date has been entered. It fills in on its own when you mark the
   project Finished (see point 2), and never appears on an Abandoned project.
 - Quick access to the **tools** (stitch calculator, free counter,
-  needle/hook helper) and the **+ Create a project** button.
+  needle/hook helper), the **+ Create a project** button and the **Import a
+  PDF** button, which opens your **Pattern library** straight on adding a pattern.
+- At the very start, while the app only holds the examples, the home screen
+  keeps to the essentials: an **Import a PDF pattern** card takes the place of
+  the Resume tile and the summary. They come back as soon as you create your
+  first project or import your first pattern.
 - Finally, **the menu at the top right** takes you at any time to your yarn
   stash, your pattern library, the statistics, **your sessions**, the expenses,
   this guide, the settings and the About screen. It is on every screen:

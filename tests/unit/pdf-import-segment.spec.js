@@ -295,6 +295,9 @@ describe('segmentSections', () => {
     expect(isTitleLine(L('3.Stb in dieselbe Masche', { bold: true }), 10)).toBe(true)
     expect(isTitleLine(L('1. Zugabe', { bold: true }), 10)).toBe(true)
   })
+  it('une ligne OBLIQUE (badge de couverture pivoté) n’est jamais promue en titre de section, même bold/majuscule/grande police', () => {
+    expect(isTitleLine(L('COULEURSS', { bold: true, size: 30, oblique: true }), 10)).toBe(false)
+  })
   it('non-régression : « 2 rows below » (définition d’abréviation « Trfp », même PDF réel) n’est PAS pris pour un début de rang', () => {
     // Le même PDF réel (lush-life-crochet-blanket-en-97699620) porte, dans la définition de
     // l'abréviation « Trfp », la phrase « … around post of next dc 2 rows below at front of
@@ -483,6 +486,65 @@ describe('segmentSections', () => {
       '36. 84 88 92 96 100',
       'Taille 36 38 40 42',
     ])
+  })
+  it('« Taille des aiguilles & tension » suivi de deux phrases sans mesure n’est plus routé vers Échantillon', () => {
+    // Protège le discriminant central : sans mesure chiffrée nulle part dans la section,
+    // un titre qui ne fait que MENTIONNER la tension redescend en rubrique générique.
+    const secs = segmentSections([[
+      L('Taille des aiguilles & tension', { bold: true, size: 13 }),
+      L('Vérifiez toujours votre tension avant de commencer votre ouvrage.'),
+      L('Changez d’aiguilles si nécessaire pour obtenir le bon tombé souhaité.'),
+    ]])
+    expect(secs[0].ref).not.toBe('echantillon')
+  })
+  it('« Echantillon: » suivi d’une vraie mesure de jauge reste inchangé (non-régression)', () => {
+    // Non-régression : une mesure chiffrée garde la section en Échantillon.
+    const secs = segmentSections([[
+      L('Echantillon:', { bold: true, size: 13 }),
+      L('28 m x 39 r = 10 cm au point mousse.'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
+  })
+  it('« Tension » nu suivi d’une mesure en pouces reste inchangé (non-régression)', () => {
+    // Non-régression : une mesure en pouces (guillemet droit) compte aussi comme preuve.
+    const secs = segmentSections([[
+      L('Tension', { bold: true, size: 13 }),
+      L('22 sts = 4" in stockinette stitch.'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
+  })
+  it('« Note sur la tension » + mesure en pouces français « po » reste inchangé (non-régression)', () => {
+    // Non-régression : l'unité française « po » (pouce) compte aussi comme preuve.
+    const secs = segmentSections([[
+      L('Note sur la tension', { bold: true, size: 13 }),
+      L('22 mailles = 4 po au point jersey.'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
+  })
+  it('« Note sur la tension » + jauge sans unité de longueur (« 22 m et 30 rgs = 10 × 10 ») reste inchangé (non-régression)', () => {
+    // Non-régression : un compte de mailles suivi d'un signe égal compte comme preuve,
+    // même sans unité déclarée après (jauge en mm ou en carré nu).
+    const secs = segmentSections([[
+      L('Note sur la tension', { bold: true, size: 13 }),
+      L('22 m et 30 rgs = 10 × 10'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
+  })
+  it('« Note sur la tension » + jauge en carré collé sans signe égal (« 10x10: 22 sts ») reste inchangé (non-régression)', () => {
+    // Non-régression : le carré chiffre×chiffre compte comme preuve à lui seul.
+    const secs = segmentSections([[
+      L('Note sur la tension', { bold: true, size: 13 }),
+      L('10x10: 22 sts au point jersey'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
+  })
+  it('« Note sur la tension » + carré nu sans mailles ni signe égal (« 10 x 10 ») reste inchangé (non-régression)', () => {
+    // Non-régression : le carré chiffre×chiffre seul, sans autre contexte, suffit.
+    const secs = segmentSections([[
+      L('Note sur la tension', { bold: true, size: 13 }),
+      L('10 x 10'),
+    ]])
+    expect(secs[0].ref).toBe('echantillon')
   })
   it('ne referme PAS un bloc matériel normal (quantités, item numéroté KV, tableau de tailles) — non-régression', () => {
     // Une ligne de quantité (« 2 pelotes de laine X »), un item de matériel numéroté
@@ -919,15 +981,27 @@ describe('segmentSections', () => {
       expect(secs[0].ref).toBe('echantillon')
     })
     it('« Stickfasthet – stickad enligt diagram » (chunky-bark-scarf-sv) : clé de 12 caractères (> 8), pas un glossaire → ## Échantillon conservé', () => {
-      const secs = segmentSections([[L('Stickfasthet – stickad enligt diagram', { bold: true })]])
+      // Ligne de jauge ajoutée : le garde glossaire testé ici porte sur le titre seul.
+      const secs = segmentSections([[
+        L('Stickfasthet – stickad enligt diagram', { bold: true }),
+        L('20 m och 28 varv = 10 x 10 cm'),
+      ]])
       expect(secs[0].ref).toBe('echantillon')
     })
     it('« Tensione della maglia a coste: 1 dir, 1 » (po-neck-warmer-it) : clé longue et espacée, pas un glossaire → ## Échantillon conservé', () => {
-      const secs = segmentSections([[L('Tensione della maglia a coste: 1 dir, 1', { bold: true })]])
+      // Ligne de jauge ajoutée, même garde que ci-dessus.
+      const secs = segmentSections([[
+        L('Tensione della maglia a coste: 1 dir, 1', { bold: true }),
+        L('20 m e 28 ferri = 10 x 10 cm'),
+      ]])
       expect(secs[0].ref).toBe('echantillon')
     })
     it('« Obwód w klatce piersiowej od-do: Próbka » (sweter-vela-air-pl) : clé longue et espacée, pas un glossaire → ## Échantillon conservé', () => {
-      const secs = segmentSections([[L('Obwód w klatce piersiowej od-do: Próbka', { bold: true })]])
+      // Ligne de jauge ajoutée, même garde que ci-dessus.
+      const secs = segmentSections([[
+        L('Obwód w klatce piersiowej od-do: Próbka', { bold: true }),
+        L('20 oczek x 28 rzędów = 10 cm'),
+      ]])
       expect(secs[0].ref).toBe('echantillon')
     })
     it('« US 9 - 5.5mm NEEDLES » (shawl-nebula-ja) : clé « US 9 » espacée, pas un glossaire → ## Aiguilles conservé', () => {
@@ -1114,6 +1188,70 @@ describe('detectTitle', () => {
       { text: '— • —', size: 18, bold: false, y: 786 },
     ]]
     expect(detectTitle(pages)).toBe('Petit Bonnet')
+  })
+  it('un libellé générique de couverture (« Patron », « Opskrift », « Oppskrift », « Patroon », « Pattern »), seul sur sa ligne en plus grande police, ne gagne jamais le titre face au vrai titre du document qui suit (Classic Sweater Soft Double)', () => {
+    for (const label of ['Patron', 'Opskrift', 'Oppskrift', 'Patroon', 'Pattern']) {
+      const pages = [[
+        { text: label, size: 30, bold: true, y: 800 },
+        { text: 'Classic Sweater', size: 20, bold: false, y: 760 },
+      ]]
+      expect(detectTitle(pages)).toBe('Classic Sweater')
+    }
+  })
+  it('un mot proche mais hors liste (« Monster », sans tréma — ce n’est pas « Mönster ») reste un vrai titre composé, jamais sauté', () => {
+    const pages = [[
+      { text: 'Monster', size: 22, bold: true, y: 800 },
+      { text: 'Fergus', size: 20, bold: false, y: 780 },
+    ]]
+    expect(detectTitle(pages)).toBe('Monster Fergus')
+  })
+  it('un libellé générique en sous-titre (juste après un vrai titre) ne se recolle pas au titre', () => {
+    const pages = [[
+      { text: 'Classic Sweater', size: 22, bold: true, y: 800 },
+      { text: 'Patron', size: 20, bold: false, y: 780 },
+    ]]
+    expect(detectTitle(pages)).toBe('Classic Sweater')
+  })
+  it('un libellé générique seul, sans aucun autre candidat, reste le titre rendu (jamais de titre vide)', () => {
+    const pages = [[{ text: 'Patron', size: 30, bold: true, y: 800 }]]
+    expect(detectTitle(pages)).toBe('Patron')
+  })
+  it('une ligne OBLIQUE (badge de couverture pivoté), même en plus grande police que le vrai titre, ne gagne jamais le titre du document', () => {
+    const pages = [[
+      { text: 'Nombreuses couleurss', size: 35, bold: true, y: 800, oblique: true },
+      { text: 'Classic Sweater', size: 20, bold: false, y: 700 },
+    ]]
+    expect(detectTitle(pages)).toBe('Classic Sweater')
+  })
+  it('une ligne OBLIQUE juste après le vrai titre ne s’y agrafe jamais comme sous-titre', () => {
+    const pages = [[
+      { text: 'Classic Sweater', size: 22, bold: true, y: 800 },
+      { text: 'couleurss', size: 20, bold: false, y: 780, oblique: true },
+    ]]
+    expect(detectTitle(pages)).toBe('Classic Sweater')
+  })
+  it('un tampon de marque plus grand ailleurs sur la page ne doit pas gagner face au nom du modèle qui suit directement le libellé générique (PDF réels moss-stitch-basket-round-fr, cardigan-cable-fr, stripe-raglan-sweater-…-fr)', () => {
+    const pages = [[
+      { text: 'Patron', size: 30, bold: true, y: 800 },
+      { text: 'Moss Stitch Panier', size: 18, bold: false, y: 780 },
+      { text: 'Go handmade', size: 25, bold: false, y: 500 },
+    ]]
+    expect(detectTitle(pages)).toBe('Moss Stitch Panier')
+  })
+  it('un bandeau d’éditeur qui commence par un tiret ou une puce ne s’agrafe jamais comme sous-titre (hooded-jacket, stripe-raglan : bandeau de collection, pas un sous-titre)', () => {
+    const pages = [[
+      { text: 'Gilet à capuche', size: 22, bold: true, y: 800 },
+      { text: "- Litt le One's & Tweens", size: 20, bold: false, y: 780 },
+    ]]
+    expect(detectTitle(pages)).toBe('Gilet à capuche')
+  })
+  it('même bandeau d’éditeur immédiatement après un libellé générique de couverture : le repêchage positionnel le refuse aussi, le vrai titre ailleurs sur la page reste gagnant', () => {
+    const pages = [[
+      { text: 'Patron', size: 30, bold: true, y: 800 },
+      { text: "-- Litt le One's & Tweens", size: 18, bold: false, y: 780 },
+      { text: 'Stripe Raglan Sweater', size: 20, bold: false, y: 500 },
+    ]]
+    expect(detectTitle(pages)).toBe('Stripe Raglan Sweater')
   })
 })
 
@@ -1547,6 +1685,113 @@ describe('kindForTitle — bugs corpus DROPS', () => {
       const sec = secs.find((s) => s.title === 'TAILLE M')
       expect(sec).toBeTruthy()
       expect(sec.ref).toBe('mesures')
+    })
+    // Protège la fusion d'une variante de taille sans rang détectable dans la section de travail qui précède.
+    it('« Tailles 1-2 ans: » (répartition de travail sans rang détectable) rejoint la section de travail « DIAGRAMME » qui précède', () => {
+      const pages = [[
+        L('DIAGRAMME', { bold: true }),
+        L('Suivre la grille ci-dessous pour le motif jacquard.'),
+        L('Tailles 1-2 ans:', { bold: true }),
+        L('dans la section 1 + 4 + 5 tricoter 2 aig Fond,'),
+      ]]
+      const secs = segmentSections(pages)
+      expect(kindForTitle('Tailles 1-2 ans:')).toBe('mesures') // prémisse : la collision existe bien au niveau du titre seul
+      expect(secs.map((s) => s.title)).toEqual(['DIAGRAMME'])
+      expect(secs[0].lines.map((l) => l.text)).toEqual([
+        'Suivre la grille ci-dessous pour le motif jacquard.',
+        'Tailles 1-2 ans:',
+        'dans la section 1 + 4 + 5 tricoter 2 aig Fond,',
+      ])
+    })
+    // Protège deux variantes de taille sœurs consécutives : la seconde ne doit jamais être fondue dans la première.
+    it('deux variantes de taille SŒURS (« Tailles 2 ans et 6 ans » / « Tailles 4 ans et (8 ans) ») ne se fondent pas l’une dans l’autre : la seconde devient section de travail du même kind', () => {
+      const pages = [[
+        L('Tailles 2 ans et 6 ans', { bold: true }),
+        L('Rang 1 : monter 48 (54) mailles.'),
+        L('Tailles 4 ans et (8 ans)', { bold: true }),
+        L('dans la section 1 + 4 + 5 tricoter 2 aig Fond,'),
+      ]]
+      const secs = segmentSections(pages)
+      expect(secs.map((s) => s.title)).toEqual(['Tailles 2 ans et 6 ans', 'Tailles 4 ans et (8 ans)'])
+      const [first, second] = secs
+      expect(first.ref).not.toBe('mesures')
+      expect(second.ref).not.toBe('mesures')
+      expect(second.kind).toBe(first.kind)
+      expect(first.lines.map((l) => l.text)).toEqual(['Tailles 2 ans et 6 ans', 'Rang 1 : monter 48 (54) mailles.'])
+      expect(second.lines.map((l) => l.text)).toEqual(['Tailles 4 ans et (8 ans)', 'dans la section 1 + 4 + 5 tricoter 2 aig Fond,'])
+    })
+    // Protège la reconnaissance des sœurs quand le titre lui-même porte une notation papier, jamais lue comme un vecteur de contenu.
+    it('deux variantes de taille SŒURS dont le titre porte une notation papier (« Tailles 4 (8) ans ») ne se fondent pas l’une dans l’autre', () => {
+      const pages = [[
+        L('Tailles 2 ans et 6 ans', { bold: true }),
+        L('Rang 1 : monter 48 (54) mailles.'),
+        L('Tailles 4 (8) ans', { bold: true }),
+        L('dans la section 1 + 4 + 5 tricoter 2 aig Fond,'),
+      ]]
+      const secs = segmentSections(pages)
+      expect(secs.map((s) => s.title)).toEqual(['Tailles 2 ans et 6 ans', 'Tailles 4 (8) ans'])
+      const [first, second] = secs
+      expect(second.ref).not.toBe('mesures')
+      expect(second.kind).toBe(first.kind)
+    })
+    // Non-régression : une vraie rangée de tableau protège la section même si le titre matche le motif de variante.
+    it('non-régression : « TAILLE M » (titre qui matche le motif de variante) précédée d’une section de travail mais porteuse d’une VRAIE rangée de tableau reste une section mesures intacte', () => {
+      const pages = [[
+        L('DIAGRAMME', { bold: true }),
+        L('Suivre la grille ci-dessous pour le motif jacquard.'),
+        L('TAILLE M', { bold: true }),
+        L('Tour de poitrine 90 94 98 cm'),
+      ]]
+      const secs = segmentSections(pages)
+      const sec = secs.find((s) => s.title === 'TAILLE M')
+      expect(sec).toBeTruthy()
+      expect(sec.ref).toBe('mesures')
+      expect(sec.lines.map((l) => l.text)).toEqual(['Tour de poitrine 90 94 98 cm'])
+    })
+    // Non-régression : un titre nu sans code de taille accolé ne matche jamais le motif de variante, quel que soit son contenu.
+    it('non-régression : « TAILLE » nue (sans code de taille accolé), après une section de travail, reste une section mesures intacte', () => {
+      const pages = [[
+        L('DIAGRAMME', { bold: true }),
+        L('Suivre la grille ci-dessous pour le motif jacquard.'),
+        L('TAILLE', { bold: true }),
+        L('choisir la taille selon le tour de poitrine mesuré.'),
+      ]]
+      const secs = segmentSections(pages)
+      const sec = secs.find((s) => s.title === 'TAILLE')
+      expect(sec).toBeTruthy()
+      expect(sec.ref).toBe('mesures')
+      expect(sec.lines.map((l) => l.text)).toEqual(['choisir la taille selon le tour de poitrine mesuré.'])
+    })
+    // Protège une vraie section mesures à vecteurs parenthésés contre la fusion dans la section de travail précédente.
+    it('non-régression : « TAILLE XS (S) M (L) » avec de vraies mesures en vecteurs parenthésés (« 80 (88) 96 (104) cm ») reste une section mesures intacte', () => {
+      const pages = [[
+        L('CORPS', { bold: true }),
+        L('Monter 48 mailles et tricoter au point mousse.'),
+        L('TAILLE XS (S) M (L)', { bold: true }),
+        L('Tour de poitrine: 80 (88) 96 (104) cm'),
+        L('Longueur totale: 55 (57) 59 (61) cm'),
+      ]]
+      const secs = segmentSections(pages)
+      const sec = secs.find((s) => s.title === 'TAILLE XS (S) M (L)')
+      expect(sec).toBeTruthy()
+      expect(sec.ref).toBe('mesures')
+      expect(sec.lines.map((l) => l.text)).toEqual([
+        'Tour de poitrine: 80 (88) 96 (104) cm',
+        'Longueur totale: 55 (57) 59 (61) cm',
+      ])
+    })
+    // Un titre « Tailles: » nu suivi d'une vraie rangée de codes de taille reste une section mesures.
+    it('non-régression : « Tailles: » nu suivi de « XS (S) M (L) », après une section de travail, reste une section mesures intacte', () => {
+      const pages = [[
+        L('DIAGRAMME', { bold: true }),
+        L('Suivre la grille ci-dessous pour le motif jacquard.'),
+        L('Tailles:', { bold: true }),
+        L('XS (S) M (L)'),
+      ]]
+      const secs = segmentSections(pages)
+      const sec = secs.find((s) => s.ref === 'mesures')
+      expect(sec).toBeTruthy()
+      expect(sec.title.replace(/:$/, '')).toBe('Tailles')
     })
   })
 

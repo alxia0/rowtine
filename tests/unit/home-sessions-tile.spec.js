@@ -32,7 +32,7 @@ async function mountHome({ recent = [] } = {}) {
   sessionsStore.recentSessions.mockResolvedValue(recent)
   // Les autres lectures du onMounted : vides, pour isoler la tuile sessions.
   const projectsStore = useProjectsStore(pinia)
-  projectsStore.projects = []
+  projectsStore.projects = [{ id: 99, name: 'Projet à soi', status: 'done' }] // accueil complet : le bento n'existe qu'hors mode allégé
   projectsStore.loaded = true
   const yarnsStore = useYarnsStore(pinia)
   yarnsStore.yarns = []
@@ -41,6 +41,9 @@ async function mountHome({ recent = [] } = {}) {
   patternsStore.patterns = []
   patternsStore.loaded = true
   const w = mount(HomeView, { global: { plugins: [pinia, i18n], stubs } })
+  // Lecture réelle (Dexie) des exemples semés dans `onMounted` (accueil allégé) : un seul
+  // tick de `flushPromises` ne suffit plus à l'attendre, cf. `home-view.spec.js#waitReady`.
+  await vi.waitFor(() => expect(w.find('[data-test="home-loading"]').exists()).toBe(false), { timeout: 10000 })
   await flushPromises()
   return w
 }

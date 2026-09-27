@@ -12,6 +12,7 @@ import { useYarnsStore } from '@/stores/yarns'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useSettingsStore } from '@/stores/settings'
 import { planRavelryImport } from '@/utils/ravelry-import'
+import { roundSkeins } from '@/utils/yarn-usage'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -76,7 +77,9 @@ async function confirmImport() {
         yarnId,
         yarnLabel: [row.yarn.brand, row.yarn.model, row.yarn.colorName].filter(Boolean).join(' · '),
         kind: 'buy',
-        quantity: row.purchase.quantity,
+        // roundSkeins ici aussi (déjà fait par mapRow) : ce site d'écriture ne doit jamais
+        // dépendre d'un arrondi fait ailleurs pour rester correct.
+        quantity: roundSkeins(row.purchase.quantity),
         unitPrice: row.purchase.unitPrice,
         currency: settingsStore.currency,
         date: row.purchase.date,

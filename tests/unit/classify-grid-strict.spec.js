@@ -1,11 +1,11 @@
 // tests/unit/classify-grid-strict.spec.js
 import { describe, it, expect } from 'vitest'
-import { classifyGridStrict } from '@/utils/pdf-import/vector-regions'
+import { classifyGridStrict, classifyRasterGrid } from '@/utils/pdf-import/vector-regions'
 
 // Construit un RGBA plat blanc (R=255) puis peint des lignes sombres (R=0) aux positions données.
-function makeLattice(w, h, rowYs, colXs) {
+function makeLattice(w, h, rowYs, colXs, ink = 0) {
   const data = new Uint8ClampedArray(w * h * 4).fill(255)
-  const paint = (x, y) => { const j = (y * w + x) * 4; data[j] = 0; data[j + 1] = 0; data[j + 2] = 0 }
+  const paint = (x, y) => { const j = (y * w + x) * 4; data[j] = ink; data[j + 1] = ink; data[j + 2] = ink }
   for (const y of rowYs) for (let x = 0; x < w; x++) paint(x, y)
   for (const x of colXs) for (let y = 0; y < h; y++) paint(x, y)
   return data
@@ -44,5 +44,28 @@ describe('classifyGridStrict', () => {
     const w = 300, h = 300
     const data = makeLattice(w, h, evenly(14, h), evenly(3, w))
     expect(classifyGridStrict(data, w, bbox(w, h))).toBe(false)
+  })
+})
+
+// Image raster : un treillis à filets gris clair (Dorn p5, gris 222) reste un diagramme.
+describe('classifyRasterGrid', () => {
+  it('filets gris clair (222) : manqués par le seuil strict, reconnus en image raster', () => {
+    const w = 300, h = 300
+    const data = makeLattice(w, h, evenly(25, h), evenly(13, w), 222)
+    expect(classifyGridStrict(data, w, bbox(w, h))).toBe(false)
+    expect(classifyRasterGrid(data, w, bbox(w, h))).toBe(true)
+  })
+
+  it('fond sans blanc papier (photo de porte, tissu) : pas de second essai en gris clair', () => {
+    const w = 300, h = 300
+    const data = makeLattice(w, h, evenly(25, h), evenly(13, w), 222)
+    for (let i = 0; i < data.length; i += 4) if (data[i] === 255) { data[i] = 238; data[i + 1] = 238; data[i + 2] = 238 }
+    expect(classifyRasterGrid(data, w, bbox(w, h))).toBe(false)
+  })
+
+  it('garde tout verdict grille du seuil strict et rejette une image sans treillis', () => {
+    const w = 300, h = 300
+    expect(classifyRasterGrid(makeLattice(w, h, evenly(25, h), evenly(25, w)), w, bbox(w, h))).toBe(true)
+    expect(classifyRasterGrid(makeLattice(w, h, evenly(6, h), evenly(6, w), 222), w, bbox(w, h))).toBe(false)
   })
 })

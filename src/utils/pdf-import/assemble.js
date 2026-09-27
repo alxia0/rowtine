@@ -2,10 +2,10 @@
 // confidence, stats }. Aucune dépendance pdfjs/DOM → testable et exécutable sous Node.
 import { validateReader, isSingleSize } from '../reader'
 import { normalizeReaderForSave } from '../reader-edit'
-import { segmentSections, detectTitle, kindForTitle } from './segment'
-import { isLetterSpaced, despace, restoreWords } from './spaced-title'
+import { segmentSections, detectTitle, kindForTitle, GENERIC_COVER_TITLE_RE, sectionHasRowLine } from './segment'
+import { restoreSpacedTitle } from './spaced-title'
 import { detectSizeLabels, findSizeVectors, applySizeVectors } from './sizes'
-import { linesToSteps } from './steps'
+import { linesToSteps, isRemarkLabel } from './steps'
 import { extractReference, execAbbrLine } from './reference'
 import { computeConfidence } from './confidence'
 import { computeBlocking, countMultiColPages } from './blocking'
@@ -16,6 +16,12 @@ import { consumeEaseHintLine } from './ease'
 import { readColumnGlossary } from './glossary-columns'
 
 const ROW_OR_REP = (st) => !st.note && !st.chart
+// Une remarque étiquetée (isRemarkLabel) est une ligne classée avec SUCCÈS par le moteur :
+// pour la confiance, elle compte comme structurée (numérateur ET dénominateur), exactement
+// comme avant que REMARK_LABEL_RE ne la reclasse en note — sinon elle fait chuter le
+// stepScore alors qu'elle est correctement classée. Le flag `note: true` du step, lui,
+// reste inchangé : seul le calcul de confiance est concerné.
+const STRUCTURED_FOR_CONFIDENCE = (st) => ROW_OR_REP(st) || (st.note && isRemarkLabel(st.t))
 
 // Extrait l'auteur d'une ligne (« X | Hobbii Design » ou « Design : X ») et NETTOIE
 // le préfixe éditorial « Design: » quand la ligne « | Hobbii Design » le porte en tête
@@ -458,11 +464,12 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
   // comparaison littérale ne matche plus jamais (bug réel, mesuré sur Mia Cardigan : la
   // section fantôme et sa ligne de copyright survivaient malgré le titre déjà corrigé).
   // On normalise donc les deux côtés par le même recollage avant de comparer.
+  // Mêmes sources de recollage que detectTitle (fiche d'identité, lignes des deux premières pages).
+  const titleTexts = pages.slice(0, 2).flat().map((l) => l.text)
   const normalizeTitleForDedup = (t) => {
     const raw = String(t || '').trim()
     if (!raw) return ''
-    if (!isLetterSpaced(raw)) return raw.toLowerCase()
-    return (restoreWords(despace(raw), docMetaTitle) || raw).toLowerCase()
+    return restoreSpacedTitle(raw, { metaTitle: docMetaTitle, texts: titleTexts }).toLowerCase()
   }
   // Calculé une seule fois : detectTitle() est pure sur `pages` (jamais muté depuis),
   // réutilisé plus bas pour pattern.name (évite de rebalayer les 2 premières pages deux fois).
@@ -477,6 +484,42 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
     }
   }
 
+  // Section de couverture au libellé générique (« Patron », « Anleitung »…) : le bandeau
+  // de gabarit reprend le mot générique comme titre de SECTION (isTitleLine, indépendant
+  // de detectTitle ci-dessus) et son corps répète tout ou partie du VRAI titre du document
+  // déjà extrait, PDF réel : « Classic Sweater » (ligne 1) suivie de « Soft Bamboo
+  // "double" » (ligne 2, sous-titre glosé PAR detectTitle dans docTitle — jamais présent
+  // seul, ligne à ligne, dans le corps de la section). Le discriminant est « la ligne
+  // correspond, mot entier, à un fragment du titre du document » (comparaison sur des mots
+  // complets, jamais une coupure en milieu de mot — « Sweater » seul ne qualifie pas).
+  // Seules CES lignes-là sont retirées : le reste du corps (description du produit,
+  // composition, longueur au mètre…) n'est pas du bruit de mise en page et rejoindrait
+  // l'introduction avec la section (sec.intro, cf. consolidateIntro) au lieu de disparaître
+  // avec les lignes de titre. Si plus aucune ligne ne reste après ce retrait, la section
+  // part en bruit comme avant. Portée volontairement étroite pour ne jamais perdre de
+  // contenu : page 0 seulement, ligne courte (≥ 4 caractères, écarte un mot-outil isolé
+  // qui coïnciderait avec le titre par hasard), et jamais si la section porte le moindre
+  // rang détectable (sectionHasRowLine, même garde que la reclassification pelote→autre
+  // plus haut) : un vrai patron ne serait jamais évacué par coïncidence de titre.
+  const lineIsTitleLead = (lineNorm) =>
+    lineNorm.length >= 4 && (' ' + docTitleNorm + ' ').includes(' ' + lineNorm + ' ')
+  if (docTitleNorm) {
+    for (const sec of sections) {
+      if (!sec.ref && !sec.noise && !sec.intro && sec.page === 0 &&
+          GENERIC_COVER_TITLE_RE.test(sec.title.trim()) &&
+          !sectionHasRowLine(sec) &&
+          sec.lines.some((l) => lineIsTitleLead(normalizeTitleForDedup(l.text)))) {
+        const kept = sec.lines.filter((l) => !lineIsTitleLead(normalizeTitleForDedup(l.text)))
+        if (kept.length) {
+          sec.lines = kept
+          sec.intro = true
+        } else {
+          sec.noise = true
+        }
+      }
+    }
+  }
+
   const workAll = consolidateIntro(sections.filter((s) => !s.ref && !s.noise), notes, n)
   const work = mergeEmptyTitledSections(workAll, { n }).filter(
     (s) => s.presteps?.length || s.lines.length,
@@ -485,11 +528,11 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
   const stats = { sectionsTotal: 0, sectionsKnown: 0, totalLines: 0, structuredLines: 0, vectorsSeen: 0, vectorsOk: 0, bySection: {} }
   const readerSections = work.map((sec) => {
     const steps = sec.presteps || linesToSteps(sec.lines, { kind: sec.kind, n })
-    const structured = steps.filter(ROW_OR_REP).length
+    const structuredForConfidence = steps.filter(STRUCTURED_FOR_CONFIDENCE).length
     stats.sectionsTotal += 1
     if (kindForTitle(sec.title)) stats.sectionsKnown += 1
     stats.totalLines += steps.length
-    stats.structuredLines += structured
+    stats.structuredLines += structuredForConfidence
     for (const line of sec.lines) {
       for (const v of findSizeVectors(line.text)) {
         stats.vectorsSeen += 1
@@ -514,8 +557,8 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
   const warnings = validateReader(reader)
   readerSections.forEach((s, i) => {
     const steps = reader.sections[i]?.steps || []
-    const structured = steps.filter(ROW_OR_REP).length
-    stats.bySection[reader.sections[i]?.id || `sec${i}`] = steps.length ? Math.round((structured / steps.length) * 100) : 0
+    const structuredForConfidence = steps.filter(STRUCTURED_FOR_CONFIDENCE).length
+    stats.bySection[reader.sections[i]?.id || `sec${i}`] = steps.length ? Math.round((structuredForConfidence / steps.length) * 100) : 0
   })
   const confidence = computeConfidence({ stats, warnings })
   stats.multiColPages = countMultiColPages(pages)

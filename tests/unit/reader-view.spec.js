@@ -9,6 +9,7 @@ import { db } from '@/db/db'
 import i18n from '@/i18n'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { SESSION_NO_SECTION } from '@/constants/session'
+import { useLightboxStore } from '@/stores/lightbox'
 
 // Même approche que ReaderView.spec.js : mock vue-router pour éviter
 // la complexité du vrai routeur et les leaks async.
@@ -196,5 +197,45 @@ describe('ReaderView — sortie d’écran et geste de masquage (lot « chrono u
       expect(rows[0].durationSec).toBe(5)
     })
     expect(active.isActive).toBe(false)
+  })
+})
+
+// La couverture du PDF ouvre la visu du patron, et s'agrandit d'un appui.
+describe('ReaderView — couverture en tête', () => {
+  const COVER = 'data:image/png;base64,COVER'
+
+  async function seedWith(extra) {
+    const patternId = await db.patterns.add({ name: 'Libre', type: 'knitting', reader: SIMPLE_READER, ...extra })
+    const projectId = await db.projects.add({ name: 'P', technique: 'knitting', patternId })
+    nav.route = { name: 'project-read', params: { id: String(projectId) }, query: {} }
+  }
+
+  it('affiche la couverture et l’ouvre dans la visionneuse', async () => {
+    await seedWith({ photos: [COVER] })
+    const pinia = createPinia()
+    const w = mountReader(pinia)
+    await settle()
+    const btn = w.find('.rcover')
+    expect(btn.exists()).toBe(true)
+    expect(btn.attributes('aria-label')).toBe(i18n.global.t('reader.coverOpen'))
+    expect(btn.find('img').attributes('src')).toBe(COVER)
+    await btn.trigger('click')
+    const lightbox = useLightboxStore(pinia)
+    expect(lightbox.open).toBe(true)
+    expect(lightbox.current).toBe(COVER)
+  })
+
+  it('repli sur l’image de couverture de la galerie (patron manuel)', async () => {
+    await seedWith({ gallery: [{ src: 'data:image/png;base64,G0' }, { src: COVER }], coverIndex: 1 })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.rcover img').attributes('src')).toBe(COVER)
+  })
+
+  it('sans photo ni galerie : aucun bloc de couverture', async () => {
+    await seedWith({})
+    const w = mountReader()
+    await settle()
+    expect(w.find('.rcover').exists()).toBe(false)
   })
 })

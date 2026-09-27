@@ -253,3 +253,38 @@ export function classifyGridStrict(data, width, bbox, opts = {}) {
   const cv = spacingCV(rowC.length <= colC.length ? rowC : colC) // régularité de l'axe limitant
   return cv != null && cv <= o.cvMax
 }
+
+// Variante pour une IMAGE raster embarquée (pixels natifs) : grille au seuil strict, OU
+// grille en comptant comme encre les gris clairs jusqu'à 230. Des filets de grille gris
+// clair (Dorn p5, gris 222) échappent au seuil 200 et le diagramme partait en galerie.
+// En second essai seulement : un verdict grille du seuil strict n'est jamais retiré (un
+// diagramme à cases colorées pâles peut fusionner ses lignes à 230). Et seulement sur
+// fond de page blanc : à 230, la texture d'une photo claire (porte peinte, toile de
+// broderie, lattes de bois) se lit en treillis. Mesuré sur 212 PDF du corpus, les
+// diagrammes ainsi rattrapés ont au moins 54 % de pixels blanc papier, les photos au
+// plus 27 %. Réservé aux images raster : les régions vectorielles gardent
+// classifyGridStrict (11 cas calibrés de tools/grid-signatures.mjs).
+const RASTER_LIGHT_INK = 230
+const PAPER_WHITE = 250 // composante minimale d'un pixel « blanc papier »
+const PAPER_MIN_SHARE = 0.4
+
+// Part des pixels (échantillonnés au pas `step` sur les deux axes) dont les trois
+// composantes sont au moins PAPER_WHITE.
+function paperWhiteShare(data, width, bbox, step) {
+  let n = 0
+  let white = 0
+  for (let y = bbox.y0; y < bbox.y1; y += step) {
+    for (let x = bbox.x0; x < bbox.x1; x += step) {
+      const j = (y * width + x) * 4
+      n++
+      if (data[j] >= PAPER_WHITE && data[j + 1] >= PAPER_WHITE && data[j + 2] >= PAPER_WHITE) white++
+    }
+  }
+  return n ? white / n : 0
+}
+
+export function classifyRasterGrid(data, width, bbox) {
+  if (classifyGridStrict(data, width, bbox)) return true
+  if (paperWhiteShare(data, width, bbox, GRID_STRICT.step) < PAPER_MIN_SHARE) return false
+  return classifyGridStrict(data, width, bbox, { inkThreshold: RASTER_LIGHT_INK })
+}

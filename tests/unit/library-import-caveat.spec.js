@@ -36,6 +36,8 @@ beforeEach(async () => {
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
   nav.router.push.mockClear()
+  nav.route.query = {}
+  nav.router.replace.mockClear()
 })
 
 async function monter() {
@@ -303,5 +305,61 @@ describe('avertissement d import de la Bibliothèque', () => {
 
     expect(q.active).toBe(NOTICE.SWIPE_HINT)
     expect(tipDialog.props('open')).toBe(true)
+  })
+})
+
+describe('feuille « Ajouter un patron » demandée depuis l’accueil (?add=1)', () => {
+  function feuille(w) {
+    return w.find('.pas__card')
+  }
+
+  // Protège l'ouverture directe quand aucun message n'occupe l'écran.
+  it('rien de dû : la feuille s’ouvre et le paramètre est retiré', async () => {
+    const s = useSettingsStore()
+    await s.load()
+    await s.markSwipeHintSeen()
+    nav.route.query = { add: '1' }
+    const w = await monter()
+    await vi.waitFor(() => expect(feuille(w).exists()).toBe(true))
+    expect(nav.router.replace).toHaveBeenCalledWith({ name: 'library', query: {} })
+  })
+
+  // Protège l'ordre de la file : le rappel d'import passe avant la feuille.
+  it('rappel dû : la feuille attend son acquittement', async () => {
+    const s = useSettingsStore()
+    await s.load()
+    await s.markSwipeHintSeen()
+    await s.setImportCaveatDue()
+    nav.route.query = { add: '1' }
+    const w = await monter()
+    expect(popup(w).props('open')).toBe(true)
+    expect(feuille(w).exists()).toBe(false)
+    await popup(w).vm.$emit('confirm')
+    await flushPromises()
+    await vi.waitFor(() => expect(feuille(w).exists()).toBe(true))
+  })
+
+  // Protège la première visite : l'astuce de balayage passe aussi avant la feuille.
+  it('astuce de balayage due : la feuille attend qu’elle quitte l’écran', async () => {
+    const s = useSettingsStore()
+    await s.load()
+    nav.route.query = { add: '1' }
+    const w = await monter()
+    const q = useNoticeQueueStore()
+    await vi.waitFor(() => expect(q.active).toBe(NOTICE.SWIPE_HINT))
+    expect(feuille(w).exists()).toBe(false)
+    q.withdraw(NOTICE.SWIPE_HINT)
+    await flushPromises()
+    await vi.waitFor(() => expect(feuille(w).exists()).toBe(true))
+  })
+
+  // Protège la navigation ordinaire : sans paramètre, la feuille reste fermée.
+  it('sans ?add : la feuille reste fermée', async () => {
+    const s = useSettingsStore()
+    await s.load()
+    await s.markSwipeHintSeen()
+    const w = await monter()
+    expect(feuille(w).exists()).toBe(false)
+    expect(nav.router.replace).not.toHaveBeenCalled()
   })
 })

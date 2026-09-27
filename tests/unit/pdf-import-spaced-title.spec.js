@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isLetterSpaced, despace, restoreWords } from '@/utils/pdf-import/spaced-title'
+import { isLetterSpaced, despace, restoreWords, restoreSpacedTitle } from '@/utils/pdf-import/spaced-title'
 
 describe('isLetterSpaced', () => {
   it('reconnait un titre interlettre reel', () => {
@@ -74,6 +74,28 @@ describe('restoreWords', () => {
   })
 })
 
+describe('restoreSpacedTitle', () => {
+  // Protège le recollage par le texte du PDF quand la fiche d'identité est vide (Merino Aran).
+  it('reprend la découpe en mots d’une autre ligne du document', () => {
+    expect(restoreSpacedTitle('M E R I N O A R A N', { metaTitle: '', texts: ['MERINO ARAN (100 gr.)'] })).toBe('MERINO ARAN')
+  })
+
+  it('préfère la fiche d’identité au texte du document', () => {
+    expect(restoreSpacedTitle('M I A C A R D I G A N', {
+      metaTitle: 'Microsoft Word - Mia Cardigan (English) v1.1.docx',
+      texts: ['MIA CARDIGAN'],
+    })).toBe('Mia Cardigan')
+  })
+
+  it('ne se reprend pas lui-même et colle les lettres sans source', () => {
+    expect(restoreSpacedTitle('M E R I N O A R A N', { texts: ['M E R I N O A R A N', 'Col. 44 verde'] })).toBe('MERINOARAN')
+  })
+
+  it('laisse intact un titre non interlettré', () => {
+    expect(restoreSpacedTitle('Merino Aran', { texts: ['MERINO ARAN'] })).toBe('Merino Aran')
+  })
+})
+
 import { detectTitle } from '@/utils/pdf-import/segment'
 
 const P = (text, size, y) => ({ text, size, bold: false, y })
@@ -94,10 +116,26 @@ describe('detectTitle — titre interlettre', () => {
       .toBe('Mia Cardigan')
   })
 
-  it('sans fiche d’identite, garde la ligne verbatim et JAMAIS « MIACARDIGAN »', () => {
-    const t = detectTitle(PAGES, {})
-    expect(t).toBe('M I A C A R D I G A N')
-    expect(t).not.toBe('MIACARDIGAN')
+  it('sans fiche d’identite, reprend la decoupe d’une ligne du document', () => {
+    expect(detectTitle(PAGES, {})).toBe('Mia Cardigan')
+  })
+
+  it('sans aucune source, colle les lettres (choix de Julien, 26/09)', () => {
+    expect(detectTitle([PAGES[0].slice(0, 2), PAGES[1]], {})).toBe('MIACARDIGAN')
+  })
+
+  it('sans aucune source, colle le titre seul, jamais le sous-titre accolé', () => {
+    const pages = [[P('P O O L S I D E', 30, 700), P('*Crochet top pattern*', 16, 670)]]
+    expect(detectTitle(pages, {})).toBe('POOLSIDE *Crochet top pattern*')
+  })
+
+  it('recolle le titre seul quand un sous-titre lui est accolé', () => {
+    const pages = [[
+      P('M E I A S D E L A R O J A', 30, 700),
+      P('*Modelo de meias top-down para adulto*', 16, 670),
+      P('As Meias de La Roja são tricotadas de cima para baixo.', 10, 400),
+    ]]
+    expect(detectTitle(pages, {})).toBe('Meias de La Roja *Modelo de meias top-down para adulto*')
   })
 
   it('ne retient plus « Sizes: » comme titre', () => {

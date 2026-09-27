@@ -192,11 +192,11 @@ function submit() {
           :label="settings.unitSystem === 'imperial' ? t('project.gaugeStitchesImperial') : t('project.gaugeStitches')"
           :hint="settings.unitSystem === 'imperial' ? t('project.gaugeHintImperial') : t('project.gaugeHint')"
         />
-        <input id="pat-gs" v-model="form.gaugeStitches" class="input" inputmode="numeric" placeholder="20" />
+        <input id="pat-gs" v-model="form.gaugeStitches" class="input" inputmode="decimal" placeholder="20" />
       </div>
       <div class="col">
         <label class="field-label" for="pat-gr">{{ settings.unitSystem === 'imperial' ? t('project.gaugeRowsImperial') : t('project.gaugeRows') }}</label>
-        <input id="pat-gr" v-model="form.gaugeRows" class="input" inputmode="numeric" placeholder="28" />
+        <input id="pat-gr" v-model="form.gaugeRows" class="input" inputmode="decimal" placeholder="28" />
       </div>
     </div>
 

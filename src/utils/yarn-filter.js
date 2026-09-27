@@ -182,6 +182,17 @@ function exportLength(lengthM, system, locale) {
   return locale === 'en' ? yards : String(yards).replace('.', ',')
 }
 
+// Même règle de virgule décimale que exportLength ci-dessus, pour les deux nombres de
+// pelotes de l'export (quantité, pelotes utilisées) — jamais formaté via Intl ici : le
+// séparateur de milliers casserait la colonne dans un tableur. `parseDecimal`, pas
+// `Number`, pour tolérer une fiche ancienne stockée à virgule (même repli qu'exportLength).
+function exportSkeins(n, locale) {
+  if (n === '' || n == null) return n
+  const v = parseDecimal(n)
+  if (!Number.isFinite(v)) return n
+  return locale === 'en' ? v : String(v).replace('.', ',')
+}
+
 // Construction du tableau CSV export « Stock de laines » (SettingsView). Testable seul : la
 // seule chose qui garantit « jamais perdre d'info » ici, c'est que head.length ==
 // rows[i].length ligne par ligne — un futur en-tête ajouté sans sa cellule correspondante
@@ -226,7 +237,8 @@ export function yarnExportTable(yarns, { t, system, currency, locale, linesFor }
     return [
       y.brand, y.model || '', y.colorName, t(`yarn.colorTypes.${y.colorType || 'uni'}`), y.colorNotes || '',
       y.weight ? t(`yarn.weights.${y.weight}`) : '',
-      exportLength(y.lengthM, system, locale), y.quantity, y.price, reservedTotal(y) || '', bainsOf(lines), latestPurchaseDate(lines),
+      exportLength(y.lengthM, system, locale), exportSkeins(y.quantity, locale), y.price,
+      reservedTotal(y) ? exportSkeins(reservedTotal(y), locale) : '', bainsOf(lines), latestPurchaseDate(lines),
       compositionToText(y.composition),
       // Ordre canonique (YARN_LABELS), pas l'ordre de cochage — même helper que la fiche
       // détaillée et la carte du stock (revue finale du 06/08/2026).

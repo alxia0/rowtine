@@ -10,7 +10,7 @@ import { formatLocalDate } from '@/utils/date-format'
 import { drawCalendar, calendarRealHeight, clamp, hslCss } from '@/utils/badge-calendar'
 import { drawStitchMotif, STITCH_MOTIF_HEIGHT } from '@/utils/badge-stitch-motif'
 import { ICONS } from '@/utils/icons'
-import { formatLength } from '@/utils/units'
+import { formatLength, formatSkeins } from '@/utils/units'
 import { parseDecimal } from '@/utils/decimal'
 
 // Parse tolérant du format `hsl(h s% l%)` (CSS Color 4, sans virgules — celui que produisent
@@ -753,7 +753,7 @@ function statLines(key, stats, t, locale, project, yarnUsage, structured = false
   if (key === 'yarns') {
     return (yarnUsage || []).map(({ yarn, balls }) => {
       const label = yarnLabel(yarn)
-      const ballsText = t('project.stats.ballsValue', balls, { locale })
+      const ballsText = t('project.stats.ballsValue', balls, { locale, named: { count: formatSkeins(balls, { locale }) } })
       const meters = balls * (parseDecimal(yarn.lengthM) || 0)
       if (!meters) return structured ? { label, value: ballsText } : `${label} · ${ballsText}`
       const len = formatLength(meters, { locale, system: unitSystem, profile: 'total' })
@@ -1056,8 +1056,9 @@ function drawStackedBlocks(ctx, rows, { left, top, rowH, textColor, maxWidth }) 
 // `includeCalendar` juste à côté dans cette signature, et la construction du libellé reste au
 // seul endroit qui la connaît (`statValue`), jamais dupliquée chez l'appelant. Défaut `true`
 // (et non `false` comme `includeCalendar`) : tout appel existant qui l'omet garde le
-// comportement d'avant ce correctif.
-export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem }) {
+// comportement d'avant ce correctif. `onGeometry` (optionnel) : reçoit la géométrie réelle
+// (`computeBadgeGeometry`, texte mesuré), même sans contexte 2D.
+export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem, onGeometry }) {
   const ctx = canvas.getContext('2d')
 
   // Technique (Task 2, chantier « badge cartouche condensé » 18/09c ; universel aux 4 gabarits
@@ -1198,21 +1199,19 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // `pairCount` (Task 9, dernier argument) : nombre de GROUPES (jamais de paires ni de
   // sous-lignes, cf. `geometryStatLineCount` juste au-dessus — Task 13 : les deux phrases de
   // `startedOn` ne comptent que pour UN groupe, cf. `countGroups`).
-  const { canvas: canvasSize, photoSlot, photoSlots, statsArea, calendarArea, textBottom, freeTextTop } = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0)
+  const geometry = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0)
+  const { canvas: canvasSize, photoSlot, photoSlots, statsArea, calendarArea, textBottom, freeTextTop } = geometry
   const { w, h } = canvasSize
   // Le canevas est dimensionné ICI, AVANT le retour anticipé qui suit — comme avant ce
   // changement (17/09) — parce que jsdom (tests) ne fournit pas de contexte 2D natif : le
   // <canvas> de prévisu monté dans BadgeComposer.vue appelle quand même `renderBadge` à
-  // chaque changement de réglage, et le composant lit `canvas.width`/`height` (positionnement
-  // du bouton « Modifier », cf. `onPreviewClick`/`previewFixStyle`) même quand aucun dessin
-  // n'a eu lieu. Sans contexte, `titleLines`/`rawStatPairs` restent le décompte NON wrappé
-  // ci-dessus (repli ci-dessus) — qui correspond exactement à ce que
-  // `BadgeComposer.vue#currentTemplate` calcule de son côté (même fonction, mêmes arguments,
-  // `titleLineCount` omis = 1 par défaut) : les deux restent synchronisés tant qu'aucun retour
-  // à la ligne réel n'est mesuré. En navigateur réel, `ctx` est toujours présent, ce repli ne
-  // joue donc aucun rôle en production.
+  // chaque changement de réglage, et le composant lit `canvas.width`/`height` et la géométrie
+  // remontée par `onGeometry` (bouton « Modifier », cf. `onPreviewClick`/`previewFixStyle`)
+  // même quand aucun dessin n'a eu lieu.
   canvas.width = w
   canvas.height = h
+  // Géométrie RÉELLE (texte mesuré) pour la prévisu ; la valeur de retour reste la dataURL.
+  onGeometry?.(geometry)
   // jsdom (tests) ne fournit pas de contexte 2D natif : sortie silencieuse plutôt qu'une
   // exception — les navigateurs réels ont toujours ce contexte.
   if (!ctx) return null

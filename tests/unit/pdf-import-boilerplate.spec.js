@@ -453,6 +453,62 @@ describe('stripBoilerplate — vague 7 : satellites du bandeau Hobbii et queues 
   })
 })
 
+describe('stripBoilerplate — onglet de langue en bord de page', () => {
+  // Un onglet « FR » au milieu de la hauteur (hors bande haute/basse) ne doit plus survivre.
+  it('retire un onglet « FR » répété au même y (±1 pt) sur 3 pages, x variable, hors bande haute/basse', () => {
+    const pages = [
+      [
+        { text: 'Un vrai rang de travail en haut de page', y: 560 },
+        { text: 'FR', x: 31, y: 209.1 },
+        { text: 'Un vrai rang de travail en bas de page', y: 40 },
+      ],
+      [
+        { text: 'Un autre vrai rang de travail en haut de page', y: 560 },
+        { text: 'FR', x: 375.6, y: 209.4 },
+        { text: 'Un autre vrai rang de travail en bas de page', y: 40 },
+      ],
+      [
+        { text: 'Encore un vrai rang de travail en haut de page', y: 560 },
+        { text: 'FR', x: 31, y: 208.6 },
+        { text: 'Encore un vrai rang de travail en bas de page', y: 40 },
+      ],
+    ]
+    const kept = textes(stripBoilerplate(pages))
+    expect(kept.filter((t) => t === 'FR')).toHaveLength(0)
+    expect(kept).toContain('Un vrai rang de travail en haut de page')
+    expect(kept).toContain('Un vrai rang de travail en bas de page')
+    expect(kept).toContain('Un autre vrai rang de travail en haut de page')
+    expect(kept).toContain('Encore un vrai rang de travail en bas de page')
+  })
+
+  it('garde « FR » quand il n’apparaît que sur une seule page (pas un onglet répété)', () => {
+    const pages = [
+      [{ text: 'FR', y: 209.1 }],
+      [{ text: 'Un vrai rang de travail ici', y: 400 }],
+    ]
+    expect(textes(stripBoilerplate(pages))).toContain('FR')
+  })
+
+  it('ne mord pas des rangs répétés « M1 »/« K2 » (pas seulement des capitales)', () => {
+    const pages = [
+      [{ text: 'M1', y: 209.1 }],
+      [{ text: 'M1', y: 209.4 }],
+      [{ text: 'K2', y: 300 }],
+    ]
+    expect(textes(stripBoilerplate(pages))).toContain('M1')
+  })
+
+  it('garde « RS »/« CC » répétés au même y sur 2 pages (étiquettes de grille/tableau, pas des codes de langue)', () => {
+    const pages = [
+      [{ text: 'RS', y: 209.1 }, { text: 'CC', y: 300 }],
+      [{ text: 'RS', y: 209.4 }, { text: 'CC', y: 300.2 }],
+    ]
+    const kept = textes(stripBoilerplate(pages))
+    expect(kept).toContain('RS')
+    expect(kept).toContain('CC')
+  })
+})
+
 describe('stripBoilerplate — D3 vague 2 : queues de pied de page coupées en deux (DROPS)', () => {
   // Témoin mesuré to-the-beach-fr-c33da181.pdf.txt l.68-77 : le filtrage du bruit étant
   // ligne à ligne AVANT recollage, la moitié « utile » de chaque phrase de pied de page
@@ -523,6 +579,22 @@ describe('stripBoilerplate — D3 vague 2 : queues de pied de page coupées en d
       'email us at',
       'maschenprobe',
       'Colonne de texte en bas de page',
+    ])
+  })
+})
+
+// La mention de l'application Rowtine parle de l'outil, pas du patron : elle ne doit jamais devenir une étape cochable.
+describe('stripBoilerplate — mention de l’application Rowtine', () => {
+  it('retire la ligne qui renvoie vers l’application Rowtine et garde ses voisines', () => {
+    const pages = [[
+      { text: 'Rentrer les fils.', y: 700 },
+      { text: 'Suivez ce patron rang par rang dans l’application Rowtine : rowtine.app', y: 660 },
+      { text: 'Bloquer l’ouvrage aux dimensions indiquées.', y: 620 },
+    ]]
+    const kept = textes(stripBoilerplate(pages))
+    expect(kept).toEqual([
+      'Rentrer les fils.',
+      'Bloquer l’ouvrage aux dimensions indiquées.',
     ])
   })
 })

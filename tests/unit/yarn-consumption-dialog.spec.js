@@ -45,6 +45,12 @@ describe('YarnConsumptionDialog', () => {
     expect(inputs[1].element.value).toBe('1')
   })
 
+  it('réservé décimal : libellé et valeur par défaut du champ au format de la langue (2,5, pas 2.5)', () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 2.5 }] })
+    expect(w.find('.ycn__reserved').text()).toContain(tk('project.consumeReserved', { n: '2,5' }))
+    expect(w.find('.ycn__input').element.value).toBe('2,5')
+  })
+
   it('« Valider » sans rien toucher émet confirm avec used === reserved pour chaque laine', async () => {
     const w = mountDialog({ open: true, yarns })
     await w.find('.ycn__confirm').trigger('click')
@@ -89,15 +95,68 @@ describe('YarnConsumptionDialog', () => {
     const champ = w.findAll('.ycn__input')[0]
     await champ.setValue(99) // retenu : 3, déjà la valeur courante
     expect(champ.element.value).toBe('3')
-    await champ.setValue(-5)
-    expect(champ.element.value).toBe('0')
+    await champ.setValue('9,9') // décimal au-dessus du réservé : borné à 3 aussi
+    expect(champ.element.value).toBe('3')
   })
 
-  it('un nombre négatif ou illisible retombe à 0', async () => {
+  // Un caractère refusé est retiré de l'affichage à la frappe, pas seulement de la valeur retenue.
+  it('un caractère refusé est filtré de l’affichage à la frappe (« 2a » → « 2 », « -5 » → « 5 »)', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 30 }] })
+    const champ = w.find('.ycn__input')
+    await champ.setValue('2a')
+    expect(champ.element.value).toBe('2')
+    await champ.setValue('-5')
+    expect(champ.element.value).toBe('5')
+  })
+
+  // Une saisie illisible (aucun chiffre) garde la valeur courante plutôt que de retomber à 0 en silence.
+  it('une saisie illisible laisse la valeur courante inchangée', async () => {
     const w = mountDialog({ open: true, yarns })
-    await w.findAll('.ycn__input')[0].setValue(-5)
+    await w.findAll('.ycn__input')[0].setValue('abc')
     await w.find('.ycn__confirm').trigger('click')
-    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 0 })
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 3 })
+  })
+
+  // Cas central de la décimalisation : « 2,5 » (en dessous du réservé) est accepté tel quel.
+  it('« 2,5 » est accepté (décimal, sous le réservé)', async () => {
+    const w = mountDialog({ open: true, yarns })
+    await w.findAll('.ycn__input')[0].setValue('2,5')
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 2.5 })
+  })
+
+  // Une quantité consommée peut être inférieure à une pelote entière.
+  it('« 0,5 » est accepté', async () => {
+    const w = mountDialog({ open: true, yarns })
+    await w.findAll('.ycn__input')[0].setValue('0,5')
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 0.5 })
+  })
+
+  // Piège : « 2, » doit rester « 2, » pendant la frappe pour pouvoir devenir « 2,5 ».
+  it('« 2, » n’est pas réécrit pendant la frappe (la virgule survit jusqu’à « 2,5 »)', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue('2,')
+    expect(champ.element.value).toBe('2,')
+    await champ.setValue('2,5')
+    expect(champ.element.value).toBe('2,5')
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 2.5 })
+  })
+
+  // Protège : le champ est lié à un tampon texte (comme ProjectEditView), pas à `defaultFor`
+  // directement — sinon un re-rendu (props.yarns recalculé, ex. changement de langue)
+  // remettrait le champ au défaut en écrasant la saisie en cours.
+  it('un re-rendu de props.yarns (même contenu, nouveau tableau) laisse le champ à la saisie en cours', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue('1,5')
+    expect(champ.element.value).toBe('1,5')
+
+    await w.setProps({ yarns: yarns.map((y) => ({ ...y })) }) // même contenu, nouveau tableau
+
+    expect(w.findAll('.ycn__input')[0].element.value).toBe('1,5')
   })
 
   it('fermer par le scrim émet confirm avec les valeurs par défaut (tout tricoté), jamais un cancel', async () => {
@@ -147,7 +206,7 @@ describe('YarnConsumptionDialog', () => {
   describe('mode « abandonné » (R3) : même dialogue, défaut inversé à 0', () => {
     it('mode abandonné : le champ est pré-rempli à 0 (par défaut on détricote, tout revient)', () => {
       const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3 }] })
-      expect(w.find('input[type=number]').element.value).toBe('0')
+      expect(w.find('.ycn__input').element.value).toBe('0')
       expect(w.text()).toContain(fr.project.abandonTitle)
     })
     it('mode abandonné : fermer applique le défaut 0 (rien de perdu)', async () => {
@@ -157,7 +216,7 @@ describe('YarnConsumptionDialog', () => {
     })
     it('mode terminé : inchangé, pré-rempli au réservé', () => {
       const w = mountDialog({ open: true, mode: 'done', yarns: [{ id: 1, name: 'Bleu', reserved: 3 }] })
-      expect(w.find('input[type=number]').element.value).toBe('3')
+      expect(w.find('.ycn__input').element.value).toBe('3')
       expect(w.text()).toContain(fr.project.consumeTitle)
     })
   })

@@ -53,6 +53,12 @@ describe('StashView — récap', () => {
     await db.settings.clear()
   })
 
+  it('affiche le total de pelotes au format de la langue (2,5, pas 2.5)', async () => {
+    const w = await mountStash([{ brand: 'A', colorName: 'Rouge', quantity: 2.5, lengthM: 100, grams: 50 }])
+    const [pelotes] = tiles(w)
+    expect(pelotes.num).toBe('2,5')
+  })
+
   it('affiche m et g sous le seuil', async () => {
     const w = await mountStash([{ brand: 'A', colorName: 'Rouge', quantity: 2, lengthM: 100, grams: 50 }])
     const [, longueur, poids] = tiles(w)

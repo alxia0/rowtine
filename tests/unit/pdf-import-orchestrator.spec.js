@@ -31,7 +31,7 @@ describe('parsePdfLocally', () => {
     const out = await parsePdfLocally(FILE)
     expect(out.scanned).toBe(false)
     expect(out.pattern.photos).toEqual(['data:image/jpeg;base64,xxx'])
-    expect(renderPdfPageToDataUrl).toHaveBeenCalledWith(FILE, 1, 800)
+    expect(renderPdfPageToDataUrl).toHaveBeenCalledWith(FILE, 1, 800, expect.objectContaining({ crop: expect.any(Function) }))
   })
 
   // Câblage CÔTÉ APP (spaced-title) : la fiche d'identité du PDF, extraite via

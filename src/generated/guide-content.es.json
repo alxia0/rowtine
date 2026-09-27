@@ -336,7 +336,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (calculadora de puntos, contador libre, ayuda de agujas o ganchillo) y al botón ",
+                  "text": " (calculadora de puntos, contador libre, ayuda de agujas o ganchillo), al botón ",
                   "bold": false,
                   "italic": false
                 },
@@ -346,7 +346,47 @@
                   "italic": false
                 },
                 {
-                  "text": ".",
+                  "text": " y al botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Importar un PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", que abre tu ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Biblioteca de patrones",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " directamente en la opción de añadir un patrón.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Al principio, mientras la app solo contiene los ejemplos, el inicio va a lo esencial: una tarjeta ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Importar un patrón en PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ocupa el lugar de la ficha Continuar y del resumen. Vuelven en cuanto creas tu primer proyecto o importas tu primer patrón.",
                   "bold": false,
                   "italic": false
                 }

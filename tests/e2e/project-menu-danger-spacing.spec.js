@@ -12,16 +12,15 @@
 // existant plutôt que d'empiler margin/border/padding sur `.menu__item--danger` (ce qui
 // doublonnerait le mécanisme de séparation).
 import { test, expect } from '@playwright/test'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome } from './helpers'
 
 test('un espace net sépare « Supprimer le projet » de « Modifier le projet » dans le menu ⋯', async ({
   page,
 }) => {
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
 
-  // Le projet démo (bouton « Reprendre ») a une fiche standard avec le menu ⋯.
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  // Le projet démo (sa carte sur l'accueil) a une fiche standard avec le menu ⋯.
+  await openDemoProjectFromHome(page)
 
   await page.locator('.phdr__kebab').click()
   const menu = page.locator('.menu')

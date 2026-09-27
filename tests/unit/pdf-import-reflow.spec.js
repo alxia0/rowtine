@@ -1452,14 +1452,13 @@ describe('reflowLines — paquet allemand vague 7 (sunburst-adult-s-top-de, bern
       'Zuerst werden die Seitennähte geschlossen. Achte darauf, dass dein Top mit der linken Seite nach außen liegt.',
     )
   })
-  it('« am » seul devant un nom ordinaire ne déclenche pas le signal (radical exigé)', () => {
-    // Le nouvel article « am » ne fusionne QUE suivi d'un radical de la liste CHOISIE —
-    // « am Nachmittag » est un groupe prépositionnel complet, pas un adjectif en attente.
+  it('« am » seul devant un nom recolle par la règle préposition (catégorie du 26/09), pas par le signal adjectif', () => {
+    // « am » contraction attend son nom : recollé depuis la règle par catégorie de prépositions.
     const out = reflowLines([
       L('Wir treffen uns am'),
       L('Nachmittag.'),
     ], { isGerman: true })
-    expect(out).toHaveLength(2)
+    expect(out).toHaveLength(1)
   })
   it('« am ersten » ne fusionne pas un nouvel item de liste allemand (NEW_ITEM_RE reste prioritaire)', () => {
     const out = reflowLines([
@@ -1781,5 +1780,255 @@ describe('reflowLines — tiret cadratin espacé en fin de ligne (jingle-bells-o
   it('ne fusionne pas deux entrées de glossaire à tiret cadratin consécutives (non-régression lucent-sweater-en)', () => {
     const out = reflowLines([L('CO – cast on'), L('C4B – cable 4 back')])
     expect(out).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — unité « Reihen » seule après un chiffre final (stanley-the-knitting-bear-de)', () => {
+  // Protège l'échantillon allemand dont l'unité « Reihen » passe seule à la ligne.
+  it('recolle « … x 3 » devant la ligne « Reihen »', () => {
+    const out = reflowLines([L('Maschenprobe: 1 x 1 cm = 3 Maschen x 3'), L('Reihen')], { isGerman: true })
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe('Maschenprobe: 1 x 1 cm = 3 Maschen x 3 Reihen')
+  })
+  it('ne recolle pas une ligne qui ne fait que commencer par « Reihen » (non-régression)', () => {
+    const out = reflowLines([L('Wiederhole die Runde 3'), L('Reihen in Muster A stricken.')], { isGerman: true })
+    expect(out).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — sous-titre « MAßE » seul suivi de sa valeur (easter-kitchen-towel-de)', () => {
+  // Protège la paire libellé de mesure allemand / valeur chiffrée coupée sur deux lignes.
+  it('recolle « MAßE » et « Ca. 26 x 36 cm »', () => {
+    const out = reflowLines([L('MAßE'), L('Ca. 26 x 36 cm')], { isGerman: true })
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe('MAßE Ca. 26 x 36 cm')
+  })
+  it('ne recolle pas « MAßE » devant une ligne qui ne commence pas par une valeur (non-régression)', () => {
+    expect(reflowLines([L('MAßE'), L('Brustumfang: 90 cm')], { isGerman: true })).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — « Größe » en fin de ligne devant un code de taille (fir-bloomers-de)', () => {
+  // Protège la paire « für Größe » / code de taille coupée par un retour à la ligne.
+  it('recolle « … die zweite für Größe » et « M, die dritte … », même hors isGerman (PDF multilingue)', () => {
+    const out = reflowLines([L('Größe S ist, die zweite für Größe'), L('M, die dritte für Größe L und die')])
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe('Größe S ist, die zweite für Größe M, die dritte für Größe L und die')
+  })
+  it('ne recolle pas « Größe » devant un mot qui n’est pas un code de taille (non-régression)', () => {
+    expect(reflowLines([L('Wähle deine Größe'), L('Maschenprobe: 22 M = 10 cm')])).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — unité d’âge « Jahre) » refermant un vecteur de tailles (picnic-children-s-top-de)', () => {
+  // Protège la dernière taille d'âge coupée entre son nombre et son unité.
+  it('recolle « … (10 Jahre, 12 » et « Jahre) »', () => {
+    const out = reflowLines([L('2 Jahre (4 Jahre, 6 Jahre, 8 Jahre) (10 Jahre, 12'), L('Jahre)')], { isGerman: true })
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe('2 Jahre (4 Jahre, 6 Jahre, 8 Jahre) (10 Jahre, 12 Jahre)')
+  })
+  it('ne recolle pas « Jahre) » sans parenthèse ouverte sur la ligne précédente (non-régression)', () => {
+    expect(reflowLines([L('Für Kinder ab 12'), L('Jahre) empfohlen')], { isGerman: true })).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — préposition allemande en fin de ligne, règle par catégorie (mesure du 26/09)', () => {
+  // Protège la famille « préposition ou contraction en fin de ligne » devant un nom capitalisé.
+  it.each([
+    ['dabei ein ca. 25 cm langes Fadenende zum', 'Vernähen stehen lassen.'],
+    ['Ziehe es durch eine Masche am', 'Rand und binde einen Knoten.'],
+    ['bis die Arbeit 15 (15) 15 cm vom', 'Armausschnitt misst.'],
+    ['6) Das Bündchen zur', 'Hälfte falten und durch die'],
+    ['henkette wieder je eine feste Masche pro', 'Luftmasche häkeln.'],
+    ['1 Lm, wenden. (Am', 'Ende solltest du 49 M haben.)'],
+    ['Nadel und nach der 2. M der 1. Nadel je', '1 M rechts verschränkt aus dem Querfaden stricken'],
+  ])('recolle « %s » et « %s »', (a, b) => {
+    const out = reflowLines([L(a), L(b)], { isGerman: true })
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe(`${a} ${b}`)
+  })
+
+  // Protège « ab » préposition après une unité ou une maille (« 4 Lftm ab Nadel »).
+  it.each([
+    ['1 DStb in die 4 Lftm ab', 'Nadel häkeln.'],
+    ['(30, 35, 40) cm ab', 'Unterarm misst.'],
+    ['in der 103. (115.) 129. (144.) Reihe ab', 'Beginn der Arbeit abgekettet.'],
+  ])('recolle « ab » préposition : « %s » et « %s »', (a, b) => {
+    expect(reflowLines([L(a), L(b)], { isGerman: true })).toHaveLength(1)
+  })
+
+  // « ab » particule verbale (abheben, abketten) clôt la proposition : la phrase suivante reste à part.
+  it('ne recolle pas « ab » particule verbale devant une nouvelle phrase', () => {
+    expect(reflowLines([L('1 M li abheben mit dem Faden vor der Arbeit ab'), L('Stricke nun folgendermaßen weiter')], { isGerman: true })).toHaveLength(2)
+    expect(reflowLines([L('Kette alle Maschen ab'), L('Nähe die Seitennähte.')], { isGerman: true })).toHaveLength(2)
+  })
+
+  // Un nouveau rang, une clé de glossaire ou une puce restent prioritaires sur la préposition finale.
+  it('ne recolle pas un nouveau rang, une clé ou une puce après une préposition finale', () => {
+    expect(reflowLines([L('Stricke rechts bis zum'), L('2. Reihe: alle Maschen links.')], { isGerman: true })).toHaveLength(2)
+    expect(reflowLines([L('Häkle weiter bis zum'), L('Rd 6: (4 fM, Zun) x 6 (36)')], { isGerman: true })).toHaveLength(2)
+    expect(reflowLines([L('Setze einen Markierer am'), L('Tipp: In diese Reihe einen Markierer setzen.')], { isGerman: true })).toHaveLength(2)
+    expect(reflowLines([L('Stricke bis zum'), L('- Ende der Reihe')], { isGerman: true })).toHaveLength(2)
+  })
+
+  // Hors allemand, « am » (anglais) ne recolle pas la ligne suivante capitalisée.
+  it('ne recolle pas « am » anglais hors isGerman', () => {
+    expect(reflowLines([L('Hello, my name is Anna and I am'), L('Designer of this pattern.')])).toHaveLength(2)
+  })
+
+  // PDF multilingue hors isGerman : seules les prépositions sans homographe hors allemand recollent.
+  it('recolle « auf » et « zum » hors isGerman (PDF multilingue), pas « am » ni « bis »', () => {
+    expect(reflowLines([L('dann kannst du etwas von dem Garn auf'), L('Wäscheklammern wickeln.')])).toHaveLength(1)
+    expect(reflowLines([L('Häkle weiter mit Pixel wie bisher bis zum'), L('Ende der Reihe.')])).toHaveLength(1)
+    expect(reflowLines([L('Numéro 12 bis'), L('Rue des Lilas')])).toHaveLength(2)
+  })
+})
+
+describe('reflowLines — « Reihe/Runde N » complément de nom après préposition ou article (mesure du 26/09)', () => {
+  // Protège « von Runde 13 », « zwischen Runde 6 und 7 », « auf der Reihe. » contre NEW_ITEM_RE.
+  it.each([
+    ['Mit ein paar Stichen den Rand von', 'Runde 13 an der Praline festnähen (siehe Fotos).'],
+    ['Steche in die nächste vordere Schlaufe von', 'Reihe 14 des Blumenherzes ein und arbeite das folgende Blatt'],
+    ['Beim Arbeiten von', 'Reihe 4 alle Maschen abketten.'],
+    ['die Augen zwischen', 'Runde 6 und 7 mit 3-4 Maschen Zwischenraum.'],
+    ['Wiederhole von * bis * auf der', 'Reihe. 1 hStb in die letzte M häkeln.'],
+    ['= 48 feste Maschen in der', 'Runde. 1 Markierer in der ersten festen Masche'],
+  ])('recolle « %s » et « %s »', (a, b) => {
+    const out = reflowLines([L(a), L(b)], { isGerman: true })
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe(`${a} ${b}`)
+  })
+
+  // Une vraie tête de rang (deux-points, parenthèse, tiret, abréviation « Rd. ») reste une nouvelle ligne.
+  it.each([
+    ['Stricke weiter von', 'Runde 3: 1 fM in jede M (18)'],
+    ['Stricke weiter von', 'Reihe 2 (LS, C): Mit Garn C, 2 Lm'],
+    ['Stricke weiter von', 'Reihe 1 – (3 li, 2 re) wiederholen'],
+    ['Stricke weiter von', 'Reihe 6-14: Reihe 4-5 noch 4-mal wdh'],
+    ['Stricke weiter von', 'Reihe 5 und alle folgenden Hinreihen: rechts'],
+    ['Häkle weiter bis zur', 'Rd. 3-7: 1 fm in jede M (22)'],
+    ['2 LM, ES in die Mitte des', '3. Reihe:'],
+  ])('ne recolle pas « %s » et la tête de rang « %s »', (a, b) => {
+    expect(reflowLines([L(a), L(b)], { isGerman: true })).toHaveLength(2)
+  })
+
+  // PDF multilingue hors isGerman : « von » + « Reihe N » (complément) recolle aussi.
+  it('recolle « Am Ende von » et « Reihe 50 [52, 54] hast Du dann » hors isGerman', () => {
+    expect(reflowLines([L('Am Ende von'), L('Reihe 50 [52, 54, 54] hast Du dann')])).toHaveLength(1)
+  })
+})
+
+describe('reflowLines — « cm mehr/weniger » devant « Maschen » (phrase d’échantillon DROPS)', () => {
+  // Protège la phrase d'échantillon DROPS coupée entre le comparatif et le nom qu'il quantifie.
+  it('recolle « Wenn Sie auf 10 cm mehr » et « Maschen als oben genannt haben »', () => {
+    const out = reflowLines([L('Wenn Sie auf 10 cm mehr'), L('Maschen als oben genannt haben, zu einer dickeren Nadel wechseln.')], { isGerman: true })
+    expect(out).toHaveLength(1)
+  })
+  it('recolle « Wenn für 10 cm weniger » et « Maschen als in der Maschenprobe »', () => {
+    expect(reflowLines([L('Wenn für 10 cm weniger'), L('Maschen als in der Maschenprobe angegeben benötigt')], { isGerman: true })).toHaveLength(1)
+  })
+  it('ne recolle pas « cm mehr » devant une nouvelle phrase qui ne commence pas par « Maschen »', () => {
+    expect(reflowLines([L('Stricke dann 5 cm mehr'), L('Nähe die Seitennähte.')], { isGerman: true })).toHaveLength(2)
+  })
+})
+
+// Diamètre d'aiguille/mesure chiffrée et incise à tiret coupés par la colonne.
+describe('reflowLines — diamètre d’aiguille, mesure chiffrée et incise à tiret', () => {
+  // Protège la fusion des trois formes de coupure relevées sur Classic Sweater Soft Double.
+  it.each([
+    ['Monter 160 (180) 190 (202) 214 (224) m sur aig', '2,5 mm.'],
+    ['Tricoter jusqu’à ce que la manche mesure', '20 (24) 26 (29) 32 (35) cm incl. les côtes'],
+    ['Tricoter côtes en rond: 1 end, 1 env', '- pour 12 (12) 14 (14) 16 (16) r.'],
+  ])('recolle « %s » et « %s »', (a, b) => {
+    const out = reflowLines([L(a), L(b)])
+    expect(out).toHaveLength(1)
+    expect(out[0].text).toBe(`${a} ${b}`)
+  })
+
+  // Protège contre trois faux positifs : ponctuation finale fermée, puce déjà ouverte, mot manquant.
+  it.each([
+    ['Rabattre toutes les m.', '- pour la suite…'],
+    ['- Avec fil A', '- avec fil B'],
+    ['Tricoter', '2 m ens'],
+  ])('ne recolle pas « %s » et « %s »', (a, b) => {
+    expect(reflowLines([L(a), L(b)])).toHaveLength(2)
+  })
+
+  // Un en-tête nu de liste de matériel n'est pas une phrase d'instruction : il n'absorbe pas
+  // son premier item même quand il finit par un mot d'aiguille suivi d'un diamètre en mm.
+  it('ne recolle pas un en-tête « Aiguilles » nu avec le premier diamètre de la liste', () => {
+    const out = reflowLines([L('Aiguilles'), L('3 mm circulaires'), L('4 mm circulaires')])
+    expect(out).toHaveLength(3)
+  })
+
+  // Un libellé court de tableau de mesures n'est pas une phrase d'instruction : il ne fusionne
+  // pas avec le vecteur de valeurs qui le suit même quand il finit par « mesure ».
+  it('ne recolle pas le libellé « Tour de poitrine mesure » avec son vecteur de valeurs', () => {
+    const out = reflowLines([L('Tour de poitrine mesure'), L('92 (96) 100 (104) cm')])
+    expect(out).toHaveLength(2)
+  })
+
+  // Une vraie liste à tirets annoncée sans « : » garde un élément par ligne.
+  it('ne recolle pas une liste à tirets de 3 éléments annoncée sans « : »', () => {
+    const out = reflowLines([L('Tricoter en jersey'), L('- avec fil A'), L('- avec fil B'), L('- avec fil C')])
+    expect(out).toHaveLength(4)
+  })
+
+  // Une remarque ouverte par « ( » n'est pas une puce : l'incise qui suit s'y recolle.
+  it('recolle une incise après une remarque parenthésée ouverte', () => {
+    const out = reflowLines([
+      L('(ou la longueur désirée qui doit être ajustée ici'),
+      L('- il est à noter que pour des manches plus courtes,'),
+    ])
+    expect(out).toHaveLength(1)
+  })
+})
+
+describe('reflowLines — un rang coupé juste après « m. » (abréviation tricot pointée) se recolle', () => {
+  // Le point d'une abréviation de tricot (« m. », « tric. »…) n'est pas une fin de phrase.
+  it('recolle une ligne coupée juste après « tric. 1 m. » et reprise par une suite en minuscule', () => {
+    const out = reflowLines([
+      L("Rabattre souplement : tric. 2 m. end., *remettre ces 2 m. sur l'aiguille gauche, les tric. ens. par le brin arrière, tric. 1 m."),
+      L("end.* ; rép. de * à * jusqu'à la dernière m."),
+    ])
+    expect(out).toHaveLength(1)
+  })
+  it('ne recolle pas quand la suite commence par une majuscule', () => {
+    expect(reflowLines([L('Monter 3 m.'), L('Tricoter 6 rangs en jersey.')])).toHaveLength(2)
+  })
+  it('ne recolle pas quand la suite est un nouvel élément (rang numéroté)', () => {
+    expect(reflowLines([L('Tricoter 2 m.'), L('rang 2 : tric. env.')])).toHaveLength(2)
+  })
+  it('ne recolle pas quand le mot avant le point n’est pas une abréviation de tricot', () => {
+    expect(reflowLines([L('Fin du rang.'), L('ensuite rabattre les mailles.')])).toHaveLength(2)
+  })
+  it('recolle aussi après « dern. »', () => {
+    expect(reflowLines([L("Tricoter à l'endroit jusqu'à la dern."), L('maille, puis rabattre.')])).toHaveLength(1)
+  })
+  // Une entrée de glossaire à tiret cadratin ne doit jamais être avalée, même après une abréviation pointée.
+  it('ne recolle pas une entrée de glossaire à tiret cadratin (« end. – endroit ») après une abréviation pointée', () => {
+    expect(reflowLines([
+      L('Utiliser une aiguille auxiliaire pour ce rang. rép.'),
+      L('end. – endroit'),
+    ])).toHaveLength(2)
+  })
+  it('ne recolle pas une autre entrée de glossaire à tiret cadratin (« m – maille ») après une abréviation pointée', () => {
+    expect(reflowLines([
+      L('Tricoter le rang suivant en jersey tric.'),
+      L('m – maille'),
+    ])).toHaveLength(2)
+  })
+  // Même garde côté tiret ASCII (« - ») qu'EN_DASH_KV_RE ci-dessus, après une abréviation pointée.
+  it('ne recolle pas une entrée de glossaire à tiret ASCII (« ml - maille ») après une abréviation pointée', () => {
+    expect(reflowLines([
+      L("Tricoter jusqu'à la dern."),
+      L('ml - maille'),
+    ])).toHaveLength(2)
+  })
+  it('ne recolle pas une autre entrée de glossaire à tiret ASCII (« m - maille ») après une abréviation pointée', () => {
+    expect(reflowLines([
+      L('Tricoter le rang suivant en jersey tric.'),
+      L('m - maille'),
+    ])).toHaveLength(2)
   })
 })

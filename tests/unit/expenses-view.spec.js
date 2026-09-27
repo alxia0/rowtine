@@ -219,6 +219,12 @@ function mountView() {
 }
 
 describe('ExpensesView', () => {
+  it('quantité décimale d’une ligne affichée avec la virgule (×2,5, pas ×2.5)', async () => {
+    await addLine({ quantity: 2.5, unitPrice: '4', date: '2026-01-10' })
+    const w = mountView()
+    expect(w.find('.exp__line-qty').text()).toBe('×2,5')
+  })
+
   it('4. le total général affiche 46 (une seule devise), une ligne sans date comprise', async () => {
     await addLine({ quantity: 4, unitPrice: '5,50', date: '2026-01-10' }) // 22
     await addLine({ quantity: 2, unitPrice: '12', date: '2026-05-20' }) // 24

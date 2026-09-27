@@ -303,6 +303,51 @@ describe('serializeYarns', () => {
     expect(JSON.parse(laineJson.data)).toEqual([])
     expect(result.files).toHaveLength(1) // seulement laines.json, aucun fichier photo
   })
+
+  // Protège l'externalisation de la galerie multi-photos, même dossier/préfixe que `photo`.
+  it('galerie (photos[]) : externalise chaque photo en Laines/laine-photo-*, laines.json ne garde que les noms, aucun data: dans le JSON, laines.json dernier', () => {
+    const yarns = [{ id: 1, brand: 'Bergère de France', photos: [PHOTO_A, PHOTO_B] }]
+    const result = serializeYarns(yarns)
+    const laineJsonFile = result.files.find((f) => f.path === 'laines.json')
+    const laineJson = JSON.parse(laineJsonFile.data)
+    expect(laineJson[0].photos).toHaveLength(2)
+    expect(laineJson[0].photos.every((n) => /^laine-photo-[0-9a-f]{8}\.(jpg|png)$/.test(n))).toBe(true)
+    expect(result.files.filter((f) => f.path.startsWith('Laines/laine-photo-'))).toHaveLength(2)
+    expect(laineJsonFile.data).not.toContain('data:')
+    const paths = result.files.map((f) => f.path)
+    expect(paths[paths.length - 1]).toBe('laines.json')
+  })
+
+  // Protège la dédup PARTAGÉE entre `photo` et `photos`, de TOUTES les laines.
+  it("dédup partagée : même photo dans le `photo` d'une laine, la galerie d'une autre, et en double dans cette même galerie → un seul fichier", () => {
+    const yarns = [
+      { id: 1, brand: 'A', photo: PHOTO_A },
+      { id: 2, brand: 'B', photos: [PHOTO_A, PHOTO_A] },
+    ]
+    const result = serializeYarns(yarns)
+    const laineJson = JSON.parse(result.files.find((f) => f.path === 'laines.json').data)
+    expect(laineJson[1].photos[0]).toBe(laineJson[0].photo)
+    expect(laineJson[1].photos[1]).toBe(laineJson[0].photo)
+    expect(result.files.filter((f) => f.path.startsWith('Laines/laine-photo-'))).toHaveLength(1)
+  })
+
+  // Protège `photoNames` (ménage des orphelines, reconcileYarnPhotos) pour la galerie.
+  it('photoNames contient les noms de fichiers de galerie', () => {
+    const yarns = [{ id: 1, brand: 'A', photos: [PHOTO_A, PHOTO_B] }]
+    const result = serializeYarns(yarns)
+    const laineJson = JSON.parse(result.files.find((f) => f.path === 'laines.json').data)
+    expect(result.photoNames.sort()).toEqual([...laineJson[0].photos].sort())
+  })
+
+  // Protège la garde isInlineDataUrl sur les items de galerie, comme sur `photo`.
+  it('galerie : data URL non analysable conservée telle quelle dans photos, aucun fichier écrit', () => {
+    const inline = 'data:image/svg+xml;utf8,<svg></svg>'
+    const yarns = [{ id: 1, brand: 'A', photos: [inline] }]
+    const result = serializeYarns(yarns)
+    const laineJson = JSON.parse(result.files.find((f) => f.path === 'laines.json').data)
+    expect(laineJson[0].photos).toEqual([inline])
+    expect(result.files.filter((f) => f.path.startsWith('Laines/'))).toHaveLength(0)
+  })
 })
 
 describe('serializeIndependentCounters', () => {

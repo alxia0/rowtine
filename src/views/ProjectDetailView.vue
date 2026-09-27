@@ -39,7 +39,7 @@ import { useCropperStore } from '@/stores/cropper'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
 import { resolveCover } from '@/utils/project-cover'
 import { reservationsOf, consumedOf } from '@/utils/yarn-usage'
-import { formatMoney, formatLength } from '@/utils/units'
+import { formatMoney, formatLength, formatSkeins } from '@/utils/units'
 import { patternPriceState } from '@/utils/pattern-price'
 import { projectYarnCost } from '@/utils/purchases'
 import { useSettingsStore } from '@/stores/settings'
@@ -821,11 +821,11 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
                      le stock, jamais ce que la tuile « Coût du projet » facture (1 pelote par
                      défaut, ProjectEditView.vue:101) — « ×10 » à côté d'un coût pour 1 pelote se
                      lisait comme un total cassé. Les deux nombres restent : rien ne disparaît. -->
-                <span class="yarnlist__meta">×{{ reservationsOf(y)[project.id] }} / {{ y.quantity }}<template v-if="y.weight"> · {{ t(`yarn.weights.${y.weight}`) }}</template></span>
+                <span class="yarnlist__meta">×{{ formatSkeins(reservationsOf(y)[project.id], { locale }) }} / {{ formatSkeins(y.quantity, { locale }) }}<template v-if="y.weight"> · {{ t(`yarn.weights.${y.weight}`) }}</template></span>
               </li>
               <li v-for="y in consumedYarns" :key="'c' + y.id">
                 {{ y.brand || '—' }}<template v-if="y.colorName"> · {{ y.colorName }}</template>
-                <span class="yarnlist__meta">{{ t('project.yarnKnitted', { n: consumedOf(y)[project.id] }) }}</span>
+                <span class="yarnlist__meta">{{ t('project.yarnKnitted', { n: formatSkeins(consumedOf(y)[project.id], { locale }) }) }}</span>
               </li>
             </ul>
             <p v-else class="yarnlist__empty">{{ t('project.yarnsNone') }}</p>
@@ -1042,7 +1042,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             <div class="stile">
               <span class="stile__k">{{ t('project.stats.ballsUsed') }}</span>
               <span class="stile__v">
-                {{ t('project.stats.ballsValue', projectStats.ballsUsed) }}<template v-if="projectStats.metersUsed"> · {{ metersStat.text }} {{ t(metersStat.unitKey) }}</template>
+                {{ t('project.stats.ballsValue', { count: formatSkeins(projectStats.ballsUsed, { locale }) }, projectStats.ballsUsed) }}<template v-if="projectStats.metersUsed"> · {{ metersStat.text }} {{ t(metersStat.unitKey) }}</template>
               </span>
             </div>
             <div class="stile">

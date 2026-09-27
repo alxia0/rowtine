@@ -25,7 +25,9 @@ function signature(c) {
 
 export function filterGalleryImages(candidates) {
   const list = Array.isArray(candidates) ? candidates : []
-  const seen = new Set()
+  // Table signature → item conservé (au lieu du seul Set) : une signature qui revient
+  // marque l'item déjà conservé comme repeated, cf. commentaire plus bas.
+  const seen = new Map()
   const grids = []
   const rest = []
   for (const c of list) {
@@ -36,9 +38,16 @@ export function filterGalleryImages(candidates) {
     // Le perdre ici = perte silencieuse d'info (cf. règle « jamais perdre d'info »).
     if (c.kind !== 'grid' && Math.min(c.w || 0, c.h || 0) < MIN_SIDE) continue
     const sig = signature(c)
-    if (seen.has(sig)) continue
-    seen.add(sig)
+    const already = seen.get(sig)
+    if (already) {
+      // Image revue ailleurs dans le document = décoration probable (logo, en-tête), cf.
+      // passe 3 d'associate.js : jamais pour un diagramme (kind:'grid'), qui peut légitimement
+      // se répéter (motif recopié) sans être de la décoration.
+      if (already.kind !== 'grid') already.repeated = true
+      continue
+    }
     const item = { ...c, src: c.src, page: c.page || 0, w: c.w || 0, h: c.h || 0 }
+    seen.set(sig, item)
     // Exemption MAX_IMAGES pour kind:'grid' (miroir de l'exemption MIN_SIDE ci-dessus) : un
     // PDF avec >64 images avant un diagramme raster ne doit JAMAIS faire perdre ce diagramme
     // au plafond — seules les images NON-grille sont plafonnées (règle « jamais perdre un

@@ -5,7 +5,7 @@ import AppIcon from '@/components/AppIcon.vue'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useSnackbarStore } from '@/stores/snackbar'
-import { formatMoney, currencySymbol } from '@/utils/units'
+import { formatMoney, formatSkeins, currencySymbol } from '@/utils/units'
 import {
   emptyPurchase,
   lineAmount,
@@ -16,10 +16,10 @@ import {
   stockGap,
   isPriceUnknown,
 } from '@/utils/purchases'
-import { consumedOf } from '@/utils/yarn-usage'
+import { consumedOf, roundSkeins } from '@/utils/yarn-usage'
 import { ymdLocal } from '@/utils/time-periods'
 // Même règle que #yarn-price : ce champ portait le même défaut.
-import { filtrerSaisieDecimale } from '@/utils/decimal'
+import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
 
 // Bloc « Achats et cadeaux » d'une fiche de laine (travaux sur le budget, 31/07) :
 // liste repliable des lignes d'historique, total (par devise), alerte d'écart
@@ -95,7 +95,7 @@ const gap = computed(() => stockGap(props.yarn, lines.value))
 const consumedTotal = computed(() =>
   Object.values(consumedOf(props.yarn)).reduce((a, n) => a + (Number(n) || 0), 0),
 )
-const adjustedQuantity = computed(() => Math.max(0, historyAcquired.value - consumedTotal.value))
+const adjustedQuantity = computed(() => roundSkeins(Math.max(0, historyAcquired.value - consumedTotal.value)))
 
 const correctingOpen = ref(false)
 function toggleCorrect() {
@@ -122,13 +122,21 @@ function onPrixUnitaire(event) {
   event.target.value = propre
   form.unitPrice = propre
 }
+// Même motif, pour la quantité : aucun bornage ici (pas de « disponible » à respecter sur
+// une ligne d'achat), donc la valeur filtrée est toujours réécrite, comme le prix.
+function onQuantiteAchat(event) {
+  const propre = filtrerSaisieDecimale(event.target.value)
+  event.target.value = propre
+  form.quantity = propre
+}
 
 function openAddMissing() {
   Object.assign(form, emptyPurchase(), {
     yarnId: props.yarnId,
     yarnLabel: props.yarnLabel,
     kind: 'buy',
-    quantity: Math.abs(gap.value) || 1,
+    // Champ modifiable : jamais le point JS, même motif que `openEdit` un peu plus bas.
+    quantity: formatSkeins(Math.abs(gap.value) || 1, { locale: locale.value, grouping: false }),
     currency: settings.currency,
     // Jour LOCAL : en UTC, l'achat oublié se proposait daté de la veille.
     date: ymdLocal(new Date()),
@@ -143,6 +151,9 @@ function openEdit(line) {
   // réafficher tel quel montrerait « 9.5 » au lieu de « 9,5 » dans un champ qui n'accepte
   // que la virgule française.
   form.unitPrice = line.unitPrice === '' || line.unitPrice == null ? '' : String(line.unitPrice).replace('.', ',')
+  // Même parade pour la quantité : `line.quantity` est un nombre JS normalisé (roundSkeins,
+  // cf. submitForm) — le réafficher tel quel montrerait « 2.5 » même en français.
+  form.quantity = formatSkeins(line.quantity, { locale: locale.value, grouping: false })
   formMode.value = 'edit'
   editingId.value = line.id
 }
@@ -150,6 +161,13 @@ function closeForm() {
   formMode.value = null
   editingId.value = null
 }
+// Même garde que le blocage de `submitForm` (juste au-dessous), extraite pour ne pas la
+// dupliquer : le bouton « Enregistrer » ne doit jamais rester actif sur une saisie que
+// submitForm refuserait de toute façon.
+const quantiteValide = computed(() => {
+  const n = roundSkeins(parseDecimal(form.quantity))
+  return Number.isFinite(n) && n > 0
+})
 async function submitForm() {
   // `form` est réutilisé entre édition et ajout : `openEdit` y copie `line.id`, et
   // `Object.assign` ne le retire jamais (une clé absente des sources d'un assign n'efface
@@ -170,6 +188,12 @@ async function submitForm() {
     // Séparateur seul (« , », gardé par le filtre pendant la frappe) : pas un prix, et
     // enregistré tel quel il s'affichait comme un montant nul au lieu de « prix inconnu ».
     if (payload.kind === 'gift' || !/\d/.test(String(payload.unitPrice ?? ''))) payload.unitPrice = ''
+    // La chaîne filtrée (virgule comprise) part sinon telle quelle en base : normalisée en
+    // nombre ici, seul point d'entrée commun à l'ajout et à l'édition d'une ligne. Un champ
+    // vide (Number('') === 0) ou illisible (« , » seul, NaN) ne doit jamais s'enregistrer
+    // en 0 ou en NaN : le save reste bloqué, comme un formulaire qu'on n'a pas fini de remplir.
+    if (!quantiteValide.value) return
+    payload.quantity = roundSkeins(parseDecimal(payload.quantity))
     if (formMode.value === 'edit') {
       await purchasesStore.update(editingId.value, payload)
     } else {
@@ -215,7 +239,7 @@ function lineAmountText(line) {
     <div v-if="gap !== 0" class="ypur__gap" data-test="purchases-gap" role="status">
       <AppIcon name="warning" :size="18" class="ypur__gap-icon" />
       <div class="ypur__gap-body">
-        <p class="ypur__gap-msg">{{ t('purchases.gapMessage', { stock: stockAcquired, history: historyAcquired }) }}</p>
+        <p class="ypur__gap-msg">{{ t('purchases.gapMessage', { stock: formatSkeins(stockAcquired, { locale }), history: formatSkeins(historyAcquired, { locale }) }) }}</p>
         <button type="button" class="btn ypur__gap-btn" data-test="purchases-correct" @click="toggleCorrect">
           {{ t('purchases.correct') }}
         </button>
@@ -230,7 +254,7 @@ function lineAmountText(line) {
             <AppIcon name="plus" :size="16" /> {{ t('purchases.correctAddMissing') }}
           </button>
           <button type="button" class="btn ypur__correct-opt" data-test="purchases-correct-adjust" @click="adjustStock">
-            {{ t('purchases.correctAdjustStock', { n: adjustedQuantity }) }}
+            {{ t('purchases.correctAdjustStock', { n: formatSkeins(adjustedQuantity, { locale }) }) }}
           </button>
         </div>
       </div>
@@ -239,7 +263,7 @@ function lineAmountText(line) {
     <ul v-if="lines.length" class="ypur__list">
       <li v-for="line in visibleLines" :key="line.id" class="ypur__line" :data-test="`purchases-line-${line.id}`">
         <div class="ypur__line-main">
-          <span class="ypur__line-qty">×{{ line.quantity }}</span>
+          <span class="ypur__line-qty">×{{ formatSkeins(line.quantity, { locale }) }}</span>
           <span v-if="line.date" class="ypur__line-date">{{ line.date }}</span>
           <span v-if="line.bain" class="ypur__line-bain">{{ line.bain }}</span>
           <span v-if="line.purchasedFrom" class="ypur__line-bain">{{ line.purchasedFrom }}</span>
@@ -278,7 +302,7 @@ function lineAmountText(line) {
         <span class="ypur__lbl">{{ t(moneyStat(cur).unitKey, { symbol: moneyStat(cur).symbol }) }}</span>
       </div>
       <div class="ypur__stat">
-        <span class="ypur__num">{{ skeins }}</span>
+        <span class="ypur__num">{{ formatSkeins(skeins, { locale }) }}</span>
         <span class="ypur__lbl">{{ t('yarn.skeins') }}</span>
       </div>
     </div>
@@ -294,7 +318,7 @@ function lineAmountText(line) {
         </button>
       </div>
       <label class="field-label mt2" for="ypur-qty">{{ t('yarn.quantity') }}</label>
-      <input id="ypur-qty" v-model="form.quantity" class="input" inputmode="numeric" />
+      <input id="ypur-qty" :value="form.quantity" class="input" inputmode="decimal" @input="onQuantiteAchat" />
       <template v-if="form.kind === 'buy'">
         <label class="field-label mt2" for="ypur-price">
           {{ t('yarn.priceWithSymbol', { symbol: currencySymbol(form.currency || settings.currency, locale) }) }}
@@ -309,7 +333,7 @@ function lineAmountText(line) {
       <input id="ypur-purchased-from" v-model="form.purchasedFrom" class="input" />
       <div class="ypur__form-actions">
         <button type="button" class="btn" data-test="purchases-form-cancel" @click="closeForm">{{ t('common.cancel') }}</button>
-        <button type="button" class="btn btn--primary" data-test="purchases-form-save" :disabled="submitting" @click="submitForm">{{ t('common.save') }}</button>
+        <button type="button" class="btn btn--primary" data-test="purchases-form-save" :disabled="submitting || !quantiteValide" @click="submitForm">{{ t('common.save') }}</button>
       </div>
     </div>
   </section>

@@ -44,8 +44,11 @@
     "resumeSize": "knitted size {size}",
     "wipSummary": "You have {n} project in progress. | You have {n} projects in progress.",
     "lastProject": "Last project",
-    "noProjects": "No projects yet. Create your first project to get started.",
+    "noProjects": "No projects yet. Import a PDF pattern or create your first project to get started.",
     "createProject": "Create a project",
+    "importPdf": "Import a PDF pattern",
+    "importPdfHint": "It will be kept in your Pattern library",
+    "importPdfShort": "Import a PDF",
     "seeAll": "See all",
     "collapse": "Collapse",
     "toolsLabel": "Tools",
@@ -1039,6 +1042,12 @@
     "preview": "Pattern preview",
     "loading": "Loading…",
     "readOnlyNote": "Read-only preview. To choose your size and track your progress, create a project then “Follow the pattern”.",
+    "legend": {
+      "title": "While tracking:",
+      "check": "gets checked",
+      "count": "gets counted",
+      "read": "to read"
+    },
     "chooseSize": "1. Choose your size",
     "singleSize": "One size",
     "section": {
@@ -1051,6 +1060,7 @@
     "markDone": "Mark step as done",
     "fixHere": "Fix",
     "stepImageOpen": "View image full screen",
+    "coverOpen": "View the cover full screen",
     "noRepeat": "No repeat for your size ({size})",
     "pickSizeShort": "choose your size",
     "seeTechnique": "See the technique",

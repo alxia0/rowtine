@@ -1,0 +1,1 @@
+Dezimale Garnmengen (z. B. 2,5 Knäuel): Vorrat, Käufe, Reservierungen, Verbrauch pro Projekt, CSV-Export und Teilen. PDF-Import: Bilder der Anleitung bleiben besser erhalten, Anleitungen werden genauer gelesen, besonders deutsche. Anleitungsansicht: große Schrittbilder, PDF-Titelseite oben, verbesserte Vorschau. Verschiedene Verbesserungen der Oberfläche und Fehlerbehebungen.

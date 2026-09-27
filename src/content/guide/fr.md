@@ -64,7 +64,12 @@ En ouvrant l'app, tu retrouves :
   que si le projet a au moins une laine et qu'elles portent toutes l'étiquette Vegan.
 - Sur un projet **Terminé**, la tuile affiche sa **date de fin** juste après la technique et la taille (« Tricot · M · Terminé le 15/07/2026 ») dès qu'une date a été saisie. Elle se renseigne toute seule quand tu marques le projet Terminé (voir point 2), et n'apparaît jamais sur un projet Abandonné.
 - Un accès rapide aux **outils** (calculateur de mailles, compteur libre, aide
-  aiguilles/crochet) et au bouton **+ Créer un projet**.
+  aiguilles/crochet), au bouton **+ Créer un projet** et au bouton **Importer un
+  PDF**, qui ouvre ta **Bibliothèque de patrons** directement sur l'ajout d'un patron.
+- Au tout début, tant que l'app ne contient que les exemples, l'accueil va à
+  l'essentiel : une carte **Importer un patron PDF** prend la place de la tuile
+  Reprendre et du récapitulatif. Ils reviennent dès que tu as créé ton premier
+  projet ou importé ton premier patron.
 - Enfin, **le menu en haut à droite** mène à tout moment au stock de laines, à
   la bibliothèque de patrons, aux statistiques, **aux sessions**, aux dépenses,
   à ce guide, aux réglages et à l'écran À propos. Il est présent sur tous les

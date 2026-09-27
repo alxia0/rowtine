@@ -100,6 +100,18 @@ describe('écart stock / historique', () => {
   it('laine sans trace de consommation', () => {
     expect(acquiredFromStock({ quantity: 6 })).toBe(6)
   })
+  // Sans l’arrondi de `totalSkeins`, 0,1 + 0,2 laisserait un écart fantôme et une alerte à tort.
+  it('bruit binaire d’une somme de décimales dans l’historique : aucun écart, aucune alerte', () => {
+    expect(stockGap({ quantity: 0.3 }, [buy({ quantity: 0.1 }), buy({ quantity: 0.2 })])).toBe(0)
+  })
+  // Sans l’arrondi d’`acquiredFromStock`, restant + déjà tricoté porterait la même traîne binaire.
+  it('bruit binaire d’une somme de décimales côté stock', () => {
+    expect(acquiredFromStock({ quantity: 0.1, consumed: { 7: 0.2 } })).toBe(0.3)
+  })
+  // Sans l’arrondi propre à `stockGap`, 1,1 - 0,2 laisserait 0.9000000000000001 dans l’écart.
+  it('bruit binaire d’une soustraction entre deux totaux déjà arrondis', () => {
+    expect(stockGap({ quantity: 1.1 }, [buy({ quantity: 0.2 })])).toBe(0.9)
+  })
 })
 
 // ─── Catégories de dépense (lot « prix du patron », 07/08) ──────────────────

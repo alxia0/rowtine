@@ -114,3 +114,16 @@ test('le tap sur « Importer au format Rowtine » ouvre lui aussi le sélecteur 
   const chooser = await chooserPromise
   expect(chooser.isMultiple()).toBe(false)
 })
+
+// Protège l'entrée de l'accueil allégé : la carte d'import mène à la Bibliothèque, feuille d'ajout ouverte.
+test('accueil après l’onboarding : la carte d’import ouvre la feuille d’ajout de la Bibliothèque', async ({ page }) => {
+  await page.goto('/')
+  const carte = page.locator('[data-test="home-import-card"]')
+  await expect(carte).toBeVisible()
+  await carte.click()
+  await expect(page).toHaveURL(/\/library/)
+  // Aucun message de première visite n'est dû ici (rappel d'import armé par la seule porte
+  // native, astuce de balayage semée par completeOnboarding) : la feuille s'ouvre seule.
+  await expect(page.locator('.pas__card')).toBeVisible()
+  await expect(page).not.toHaveURL(/add=1/)
+})

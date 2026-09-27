@@ -33,6 +33,27 @@ const MAX_CHROME_ROWS_PER_BAND = 1
 const SUPERSCRIPT_SIZE_RATIO = 0.7
 const SUPERSCRIPT_Y_OFFSET_RATIO = 0.6
 
+// Item OBLIQUE : la matrice de transformation pdf.js encode aussi la ROTATION du glyphe
+// (composantes a,b de `transform`), jamais lue jusqu'ici — un badge de couverture pivoté
+// (« Nombreuses couleurss » à 35-38°, dizaines de PDF Go handmade) est traité comme du
+// texte horizontal normal et se recolle par pure coïncidence de Y à du contenu voisin sans
+// rapport. Mesuré sur le corpus (500 PDF) : 67 items obliques sur 18 documents, dont du
+// vrai contenu à conserver intégralement (numéros de diagramme livojoki, légendes de photo
+// sensory-bunny) — le drapeau ne supprime donc RIEN ici,
+// il sert uniquement à la garde de promotion en titre (segment.js, isTitleLine/
+// isSpacedTitle/detectTitle). Bornes [20°, 80°] : sous 20°, un texte quasi horizontal
+// (skew d'imprimante, cas réel mesuré 17-18°) reste un TITRE légitime, jamais un badge ;
+// au-dessus de 80°, c'est du texte VERTICAL (légende de reliure, colonne latérale),
+// hors du phénomène diagnostiqué (35-45° observés) et donc hors de cette garde.
+const OBLIQUE_ANGLE_MIN = 20
+const OBLIQUE_ANGLE_MAX = 80
+function isObliqueTransform(transform) {
+  const a = transform?.[0] ?? 1
+  const b = transform?.[1] ?? 0
+  const deg = Math.abs((Math.atan2(b, a) * 180) / Math.PI)
+  return deg >= OBLIQUE_ANGLE_MIN && deg <= OBLIQUE_ANGLE_MAX
+}
+
 // Exclut les bandes Y extrêmes (en-tête/pied de page) d'un ensemble de cellules — même
 // bande 6%-94% que detectColumnGutter ci-dessous, extraite en fonction partagée. Sans
 // cela, une ligne de pied de page pleine largeur (« Hobbii.de - Copyright © … » recollée
@@ -151,6 +172,13 @@ const CLUSTER_GAP = 40     // écart mini (pt) entre x-début de 2 colonnes dist
 const MIN_COL_WIDTH = 60   // largeur mini d'une colonne (garde anti sur-découpage)
 const MIN_SHARED_ROWS = 2  // rangées mini qu'une colonne candidate doit partager avec une
                             // AUTRE colonne pour être retenue (élague les étiquettes isolées)
+const VALCOL_MAX_CHARS = 12  // longueur maxi d'une cellule de la colonne candidate « valeur »
+                              // (« 250 g », « 50 g ») — une vraie colonne de prose porte des
+                              // cellules bien plus longues (garde ci-dessous)
+const VALCOL_ENDX_TOL = 2    // écart maxi (pt) entre les endX des cellules candidates pour
+                              // les considérer alignées à droite (colonne de valeurs de fil)
+const VALCOL_PAIRED_MIN = 0.9 // proportion mini de rangées de la colonne candidate qui
+                               // partagent leur rangée avec la colonne précédente (libellés)
 
 // Cellule = étiquette de diagramme probable (axe de rangs d'un schéma tricot, cote isolée :
 // « 50 », « 27-28 ») : uniquement chiffres/tirets/espaces/virgules, jamais une lettre — une
@@ -310,7 +338,61 @@ function detectColumns(filled, pageWidth) {
     const shared = Array.from({ length: cols.length }).fill(0)
     for (const set of byRow.values()) if (set.size >= 2) for (const k of set) shared[k]++
     const bad = shared.findIndex((n) => n < MIN_SHARED_ROWS)
-    if (bad !== -1) { cols.splice(bad, 1); changed = true }
+    if (bad !== -1) { cols.splice(bad, 1); changed = true; continue }
+    // Garde « colonne de valeurs » : une colonne de fil/mesures alignée à droite
+    // (« 250 g », « 50 g », formée par les endX des cellules, PAS leurs x-début) passe
+    // les deux gardes ci-dessus — elle
+    // PARTAGE ses rangées avec la colonne de libellés qui la précède (garde solitaire
+    // inopérante) et son couloir n'est piétiné par rien (garde chevauchement inopérante)
+    // — et se fait donc traiter comme une VRAIE colonne de lecture par detectColumns,
+    // séparant « Fond » de « 250 g » (Classic Sweater p.3). Discriminant : ses cellules
+    // sont COURTES (≤ VALCOL_MAX_CHARS, jamais une vraie colonne de prose), leurs endX
+    // sont quasi identiques (± VALCOL_ENDX_TOL, une vraie prose wrap à des largeurs
+    // variables) et ≥ VALCOL_PAIRED_MIN de ses rangées portent aussi une cellule de la
+    // colonne précédente (une colonne de valeurs sans étiquette en face n'existe pas).
+    // Contre-exemple testé : une colonne de cellules > VALCOL_MAX_CHARS caractères,
+    // même alignée à droite, reste une colonne (vraie prose, pas des valeurs de fil).
+    //
+    // Un tableau de mesures à DEUX tailles (libellés + colonne S alignée à droite +
+    // colonne L alignée à droite, encore plus à droite) est un contre-exemple réel :
+    // la garde retirait la colonne S (courte, alignée, appariée aux
+    // libellés) sans savoir que la colonne L, à sa droite, en dépend tout autant —
+    // cols.length tombait sous 3, detectColumns rendait null, et L partait seule via
+    // le repli bimodal, déconnectée de ses libellés. Une colonne de valeurs n'est
+    // retirée que si la colonne qui la SUIT existe et n'est PAS elle-même de forme
+    // « valeurs » (courte + alignée à droite, sans exiger l'appariement — L n'a pas
+    // besoin d'être appariée à S pour prouver que S n'est pas la dernière colonne de
+    // fil de la rangée) : dans Classic, la colonne suivante est une vraie prose, donc
+    // pas de cette forme, et S est retirée normalement. La DERNIÈRE colonne n'est
+    // jamais retirée par cette garde (rien ne prouve qu'elle n'est pas la seule vraie
+    // colonne de lecture de droite) — non nécessaire sur Classic, revérifié au sweep.
+    const isValueShaped = (k) => {
+      const cs = textNarrow.filter((c) => colOf(c.x, cols) === k)
+      if (cs.length < MIN_COL_CELLS) return false
+      if (!cs.every((c) => c.text.trim().length <= VALCOL_MAX_CHARS)) return false
+      const ends = cs.map((c) => c.endX)
+      const starts = cs.map((c) => c.x)
+      const endSpread = Math.max(...ends) - Math.min(...ends)
+      const startSpread = Math.max(...starts) - Math.min(...starts)
+      // Un vrai libellé de colonne (« C2 haut », « C3 haut »…) démarre TOUJOURS au même x —
+      // seule une colonne de valeurs RIGHT-JUSTIFIÉES (nombre de chiffres variable, « 250 g »
+      // vs « 50 g ») a un x-début qui varie plus que son endX : sans cette condition, une
+      // colonne de libellés à x fixe (dont endX est incidemment constant, texte de même
+      // longueur) serait retirée à tort — mesuré sur les fixtures PT1/chevauchement du dépôt.
+      return endSpread <= VALCOL_ENDX_TOL && startSpread > VALCOL_ENDX_TOL
+    }
+    for (let j = 1; j < cols.length; j++) {
+      if (!isValueShaped(j)) continue
+      const candidate = textNarrow.filter((c) => colOf(c.x, cols) === j)
+      const leftRows = new Set(
+        textNarrow.filter((c) => colOf(c.x, cols) === j - 1).map((c) => Math.round(c.y / Y_TOL)),
+      )
+      const paired = candidate.filter((c) => leftRows.has(Math.round(c.y / Y_TOL))).length / candidate.length
+      if (paired < VALCOL_PAIRED_MIN) continue
+      const hasNext = j + 1 < cols.length
+      if (!hasNext || isValueShaped(j + 1)) continue
+      cols.splice(j, 1); changed = true; break
+    }
   }
   if (cols.length < 3) return null
   for (let i = 1; i < cols.length; i++) if (cols[i] - cols[i - 1] < MIN_COL_WIDTH) return null
@@ -909,6 +991,193 @@ function readPairedGrid(filled, paired, toLines) {
   return out
 }
 
+// Cellule de grille de diagramme (jacquard/point) : un seul glyphe répété, jamais un
+// chiffre (« x x x », « o o o », rarement une lettre de patron isolée comme « k k k »).
+// Ces grilles ne sont filtrées côté app QUE par le calque vectoriel
+// (vector-regions/promote-grids), jamais côté node —
+// isGlyphOnly (résidu de police) et isGridToken (chiffres) ne les couvrent pas, et
+// detectColumnGutter échoue : la grille remplit elle-même le couloir qu'il cherche. Des
+// centaines de ces cellules finissent recollées par Y à l'encadré de prose voisin.
+const CHART_CELL_RUN_RE = /^([^\s\p{N}])(?:\s+\1)*$/u
+const CHART_MIN_GLYPHS = 40 // jetons mini du glyphe, PAR GRAPPE (pas sur toute la page)
+const CHART_MIN_RUNS = 5 // cellules mini d'≥ 3 jetons, PAR GRAPPE — sous ce double seuil,
+// une vraie ligne de patron à lettre répétée (« k k k », rare mais réelle) doit survivre.
+const CHART_BOX_PAD = 2 // marge (pt) de la boîte englobante d'une grappe retenue
+// Facteur d'écart Y (× taille de cellule, la plus PETITE des deux rangées comparées — un
+// séparateur dessiné dans un corps différent de celui de la grille ne doit pas hériter du
+// corps le plus grand des deux pour s'autoriser un écart plus large). Mesuré sur la grille
+// réelle Classic Sweater p.6-7 : la plupart des rangées
+// s'enchaînent à 1× la taille de cellule (5,62-6,03 pt), mais certaines rangées de la MÊME
+// grille (frontière entre tailles empilées dans le même diagramme) sautent à ~3× (16,85-
+// 18,09 pt) — un facteur de 2 les aurait coupées à tort. 4 (marge au-delà du 3× mesuré)
+// reste très en-deçà d'un saut vers une grille séparée ou un séparateur isolé (dizaines à
+// centaines de pt), mais ne suffit PAS à lui seul à écarter un séparateur du même glyphe
+// posé à seulement 2-3× la taille de cellule d'une grille : c'est le rôle de
+// l'encadrement ci-dessous, pas de ce facteur.
+const CHART_ROW_GAP_FACTOR = 4
+
+// Regroupe les cellules d'UN glyphe en grappes denses (composantes connexes) : la vraie
+// unité de regroupement est le SEGMENT (une rangée Y peut porter plusieurs segments
+// disjoints en X — deux grilles côte à côte sur les mêmes rangées, cf. tests dédiés), pas
+// la rangée entière. Un segment rejoint la grappe d'un autre si leur écart en Y reste sous
+// CHART_ROW_GAP_FACTOR fois la PLUS PETITE taille de cellule des deux ET si leurs empans X
+// se chevauchent à ± une marge relative au pas de cellule (pas absolue : le pas d'une
+// grille à cellules 14pt n'est pas celui d'un chart dentelle à cellules 40pt). Ce pas de
+// référence (refGap ci-dessous) est le pas médian intra-rangée (écart entre cellules
+// voisines d'une même rangée), calculé sur TOUT le glyphe de la page (pas par grappe : deux
+// grappes distinctes du même glyphe mais à pas différent partagent ce refGap) ; à défaut
+// (rangées d'une seule cellule, ex. séparateur), la largeur médiane des cellules du glyphe.
+//
+// Calé au plus juste, sans marge : seuil de fragmentation ≈ +25 % du pas médian. Sert aussi
+// bien à couper une rangée en segments (deux grilles côte à côte) qu'à les refusionner.
+const CHART_ROW_X_MARGIN_FACTOR = 1.25 // écart/chevauchement X entre segments, × refGap
+// Tolérance (× écart médian entre rangées de la grappe) sous laquelle une rangée est
+// considérée isolée (aucune AUTRE rangée de la grappe à proximité) — cf. isNonIsolated.
+const CHART_ISOLATION_FACTOR = 1.5
+
+// Limites connues, non traitées :
+// (a) deux grilles du même glyphe séparées de MOINS de CHART_ROW_X_MARGIN_FACTOR × refGap
+//     restent fusionnées (le seuil calibré ci-dessus l'exige pour un chart dentelle, cf.
+//     tests dédiés) — le texte posé dans un écart plus étroit que cette marge disparaîtrait.
+// (b) refGap se calcule sur TOUT le glyphe de la page, pas par grappe : deux grappes du
+//     même glyphe à des pas de cellule très différents (une petite grille dense et un
+//     chart dentelle sur la même page) partagent la même marge, calibrée pour le pas
+//     médian de L'ENSEMBLE, pas de chacune séparément.
+// (c) une cellule non-glyphe contenue dans la boîte d'une grappe mais NON encadrée (une des
+//     deux rangées voisines isolée) survit désormais toujours, même quand elle appartient
+//     réellement au bruit du diagramme plutôt qu'à une légende : mesuré sur une vraie page
+//     du corpus (nino-adult-fr p.8, glyphe de contrôle non-Unicode, diagnostic hors de
+//     CHART_CELL_RUN_RE dans les deux versions) où l'ancien code (une seule boîte par page)
+//     balayait ce bruit sans discernement alors que l'encadrement, ici, le retient.
+function clusterGlyphRows(cells) {
+  const byY = new Map()
+  for (const c of cells) {
+    if (!byY.has(c.y)) byY.set(c.y, [])
+    byY.get(c.y).push(c)
+  }
+  const rowGroups = [...byY.values()].map((cs) => [...cs].sort((a, b) => a.x - b.x))
+
+  // Pas de référence : écart médian entre cellules voisines d'une même rangée (le pas
+  // « naturel » de la grille) ; à défaut (aucune rangée à ≥ 2 cellules — séparateurs
+  // isolés, chart à une seule colonne), largeur médiane des cellules du glyphe.
+  const intraRowGaps = []
+  for (const row of rowGroups) for (let i = 1; i < row.length; i++) intraRowGaps.push(row[i].x - row[i - 1].endX)
+  const refGap = median(intraRowGaps) ?? median(cells.map((c) => c.endX - c.x)) ?? 1
+
+  // 1. Découpe chaque rangée Y en segments X disjoints (saut > CHART_ROW_X_MARGIN_FACTOR ×
+  // refGap) : deux grilles côte à côte sur les MÊMES rangées Y sont sinon indiscernables
+  // (une seule rangée mêlant leurs cellules, aucun test X ne s'applique plus jamais).
+  const segments = []
+  for (const row of rowGroups) {
+    let cur = null
+    for (const c of row) {
+      if (cur && c.x - cur.maxEndX > CHART_ROW_X_MARGIN_FACTOR * refGap) {
+        segments.push(cur)
+        cur = null
+      }
+      if (!cur) cur = { cells: [], y: c.y, minX: c.x, maxEndX: c.endX, maxSize: 0 }
+      cur.cells.push(c)
+      cur.minX = Math.min(cur.minX, c.x)
+      cur.maxEndX = Math.max(cur.maxEndX, c.endX)
+      cur.maxSize = Math.max(cur.maxSize, c.size || 0)
+    }
+    if (cur) segments.push(cur)
+  }
+
+  // 2. Union-find sur TOUTES les paires de segments (jamais un chaînage au segment
+  // précédent) : deux grilles entrelacées en Y mais disjointes en X intercalent leurs
+  // rangées dans le tri par Y — un chaînage séquentiel romprait chacune en segments isolés.
+  const parent = segments.map((_, i) => i)
+  const find = (i) => {
+    while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i] }
+    return i
+  }
+  const union = (i, j) => {
+    const ri = find(i)
+    const rj = find(j)
+    if (ri !== rj) parent[ri] = rj
+  }
+  for (let i = 0; i < segments.length; i++) {
+    for (let j = i + 1; j < segments.length; j++) {
+      const a = segments[i]
+      const b = segments[j]
+      const rowGapMax = CHART_ROW_GAP_FACTOR * Math.max(Math.min(a.maxSize, b.maxSize), 1)
+      const xMargin = CHART_ROW_X_MARGIN_FACTOR * refGap
+      const overlapsX = a.minX <= b.maxEndX + xMargin && b.minX <= a.maxEndX + xMargin
+      if (Math.abs(a.y - b.y) <= rowGapMax && overlapsX) union(i, j)
+    }
+  }
+  const groups = new Map()
+  for (let i = 0; i < segments.length; i++) {
+    const r = find(i)
+    if (!groups.has(r)) groups.set(r, [])
+    groups.get(r).push(...segments[i].cells)
+  }
+  return [...groups.values()].map((cells) => ({ cells }))
+}
+
+function chartCellDrop(filled) {
+  const byGlyph = new Map()
+  for (const c of filled) {
+    const t = c.text.trim()
+    if (!CHART_CELL_RUN_RE.test(t)) continue
+    const g = t[0]
+    if (!byGlyph.has(g)) byGlyph.set(g, [])
+    byGlyph.get(g).push(c)
+  }
+  const drop = new Set()
+  for (const cells of byGlyph.values()) {
+    for (const cluster of clusterGlyphRows(cells)) {
+      let n = 0
+      let long = 0
+      for (const c of cluster.cells) {
+        const tokens = c.text.trim().split(/\s+/).length
+        n += tokens
+        if (tokens >= 3) long++
+      }
+      if (n < CHART_MIN_GLYPHS || long < CHART_MIN_RUNS) continue
+      for (const c of cluster.cells) drop.add(c)
+
+      // Rangées Y distinctes de la grappe (triées), pour l'encadrement ci-dessous : une
+      // rangée est isolée si sa voisine la plus proche dans la grappe dépasse
+      // CHART_ISOLATION_FACTOR × l'écart médian entre rangées de la grappe — c'est le cas
+      // d'un séparateur qui n'a rejoint la grappe QUE par la marge d'écart Y généreuse
+      // (CHART_ROW_GAP_FACTOR), pas d'une rangée interne dense.
+      const ys = [...new Set(cluster.cells.map((c) => c.y))].sort((a, b) => b - a)
+      const rowGaps = []
+      for (let i = 1; i < ys.length; i++) rowGaps.push(ys[i - 1] - ys[i])
+      const isolationMax = (median(rowGaps) ?? 0) * CHART_ISOLATION_FACTOR
+      const nearestGap = (y) => {
+        let best = Infinity
+        for (const other of ys) if (other !== y) best = Math.min(best, Math.abs(other - y))
+        return best
+      }
+      const isIsolated = (y) => ys.length > 1 && nearestGap(y) > isolationMax
+
+      // Étend le retrait à toute cellule non-glyphe CONTENUE dans la boîte englobante DE
+      // CETTE GRAPPE (± CHART_BOX_PAD), mais seulement si elle est ENCADRÉE par une rangée
+      // de la grappe au-dessus ET en dessous, toutes deux NON isolées : c'est le cas d'une
+      // étiquette « Section N » posée en plein cœur d'une grille dense,
+      // jamais celui d'une légende posée entre une grille et un séparateur qui ne l'a
+      // rejointe que par la tolérance d'écart Y — ce séparateur, lui, EST isolé.
+      const x0 = Math.min(...cluster.cells.map((c) => c.x)) - CHART_BOX_PAD
+      const x1 = Math.max(...cluster.cells.map((c) => c.endX)) + CHART_BOX_PAD
+      const y0 = Math.min(...cluster.cells.map((c) => c.y)) - CHART_BOX_PAD
+      const y1 = Math.max(...cluster.cells.map((c) => c.y)) + CHART_BOX_PAD
+      for (const c of filled) {
+        if (drop.has(c)) continue
+        if (!(c.x >= x0 && c.endX <= x1 && c.y >= y0 && c.y <= y1)) continue
+        const above = ys.filter((y) => y > c.y).at(-1)
+        const below = ys.find((y) => y < c.y)
+        if (above == null || below == null) continue
+        if (isIsolated(above) || isIsolated(below)) continue
+        drop.add(c)
+      }
+    }
+  }
+  return drop.size ? drop : null
+}
+
 export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
   // 1. items → rangées par Y, puis cellules par sauts X.
   const rows = []
@@ -918,6 +1187,7 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
     const x = it.transform?.[4] ?? 0
     const size = it.height || Math.abs(it.transform?.[3] ?? 0) || 0
     const bold = /bold|black|heavy/i.test(styles[it.fontName]?.fontFamily || '')
+    const oblique = isObliqueTransform(it.transform)
     // Exposant (cf. SUPERSCRIPT_SIZE_RATIO ci-dessus) : rattaché à la rangée EN COURS
     // sans jamais toucher cur.y — ainsi le fragment suivant, revenu à la ligne de base,
     // continue de se comparer à cur.y (inchangé) et rejoint la même rangée normalement.
@@ -938,7 +1208,7 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
       cur = { y, items: [] }
       rows.push(cur)
     }
-    cur.items.push({ x, w: it.width || 0, str: it.str, size, bold })
+    cur.items.push({ x, w: it.width || 0, str: it.str, size, bold, oblique })
   }
   const cells = []
   for (const row of rows) {
@@ -955,19 +1225,25 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
       // du même texte (colonnes de tailles) sont éloignées en X et donc préservées.
       if (prev && it.str === prev.str && Math.abs(it.x - prev.x) < 0.6) continue
       if (!cell || (endX != null && it.x - endX > X_GAP && it.str.trim())) {
-        cell = { text: '', size: 0, bold: false, y: row.y, x: it.x, endX: it.x, parts: [] }
+        cell = { text: '', size: 0, bold: false, y: row.y, x: it.x, endX: it.x, parts: [], oblique: true }
         cells.push(cell)
       }
       cell.parts.push({ x: it.x, text: it.str })
       cell.text += it.str
       cell.size = Math.max(cell.size, it.size)
       cell.bold = cell.bold || it.bold
+      // Cellule oblique seulement si TOUS ses items le sont (ET, pas OU) : un fragment
+      // horizontal recollé par coïncidence à un fragment pivoté ne doit pas priver toute
+      // la cellule de sa promotion en titre si elle reste, pour l'essentiel, du texte
+      // normal (cf. commentaire OBLIQUE_ANGLE_MIN/MAX ci-dessus).
+      cell.oblique = cell.oblique && it.oblique
       endX = Math.max(endX ?? it.x, it.x + it.w)
       cell.endX = endX
       prev = it
     }
   }
   const filled = cells.filter((c) => c.text.trim())
+  const chartDrop = chartCellDrop(filled)
 
   // 2. Détection deux-colonnes. Deux mécanismes complémentaires :
   //  (a) gouttière géométrique par page (detectColumnGutter) : trouve un couloir
@@ -988,13 +1264,22 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
 
   const toLines = (list) => {
     // Regroupe à nouveau par Y à l'intérieur d'une colonne (cellules sœurs recollées).
+    // chartDrop retiré ICI, en aval de toute la détection de colonnes ci-dessus (gouttière,
+    // bimodalité, grille appariée, N-colonnes) : filtrer `filled` en amont changerait la
+    // population de cellules vue par ces détecteurs et ferait basculer une page réelle
+    // (Classic Sweater p.7) en 3 colonnes parasites. Chaque branche ci-dessous appelle
+    // cette même closure : le retrait
+    // s'applique donc partout où des lignes sont réellement émises, jamais avant.
     const out = []
     let prev = null
-    for (const c of [...list].sort((a, b) => b.y - a.y || a.x - b.x)) {
+    for (const c of [...list].filter((c) => !chartDrop?.has(c)).sort((a, b) => b.y - a.y || a.x - b.x)) {
       if (prev && Math.abs(c.y - prev.y) <= Y_TOL) {
         prev.text += ` ${c.text}`
         prev.size = Math.max(prev.size, c.size)
         prev.bold = prev.bold || c.bold
+        // Même règle qu'à la construction des cellules : la ligne fusionnée ne reste
+        // oblique que si TOUTES ses cellules sœurs le sont (ET).
+        prev.oblique = prev.oblique && c.oblique
         // Séparateur x=null : l'espace de recollage n'existe dans AUCUN item du PDF
         // (deux cellules sœurs, pas un fragment) — le marquer null l'empêche d'être
         // confondu avec une vraie abscisse par un futur consommateur de parts.
@@ -1009,7 +1294,7 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
       // ses clés depuis parts et duplique les définitions). Les OBJETS internes restent
       // partagés : ils sont traités comme immuables partout ailleurs (aucun site ne les
       // mute), seul le tableau est cloné.
-      prev = { text: c.text, size: c.size, bold: c.bold, y: c.y, parts: [...c.parts] }
+      prev = { text: c.text, size: c.size, bold: c.bold, y: c.y, parts: [...c.parts], oblique: c.oblique }
       out.push(prev)
     }
     // Puce typographique en tête de ligne (glyphe de liste PDF « ● • ◦ ▪ ‣ ⁃ ∙ »
@@ -1036,7 +1321,11 @@ export function itemsToLines(items, styles = {}, { pageWidth = 595 } = {}) {
           const head = parts[0].text.replace(/^\s+/, '').replace(/^[●•◦▪‣⁃∙]\s*/, '')
           parts = head ? [{ ...parts[0], text: head }, ...parts.slice(1)] : parts.slice(1)
         }
-        return { ...l, text, parts }
+        const out2 = { ...l, text, parts }
+        // Clé posée SEULEMENT si vraie (jamais `oblique: false`) : ce champ est nouveau,
+        // un `toEqual` existant sur la forme exacte d'une ligne ne l'attend pas.
+        if (!out2.oblique) delete out2.oblique
+        return out2
       })
       .filter((l) => l.text)
   }

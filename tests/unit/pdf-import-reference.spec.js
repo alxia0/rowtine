@@ -213,6 +213,28 @@ describe('extractReference', () => {
     const needleBlock = blocks.find((b) => /aiguille/i.test(b.h3 || ''))
     expect((needleBlock?.p || []).join('\n')).toContain('Stricknadeln 4')
   })
+  // Protège le libellé nu « Verbrauch » : il suit sa quantité de pelotes dans le bloc Fil (railway-pillow-de).
+  it('« Verbrauch » nu reste en tête de sa quantité de pelotes, dans le bloc Fil', () => {
+    const materiel = sec('Material', 'materiel', ['Baby Snuggle Fb. 24', '1 Holzknopf 60 mm', 'Verbrauch', '450g (5 Knäuel)', 'Bestelle Garn und Zubehör hier'])
+    const { reference } = extractReference([materiel], { n: 1 })
+    const blocks = reference.tabs.find((t) => t.id === 'materiel')?.blocks || []
+    const yarnBlock = blocks.find((b) => b.h3 === 'Fil')
+    const matBlock = blocks.find((b) => b.h3 === 'Matériel')
+    expect((yarnBlock?.p || []).join('\n')).toBe('Verbrauch\n450g (5 Knäuel)')
+    expect(matBlock?.p).toEqual(['Baby Snuggle Fb. 24', '1 Holzknopf 60 mm', 'Bestelle Garn und Zubehör hier'])
+  })
+  it('sans libellé « Verbrauch », des lignes de pelotes consécutives restent seules au Fil (non-régression)', () => {
+    const materiel = sec('Material', 'materiel', ['2 Knäuel Toucan, Farbe 15', '1 Knäuel Toucan, Farbe 01'])
+    const { reference } = extractReference([materiel], { n: 1 })
+    const blocks = reference.tabs.find((t) => t.id === 'materiel')?.blocks || []
+    expect((blocks.find((b) => b.h3 === 'Fil')?.p || []).join('\n')).toBe('2 Knäuel Toucan, Farbe 15\n1 Knäuel Toucan, Farbe 01')
+  })
+  it('« Verbrauch: » suivi d’une valeur hors Fil reste au Matériel, à sa place (non-régression knit-domino-shawl-de)', () => {
+    const materiel = sec('Material', 'materiel', ['Verbrauch:', '300 g Hobbii Dream Colour, Farbe 03', 'Rundstricknadel 4 mm'])
+    const { reference } = extractReference([materiel], { n: 1 })
+    const blocks = reference.tabs.find((t) => t.id === 'materiel')?.blocks || []
+    expect(blocks.find((b) => b.h3 === 'Matériel')?.p).toEqual(['Verbrauch:', '300 g Hobbii Dream Colour, Farbe 03'])
+  })
   // scallops-rectangular-placemat-de-85957bc1 (corpus réel, crochet, palier 7) : dans le
   // filet ligne-à-ligne d'une section ref==='aiguilles', le motif NON ANCRÉ « n[åa]l » (censé
   // matcher le scandinave « nål ») matchait par collision de sous-chaîne l'anglais
@@ -592,6 +614,13 @@ describe('extractReference', () => {
     expect(rows).toContainEqual({ label: 'Largo (Antes de lavar y bloquear)', values: ['27', '30'] })
     expect(rows).toContainEqual({ label: 'Ancho (Después de lavar y bloquear)', values: ['60', '65'] })
     expect(rows).toContainEqual({ label: 'Largo (Después de lavar y bloquear)', values: ['33', '36'] })
+  })
+  // Protège contre le doublon en note d'un qualificatif déjà porté par les libellés de rangée (mammatus-bandana-es).
+  it('measure-row : un qualificatif avant/après blocage rattaché à une rangée ne repart pas en note', () => {
+    const s = sec('MEDIDAS', 'mesures', ['Antes de lavar y bloquear:', 'Ancho: Aprox. 50 (55) cm', 'Después de lavar y bloquear:', 'Ancho: Aprox. 60 (65) cm'])
+    const { notes } = extractReference([s], { n: 2 })
+    expect(notes).not.toContain('Antes de lavar y bloquear:')
+    expect(notes).not.toContain('Después de lavar y bloquear:')
   })
   it('measure-row : un sous-titre HORS vocabulaire avant/après blocage n’est jamais attaché comme qualificatif (garde étroite, non-invention)', () => {
     const s = sec('MEDIDAS', 'mesures', [
@@ -2717,6 +2746,17 @@ describe('bloc mesures — libellé sur la ligne PRÉCÉDENTE (Mia Cardigan, PDF
     expect(notes).toContain('Mesures prises à plat')
     expect(notes).toContain('Laver à la main')
   })
+
+  // Protège un libellé nu d'échantillon suivi de sa valeur dans une section « mesures » (ash-knit-wrist-warmers-de).
+  it('« Musterprobe » nu puis « 28 masker på 10 cm » vont au bloc Échantillon, pas en note', () => {
+    const { reference, notes } = extractReference([
+      sec('MAßE', 'mesures', ['Durchmesser: 18 (21) cm', 'Länge: 26 (26) cm', 'Musterprobe', '28 masker på 10 cm']),
+    ], { n: 2 })
+    const blocks = reference.tabs.find((t) => t.id === 'materiel')?.blocks || []
+    expect((blocks.find((b) => b.h3 === 'Échantillon')?.p || []).join('\n')).toBe('28 masker på 10 cm')
+    expect(notes).not.toContain('Musterprobe')
+    expect(notes).not.toContain('28 masker på 10 cm')
+  })
 })
 
 // Bout en bout (segment.js + reference.js), géométrie VERBATIM du PDF réel Mia Cardigan
@@ -2846,7 +2886,7 @@ describe('bloc materiel — les fils partent vers Fil (Mia Cardigan)', () => {
   // premier (ordre du document, `sections` traversées dans l'ordre) ; la puce à
   // métrage rencontrée ensuite dans le bloc Matériel ne peut plus rejoindre `yarns`
   // — sans le repli, elle disparaîtrait (ni Fil, ni Matériel, ni nulle part).
-  it("jamais perdre d'info : au plafond de qualite du champ Fil (8), une puce a metrage du bloc Materiel retombe au Materiel plutot que de disparaitre", () => {
+  it("jamais perdre d'info : au plafond de qualité du champ Fil (8), une puce à métrage du bloc Matériel retombe au Matériel plutôt que de disparaître", () => {
     const lignes = []
     for (let i = 1; i <= 8; i++) lignes.push(`Fibre ${i}, 100 g = 200 m`)
     const filSec = sec('FIL', 'fil', lignes)
@@ -2865,6 +2905,77 @@ describe('bloc materiel — les fils partent vers Fil (Mia Cardigan)', () => {
     expect(matBlock).toBeTruthy()
     expect(yarnText).not.toContain('Merino Singles')
     expect(matBlock.p).toContain('300 g Merino Singles by Sysleriget (100g = 366m)')
+  })
+
+  // Une section fil à 6 tailles « N ans: » + « Libellé NUM g » par taille est pivotée en une ligne par étiquette.
+  it('section fil à 6 tailles « N ans: » + « Libellé NUM g » : pivot en une ligne par étiquette, rien en Matériel', () => {
+    const sizeLabels = ['1-2 ans', '3-4 ans', '5-6 ans', '7-8 ans', '9-10 ans', '11-12 ans']
+    const filSec = sec('FIL', 'fil', [
+      '1-2 ans:', 'Fond 250 g', 'Jacquard 50 g',
+      '3-4 ans:', 'Fond 250 g', 'Jacquard 50 g',
+      '5-6 ans:', 'Fond 300 g', 'Jacquard 50 g',
+      '7-8 ans:', 'Fond 300 g', 'Jacquard 50 g',
+      '9-10 ans:', 'Fond 350 g', 'Jacquard 100 g',
+      '11-12 ans:', 'Fond 350 g', 'Jacquard 100 g',
+    ])
+    const { reference } = extractReference([filSec], { n: 6, sizeLabels })
+    const yarn = blockText(reference, /^fil$/i)
+    const materials = blockText(reference, /^mat[ée]riel$/i)
+    expect(yarn).toContain('Fond 250 (250) 300 (300) 350 (350) g')
+    expect(yarn).toContain('Jacquard 50 (50) 50 (50) 100 (100) g')
+    expect(materials).toBe('')
+  })
+
+  // Garde tout-ou-rien : une taille absente des lignes (rangée incomplète) désactive le pivot de toute l'étiquette.
+  it('une taille manquante dans les lignes (rangée incomplète) : aucun pivot, la ligne « Fond » repart telle quelle', () => {
+    const sizeLabels = ['1-2 ans', '3-4 ans', '5-6 ans', '7-8 ans', '9-10 ans', '11-12 ans']
+    const filSec = sec('FIL', 'fil', ['1-2 ans:', 'Fond 250 g', '11-12 ans:', 'Fond 350 g'])
+    const { reference } = extractReference([filSec], { n: 6, sizeLabels })
+    const yarn = blockText(reference, /^fil$/i)
+    expect(yarn).toContain('Fond 250 g')
+    expect(yarn).not.toContain('250 (250)')
+  })
+
+  // Jamais perdre d'info : au plafond de qualité du champ Fil (8), une ligne pivotée retombe au Matériel plutôt que de disparaître.
+  it("jamais perdre d'info : au plafond de qualité du champ Fil (8), une ligne pivotée retombe au Matériel plutôt que de disparaître", () => {
+    const lignes = []
+    for (let i = 1; i <= 8; i++) lignes.push(`Fibre ${i}, 100 g = 200 m`)
+    const filDummySec = sec('FIL', 'fil', lignes)
+    const sizeLabels = ['1-2 ans', '3-4 ans', '5-6 ans', '7-8 ans', '9-10 ans', '11-12 ans']
+    const filPivotSec = sec('FIL', 'fil', [
+      '1-2 ans:', 'Fond 250 g',
+      '3-4 ans:', 'Fond 250 g',
+      '5-6 ans:', 'Fond 300 g',
+      '7-8 ans:', 'Fond 300 g',
+      '9-10 ans:', 'Fond 350 g',
+      '11-12 ans:', 'Fond 350 g',
+    ])
+    const { reference } = extractReference([filDummySec, filPivotSec], { n: 6, sizeLabels })
+    const yarn = blockText(reference, /^fil$/i)
+    const materials = blockText(reference, /^mat[ée]riel$/i)
+    expect(yarn).not.toContain('250 (250)')
+    expect(materials).toContain('Fond 250 (250) 300 (300) 350 (350) g')
+  })
+
+  // Un libellé d'outil « …: » suivi d'une ligne de taille nue, dans le bloc fil, rejoint Aiguilles.
+  it('libellé d\'aiguilles « …: » suivi d\'une ligne de taille nue rejoint Aiguilles', () => {
+    const filSec = sec('FIL', 'fil', ['Aig à tricoter circ ou longues double pointes:', '2,5 et 3,0 mm'])
+    const { reference } = extractReference([filSec], { n: 1 })
+    const needlesText = blockText(reference, /aiguille/i)
+    expect(needlesText).toContain('Aig à tricoter circ ou longues double pointes: 2,5 et 3,0 mm')
+  })
+
+  // Jamais perdre d'info : au plafond d'Aiguilles (6), la ligne fusionnée retombe au Matériel plutôt que de disparaître.
+  it("jamais perdre d'info : au plafond d'Aiguilles (6), la ligne fusionnee retombe au Materiel plutot que de disparaitre", () => {
+    const lignes = []
+    for (let i = 2; i <= 7; i++) lignes.push(`Aiguilles ${i} mm`)
+    const aigSec = sec('AIGUILLES', 'aiguilles', lignes)
+    const filSec = sec('FIL', 'fil', ['Aig à tricoter circ ou longues double pointes:', '2,5 et 3,0 mm'])
+    const { reference } = extractReference([aigSec, filSec], { n: 1 })
+    const needlesText = blockText(reference, /aiguille/i)
+    const materials = blockText(reference, /^mat[ée]riel$/i)
+    expect(needlesText).not.toContain('Aig à tricoter circ ou longues double pointes: 2,5 et 3,0 mm')
+    expect(materials).toContain('Aig à tricoter circ ou longues double pointes: 2,5 et 3,0 mm')
   })
 })
 

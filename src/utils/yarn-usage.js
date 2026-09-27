@@ -4,13 +4,19 @@
 // dérivation ne vit pas dans les vues.
 import { normalizeLabels } from '@/constants/yarn-labels'
 
-// Map { [projectId]: qté } propre : clés numériques, quantités entières > 0.
+// Précision retenue pour une quantité de pelotes : deux décimales (demi, quart de
+// pelote). SEUL helper d'arrondi de pelotes de l'appli — pas de deuxième copie ailleurs.
+export function roundSkeins(n) {
+  return Math.round(n * 100) / 100
+}
+
+// Map { [projectId]: qté } propre : clés numériques, quantités décimales > 0.
 function cleanReservations(raw) {
   const out = {}
   if (!raw || typeof raw !== 'object') return out
   for (const [k, v] of Object.entries(raw)) {
     const pid = Number(k)
-    const qty = Math.floor(Number(v))
+    const qty = roundSkeins(Number(v))
     if (!Number.isFinite(pid) || !Number.isFinite(qty) || qty <= 0) continue
     out[pid] = qty
   }
@@ -35,8 +41,8 @@ export function normalizeYarnReservations(yarn) {
   if (yarn?.reservedFor == null || !Number.isFinite(pid)) return { reservations: {}, consumed: {} }
   // Un reservedFor valide = intention de lien : on ne la perd JAMAIS. Seule la QUANTITÉ
   // retombe (absente / nulle / négative / illisible → nb total de pelotes, puis 1).
-  const raw = Math.floor(Number(yarn.reservedQty))
-  const fromQuantity = Math.floor(Number(yarn.quantity))
+  const raw = roundSkeins(Number(yarn.reservedQty))
+  const fromQuantity = roundSkeins(Number(yarn.quantity))
   const qty = Number.isFinite(raw) && raw > 0 ? raw : Number.isFinite(fromQuantity) && fromQuantity > 0 ? fromQuantity : 1
   return { reservations: { [pid]: qty }, consumed: {} }
 }
@@ -47,21 +53,26 @@ export function reservationsOf(yarn) {
   return cleanReservations(normalizeYarnReservations(yarn)?.reservations)
 }
 
+// Une somme de décimales a sa propre traîne binaire (0,1 + 0,7 = 0.7999999999999999) :
+// roundSkeins referme derrière, sinon elle fuit dans tout ce qui compare ce total.
 export function reservedTotal(yarn) {
-  return Object.values(reservationsOf(yarn)).reduce((a, n) => a + n, 0)
+  return roundSkeins(Object.values(reservationsOf(yarn)).reduce((a, n) => a + n, 0))
 }
 
 // Pelotes libres de toute réservation.
 export function yarnAvailable(yarn) {
-  return Math.max(0, (Number(yarn?.quantity) || 0) - reservedTotal(yarn))
+  return roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - reservedTotal(yarn)))
 }
 
 // Ce que CE projet peut prendre au maximum : sa propre allocation est en cours d'édition,
-// donc on ne la décompte pas (seules celles des AUTRES projets bloquent).
+// donc on ne la décompte pas (seules celles des AUTRES projets bloquent). roundSkeins sur
+// la somme ET sur le résultat : une soustraction du type 1,1 - 0,2 a sa traîne binaire
+// (0.9000000000000001), qui fuirait sinon dans les allocations écrites par
+// setProjectReservation.
 export function availableForProject(yarn, pid) {
   const res = reservationsOf(yarn)
-  const others = Object.entries(res).reduce((a, [k, n]) => (Number(k) === Number(pid) ? a : a + n), 0)
-  return Math.max(0, (Number(yarn?.quantity) || 0) - others)
+  const others = roundSkeins(Object.entries(res).reduce((a, [k, n]) => (Number(k) === Number(pid) ? a : a + n), 0))
+  return roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - others))
 }
 
 // Écrit/retire l'allocation d'UN projet dans le pool d'une laine, sans jamais toucher
@@ -75,11 +86,13 @@ export function setProjectReservation(yarn, pid, qty) {
   // Number(null) === Number('') === 0 est « finite » : sans le key <= 0, un pid absent
   // écrirait une allocation au projet fantôme n° 0 (les ids Dexie démarrent à 1).
   if (!Number.isFinite(key) || key <= 0) return next
-  const n = Math.floor(Number(qty))
+  const n = roundSkeins(Number(qty))
   if (!Number.isFinite(n) || n <= 0) {
     delete next[key]
     return next
   }
+  // availableForProject arrondit déjà son résultat (cf. son commentaire) : max <= 0 voit
+  // vraiment zéro, pas un résidu de traîne binaire.
   const max = availableForProject(yarn, key)
   if (max <= 0) {
     delete next[key]
@@ -105,12 +118,12 @@ export function consumedOf(yarn) {
 export function consumeProjectReservation(yarn, pid, used) {
   const key = Number(pid)
   const reserved = reservationsOf(yarn)[key] || 0
-  const n = Math.floor(Number(used))
+  const n = roundSkeins(Number(used))
   const clamped = Number.isFinite(n) ? Math.max(0, Math.min(n, reserved)) : 0
   const reservations = setProjectReservation(yarn, key, null)
   const before = consumedOf(yarn)
   const consumed = cleanReservations({ ...before, [key]: (before[key] || 0) + clamped })
-  const quantity = Math.max(0, (Number(yarn?.quantity) || 0) - clamped)
+  const quantity = roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - clamped))
   return { reservations, consumed, quantity }
 }
 
@@ -126,7 +139,7 @@ export function yarnUsageState(yarn, projectsById = {}) {
   const res = reservationsOf(yarn)
   const pids = Object.keys(res)
   const used = Math.min(
-    pids.reduce((a, k) => a + res[k], 0),
+    roundSkeins(pids.reduce((a, k) => a + res[k], 0)),
     total,
   )
   if (used <= 0) return { state: 'free', used: 0, total }

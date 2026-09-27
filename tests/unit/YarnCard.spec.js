@@ -24,6 +24,14 @@ describe('YarnCard', () => {
     expect(w.emitted('view')[0]).toEqual([YARN])
   })
 
+  it('affiche une quantité décimale au format de la locale (« ×2,5 »)', () => {
+    const w = mount(YarnCard, {
+      props: { yarn: { ...YARN, quantity: 2.5 }, usage: USAGE },
+      global: { plugins: [i18n, createPinia()], stubs: { ThumbImage: true } },
+    })
+    expect(w.find('.ycard__meta').text()).toContain('×2,5')
+  })
+
   it('badge de type de coloris affiché pour une pelote non-Uni (ex. Moucheté)', () => {
     const w = mount(YarnCard, {
       props: { yarn: { ...YARN, colorType: 'mouchete' }, usage: USAGE },

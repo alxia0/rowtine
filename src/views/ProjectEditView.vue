@@ -15,8 +15,10 @@ import { useProjectConsumption } from '@/composables/useProjectConsumption'
 import { STATUS_ORDER, TECHNIQUES } from '@/constants/status'
 import { fillProjectFromPattern } from '@/utils/project-fill'
 import { shouldDeriveDone } from '@/utils/project-finished-at'
-import { reservationsOf, availableForProject, setProjectReservation } from '@/utils/yarn-usage'
+import { reservationsOf, availableForProject, setProjectReservation, roundSkeins } from '@/utils/yarn-usage'
 import { matchesBrand, NO_BRAND } from '@/utils/yarn-filter'
+import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
+import { formatSkeins } from '@/utils/units'
 import AppIcon from '@/components/AppIcon.vue'
 import AppCheckbox from '@/components/AppCheckbox.vue'
 import AppToggle from '@/components/AppToggle.vue'
@@ -28,7 +30,7 @@ import { MIN_YEAR } from '@/utils/stats-grid'
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const projectsStore = useProjectsStore()
 const yarnsStore = useYarnsStore()
 const patternsStore = usePatternsStore()
@@ -51,6 +53,12 @@ const nameError = ref('') // message d'erreur inline sous le champ Nom
 const sizesText = ref('')
 const selectedYarnIds = ref([]) // laines liées (source unique : yarn.reservations[pid])
 const yarnQty = reactive({}) // yarnId -> nb de pelotes utilisées par ce projet
+// yarnId -> texte tapé dans le champ, miroir d'affichage. `yarnQty` change à CHAQUE
+// caractère décimal valide (« 2 » → 2, « 2,5 » → 2.5) : si `:value` lisait `yarnQty`
+// directement, Vue repeindrait le champ dès que la valeur numérique change de forme
+// (« 2,5 » → « 2.5 »), cassant la virgule sous le doigt. Ce buffer reste calé sur ce que
+// l'utilisatrice vient de taper ; seule une saisie BORNÉE (au-dessus du disponible) l'écrase.
+const yarnQtyText = reactive({})
 const patternSel = ref('') // id du patron lié (chaîne du <select>) ; '' = aucun
 const originalPatternId = ref(null) // pour détecter un changement de patron
 const hydrating = ref(true) // true tant que le montage initial n'est pas fini (ignore le watch de préremplissage)
@@ -142,19 +150,45 @@ function toggleYarn(id) {
     selectedYarnIds.value.push(id)
     if (yarnQty[id] == null) {
       const y = yarnsStore.yarns.find((v) => v.id === id)
-      // Par défaut : 1 pelote (décision produit, 16/07). Prendre tout le disponible par
-      // défaut réservait la laine entière en silence — l'usage partiel devenait invisible
-      // (used === total ⇒ pas de « x/N » sur le badge du stock).
-      yarnQty[id] = Math.min(1, availableForProject(y, pid.value)) || 1
+      // Par défaut : 1 pelote (décision produit, 16/07), bornée au disponible — SANS
+      // plancher à 1 : une laine avec moins d'une pelote démarre directement à ce qu'il en
+      // reste (0,5), jamais forcée à 1 par un `|| 1` qui inventerait une pelote absente.
+      // Prendre tout le disponible par défaut réservait la laine entière en silence —
+      // l'usage partiel devenait invisible (used === total ⇒ pas de « x/N » sur le badge).
+      yarnQty[id] = Math.min(1, availableForProject(y, pid.value))
     }
   } else {
     selectedYarnIds.value.splice(i, 1)
   }
 }
+// Même motif que YarnConsumptionDialog.onInput : le champ n'est réécrit que si la saisie a
+// été bornée (au-dessus du disponible) — jamais pour une simple différence de forme, sinon
+// « 2, » deviendrait « 2 » avant que la virgule n'ait pu rejoindre son « 5 ». `yarnQtyText`
+// est mis à jour AVANT tout retour anticipé : c'est lui, pas `yarnQty`, que `:value` lit.
 function setYarnQty(id, e) {
   const y = yarnsStore.yarns.find((v) => v.id === id)
-  const max = availableForProject(y, pid.value) || 1
-  yarnQty[id] = Math.min(max, Math.max(1, Number(e.target.value) || 1))
+  const max = availableForProject(y, pid.value)
+  // Un caractère refusé (lettre, signe moins) est retiré de l'affichage tout de suite,
+  // comme `onPrixLaine` : « 2a » devient « 2 », « -5 » devient « 5 ». La virgule seule
+  // survit pour que « 2, » reste tapable jusqu'à « 2,5 ».
+  const filtre = filtrerSaisieDecimale(e.target.value)
+  if (filtre !== e.target.value) e.target.value = filtre
+  yarnQtyText[id] = filtre
+  if (filtre === '') return
+  const n = parseDecimal(filtre)
+  // Une quantité illisible ou ≤ 0 (« 0 » compris, plus aucun plancher à 1) garde la valeur
+  // courante : la frappe suivante (« 0,5 ») la remplacera normalement.
+  if (!Number.isFinite(n) || n <= 0) return
+  const next = roundSkeins(Math.min(n, max))
+  yarnQty[id] = next
+  if (roundSkeins(n) !== next) {
+    // formatSkeins (SANS groupement, un champ modifiable ne doit jamais recevoir un
+    // séparateur de milliers), pas un String(next) nu : même motif que
+    // YarnConsumptionDialog.onInput — la virgule française doit survivre au bornage.
+    const texte = formatSkeins(next, { locale: locale.value, grouping: false })
+    yarnQtyText[id] = texte
+    e.target.value = texte
+  }
 }
 
 onMounted(async () => {
@@ -259,8 +293,11 @@ async function applyYarnLinks(projectId) {
   for (const y of selectableYarns.value) {
     const linked = selectedYarnIds.value.includes(y.id)
     const before = reservationsOf(y)[projectId] ?? null
-    const max = availableForProject(y, projectId) || 1
-    const want = linked ? Math.min(max, Math.max(1, Number(yarnQty[y.id]) || max)) : null
+    const max = availableForProject(y, projectId)
+    // Plus de plancher à 1 ni de `|| 1` : une quantité illisible ou ≤ 0 retombe sur TOUT le
+    // disponible (repli, pas une pelote inventée), jamais sur un minimum arbitraire.
+    const n = roundSkeins(parseDecimal(yarnQty[y.id]))
+    const want = linked ? Math.min(max, Number.isFinite(n) && n > 0 ? n : max) : null
     if (before === want) continue
     await yarnsStore.update(y.id, { reservations: setProjectReservation(y, projectId, want) })
   }
@@ -484,16 +521,14 @@ async function saveProject() {
             <span v-if="selectedYarnIds.includes(y.id)" class="ypick__qty">
               <input
                 class="ypick__qtyin"
-                type="number"
-                min="1"
-                :max="availableForProject(y, pid)"
+                inputmode="decimal"
                 :aria-label="(y.brand || y.colorName) ? `${t('yarn.quantity')} — ${y.brand || y.colorName}` : t('yarn.quantity')"
-                :value="yarnQty[y.id]"
+                :value="yarnQtyText[y.id] ?? formatSkeins(yarnQty[y.id], { locale, grouping: false })"
                 @input="setYarnQty(y.id, $event)"
               />
-              <span class="ypick__unit">/ {{ availableForProject(y, pid) }} {{ t('project.yarnSkeins') }}</span>
+              <span class="ypick__unit">/ {{ formatSkeins(availableForProject(y, pid), { locale }) }} {{ t('project.yarnSkeins') }}</span>
             </span>
-            <span v-else class="ypick__meta">×{{ availableForProject(y, pid) }}</span>
+            <span v-else class="ypick__meta">×{{ formatSkeins(availableForProject(y, pid), { locale }) }}</span>
           </div>
         </div>
       </template>
@@ -535,11 +570,11 @@ async function saveProject() {
             :label="settings.unitSystem === 'imperial' ? t('project.gaugeStitchesImperial') : t('project.gaugeStitches')"
             :hint="settings.unitSystem === 'imperial' ? t('project.gaugeHintImperial') : t('project.gaugeHint')"
           />
-          <input id="gs" v-model="form.gaugeStitches" class="input" inputmode="numeric" placeholder="20" />
+          <input id="gs" v-model="form.gaugeStitches" class="input" inputmode="decimal" placeholder="20" />
         </div>
         <div class="col">
           <label class="field-label" for="gr">{{ settings.unitSystem === 'imperial' ? t('project.gaugeRowsImperial') : t('project.gaugeRows') }}</label>
-          <input id="gr" v-model="form.gaugeRows" class="input" inputmode="numeric" placeholder="28" />
+          <input id="gr" v-model="form.gaugeRows" class="input" inputmode="decimal" placeholder="28" />
         </div>
       </div>
 

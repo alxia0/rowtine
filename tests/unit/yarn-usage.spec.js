@@ -10,7 +10,14 @@ import {
   consumedOf,
   consumeProjectReservation,
   isProjectVegan,
+  roundSkeins,
 } from '@/utils/yarn-usage'
+
+describe('roundSkeins', () => {
+  it('arrondit à deux décimales, sans traîne binaire', () => {
+    expect(roundSkeins(0.1 + 0.2)).toBe(0.3)
+  })
+})
 
 describe('normalizeYarnReservations — migration ancien modèle', () => {
   it('ancien format réservé → map { projet: qté } + trace de consommation vide', () => {
@@ -65,6 +72,10 @@ describe('availableForProject', () => {
     expect(availableForProject(y, 2)).toBe(3) // 5 - (autres = 2)
     expect(availableForProject(y, 9)).toBe(2) // projet non lié : 5 - 3
   })
+  it('soustraction à dixièmes sans traîne binaire (1,1 - 0,2)', () => {
+    const y = { quantity: 1.1, reservations: { 2: 0.2 } }
+    expect(availableForProject(y, 1)).toBe(0.9)
+  })
 })
 
 describe('setProjectReservation', () => {
@@ -108,6 +119,19 @@ describe('setProjectReservation', () => {
     expect(setProjectReservation(y, '', 2)).toEqual({ 1: 2 })
     expect(setProjectReservation(y, 0, 2)).toEqual({ 1: 2 })
   })
+  it('réserve une demi et une deux et demi pelotes : la fraction est conservée', () => {
+    const y = { quantity: 5, reservations: {} }
+    expect(setProjectReservation(y, 1, 0.5)).toEqual({ 1: 0.5 })
+    expect(setProjectReservation(y, 1, 2.5)).toEqual({ 1: 2.5 })
+  })
+  it('borne au disponible décimal (autre projet à 2 sur un total de 2,5 → 0,5 dispo)', () => {
+    const y = { quantity: 2.5, reservations: { 2: 2 } }
+    expect(setProjectReservation(y, 1, 99)).toEqual({ 2: 2, 1: 0.5 })
+  })
+  it('dispo issu d une soustraction à traîne binaire (1,1 - 0,2) : arrondi à 0,9 pile', () => {
+    const y = { quantity: 1.1, reservations: { 2: 0.2 } }
+    expect(setProjectReservation(y, 1, 99)).toEqual({ 2: 0.2, 1: 0.9 })
+  })
 })
 
 describe('yarnUsageState', () => {
@@ -136,6 +160,10 @@ describe('yarnUsageState', () => {
   })
   it('sur-réservation : used est borné au total', () => {
     expect(yarnUsageState({ quantity: 2, reservations: { 1: 5 } }, { 1: done })).toEqual({ state: 'used', used: 2, total: 2 })
+  })
+  it('somme à dixièmes sans traîne binaire (0,1 + 0,7 = 0,8 pile) : deux projets terminés → utilisée', () => {
+    const y = { quantity: 0.8, reservations: { 1: 0.1, 2: 0.7 } }
+    expect(yarnUsageState(y, { 1: done, 2: done })).toEqual({ state: 'used', used: 0.8, total: 0.8 })
   })
 })
 
@@ -183,6 +211,14 @@ describe('consumeProjectReservation', () => {
     const y = base()
     consumeProjectReservation(y, 1, 2)
     expect(y).toEqual({ quantity: 5, reservations: { 1: 3 }, consumed: {} })
+  })
+  it('consomme 2,5 sur 3 réservées : trace décimale, reliquat décimal', () => {
+    const y = { quantity: 5, reservations: { 1: 3 }, consumed: {} }
+    expect(consumeProjectReservation(y, 1, 2.5)).toEqual({ quantity: 2.5, reservations: {}, consumed: { 1: 2.5 } })
+  })
+  it('consomme 2,1 sur 2,3 : 0,2 pile, sans traîne binaire (2.3 - 2.1)', () => {
+    const y = { quantity: 2.3, reservations: { 1: 2.3 }, consumed: {} }
+    expect(consumeProjectReservation(y, 1, 2.1).quantity).toBe(0.2)
   })
 })
 

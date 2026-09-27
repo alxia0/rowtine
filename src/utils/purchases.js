@@ -3,7 +3,7 @@
 // rester testables sans base et réutilisables par la fiche, l'écran Dépenses et
 // l'accueil sans les faire diverger (leçon du récap de stock dupliqué, 17/07).
 import { parseDecimal } from '@/utils/decimal'
-import { consumedOf, reservationsOf } from '@/utils/yarn-usage'
+import { consumedOf, reservationsOf, roundSkeins } from '@/utils/yarn-usage'
 
 // Une ligne d'historique. `kind` : 'buy' (acheté) | 'gift' (offert).
 // `unitPrice` : prix d'UNE pelote, saisi (virgule française admise). Vide sur un
@@ -52,8 +52,11 @@ export function totalsByCurrency(lines) {
   return out
 }
 
+// roundSkeins referme derrière la somme : une addition de décimales a sa propre traîne
+// binaire (0,1 + 0,2 = 0.30000000000000004), qui fuirait sinon dans `stockGap` (même
+// motif que `reservedTotal`, yarn-usage.js).
 export function totalSkeins(lines) {
-  return (lines || []).reduce((a, l) => a + (parseDecimal(l.quantity) || 0), 0)
+  return roundSkeins((lines || []).reduce((a, l) => a + (parseDecimal(l.quantity) || 0), 0))
 }
 
 // Ce que l'état du stock sous-entend avoir été acquis : les pelotes restantes PLUS
@@ -62,7 +65,7 @@ export function totalSkeins(lines) {
 export function acquiredFromStock(yarn) {
   const rest = Number(yarn?.quantity) || 0
   const used = Object.values(consumedOf(yarn)).reduce((a, n) => a + (Number(n) || 0), 0)
-  return rest + used
+  return roundSkeins(rest + used)
 }
 
 // Alias sémantique de `totalSkeins` côté « historique d'achats » (nom utilisé par `stockGap`
@@ -72,8 +75,12 @@ export const acquiredFromLines = totalSkeins
 
 // Positif : le stock dépasse l'historique (achat non enregistré, ou cadeau).
 // Négatif : l'historique dépasse le stock (pelotes sorties sans passer par un projet).
+// roundSkeins sur la soustraction elle-même : même deux opérandes déjà arrondis peuvent
+// laisser un résidu à leur différence (1,1 - 0,2 = 0.9000000000000001, même exemple que
+// `availableForProject`, yarn-usage.js) — sans lui, l'alerte d'écart (YarnPurchases.vue)
+// s'afficherait pour une différence qui n'existe pas.
 export function stockGap(yarn, lines) {
-  return acquiredFromStock(yarn) - acquiredFromLines(lines)
+  return roundSkeins(acquiredFromStock(yarn) - acquiredFromLines(lines))
 }
 
 // Date d'achat la plus récente parmi les lignes d'une laine — ce que le tri du stock et
@@ -268,5 +275,8 @@ export function projectYarnCost(yarns, projectId) {
     out.pricedCount++
     out.amount += (parseDecimal(raw) || 0) * n
   }
+  // roundSkeins referme la traîne binaire d'une somme de décimales (0,1 + 0,2 =
+  // 0.30000000000000004) : `skeins` sert de sélecteur de pluriel à l'affichage.
+  out.skeins = roundSkeins(out.skeins)
   return out
 }

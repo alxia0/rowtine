@@ -1043,6 +1043,85 @@ describe('mdlab assemble — titre de couverture = titre du document (bug Jumper
     expect(montage.kind).toBe('autre')
     expect(montage.steps.length).toBeGreaterThan(0)
   })
+
+  it('une section de couverture titrée d’un libellé générique (« Patron ») qui répète le titre du document disparaît comme section de travail, mais son bandeau décoratif rejoint la Présentation au lieu d’être perdu', () => {
+    const pages = [
+      // page 0 (couverture) : badge « Patron » (bold, grande police) + bandeau décoratif + le titre du document réécrit tel quel plus bas (même badge, même page).
+      [
+        T('Patron', 800, 30, true),
+        T('Classic Sweater', 786, 20, false),
+        T('Nombreuses', 774, 9, false),
+        T('couleurss', 762, 9, false),
+        T('Classic Sweater', 750, 9, false),
+      ],
+      [ // page 1 : vraie section de travail
+        T('MONTAGE', 800, 14, true),
+        T('Monter 100 m. avec vos aiguilles.', 780),
+        T('Tricoter en jersey pendant 10 cm.', 765),
+      ],
+    ]
+    expect(detectTitle(pages)).toBe('Classic Sweater')
+    const { reader } = buildReaderFromPages(pages)
+    expect(reader.sections.some((s) => s.title === 'Patron')).toBe(false)
+    const presentation = reader.sections.find((s) => s.title === 'Présentation')
+    expect(presentation?.steps.some((st) => st.t.includes('Nombreuses'))).toBe(true)
+    expect(presentation?.steps.some((st) => st.t === 'Classic Sweater')).toBe(false)
+    const montage = reader.sections.find((s) => s.title === 'MONTAGE')
+    expect(montage).toBeTruthy()
+    expect(montage.steps.length).toBeGreaterThan(0)
+  })
+
+  it('géométrie du PDF réel (Classic Sweater) : titre principal glosé d’un sous-titre (« Classic Sweater Soft Bamboo ») — les deux lignes de titre sont retirées de la section « Patron », le reste de son bandeau rejoint la Présentation', () => {
+    const pages = [
+      // page 0 : « Patron » (badge, générique) suivi de son propre titre en police normale, puis d’un sous-titre glosé par detectTitle (« Soft Bamboo ») que la section répète aussi.
+      [
+        T('Patron', 800, 30, true),
+        T('Classic Sweater', 780, 18, false),
+        T('Soft Bamboo', 762, 17, false),
+        T('Nombreuses', 748, 9, false),
+        T('couleurss', 736, 9, false),
+      ],
+      [ // page 1 : section de travail + « chart » (grosses cellules) qui fixe la taille de corps modale à 16, au-delà du titre.
+        T('MONTAGE', 800, 14, true),
+        T('Monter 100 m. avec vos aiguilles.', 780, 9),
+        T('Tricoter en jersey pendant 10 cm.', 765, 9),
+        T('x x x x x x x x x x x x x x x x', 750, 16),
+        T('x x x x x x x x x x x x x x x x', 735, 16),
+        T('x x x x x x x x x x x x x x x x', 720, 16),
+      ],
+    ]
+    expect(detectTitle(pages)).toBe('Classic Sweater Soft Bamboo')
+    const { reader } = buildReaderFromPages(pages)
+    expect(reader.sections.some((s) => s.title === 'Patron')).toBe(false)
+    const presentation = reader.sections.find((s) => s.title === 'Présentation')
+    expect(presentation?.steps.some((st) => st.t.includes('Nombreuses'))).toBe(true)
+    expect(presentation?.steps.some((st) => st.t === 'Soft Bamboo')).toBe(false)
+    const montage = reader.sections.find((s) => s.title === 'MONTAGE')
+    expect(montage).toBeTruthy()
+    expect(montage.steps.length).toBeGreaterThan(0)
+  })
+
+  it('la description du produit sur la page de couverture n’est pas perdue avec le libellé générique : elle rejoint la Présentation, seul le titre répété part', () => {
+    const pages = [
+      [
+        T('Patron', 800, 30, true),
+        T('Classic Sweater', 786, 20, false),
+        T('Classic Sweater', 750, 9, false),
+        T('Un pull raglan douillet, tricoté du haut vers le bas en fil de bambou.', 738, 9, false),
+        T('Empiècement jacquard et côtes aux poignets et au bas du corps.', 726, 9, false),
+      ],
+      [
+        T('MONTAGE', 800, 14, true),
+        T('Monter 100 m. avec vos aiguilles.', 780),
+        T('Tricoter en jersey pendant 10 cm.', 765),
+      ],
+    ]
+    const { reader } = buildReaderFromPages(pages)
+    expect(reader.sections.some((s) => s.title === 'Patron')).toBe(false)
+    const presentation = reader.sections.find((s) => s.title === 'Présentation')
+    expect(presentation?.steps.some((st) => st.t.includes('pull raglan douillet'))).toBe(true)
+    expect(presentation?.steps.some((st) => st.t.includes('Empiècement jacquard'))).toBe(true)
+  })
 })
 
 

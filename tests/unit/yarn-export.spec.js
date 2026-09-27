@@ -106,6 +106,20 @@ describe('yarnExportTable', () => {
     expect(rows[0][col]).toBe('Vegan, Fibres biologiques (GOTS)')
   })
 
+  // La quantité et les pelotes utilisées suivent la même règle de virgule décimale que
+  // exportLength (fr/de/es en virgule, en en point).
+  it('quantité et pelotes utilisées décimales : virgule en français, point en anglais', () => {
+    const laine = { id: 3, brand: 'Drops', colorName: 'Bleu', quantity: 2.5, reservations: { 9: 1.5 } }
+    const qtyCol = ({ head }) => head.indexOf(t('settings.export.yarn.quantity'))
+    const usedCol = ({ head }) => head.indexOf(t('settings.export.yarn.usedSkeins'))
+    const fr = yarnExportTable([laine], { t, locale: 'fr', linesFor })
+    expect(fr.rows[0][qtyCol(fr)]).toBe('2,5')
+    expect(fr.rows[0][usedCol(fr)]).toBe('1,5')
+    const en = yarnExportTable([laine], { t, locale: 'en', linesFor })
+    expect(en.rows[0][qtyCol(en)]).toBe(2.5)
+    expect(en.rows[0][usedCol(en)]).toBe(1.5)
+  })
+
   it('laisse la colonne vide pour une laine sans caractéristique', () => {
     const { head, rows } = yarnExportTable([{ brand: 'Drops' }], { t: realT })
     expect(rows[0][head.indexOf('Caractéristiques')]).toBe('')

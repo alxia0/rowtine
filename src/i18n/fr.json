@@ -44,8 +44,11 @@
     "resumeSize": "taille tricotée {size}",
     "wipSummary": "Tu as {n} ouvrage en cours. | Tu as {n} ouvrages en cours.",
     "lastProject": "Dernier projet",
-    "noProjects": "Aucun projet pour l'instant. Crée ton premier projet pour commencer.",
+    "noProjects": "Aucun projet pour l'instant. Importe un patron PDF ou crée ton premier projet pour commencer.",
     "createProject": "Créer un projet",
+    "importPdf": "Importer un patron PDF",
+    "importPdfHint": "Il sera rangé dans ta Bibliothèque de patrons",
+    "importPdfShort": "Importer un PDF",
     "seeAll": "Tout voir",
     "collapse": "Réduire",
     "toolsLabel": "Outils",
@@ -1059,6 +1062,12 @@
     "preview": "Aperçu du patron",
     "loading": "Chargement…",
     "readOnlyNote": "Aperçu en lecture seule. Pour choisir ta taille et suivre ta progression, crée un projet puis « Suivre le patron ».",
+    "legend": {
+      "title": "Pendant le suivi :",
+      "check": "se coche",
+      "count": "se compte",
+      "read": "à lire"
+    },
     "chooseSize": "1. Choisis ta taille",
     "singleSize": "Taille unique",
     "section": {
@@ -1071,6 +1080,7 @@
     "markDone": "Marquer l’étape comme faite",
     "fixHere": "Corriger",
     "stepImageOpen": "Voir l’image en grand",
+    "coverOpen": "Voir la couverture en grand",
     "noRepeat": "Aucune répétition pour ta taille ({size})",
     "pickSizeShort": "choisis ta taille",
     "seeTechnique": "Voir la technique",

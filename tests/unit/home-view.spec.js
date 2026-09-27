@@ -17,6 +17,10 @@ import { setActivePinia, createPinia } from 'pinia'
 import { db, getSetting, setSetting } from '@/db/db'
 import i18n from '@/i18n'
 import fr from '@/i18n/fr.json'
+import { recordSeededSamples } from '@/utils/seeded-samples'
+import { useSessionsStore } from '@/stores/sessions'
+import { useSettingsStore } from '@/stores/settings'
+import { makeTk } from './helpers/i18n-router'
 
 const nav = vi.hoisted(() => ({
   router: { push: vi.fn(), replace: vi.fn(), back: vi.fn() },
@@ -34,14 +38,16 @@ vi.mock('@/utils/tour-sample', () => ({ ensureTourProject: vi.fn().mockResolvedV
 
 import HomeView from '@/views/HomeView.vue'
 
-function mountHome() {
+function mountHome(pinia = createPinia()) {
   return mount(HomeView, {
     global: {
-      plugins: [createPinia(), i18n],
+      plugins: [pinia, i18n],
       stubs: { ProjectCard: true, StitchProgress: true },
     },
   })
 }
+
+const tk = makeTk(i18n)
 
 function findDialog(w) {
   return w.find('[role="dialog"]')
@@ -89,5 +95,84 @@ describe("HomeView — la bienvenue survit à un vrai relancement de l'app", () 
     await new Promise((r) => setTimeout(r, 50)) // laisse onMounted(w2) se dérouler avant d'affirmer une absence
     expect(findDialog(w2).exists()).toBe(false)
     w2.unmount()
+  })
+})
+
+async function waitReady(w) {
+  await vi.waitFor(() => expect(w.find('[data-test="home-loading"]').exists()).toBe(false), { timeout: 10000 })
+  await flushPromises()
+}
+
+describe('HomeView — import de PDF mis en avant', () => {
+  // Protège l'accueil allégé : l'import prend la place du héros et des stats sur une base d'exemples.
+  it('base d’exemples seulement : carte d’import, ni Reprendre ni stats, Créer un projet secondaire', async () => {
+    const id = await db.projects.add({ name: 'Bonnet', status: 'wip', technique: 'knitting', createdAt: '2026-09-01T10:00:00' })
+    await recordSeededSamples({ patterns: [], projects: [id] })
+    const w = mountHome()
+    await waitReady(w)
+    await vi.waitFor(() => expect(w.find('[data-test="home-import-card"]').exists()).toBe(true), { timeout: 10000 })
+    expect(w.find('[data-test="home-import-card"]').text()).toContain(tk('home.importPdf'))
+    expect(w.find('[data-test="home-import-card"]').text()).toContain(tk('home.importPdfHint'))
+    expect(w.find('.resume').exists()).toBe(false)
+    expect(w.find('.bento').exists()).toBe(false)
+    expect(w.find('.subtle').exists()).toBe(false)
+    expect(w.find('[data-test="home-import"]').exists()).toBe(false)
+    expect(w.find('[data-test="home-create"]').classes()).not.toContain('btn--primary')
+  })
+
+  // Protège l'accueil complet : un projet à soi ramène héros, stats et la rangée de deux boutons.
+  it('un projet à soi : accueil complet avec Créer un projet et Importer un PDF', async () => {
+    await db.projects.add({ name: 'Châle', status: 'wip', technique: 'knitting', createdAt: '2026-09-01T10:00:00' })
+    const w = mountHome()
+    await waitReady(w)
+    expect(w.find('[data-test="home-import-card"]').exists()).toBe(false)
+    expect(w.find('.resume').exists()).toBe(true)
+    expect(w.find('.bento').exists()).toBe(true)
+    expect(w.find('[data-test="home-create"]').classes()).toContain('btn--primary')
+    expect(w.find('[data-test="home-import"]').text()).toContain(tk('home.importPdfShort'))
+  })
+
+  // Protège l'absence de flash : l'accueil allégé se décide dès les exemples lus, sans attendre les lectures lentes.
+  it('carte d’import affichée pendant que les autres lectures tournent encore', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    vi.spyOn(useSessionsStore(), 'secondsSince').mockReturnValue(new Promise(() => {}))
+    const w = mountHome(pinia)
+    await vi.waitFor(() => expect(w.find('[data-test="home-import-card"]').exists()).toBe(true), { timeout: 10000 })
+    expect(w.find('[data-test="home-loading"]').exists()).toBe(true)
+    expect(w.find('.bento').exists()).toBe(false)
+    w.unmount()
+  })
+
+  // Protège la relecture des exemples quand une restauration aboutit accueil monté.
+  it('restauration pendant que l’accueil est monté : les exemples sont relus', async () => {
+    const id = await db.projects.add({ name: 'Bonnet', status: 'wip', technique: 'knitting', createdAt: '2026-09-01T10:00:00' })
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const w = mountHome(pinia)
+    await waitReady(w)
+    expect(w.find('[data-test="home-import-card"]').exists()).toBe(false)
+
+    await recordSeededSamples({ patterns: [], projects: [id] })
+    await useSettingsStore().setRestoredDue()
+    await vi.waitFor(() => expect(w.find('[data-test="home-import-card"]').exists()).toBe(true), { timeout: 10000 })
+    w.unmount()
+  })
+
+  // Protège la destination commune : la Bibliothèque, feuille d'ajout demandée.
+  it('les deux entrées mènent à la Bibliothèque avec ?add=1', async () => {
+    const w1 = mountHome()
+    await waitReady(w1)
+    await vi.waitFor(() => expect(w1.find('[data-test="home-import-card"]').exists()).toBe(true), { timeout: 10000 })
+    await w1.find('[data-test="home-import-card"]').trigger('click')
+    expect(nav.router.push).toHaveBeenLastCalledWith({ name: 'library', query: { add: '1' } })
+    w1.unmount()
+
+    await db.projects.add({ name: 'Châle', status: 'done', technique: 'knitting', createdAt: '2026-09-01T10:00:00' })
+    setActivePinia(createPinia())
+    const w2 = mountHome()
+    await waitReady(w2)
+    await w2.find('[data-test="home-import"]').trigger('click')
+    expect(nav.router.push).toHaveBeenLastCalledWith({ name: 'library', query: { add: '1' } })
   })
 })

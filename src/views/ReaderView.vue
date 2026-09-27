@@ -12,8 +12,10 @@ import { useSnackbarStore } from '@/stores/snackbar'
 import { useChartZoomStore } from '@/stores/chart-zoom'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { useCorrectionHandoff } from '@/stores/correction-handoff'
+import { useLightboxStore } from '@/stores/lightbox'
 import { closeChronoSession } from '@/utils/close-chrono-session'
 import { scrollBehavior } from '@/utils/scroll-behavior'
+import { patternCoverOf } from '@/utils/pattern-cover'
 import { useSmartBack } from '@/composables/useSmartBack'
 import { useSplitReader } from '@/composables/useSplitReader'
 import { repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
@@ -773,6 +775,14 @@ function openHelp(tab) {
 // Absent si le patron n'a pas de PDF (import IA sans PDF, patron manuel) → pas de tuile morte.
 const originalPdf = computed(() => pattern.value?.pdf || '')
 
+// Couverture du patron en tête de la visu (spec 2026-09-26) : pour un PDF importé, la page 1
+// telle que la créatrice l'a composée ; pour un patron manuel, l'image choisie en galerie.
+const lightbox = useLightboxStore()
+const coverSrc = computed(() => patternCoverOf(pattern.value))
+function openCover() {
+  lightbox.show([coverSrc.value], 0)
+}
+
 async function openOriginalPdf() {
   try {
     await openPdfExternally(originalPdf.value, 'patron.pdf')
@@ -934,6 +944,12 @@ function onKey(e) {
         <button class="chip chip--resume" @click="resume"><AppIcon name="resume" :size="16" /> {{ t('reader.resume') }}</button>
       </div>
 
+      <!-- Couverture du PDF : ouvre la visu comme elle ouvre le PDF. Après la puce
+           « Reprendre », qui doit rester hors de portée de la barre d'action fixe. -->
+      <button v-if="coverSrc" type="button" class="rcover" :aria-label="t('reader.coverOpen')" @click="openCover">
+        <img :src="coverSrc" alt="" decoding="async" />
+      </button>
+
       <!-- Sélecteur de taille (uniquement en suivi de projet) -->
       <section v-if="!readOnly && reader.sizeLabels?.length" class="szcard">
         <h2>{{ t('reader.chooseSize') }}</h2>
@@ -959,6 +975,24 @@ function onKey(e) {
       </section>
 
       <p v-if="readOnly" class="ro-note">{{ t('reader.readOnlyNote') }}</p>
+      <!-- Aperçu lecture seule : légende des marqueurs de suivi. Les marqueurs eux-mêmes
+           sont décoratifs (aria-hidden), c'est ELLE qui porte le sens — texte réel, lisible
+           par TalkBack, pas un aria-label. -->
+      <div v-if="readOnly" class="rlegend">
+        <span class="rlegend__title">{{ t('reader.legend.title') }}</span>
+        <span class="rlegend__item">
+          <span class="rmark rmark--row rlegend__ic" aria-hidden="true"><AppIcon name="check" :size="14" /></span>
+          <span class="rlegend__lab">{{ t('reader.legend.check') }}</span>
+        </span>
+        <span class="rlegend__item">
+          <span class="rmark rmark--rep rlegend__ic" aria-hidden="true"><AppIcon name="counter" :size="14" /></span>
+          <span class="rlegend__lab">{{ t('reader.legend.count') }}</span>
+        </span>
+        <span class="rlegend__item">
+          <span class="rmark rmark--note rlegend__ic" aria-hidden="true"><AppIcon name="note" :size="14" /></span>
+          <span class="rlegend__lab">{{ t('reader.legend.read') }}</span>
+        </span>
+      </div>
       <!-- Corriger le patron : déplacé depuis la fiche patron
            vers l'aperçu Prévisualiser — uniquement en contexte bibliothèque
            (readOnly) et si le patron a des sections à corriger. Réutilise la clé
@@ -1027,10 +1061,15 @@ function onKey(e) {
         </div>
 
         <template v-for="step in sec.steps" :key="step.id">
-          <!-- NOTE : information, non cochable -->
-          <div v-if="step.note" class="rnote" @click="onCardTap($event, step)">
-            <ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" />
-            <StepImages v-if="step.imgs && step.imgs.length" :imgs="step.imgs" />
+          <!-- NOTE : information, non cochable. Aperçu lecture seule : marqueur .rmark--note
+               à gauche, la note passe en flex UNIQUEMENT dans ce cas (classe rnote--ro) — en
+               suivi, la note garde sa mise en page d'origine. -->
+          <div v-if="step.note" class="rnote" :class="{ 'rnote--ro': readOnly }" @click="onCardTap($event, step)">
+            <span v-if="readOnly" class="rmark rmark--note" aria-hidden="true"><AppIcon name="note" :size="16" /></span>
+            <div class="rnote__body">
+              <ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" />
+              <StepImages v-if="step.imgs && step.imgs.length" :imgs="step.imgs" />
+            </div>
             <ReaderFixOverlay v-if="fixTarget === step.id" @fix="startFix(sec, step)" @close="fixTarget = null" />
           </div>
 
@@ -1117,8 +1156,11 @@ function onKey(e) {
             <ReaderFixOverlay v-if="fixTarget === step.id" @fix="startFix(sec, step)" @close="fixTarget = null" />
           </div>
 
-          <!-- RÉPÉTITION : texte verbatim + compteur (interactif en projet) -->
-          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDone(step), 'rstep--ro': readOnly }" @click="onCardTap($event, step)">
+          <!-- RÉPÉTITION : texte verbatim + compteur (interactif en projet). Aperçu lecture
+               seule : marqueur .rmark--rep en premier enfant — .rstep est déjà flex, il se
+               place donc à gauche du corps sans CSS supplémentaire. -->
+          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDone(step) }" @click="onCardTap($event, step)">
+            <span v-if="readOnly" class="rmark rmark--rep" aria-hidden="true"><AppIcon name="counter" :size="16" /></span>
             <div class="rstep__body">
               <p class="rstep__p"><ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" /></p>
               <!-- Cadence : rappel de période « tous les X rangs » (step.every). Placé HORS de .rcount,
@@ -1152,7 +1194,7 @@ function onKey(e) {
             v-else-if="!step.chart"
             :id="'rstep-' + step.id"
             class="rstep"
-            :class="{ 'rstep--done': !readOnly && st.done[step.id], 'rstep--cur': !readOnly && currentStepId === step.id, 'rstep--ro': readOnly }"
+            :class="{ 'rstep--done': !readOnly && st.done[step.id], 'rstep--cur': !readOnly && currentStepId === step.id }"
             @click="onCardTap($event, step)"
           >
             <button
@@ -1165,6 +1207,9 @@ function onKey(e) {
             >
               <AppIcon name="check" :size="18" />
             </button>
+            <!-- Aperçu lecture seule : à la place exacte de .rcheck, un marqueur de suivi
+                 décoratif — la légende (.rlegend) porte le sens, pas ce marqueur. -->
+            <span v-else class="rmark rmark--row" aria-hidden="true"><AppIcon name="check" :size="16" /></span>
             <div class="rstep__body">
               <p class="rstep__p"><ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" /></p>
               <StepImages v-if="step.imgs && step.imgs.length" :imgs="step.imgs" />
@@ -1486,6 +1531,24 @@ html[data-theme='dark'] .rhdr {
   border-radius: var(--r-pill);
   box-shadow: 0 8px 16px -8px rgba(var(--brand-rgb), 0.6);
 }
+.rcover {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+  margin: var(--sp-4) 0 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.rcover img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: var(--r-lg);
+}
 .amblock {
   margin: var(--sp-5) 0;
 }
@@ -1605,6 +1668,16 @@ html[data-theme='dark'] .rhdr {
   color: var(--ink-70);
   font-size: 13.5px;
 }
+/* Aperçu lecture seule SEULEMENT : le marqueur .rmark--note se pose à gauche du texte —
+   en suivi, .rnote garde sa mise en page d'origine (pas de marqueur à aligner). */
+.rnote--ro {
+  display: flex;
+  gap: var(--sp-2);
+}
+.rnote__body {
+  flex: 1;
+  min-width: 0;
+}
 /* navigation Rang précédent / suivant */
 .rownav {
   display: flex;
@@ -1669,10 +1742,6 @@ html[data-theme='dark'] .rstep--done {
   border-color: var(--brand);
   box-shadow: 0 0 0 2px rgba(var(--brand-rgb), 0.18), var(--clay);
 }
-/* lecture seule (aperçu biblio) : pas de coche, texte pleine largeur */
-.rstep--ro {
-  padding-left: var(--sp-4);
-}
 .ro-note {
   font-size: 12.5px;
   color: var(--ink-70);
@@ -1681,6 +1750,70 @@ html[data-theme='dark'] .rstep--done {
 }
 .ro-correct {
   margin-bottom: var(--sp-3);
+}
+/* Légende des marqueurs de suivi : une ligne de titre, puis les trois marqueurs +
+   libellé côte à côte — chaque item ne casse pas en deux lignes (passe à la ligne
+   proprement dès 320 px de large grâce à flex-wrap sur des items entiers). */
+.rlegend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  margin: 0 2px var(--sp-3);
+}
+.rlegend__title {
+  flex: 1 0 100%;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-70);
+}
+.rlegend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-70);
+  white-space: nowrap;
+}
+/* Marqueur décoratif : indique en aperçu lecture seule ce que l'élément deviendra en
+   suivi (coche / compteur / rien) — jamais de fond ni de texte porteurs de sens, la
+   légende (.rlegend) fait ce travail. Rond 26 px par défaut ; la légende réduit à 22 px
+   via --rmark-size (sélecteur plus spécifique, cf. .rlegend__ic ci-dessous). */
+.rmark {
+  --rmark-size: 26px;
+  flex: none;
+  width: var(--rmark-size);
+  height: var(--rmark-size);
+  border-radius: var(--r-pill);
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+/* Rang/action : même famille que le fond « terminé » (--sage-tile-bg/--sage-deep-strong,
+   cf. .corr-chip--on) — pire arrêt du dégradé mesuré aux DEUX : 5,29:1 en clair (#dde6d2),
+   5,98:1 en sombre (#26302a, cf. commentaire déjà posé sur --sage-deep-strong dans
+   tokens.css) — largement au-dessus des 3:1 requis (WCAG 1.4.11). */
+.rmark--row {
+  background: var(--sage-tile-bg);
+  color: var(--sage-deep-strong);
+}
+/* Répétition : neutre (pas encore « fait », juste « à compter ») — --ink-55 sur --surface
+   mesure 5,00:1 en clair, 6,19:1 en sombre (rgba composé sur --surface) : au-dessus du
+   seuil, --ink-70 n'est pas nécessaire. */
+.rmark--rep {
+  background: var(--surface);
+  color: var(--ink-55);
+}
+/* Note : sans fond (posée sur --surface-lin, le fond de .rnote) — --ink-55 y mesure
+   4,67:1 en clair, 5,84:1 en sombre (rgba composé sur --surface-lin) : au-dessus du seuil. */
+.rmark--note {
+  background: none;
+  color: var(--ink-55);
+  margin-top: 0;
+}
+.rlegend__ic.rmark {
+  --rmark-size: 22px;
 }
 .rcheck {
   flex: none;

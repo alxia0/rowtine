@@ -22,7 +22,7 @@ import {
 } from '@/utils/yarn-filter'
 import { EXAMPLE_YARN } from '@/constants/empty-samples'
 import { parseDecimal } from '@/utils/decimal'
-import { formatLength, formatWeight, formatMoney } from '@/utils/units'
+import { formatLength, formatWeight, formatMoney, formatSkeins } from '@/utils/units'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
 
@@ -261,7 +261,7 @@ const sortOptions = computed(() => [
   <main class="screen">
     <template v-if="yarnsStore.yarns.length">
       <div class="recap">
-        <div class="recap__stat"><span class="recap__num">{{ totalSkeins }}</span><span class="recap__lbl">{{ t('yarn.skeins') }}</span></div>
+        <div class="recap__stat"><span class="recap__num">{{ formatSkeins(totalSkeins, { locale }) }}</span><span class="recap__lbl">{{ t('yarn.skeins') }}</span></div>
         <div class="recap__stat"><span class="recap__num">{{ lengthStat.text }}</span><span class="recap__lbl">{{ t(lengthStat.unitKey) }}</span></div>
         <div class="recap__stat"><span class="recap__num">{{ weightStat.text }}</span><span class="recap__lbl">{{ t(weightStat.unitKey) }}</span></div>
         <div v-if="totalSpent > 0" class="recap__stat"><span class="recap__num">{{ moneyStat.text }}</span><span class="recap__lbl">{{ t(moneyStat.unitKey, { symbol: moneyStat.symbol }) }}</span></div>

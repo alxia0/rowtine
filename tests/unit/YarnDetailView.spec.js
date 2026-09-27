@@ -172,6 +172,18 @@ describe('YarnDetailView', () => {
 
   // --- Portées depuis tests/unit/yarn-detail-dialog.spec.js ---
 
+  it('affiche une quantité décimale au format de la langue (2,5, pas 2.5)', async () => {
+    const { w } = await mountView({ ...BASE_YARN, quantity: 2.5 })
+    expect(fieldValue(w, fr.yarn.quantity)).toBe('2,5')
+  })
+
+  // Protège : `formatSkeins('')` rend « 0 » — sans garde, une fiche ancienne sans quantité
+  // afficherait « 0 » au lieu d'omettre la ligne, comme avant la décimalisation.
+  it('quantité vide (ancienne fiche) : la ligne « Quantité » est omise, pas affichée à « 0 »', async () => {
+    const { w } = await mountView({ ...BASE_YARN, quantity: '' })
+    expect(fieldValue(w, fr.yarn.quantity)).toBeNull()
+  })
+
   it('affiche tous les champs saisis, bain et date d’achat compris via le registre (jamais perdre d’info)', async () => {
     const { w } = await mountView({ ...BASE_YARN }, { purchases: [{ bain: 'LOT42', date: '2026-06-01' }] })
     const txt = w.text()

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useCropperStore } from '@/stores/cropper'
@@ -11,6 +11,7 @@ import { DEMO_PHOTOS } from '@/utils/badge-demo'
 import { lockBodyScroll, unlockBodyScroll } from '@/utils/body-scroll-lock'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import AppIcon from '@/components/AppIcon.vue'
+import SnackBar from '@/components/SnackBar.vue'
 import { LANGUAGES } from '@/constants/languages'
 import ColorPickerDialog from '@/components/ColorPickerDialog.vue'
 import BadgePhotoPicker from '@/components/BadgePhotoPicker.vue'
@@ -320,7 +321,7 @@ const photoRatioParam = computed(() =>
 // gabarits dimensionnent maintenant leur CANEVAS à partir de ce nombre (cf.
 // computeBadgeGeometry) — sans lui ici, `currentTemplate.canvas.h` retomberait sur le défaut
 // (0 ligne) et ne correspondrait plus à la hauteur RÉELLE du canevas dessiné par `renderBadge`.
-// `currentTemplate` demeure utile pour calculer la géométrie des slots photo. `customText` en
+// `currentTemplate` sert de repli aux slots photo avant le premier rendu. `customText` en
 // est exclu ICI pour les 4 gabarits (chantier « badge corrections typo/zoom » 19/09, Task 4 —
 // avant ce chantier, seuls Vertical/Horizontal l'excluaient, Task 6 du chantier « badge
 // cartouche condensé » 18/09c) exactement comme `renderBadge` l'exclut de son propre
@@ -401,6 +402,8 @@ const previewCanvas = ref(null)
 const previewLayer = ref(null)
 const previewBoxSize = ref({ w: 0, h: 0 })
 const previewRenderTick = ref(0)
+// Géométrie RÉELLE du dernier rendu de la prévisu (`onGeometry` de `renderBadge`, texte mesuré).
+const previewGeometry = shallowRef(null)
 
 function measurePreviewBox() {
   const box = previewLayer.value
@@ -551,6 +554,7 @@ async function updatePreview() {
       // `renderBadge` de ce fichier (prévisu ET génération), sans quoi l'image partagée ne
       // dirait pas la même chose que la prévisu.
       includeTechnique: includeTechnique.value,
+      onGeometry: (g) => { previewGeometry.value = g },
     })
     await nextTick()
     measurePreviewBox()
@@ -618,55 +622,20 @@ function onPreviewClick(e) {
   if (!rect.width || !rect.height) return
   const x = (e.clientX - rect.left) * (canvas.width / rect.width)
   const y = (e.clientY - rect.top) * (canvas.height / rect.height)
-  const tpl = currentTemplate.value
+  const tpl = previewGeometry.value || currentTemplate.value
   const slots = tpl.photoSlots || (tpl.photoSlot ? [tpl.photoSlot] : [])
   const idx = slots.findIndex((s) => x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h)
   previewFixSlot.value = idx === -1 ? null : idx + 1
 }
 const previewFixStyle = computed(() => {
   if (!previewFixSlot.value) return null
-  const tpl = currentTemplate.value
+  const tpl = previewGeometry.value || currentTemplate.value
   const slot = tpl.photoSlots ? tpl.photoSlots[previewFixSlot.value - 1] : tpl.photoSlot
   const canvas = previewCanvas.value
-  // Dénominateur : les dimensions RÉELLES du <canvas> du DOM (déjà posées par `renderBadge`
-  // dans `updatePreview()`), jamais `tpl.canvas` — cette prédiction ne peut plus être fiable
-  // dès qu'un titre ou une ligne de stat retourne effectivement à la ligne (Task 2), le
-  // composant n'ayant aucun moyen de prévoir le nombre de lignes WRAPPÉES sans un contexte 2D
-  // réel (que `wrapText`/`renderBadge`, dans badge-render.js, sont seuls à posséder). Le
-  // numérateur (position/taille du SLOT lui-même) reste celui de `tpl`, avec le même genre
-  // d'approximation assumée pour DEUX gabarits : pour Deux images, il dépend aussi de
-  // `requiredTextWidth` depuis l'élargissement du canevas pour éviter les retours à la ligne
-  // évitables (Task 10, 17/09) — le canevas s'élargit, donc `anchorW` et les deux slots avec —
-  // `currentTemplate`, appelé ici SANS cet argument (posé à 0, cf. son commentaire plus haut),
-  // peut diverger visiblement avec un titre/une stat assez longs. Pour Horizontal, ce n'est
-  // PLUS vrai non plus depuis le 20/09 (retour Julien, la photo suit désormais la hauteur du
-  // cartouche plutôt qu'une ancre fixe à 600, cf. `computeBadgeGeometry`) : son slot ne dépend
-  // plus SEULEMENT du ratio de photo choisi, il grandit aussi avec la hauteur du cartouche
-  // (`statLineCount`/`freeTextLineCount`/le calendrier), que `currentTemplate` transmet bien —
-  // mais ni le nombre RÉEL de lignes WRAPPÉES (titre figé à 1 ligne ici, cf. son commentaire
-  // plus haut) ni `requiredTextWidth` (toujours 0 ici) n'y participent, alors que tous deux
-  // allongent le cartouche RÉEL — SANS calendrier, le slot prédit ici est donc TOUJOURS un peu
-  // plus PETIT que le slot réellement dessiné, jamais plus grand (le wrap ne fait qu'ALLONGER
-  // le cartouche, jamais le raccourcir) : la photo réelle est donc TOUJOURS au moins aussi
-  // haute que celle prédite (même origine dans les deux cas, `x`/`y` valent `MARGIN`), le slot
-  // prédit reste INCLUS dans le vrai.
-  //
-  // AVEC calendrier actif, ce n'est PLUS vrai (repéré en revue, 21/09) : `requiredTextWidth = 0` ici
-  // maintient `colW` au plancher (`MIN_LANDSCAPE_TEXT_W`, 420) tant que seule la largeur de
-  // photo l'exige, donc le calendrier prédit reste en mode EMPILÉ (`stack`, +330px de hauteur,
-  // cf. `calendarLayout`/`CALENDAR_STACK_HEIGHT`) — alors que le texte RÉEL (titre/stats/texte
-  // libre, une trentaine de caractères de texte libre suffisent à porter `requiredTextWidth`
-  // vers ~830px) fait souvent grandir `colW` jusqu'au mode CÔTE À CÔTE (`side`, cartouche
-  // réellement plus COURT, sans cette réserve empilée). Le slot prédit ici peut alors être
-  // NETTEMENT plus GRAND que le slot réel, pas seulement plus petit (mesuré : 16:9 + 6 stats +
-  // calendrier + texte libre → prédit 2386×1342, réel 1664×936) — un appui sur la partie
-  // GAUCHE du cartouche dans la prévisu ouvre alors à tort le sélecteur de photo, la zone
-  // prédite débordant sur ce qui est, en vrai, déjà le cartouche de texte. Prévisu SEULEMENT :
-  // l'export (`renderBadge` réel) reste correct, lui, dans tous les cas.
-  //
-  // Repli assumé, même famille que Deux images ci-dessus — à corriger dans un lot séparé en
-  // faisant remonter la géométrie RÉELLE depuis `renderBadge` (qui ne renvoie aujourd'hui que
-  // la dataURL) plutôt qu'en la re-prédisant ici.
+  // Numérateur et dénominateur viennent du dernier rendu RÉEL (`previewGeometry`, texte et
+  // retours à la ligne mesurés, et `canvas.width`/`height` posés par `renderBadge`), jamais de
+  // la prédiction de `currentTemplate` (texte non mesuré, `requiredTextWidth` à 0), qui ne sert
+  // que de repli tant qu'aucun rendu n'a eu lieu.
   if (!slot || !canvas || !canvas.width || !canvas.height) return null
   return {
     left: `${((slot.x + slot.w / 2) / canvas.width) * 100}%`,
@@ -1295,6 +1264,10 @@ async function confirmShare() {
          (revue finale de branche, 18/09). Ici, il partage le contexte d'empilement de ces
          boutons et passe devant eux. -->
     <ColorPickerDialog :open="colorPickerOpen" :color="badgeColor" @pick="onPickCustomColor" @close="colorPickerOpen = false" />
+    <!-- Snackbar de l'app rendue DANS la feuille : la globale (App.vue, z-index 100) est peinte
+         sous `.bdg` (1050, opaque), un échec de `pickImage()` y restait invisible. Dernier
+         enfant direct, au-dessus de la pop-up photo (cf. SnackBar.vue, `embedded`). -->
+    <SnackBar embedded />
   </div>
 </template>
 

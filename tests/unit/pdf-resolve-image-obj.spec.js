@@ -22,6 +22,11 @@ describe('resolveImageObj — borne le get d’objet image', () => {
     await expect(p).resolves.toBeNull()
   })
 
+  it('lit une image réutilisée entre pages (« g_… ») dans commonObjs, sans attendre', async () => {
+    const page = { objs: { get: () => {} }, commonObjs: { get: (name, cb) => cb({ width: 2048, height: 582 }) } }
+    await expect(resolveImageObj(page, 'g_d0_img_p1_2', 4000)).resolves.toEqual({ width: 2048, height: 582 })
+  })
+
   it('résout à null si objs.get jette', async () => {
     const page = { objs: { get: () => { throw new Error('boom') } } }
     await expect(resolveImageObj(page, 'img_c', 4000)).resolves.toBeNull()

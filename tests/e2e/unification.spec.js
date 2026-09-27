@@ -8,7 +8,7 @@
 // un contexte isolé par test → IndexedDB Dexie vide, pas de fuite d'état entre tests).
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome } from './helpers'
 
 // ───────────────────────── helpers locaux ──────────────────────────────────
 
@@ -29,9 +29,8 @@ async function createFreeProject(page, name = 'Écharpe test') {
 async function openDemoProjectReader(page) {
   await completeOnboarding(page, { firstName: 'Alex' })
   // L'onboarding seed un projet "Bonnet Torsade" en statut wip comme dernier projet.
-  // On clique sur la section « Reprendre » du héros → atterrit sur la fiche projet.
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  // On clique sur sa carte de l'accueil → atterrit sur la fiche projet.
+  await openDemoProjectFromHome(page)
   // Entrer dans le suivi interactif.
   await page.getByRole('button', { name: /Suivre le patron/ }).click()
   await expect(page).toHaveURL(/\/project\/\d+\/read/)

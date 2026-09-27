@@ -334,4 +334,48 @@ describe('linesToSteps', () => {
     const steps = linesToSteps([L(long)], { kind: 'neckline', n: 1 })
     expect(steps[0].note).toBe(true)
   })
+
+  // Une remarque introduite par un libellé (« Note : », « Astuce : »…) reste une note, même en section de travail.
+  it('une remarque « Note : » / « Astuce : » (multilingue) reste une note en section de travail', () => {
+    const lignes = [
+      'Note : après n rangs d’augmentation, le châle compte 9 + 4n mailles.',
+      'Astuce : pour débuter plus simplement, monter 9 m.',
+      'Tip: block the swatch before measuring.',
+      'Hinweis: Die Maschenprobe vor dem Messen spannen.',
+    ]
+    const steps = linesToSteps(lignes.map(L), { kind: 'corps', n: 3 })
+    for (const step of steps) expect(step.note).toBe(true)
+  })
+
+  it('contre-exemples : un rang numéroté ou une consigne sans libellé de remarque restent des étapes', () => {
+    const rang = linesToSteps([L('Rang 1 (End.) : tric. 2 m. end.')], { kind: 'corps', n: 3 })
+    expect(rang[0].note).toBeUndefined()
+    const consigne = linesToSteps([L('Notez le nombre de mailles.')], { kind: 'corps', n: 3 })
+    expect(consigne[0].note).toBeUndefined()
+    const repetition = linesToSteps(
+      [L('Répéter les rangs 1 et 2 encore 74 (96) 118 fois.')],
+      { kind: 'corps', n: 3 },
+    )
+    expect(repetition[0]).toMatchObject({ repeat: true, total: [74, 96, 118] })
+  })
+
+  // Protège les pluriels français et les libellés suédois de REMARK_LABEL_RE.
+  it('une remarque au pluriel ou en suédois (« Remarques : », « OBS: », « Tips: »…) reste une note', () => {
+    const lignes = [
+      'Notes : plusieurs finitions sont possibles.',
+      'Remarques : vérifier la jauge avant de commencer.',
+      'Astuces : bloquer l’ouvrage avant de coudre.',
+      'Conseils : utiliser un fil auxiliaire.',
+      'Tips: use a stitch marker here.',
+      'OBS: kontrollera maskantalet.',
+      'Notera: se mönstret för detaljer.',
+    ]
+    const steps = linesToSteps(lignes.map(L), { kind: 'corps', n: 3 })
+    for (const step of steps) expect(step.note).toBe(true)
+  })
+
+  it('contre-exemple : « Observer le motif. » sans libellé à deux points reste une étape', () => {
+    const consigne = linesToSteps([L('Observer le motif.')], { kind: 'corps', n: 3 })
+    expect(consigne[0].note).toBeUndefined()
+  })
 })

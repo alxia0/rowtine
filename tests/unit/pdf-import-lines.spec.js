@@ -1835,3 +1835,347 @@ describe('itemsToLines — garde chevauchement (sous-bloc indenté ≠ colonne)'
     ])
   })
 })
+
+// Protège une colonne de valeurs alignées à droite (« 250 g », Classic Sweater p.3) d'être lue comme une colonne séparée au lieu d'être recollée à son libellé.
+describe('itemsToLines — garde colonne de valeurs alignées à droite', () => {
+  const at = (str, x, y, w, h = 10) => ({ str, transform: [h, 0, 0, h, x, y], width: w, height: h, fontName: 'f1' })
+
+  it('une colonne de valeurs de fil alignée à droite se recolle à ses libellés (Classic Sweater p.3)', () => {
+    const items = [
+      at('1-2 ans:', 28.3, 449.7, 25.8),
+      at('Fond', 28.3, 440.0, 15.4), at('250 g', 150.4, 440.0, 19.7),
+      at('Jacquard', 28.3, 430.2, 28.4), at('50 g', 154.8, 430.2, 15.3),
+      at('3-4 ans:', 28.3, 410.7, 25.8),
+      at('Fond', 28.3, 401.0, 15.4), at('250 g', 150.4, 401.0, 19.7),
+      at('Jacquard', 28.3, 391.2, 28.4), at('50 g', 154.8, 391.2, 15.3),
+      // vraie colonne de prose (Notes pour la partie jacquard), cellules > 12 caractères
+      at('Notes pour la partie jacquard vraiment', 213, 449.7, 140),
+      at('Il est recommande de tricoter sans croiser', 213, 440.0, 140),
+      at('la laine derriere le travail vraiment ici', 213, 430.2, 140),
+      at('et un peu plus pour etre sur ok', 213, 420.0, 140),
+    ]
+    const lines = itemsToLines(items, {}, { pageWidth: 595 })
+    expect(lines.map((l) => l.text)).toContain('Fond 250 g')
+    expect(lines.map((l) => l.text)).toContain('Jacquard 50 g')
+    // la colonne de prose reste distincte, jamais absorbée par la garde
+    expect(lines.filter((l) => l.rightCol)).toHaveLength(4)
+  })
+
+  it('contre-exemple : une colonne de cellules de plus de 12 caractères alignées à droite reste une colonne', () => {
+    // Même géométrie de gouttières que le test ci-dessus, mais la colonne candidate porte
+    // des cellules de prose (> 12 caractères), pas des valeurs de fil : la garde ne doit
+    // pas la retirer, la page reste lue en 3 colonnes distinctes.
+    const items = [
+      at('Fond', 28.3, 440.0, 15.4), at('Environ 250 grammes', 160, 440.0, 90),
+      at('Jacquard', 28.3, 430.2, 28.4), at('Environ cinquante g', 160, 430.2, 90),
+      at('Ourlet', 28.3, 401.0, 25), at('Environ trois cents', 160, 401.0, 90),
+      at('Poignet', 28.3, 391.2, 30), at('Environ cent grammes', 160, 391.2, 90),
+      at('Notes pour la partie jacquard vraiment', 310, 440.0, 140),
+      at('Il est recommande de tricoter sans croiser', 310, 430.2, 140),
+      at('la laine derriere le travail vraiment ici', 310, 401.0, 140),
+    ]
+    const lines = itemsToLines(items, {}, { pageWidth: 595 })
+    expect(lines.every((l) => l.multiCol)).toBe(true)
+    expect(lines.map((l) => l.text)).not.toContain('Fond Environ 250 grammes')
+    expect(lines.map((l) => l.text)).toContain('Environ 250 grammes')
+  })
+
+  it('un tableau de mesures à deux tailles (deux colonnes de valeurs) garde ses 3 colonnes', () => {
+    // Protège la garde « colonne de valeurs » : elle ne retire une colonne alignée à droite que si la suivante n'est pas elle-même de forme « valeurs ».
+    const items = [
+      at('Tour de poitrine', 28.3, 440.0, 60), at('80 cm', 150, 440.0, 20), at('36 cm', 228, 440.0, 22),
+      at('Longueur', 28.3, 430.2, 35), at('104 cm', 146, 430.2, 24), at('128 cm', 222, 430.2, 28),
+      at('Tour de bras', 28.3, 401.0, 45), at('9 cm', 155, 401.0, 15), at('12 cm', 230, 401.0, 20),
+      at('Encolure', 28.3, 391.2, 35), at('5 cm', 155, 391.2, 15), at('8 cm', 234, 391.2, 16),
+    ]
+    const lines = itemsToLines(items, {}, { pageWidth: 595 })
+    expect(lines.every((l) => l.multiCol)).toBe(true)
+    // aucune fusion : libellés, colonne S et colonne L restent 3 flux distincts
+    expect(lines.map((l) => l.text)).toContain('Tour de poitrine')
+    expect(lines.map((l) => l.text)).toContain('80 cm')
+    expect(lines.map((l) => l.text)).toContain('36 cm')
+    expect(lines.map((l) => l.text)).not.toContain('Tour de poitrine 80 cm')
+  })
+
+  it('une colonne à x-début fixe (pas de right-justification) n’est jamais une colonne de valeurs', () => {
+    // Protège la condition « x de départ variable » : x-début ET endX identiques sur toutes les rangées, ce n'est jamais une colonne de valeurs.
+    const items = [
+      at('Réf un', 20, 440.0, 50), at('AA', 200, 440.0, 20), at('Prose ligne un du texte', 300, 440.0, 140),
+      at('Réf deux', 20, 430.2, 50), at('BB', 200, 430.2, 20), at('Prose ligne deux du texte', 300, 430.2, 140),
+      at('Réf trois', 20, 401.0, 50), at('CC', 200, 401.0, 20), at('Prose ligne trois du texte', 300, 401.0, 140),
+    ]
+    const lines = itemsToLines(items, {}, { pageWidth: 595 })
+    expect(lines.every((l) => l.multiCol)).toBe(true)
+    expect(lines.map((l) => l.text)).toContain('AA')
+    expect(lines.map((l) => l.text)).not.toContain('Réf un AA')
+  })
+})
+
+// Protège une page de diagramme jacquard (Classic Sweater p.7) de la pollution de l'encadré de prose voisin.
+describe('itemsToLines — cellules de grille à glyphe unique', () => {
+  const at = (str, x, y, w, h = 10) => ({ str, transform: [h, 0, 0, h, x, y], width: w, height: h, fontName: 'f1' })
+
+  it('un vrai diagramme jacquard (≥ 40 jetons, ≥ 5 cellules de ≥ 3) disparaît sans toucher l’encadré ni la légende', () => {
+    // Protège le retrait de la grille jacquard et de son étiquette interne, sans toucher la prose voisine ni la légende hors grille.
+    const proseTexts = ['Attention', 'Reportez-vous', 'au schéma', 'ci-contre pour', 'le motif de', 'jacquard sur', 'les rangs', 'indiqués.']
+    const items = []
+    let y = 700
+    for (const t of proseTexts) { items.push(at(t, 31, y, 45)); y -= 12 }
+    y = 700
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 96, y, 14))
+      items.push(at('x x x', 130, y, 14))
+      items.push(at('x x x', 164, y, 14))
+      items.push(at('x x x', 198, y, 14))
+      y -= 12
+    }
+    items.push(at('Section 1', 130, 660, 60))
+    items.push(at('x Jacquard', 96, 590, 70))
+
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+
+    // aucune ligne ne porte plus de cellule de grille
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+    // la prose de l'encadré est intacte, une ligne par phrase, rien d'accolé
+    expect(lines.map((l) => l.text)).toEqual(expect.arrayContaining(proseTexts))
+    // l'étiquette posée dans la boîte de la grille a disparu avec elle
+    expect(lines.some((l) => l.text.includes('Section 1'))).toBe(false)
+    // la légende hors de la boîte de la grille est conservée
+    expect(lines.some((l) => l.text === 'x Jacquard')).toBe(true)
+  })
+
+  it('contre-exemple : 3 cellules « x x » sous le seuil (5 cellules mini) restent en sortie', () => {
+    // Même encadré, mais grille réduite à 3 cellules « x x » (2 jetons chacune, 6 au
+    // total) : sous CHART_MIN_RUNS (5) ET CHART_MIN_GLYPHS (40) — le filtre ne doit pas
+    // se déclencher, sortie inchangée (les 3 cellules restent recollées à leur voisine).
+    const items = [
+      at('Attention', 31, 700, 45),
+      at('x x', 96, 700, 10),
+      at('Reportez-vous', 31, 688, 45),
+      at('x x', 96, 688, 10),
+      at('au schéma', 31, 676, 45),
+      at('x x', 96, 676, 10),
+    ]
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.filter((l) => l.text.includes('x x')).length).toBe(3)
+  })
+
+  it('40 jetons mais seulement 4 cellules longues (< 5) : sous CHART_MIN_RUNS, rien n’est retiré', () => {
+    // 4 cellules de 10 jetons chacune = 40 jetons (>= CHART_MIN_GLYPHS) mais seulement
+    // 4 cellules d'≥ 3 jetons (< CHART_MIN_RUNS=5) : verrouille le seuil RUNS séparément
+    // du seuil GLYPHS (une mutation de l'un seul ne doit pas laisser l'autre couvrir).
+    const items = [0, 1, 2, 3].map((i) => at('x x x x x x x x x x', 96, 700 - i * 12, 90))
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.filter((l) => l.text === 'x x x x x x x x x x').length).toBe(4)
+  })
+
+  it('5 cellules de 3 jetons mais 15 jetons au total (< 40) : sous CHART_MIN_GLYPHS, rien n’est retiré', () => {
+    // 5 cellules « x x x » (>= CHART_MIN_RUNS=5) mais 15 jetons au total (< CHART_MIN_GLYPHS=40) :
+    // verrouille le seuil GLYPHS séparément du seuil RUNS.
+    const items = [0, 1, 2, 3, 4].map((i) => at('x x x', 96, 700 - i * 12, 20))
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.filter((l) => l.text === 'x x x').length).toBe(5)
+  })
+
+  it('25 cellules « x x » (50 jetons, aucune ≥ 3) : sans cellule longue, rien n’est retiré', () => {
+    // 25 cellules de 2 jetons = 50 jetons (>= CHART_MIN_GLYPHS) mais 0 cellule d'≥ 3 jetons
+    // (< CHART_MIN_RUNS) : verrouille le seuil « ≥ 3 jetons » par cellule, distinct du
+    // compte total de cellules ou de jetons.
+    const items = Array.from({ length: 25 }, (_, i) => at('x x', 96, 700 - i * 12, 10))
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.filter((l) => l.text === 'x x').length).toBe(25)
+  })
+
+  it('deux grilles distinctes sur la page : le texte court entre elles (« Dos », « R5 ») survit', () => {
+    // Protège la boîte englobante PAR GRAPPE (pas une seule boîte pour toute la page).
+    const items = []
+    let y = 700
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 96, y, 14), at('x x x', 130, y, 14), at('x x x', 164, y, 14), at('x x x', 198, y, 14))
+      y -= 12
+    }
+    items.push(at('Dos', 100, 590, 30))
+    items.push(at('R5', 100, 560, 20))
+    y = 500
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 96, y, 14), at('x x x', 130, y, 14), at('x x x', 164, y, 14), at('x x x', 198, y, 14))
+      y -= 12
+    }
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+    expect(lines.map((l) => l.text)).toEqual(['Dos', 'R5'])
+  })
+
+  it('séparateurs de section espacés : les titres entre eux survivent (grappes isolées sous le seuil)', () => {
+    // Protège le seuil PAR GRAPPE : 6 séparateurs isolés n'atteignent jamais 5 cellules.
+    const seps = [700, 600, 500, 400, 300, 200]
+    const titles = ['Section deux', 'Section trois', 'Section quatre', 'Section cinq', 'Section six']
+    const items = []
+    for (let i = 0; i < seps.length; i++) {
+      items.push(at('- - - - - - - - - -', 40, seps[i], 90))
+      if (i < titles.length) items.push(at(titles[i], 40, seps[i] - 50, 90))
+    }
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.map((l) => l.text)).toEqual(expect.arrayContaining(titles))
+    expect(lines.filter((l) => l.text === '- - - - - - - - - -').length).toBe(6)
+  })
+
+  it('deux grilles entrelacées en Y mais disjointes en X (colonnes de tailles côte à côte) : le texte entre les deux survit', () => {
+    // Protège l'union-find : un chaînage « rangée précédente » romprait chaque grille dès
+    // que leurs rangées s'entrelacent par Y, même sans jamais se chevaucher en X.
+    const items = []
+    let yA = 700
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 96, yA, 14), at('x x x', 130, yA, 14), at('x x x', 164, yA, 14), at('x x x', 198, yA, 14))
+      yA -= 12
+    }
+    let yB = 694
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 300, yB, 14), at('x x x', 334, yB, 14), at('x x x', 368, yB, 14))
+      yB -= 12
+    }
+    items.push(at('Manche', 230, 670, 45))
+    items.push(at('R3', 230, 640, 20))
+    const lines = itemsToLines(items, {}, { pageWidth: 595 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+    expect(lines.map((l) => l.text)).toEqual(['Manche', 'R3'])
+  })
+
+  it('grille à cellules dispersées en X sur une même rangée (chart dentelle) : la marge relative tolère l’écart', () => {
+    // Géométrie synthétique (phénomène observé sur un vrai chart dentelle éparse, ravelry
+    // seed-belt-en p.4) : un chevauchement en X strict romprait la grappe à tort.
+    const items = []
+    let y = 700
+    for (let i = 0; i < 10; i++) {
+      items.push(at('x x x x x', 96 + (i % 3) * 90, y, 40))
+      y -= 10
+    }
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+  })
+
+  it('deux moitiés de grille séparées par une frontière de taille (~3× la cellule) se cumulent au-delà du seuil', () => {
+    // Protège la borne basse de CHART_ROW_GAP_FACTOR : chaque moitié seule reste sous les
+    // deux seuils (20 jetons, 4 cellules), réunies elles les franchissent (40, 8).
+    const items = []
+    let y = 700
+    for (let i = 0; i < 4; i++) { items.push(at('x x x x x', 96, y, 40)); y -= 10 }
+    y -= 20
+    for (let i = 0; i < 4; i++) { items.push(at('x x x x x', 96, y, 40)); y -= 10 }
+    const lines = itemsToLines(items, {}, { pageWidth: 420 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+  })
+
+  it('séparateur dans un corps plus grand que la grille, à 60 pt : l’écart Y utilise la PLUS PETITE taille', () => {
+    // Protège le choix du minimum (pas du maximum) : le corps du séparateur (20) ne doit
+    // pas élargir la fenêtre au-delà de celle de la grille (10), sous peine de fusionner.
+    const items = []
+    let y = 500
+    for (let i = 0; i < 8; i++) {
+      for (let c = 0; c < 5; c++) items.push(at('- - -', 40 + c * 34, y, 14))
+      y -= 12
+    }
+    items.push(at('- - - - - - - - - -', 40, 356, 90, 20))
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.map((l) => l.text)).toContain('- - - - - - - - - -')
+  })
+
+  it('légende étroite entre une grille et un séparateur du même glyphe (S1-narrow) : la légende survit', () => {
+    // Protège l'encadrement : le séparateur ne rejoint la grappe que par la tolérance
+    // d'écart Y généreuse (isolé de toute autre rangée), la légende n'est pas encadrée.
+    const items = []
+    let y = 500
+    for (let i = 0; i < 8; i++) {
+      for (let c = 0; c < 5; c++) items.push(at('- - -', 40 + c * 34, y, 14))
+      y -= 12
+    }
+    items.push(at('R5', 40, 400, 20))
+    items.push(at('- - - - - - - - - -', 40, 390, 90))
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.some((l) => /- -/.test(l.text))).toBe(false)
+    expect(lines.map((l) => l.text)).toContain('R5')
+  })
+
+  it('deux grilles côte à côte sur les mêmes rangées Y (S2) : le texte entre les deux survit', () => {
+    // Protège la segmentation X d'une rangée : sans elle, deux grilles sur les MÊMES
+    // rangées Y ne forment qu'une seule rangée, aucun test X ne peut plus les séparer.
+    const items = []
+    let y = 700
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 40, y, 14), at('x x x', 74, y, 14), at('x x x', 108, y, 14), at('x x x', 142, y, 14))
+      items.push(at('x x x', 196, y, 14), at('x x x', 230, y, 14), at('x x x', 264, y, 14), at('x x x', 298, y, 14))
+      y -= 12
+    }
+    items.push(at('Dos', 165, 664, 25))
+    const lines = itemsToLines(items, {}, { pageWidth: 400 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+    expect(lines.map((l) => l.text)).toContain('Dos')
+  })
+
+  it('deux grilles côte à côte, rangées Y entrelacées de 6 pt (S2bis) : le texte entre les deux survit', () => {
+    // Variante S2 avec des rangées légèrement décalées (cas le plus dur pour la
+    // segmentation par rangée exacte) : même marge X relative, même résultat attendu.
+    const items = []
+    let yA = 700
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 40, yA, 14), at('x x x', 74, yA, 14), at('x x x', 108, yA, 14), at('x x x', 142, yA, 14))
+      yA -= 12
+    }
+    let yB = 694
+    for (let i = 0; i < 8; i++) {
+      items.push(at('x x x', 182, yB, 14), at('x x x', 216, yB, 14), at('x x x', 250, yB, 14), at('x x x', 284, yB, 14))
+      yB -= 12
+    }
+    items.push(at('Dos', 155, 664, 25))
+    const lines = itemsToLines(items, {}, { pageWidth: 400 })
+    expect(lines.some((l) => /x x/.test(l.text))).toBe(false)
+    expect(lines.map((l) => l.text)).toContain('Dos')
+  })
+})
+
+describe('itemsToLines — drapeau oblique (badge de couverture pivoté)', () => {
+  // Item pivoté de `deg` degrés autour de son point d'ancrage (matrice de rotation
+  // standard PDF) : même géométrie que le badge réel « Nombreuses couleurss » (35-38°).
+  const rot = (str, x, y, deg, h = 10) => {
+    const rad = (deg * Math.PI) / 180
+    return {
+      str,
+      transform: [h * Math.cos(rad), h * Math.sin(rad), -h * Math.sin(rad), h * Math.cos(rad), x, y],
+      height: h,
+      fontName: 'f1',
+    }
+  }
+  const flat = (str, x, y, h = 10) => ({ str, transform: [h, 0, 0, h, x, y], height: h, fontName: 'f1' })
+
+  it('un item pivoté de 35° (badge réel) porte le drapeau oblique', () => {
+    const items = [rot('Nombreuses', 40, 700, 35)]
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.find((l) => l.text === 'Nombreuses').oblique).toBe(true)
+  })
+
+  it('un léger biais d’impression (10°, sous le seuil) reste un texte normal, jamais oblique', () => {
+    const items = [rot('Pull torsades', 40, 700, 10)]
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.find((l) => l.text === 'Pull torsades').oblique).toBeUndefined()
+  })
+
+  it('un texte VERTICAL (90°, légende de reliure) reste hors du drapeau oblique (borne haute 80°)', () => {
+    const items = [rot('Reliure', 40, 700, 90)]
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.find((l) => l.text === 'Reliure').oblique).toBeUndefined()
+  })
+
+  it('une ligne née du recollage d’un fragment oblique ET d’un fragment horizontal (même Y) n’est PAS oblique (il faut que TOUS les items le soient)', () => {
+    const items = [rot('Titre', 40, 700, 35), flat('Suite', 90, 700)]
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    const line = lines.find((l) => l.text === 'Titre Suite')
+    expect(line).toBeTruthy()
+    expect(line.oblique).toBeUndefined()
+  })
+
+  it('le texte oblique n’est jamais supprimé (livojoki/sensory-bunny) : le contenu survit, seul le drapeau change', () => {
+    const items = [rot('1', 40, 700, 30), rot('2', 60, 700, 30), rot('3', 80, 700, 30)]
+    const lines = itemsToLines(items, {}, { pageWidth: 300 })
+    expect(lines.map((l) => l.text).join(' ')).toContain('1')
+  })
+})

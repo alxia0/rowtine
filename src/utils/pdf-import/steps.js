@@ -86,6 +86,18 @@ const REP_RE_UNIT_VECTOR_RE = /(?:r[ée]p(?:[ée]ter\b|\.|\b)|repeat\b|gentag\b|
 // `NEEDLE_SF_MAX_LEN`, reference.js) — cf. le commentaire au point d'appel, dans
 // `linesToSteps`, qui porte la mesure et le raisonnement sur le repli.
 const REP_MAX_LEN = 4000
+// Libellé de remarque en tête de ligne (« Note : », « Astuce : »…), multilingue : une telle
+// ligne reste une note, jamais une étape cochable, même en section de travail.
+const REMARK_LABEL_RE = /^(?:notes?|nota|remarques?|astuces?|conseils?|n\.?\s?b\.?|tips?|hint|hinweis|tipp|anmerkung|consejo|consiglio|opmerking|let op|bem[æe]rk|huom(?:io)?|vinkki|uwaga|wskaz[óo]wka|obs|notera)\s*:\s*\S/i
+
+// Exporté pour assemble.js : une remarque étiquetée reconnue ici ne doit pas non plus
+// compter dans le dénominateur de confiance (stats.totalLines), sous peine de pénaliser
+// à tort un patron qui n'a fait qu'annoter une note. Reçoit le texte du step (déjà mis en
+// gras « **…** » si la ligne source l'était, cf. emphasize) : on retire cet enrobage avant
+// le test, sinon une remarque en gras échappe à REMARK_LABEL_RE (ancré en tête de chaîne).
+export function isRemarkLabel(text) {
+  return REMARK_LABEL_RE.test(String(text || '').replace(/^\*\*(.*)\*\*$/, '$1'))
+}
 
 // Kinds « non-travail » : sections où le texte reste informatif (pas de suivi ligne à ligne).
 // Exporté : les tests de kindForTitle (segment.js) vérifient CONTRE cette liste réelle
@@ -184,6 +196,7 @@ export function linesToSteps(lines, { kind = 'pelote', n = 1 } = {}) {
     // un vrai rang ne commence pas par « = ». Confiné aux sections de travail : en section
     // non-travail ces lignes sont déjà des notes (repli final). Cf. plan lot #3 coupe minimale.
     if (SYMBOL_LEGEND_RE.test(src)) return { t: et, c, note: true }
+    if (REMARK_LABEL_RE.test(src)) return { t: et, c, note: true }
     const isWorkSection = !NON_WORK_KINDS.has(kind)
     // Bug 1 (campagne 2026-08-27, ~110 PDF DROPS + diaphane-top-buttoned-shirt-fr-09bb8728,
     // love-for-squares-blanket-fr-a4af4182) : le plafond `src.length <= 220` seul confondait

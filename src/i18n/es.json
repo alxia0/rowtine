@@ -44,8 +44,11 @@
     "resumeSize": "talla tejida {size}",
     "wipSummary": "Tienes {n} proyecto en curso. | Tienes {n} proyectos en curso.",
     "lastProject": "Último proyecto",
-    "noProjects": "Aún no tienes proyectos. Crea tu primer proyecto para empezar.",
+    "noProjects": "Aún no tienes proyectos. Importa un patrón en PDF o crea tu primer proyecto para empezar.",
     "createProject": "Crear un proyecto",
+    "importPdf": "Importar un patrón en PDF",
+    "importPdfHint": "Se guardará en tu Biblioteca de patrones",
+    "importPdfShort": "Importar un PDF",
     "seeAll": "Ver todo",
     "collapse": "Contraer",
     "toolsLabel": "Herramientas",
@@ -1108,6 +1111,12 @@
     "preview": "Vista previa del patrón",
     "loading": "Cargando…",
     "readOnlyNote": "Vista previa de solo lectura. Para elegir tu talla y seguir tu progreso, crea un proyecto y luego pulsa «Seguir el patrón».",
+    "legend": {
+      "title": "Durante el seguimiento:",
+      "check": "se marca",
+      "count": "se cuenta",
+      "read": "para leer"
+    },
     "chooseSize": "1. Elige tu talla",
     "singleSize": "Talla única",
     "section": {
@@ -1120,6 +1129,7 @@
     "markDone": "Marcar el paso como hecho",
     "fixHere": "Corregir",
     "stepImageOpen": "Ver la imagen en grande",
+    "coverOpen": "Ver la portada en grande",
     "noRepeat": "Sin repetición para tu talla ({size})",
     "pickSizeShort": "elige tu talla",
     "seeTechnique": "Ver la técnica",

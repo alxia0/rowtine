@@ -1,4 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 // Espion QUI APPELLE l'implémentation réelle par défaut (tous les tests existants du
 // fichier restent inchangés) — sauf pour le test de preuve par mutation d'assemble.js:349
 // ci-dessous, qui substitue PONCTUELLEMENT un retour (mockReturnValueOnce)
@@ -14,6 +17,12 @@ import { segmentSections } from '@/utils/pdf-import/segment'
 import { computeConfidence } from '@/utils/pdf-import/confidence'
 import { validateReader } from '@/utils/reader'
 import { detectSizeLabels } from '@/utils/pdf-import/sizes'
+import { patternToMd, mdToPattern } from '@/utils/pattern-md'
+
+// Note : `fileURLToPath` + `path.join` (pas `new URL('./relative', import.meta.url)`,
+// que Vite réécrit en référence d'asset), même contournement que pattern-md-roundtrip.spec.js.
+const BRUME_FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), '__fixtures__', 'brume-v2')
+const brumeFixture = (f) => readFileSync(join(BRUME_FIXTURES_DIR, f), 'utf8')
 
 const L = (text, o = {}) => ({ text, size: 10, bold: false, y: 0, ...o })
 
@@ -619,6 +628,36 @@ describe('buildReaderFromPages — la phrase promue en easeHint ne se duplique p
   })
 })
 
+// Une remarque étiquetée (REMARK_LABEL_RE) est une ligne classée avec succès : elle compte comme structurée pour la confiance.
+describe('buildReaderFromPages, une remarque étiquetée ne pénalise plus le stepScore', () => {
+  const PAGES_NOTE = [[
+    L('Pull Exemple', { size: 24 }),
+    L('Corps', { bold: true, size: 14 }),
+    L('Rang 1 : tricoter 10 m.'),
+    L('Rang 2 : tricoter 10 m.'),
+    L('Note : vérifier la jauge avant de continuer.'),
+  ]]
+  it('une section à 2 rangs + 1 « Note : » compte la remarque en plus (3), stepScore à 1', () => {
+    const { stats } = buildReaderFromPages(PAGES_NOTE, { fileName: 'x.pdf' })
+    expect(stats.totalLines).toBe(3)
+    expect(stats.structuredLines).toBe(3)
+    expect(stats.bySection.corps).toBe(100)
+  })
+  it('une remarque étiquetée en gras (enrobée « **…** ») compte aussi comme ligne structurée', () => {
+    const pagesBold = [[
+      L('Pull Exemple', { size: 24 }),
+      L('Corps', { bold: true, size: 14 }),
+      L('Rang 1 : tricoter 10 m.'),
+      L('Rang 2 : tricoter 10 m.'),
+      L('Note : vérifier la jauge avant de continuer.', { bold: true }),
+    ]]
+    const { stats } = buildReaderFromPages(pagesBold, { fileName: 'x.pdf' })
+    expect(stats.totalLines).toBe(3)
+    expect(stats.structuredLines).toBe(3)
+    expect(stats.bySection.corps).toBe(100)
+  })
+})
+
 describe('computeConfidence', () => {
   it('pondère sections connues, lignes structurées, vecteurs et warnings', () => {
     const c = computeConfidence({
@@ -964,5 +1003,27 @@ describe('parseAuthorLine — forme « © Marque annee »', () => {
   it('capte une marque reelle meme si un de ses mots figure aussi dans la liste generique', () => {
     expect(parseAuthorLine('© Design Studio 2021')).toBe('Design Studio')
     expect(parseAuthorLine('© Rights & Stitches 2022')).toBe('Rights & Stitches')
+  })
+})
+
+// Verrou BRUME V2 : ce patron « prêt pour Rowtine » doit ressortir du moteur identique à son oracle Rowtine-MD.
+describe('BRUME V2 : identité avec l’oracle', () => {
+  it('le PDF relu par le moteur égale l’oracle relu, sans avertissement', () => {
+    const { pages, metaTitle } = JSON.parse(brumeFixture('pages.json'))
+    const { pattern, reader, warnings, blocking } = buildReaderFromPages(pages, {
+      fileName: 'BRUME V2 FR.pdf',
+      docMetaTitle: metaTitle,
+    })
+    expect(warnings).toEqual([])
+    expect(blocking.blocked).toBe(false)
+    expect(reader.sizeLabels).toEqual(['S', 'M', 'L'])
+    expect(pattern.author).toBe('Alexia O., Velaine Studio')
+
+    const { md } = patternToMd({ ...pattern, reader })
+    const idealMd = brumeFixture('brume-v2-fr-ideal.md')
+    const engineParsed = mdToPattern(md)
+    const idealParsed = mdToPattern(idealMd)
+    const norm = (p) => JSON.stringify(p.pattern, (k, v) => (k === 'id' ? undefined : v))
+    expect(norm(engineParsed)).toBe(norm(idealParsed))
   })
 })

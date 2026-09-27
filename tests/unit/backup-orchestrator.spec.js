@@ -546,6 +546,22 @@ describe('backupAll — patron de bibliothèque et fichiers racine', () => {
     expect(photos).toHaveLength(2)
     for (const p of photos) expect(acheves.indexOf(p)).toBeLessThan(iLaines)
   })
+
+  // Protège le ménage des orphelines (reconcileYarnPhotos) : ne doit pas effacer la galerie.
+  it('galerie de laine (photos[]) : les deux fichiers restent sous Laines/ après deux sauvegardes successives, laines.json sans data:', async () => {
+    const snapshot = baseSnapshot({
+      yarns: [{ id: 1, brand: 'Katia', photos: [PHOTO_A, PHOTO_B] }],
+    })
+    await backupAll(storage, snapshot)
+    await backupAll(storage, snapshot)
+
+    const laines = JSON.parse(await storage.readFile('laines.json'))
+    expect(laines[0].photos).toHaveLength(2)
+    for (const name of laines[0].photos) {
+      expect(await storage.exists(`Laines/${name}`)).toBe(true)
+    }
+    expect(await storage.readFile('laines.json')).not.toContain('data:')
+  })
 })
 
 describe('backupAll — corbeille.json (index des ids en corbeille)', () => {

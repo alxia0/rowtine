@@ -8,7 +8,7 @@ import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 import { itemsToLines } from './pdf-import/lines'
 import { filterGalleryImages } from './pdf-import/gallery'
-import { clusterPathBoxes, splitRegionGuarded, classifyGridStrict } from './pdf-import/vector-regions'
+import { clusterPathBoxes, splitRegionGuarded, classifyGridStrict, classifyRasterGrid } from './pdf-import/vector-regions'
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
 
@@ -74,7 +74,10 @@ export async function extractDocMetaTitle(file) {
 
 // Rend une page du PDF en image (data URL JPEG). Sert à récupérer un diagramme ou une
 // photo « objet fini » directement depuis le PDF (cf. import IA). `pageNumber` est 1-indexé.
-export async function renderPdfPageToDataUrl(file, pageNumber = 1, maxWidth = 1100) {
+// Option `crop(pageWidth, pageHeight)` : rend une boîte en points PDF ({ x0, y0, x1, y1 },
+// y vers le haut) à la place de la page entière, ou null pour la page entière (couverture
+// rognée, cf. pdf-import/cover-crop.js). `maxWidth` vaut alors pour la largeur de la boîte.
+export async function renderPdfPageToDataUrl(file, pageNumber = 1, maxWidth = 1100, { crop } = {}) {
   const data = await file.arrayBuffer()
   const task = openPdf(data)
   try {
@@ -82,14 +85,18 @@ export async function renderPdfPageToDataUrl(file, pageNumber = 1, maxWidth = 11
     const n = Math.min(Math.max(1, pageNumber || 1), doc.numPages)
     const page = await doc.getPage(n)
     const base = page.getViewport({ scale: 1 })
-    let scale = Math.min(2.5, Math.max(0.5, maxWidth / base.width))
-    scale = clampRenderScale(base.width, base.height, scale) // filet de sécurité pages grand format
+    const box = crop?.(base.width, base.height) || null
+    const unit = box ? viewportRect(base, box) : { left: 0, top: 0, width: base.width, height: base.height }
+    let scale = Math.min(2.5, Math.max(0.5, maxWidth / unit.width))
+    scale = clampRenderScale(unit.width, unit.height, scale) // filet de sécurité pages grand format
     const viewport = page.getViewport({ scale })
     const canvas = document.createElement('canvas')
-    canvas.width = Math.ceil(viewport.width)
-    canvas.height = Math.ceil(viewport.height)
+    canvas.width = Math.ceil(unit.width * scale)
+    canvas.height = Math.ceil(unit.height * scale)
     const ctx = canvas.getContext('2d')
-    await page.render({ canvasContext: ctx, viewport }).promise
+    // Décalage de la boîte : la page est rendue en entier, seule la boîte tombe dans le canvas.
+    const transform = box ? [1, 0, 0, 1, -unit.left * scale, -unit.top * scale] : undefined
+    await page.render({ canvasContext: ctx, viewport, ...(transform ? { transform } : {}) }).promise
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
     // Libère le buffer du canvas offscreen dès l'extraction faite (cf. RENDER_MAX_DIM).
     canvas.width = 0
@@ -98,6 +105,16 @@ export async function renderPdfPageToDataUrl(file, pageNumber = 1, maxWidth = 11
   } finally {
     await releasePdf(task)
   }
+}
+
+// Boîte en points PDF → rectangle dans le repère du viewport à l'échelle 1 (y vers le bas,
+// origine et rotation de la page prises en compte par pdf.js).
+function viewportRect(viewport, box) {
+  const [ax, ay] = viewport.convertToViewportPoint(box.x0, box.y0)
+  const [bx, by] = viewport.convertToViewportPoint(box.x1, box.y1)
+  const left = Math.min(ax, bx)
+  const top = Math.min(ay, by)
+  return { left, top, width: Math.abs(bx - ax), height: Math.abs(by - ay) }
 }
 
 // Nombre de pages d'un PDF. Sert à la navigation de la visionneuse in-app.
@@ -127,6 +144,30 @@ export function fitScale(iw, ih, maxW, maxH) {
   if (!iw || !ih) return 1
   if (!maxW || maxW <= 0 || !maxH || maxH <= 0) return 1
   return Math.min(1, maxW / iw, maxH / ih)
+}
+
+// Taille de sortie du décodage d'une image intrinsèque w×h : réduite pour tenir dans
+// maxW×maxH, jamais agrandie. `aspect` = rapport largeur/hauteur AFFICHÉ par le PDF (sa
+// matrice peut étirer l'image : margrethe p3, 1100×1164 natif affiché 502×354). S'il
+// s'écarte de plus de 5 % du rapport natif, la sortie le suit : chaque axe est borné
+// séparément (plafond, et jamais plus que le natif sur cet axe), puis l'axe en trop est
+// réduit. Sans quoi l'image stockée gardait ses proportions natives, écrasée d'un tiers.
+const ASPECT_TOLERANCE = 1.05
+
+export function decodeTargetSize(w, h, maxW, maxH, aspect) {
+  const scale = fitScale(w, h, maxW, maxH)
+  const fit = {
+    outW: scale < 1 ? Math.max(1, Math.round(w * scale)) : w,
+    outH: scale < 1 ? Math.max(1, Math.round(h * scale)) : h,
+  }
+  if (!(aspect > 0) || !w || !h) return fit
+  const ratio = w / h / aspect
+  if (ratio <= ASPECT_TOLERANCE && ratio >= 1 / ASPECT_TOLERANCE) return fit
+  let tw = maxW > 0 ? Math.min(w, maxW) : w
+  let th = maxH > 0 ? Math.min(h, maxH) : h
+  if (tw / th > aspect) tw = th * aspect
+  else th = tw / aspect
+  return { outW: Math.max(1, Math.round(tw)), outH: Math.max(1, Math.round(th)) }
 }
 
 // Plafond (px) pour tout rendu de PAGE (viewport pdf.js) sur canvas offscreen — pages
@@ -169,6 +210,8 @@ const IMAGE_DECODE_MAX_DIM = 2048
 // en data URL via canvas. Testable : surchargeable par globalThis.__decodeStub.
 // `maxW`/`maxH` (optionnels, px) bornent la sortie : au-delà, l'image est réduite (jamais
 // agrandie — cf. `fitScale`), plafonnée dans tous les cas par `IMAGE_DECODE_MAX_DIM`.
+// `aspect` (optionnel) : rapport largeur/hauteur affiché par le PDF, suivi quand la page
+// étire l'image (cf. `decodeTargetSize`).
 // Le plafond est appliqué AVANT le décodage (pas après) : pour la forme ImageBitmap, on
 // décode/dessine directement à la taille cible plutôt que de décoder plein format puis
 // réduire, ce qui évite le pic mémoire d'un canvas intermédiaire disproportionné sur les
@@ -183,17 +226,15 @@ const IMAGE_DECODE_MAX_DIM = 2048
 // une resynthèse indépendante — fermer un bitmap qu'on ne sait pas relié à cette mise en cache
 // est un risque qu'on préfère ne pas courir. Seul le canvas qu'on
 // alloue nous-mêmes est sûr à libérer.
-function decodeImageObject(img, maxW, maxH) {
-  if (globalThis.__decodeStub) return globalThis.__decodeStub(img, maxW, maxH)
+function decodeImageObject(img, maxW, maxH, aspect) {
+  if (globalThis.__decodeStub) return globalThis.__decodeStub(img, maxW, maxH, aspect)
   if (!img) return ''
   const w = img.width
   const h = img.height
   if (!w || !h) return ''
   const cappedMaxW = Math.min(maxW ?? IMAGE_DECODE_MAX_DIM, IMAGE_DECODE_MAX_DIM)
   const cappedMaxH = Math.min(maxH ?? IMAGE_DECODE_MAX_DIM, IMAGE_DECODE_MAX_DIM)
-  const scale = fitScale(w, h, cappedMaxW, cappedMaxH)
-  const outW = scale < 1 ? Math.max(1, Math.round(w * scale)) : w
-  const outH = scale < 1 ? Math.max(1, Math.round(h * scale)) : h
+  const { outW, outH } = decodeTargetSize(w, h, cappedMaxW, cappedMaxH, aspect)
 
   if (img.bitmap) {
     // Décode directement à la taille cible (pas de canvas plein format intermédiaire).
@@ -201,6 +242,10 @@ function decodeImageObject(img, maxW, maxH) {
     canvas.width = outW
     canvas.height = outH
     const ctx = canvas.getContext('2d')
+    // Fond blanc d'abord : le JPEG n'a pas d'alpha, un pixel transparent (masque doux)
+    // sortirait NOIR (légendes de symboles, volutes décoratives).
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, outW, outH)
     ctx.drawImage(img.bitmap, 0, 0, outW, outH)
     const dataUrl = canvas.toDataURL('image/jpeg', 0.8)
     canvas.width = 0
@@ -220,7 +265,17 @@ function decodeImageObject(img, maxW, maxH) {
     const imgData = ctx.createImageData(w, h)
     const src = img.data
     if (img.kind === 3) {
-      imgData.data.set(src)
+      // Composé sur blanc ici : putImageData écrit l'alpha tel quel (aucun fond ne s'y
+      // mélange), et le JPEG rendrait noir tout pixel transparent.
+      const out = imgData.data
+      for (let i = 0; i < src.length; i += 4) {
+        const a = src[i + 3]
+        const k = 255 - a
+        out[i] = (src[i] * a + 255 * k) / 255
+        out[i + 1] = (src[i + 1] * a + 255 * k) / 255
+        out[i + 2] = (src[i + 2] * a + 255 * k) / 255
+        out[i + 3] = 255
+      }
     } else if (img.kind === 2) {
       for (let i = 0, j = 0; i < src.length; i += 3, j += 4) {
         imgData.data[j] = src[i]; imgData.data[j + 1] = src[i + 1]; imgData.data[j + 2] = src[i + 2]; imgData.data[j + 3] = 255
@@ -243,7 +298,7 @@ function decodeImageObject(img, maxW, maxH) {
       }
     }
     ctx.putImageData(imgData, 0, 0)
-    if (scale < 1) {
+    if (outW !== w || outH !== h) {
       const out = document.createElement('canvas')
       out.width = outW
       out.height = outH
@@ -349,9 +404,11 @@ function mulCtm(m1, m2) {
   ]
 }
 
-// Récupère un objet image de pdfjs de façon BORNÉE : `page.objs.get(name, cb)` peut
-// ne jamais rappeler son callback (image résidant dans commonObjs, objet non résolu…),
-// ce qui gèlerait l'import. On borne par un timeout → `null` (image sautée) si dépassé.
+// Récupère un objet image de pdfjs de façon BORNÉE : `get(name, cb)` peut ne jamais
+// rappeler son callback (objet non résolu…), ce qui gèlerait l'import. On borne par un
+// timeout → `null` (image sautée) si dépassé. Une image réutilisée entre pages (« g_… »)
+// vit dans `commonObjs`, pas dans `objs` : même aiguillage que le rendu canvas de pdfjs,
+// sans quoi chacune attendait le timeout puis était perdue (logo répété à chaque page).
 export function resolveImageObj(page, name, timeoutMs = 4000) {
   return new Promise((resolve) => {
     let done = false
@@ -363,7 +420,8 @@ export function resolveImageObj(page, name, timeoutMs = 4000) {
     }
     const timer = setTimeout(() => finish(null), timeoutMs)
     try {
-      page.objs.get(name, (img) => finish(img))
+      const pool = name.startsWith('g_') && page.commonObjs ? page.commonObjs : page.objs
+      pool.get(name, (img) => finish(img))
     } catch {
       finish(null)
     }
@@ -463,18 +521,19 @@ export async function extractImagesWithPos(file, onPage) {
             img,
             Math.min(Math.round(disp.w * 2), 1280),
             Math.min(Math.round(disp.h * 2), 1280),
+            disp.h > 0 ? disp.w / disp.h : undefined,
           )
           if (!src) continue
           // Classe l'image en diagramme (kind:'grid') à sa résolution INTRINSÈQUE (pas le src
           // downsamplé ci-dessus, hormis le filet de sécurité IMAGE_DECODE_MAX_DIM sur les
           // images démesurées — cf. imageObjectToRGBA) — corrige E : les diagrammes Cella sont
-          // des JPEG embarqués, invisibles au pipeline vectoriel. Défauts calibrés de
-          // classifyGridStrict (pas d'opts ici). Best-effort : image non classable
-          // → reste une image simple.
+          // des JPEG embarqués, invisibles au pipeline vectoriel. classifyRasterGrid : seuil
+          // calibré de classifyGridStrict, puis second essai pour les filets gris clair.
+          // Best-effort : image non classable → reste une image simple.
           let kind
           try {
             const rgba = imageObjectToRGBA(img)
-            if (rgba && classifyGridStrict(rgba.data, rgba.width, { x0: 0, y0: 0, x1: rgba.width, y1: rgba.height })) kind = 'grid'
+            if (rgba && classifyRasterGrid(rgba.data, rgba.width, { x0: 0, y0: 0, x1: rgba.width, y1: rgba.height })) kind = 'grid'
           } catch { /* best-effort : image non classée reste une image simple */ }
           candidates.push({
             src,

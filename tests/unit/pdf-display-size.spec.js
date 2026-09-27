@@ -6,7 +6,7 @@ import { describe, it, expect, vi } from 'vitest'
 vi.mock('pdfjs-dist/legacy/build/pdf.mjs', () => ({ GlobalWorkerOptions: {}, OPS: {} }))
 vi.mock('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url', () => ({ default: '' }))
 
-import { displayedImageSize, fitScale, clampRenderScale, pxOptsForScale } from '@/utils/pdf'
+import { displayedImageSize, fitScale, decodeTargetSize, clampRenderScale, pxOptsForScale } from '@/utils/pdf'
 
 describe('displayedImageSize (CTM → px CSS)', () => {
   it('image axis-aligned : |a|,|d| en points → px CSS (×96/72)', () => {
@@ -31,6 +31,20 @@ describe('fitScale (réduction, jamais agrandissement)', () => {
   it('cible absente/nulle → 1', () => {
     expect(fitScale(2048, 2048, 0, 0)).toBe(1)
     expect(fitScale(2048, 2048)).toBe(1)
+  })
+})
+
+// Taille de décodage : proportions AFFICHÉES par le PDF quand il étire l'image, jamais au-delà du natif.
+describe('decodeTargetSize', () => {
+  it('image étirée par le PDF (margrethe p3) : suit les proportions affichées', () => {
+    expect(decodeTargetSize(1100, 1164, 1004, 708, 502 / 354)).toEqual({ outW: 1004, outH: 708 })
+  })
+  it('proportions affichées à moins de 5 % des natives : réduction homothétique inchangée', () => {
+    expect(decodeTargetSize(2000, 2000, 267, 267, 1.03)).toEqual({ outW: 267, outH: 267 })
+    expect(decodeTargetSize(400, 300, 800, 600, 4 / 3)).toEqual({ outW: 400, outH: 300 })
+  })
+  it('étirée mais petite : réduit un axe, n’agrandit jamais l’autre', () => {
+    expect(decodeTargetSize(100, 100, 400, 200, 2)).toEqual({ outW: 100, outH: 50 })
   })
 })
 

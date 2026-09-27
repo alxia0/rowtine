@@ -74,7 +74,13 @@ Al abrir la app encuentras:
   proyecto como Terminado (ver punto 2), y nunca aparece en un proyecto
   Abandonado.
 - Acceso rápido a las **herramientas** (calculadora de puntos, contador
-  libre, ayuda de agujas o ganchillo) y al botón **+ Crear un proyecto**.
+  libre, ayuda de agujas o ganchillo), al botón **+ Crear un proyecto** y al
+  botón **Importar un PDF**, que abre tu **Biblioteca de patrones** directamente
+  en la opción de añadir un patrón.
+- Al principio, mientras la app solo contiene los ejemplos, el inicio va a lo
+  esencial: una tarjeta **Importar un patrón en PDF** ocupa el lugar de la ficha
+  Continuar y del resumen. Vuelven en cuanto creas tu primer proyecto o importas
+  tu primer patrón.
 - Por último, **el menú arriba a la derecha** te lleva en todo momento al
   stock de lana, a la biblioteca de patrones, a las estadísticas, **a las
   sesiones**, a los gastos, a esta guía, a los ajustes y a la pantalla

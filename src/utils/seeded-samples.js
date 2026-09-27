@@ -1,9 +1,11 @@
 // Mémoire des exemples semés au 1er lancement (3 patrons + 2 projets, cf.
-// OnboardingView.seedExamples). Sert UNIQUEMENT à `isDbRestorable`
-// (src/backup/restore-service.js) : une base qui ne contient QUE ces
+// OnboardingView.seedExamples). Sert à DEUX choses, et à elles seules. D'abord à
+// `isDbRestorable` (src/backup/restore-service.js) : une base qui ne contient QUE ces
 // identifiants-là n'est pas « pleine », c'est une base neuve — et refuser d'y
 // restaurer rendait fausse la promesse du guide (« tu redésignes ce dossier,
-// tout revient comme avant »).
+// tout revient comme avant »). Ensuite à l'accueil allégé (`isSampleOnlyHome`,
+// HomeView) : tant que la base ne contient que ces exemples, l'import de PDF y
+// tient la place du héros.
 //
 // On ENREGISTRE les identifiants plutôt que de reconnaître les exemples à leur
 // contenu : un nom ou un texte se modifie, un identifiant non. C'est ce qui
@@ -48,4 +50,23 @@ export async function getSeededSampleIds() {
   const raw = await getSetting(KEY)
   if (!raw || typeof raw !== 'object') return { ...EMPTY }
   return { patterns: toIds(raw.patterns), projects: toIds(raw.projects) }
+}
+
+// Projet de la visite guidée (réglage local `tourProjectId`), réduit aux entiers
+// strictement positifs comme `seededSampleIds`. `recreateTourProject` (tour-sample.js)
+// peut le recréer hors du semis : l'accueil et `isDbRestorable` le traitent en exemple.
+export async function getTourProjectIds() {
+  const v = await getSetting('tourProjectId')
+  const n = Number(v)
+  return v !== null && v !== undefined && Number.isInteger(n) && n > 0 ? [n] : []
+}
+
+// Accueil allégé : vrai tant que l'utilisatrice n'a ni projet ni patron de bibliothèque à
+// elle. Volontairement plus large que `isDbRestorable` (qui protège une restauration) :
+// l'avancement sur les exemples, les laines ou les compteurs ne comptent pas, l'accueil
+// parle de projets et de patrons. `libraryPatterns` exclut déjà patron libre et instances.
+export function isSampleOnlyHome({ projects = [], libraryPatterns = [], seeded = EMPTY, tourProjectIds = [] } = {}) {
+  const sampleProjects = new Set([...seeded.projects, ...tourProjectIds])
+  const samplePatterns = new Set(seeded.patterns)
+  return projects.every((p) => sampleProjects.has(p.id)) && libraryPatterns.every((p) => samplePatterns.has(p.id))
 }

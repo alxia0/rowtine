@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import { useYarnsStore, emptyYarn } from '@/stores/yarns'
-import { reservedTotal } from '@/utils/yarn-usage'
+import { reservedTotal, roundSkeins } from '@/utils/yarn-usage'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { YARN_WEIGHTS, YARN_BRANDS, YARN_COLOR_TYPES } from '@/constants/catalog'
 import { COLOR_PALETTE, isCustomColor, paletteColorLabel } from '@/constants/swatch'
@@ -20,7 +20,7 @@ import { ymdLocal } from '@/utils/time-periods'
 // Le champ de prix n'accepte que des chiffres et un séparateur : un prix tapé « 18,90 € »
 // donnait NaN, donc 0, donc « Gratuit ».
 import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
-import { toInput, fromInput, currencySymbol } from '@/utils/units'
+import { toInput, fromInput, currencySymbol, formatSkeins } from '@/utils/units'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
 
@@ -131,8 +131,10 @@ const firstPurchaseBain = ref('')
 function normalizedQuantity(raw) {
   if (raw === '' || raw == null) return 1
   // Virgule décimale acceptée (« 2,5 ») : `Number` natif en faisait NaN, donc 1 en silence.
+  // roundSkeins referme la traîne binaire d'une décimale (2,3 - 2,1 = 0.19999999999999973
+  // sans lui) avant que ce nombre ne serve de base à `delta`/`isReconciliation` plus bas.
   const n = parseDecimal(raw)
-  return Number.isFinite(n) ? Math.max(0, n) : 1
+  return Number.isFinite(n) ? roundSkeins(Math.max(0, n)) : 1
 }
 // Proposition d'achat en attente (hausse de quantité en édition, cf. save()) :
 // null, ou { delta, payload } — le formulaire normal cède la place à cette proposition
@@ -147,7 +149,9 @@ const saving = ref(false)
 // le stock avec un historique DÉJÀ enregistré, ce n'est PAS un nouvel achat.
 const adjustedFromHistory = ref(null)
 function onAdjustQuantity(qty) {
-  form.quantity = qty
+  // Champ modifiable : jamais de séparateur de milliers (cf. formatSkeins). `adjustedFromHistory`
+  // garde le nombre brut, seul `form.quantity` (réaffiché) est formaté.
+  form.quantity = formatSkeins(qty, { locale: locale.value, grouping: false })
   adjustedFromHistory.value = qty
 }
 
@@ -234,6 +238,12 @@ function applyExisting(y) {
   // tel quel montrerait « 9.5 » au lieu de « 9,5 » dans un champ qui n'accepte que la virgule
   // française, cassant la parité avec le métrage/poids (`toInput`).
   form.price = y.price === '' || y.price == null ? '' : String(y.price).replace('.', ',')
+  // Même parade pour la quantité, mais au format de la langue active (comma OU point) :
+  // `y.quantity` est un nombre JS (roundSkeins) — le réafficher tel quel montrerait
+  // « 2.5 » même en français. `formatSkeins('')` rend « 0 » : une quantité vide/absente
+  // (fiche ancienne) reste préremplie VIDE, pour que `normalizedQuantity('')` retombe
+  // sur son plancher à 1 comme avant — pas à 0 comme le préremplissage l'inventerait.
+  form.quantity = y.quantity === '' || y.quantity == null ? '' : formatSkeins(y.quantity, { locale: locale.value, grouping: false })
   form.composition = normalizeComposition(y.composition) // filtre les valeurs invalides
   form.labels = normalizeLabels(y.labels) // écarte toute clé hors des huit connues
   loadUnitFields(y)
@@ -318,7 +328,7 @@ async function save() {
       const minQty = current ? reservedTotal(current) : 0
       // Même lecture que la valeur enregistrée : un NaN (« 2,5 ») passait sous ce plancher.
       if (normalizedQuantity(form.quantity) < minQty) {
-        snackbar.show(t('yarn.quantityBelowReserved', { n: minQty }))
+        snackbar.show(t('yarn.quantityBelowReserved', { n: formatSkeins(minQty, { locale: locale.value }) }))
         return
       }
     }
@@ -350,11 +360,17 @@ async function save() {
     }
     if (isEdit.value) {
       const previousQty = current ? Number(current.quantity) || 0 : 0
-      const delta = payload.quantity - previousQty
+      // roundSkeins referme la traîne binaire d'une soustraction décimale (2,3 - 2,1 =
+      // 0.19999999999999973 sans lui) : sans elle, la proposition d'achat afficherait ce
+      // nombre au lieu de « 0,2 » exactement.
+      const delta = roundSkeins(payload.quantity - previousQty)
       // Seule une HAUSSE ouvre la proposition d'achat — SAUF si cette hausse est EXACTEMENT
       // celle que « Ajuster le stock » (<YarnPurchases>) vient d'émettre : ce nombre
       // réconcilie le stock avec un historique DÉJÀ enregistré, ce n'est pas un nouvel achat.
-      const isReconciliation = adjustedFromHistory.value != null && payload.quantity === adjustedFromHistory.value
+      // Les deux côtés sont arrondis : `payload.quantity` l'est déjà (normalizedQuantity),
+      // `adjustedFromHistory` peut porter sa propre traîne binaire (somme de décimales
+      // côté YarnPurchases) — comparer l'un arrondi à l'autre brut manquerait la réconciliation.
+      const isReconciliation = adjustedFromHistory.value != null && payload.quantity === roundSkeins(adjustedFromHistory.value)
       // Une baisse (ou une quantité inchangée) enregistre directement, SANS jamais toucher
       // purchases : le budget ne doit jamais descendre tout seul.
       if (delta > 0 && !isReconciliation) {
@@ -428,7 +444,7 @@ async function resolvePendingPurchase(kind) {
     <!-- Proposition d'achat en attente (hausse de quantité en édition, cf. save()) : cède la
          place au formulaire normal tant qu'elle n'est pas résolue par l'une des 3 issues. -->
     <div v-if="pendingPurchase" class="card addform" data-test="qty-increase-prompt">
-      <p class="addform__title">{{ t('yarn.purchasePrompt.message', { n: pendingPurchase.delta }) }}</p>
+      <p class="addform__title">{{ t('yarn.purchasePrompt.message', { n: formatSkeins(pendingPurchase.delta, { locale }) }) }}</p>
       <div class="addform__actions">
         <button class="btn btn--primary" data-test="qty-increase-buy" :disabled="resolvingPurchase" @click="resolvePendingPurchase('buy')">{{ t('yarn.purchasePrompt.recordBuy') }}</button>
         <button class="btn" data-test="qty-increase-gift" :disabled="resolvingPurchase" @click="resolvePendingPurchase('gift')">{{ t('yarn.purchasePrompt.recordGift') }}</button>
@@ -494,9 +510,9 @@ async function resolvePendingPurchase(kind) {
         <option v-for="w in YARN_WEIGHTS" :key="w" :value="w">{{ t(`yarn.weights.${w}`) }}</option>
       </select>
       <div class="row row--fields mt2">
-        <div class="col"><label class="field-label" for="yarn-length">{{ settings.unitSystem === 'imperial' ? t('yarn.lengthYd') : t('yarn.lengthM') }}</label><input id="yarn-length" v-model="form.lengthM" class="input" inputmode="numeric" placeholder="100" /></div>
-        <div class="col"><label class="field-label" for="yarn-grams">{{ settings.unitSystem === 'imperial' ? t('yarn.ounces') : t('yarn.grams') }}</label><input id="yarn-grams" v-model="form.grams" class="input" inputmode="numeric" placeholder="50" /></div>
-        <div class="col"><label class="field-label" for="yarn-quantity">{{ t('yarn.quantity') }}</label><input id="yarn-quantity" v-model="form.quantity" class="input" inputmode="numeric" placeholder="1" /></div>
+        <div class="col"><label class="field-label" for="yarn-length">{{ settings.unitSystem === 'imperial' ? t('yarn.lengthYd') : t('yarn.lengthM') }}</label><input id="yarn-length" v-model="form.lengthM" class="input" inputmode="decimal" placeholder="100" /></div>
+        <div class="col"><label class="field-label" for="yarn-grams">{{ settings.unitSystem === 'imperial' ? t('yarn.ounces') : t('yarn.grams') }}</label><input id="yarn-grams" v-model="form.grams" class="input" inputmode="decimal" placeholder="50" /></div>
+        <div class="col"><label class="field-label" for="yarn-quantity">{{ t('yarn.quantity') }}</label><input id="yarn-quantity" v-model="form.quantity" class="input" inputmode="decimal" placeholder="1" /></div>
         <div class="col"><label class="field-label" for="yarn-price">{{ t('yarn.priceWithSymbol', { symbol: currencySymbol(settings.currency, locale) }) }}</label><input id="yarn-price" :value="form.price" class="input" inputmode="decimal" placeholder="—" @input="onPrixLaine" /></div>
       </div>
       <label class="field-label mt2" for="yarn-stored-in">{{ t('yarn.storedIn') }}</label>

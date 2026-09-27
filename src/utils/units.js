@@ -226,3 +226,20 @@ export function formatAmount(amount, { locale } = {}) {
     maximumFractionDigits: 2,
   }).format(v)
 }
+
+// Nombre de pelotes affiché : virgule en fr/de/es, point en anglais, deux décimales au
+// plus (demi/quart de pelote, cf. roundSkeins). `num()` tolère la virgule d'une saisie
+// canonique (« 2,5 ») quelle que soit la locale d'affichage.
+//
+// `grouping: false` — OBLIGATOIRE dès que le résultat repart dans un champ MODIFIABLE
+// (valeur par défaut, réaffichage à l'ouverture, réécriture bornée) : par défaut, Intl
+// groupe les milliers (« 1 000 » en fr, « 1.000 » en de, « 1,000 » en en) et
+// `parseDecimal`/`filtrerSaisieDecimale` ne savent pas le lire — le save qui suit
+// perdrait silencieusement la quantité réelle (NaN, ou repli à 1). Un texte purement
+// affiché (jamais retapé) garde le groupement par défaut.
+export function formatSkeins(n, { locale, grouping = true } = {}) {
+  return new Intl.NumberFormat(locale || 'fr', {
+    maximumFractionDigits: 2,
+    ...(grouping ? {} : { useGrouping: false }),
+  }).format(num(n))
+}

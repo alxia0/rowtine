@@ -19,15 +19,17 @@ import {
   deserializeSettings,
 } from './deserialize'
 
-// Laines : `deserializeYarnsRaw` (deserialize.js) résout d'abord la photo de chaque laine —
-// inline (ancien format, avant le 15/08/2026) OU fichier `laine-photo-*` via `filesByName`
-// (nouveau format, cf. serializeYarns) — sans rien migrer côté réservations. C'est ICI, à la
-// restauration d'une sauvegarde qui peut dater d'AVANT le passage au pool, qu'on applique EN PLUS
-// cette migration-là (mêmes scalaires reservedFor/reservedQty que stores/yarns.js `load()`) :
-// une sauvegarde ancienne sur un disque utilisateur doit rester restaurable, convertie à la volée.
-// Idempotent : une laine déjà au nouveau format traverse inchangée.
-export function deserializeYarns(json, filesByName = {}) {
-  return deserializeYarnsRaw(json, filesByName).map((y) => {
+// Laines : `deserializeYarnsRaw` (deserialize.js) résout d'abord la photo ET la galerie de
+// chaque laine — inline (ancien format : avant le 15/08/2026 pour `photo`, avant le
+// 25/09/2026 pour `photos`) OU fichier `laine-photo-*` via `filesByName` (nouveau format,
+// cf. serializeYarns), `missing` recevant le nom de tout fichier référencé mais absent —
+// sans rien migrer côté réservations. C'est ICI, à la restauration d'une sauvegarde qui
+// peut dater d'AVANT le passage au pool, qu'on applique EN PLUS cette migration-là (mêmes
+// scalaires reservedFor/reservedQty que stores/yarns.js `load()`) : une sauvegarde ancienne
+// sur un disque utilisateur doit rester restaurable, convertie à la volée. Idempotent : une
+// laine déjà au nouveau format traverse inchangée.
+export function deserializeYarns(json, filesByName = {}, missing = []) {
+  return deserializeYarnsRaw(json, filesByName, missing).map((y) => {
     const patch = normalizeYarnReservations(y)
     if (!patch) return y
     const next = { ...y, ...patch }
@@ -446,12 +448,17 @@ export async function readBackup(storage, { onProgress } = {}) {
   } catch (err) {
     errors.push({ where: YARN_PHOTOS_DIR, error: err?.message || String(err) })
   }
+  // `yarnMissing` : partagé entre `photo` et `photos` de toutes les laines (même
+  // convention que `missing` pour un dossier projet/patron) — un fichier de galerie
+  // manquant suit la même règle qu'une photo de patron manquante, cf. reportMissingAssets.
+  const yarnMissing = []
   const yarns = keepEntities(
-    deserializeYarns(await readRootJson(storage, 'laines.json', [], errors), yarnPhotoFiles),
+    deserializeYarns(await readRootJson(storage, 'laines.json', [], errors), yarnPhotoFiles, yarnMissing),
     'yarns',
     errors,
     'laines.json',
   )
+  reportMissingAssets(yarnMissing, YARN_PHOTOS_DIR, errors)
   const independentCounters = keepEntities(
     deserializeIndependentCounters(await readRootJson(storage, 'compteurs.json', [], errors)),
     'counters',

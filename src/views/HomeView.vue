@@ -21,6 +21,7 @@ import { relativeDayLabel } from '@/utils/date-format'
 import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
 import { useStartTour } from '@/composables/useStartTour'
+import { getSeededSampleIds, getTourProjectIds, isSampleOnlyHome } from '@/utils/seeded-samples'
 
 const router = useRouter()
 const { t, locale } = useI18n()
@@ -48,6 +49,17 @@ const monthSec = ref(0)
 const recentRows = ref([])
 const progressMap = ref({}) // projectId -> { done, total }
 const heroSection = ref(null) // section active du projet « à reprendre »
+// Identifiants des exemples semés et du projet de visite, lus au montage puis relus après
+// une restauration : ils décident de l'accueil allégé (cf. `lightHome`). `samplesReady`
+// passe dès cette lecture faite, sans attendre les lectures lentes qui gouvernent
+// `homeReady`.
+const sampleIds = ref({ seeded: { patterns: [], projects: [] }, tour: [] })
+const samplesReady = ref(false)
+async function readSampleIds() {
+  const [seeded, tour] = await Promise.all([getSeededSampleIds(), getTourProjectIds()])
+  sampleIds.value = { seeded, tour }
+  samplesReady.value = true
+}
 
 // Pop-up de bienvenue (10/08/2026). Elle a pris la place de l'astuce « Le sais-tu ? »,
 // partie dans FirstDetailTip.vue : expliquer comment REVENIR à quelqu'un qui vient d'arriver
@@ -140,10 +152,13 @@ async function onWelcomeCancel() {
 // réel du premier lancement : `runRestore` (déclenchée par la porte pendant que ce
 // composant est monté) écrit la clé en base, puis `reloadStores()` →
 // `settingsStore.load()` fait basculer le store, sans aucune navigation.
+// La restauration vient aussi de remplacer la base : les identifiants d'exemples lus au
+// montage sont périmés, on les relit pour que l'accueil allégé suive.
 watch(
   () => [settings.welcomeDue, settings.restoredDue],
-  ([welcome, restored]) => {
+  ([welcome, restored], [, wasRestored]) => {
     if (welcome || restored) showWelcome.value = true
+    if (restored && !wasRestored) readSampleIds().catch(() => {})
   },
 )
 
@@ -162,6 +177,7 @@ onMounted(async () => {
     // qui court-circuiterait le chargement au démarrage de l'app) : patternFor() ci-dessous
     // lit patternsStore.patterns pour le repli « reader » de la progression.
     if (!patternsStore.loaded) patternsStore.load()
+    await readSampleIds()
     progressMap.value = await sectionsStore.progressByProject()
     // Repli « reader » (#7) : les patrons structurés suivent la progression via
     // project.readerState, pas via la table sections (rowsTotal) — sinon l'accueil
@@ -191,6 +207,8 @@ onMounted(async () => {
     // Dans un `finally` VOLONTAIREMENT : si une lecture ci-dessus lève (base illisible, patron
     // corrompu), le drapeau doit passer quand même. Un squelette qui tourne sans fin serait un
     // second mensonge, pire que le premier — mieux vaut un écran honnêtement vide.
+    // `samplesReady` suit la même règle : une lecture des exemples qui lève ne le gèle pas.
+    samplesReady.value = true
     homeReady.value = true
   }
 })
@@ -300,6 +318,21 @@ const groups = computed(() =>
   })).filter((g) => g.items.length > 0),
 )
 
+// Accueil allégé (26/09/2026) : tant que la base ne contient que les exemples semés,
+// l'import de PDF tient la place du héros et des stats. Faux jusqu'à la lecture des
+// exemples (`samplesReady`, pas `homeReady`) : l'accueil complet ne clignote pas à chaque
+// retour pendant que les lectures lentes finissent.
+const lightHome = computed(
+  () =>
+    samplesReady.value &&
+    isSampleOnlyHome({
+      projects: projectsStore.projects,
+      libraryPatterns: patternsStore.libraryPatterns,
+      seeded: sampleIds.value.seeded,
+      tourProjectIds: sampleIds.value.tour,
+    }),
+)
+
 const expanded = reactive({})
 function visibleItems(group) {
   return expanded[group.status] ? group.items : group.items.slice(0, 3)
@@ -317,6 +350,11 @@ function open(id) {
 function createProject() {
   router.push({ name: 'project-new' })
 }
+// L'import passe toujours par la Bibliothèque (relais, garde de synchro, avertissements) :
+// `?add=1` y ouvre la feuille « Ajouter un patron ».
+function importPdf() {
+  router.push({ name: 'library', query: { add: '1' } })
+}
 </script>
 
 <template>
@@ -324,10 +362,10 @@ function createProject() {
   <AppHeader :title="t('nav.home')" />
   <main class="screen">
     <h2 class="greet">{{ hello }}</h2>
-    <p v-if="wipCount" class="subtle">{{ t('home.wipSummary', { n: wipCount }, wipCount) }}</p>
+    <p v-if="wipCount && !lightHome" class="subtle">{{ t('home.wipSummary', { n: wipCount }, wipCount) }}</p>
 
     <!-- HÉROS « Reprendre » : le projet en cours, le geste de reprendre -->
-    <section v-if="lastProject" class="resume" @click="resume">
+    <section v-if="lastProject && !lightHome" class="resume" @click="resume">
       <span class="resume__tag">{{ t('home.resume') }}</span>
       <h3 class="resume__title">{{ lastProject.name }}</h3>
       <p v-if="heroWhere" class="resume__where">{{ heroWhere }}</p>
@@ -347,8 +385,18 @@ function createProject() {
       </div>
     </section>
 
+    <!-- Accueil allégé : l'import de PDF à la place du héros, avec le nom du lieu où le patron sera rangé -->
+    <button v-if="lightHome" type="button" class="import-card" data-test="home-import-card" @click="importPdf">
+      <span class="tool__icon"><AppIcon name="import" :size="18" /></span>
+      <span class="import-card__body">
+        <span class="import-card__title">{{ t('home.importPdf') }}</span>
+        <span class="import-card__hint">{{ t('home.importPdfHint') }}</span>
+      </span>
+      <AppIcon class="import-card__chevron" name="chevronRight" :size="18" aria-hidden="true" />
+    </button>
+
     <!-- Stats en tuiles (bento) -->
-    <div class="bento">
+    <div v-if="!lightHome" class="bento">
       <div class="tile tile--accent">
         <span class="tile__k">{{ t('home.inProgress') }}</span>
         <!-- « — » tant que la base n'a pas répondu : un « 0 » affiché avant toute mesure est un
@@ -404,7 +452,17 @@ function createProject() {
         {{ t('home.toolNeedle') }}
       </button>
     </div>
-    <button class="btn btn--primary btn--block create" @click="createProject"><AppIcon name="plus" :size="17" /> {{ t('home.createProject') }}</button>
+    <button v-if="lightHome" class="btn btn--block create" data-test="home-create" @click="createProject">
+      <AppIcon name="plus" :size="17" /> {{ t('home.createProject') }}
+    </button>
+    <div v-else class="create-row">
+      <button class="btn btn--primary" data-test="home-create" @click="createProject">
+        <AppIcon name="plus" :size="17" /> {{ t('home.createProject') }}
+      </button>
+      <button class="btn" data-test="home-import" @click="importPdf">
+        <AppIcon name="import" :size="17" /> {{ t('home.importPdfShort') }}
+      </button>
+    </div>
 
     <!-- La base répond encore : on annonce le chargement, on n'affirme RIEN sur son contenu.
          Même convention que SkeletonScreen.vue (aria-busy + une annonce role="status" qui porte
@@ -456,7 +514,8 @@ function createProject() {
 .greet { font-family: var(--font-display); font-size: 25px; line-height: 1.15; margin: 0 0 2px; }
 .subtle { color: var(--ink-55); font-size: 13.5px; margin: 0 0 var(--sp-4); }
 
-.resume {
+.resume,
+.import-card {
   position: relative;
   overflow: hidden;
   background: linear-gradient(165deg, #f4ddc6, #efd2b8);
@@ -469,16 +528,27 @@ function createProject() {
 /* Crème claire illisible en sombre : bascule vers le duo lin/surface (même esprit
    que .srow--wip), sans toucher au clair (littéraux d'origine conservés). */
 :root[data-theme='dark'] .resume,
-html[data-theme='dark'] .resume {
+html[data-theme='dark'] .resume,
+:root[data-theme='dark'] .import-card,
+html[data-theme='dark'] .import-card {
   background: linear-gradient(165deg, var(--surface-lin), var(--surface));
   border-color: var(--brand-deep);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .resume {
+  :root:not([data-theme='light']) .resume,
+  :root:not([data-theme='light']) .import-card {
     background: linear-gradient(165deg, var(--surface-lin), var(--surface));
     border-color: var(--brand-deep);
   }
 }
+.import-card { display: flex; align-items: center; gap: var(--sp-3); width: 100%; text-align: left; color: var(--ink); margin-top: var(--sp-4); }
+.import-card:active { transform: scale(0.98); box-shadow: var(--clay-press); }
+.import-card__body { flex: 1; min-width: 0; }
+.import-card__title { display: block; font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 1.2; }
+.import-card__hint { display: block; margin-top: 2px; font-size: 13.5px; color: var(--ink-70); }
+.import-card__chevron { flex-shrink: 0; color: var(--brand-deep); }
+.create-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); margin-bottom: var(--sp-5); }
+.create-row .btn { flex: 1 1 140px; }
 /* halo chaud discret en haut-droite */
 .resume::after {
   content: '';

@@ -280,8 +280,11 @@ export function serializePattern(pattern) {
 // que le nom de fichier. Décision du 15/08/2026 (spec compression images importées) :
 // laines.json à 5,75 Mo était la cause structurelle du plantage mémoire du 13/08 (il faut
 // tout charger en mémoire d'un bloc pour lire une seule photo). Pas de `buildPhotoFiles`
-// (conçue pour un TABLEAU de photos d'une même entité) : ici c'est un tableau d'ENTITÉS
-// portant chacune UNE photo — mécanisme dédié, même nommage/dédup (photoFileName).
+// (conçue pour un TABLEAU de photos d'une même entité, avec sa PROPRE dédup par appel) :
+// ici il faut une dédup PARTAGÉE entre `photo` ET `photos`, de TOUTES les laines à la
+// fois (une même image reprise dans deux laines, ou entre l'ancien champ et la galerie
+// d'une même laine, ne doit produire qu'un seul fichier) — un seul `seen` pour tout
+// l'appel, hors de la portée d'une entité.
 //
 // `files` renvoie les photos AVANT laines.json (l'orchestrateur écrit dans cet ordre,
 // séquentiellement — cf. orchestrator.js) : une écriture interrompue en cours de route ne
@@ -291,22 +294,36 @@ export function serializePattern(pattern) {
 // Depuis le 21/08/2026 les fichiers partent sous `Laines/` (demande d'usage du 16/08,
 // arbitrée le 21 : « leur propre dossier par défaut »). Ils étaient jusque-là posés en vrac
 // à la racine — 31 photos pour 39 entrées sur les deux appareils, quatre entrées sur cinq.
-// 🔑 `laines.json` ne change PAS de format : le champ `photo` garde le NOM NU, jamais le
-// chemin. C'est ce qui laisse `deserializeYarns` lire les DEUX dispositions sans une
+// 🔑 `laines.json` ne change PAS de format pour `photo` : le champ garde le NOM NU, jamais
+// le chemin. C'est ce qui laisse `deserializeYarns` lire les DEUX dispositions sans une
 // seconde forme de donnée à faire vivre (cf. restore.js, qui fusionne les deux endroits).
+//
+// Galerie (`yarn.photos[]`, refonte du stock du 22/09/2026) : jusqu'ici seule `photo`
+// était externalisée — `photos` partait en base64 dans laines.json, la cause du même
+// plantage mémoire que celui corrigé le 15/08 pour `photo`. MÊME préfixe, MÊME dossier que
+// `photo` : `readRootFilesByPrefix('laine-photo-')` + `readdir(Laines)` (restore.js) et
+// le ménage `reconcileYarnPhotos` (orchestrator.js) les trouvent sans changement — un
+// autre préfixe laisserait ces photos jamais restaurées, ou effacées par le ménage au
+// tour suivant. Nom de repli (entrée non data URL) unique par laine ET par position,
+// `${yarnIndex}-${i}` : l'index de galerie seul ferait collisionner la photo 0 de deux
+// laines différentes. `photo` garde `yarnIndex` seul, format déjà publié, inchangé.
 export const YARN_PHOTOS_DIR = 'Laines'
 
 export function serializeYarns(yarns) {
-  const seen = new Set() // noms déjà construits (dédup par contenu)
+  const seen = new Set() // noms déjà construits — dédup PARTAGÉE entre photo et photos,
+  // toutes laines confondues (cf. note ci-dessus)
   const files = []
   const photoNames = [] // noms référencés, dans l'ordre : sert au ménage des orphelines
-  const yarnsJson = (yarns || []).map((yarn, index) => {
-    // Pas de photo, ou data URL non analysable (cf. isInlineDataUrl) : champ inchangé,
-    // aucun fichier écrit — même garde que buildPhotoFiles pour patrons/projets.
-    if (!yarn.photo || isInlineDataUrl(yarn.photo)) return yarn
-    const name = assetFileName(yarn.photo, index, 'laine-photo-')
+
+  // Résout UNE data URL (photo unique ou item de galerie) en nom de fichier, en
+  // écrivant le fichier au besoin (dédup par `seen`, partagé sur tout l'appel).
+  // Data URL non analysable (cf. isInlineDataUrl) : conservée telle quelle, aucun
+  // fichier — même garde que buildPhotoFiles pour patrons/projets.
+  function resolvePhoto(dataUrl, fallbackIndex) {
+    if (isInlineDataUrl(dataUrl)) return dataUrl
+    const name = assetFileName(dataUrl, fallbackIndex, 'laine-photo-')
     if (!seen.has(name)) {
-      const parsed = parseDataUrl(yarn.photo)
+      const parsed = parseDataUrl(dataUrl)
       const file = {
         path: `${YARN_PHOTOS_DIR}/${name}`,
         data: parsed ? parsed.base64 : '',
@@ -316,7 +333,22 @@ export function serializeYarns(yarns) {
       files.push(file)
       photoNames.push(name)
     }
-    return { ...yarn, photo: name }
+    return name
+  }
+
+  const yarnsJson = (yarns || []).map((yarn, yarnIndex) => {
+    let next = yarn
+    // Pas de photo : champ inchangé.
+    if (yarn.photo) {
+      next = { ...next, photo: resolvePhoto(yarn.photo, yarnIndex) }
+    }
+    // `photos` n'est touché QUE si la clé existe : une laine qui n'a jamais porté de
+    // galerie ne doit pas en gagner une (round-trip strict, cf. deserializeYarns).
+    if ('photos' in yarn) {
+      const gallery = Array.isArray(yarn.photos) ? yarn.photos : []
+      next = { ...next, photos: gallery.map((p, i) => resolvePhoto(p, `${yarnIndex}-${i}`)) }
+    }
+    return next
   })
   return {
     files: [

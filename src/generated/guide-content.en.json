@@ -331,7 +331,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (stitch calculator, free counter, needle/hook helper) and the ",
+                  "text": " (stitch calculator, free counter, needle/hook helper), the ",
                   "bold": false,
                   "italic": false
                 },
@@ -341,7 +341,47 @@
                   "italic": false
                 },
                 {
-                  "text": " button.",
+                  "text": " button and the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Import a PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button, which opens your ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Pattern library",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " straight on adding a pattern.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "At the very start, while the app only holds the examples, the home screen keeps to the essentials: an ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Import a PDF pattern",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " card takes the place of the Resume tile and the summary. They come back as soon as you create your first project or import your first pattern.",
                   "bold": false,
                   "italic": false
                 }

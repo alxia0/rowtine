@@ -6,7 +6,7 @@
 import { dayKeyOf, sessionsByDay, buildGrid, totalSeconds, activeDays, longestStreakInWindow, isPlausibleDay, MAX_WINDOW_WEEKS } from '@/utils/stats-grid'
 import { startOfWeek, ymdLocal, addDays } from '@/utils/time-periods'
 import { localDayToDate } from '@/utils/date-format'
-import { reservationsOf, consumedOf } from '@/utils/yarn-usage'
+import { reservationsOf, consumedOf, roundSkeins } from '@/utils/yarn-usage'
 import { parseDecimal } from '@/utils/decimal'
 import { readerProgress, patternToReader } from '@/utils/reader'
 
@@ -52,7 +52,7 @@ export function projectYarnUsage(project, yarns) {
   const pid = project?.id
   const out = []
   for (const y of yarns || []) {
-    const balls = (reservationsOf(y)[pid] || 0) + (consumedOf(y)[pid] || 0)
+    const balls = roundSkeins((reservationsOf(y)[pid] || 0) + (consumedOf(y)[pid] || 0))
     if (balls > 0) out.push({ yarn: y, balls })
   }
   return out
@@ -95,7 +95,9 @@ export function aggregateProjectStats(project, sessions, yarns, pattern = null, 
   return {
     totalSeconds: totalSeconds(win, byDay),
     sessionsCount: list.length,
-    ballsUsed,
+    // roundSkeins referme la traîne binaire d'une somme de décimales (0,1 + 0,2 =
+    // 0.30000000000000004) : ballsUsed sert de sélecteur de pluriel à l'affichage.
+    ballsUsed: roundSkeins(ballsUsed),
     metersUsed,
     // Détail par laine (cf. `projectYarnUsage`) porté par l'agrégat lui-même : le badge
     // (BadgeComposer.vue, via ProjectDetailView.vue) le relit ici plutôt que de rappeler

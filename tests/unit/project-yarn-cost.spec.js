@@ -80,6 +80,19 @@ describe('projectYarnCost', () => {
     expect(r.pricedCount).toBe(2)
   })
 
+  // Protège : une somme de décimales (0,1 + 0,2 = 0.30000000000000004 en JS) ne doit jamais
+  // fuir dans skeins, qui sert de sélecteur de pluriel à l'affichage.
+  it('9. skeins referme la traîne binaire d\'une somme décimale (0,1 + 0,2 → 0,3)', () => {
+    const r = projectYarnCost(
+      [
+        { price: '4', reservations: { [PID]: 0.1 }, consumed: {} },
+        { price: '4', reservations: { [PID]: 0.2 }, consumed: {} },
+      ],
+      PID,
+    )
+    expect(r.skeins).toBe(0.3)
+  })
+
   it('8. projectId absent ou invalide : tout à zéro, aucune exception', () => {
     const yarns = [{ price: '5', reservations: { 0: 3 }, consumed: {} }]
     for (const bad of [null, undefined, '', 0, NaN]) {

@@ -3,6 +3,9 @@ import { reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/AppIcon.vue'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
+import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
+import { roundSkeins } from '@/utils/yarn-usage'
+import { formatSkeins } from '@/utils/units'
 
 // Question posée quand un projet passe à Terminé OU Abandonné (K2 + R3), SI ce projet
 // réserve des pelotes : « combien as-tu réellement utilisées ? ». Un seul dialogue, deux
@@ -21,7 +24,7 @@ const props = defineProps({
   mode: { type: String, default: 'done' }, // 'done' | 'abandoned'
 })
 const emit = defineEmits(['confirm'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const titleKey = computed(() => (props.mode === 'abandoned' ? 'project.abandonTitle' : 'project.consumeTitle'))
 const introKey = computed(() => (props.mode === 'abandoned' ? 'project.abandonIntro' : 'project.consumeIntro'))
@@ -35,8 +38,16 @@ function defaultFor(y) {
 
 // { [yarnId]: quantité saisie }, réinitialisé au défaut du mode à chaque ouverture.
 const used = reactive({})
+// yarnId -> texte tapé dans le champ, miroir d'affichage (même motif que `yarnQtyText`,
+// ProjectEditView.vue) : `used` change à chaque caractère décimal valide, donc lier `:value`
+// à `defaultFor(y)` seul re-régresse le champ sous le doigt dès que `props.yarns` est
+// recalculé (nouveau tableau, même contenu — ex. changement de langue), alors que `used`
+// garde la vraie saisie. Ce tampon reste calé sur ce qui a été tapé ; seule une saisie
+// BORNÉE (au-dessus du réservé) l'écrase.
+const usedText = reactive({})
 function resetDefaults() {
   for (const key of Object.keys(used)) delete used[key]
+  for (const key of Object.keys(usedText)) delete usedText[key]
   for (const y of props.yarns) used[y.id] = defaultFor(y)
 }
 
@@ -44,24 +55,37 @@ function resetDefaults() {
 // 0 ET passe `Number.isFinite`, donc l'ancien garde ne se déclenchait jamais : vider le champ
 // pour retaper valait « 0 pelote consommée », et un Valider à cet instant rendait au stock
 // toute la réserve d'un projet pourtant terminé — exactement ce que cette fenêtre existe pour
-// empêcher. Seul appelant : `onInput` ci-dessous.
+// empêcher. Seul appelant : `onInput` ci-dessous. `filtrerSaisieDecimale` tolère la virgule ET
+// laisse tomber un signe moins (même règle que le prix) : une quantité négative n'existe pas.
 function clampFor(id, raw) {
   const reserved = props.yarns.find((y) => y.id === id)?.reserved ?? 0
-  const s = String(raw).trim()
-  if (s === '') return null
-  const n = Math.floor(Number(s))
-  return Number.isFinite(n) ? Math.max(0, Math.min(n, reserved)) : null
+  const filtre = filtrerSaisieDecimale(raw)
+  if (filtre === '') return null
+  const n = parseDecimal(filtre)
+  return Number.isFinite(n) ? roundSkeins(Math.max(0, Math.min(n, reserved))) : null
 }
 function onInput(id, e) {
-  const next = clampFor(id, e.target.value)
+  // Un caractère refusé (lettre, signe moins) est retiré de l'affichage tout de suite,
+  // comme `onPrixLaine` : « 2a » devient « 2 », « -5 » devient « 5 ». La virgule seule
+  // survit (filtrerSaisieDecimale la garde) pour que « 2, » reste tapable jusqu'à « 2,5 ».
+  const filtre = filtrerSaisieDecimale(e.target.value)
+  if (filtre !== e.target.value) e.target.value = filtre
+  // `usedText` est mis à jour AVANT tout retour anticipé (même motif que `yarnQtyText`,
+  // ProjectEditView.vue) : c'est lui, pas `used`, que `:value` lit.
+  usedText[id] = filtre
+  const next = clampFor(id, filtre)
   // Champ vidé/illisible : on GARDE la valeur courante (l'état ne change pas, donc Vue ne
   // repeint pas le champ sous le doigt) et la frappe suivante la remplacera normalement.
   if (next === null) return
   used[id] = next
-  // Saisie bornée (au-dessus du réservé, négative, décimale) : réécrite dans le champ. Si la
-  // valeur retenue ne change pas, Vue ne repeint rien et le champ montrerait « 7 » pour 5
-  // enregistrées.
-  if (e.target.value !== String(next)) e.target.value = String(next)
+  // Ne réécrire QUE si le nombre tapé a vraiment été borné (au-dessus du réservé) : comparer
+  // au texte tapé casserait « 2, » (reformaté en "2" avant que la virgule n'ait pu rejoindre
+  // son « 5 »).
+  if (roundSkeins(parseDecimal(filtre)) !== next) {
+    const texte = formatSkeins(next, { locale: locale.value, grouping: false })
+    usedText[id] = texte
+    e.target.value = texte
+  }
 }
 
 // Toute fermeture applique le défaut du mode (« jamais perdre l'info » : fermer la
@@ -116,16 +140,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
           <li v-for="y in yarns" :key="y.id" class="ycn__row">
             <div class="ycn__meta">
               <span class="ycn__name">{{ y.name }}</span>
-              <span class="ycn__reserved">{{ t('project.consumeReserved', { n: y.reserved }) }}</span>
+              <span class="ycn__reserved">{{ t('project.consumeReserved', { n: formatSkeins(y.reserved, { locale }) }) }}</span>
             </div>
             <input
               class="ycn__input"
-              type="number"
-              inputmode="numeric"
-              min="0"
-              :max="y.reserved"
+              inputmode="decimal"
               :aria-label="y.name"
-              :value="used[y.id] ?? defaultFor(y)"
+              :value="usedText[y.id] ?? formatSkeins(defaultFor(y), { locale, grouping: false })"
               @input="onInput(y.id, $event)"
             />
           </li>

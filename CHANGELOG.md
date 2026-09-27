@@ -2,6 +2,16 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.3.3]
+
+- Decimal yarn quantities (e.g. 2.5 skeins): stash, purchases, reservations,
+  per-project usage, CSV export and sharing.
+- PDF import: the pattern's pictures are better preserved.
+- Pattern viewer: large step images, PDF cover at the top, improved preview.
+- PDF import: patterns are read more accurately, German ones in particular.
+- Various UI improvements.
+- Various fixes.
+
 ## [1.3.2]
 
 - Import your yarn stash from a Ravelry export (.xlsx): status, colour,

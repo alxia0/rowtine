@@ -51,4 +51,13 @@ describe('filterGalleryImages', () => {
     expect(gridOut[0].page).toBe(999)
     expect(nonGridOut).toHaveLength(64)
   })
+  // Une image qui revient sur plusieurs pages (logo, en-tête) est marquée comme décoration.
+  it('marque repeated l’occurrence conservée d’une image répétée, pas une image unique', () => {
+    const logo = { src: 'data:image/png;base64,LOGOLOGO', page: 2, w: 293, h: 211 }
+    const photo = { src: 'data:image/png;base64,PHOTOPHO', page: 3, w: 300, h: 200 }
+    const out = filterGalleryImages([logo, photo, { ...logo, page: 5 }, { ...logo, page: 8 }])
+    expect(out).toHaveLength(2)
+    expect(out.find((o) => o.src === logo.src).repeated).toBe(true)
+    expect(out.find((o) => o.src === photo.src).repeated).toBeUndefined()
+  })
 })

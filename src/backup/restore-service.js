@@ -14,10 +14,10 @@ import { hasBackup, readBackup, writeSnapshotToDb } from './restore'
 import { suppressAutoBackup } from './auto-backup'
 import { clearBackupDecision, recordBackupDecision } from './backup-decision'
 import { writeManifest } from './backup-manifest'
-import { db, getSetting, setSetting } from '@/db/db'
+import { db, setSetting } from '@/db/db'
 import i18n from '@/i18n'
 import { detectDeviceLocale } from '@/utils/app-locale'
-import { getSeededSampleIds } from '@/utils/seeded-samples'
+import { getSeededSampleIds, getTourProjectIds } from '@/utils/seeded-samples'
 import { isLibraryPattern } from '@/utils/pattern-price'
 import { usePatternsStore } from '@/stores/patterns'
 import { useProjectsStore } from '@/stores/projects'
@@ -429,14 +429,6 @@ export async function isDbEmpty() {
   return true
 }
 
-// Id du projet de la visite guidée (réglage local `tourProjectId`), réduit aux entiers
-// strictement positifs comme `seededSampleIds`.
-async function tourProjectIds() {
-  const v = await getSetting('tourProjectId')
-  const n = Number(v)
-  return v !== null && v !== undefined && Number.isInteger(n) && n > 0 ? [n] : []
-}
-
 // Vrai si restaurer ne détruirait rien que l'utilisatrice ait créé : base
 // strictement vide, OU ne contenant QUE les exemples semés au 1er lancement.
 //
@@ -495,7 +487,7 @@ export async function isDbRestorable() {
   // Nouveaux tableaux, jamais `push` : le repli de `getSeededSampleIds` partage ceux
   // d'une constante de module.
   const seeded = {
-    projects: [...semis.projects, ...(await tourProjectIds())],
+    projects: [...semis.projects, ...(await getTourProjectIds())],
     patterns: semis.patterns,
   }
   // Repli sûr : rien d'enregistré (installation antérieure, semis échoué) → on

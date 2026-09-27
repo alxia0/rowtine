@@ -432,6 +432,14 @@ export async function openAddPatternSheet(page, label = 'Ajouter un patron') {
   await page.getByRole('button', { name: label }).click()
 }
 
+// Ouvre, depuis l'accueil, la fiche du projet démo en cours (Bonnet Torsade) par sa carte.
+// Depuis le 26/09/2026, l'accueil d'une base qui ne contient que les exemples n'a plus de
+// héros « Reprendre » : la carte du projet est la seule entrée commune aux deux accueils.
+export async function openDemoProjectFromHome(page) {
+  await page.getByRole('button', { name: /Bonnet Torsade/ }).click()
+  await expect(page).toHaveURL(/\/project\/\d+/)
+}
+
 // Ouvre le suivi interactif (lecteur, contexte projet) d'un patron de démo à diagramme
 // (Bonnet Torsade). Reprend la navigation du test « projet : diagramme + chrono discret »
 // de reader.spec.js. IDEMPOTENT : si la page est déjà sur /project/:id/read (ex. après un

@@ -93,6 +93,20 @@ describe('extractImagesWithPos', () => {
     expect(out[0].kind).toBe('grid')
   })
 
+  // Filets de grille gris clair (Dorn p5) : l'image raster reste classée diagramme.
+  it("classe kind:'grid' un treillis à filets gris clair (222)", async () => {
+    const w = 300, h = 300
+    const evenly = (n, span, start = 4) => Array.from({ length: n }, (_, i) => Math.round(start + i * (span - 2 * start) / (n - 1)))
+    const data = new Uint8ClampedArray(w * h * 4).fill(255)
+    const paint = (x, y) => { const j = (y * w + x) * 4; data[j] = 222; data[j + 1] = 222; data[j + 2] = 222 }
+    for (const y of evenly(25, h)) for (let x = 0; x < w; x++) paint(x, y)
+    for (const x of evenly(13, w)) for (let y = 0; y < h; y++) paint(x, y)
+    page1.objs.get.mockImplementationOnce((id, cb) => cb({ width: w, height: h, kind: 3, data }))
+    const out = await extractImagesWithPos({ arrayBuffer: async () => new ArrayBuffer(8) })
+    expect(out).toHaveLength(1)
+    expect(out[0].kind).toBe('grid')
+  })
+
   it("ne pose pas kind quand l'image décodée n'a pas de treillis (photo)", async () => {
     // RGBA plat 300×300 blanc uni : aucune ligne détectée sur aucun axe → classifyGridStrict false.
     const w = 300, h = 300
@@ -135,6 +149,7 @@ describe('extractImagesWithPos', () => {
         width: 0,
         height: 0,
         getContext: () => ({
+          fillRect: () => {},
           drawImage: () => {},
           getImageData: () => ({ data: lattice }),
         }),
@@ -179,6 +194,7 @@ describe('extractImagesWithPos', () => {
         getContext: () => {
           snapshots.push({ width: c.width, height: c.height })
           return {
+            fillRect: () => {},
             drawImage: () => {},
             getImageData: () => ({ data: new Uint8ClampedArray(c.width * c.height * 4).fill(255) }),
           }
@@ -195,6 +211,33 @@ describe('extractImagesWithPos', () => {
     expect(snapshots[0].width).toBeLessThan(300)
     expect(snapshots[0].height).toBeLessThan(300)
     expect(snapshots[0].width).toBeGreaterThan(0)
+  })
+
+  // Image étirée par le PDF (margrethe p3) : décodée aux proportions affichées, pas natives.
+  it('décodage réel, image bitmap étirée : canvas aux proportions affichées', async () => {
+    delete globalThis.__decodeStub
+    page1.getOperatorList.mockResolvedValueOnce({
+      // 376,5 × 265,5 pt affichés → 502 × 354 px CSS, bornes 2× : 1004 × 708
+      fnArray: [10, 12, 85, 11],
+      argsArray: [[], [376.5, 0, 0, 265.5, 0, 0], ['img_stretched'], []],
+    })
+    page1.objs.get.mockImplementationOnce((id, cb) => cb({ width: 1100, height: 1164, bitmap: { close() {} } }))
+    const snapshots = []
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag !== 'canvas') return {}
+      const c = {
+        width: 0,
+        height: 0,
+        getContext: () => {
+          snapshots.push({ width: c.width, height: c.height })
+          return { fillRect: () => {}, drawImage: () => {}, getImageData: () => ({ data: new Uint8ClampedArray(c.width * c.height * 4).fill(255) }) }
+        },
+        toDataURL: () => 'data:image/jpeg;base64,X',
+      }
+      return c
+    })
+    await extractImagesWithPos({ arrayBuffer: async () => new ArrayBuffer(8) })
+    expect(snapshots[0]).toEqual({ width: 1004, height: 708 })
   })
 
   it('plafonne à 1280px même quand 2× la taille affichée le dépasse (grand diagramme)', async () => {
@@ -215,5 +258,51 @@ describe('extractImagesWithPos', () => {
     // Sans le plafond, maxW/maxH vaudraient ~2667 (2× affiché) ; avec, ils sont bornés à 1280.
     expect(calls[0][0]).toBeLessThanOrEqual(1280)
     expect(calls[0][1]).toBeLessThanOrEqual(1280)
+  })
+  // Un pixel transparent (masque doux) sort blanc dans le JPEG, jamais noir : voie bitmap.
+  it('décodage réel, image bitmap : fond blanc peint AVANT l’image (transparence non noircie)', async () => {
+    delete globalThis.__decodeStub
+    const calls = []
+    page1.objs.get.mockImplementationOnce((id, cb) => cb({ width: 40, height: 30, bitmap: { close() {} } }))
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag !== 'canvas') return {}
+      const ctx = {
+        set fillStyle(v) { calls.push(['fillStyle', v]) },
+        fillRect: (...a) => calls.push(['fillRect', ...a]),
+        drawImage: () => calls.push(['drawImage']),
+        getImageData: () => ({ data: new Uint8ClampedArray(40 * 30 * 4).fill(255) }),
+      }
+      return { width: 0, height: 0, getContext: () => ctx, toDataURL: () => 'data:image/jpeg;base64,X' }
+    })
+    await extractImagesWithPos({ arrayBuffer: async () => new ArrayBuffer(8) })
+    const fill = calls.findIndex((c) => c[0] === 'fillRect')
+    expect(calls.find((c) => c[0] === 'fillStyle')?.[1]).toMatch(/^#fff(fff)?$/i)
+    expect(fill).toBeGreaterThanOrEqual(0)
+    expect(fill).toBeLessThan(calls.findIndex((c) => c[0] === 'drawImage'))
+  })
+
+  // Même garantie pour les pixels RGBA bruts (putImageData ne compose pas) : alpha 0 → blanc, alpha 128 → gris moyen.
+  it('décodage réel, pixels RGBA bruts : composés sur blanc avant l’encodage JPEG', async () => {
+    delete globalThis.__decodeStub
+    let put = null
+    const data = new Uint8ClampedArray([0, 0, 0, 0, 0, 0, 0, 128, 10, 20, 30, 255])
+    page1.objs.get.mockImplementationOnce((id, cb) => cb({ width: 3, height: 1, kind: 3, data }))
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag !== 'canvas') return {}
+      const ctx = {
+        createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+        putImageData: (d) => { put = Array.from(d.data) },
+        drawImage: () => {},
+        fillRect: () => {},
+        getImageData: () => ({ data: new Uint8ClampedArray(12).fill(255) }),
+      }
+      return { width: 0, height: 0, getContext: () => ctx, toDataURL: () => 'data:image/jpeg;base64,X' }
+    })
+    await extractImagesWithPos({ arrayBuffer: async () => new ArrayBuffer(8) })
+    expect(put.slice(0, 4)).toEqual([255, 255, 255, 255])
+    expect(put[4]).toBeGreaterThanOrEqual(126)
+    expect(put[4]).toBeLessThanOrEqual(128)
+    expect(put[7]).toBe(255)
+    expect(put.slice(8, 12)).toEqual([10, 20, 30, 255])
   })
 })

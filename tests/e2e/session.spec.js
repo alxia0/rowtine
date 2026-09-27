@@ -12,7 +12,7 @@
 // fusion se fait quand même (l'écart se mesure au dernier contact `lastWriteAt`, pas à
 // la date de naissance `date` de la ligne).
 import { test, expect } from '@playwright/test'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome } from './helpers'
 
 // Entre dans le lecteur du projet démo « en cours » (Bonnet Torsade), éventuellement sous
 // horloge falsifiée. `page.clock.install()` agit par script d'initialisation : elle ne
@@ -27,9 +27,8 @@ import { completeOnboarding } from './helpers'
 async function ouvrirLecteurDemo(page, { horlogeFaussee = false } = {}) {
   if (horlogeFaussee) await page.clock.install()
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
-  // Le projet démo « en cours » (Bonnet Torsade) expose la section « Reprendre » sur l'accueil.
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  // Le projet démo « en cours » (Bonnet Torsade) s'ouvre depuis sa carte sur l'accueil.
+  await openDemoProjectFromHome(page)
   // Entrer dans le suivi lecteur.
   await page.getByRole('button', { name: /Suivre le patron/ }).click()
   await expect(page).toHaveURL(/\/project\/\d+\/read/)
@@ -142,8 +141,7 @@ test.describe('micro-séances : fusion, split, édition inline', () => {
     await expect(page).toHaveURL('/')
     await expect(page.getByText(/Temps enregistré/)).toBeVisible() // 1re ligne en base
     // Retour < 2 h : reprendre le suivi, relancer le chrono, le re-pauser.
-    await page.locator('.resume').click()
-    await expect(page).toHaveURL(/\/project\/\d+/)
+    await openDemoProjectFromHome(page)
     await page.getByRole('button', { name: /Suivre le patron/ }).click()
     await expect(page).toHaveURL(/\/project\/\d+\/read/)
     await page.locator('.chrono-fab__body').click() // reprise -> FUSION (dernier contact < 2 h)
@@ -267,8 +265,7 @@ test.describe('suppression d’un projet dont le chrono tourne', () => {
     // Même porte d'entrée que ouvrirLecteurDemo (le projet démo « en cours », Bonnet
     // Torsade), mais on RESTE sur la fiche : c'est elle qui porte le dock chrono (lot
     // « chrono unifié » : la pastille vit sur tous les onglets) et le menu ⋮.
-    await page.locator('.resume').click()
-    await expect(page).toHaveURL(/\/project\/(\d+)/)
+    await openDemoProjectFromHome(page)
     const pid = Number(page.url().match(/\/project\/(\d+)/)[1])
     // Chrono lancé DEPUIS LA FICHE, puis ~1,6 s de tricot : un solde >= 1 s au journal —
     // exactement le solde que l'ancien flux réécrivait en ligne orpheline après la purge.

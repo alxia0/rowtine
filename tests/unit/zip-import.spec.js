@@ -3,6 +3,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { unzipToPattern, resolvePatternImagesFromZip, bytesToBase64 } from '@/utils/zip-import'
 import { WARNING_CODES } from '@/utils/pattern-md/warning-codes'
+import { readdirSync, readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { sniffImportKind, SNIFF_BYTES } from '@/utils/import-kind'
+import { mdToPattern, patternToMd } from '@/utils/pattern-md'
 
 vi.mock('@/utils/image-resize', () => ({ resizeDataUrl: async (dataUrl) => dataUrl }))
 
@@ -140,6 +144,83 @@ describe('unzipToPattern', () => {
     // La couverture ET l'image de section doivent toutes deux avoir été SOUMISES au plafond —
     // si le branchement disparaît, `calls` reste vide et ce test rougit.
     expect(calls.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+// Protège le modèle public .github/rowtine-md/example : l'archive faite comme le dit son README s'importe sans perte ni avertissement.
+describe('modèle Rowtine-MD publié (.github/rowtine-md/example)', () => {
+  const EXAMPLE_DIR = resolve(process.cwd(), '.github/rowtine-md/example')
+
+  // `cd example && zip -r -X ~/x.rowtine .` : chaque dossier et chaque fichier, à son chemin relatif.
+  function exampleEntries(dir = EXAMPLE_DIR, prefix = '') {
+    const out = {}
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const rel = prefix + e.name
+      if (e.isDirectory()) Object.assign(out, { [`${rel}/`]: new Uint8Array(0) }, exampleEntries(join(dir, e.name), `${rel}/`))
+      else out[rel] = new Uint8Array(readFileSync(join(dir, e.name)))
+    }
+    return out
+  }
+
+  const isDataUrl = (s) => typeof s === 'string' && s.startsWith('data:image/png;base64,')
+
+  it("s'importe comme une archive Rowtine, sans aucun avertissement", async () => {
+    const bytes = zipSync(exampleEntries())
+    expect(sniffImportKind(bytes.slice(0, SNIFF_BYTES))).toBe('zip')
+    const { pattern, warnings } = await unzipToPattern(bytes)
+    expect(warnings).toEqual([])
+
+    expect(pattern.name).toBe('Meadowlark Round Cushion')
+    expect(pattern.authorUrl).toBe('https://example.com/meadowlark-cushion')
+    expect(pattern.sizes).toEqual(['S', 'M', 'L'])
+    expect(pattern.reader.sizeSub).toEqual(['35', '40', '45'])
+    expect(pattern.reader.sizeSubLabel).toBe('insert diameter, cm')
+    expect(pattern.reader.easeHint).toBeTruthy()
+    expect(isDataUrl(pattern.photos[0])).toBe(true)
+    expect(pattern.gallery).toHaveLength(2)
+    expect(pattern.gallery.every((g) => isDataUrl(g.src))).toBe(true)
+
+    const ref = pattern.reader.reference
+    expect(ref.tabs.map((tab) => tab.id)).toEqual(['materiel', 'tailles', 'tech', 'abbr', 'tips'])
+    expect(ref.tabs[0].blocks.map((b) => b.h3Key)).toEqual([
+      'reader.reference.h3.gauge',
+      'reader.reference.h3.needles',
+      'reader.reference.h3.yarn',
+      'reader.reference.h3.materials',
+    ])
+    expect(ref.abbr.C6B).toBeTruthy()
+
+    const sections = pattern.reader.sections
+    expect(sections.map((s) => [s.title, s.kind])).toEqual([
+      ['presentation', 'autre'],
+      ['Gauge swatch', 'echantillon'],
+      ['Front medallion', 'dentelle'],
+      ['Leaf edging', 'bordure'],
+      ['Side band', 'motif'],
+      ['Back', 'pelote'],
+      ['Finishing', 'finitions'],
+      ['About this example', 'infos'],
+    ])
+    const sec = (title) => sections.find((s) => s.title === title)
+    const step = (title, text) => sec(title).steps.find((st) => (st.t || '').includes(text))
+
+    expect(sec('Front medallion').chart).toMatchObject({ cols: 11, rows: 20, shape: 'radial-circle', readDir: 'rtl' })
+    expect(sec('Leaf edging').chart).toMatchObject({ cols: 12, rows: 4, readDir: 'rtl', sizes: ['M', 'L'] })
+    expect(sec('Side band').chart).toMatchObject({ cols: 12, rows: 8, readDir: 'rtl', reps: 3 })
+    for (const title of ['Front medallion', 'Leaf edging', 'Side band']) expect(isDataUrl(sec(title).chart.img)).toBe(true)
+
+    expect(isDataUrl(sections[0].steps.at(-1).imgs?.[0])).toBe(true)
+    expect(isDataUrl(step('Front medallion', 'invisible circular cast-on').imgs?.[0])).toBe(true)
+    expect(step('Front medallion', 'Continue in stocking stitch')).toMatchObject({ repeat: true, total: [9, 12, 15] })
+    expect(step('Side band', 'Work rounds 1 to 8')).toMatchObject({ repeat: true, total: [3, 3, 3] })
+    expect(step('Back', 'Increase round')).toMatchObject({ repeat: true, every: 2, total: [17, 17, 17] })
+    expect(step('Back', 'Repeat the last 2 rounds')).toMatchObject({ repeat: true, total: [2, 5, 8] })
+    expect(step('Finishing', 'three-needle bind-off').c).toEqual([[240, 276, 312]])
+  })
+
+  it("est écrit sous la forme exacte que l'app réécrit", () => {
+    const md = readFileSync(join(EXAMPLE_DIR, 'patron.md'), 'utf8')
+    expect(patternToMd(mdToPattern(md).pattern).md).toBe(md)
   })
 })
 

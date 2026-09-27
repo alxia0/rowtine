@@ -52,6 +52,17 @@ describe('aggregateProjectStats', () => {
     expect(stats.metersUsed).toBe(0)
   })
 
+  // Protège : une somme de décimales (0,1 + 0,2 = 0.30000000000000004 en JS) ne doit jamais
+  // fuir dans ballsUsed, qui sert de sélecteur de pluriel à l'affichage.
+  it('ballsUsed referme la traîne binaire d\'une somme décimale (0,1 + 0,2 → 0,3)', () => {
+    const yarns = [
+      { reservations: { 1: 0.1 }, consumed: {}, lengthM: 100 },
+      { reservations: { 1: 0.2 }, consumed: {}, lengthM: 100 },
+    ]
+    const stats = aggregateProjectStats(project, sessions, yarns)
+    expect(stats.ballsUsed).toBe(0.3)
+  })
+
   it('marque un projet sans finishedAt comme en cours, fenetre bornee a aujourd hui', () => {
     const stats = aggregateProjectStats(
       { startedAt: '2026-01-05', finishedAt: '' },

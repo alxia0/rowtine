@@ -18,7 +18,7 @@ import { useCropperStore } from '@/stores/cropper'
 import { useLightboxStore } from '@/stores/lightbox'
 import { pickAndCropImage } from '@/utils/photo'
 import { photosOf, coverPhotoOf } from '@/utils/yarn-photos'
-import { formatLength, formatWeight, formatAmount, currencySymbol } from '@/utils/units'
+import { formatLength, formatWeight, formatAmount, formatSkeins, currencySymbol } from '@/utils/units'
 import { formatLocalDate } from '@/utils/date-format'
 import { parseDecimal } from '@/utils/decimal'
 import { latestPurchaseDate, bainsOf } from '@/utils/purchases'
@@ -81,7 +81,9 @@ const rows = computed(() => {
   push(imperial ? 'yarn.lengthYd' : 'yarn.lengthM', len ? len.text : '')
   const wgt = y.grams ? formatWeight(y.grams, opts) : null
   push(imperial ? 'yarn.ounces' : 'yarn.grams', wgt ? wgt.text : '')
-  push('yarn.quantity', y.quantity)
+  // `formatSkeins('')` rend « 0 » : une quantité vide/absente (fiche ancienne) omet la
+  // ligne, comme avant la décimalisation, plutôt que d'afficher un « 0 » inventé.
+  push('yarn.quantity', y.quantity !== '' && y.quantity != null ? formatSkeins(y.quantity, { locale: locale.value }) : '')
   // Une saisie illisible comme nombre reste affichée telle quelle (jamais perdre d'info).
   const priceOk = y.price !== '' && y.price != null && Number.isFinite(parseDecimal(y.price))
   push('yarn.priceWithSymbol', priceOk ? formatAmount(y.price, { locale: locale.value }) : y.price)
@@ -108,7 +110,9 @@ const origineTexte = computed(() => {
 const usageLabel = computed(() => {
   const u = usage.value
   const base = t(`yarn.usage.${u.state}`)
-  return u.state !== 'free' && u.used < u.total ? `${base} · ${u.used}/${u.total}` : base
+  return u.state !== 'free' && u.used < u.total
+    ? `${base} · ${formatSkeins(u.used, { locale: locale.value })}/${formatSkeins(u.total, { locale: locale.value })}`
+    : base
 })
 
 // --- Galerie (ajout/suppression/couverture) : motif ProjectDetailView.vue:599-634 ---

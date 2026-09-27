@@ -639,6 +639,10 @@ const LABELS = [
   ['measure-row', /^(?:longueur(?:\sdes?\s.+)?|largeur|hauteur|circonf[ée]rence|tour de .+|length|width|height|circumference|l[äa]nge|breite|h[öo]he|umfang|l[æe]ngde|bredde|h[øo]jde|omkreds|largo|ancho|alto|contorno|lunghezza|larghezza|altezza|circonferenza|lengte|breedte|hoogte|omtrek|d[łl]ugo[śs][ćc]|szeroko[śs][ćc]|wysoko[śs][ćc]|obw[óo]d|pituus|leveys|korkeus|ymp[äa]rys|l[äa]ngd|bredd|h[öo]jd|omkrets|durchmesser|diam[èe]tre|diameter|di[áa]metro|diametro)$/i],
 ]
 
+// Libellé d'échantillon de la table LABELS (« Maschenprobe », « Musterprobe », « Gauge »…),
+// réutilisé tel quel pour reconnaître un libellé NU en attente dans une section « mesures ».
+const GAUGE_LABEL_RE = LABELS.find(([field]) => field === 'gauge')[1]
+
 function labelFor(text) {
   const m = /^(.{1,40}?)\s*:\s*(.*)$/.exec(text.trim())
   if (!m) return null
@@ -786,6 +790,13 @@ function bareLabelFor(text) {
 // rentre plus du tout en ligne de compte pour ces lignes.
 const isYarnLabelLine = (t) => labelFor(String(t))?.field === 'yarn'
 const isColorwayLine = (t) => COLORWAY_RE.test(String(t))
+
+// Libellé NU de consommation de fil allemand (« Verbrauch », ligne entière, « : » final
+// toléré), cas réel railway-pillow-de : « Verbrauch » puis « 450g (5 Knäuel) » dans la section
+// Material. Hors LABELS à dessein : cette table est partagée avec labelFor, qui rerouterait
+// alors toutes les lignes « Verbrauch: Ca. 10g » du corpus. Seul usage : la branche
+// sec.ref==='materiel' d'extractReference, quand la ligne suivante part au Fil.
+const CONSUMPTION_BARE_LABEL_RE = /^verbrauch\s*:?$/i
 
 // Champ de référence porté par une ligne TITRE ou ÉTIQUETTE (« Échantillon »,
 // « Gauge », « Materials: … ») : teste la partie avant un éventuel « : » contre
@@ -1090,13 +1101,17 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
       // déclenche l'attache, et seule une ligne NON reconnue par labelFor (donc jamais
       // consommée par ailleurs) peut la déclencher.
       let pendingBlockingQualifier = ''
+      // Ligne verbatim du qualificatif : consommée dès qu'il a qualifié une rangée, sinon la
+      // passe « mesures » la reprenait comme libellé en attente et la renvoyait en note, en
+      // doublon des libellés de rangée qui la portent déjà.
+      let pendingBlockingQualifierLine = null
       for (const line of sec.lines) {
         if (line.consumed) continue
         const t = line.text.trim()
         const lab = labelFor(t)
         if (!lab) {
           const strippedForQualifier = t.replace(/[\s:]+$/, '').trim()
-          if (BEFORE_AFTER_BLOCKING_RE.test(strippedForQualifier)) pendingBlockingQualifier = strippedForQualifier
+          if (BEFORE_AFTER_BLOCKING_RE.test(strippedForQualifier)) { pendingBlockingQualifier = strippedForQualifier; pendingBlockingQualifierLine = line }
         }
         if (lab) {
           // Une étiquette RÉELLE (« : ») referme toujours un bloc nu en cours : priorité
@@ -1150,7 +1165,11 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
             // il continue d'annoncer les lignes measure-row suivantes jusqu'au prochain
             // sous-titre de groupe (remplacement par simple réaffectation, plus haut).
             const label = pendingBlockingQualifier ? `${lab.label} (${pendingBlockingQualifier})` : lab.label
-            if (pushMeasure(label, lab.value)) { line.consumed = true; block = null }
+            if (pushMeasure(label, lab.value)) {
+              line.consumed = true
+              block = null
+              if (pendingBlockingQualifier && pendingBlockingQualifierLine) pendingBlockingQualifierLine.consumed = true
+            }
             continue
           }
           // Les tailles vont au front-matter (sizes.js) — SAUF pour un patron mono-taille
@@ -1538,6 +1557,84 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
     // tête du libellé de la ligne suivante, déjà correcte avant la fusion — régression
     // mesurée sur 4 patrons du corpus large (elin-top-es, selina-kimono-cardigan-es,
     // sweet-as-pie-dress-en, pink-heart-sweater…) avant l'ajout de cette garde.
+    // Classic Sweater Soft Double (corpus réel, 6 tailles) : dans une section fil/matériel,
+    // un libellé d'outil terminé par « : » (« Aig à tricoter circ ou longues double
+    // pointes: ») suivi d'une ligne de taille NUE (« 2,5 et 3,0 mm ») partait en Matériel —
+    // aucun mot-outil dans le vocabulaire d'aiguilles ne couvre « aig » seul (NEEDLE_RE ne
+    // doit PAS l'apprendre : « sur aig 2,5 mm » est trop fréquent en prose de patron pour
+    // devenir un signal fiable). isBareSizeLine (déjà utilisée pour ref==='aiguilles', M4
+    // ci-dessus) reconnaît la ligne de taille ; le rattachement se limite aux deux lignes
+    // adjacentes, jamais un balayage de la section entière.
+    // Même repli « jamais perdre d'info » que les autres points d'entrée de `needles`
+    // (M1/Au2 ci-dessus, plafond 6) : au plafond, la ligne fusionnée retombe au Matériel
+    // plutôt que de disparaître (les deux lignes sources restent `consumed`).
+    if (sec.ref === 'fil' || sec.ref === 'materiel') {
+      for (let i = 0; i < sec.lines.length - 1; i++) {
+        const a = sec.lines[i], b = sec.lines[i + 1]
+        if (a.consumed || b.consumed) continue
+        if (/:\s*$/.test(a.text) && /\b(?:aig|aiguilles?|needles?)\b/i.test(a.text) && isBareSizeLine(b.text)) {
+          const merged = a.text.trim() + ' ' + b.text.trim()
+          if (needles.length < 6) needles.push(merged)
+          else materials.push(merged)
+          a.consumed = true; b.consumed = true
+        }
+      }
+    }
+    // Classic Sweater Soft Double : `pushYarn` plafonne à 8 lignes de qualité (Au2
+    // ci-dessus) — un patron à 6 tailles qui répète « N ans: » puis une ligne « Libellé
+    // NUM g » par qualité de fil (Fond/Jacquard/…) sature le plafond avant la dernière
+    // taille, le reste retombant en Matériel (fil tronqué). Pivot : regroupe les valeurs
+    // d'UNE MÊME étiquette (label + unité) par index de taille, puis émet UNE seule ligne
+    // par étiquette (au lieu d'une par taille) — le plafond de qualité n'est plus jamais
+    // atteint par ce motif. Le TITRE de taille sert de repère, jamais une donnée en soi :
+    // `headRe` exige une correspondance EXACTE avec `sizeLabels` (compte déjà vérifié
+    // égal à n), donc aucun repère fantaisiste ne peut décaler les valeurs. Notation finale
+    // émise par `toPaperNotation` (grammaire déjà partagée par gauge/needles/yarn/materials
+    // ci-dessous), jamais reconstruite à la main : la valeur de tête est nue, les valeurs
+    // suivantes portées par un groupe entre parenthèses (forme reconnue par
+    // `findSizeVectors`), pour que `toPaperNotation` retrouve exactement le même vecteur de
+    // longueur n et le réémette en alternance « a (b) c (d)… ». Tout-ou-rien : si UNE SEULE
+    // étiquette n'a pas ses n valeurs, aucune ligne n'est pivotée (non-invention) — la
+    // section repart telle quelle vers le routage existant.
+    if (sec.ref === 'fil' && n > 1 && sizeLabels.length === n) {
+      const headRe = sizeLabels.map((lbl) => new RegExp('^' + escapeRegExp(lbl) + '\\s*:?\\s*$', 'i'))
+      let idx = -1
+      const rows = new Map()
+      const used = []
+      for (const l of sec.lines) {
+        if (l.consumed) continue
+        const h = headRe.findIndex((re) => re.test(l.text.trim()))
+        if (h !== -1) { idx = h; used.push(l); continue }
+        // Unité mm/US écartée à dessein : une taille d'aiguille (traitée par le
+        // rattachement d'aiguilles ci-dessus) n'est jamais une quantité de fil. `g`/`m`
+        // seuls (masse/longueur), aucun mot compté (pelote/skein/…) : ce mécanisme est
+        // multilingue, un mot d'une seule langue n'y a pas sa place (cf. COLORWAY_RE/
+        // YARN_RE pour cette notion, hors scope ici — Classic n'utilise que « g »).
+        const m = /^(\p{L}[\p{L} ]{0,30}?)\s+(\d+(?:[.,]\d+)?)\s*(g|m)$/u.exec(l.text.trim())
+        if (idx !== -1 && m) {
+          const k = m[1] + '|' + m[3]
+          if (!rows.has(k)) rows.set(k, { label: m[1], unit: m[3], values: Array(n).fill('') })
+          rows.get(k).values[idx] = m[2]
+          used.push(l)
+          continue
+        }
+        idx = -1
+      }
+      const full = [...rows.values()].filter((r) => r.values.every(Boolean))
+      if (full.length && full.length === rows.size) {
+        for (const l of used) l.consumed = true
+        // Même repli « jamais perdre d'info » que le point d'entrée `fil` du routage
+        // ligne à ligne (ci-dessous) : au plafond de qualité, la ligne pivotée retombe au
+        // Matériel plutôt que de disparaître.
+        for (const r of full) {
+          const grouped = r.values[0] + r.values.slice(1).map((v) => `, (${v})`).join('')
+          const text = toPaperNotation(`${r.label} ${grouped} ${r.unit}`, n)
+          const before = yarns.length
+          pushYarn(text)
+          if (yarns.length === before) materials.push(text)
+        }
+      }
+    }
     if (sec.ref === 'mesures' && n > 1) {
       for (let i = 0; i < sec.lines.length - 1; i++) {
         const line = sec.lines[i]
@@ -1559,9 +1656,14 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
     // (titrée par défaut avec le titre de la section, cf. branche ci-dessous), jamais
     // une continuation de la section précédente.
     let curTech = null
+    // Libellé nu « Verbrauch » (cf. CONSUMPTION_BARE_LABEL_RE) venant d'être rangé au
+    // Matériel : position dans `materials`, reprise si la ligne suivante part au Fil.
+    let pendingConsumptionAt = -1
     for (const line of sec.lines) {
       if (line.consumed) continue
       const t = line.text
+      const consumptionAt = pendingConsumptionAt
+      pendingConsumptionAt = -1
       // Défauts 1+2 — dans une section Abréviations dédiée, une ligne de laine (rappel
       // « Fil: … » ou coloris/quantité « … - 1 pelote ») n'est jamais une abréviation :
       // testée AVANT execAbbrLine (ci-dessous), qui l'aurait sinon captée à tort (clé
@@ -1747,6 +1849,9 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
           const before = yarns.length
           pushYarn(t)
           if (yarns.length === before) materials.push(t)
+          // Le libellé « Verbrauch » de la ligne précédente suit sa quantité au Fil, en tête
+          // (même convention que le libellé d'un bloc nu, cf. bareBlockLabel).
+          else if (consumptionAt >= 0 && consumptionAt === materials.length - 1) yarns.splice(yarns.length - 1, 0, materials.pop())
           continue
         }
         // Même garde « jamais perdre d'info » qu'au bloc ci-dessus : le plafond
@@ -1754,6 +1859,7 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // reclasser au Matériel.
         if (isNeedleLine(t)) { if (needles.length < 6) needles.push(t); else materials.push(t); continue }
         materials.push(t)
+        if (CONSUMPTION_BARE_LABEL_RE.test(t.trim())) pendingConsumptionAt = materials.length - 1
         continue
       }
       if (sec.ref === 'techniques') {
@@ -1803,6 +1909,19 @@ export function extractReference(sections, { n = 1, sizeLabels = [], preAbbr = [
         // utilisé par steps.js) traite déjà plusieurs vecteurs par ligne comme un cas normal —
         // même lecture ici, un par un, dans l'ordre, chacun étiqueté par le texte qui le
         // précède depuis la fin du vecteur précédent.
+        // Libellé NU d'échantillon en attente (« Musterprobe ») suivi d'une valeur
+        // d'échantillon (GAUGE_RE) : cas réel ash-knit-wrist-warmers-de, les deux lignes sous
+        // le titre MAßE. La valeur rejoint le bloc Échantillon ; le libellé, redondant avec le
+        // titre du bloc, est consommé avec elle (il partait en note, la valeur aussi).
+        if (
+          pendingMeasureLabel && GAUGE_LABEL_RE.test(foldEszett(pendingMeasureLabel)) &&
+          String(t).length <= NEEDLE_SF_MAX_LEN && GAUGE_RE.test(t)
+        ) {
+          gaugeLines.push(t)
+          pendingMeasureLabel = ''
+          pendingMeasureRaw = ''
+          continue
+        }
         const rawVecs = findSizeVectors(t)
         const vecs = rawVecs.filter((x) => x.values.length === n)
         if (vecs.length) {

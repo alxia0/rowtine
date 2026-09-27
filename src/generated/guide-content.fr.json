@@ -336,7 +336,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (calculateur de mailles, compteur libre, aide aiguilles/crochet) et au bouton ",
+                  "text": " (calculateur de mailles, compteur libre, aide aiguilles/crochet), au bouton ",
                   "bold": false,
                   "italic": false
                 },
@@ -346,7 +346,47 @@
                   "italic": false
                 },
                 {
-                  "text": ".",
+                  "text": " et au bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Importer un PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", qui ouvre ta ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Bibliothèque de patrons",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " directement sur l'ajout d'un patron.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Au tout début, tant que l'app ne contient que les exemples, l'accueil va à l'essentiel : une carte ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Importer un patron PDF",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " prend la place de la tuile Reprendre et du récapitulatif. Ils reviennent dès que tu as créé ton premier projet ou importé ton premier patron.",
                   "bold": false,
                   "italic": false
                 }

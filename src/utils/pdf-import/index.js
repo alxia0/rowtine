@@ -4,6 +4,7 @@
 import { extractPages, extractDocMetaTitle, renderPdfPageToDataUrl, extractImagesWithPos, extractVectorRegions, readFileAsDataUrl } from '@/utils/pdf'
 import { buildReaderFromPages } from './assemble'
 import { associateImages } from './associate'
+import { coverCropBox } from './cover-crop'
 import { promoteGridSections } from './promote-grids'
 import { detectRejection } from './reject'
 
@@ -110,12 +111,6 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
   const out = buildReaderFromPages(pages, { fileName: file?.name || '', docMetaTitle })
 
   onProgress?.({ phase: 'images', page: 0, total: 0 })
-  try {
-    out.pattern.photos = [await renderPdfPageToDataUrl(file, 1, 800)]
-  } catch {
-    out.pattern.photos = []
-  }
-
   // Rétention du PDF (best-effort, comme les images de page).
   try {
     out.pattern.pdf = await readFileAsDataUrl(file)
@@ -141,6 +136,20 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
     vecRegions = Array.isArray(res) ? res : []
   } catch { vecRegions = [] }
 
+  // Couverture = rendu de la page 1. Si elle porte aussi les instructions, on n'en garde que la
+  // photo principale et le titre-descriptif collé à elle (cover-crop.js). Rendue après
+  // l'extraction des images : le cadrage part de la photo principale.
+  const page1Images = imagesWithPos.filter((im) => im && im.page === 1)
+  let coverBox = null
+  try {
+    const crop = (pageWidth, pageHeight) =>
+      (coverBox = coverCropBox({ lines: pages[0] || [], images: page1Images, pageWidth, pageHeight }))
+    out.pattern.photos = [await renderPdfPageToDataUrl(file, 1, 800, { crop })]
+  } catch {
+    out.pattern.photos = []
+    coverBox = null
+  }
+
   onProgress?.({ phase: 'assemble' })
   // Grilles dessinées (kind:'grid') : promues en diagrammes INTERACTIFS suivables rang-par-rang
   // (lot #2-B), chacune sa section — donc PAS ancrées comme simples images. Le reste (raster +
@@ -152,7 +161,19 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
   const imageNonGrids = imagesWithPos.filter((im) => !(im && im.kind === 'grid'))
   const gridRegions = [...vecGrids, ...imageGrids]
   // #5 : images (raster + régions 'reference') ancrées sous leur ligne d'instruction ; le reste → galerie.
-  const { sections, gallery } = associateImages(out.reader.sections, [...imageNonGrids, ...nonGridRegions], pages)
+  // Couverture rendue : les images de la page 1 y sont déjà visibles, elles restent en galerie.
+  // Un PDF d'une seule page EST le patron (pas une couverture séparée) : ses images restent dans le fil.
+  // Ordre de lecture (page croissante puis y décroissant, haut de page d'abord) : sous une même
+  // étape, plusieurs images s'empilent dans l'ordre où on les voit dans le PDF, pas dans l'ordre
+  // d'extraction (raster puis régions).
+  const orderedImages = [...imageNonGrids, ...nonGridRegions].sort(
+    (a, b) => (a.page || 1) - (b.page || 1) || (b.y ?? 0) - (a.y ?? 0),
+  )
+  // Couverture rognée : seules les images de son cadre y sont visibles, les autres suivent le fil.
+  const { sections, gallery } = associateImages(out.reader.sections, orderedImages, pages, {
+    coverShown: !coverBox && out.pattern.photos.length > 0 && pages.length > 1,
+    coverBox,
+  })
   out.reader.sections = sections
   out.pattern.gallery = gallery
   out.reader = promoteGridSections(out.reader, gridRegions, pages)

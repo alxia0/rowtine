@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import BackToTop from '@/components/BackToTop.vue'
@@ -21,6 +21,7 @@ import { useImportHandoff } from '@/stores/import-handoff'
 import { PDF_ACCEPT, ROWTINE_ACCEPT } from '@/utils/import-kind'
 import { EXAMPLE_PATTERN } from '@/constants/empty-samples'
 import { useSettingsStore } from '@/stores/settings'
+import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
@@ -69,6 +70,33 @@ watch(
 )
 onBeforeUnmount(() => document.removeEventListener('keydown', onAddSheetKey))
 
+const settings = useSettingsStore()
+
+// Demande de l'accueil (`?add=1`, 26/09/2026) : ouvrir la feuille d'ajout, mais seulement
+// quand la file des messages est libre et qu'aucun des deux messages propres à cet écran
+// (rappel d'import, astuce de balayage) n'est encore dû : jamais deux surfaces modales
+// ensemble. Une seule ouverture par arrivée : le paramètre quitte l'adresse aussitôt, pour
+// que Retour depuis le patron importé ou un rechargement ne rouvrent rien.
+const route = useRoute()
+const noticeQueue = useNoticeQueueStore()
+const addRequested = ref(route.query?.add != null)
+watch(
+  () =>
+    addRequested.value &&
+    settings.loaded &&
+    !settings.importCaveatDue &&
+    settings.swipeHintSeen &&
+    noticeQueue.active === null,
+  (ready) => {
+    if (!ready) return
+    addRequested.value = false
+    addSheetOpen.value = true
+    const { add, ...query } = route.query
+    router.replace({ name: 'library', query })
+  },
+  { immediate: true },
+)
+
 // Import direct : le tap sur le label (dans la feuille) ouvre le sélecteur natif (geste
 // utilisateur requis) ; au choix du fichier, on le pose dans le relais et on file à l'écran
 // d'import. Annuler le sélecteur (aucun fichier) ne navigue pas.
@@ -99,7 +127,6 @@ function onImportFile(e, format) {
 // ⚠️ Ce n'est PAS le rappel permanent retiré le 17/08 (gardé
 // par tests/unit/library-import-notice.spec.js) : celui-là vivait en permanence sous le
 // bouton d'import. Celui-ci se montre une fois, puis disparaît pour toujours.
-const settings = useSettingsStore()
 const caveatHasSlot = useNoticeSlot(NOTICE.IMPORT_CAVEAT, () => settings.importCaveatDue)
 
 async function dismissCaveat() {

@@ -44,8 +44,11 @@
     "resumeSize": "gestrickte Größe {size}",
     "wipSummary": "Du hast {n} laufendes Projekt. | Du hast {n} laufende Projekte.",
     "lastProject": "Letztes Projekt",
-    "noProjects": "Noch keine Projekte. Erstelle dein erstes Projekt, um loszulegen.",
+    "noProjects": "Noch keine Projekte. Importiere eine PDF-Anleitung oder erstelle dein erstes Projekt, um loszulegen.",
     "createProject": "Projekt erstellen",
+    "importPdf": "PDF-Anleitung importieren",
+    "importPdfHint": "Sie wird in deinen Anleitungen gespeichert",
+    "importPdfShort": "PDF importieren",
     "seeAll": "Alle anzeigen",
     "collapse": "Einklappen",
     "toolsLabel": "Werkzeuge",
@@ -1108,6 +1111,12 @@
     "preview": "Anleitungsvorschau",
     "loading": "Lädt…",
     "readOnlyNote": "Vorschau ohne Bearbeitungsmöglichkeit. Um deine Größe zu wählen und deinen Fortschritt zu verfolgen, erstelle ein Projekt und tippe dann auf „Anleitung folgen“.",
+    "legend": {
+      "title": "Beim Verfolgen:",
+      "check": "wird abgehakt",
+      "count": "wird gezählt",
+      "read": "nur zum Lesen"
+    },
     "chooseSize": "1. Wähle deine Größe",
     "singleSize": "Einheitsgröße",
     "section": {
@@ -1120,6 +1129,7 @@
     "markDone": "Als erledigt markieren",
     "fixHere": "Korrigieren",
     "stepImageOpen": "Bild groß anzeigen",
+    "coverOpen": "Titelseite groß anzeigen",
     "noRepeat": "Keine Wiederholung für deine Größe ({size})",
     "pickSizeShort": "wähle deine Größe",
     "seeTechnique": "Technik ansehen",

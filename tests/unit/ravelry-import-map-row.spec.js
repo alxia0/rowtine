@@ -87,6 +87,14 @@ describe('mapRow, quantites et prix', () => {
     expect(yarn.grams).toBe(1234.5)
     expect(yarn.lengthM).toBe(105)
   })
+
+  // Protège : les quantités de pelotes passent par roundSkeins (2 décimales au plus),
+  // jamais par un arrondi maison distinct de celui du reste de l'appli.
+  it('quantités de pelotes arrondies à 2 décimales (roundSkeins), pas au-delà', () => {
+    const { yarn, purchase } = mapRow({ remainingSkeins: 2.333, skeins: 2.333 })
+    expect(yarn.quantity).toBe(2.33)
+    expect(purchase.quantity).toBe(2.33)
+  })
 })
 
 describe('mapRow, achat (bain, date, lieu d\'achat)', () => {

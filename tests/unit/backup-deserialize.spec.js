@@ -466,6 +466,39 @@ describe('round-trip serializeYarns → deserializeYarns', () => {
     const oldFormatJson = [{ id: 1, brand: 'Ancien format', photo: PHOTO_A }]
     expect(deserializeYarns(oldFormatJson, {})).toEqual(oldFormatJson)
   })
+
+  // Protège le round-trip d'une galerie multi-photos, `coverIndex` compris.
+  it('laine avec galerie (photos + coverIndex) : round-trip identique', () => {
+    const yarns = [{ id: 1, brand: 'Bergère de France', photos: [PHOTO_A, PHOTO_B], coverIndex: 1 }]
+    const result = serializeYarns(yarns)
+    const laineJson = result.files.find((f) => f.path === 'laines.json')
+    const filesByName = toRootFilesByName(result.files)
+    const restored = deserializeYarns(JSON.parse(laineJson.data), filesByName)
+    expect(restored).toEqual(yarns)
+  })
+
+  // Protège le filtrage d'un fichier de galerie manquant, consigné dans `missing`.
+  it('galerie : nom référencé absent du disque → filtré de photos, consigné dans missing', () => {
+    const laineJson = [{ id: 1, brand: 'A', photos: ['laine-photo-abc.jpg', 'laine-photo-def.jpg'] }]
+    const missing = []
+    const restored = deserializeYarns(laineJson, { 'laine-photo-def.jpg': 'ZGVm' }, missing)
+    expect(restored[0].photos).toEqual([expect.stringContaining('data:image/jpeg;base64,ZGVm')])
+    expect(missing).toEqual(['laine-photo-abc.jpg'])
+  })
+
+  // Protège la rétrocompatibilité : ancienne galerie non externalisée, data URLs inline.
+  it('rétrocompatibilité galerie : ancien laines.json avec photos en data URLs inline se restaure identique', () => {
+    const oldFormatJson = [{ id: 1, brand: 'Ancien format', photos: [PHOTO_A, PHOTO_B] }]
+    expect(deserializeYarns(oldFormatJson, {})).toEqual(oldFormatJson)
+  })
+
+  // Protège le round-trip strict : une laine sans `photos` n'en gagne pas une.
+  it('laine sans clé photos : objet inchangé (pas de photos: [] ajouté)', () => {
+    const json = [{ id: 1, brand: 'Sans galerie' }]
+    const restored = deserializeYarns(json, {})
+    expect(restored).toEqual(json)
+    expect('photos' in restored[0]).toBe(false)
+  })
 })
 
 describe('round-trip serializeIndependentCounters → deserializeIndependentCounters', () => {

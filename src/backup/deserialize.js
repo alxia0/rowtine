@@ -181,20 +181,36 @@ export function deserializeProject(projetJson, filesByName = {}, missing = []) {
   }
 }
 
-// Laines : chaque entité peut porter SOIT une photo inline (ancien format, avant le
-// 15/08/2026), SOIT un nom de fichier laine-photo-* à résoudre via `filesByName` (nouveau
-// format — cf. serializeYarns). Même discriminant que photoFromEntry pour patrons/projets :
-// le préfixe `data:`. `filesByName` est indexé par NOM DE FICHIER, jamais par chemin : il
-// fusionne les photos rangées sous `Laines/` (depuis le 21/08/2026) et celles restées à la
-// RACINE (avant) — cf. restore.js pour sa construction. C'est parce que `laines.json` n'a
-// jamais porté que le nom que cette fonction n'a pas eu à changer d'un octet.
-export function deserializeYarns(json, filesByName = {}) {
+// Laines : chaque entité peut porter, pour `photo` COMME pour `photos[]` (galerie,
+// refonte du stock du 22/09/2026), SOIT une valeur inline (ancien format : avant le
+// 15/08/2026 pour `photo`, et avant le 25/09/2026 pour `photos` — la galerie n'était pas
+// encore externalisée), SOIT un nom de fichier laine-photo-* à résoudre via `filesByName`
+// (nouveau format — cf. serializeYarns). Même discriminant que photoFromEntry pour
+// patrons/projets : le préfixe `data:`. `filesByName` est indexé par NOM DE FICHIER,
+// jamais par chemin : il fusionne les photos rangées sous `Laines/` (depuis le 21/08/2026)
+// et celles restées à la RACINE (avant) — cf. restore.js pour sa construction. C'est parce
+// que `laines.json` n'a jamais porté que le nom que cette fonction n'a pas eu à changer de
+// forme pour `photo`.
+// `photos` n'est touché que si la clé existe (round-trip strict, cf. serializeYarns) :
+// résolu par `photosFromNames`, qui filtre déjà les entrées manquantes. `coverIndex`
+// n'est PAS touché ici : `boundedIndex` (src/utils/yarn-photos.js) le borne à l'affichage.
+// `missing` (tableau, optionnel) reçoit le nom de chaque fichier référencé mais absent de
+// `filesByName`, pour `photo` ET `photos` — l'appelant (restore.js) le rapporte comme
+// pour les projets/patrons.
+export function deserializeYarns(json, filesByName = {}, missing = []) {
   return asArray(json).map((yarn) => {
     // `laines.json` réduit à `[null]` par une édition à la main : la ligne est rendue
     // telle quelle, la validation d'entité (restore.js) l'écartera avec un rapport —
     // ici on ne fait que ne pas lever.
-    if (!yarn || typeof yarn !== 'object' || !yarn.photo) return yarn
-    return { ...yarn, photo: photoFromEntry(yarn.photo, filesByName) }
+    if (!yarn || typeof yarn !== 'object') return yarn
+    let next = yarn
+    if (yarn.photo) {
+      next = { ...next, photo: photoFromEntry(yarn.photo, filesByName, missing) }
+    }
+    if ('photos' in yarn) {
+      next = { ...next, photos: photosFromNames(yarn.photos, filesByName, missing) }
+    }
+    return next
   })
 }
 

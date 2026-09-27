@@ -34,4 +34,15 @@ describe('StepImages', () => {
     const wrapper = mount(StepImages, { props: { imgs: [] }, global: { plugins: [i18n] } })
     expect(wrapper.find('img').exists()).toBe(false)
   })
+
+  // Une image seule s'affiche en grand, une série en grille de deux colonnes.
+  it('mise en page : une image seule et une série ne se rangent pas pareil', () => {
+    const one = mount(StepImages, { props: { imgs: ['data:image/png;base64,A'] }, global: { plugins: [i18n] } })
+    const two = mount(StepImages, {
+      props: { imgs: ['data:image/png;base64,A', 'data:image/png;base64,B'] },
+      global: { plugins: [i18n] },
+    })
+    expect(one.find('.stepimgs').classes()).toContain('stepimgs--single')
+    expect(two.find('.stepimgs').classes()).toContain('stepimgs--grid')
+  })
 })

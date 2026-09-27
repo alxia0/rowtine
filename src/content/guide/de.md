@@ -77,7 +77,13 @@ Beim Öffnen der App findest du:
   Projekt auf Fertig setzt (siehe Punkt 2), und erscheint nie bei einem
   aufgegebenen Projekt.
 - Schneller Zugriff auf die **Werkzeuge** (Maschenrechner, freier Zähler,
-  Nadel-/Häkelnadelhilfe) und die Schaltfläche **+ Projekt erstellen**.
+  Nadel-/Häkelnadelhilfe), die Schaltfläche **+ Projekt erstellen** und die
+  Schaltfläche **PDF importieren**, die deine **Anleitungen** direkt beim
+  Hinzufügen einer Anleitung öffnet.
+- Ganz am Anfang, solange die App nur die Beispiele enthält, beschränkt sich der
+  Start auf das Wesentliche: Eine Karte **PDF-Anleitung importieren** ersetzt die
+  Kachel Fortsetzen und die Übersicht. Beides kehrt zurück, sobald du dein erstes
+  Projekt erstellt oder deine erste Anleitung importiert hast.
 - Und schließlich bringt dich **das Menü oben rechts** jederzeit zum
   Garnvorrat, zu den Anleitungen, zur Statistik, **zu den Sitzungen**, zu den
   Ausgaben, zu dieser Anleitung, zu den Einstellungen und zum Bildschirm

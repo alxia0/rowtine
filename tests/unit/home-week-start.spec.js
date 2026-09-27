@@ -31,17 +31,24 @@ const SUNDAY_SESSION = { projectId: 1, sectionId: 1, date: new Date(2026, 6, 12,
 // fournit une implémentation FIDÈLE (même filtre `date >= sinceDate`, même somme) plutôt que de
 // coder en dur un résultat : c'est ce qui fait que le test exerce réellement la borne que
 // HomeView calcule, et pas seulement l'affichage d'un chiffre préparé à l'avance.
-function mountHome({ weekStart = 1, sessions = [] } = {}) {
+async function mountHome({ weekStart = 1, sessions = [] } = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn })
   const settings = useSettingsStore(pinia)
   settings.weekStart = weekStart
   settings.loaded = true
-  useProjectsStore(pinia).loaded = true
+  const projectsStore = useProjectsStore(pinia)
+  projectsStore.projects = [{ id: 99, name: 'Projet à soi', status: 'done' }] // accueil complet : la tuile semaine n'existe qu'hors mode allégé
+  projectsStore.loaded = true
   const sessionsStore = useSessionsStore(pinia)
   sessionsStore.secondsSince.mockImplementation(async (sinceDate) =>
     sessions.filter((s) => s.date && new Date(s.date) >= sinceDate).reduce((acc, s) => acc + (s.durationSec || 0), 0),
   )
-  return mount(HomeView, { global: { plugins: [pinia, i18n], stubs } })
+  const w = mount(HomeView, { global: { plugins: [pinia, i18n], stubs } })
+  // Lecture réelle (Dexie) des exemples semés dans `onMounted` (accueil allégé) : un seul
+  // tick de `flushPromises` ne suffit plus à l'attendre, cf. `home-view.spec.js#waitReady`.
+  await vi.waitFor(() => expect(w.find('[data-test="home-loading"]').exists()).toBe(false), { timeout: 10000 })
+  await flushPromises()
+  return w
 }
 
 // `.tile--sage` est la classe SPÉCIFIQUE de cette tuile (unique dans HomeView.vue) : plus fiable
@@ -58,14 +65,12 @@ afterEach(() => vi.useRealTimers())
 
 describe('HomeView — le premier jour de la semaine (ÉVO E) gouverne le total « cette semaine »', () => {
   it('réglage LUNDI (défaut) : la séance du dimanche précédent tombe HORS de la semaine courante', async () => {
-    const w = mountHome({ weekStart: 1, sessions: [SUNDAY_SESSION] })
-    await flushPromises()
+    const w = await mountHome({ weekStart: 1, sessions: [SUNDAY_SESSION] })
     expect(thisWeekValue(w)).toBe('0 h')
   })
 
   it('réglage DIMANCHE : la MÊME séance tombe DANS la semaine courante — même fixture, résultat opposé', async () => {
-    const w = mountHome({ weekStart: 0, sessions: [SUNDAY_SESSION] })
-    await flushPromises()
+    const w = await mountHome({ weekStart: 0, sessions: [SUNDAY_SESSION] })
     expect(thisWeekValue(w)).not.toBe('0 h')
     expect(thisWeekValue(w)).toBe('0 h 30')
   })
@@ -74,12 +79,15 @@ describe('HomeView — le premier jour de la semaine (ÉVO E) gouverne le total 
     // `weekStart` par défaut du store (1, jamais réglé ici) — reproduit un compte qui n'a
     // jamais ouvert les Réglages depuis ce lot.
     const pinia = createTestingPinia({ createSpy: vi.fn })
-    useProjectsStore(pinia).loaded = true
+    const projectsStore = useProjectsStore(pinia)
+    projectsStore.projects = [{ id: 99, name: 'Projet à soi', status: 'done' }] // accueil complet : la tuile semaine n'existe qu'hors mode allégé
+    projectsStore.loaded = true
     const sessionsStore = useSessionsStore(pinia)
     sessionsStore.secondsSince.mockImplementation(async (sinceDate) =>
       [SUNDAY_SESSION].filter((s) => s.date && new Date(s.date) >= sinceDate).reduce((acc, s) => acc + (s.durationSec || 0), 0),
     )
     const w = mount(HomeView, { global: { plugins: [pinia, i18n], stubs } })
+    await vi.waitFor(() => expect(w.find('[data-test="home-loading"]').exists()).toBe(false), { timeout: 10000 })
     await flushPromises()
     expect(thisWeekValue(w)).toBe('0 h') // même verdict que « réglage LUNDI (défaut) » ci-dessus
   })

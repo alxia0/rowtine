@@ -122,8 +122,132 @@ describe('ProjectEditView — sélection des laines via AppCheckbox', () => {
     await w.find('.ypick__row input[type="checkbox"]').setValue(true)
     await flushPromises()
 
+    // Plus de `max` HTML5 (type="number" abandonné, la virgule y vidait le champ) : le
+    // bornage se prouve désormais en tapant au-dessus du disponible.
     const qtyInput = w.find('.ypick__qtyin')
     expect(qtyInput.exists()).toBe(true)
-    expect(qtyInput.attributes('max')).toBe('4')
+    await qtyInput.setValue('9')
+    expect(w.find('.ypick__qtyin').element.value).toBe('4')
+  })
+
+  // Protège : la réécriture bornée reste avec la virgule française, pas le point JS d'un `String(next)` nu.
+  it('bornage au-dessus d’un disponible décimal : réécrit avec la virgule, pas le point JS', async () => {
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4.5 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+
+    const qtyInput = w.find('.ypick__qtyin')
+    await qtyInput.setValue('9,9')
+    expect(w.find('.ypick__qtyin').element.value).toBe('4,5')
+  })
+
+  // Le disponible affiché (coché ou pas) suit la locale.
+  it('disponible affiché avec la virgule, cochée ou pas (« / 2,5 pelotes », « ×2,5 »)', async () => {
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 2.5 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+
+    expect(w.find('.ypick__meta').text()).toBe('×2,5')
+
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+    expect(w.find('.ypick__unit').text()).toContain('2,5')
+  })
+
+  // Décimalisation : le pool de pelotes accepte désormais un chiffre après la virgule.
+  it('quantité du pool : « 1,5 » saisi est retenu tel quel, « 2, » reste tapable jusqu’à « 2,5 »', async () => {
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+
+    const qtyInput = w.find('.ypick__qtyin')
+    await qtyInput.setValue('1,5')
+    expect(qtyInput.element.value).toBe('1,5')
+
+    // « 2, » ne doit pas être réécrit sous le doigt avant que la virgule n'ait pu rejoindre son « 5 ».
+    await qtyInput.setValue('2,')
+    expect(qtyInput.element.value).toBe('2,')
+    await qtyInput.setValue('2,5')
+    expect(qtyInput.element.value).toBe('2,5')
+  })
+
+  // Un caractère refusé (lettre, signe moins) est retiré de l'affichage à la frappe, pas seulement de la valeur retenue.
+  it('quantité du pool : un caractère refusé est filtré de l’affichage (« 2a » → « 2 », « -5 » → « 5 »)', async () => {
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 30 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+
+    const qtyInput = w.find('.ypick__qtyin')
+    await qtyInput.setValue('2a')
+    expect(qtyInput.element.value).toBe('2')
+    await qtyInput.setValue('-5')
+    expect(qtyInput.element.value).toBe('5')
+  })
+
+  // Protège : la quantité tapée est bien celle réservée en base, pas seulement celle affichée.
+  it('quantité du pool : « 1,5 » saisi est réservé tel quel en base', async () => {
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('#name').setValue('Pull en 1,5')
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+    await w.find('.ypick__qtyin').setValue('1,5')
+
+    await w.find('.btn--primary').trigger('click')
+    await flushPromises()
+    await vi.waitFor(
+      async () => expect(Object.keys((await db.yarns.get(yid)).reservations || {})).toHaveLength(1),
+      { timeout: 10000 },
+    )
+
+    const created = (await db.projects.toArray()).find((p) => p.name === 'Pull en 1,5')
+    const saved = await db.yarns.get(yid)
+    expect(saved.reservations).toEqual({ [created.id]: 1.5 })
+  })
+
+  // Plus de plancher à 1 : une laine avec moins d'une pelote disponible se réserve à 0,5.
+  it('0,5 pelote disponible est réservable et survit à l’enregistrement', async () => {
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 0.5 })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('#name').setValue('Mon projet')
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type="checkbox"]').setValue(true)
+    await flushPromises()
+
+    expect(w.find('.ypick__qtyin').element.value).toBe('0,5') // défaut, formaté à la locale
+
+    await w.find('.btn--primary').trigger('click')
+    await flushPromises()
+
+    // Deux écritures Dexie enchaînées (la fiche projet PUIS la mise à jour de la laine) :
+    // un seul flushPromises() ne suffit pas toujours à tout drainer (même motif que
+    // yarn-purchases.spec.js).
+    await vi.waitFor(
+      async () => expect(Object.keys((await db.yarns.get(yid)).reservations || {})).toHaveLength(1),
+      { timeout: 10000 },
+    )
+
+    const created = (await db.projects.toArray()).find((p) => p.name === 'Mon projet')
+    const saved = await db.yarns.get(yid)
+    expect(saved.reservations).toEqual({ [created.id]: 0.5 })
   })
 })

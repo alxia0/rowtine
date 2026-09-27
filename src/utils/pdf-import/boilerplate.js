@@ -19,6 +19,8 @@ const NOISE_MAX_LEN = 4000
 const NOISE_RES = [
   /^hobbii-pattern-sku:/i,
   /powered by tcpdf/i,
+  // Mention de l'application Rowtine (« Suivez ce patron... dans l'application Rowtine : rowtine.app ») : parle de l'outil, pas du patron.
+  /\browtine\b/i,
   /copyright\s*©|©\s*\d{4}|all rights reserved|alle rechte vorbehalten|alle rettigheder|tutti i diritti|todos los derechos|wszelkie prawa|kaikki oikeudet|med ensamrätt|alle rechten voorbehouden/i,
   // Mention légale « usage personnel uniquement » — PDF réel Mia Cardigan v1.1 :
   // « Pattern and items knitted using this pattern are for personal use only. »
@@ -278,6 +280,49 @@ export function stripBoilerplate(pages) {
   const repeated = new Set(
     [...seenOnPages.entries()].filter(([, n]) => pageCount >= 2 && n >= threshold).map(([t]) => t),
   )
+  // Onglet de langue imprimé au bord gauche OU droit de la page (« FR », « ENG »…, PDF réel
+  // Classic Sweater Soft Double) : le mécanisme `repeated` ci-dessus ne le voit jamais, pour
+  // deux raisons cumulées — il n'apprend que dans les bandes haute/basse (edgeLines, 12 %)
+  // alors que l'onglet est imprimé au MILIEU de la hauteur, et il ignore tout texte normalisé
+  // de moins de 4 caractères (garde `t.length >= 4` de `repeated`). Détection dédiée : un
+  // premier tour trop large (2-3 CAPITALES EXACTES sans restriction de vocabulaire) aurait
+  // aussi supprimé de vrais contenus répétés d'une page à l'autre (étiquettes de grille/
+  // tableau « RS », « WS », « CC », « MC », abréviations) — ENSEMBLE FERMÉ de codes de
+  // langue (ISO 639-1) et de codes pays usuels des éditeurs de patrons, revenant au même y à
+  // 1 pt près (ancré au premier point du groupe, pas de chaînage point à point) sur ≥ 2 pages
+  // DIFFÉRENTES, quelle que soit la bande ; x n'entre pas en jeu (bord gauche p.2, bord droit
+  // p.3 sur le PDF réel). Mesuré sur le corpus : 10/501 PDF touchés, 0 faux positif.
+  const LANG_TAB_CODES = [
+    'FR', 'EN', 'GB', 'UK', 'US', 'DE', 'NL', 'DA', 'DK', 'NO', 'SV', 'SE', 'FI', 'ES', 'IT',
+    'PT', 'PL', 'CS', 'CZ', 'HU', 'IS', 'ET', 'LV', 'LT', 'RU', 'JA', 'JP', 'ZH', 'CN', 'KO',
+  ]
+  const LANG_TAB_RE = new RegExp(`^(?:${LANG_TAB_CODES.join('|')})$`)
+  const langTabOccurrences = new Map() // texte exact -> [{ l, page, y }]
+  pages?.forEach((page, i) => {
+    for (const l of page) {
+      // (V2b2, miroir de la garde `repeated` voisine) Une ligne pairedRow (grille
+      // appariée) n'alimente jamais l'apprentissage : restore-only, comme ci-dessus.
+      if (l.pairedRow) continue
+      const t = l.text.trim()
+      if (!LANG_TAB_RE.test(t)) continue
+      if (!langTabOccurrences.has(t)) langTabOccurrences.set(t, [])
+      langTabOccurrences.get(t).push({ l, page: i, y: l.y ?? 0 })
+    }
+  })
+  const langTabs = new Set()
+  for (const occ of langTabOccurrences.values()) {
+    const sorted = [...occ].sort((a, b) => a.y - b.y)
+    let anchor = sorted[0].y
+    let group = [sorted[0]]
+    const flushGroup = () => {
+      if (new Set(group.map((o) => o.page)).size >= 2) group.forEach((o) => langTabs.add(o.l))
+    }
+    for (let k = 1; k < sorted.length; k++) {
+      if (sorted[k].y - anchor <= 1) group.push(sorted[k])
+      else { flushGroup(); group = [sorted[k]]; anchor = sorted[k].y }
+    }
+    flushGroup()
+  }
   // Légendes photo récurrentes : une ligne COURTE de colonne droite (rightCol, posée
   // par lines.js sur les pages à deux colonnes) dont le texte normalisé se répète sur
   // plusieurs pages est une légende d'illustration (« Comme ceci », « Wie hier »),
@@ -495,6 +540,7 @@ export function stripBoilerplate(pages) {
         // toLines/reflow) porte le contexte « rangée de grille ». Restore-only.
         const nt = norm(t) // calculé une fois, réutilisé par les deux gardes ci-dessous (repeated/captions)
         if (edges[i].has(l) && !l.pairedRow && repeated.has(nt) && !isRowStart(t)) return false
+        if (langTabs.has(l)) return false
         if (urlFragments[i].has(l)) return false
         if (orphanTails[i].has(l)) return false
         if (noiseCascades[i].has(l)) return false

@@ -6,7 +6,7 @@
 // projet — vérifié ici en comparant la ligne IndexedDB avant/après, pas seulement en
 // observant l'écran.
 import { test, expect } from '@playwright/test'
-import { completeOnboarding, writeSetting, readSetting } from './helpers'
+import { completeOnboarding, writeSetting, readSetting, openDemoProjectFromHome } from './helpers'
 
 // Lit une ligne de la table `projects` directement dans IndexedDB (même raison que
 // `writeSetting`/`readSetting` dans helpers.js : pas d'import du module app sous
@@ -80,11 +80,10 @@ test('relance depuis les Réglages : trois bulles sur le bonnet en cours, puis v
 }) => {
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
 
-  // Le bonnet en cours (tuile « Reprendre » de l'accueil) est le projet que la visite
+  // Le bonnet en cours (sa carte sur l'accueil) est le projet que la visite
   // utilise — on relève son id et son état AVANT toute visite, pour prouver ensuite
   // qu'elle n'a rien écrit dedans.
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  await openDemoProjectFromHome(page)
   const bonnetId = projectIdFromUrl(page.url())
   expect(bonnetId).not.toBeNull()
   const avant = await readProject(page, bonnetId)
@@ -171,8 +170,7 @@ test('bonnet supprimé (corbeille) puis relance : le projet est recréé sans du
 }) => {
   await completeOnboarding(page, { firstName: 'Alex', technique: 'knitting' })
 
-  await page.locator('.resume').click()
-  await expect(page).toHaveURL(/\/project\/\d+/)
+  await openDemoProjectFromHome(page)
   const oldId = projectIdFromUrl(page.url())
   expect(oldId).not.toBeNull()
   const patternsAvant = await countPatterns(page)

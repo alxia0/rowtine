@@ -128,6 +128,15 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     expect(w.findAll('.szpill').length).toBe(3)
   })
 
+  // Les marqueurs de suivi et leur légende sont réservés à l'aperçu lecture seule.
+  it('ne porte aucun marqueur .rmark ni légende .rlegend', async () => {
+    await seedProject()
+    const w = mountReader()
+    await settle()
+    expect(w.find('.rmark').exists()).toBe(false)
+    expect(w.find('.rlegend').exists()).toBe(false)
+  })
+
   it('filtre les chiffres selon la taille choisie', async () => {
     await seedProject()
     const w = mountReader()
@@ -630,6 +639,54 @@ describe('ReaderView — aperçu bibliothèque (lecture seule)', () => {
     expect(w.find('.amtile').exists()).toBe(true) // aide-mémoire via les tuiles
     expect(w.find('.fab--ref').exists()).toBe(false) // pas de bouton flottant en lecture seule
     expect(w.find('.chart').exists()).toBe(true)
+  })
+
+  // Chaque rang cochable porte un marqueur .rmark--row, jamais .rcheck (scopé à .rstep : la légende porte aussi un swatch .rmark--row).
+  it('un rang porte un marqueur .rmark--row, jamais de case .rcheck', async () => {
+    await seedLibrary() // FIX_READER : s1#0 et s1#1 sont des rangs
+    const w = mountReader()
+    await settle()
+    expect(w.findAll('.rstep > .rmark--row').length).toBe(2)
+    expect(w.find('.rcheck').exists()).toBe(false)
+  })
+
+  // Une répétition porte le marqueur compteur .rmark--rep (FIX_READER : s1#2).
+  it('une répétition porte le marqueur .rmark--rep', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    expect(w.findAll('.rstep > .rmark--rep').length).toBe(1)
+  })
+
+  // Une note porte le marqueur .rmark--note (FIX_READER : s1#3), jamais de coche ni de compteur.
+  it('une note porte le marqueur .rmark--note', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    expect(w.findAll('.rnote > .rmark--note').length).toBe(1)
+  })
+
+  // Un diagramme (FIX_READER : s1#4) ne porte aucun marqueur : il n'est ni cochable, ni compteur, ni note.
+  it('un diagramme ne porte aucun marqueur', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const chart = w.find('.rstep__chart')
+    expect(chart.exists()).toBe(true)
+    expect(chart.find('.rmark').exists()).toBe(false)
+  })
+
+  // La légende explique les trois marqueurs par leur libellé (clé i18n, pas le texte traduit en dur).
+  it('affiche la légende des marqueurs avec ses trois libellés', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const legend = w.find('.rlegend')
+    expect(legend.exists()).toBe(true)
+    expect(legend.text()).toContain(i18n.global.t('reader.legend.title'))
+    expect(legend.text()).toContain(i18n.global.t('reader.legend.check'))
+    expect(legend.text()).toContain(i18n.global.t('reader.legend.count'))
+    expect(legend.text()).toContain(i18n.global.t('reader.legend.read'))
   })
 })
 
