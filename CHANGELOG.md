@@ -2,6 +2,10 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.3.4]
+
+- No app change from 1.3.3: release tooling for F-Droid updates.
+
 ## [1.3.3]
 
 - Decimal yarn quantities (e.g. 2.5 skeins): stash, purchases, reservations,

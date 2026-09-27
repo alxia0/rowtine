@@ -7,8 +7,8 @@ on:
         description: 'Prepare the fork and the commit but do not push or update the merge request'
         type: boolean
         default: true
-      commit_hash:
-        description: 'Full commit hash for the Build entry (git rev-parse of the release tag)'
+      tag:
+        description: 'Release tag to submit (e.g. v1.3.4); version, versionCode and commit are read from it'
         required: true
         type: string
 
@@ -21,6 +21,26 @@ jobs:
   submit:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag }}
+          path: app
+
+      - name: Read version from the tag
+        id: version
+        working-directory: app
+        run: |
+          NAME=$(jq -r .version package.json)
+          CODE=$(jq -r .buildNumber package.json)
+          if [ "v$NAME" != "${{ inputs.tag }}" ]; then
+            echo "Tag ${{ inputs.tag }} does not match package.json version $NAME" >&2
+            exit 1
+          fi
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Resolve upstream project
         id: upstream
         run: |
@@ -61,112 +81,49 @@ jobs:
           echo "Fork import did not finish in time" >&2
           exit 1
 
-      - name: Clone fork and add metadata
-        id: metadata
+      - name: Clone fork and add the Build entry
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+          COMMIT: ${{ steps.version.outputs.commit }}
         run: |
           git clone "https://oauth2:${TOKEN}@gitlab.com/$GITLAB_USER/fdroiddata.git" fork
           cd fork
           git remote add upstream "https://gitlab.com/$UPSTREAM_PATH.git"
           git fetch upstream "${{ steps.upstream.outputs.default_branch }}"
-
-          if git show "upstream/${{ steps.upstream.outputs.default_branch }}:metadata/com.rowtine.app.yml" > /dev/null 2>&1; then
-            IS_UPDATE=true
-          else
-            IS_UPDATE=false
-          fi
-          echo "is_update=$IS_UPDATE" >> "$GITHUB_OUTPUT"
-
-          git checkout -B add-com-rowtine-app "upstream/${{ steps.upstream.outputs.default_branch }}"
+          git checkout -B update-com-rowtine-app "upstream/${{ steps.upstream.outputs.default_branch }}"
           git config user.name "$GITLAB_USER"
           git config user.email "$GITLAB_USER@users.noreply.gitlab.com"
 
-          cat > metadata/com.rowtine.app.yml <<'YAML'
-          Categories:
-            - Habit Tracker
-            - Inventory
-            - Time Tracker
-          License: Apache-2.0
-          AuthorName: alxia0
-          AuthorEmail: rowtine-fdroid.stash285@silomails.com
-          WebSite: https://rowtine.app
-          SourceCode: https://github.com/alxia0/rowtine
-          IssueTracker: https://github.com/alxia0/rowtine/issues
-          Changelog: https://github.com/alxia0/rowtine/blob/main/CHANGELOG.md
-
-          AutoName: Rowtine
-
-          RepoType: git
-          Repo: https://github.com/alxia0/rowtine.git
-          Binaries: https://github.com/alxia0/rowtine/releases/download/v%v/rowtine-v%v.apk
-
-          Builds:
-            - versionName: 1.2.3
-              versionCode: 6
-              commit: 718a6e3da7131566922d0c7c7ad89a7d5b986c37
-              subdir: android/app
-              sudo:
-                - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
-                - apt-get update
-                - apt-get install -y -t forky nodejs npm
-                - npm install -g corepack
-                - corepack enable
-              init:
-                - cd ../..
-                - yarn install --immutable
-                - yarn build
-                - yarn cap sync android
-              gradle:
-                - yes
-              scandelete:
-                - node_modules
-                - .yarn
-                - tests/e2e/fixtures
-
-            - versionName: 1.3.1
-              versionCode: 8
-              commit: ${{ inputs.commit_hash }}
-              subdir: android/app
-              sudo:
-                - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
-                - apt-get update
-                - apt-get install -y -t forky nodejs npm
-                - npm install -g corepack
-                - corepack enable
-              init:
-                - cd ../..
-                - yarn install --immutable
-                - yarn build
-                - yarn cap sync android
-              gradle:
-                - yes
-              scandelete:
-                - node_modules
-                - .yarn
-                - tests/e2e/fixtures
-
-          AllowedAPKSigningKeys: 4a85cad2642267b1fa54675b34b3f7c07f21937b0c22ac9cd2aa0a7c9391faa5
-
-          AutoUpdateMode: Version
-          UpdateCheckMode: Tags
-          UpdateCheckData: package.json|"buildNumber":\s*(\d+)|.|"version":\s*"([^"]+)"
-          CurrentVersion: 1.3.1
-          CurrentVersionCode: 8
-          YAML
+          # Copies the last Build entry with the new versionName, versionCode and commit,
+          # and moves CurrentVersion/CurrentVersionCode: the rest of the file stays as upstream has it.
+          python3 - <<'PY'
+          import os, re, sys
+          path = 'metadata/com.rowtine.app.yml'
+          name, code, commit = os.environ['VERSION_NAME'], os.environ['VERSION_CODE'], os.environ['COMMIT']
+          s = open(path).read()
+          if re.search(rf'^  - versionName: {re.escape(name)}$', s, re.M):
+              sys.exit(f'versionName {name} already has a Build entry')
+          end = s.index('\n\nAllowedAPKSigningKeys:')
+          last = s[s.rindex('\n  - versionName:', 0, end) + 1:end]
+          new = re.sub(r'(?m)^(  - versionName: ).*$', rf'\g<1>{name}', last)
+          new = re.sub(r'(?m)^(    versionCode: ).*$', rf'\g<1>{code}', new)
+          new = re.sub(r'(?m)^(    commit: ).*$', rf'\g<1>{commit}', new)
+          s = s[:end] + '\n\n' + new + s[end:]
+          s = re.sub(r'(?m)^CurrentVersion: .*$', f'CurrentVersion: {name}', s)
+          s = re.sub(r'(?m)^CurrentVersionCode: .*$', f'CurrentVersionCode: {code}', s)
+          open(path, 'w').write(s)
+          PY
 
           git add metadata/com.rowtine.app.yml
-          if [ "$IS_UPDATE" = "true" ]; then
-            git commit -m "Update com.rowtine.app metadata" --allow-empty
-          else
-            git commit -m "New app: Rowtine" --allow-empty
-          fi
-          git diff upstream/${{ steps.upstream.outputs.default_branch }} --stat
+          git commit -m "Update Rowtine to $VERSION_NAME ($VERSION_CODE)"
+          git diff "upstream/${{ steps.upstream.outputs.default_branch }}"
 
       - name: Push branch
         if: ${{ !inputs.dry_run }}
         working-directory: fork
-        run: git push origin add-com-rowtine-app --force-with-lease
+        run: git push origin update-com-rowtine-app --force-with-lease
 
       - name: Open or find merge request
         id: mr
@@ -174,22 +131,17 @@ jobs:
         env:
           TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
         run: |
-          if [ "${{ steps.metadata.outputs.is_update }}" = "true" ]; then
-            TITLE="Update com.rowtine.app: 1.3.1 build entry, fix AutoUpdateMode tag prefix"
-            DESCRIPTION="Adds the 1.3.1 Build entry for the already-included com.rowtine.app (Rowtine). Also fixes AutoUpdateMode to 'Version v%v' (was 'Version %v'): this repo's release tags are prefixed with 'v' (e.g. v1.3.1), so the un-prefixed pattern made the last automated checkupdates run generate an invalid commit ref ('1.3.0' instead of 'v1.3.0') and fail CI (see MR !49730)."
-          else
-            TITLE="New app: Rowtine"
-            DESCRIPTION="Adds com.rowtine.app (Rowtine), a knitting/crochet companion."
-          fi
+          TITLE="Update Rowtine to ${{ steps.version.outputs.name }} (${{ steps.version.outputs.code }})"
+          DESCRIPTION="Adds the ${{ steps.version.outputs.name }} Build entry for com.rowtine.app (tag ${{ inputs.tag }}, commit ${{ steps.version.outputs.commit }})."
 
           EXISTING_MRS=$(curl -fsS -H "PRIVATE-TOKEN: $TOKEN" \
-            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests?source_branch=add-com-rowtine-app&source_project_id=${{ steps.fork.outputs.id }}&state=opened")
+            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests?source_branch=update-com-rowtine-app&source_project_id=${{ steps.fork.outputs.id }}&state=opened")
           if [ "$(echo "$EXISTING_MRS" | jq 'length')" -gt 0 ]; then
             IID=$(echo "$EXISTING_MRS" | jq -r '.[0].iid')
             echo "MR already open: $(echo "$EXISTING_MRS" | jq -r '.[0].web_url')"
           else
             CREATED=$(curl -fsS -X POST -H "PRIVATE-TOKEN: $TOKEN" \
-              --data-urlencode "source_branch=add-com-rowtine-app" \
+              --data-urlencode "source_branch=update-com-rowtine-app" \
               --data-urlencode "target_branch=${{ steps.upstream.outputs.default_branch }}" \
               --data-urlencode "target_project_id=${{ steps.upstream.outputs.id }}" \
               --data-urlencode "title=$TITLE" \
@@ -199,37 +151,6 @@ jobs:
             echo "MR created: $(echo "$CREATED" | jq -r '.web_url')"
           fi
           echo "iid=$IID" >> "$GITHUB_OUTPUT"
-
-      - name: Add F-Droid inclusion checklist to the merge request
-        if: ${{ !inputs.dry_run && steps.metadata.outputs.is_update != 'true' }}
-        env:
-          TOKEN: ${{ secrets.FDROID_GITLAB_TOKEN }}
-        run: |
-          curl -fsS -X PUT -H "PRIVATE-TOKEN: $TOKEN" \
-            --data-urlencode "description=Adds com.rowtine.app (Rowtine), a knitting/crochet companion.
-
-          ## Required
-
-          - [x] The app complies with the inclusion criteria
-          - [x] The original app author has been notified (and does not oppose the inclusion) \`self-submission by the app author\`
-          - [x] All related fdroiddata and RFP issues have been referenced in this merge request \`none exist\`
-          - [x] Builds with \`fdroid build\` and all pipelines pass
-          - [x] There is an issue tracker and contact info of the author so that we can report bugs and contact the author.
-
-          ## Strongly Recommended
-
-          - [x] The upstream app source code repo contains the app metadata (summary/description/images/changelog/etc) in a Fastlane or Triple-T folder structure
-          - [x] Releases are tagged and auto update is enabled
-
-          ## Suggested
-
-          - [ ] External repos are added as git submodules instead of srclibs
-          - [x] Enable Reproducible Builds
-          - [ ] Multiple apks for native code
-
-          /label ~\"New App\"" \
-            "$GITLAB_API/projects/${{ steps.upstream.outputs.id }}/merge_requests/${{ steps.mr.outputs.iid }}" \
-          || echo "Could not update the MR description via the API (token scope?) — update it manually in the GitLab UI." >&2
 
       - name: Dry-run summary
         if: ${{ inputs.dry_run }}

@@ -1,0 +1,1 @@
+Decimal yarn quantities (e.g. 2.5 skeins). Import your yarn stash from a Ravelry export (.xlsx). PDF import: the pattern's pictures are better preserved, and patterns are read more accurately, German ones in particular. Pattern viewer: large step images, PDF cover at the top, improved preview. Various UI improvements and fixes.

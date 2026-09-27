@@ -1,0 +1,1 @@
+Quantités de laine décimales (ex. 2,5 pelotes). Import du stock de laines depuis un export Ravelry (.xlsx). Import PDF : les images du patron sont mieux conservées, et les patrons mieux lus, allemands en particulier. Visu du patron : images d'étape en grand, couverture du PDF en tête, aperçu amélioré. Diverses améliorations de l'interface et divers correctifs.
