@@ -2,6 +2,21 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.4.0]
+
+- Stitch memo: basic and common knitting and crochet techniques (cast-ons,
+  bind-offs, stitches), in the Tools and in the reader's cheat sheet; pick
+  the stitches that go with each pattern.
+- Current row in a notification while following a pattern: check off the
+  row, count repeats with minus and plus, chart reminders, visible on the
+  lock screen. On by default, can be turned off in Settings.
+- The screen stays on while following a pattern (on by default).
+- Reader: the current step also stops on repeat counters; tapping the left
+  third of a step card checks it off.
+- Share badge: each yarn shows its colorway, the project's fibres above the
+  calendar, sharper image.
+- Stash: each yarn card shows the total yardage of the lot.
+
 ## [1.3.4]
 
 - No app change from 1.3.3: release tooling for F-Droid updates.

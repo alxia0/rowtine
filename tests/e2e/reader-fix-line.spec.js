@@ -35,6 +35,39 @@ test('un appui sur une carte propose de la corriger', async ({ page }) => {
   await expect(card.getByRole('button', { name: 'Fermer' })).toBeVisible()
 })
 
+test('le tiers gauche d’une carte cochable coche la case, le milieu propose de corriger', async ({ page }) => {
+  await openProjectReader(page)
+  const card = page.locator('.rstep', { has: page.locator('.rcheck') }).first()
+  const check = card.locator('.rcheck')
+  await card.scrollIntoViewIfNeeded()
+  const cardBox = await card.boundingBox()
+  const checkBox = await check.boundingBox()
+  // Hors de la case (à sa droite, dans le padding bas de la carte, loin du
+  // texte et de ses abréviations) mais toujours dans le premier tiers.
+  const x = (checkBox.x + checkBox.width - cardBox.x + cardBox.width / 3) / 2
+  const y = cardBox.height - 6
+  expect(x).toBeGreaterThan(checkBox.x + checkBox.width - cardBox.x)
+  expect(x).toBeLessThan(cardBox.width / 3)
+  expect(y).toBeGreaterThan(checkBox.y + checkBox.height - cardBox.y)
+
+  await card.click({ position: { x, y } })
+  await expect(check).toHaveAttribute('aria-checked', 'true')
+  await expect(page.locator('.rfix')).toHaveCount(0)
+
+  // Même geste une seconde fois : la case se décoche, toujours sans voile.
+  await card.click({ position: { x, y } })
+  await expect(check).toHaveAttribute('aria-checked', 'false')
+  await expect(page.locator('.rfix')).toHaveCount(0)
+
+  // Au milieu de la carte, le voile de correction reste le geste.
+  const body = card.locator('.rstep__body')
+  const bodyBox = await body.boundingBox()
+  expect(bodyBox.x + bodyBox.width / 2 - cardBox.x).toBeGreaterThan(cardBox.width / 3)
+  await body.click()
+  await expect(card.locator('.rfix')).toBeVisible()
+  await expect(check).toHaveAttribute('aria-checked', 'false')
+})
+
 test('les deux cibles tiennent le plancher tactile de 56 px', async ({ page }) => {
   // Retouche 2026-08-21 après essai sur Nexus 7 réelle : 44 px (7,0 mm au
   // doigt) n'était que le plancher absolu, pas le confort, et « Corriger » se

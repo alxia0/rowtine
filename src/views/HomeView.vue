@@ -14,7 +14,7 @@ import { fmtDuration } from '@/stores/activeSession'
 import { useSectionsStore } from '@/stores/sections'
 import { useYarnsStore } from '@/stores/yarns'
 import { usePatternsStore } from '@/stores/patterns'
-import { readerProgress, patternToReader } from '@/utils/reader'
+import { withReaderProgress } from '@/utils/reader'
 import { STATUS_ORDER } from '@/constants/status'
 import { startOfWeek } from '@/utils/time-periods'
 import { relativeDayLabel } from '@/utils/date-format'
@@ -47,7 +47,15 @@ const monthSec = ref(0)
 // la liste n'existe qu'une fois la base répondue, donc la
 // tuile ne peut JAMAIS mentir avec un contenu provisoire : elle apparaît d'un bloc.
 const recentRows = ref([])
-const progressMap = ref({}) // projectId -> { done, total }
+// Avancement par projet, lu des sections au montage ; le repli « reader » se rejoue quand les
+// patrons arrivent (ils peuvent se charger APRÈS le montage au démarrage à froid).
+// Le repli n'est calculé qu'une fois les sections lues : sinon, pour un projet qui a à la fois
+// des sections et un patron structuré, le pourcentage « reader » s'afficherait un instant.
+const sectionProgress = ref({}) // projectId -> { done, total }
+const sectionsLoaded = ref(false)
+const progressMap = computed(() =>
+  sectionsLoaded.value ? withReaderProgress(sectionProgress.value, projectsStore.projects, patternFor) : {},
+)
 const heroSection = ref(null) // section active du projet « à reprendre »
 // Identifiants des exemples semés et du projet de visite, lus au montage puis relus après
 // une restauration : ils décident de l'accueil allégé (cf. `lightHome`). `samplesReady`
@@ -178,21 +186,7 @@ onMounted(async () => {
     // lit patternsStore.patterns pour le repli « reader » de la progression.
     if (!patternsStore.loaded) patternsStore.load()
     await readSampleIds()
-    progressMap.value = await sectionsStore.progressByProject()
-    // Repli « reader » (#7) : les patrons structurés suivent la progression via
-    // project.readerState, pas via la table sections (rowsTotal) — sinon l'accueil
-    // n'affiche aucun avancement pour eux. On complète la carte quand elle est vide.
-    const map = { ...progressMap.value }
-    for (const p of projectsStore.projects) {
-      if (map[p.id] && map[p.id].total > 0) continue
-      if (p.patternId == null) continue
-      const pat = patternFor(p)
-      const reader = pat ? patternToReader(pat) : null
-      if (!reader) continue
-      const prog = readerProgress(reader, p.readerState)
-      if (prog.total > 0) map[p.id] = { done: prog.done, total: prog.total }
-    }
-    progressMap.value = map
+    sectionProgress.value = await sectionsStore.progressByProject()
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     // Évolution du 11/08 : le premier jour de la semaine (Réglages) gouverne aussi la remise à zéro du
@@ -209,6 +203,7 @@ onMounted(async () => {
     // second mensonge, pire que le premier — mieux vaut un écran honnêtement vide.
     // `samplesReady` suit la même règle : une lecture des exemples qui lève ne le gèle pas.
     samplesReady.value = true
+    sectionsLoaded.value = true
     homeReady.value = true
   }
 })
@@ -450,6 +445,10 @@ function importPdf() {
       <button class="tool" @click="router.push({ name: 'needle-gauge' })">
         <span class="tool__icon"><AppIcon name="needleGauge" :size="18" /></span>
         {{ t('home.toolNeedle') }}
+      </button>
+      <button class="tool" @click="router.push({ name: 'stitch-memo' })">
+        <span class="tool__icon"><AppIcon name="tab-stitches" :size="18" /></span>
+        {{ t('home.toolStitches') }}
       </button>
     </div>
     <button v-if="lightHome" class="btn btn--block create" data-test="home-create" @click="createProject">

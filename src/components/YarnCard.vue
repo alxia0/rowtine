@@ -20,15 +20,16 @@ const settings = useSettingsStore()
 function weightLabel(w) {
   return w ? t(`yarn.weights.${w}`) : ''
 }
-// Métrage d'UNE pelote (yarn.lengthM) : profil 'detail', jamais de bascule km — un
-// écheveau ne se mesure pas en kilomètres.
-const lengthText = computed(() =>
-  props.yarn.lengthM
-    ? formatLength(props.yarn.lengthM, { locale: locale.value, system: settings.unitSystem, profile: 'detail' })
-    : null,
-)
+// Métrage TOTAL du lot (quantité × métrage d'une pelote), comme le poids voisin, mais en
+// profil 'lot' : toujours en mètres (« 3 500 m », jamais « 3,5 km », décision du 29/09), jamais
+// de mile en impérial. Le métrage d'une pelote reste sur la fiche détaillée. `parseDecimal` :
+// quantité et métrage peuvent être des saisies à virgule.
+const lengthText = computed(() => {
+  const total = (parseDecimal(props.yarn.quantity) || 0) * (parseDecimal(props.yarn.lengthM) || 0)
+  return total ? formatLength(total, { locale: locale.value, system: settings.unitSystem, profile: 'lot' }) : null
+})
 const weightText = computed(() => {
-  const total = (Number(props.yarn.quantity) || 0) * (parseDecimal(props.yarn.grams) || 0)
+  const total = (parseDecimal(props.yarn.quantity) || 0) * (parseDecimal(props.yarn.grams) || 0)
   // Cumul du lot, pas poids unitaire : profil 'total', donc bascule autorisée en kg / lb.
   return total ? formatWeight(total, { locale: locale.value, system: settings.unitSystem, profile: 'total' }) : null
 })

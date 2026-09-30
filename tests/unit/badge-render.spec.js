@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest'
-import { renderBadge, BADGE_TEMPLATES, computeBadgeGeometry, wrapText, statValue, createBadgeCanvas, buildRawStatLines, drawTechniqueBadge } from '@/utils/badge-render'
+import { renderBadge, BADGE_TEMPLATES, BADGE_EXPORT_SCALE, computeBadgeGeometry, wrapText, statValue, createBadgeCanvas, buildRawStatLines, drawTechniqueBadge, yarnLabel, compositionSummary } from '@/utils/badge-render'
 import { calendarRealHeight, drawCalendar } from '@/utils/badge-calendar'
 import { createTestI18n } from './helpers/i18n-router'
+import appI18n from '@/i18n'
+
+// i18n RÉELLE de l'app (4 langues) : le faux `t` ci-dessous renvoie la clé pour une matière.
+const ti = (...a) => appI18n.global.t(...a)
 
 // Largeur FICTIVE : 20 « px » par caractère, déterministe. Ce stub n'a pas de moteur de
 // métriques de police (et le dépôt s'interdit toute dépendance npm de rendu canvas) : ces
@@ -101,7 +105,7 @@ describe('renderBadge', () => {
     expect(canvas.width).toBe(BADGE_TEMPLATES.minimal.canvas.w)
     expect(canvas.height).toBeGreaterThan(0)
     expect(url).toBe('data:image/jpeg;base64,BADGE')
-    expect(calls).toContainEqual(['toDataURL', 'image/jpeg', 0.9])
+    expect(calls).toContainEqual(['toDataURL', 'image/jpeg', 0.92])
   })
 
   it("n'appelle drawImage que si une photo est fournie", () => {
@@ -415,6 +419,58 @@ describe('renderBadge', () => {
         photoImg: null, project: { name: 'X' }, t: (k) => k, generatedAt: new Date(),
       }),
     ).not.toThrow()
+  })
+
+  // Protège l'export haute définition : canevas physique agrandi, mise en page en unités logiques.
+  it('scale : 2 double le canevas physique, applique ctx.scale et garde une géométrie logique', () => {
+    const opts = {
+      templateKey: 'vertical', color: 'hsl(230 70% 45%)',
+      statKeys: ['totalTime'], stats, photoImg: null,
+      project: { name: 'Pull Alma' }, t, generatedAt: new Date(2026, 0, 20),
+    }
+    const ref = stubCanvas()
+    renderBadge(ref.canvas, opts)
+    const { canvas, calls } = stubCanvas()
+    let geometry = null
+    renderBadge(canvas, { ...opts, scale: 2, onGeometry: (g) => { geometry = g } })
+    expect(canvas.width).toBe(ref.canvas.width * 2)
+    expect(canvas.height).toBe(ref.canvas.height * 2)
+    expect(calls).toContainEqual(['scale', 2, 2])
+    expect(geometry.canvas.w).toBe(ref.canvas.width)
+    expect(geometry.canvas.h).toBe(ref.canvas.height)
+    // L'échelle précède tout dessin : sinon le dégradé de fond resterait à l'échelle 1.
+    expect(calls.findIndex((c) => c[0] === 'scale')).toBeLessThan(calls.findIndex((c) => c[0] === 'createLinearGradient'))
+  })
+
+  // Protège la prévisu : sans option, aucun changement d'échelle.
+  it('sans scale : dimensions logiques et aucun ctx.scale', () => {
+    const { canvas, calls } = stubCanvas()
+    renderBadge(canvas, {
+      templateKey: 'vertical', color: 'hsl(230 70% 45%)',
+      statKeys: ['totalTime'], stats, photoImg: null,
+      project: { name: 'X' }, t, generatedAt: new Date(),
+    })
+    expect(canvas.width).toBe(BADGE_TEMPLATES.vertical.canvas.w)
+    expect(calls.some((c) => c[0] === 'scale')).toBe(false)
+  })
+
+  // Protège la mémoire des vieilles tablettes : le grand côté physique ne dépasse jamais 4096 px.
+  it('scale excessif : grand côté physique plafonné à 4096 px', () => {
+    const { canvas, calls } = stubCanvas()
+    renderBadge(canvas, {
+      templateKey: 'vertical', color: 'hsl(230 70% 45%)',
+      statKeys: ['totalTime'], stats, photoImg: null,
+      project: { name: 'X' }, t, generatedAt: new Date(), scale: 10,
+    })
+    expect(Math.max(canvas.width, canvas.height)).toBe(4096)
+    const scaleCall = calls.find((c) => c[0] === 'scale')
+    expect(scaleCall[1]).toBeLessThan(10)
+    expect(scaleCall[1]).toBe(scaleCall[2])
+  })
+
+  // Protège la définition du badge partagé (double de la mise en page logique).
+  it('BADGE_EXPORT_SCALE vaut 2', () => {
+    expect(BADGE_EXPORT_SCALE).toBe(2)
   })
 
   it('createBadgeCanvas() renvoie un <canvas> réel', () => {
@@ -1095,6 +1151,11 @@ describe('buildRawStatLines', () => {
     expect(lines[1]).toContain('Drops Merino')
   })
 
+  it('la clé "composition" (bandeau à part) ne produit aucune ligne de stats', () => {
+    const yarnUsage = [{ yarn: { brand: 'Drops', composition: ['laine'] }, balls: 1 }]
+    expect(buildRawStatLines(['composition'], { stats, t, locale: 'fr', project: { name: 'X' }, yarnUsage })).toEqual([])
+  })
+
   it('customText non vide ajoute UNE ligne finale', () => {
     const lines = buildRawStatLines(['sessionsCount'], {
       stats, t, locale: 'fr',
@@ -1137,6 +1198,14 @@ describe('buildRawStatLines', () => {
         stats, t, locale: 'fr', project: { name: 'X' }, yarnUsage, customText: '', structured: true,
       })
       expect(lines).toEqual([{ label: 'Drops Merino', value: nbsp('4 pelotes') }])
+    })
+
+    it('yarns : le coloris figure dans le libellé de la paire (« Marque Modèle, Coloris »)', () => {
+      const yarnUsage = [{ yarn: { brand: 'Drops', model: 'Merino', colorName: 'Bleu nuit' }, balls: 4 }]
+      const lines = buildRawStatLines(['yarns'], {
+        stats, t, locale: 'fr', project: { name: 'X' }, yarnUsage, customText: '', structured: true,
+      })
+      expect(lines).toEqual([{ label: 'Drops Merino, Bleu nuit', value: nbsp('4 pelotes') }])
     })
 
     it('startedOn : une paire par phrase, label vide (phrase déjà complète, pas de libellé séparable)', () => {
@@ -2323,8 +2392,8 @@ describe('projet complet : intersection des correctifs de la revue finale (19/09
       expect(labelYs.length).toBeGreaterThan(0)
 
       // Le libellé de laine est bien REVENU À LA LIGNE (plusieurs lignes en majuscules pour la
-      // seule laine) — libellé complet (marque + modèle, cf. `yarnLabel`), pas seulement le
-      // modèle : la première sous-ligne wrappée commence par la marque.
+      // seule laine) — libellé complet (marque + modèle, plus le coloris quand il existe, cf.
+      // `yarnLabel`), pas seulement le modèle : la première sous-ligne wrappée commence par la marque.
       const fullYarnLabel = `${LONG_YARN[0].yarn.brand} ${LONG_YARN[0].yarn.model}`.toUpperCase()
       expect(r.labelCalls.filter((c) => fullYarnLabel.includes(c[1])).length).toBeGreaterThan(1)
 
@@ -2658,5 +2727,179 @@ describe('renderBadge : onGeometry', () => {
     expect(url).toBeNull()
     expect(geometry.canvas).toEqual({ w: canvas.width, h: canvas.height })
     expect(geometry.photoSlot).toBeTruthy()
+  })
+})
+
+describe('yarnLabel : coloris', () => {
+  // Protège : deux coloris du même modèle se distinguent, et le coloris n'est jamais doublé.
+  it('ajoute le coloris après marque et modèle', () => {
+    expect(yarnLabel({ brand: 'DROPS', model: 'Merino Extra Fine', colorName: 'Moutarde' })).toBe('DROPS Merino Extra Fine, Moutarde')
+  })
+  it('sans coloris : marque et modèle seuls', () => {
+    expect(yarnLabel({ brand: 'DROPS', model: 'Merino Extra Fine', colorName: '' })).toBe('DROPS Merino Extra Fine')
+  })
+  it('sans marque ni modèle : le coloris seul, une seule fois', () => {
+    expect(yarnLabel({ brand: '', model: '', colorName: 'Écru' })).toBe('Écru')
+  })
+  it('deux coloris du même modèle donnent deux libellés différents', () => {
+    const a = yarnLabel({ brand: 'DROPS', model: 'Merino', colorName: 'Moutarde' })
+    const b = yarnLabel({ brand: 'DROPS', model: 'Merino', colorName: 'Écru' })
+    expect(a).not.toBe(b)
+  })
+})
+
+describe('compositionSummary', () => {
+  // Protège : matières de l'ouvrage, dédoublonnées, traduites dans la langue du badge, sans pourcentage.
+  const u = (composition, compositionPercents = {}) => ({ yarn: { brand: 'X', composition, compositionPercents }, balls: 1 })
+  it('union dédoublonnée dans l\'ordre de première apparition, jointe par « · », sans pourcentage', () => {
+    const s = compositionSummary([u(['laine', 'polyamide'], { laine: 75, polyamide: 25 }), u(['laine'])], ti, 'fr')
+    expect(s).toBe(`${ti('yarn.compositions.laine', {}, { locale: 'fr' })} · ${ti('yarn.compositions.polyamide', {}, { locale: 'fr' })}`)
+    expect(s).not.toMatch(/%/)
+  })
+  it('traduit dans la langue du badge, matière libre telle quelle', () => {
+    expect(compositionSummary([u(['laine', 'soie de bambou'])], ti, 'en')).toBe(`${ti('yarn.compositions.laine', {}, { locale: 'en' })} · soie de bambou`)
+  })
+  it('aucune composition connue : chaîne vide', () => {
+    expect(compositionSummary([u([]), { yarn: {}, balls: 1 }], ti, 'fr')).toBe('')
+    expect(compositionSummary([], ti, 'fr')).toBe('')
+  })
+})
+
+// Marge du texte, valeur privée de badge-render.js (TEXT_PAD), partagée par les deux describe du bandeau.
+const TEXT_PAD = 60
+
+describe('computeBadgeGeometry : bandeau des matières', () => {
+  // Protège : le bandeau pleine largeur s'intercale sans rien chevaucher, et son absence ne change rien.
+  const TPLS = ['vertical', 'horizontal', 'minimal', 'double']
+  const geo = (tpl, cal, band, free = 0) => computeBadgeGeometry(tpl, 1, 4, 1, cal, 0, free, 3, cal ? 6 : 0, band)
+  // Constantes privées de badge-render.js, recopiées ici : ligne de base du titre (TITLE_BASELINE),
+  // hauteur de la rangée date (DATE_ROW_H) ; la marge du texte (TEXT_PAD) est déclarée plus haut.
+  const TITLE_BASELINE = 56
+  const DATE_ROW_H = 32
+
+  // Valeurs mesurées AVANT l'introduction du bandeau (commit 7b79ad86^), 4 lignes de stats, 1 ligne de titre :
+  // [largeur, hauteur du canevas, textBottom, freeTextTop], clé « gabarit calendrier texte-libre ».
+  const BEFORE_BAND = {
+    'vertical false 0': [1080, 1614, 1614, null], 'vertical false 1': [1080, 1674, 1674, 1522],
+    'vertical true 0': [1080, 1622, 1622, null], 'vertical true 1': [1080, 1682, 1682, 1522],
+    'horizontal false 0': [1350, 780, 780, null], 'horizontal false 1': [1410, 840, 840, 472],
+    'horizontal true 0': [1548, 978, 978, null], 'horizontal true 1': [1608, 1038, 1038, 878],
+    'minimal false 0': [1080, 744, 654, null], 'minimal false 1': [1080, 804, 714, 562],
+    'minimal true 0': [1350, 752, 662, null], 'minimal true 1': [1350, 812, 722, 562],
+    'double false 0': [1080, 1144, 1144, null], 'double false 1': [1080, 1204, 1204, 1052],
+    'double true 0': [1080, 1152, 1152, null], 'double true 1': [1080, 1212, 1212, 1052],
+  }
+
+  it('0 ligne de bandeau : géométrie d\'avant le bandeau, bandeau null, stats non décalées', () => {
+    for (const tpl of TPLS) for (const cal of [false, true]) for (const free of [0, 1]) {
+      const g = geo(tpl, cal, 0, free)
+      expect(g.compositionBand).toBeNull()
+      expect(g.statsTopOffset).toBe(0)
+      expect([g.canvas.w, g.canvas.h, g.textBottom, g.freeTextTop], `${tpl} ${cal} ${free}`).toEqual(BEFORE_BAND[`${tpl} ${cal} ${free}`])
+    }
+  })
+
+  it('le bandeau prend la largeur pleine du cartouche et n\'empiète ni sur le calendrier ni sur la date', () => {
+    for (const tpl of TPLS) for (const cal of [false, true]) {
+      const g = geo(tpl, cal, 1)
+      const b = g.compositionBand
+      expect(b, `${tpl} cal=${cal}`).not.toBeNull()
+      expect(b.h).toBeGreaterThan(0)
+      // Pleine largeur du cartouche : de la colonne des stats jusqu'au bord droit du calendrier
+      // s'il est à côté, sinon celle des stats seule (jamais la seule colonne des stats côte à côte).
+      const right = g.calendarArea && g.calendarArea.x > g.statsArea.x ? g.calendarArea.x + g.calendarArea.w : g.statsArea.x + g.statsArea.w
+      expect(b.x, `${tpl} cal=${cal}`).toBe(g.statsArea.x)
+      expect(b.x + b.w, `${tpl} cal=${cal}`).toBe(right)
+      if (g.calendarArea) expect(b.y + b.h, `${tpl} : bandeau sous le haut du calendrier`).toBeLessThanOrEqual(g.calendarArea.y)
+      expect(b.y + b.h).toBeLessThanOrEqual(g.textBottom)
+    }
+  })
+
+  it('le canevas grandit, jamais ne rétrécit ; le calendrier et le texte libre descendent', () => {
+    for (const tpl of TPLS) for (const cal of [false, true]) {
+      const a = geo(tpl, cal, 0, 1)
+      const b = geo(tpl, cal, 1, 1)
+      expect(b.canvas.h).toBeGreaterThanOrEqual(a.canvas.h)
+      if (a.calendarArea) expect(b.calendarArea.y).toBeGreaterThan(a.calendarArea.y)
+      expect(b.freeTextTop).toBeGreaterThan(a.freeTextTop)
+      expect(b.freeTextTop).toBeGreaterThanOrEqual(b.compositionBand.y + b.compositionBand.h)
+    }
+  })
+
+  // Vertical est côte à côte ; Horizontal à photo carrée (colonne de 600 px) est empilé, cf. `calendarLayout`.
+  it('calendrier côte à côte : le bandeau passe sous le titre, au-dessus des stats ET du calendrier', () => {
+    const g = geo('vertical', true, 1)
+    // Précondition : ce gabarit avec calendrier est bien en mode côte à côte (stats plus étroites que le cartouche).
+    expect(g.compositionBand.w).toBeGreaterThan(g.statsArea.w)
+    expect(g.compositionBand.y + g.compositionBand.h).toBeLessThanOrEqual(g.calendarArea.y)
+    // Les stats descendent sous le bandeau, qui démarre sous la ligne de base du titre (TEXT_PAD + TITLE_BASELINE).
+    expect(g.statsTopOffset).toBeGreaterThan(0)
+    expect(g.compositionBand.y).toBeGreaterThan(g.statsArea.y + TEXT_PAD + TITLE_BASELINE)
+  })
+
+  it('le bas du bandeau reste au-dessus de la ligne date', () => {
+    // Haut de la rangée date : `textBottom - TEXT_PAD - DATE_ROW_H`, cf. le `fillText` de la date dans `renderBadge`.
+    const DATE_ROW_TOP_FROM_BOTTOM = TEXT_PAD + DATE_ROW_H
+    for (const tpl of TPLS) for (const cal of [false, true]) for (const free of [0, 1]) {
+      const g = geo(tpl, cal, 1, free)
+      expect(g.compositionBand.y + g.compositionBand.h, `${tpl} cal=${cal} free=${free}`).toBeLessThanOrEqual(g.textBottom - DATE_ROW_TOP_FROM_BOTTOM)
+    }
+  })
+
+  it('même écart stats → filet sans calendrier et avec calendrier empilé', () => {
+    // Horizontal : mêmes stats et même cartouche (x = 0, y = 0) avec ou sans calendrier, donc même bas réel des stats.
+    const none = geo('horizontal', false, 1)
+    const stack = geo('horizontal', true, 1)
+    // Précondition : calendrier empilé (même abscisse que les stats, stats non décalées).
+    expect(stack.calendarArea.x).toBe(stack.statsArea.x)
+    expect(stack.statsTopOffset).toBe(0)
+    // Bas réel des stats : sans bandeau ni calendrier, le texte libre démarre exactement là (`contentBottom`).
+    const statsBottom = geo('horizontal', false, 0, 1).freeTextTop
+    const gapNone = none.compositionBand.y - statsBottom
+    const gapStack = stack.compositionBand.y - statsBottom
+    expect(gapNone).toBeGreaterThan(0)
+    expect(gapStack).toBe(gapNone)
+    // Et le calendrier suit le filet bas du même écart.
+    expect(stack.calendarArea.y - (stack.compositionBand.y + stack.compositionBand.h)).toBe(gapStack)
+  })
+
+  it('sans calendrier ou en mode empilé, les stats ne sont jamais décalées', () => {
+    for (const tpl of TPLS) expect(geo(tpl, false, 1).statsTopOffset, tpl).toBe(0)
+    expect(geo('horizontal', true, 1).statsTopOffset).toBe(0)
+  })
+})
+
+describe('renderBadge : bandeau des matières', () => {
+  // Protège : les matières sont dessinées seules, sans libellé « Composition » ni ligne de stats.
+  // `ti` (i18n réelle) : le faux `t` rendrait la clé « yarn.compositions.laine », qui contient « composition ».
+  it('dessine les matières, jamais le libellé, et seulement si la clé est cochée', () => {
+    const yarnUsage = [{ yarn: { brand: 'DROPS', model: 'Merino', colorName: 'Rouge', composition: ['laine', 'polyamide'] }, balls: 2 }]
+    const summary = compositionSummary(yarnUsage, ti, 'fr')
+    const draw = (statKeys) => {
+      const { canvas, calls } = stubCanvas()
+      renderBadge(canvas, { templateKey: 'minimal', color: 'hsl(20 60% 50%)', statKeys, stats, project: { name: 'Bonnet' }, t: ti, generatedAt: new Date('2026-09-29'), yarnUsage })
+      return calls.filter((c) => c[0] === 'fillText').map((c) => c[1])
+    }
+    const on = draw(['totalTime', 'composition'])
+    expect(on.some((s) => s.includes(summary))).toBe(true)
+    expect(on.some((s) => /composition/i.test(s))).toBe(false)
+    expect(draw(['totalTime']).some((s) => s.includes(summary))).toBe(false)
+  })
+
+  it('deux filets encadrent le bandeau, à la largeur du titre', () => {
+    const yarnUsage = [{ yarn: { brand: 'DROPS', composition: ['laine'] }, balls: 2 }]
+    let geometry
+    const { canvas, calls } = stubCanvas()
+    renderBadge(canvas, { templateKey: 'minimal', color: 'hsl(20 60% 50%)', statKeys: ['totalTime', 'composition'], stats, project: { name: 'Bonnet' }, t: ti, generatedAt: new Date('2026-09-29'), yarnUsage, onGeometry: (g) => { geometry = g } })
+    const b = geometry.compositionBand
+    // Constante privée de badge-render.js, recopiée : COMPO_BAND_RULE (épaisseur d'un filet).
+    const RULE_H = 1.5
+    // fillRect journalisé : [nom, fillStyle, x, y, w, h] ; un filet se reconnaît à sa hauteur exacte.
+    const rules = calls.filter((c) => c[0] === 'fillRect' && c[3] >= b.y && c[3] + c[5] <= b.y + b.h && c[5] === RULE_H)
+    expect(rules).toHaveLength(2)
+    for (const r of rules) {
+      expect(r[2]).toBe(b.x + TEXT_PAD)
+      expect(r[4]).toBe(b.w - TEXT_PAD * 2)
+    }
   })
 })

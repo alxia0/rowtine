@@ -107,10 +107,10 @@ const moneyStat = computed(() =>
 )
 
 // Carte d'exemple de l'écran « stock vide » (EXAMPLE_YARN) : mêmes profils que YarnCard
-// (métrage d'UNE pelote = 'detail', poids = CUMUL du lot = 'total') — sinon une
-// utilisatrice en impérial verrait « 175 m · 250 g » en arrivant sur son tout premier écran.
+// (métrage du lot = 'lot', poids du lot = 'total') ; sinon une utilisatrice en impérial
+// verrait « 875 m · 250 g » en arrivant sur son tout premier écran.
 const exampleLengthStat = computed(() =>
-  formatLength(EXAMPLE_YARN.lengthM, { locale: locale.value, system: settings.unitSystem, profile: 'detail' }),
+  formatLength(EXAMPLE_YARN.quantity * EXAMPLE_YARN.lengthM, { locale: locale.value, system: settings.unitSystem, profile: 'lot' }),
 )
 const exampleWeightStat = computed(() =>
   formatWeight(EXAMPLE_YARN.quantity * EXAMPLE_YARN.grams, {

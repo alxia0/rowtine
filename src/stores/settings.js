@@ -74,11 +74,19 @@ export const useSettingsStore = defineStore('settings', () => {
   // à l'intérieur d'une fonction pure). Portée : la grille calendaire, les barres par jour de
   // semaine et le total hebdomadaire de l'Accueil — « tout ce qui parle de semaine ».
   const weekStart = ref(1) // 0 | 1
+  // Notification du rang en cours (29/09) : active par défaut ; `Asked` retient que la
+  // permission Android a déjà été demandée une fois (pas de nouvelle demande en boucle).
+  const rowNotification = ref(true)
+  const rowNotificationAsked = ref(false)
+  // Écran gardé allumé pendant le suivi d'un projet (30/09) : actif par défaut (opt-out,
+  // décision de Julien du 30/09). Préférence, elle part dans la sauvegarde. Appliquée par le
+  // lecteur (composables/useKeepScreenOn.js).
+  const keepScreenOn = ref(true)
 
   async function load() {
-    // Les quatorze clés sont lues EN PARALLÈLE : chaque `getSetting` est une transaction
+    // Les clés sont lues EN PARALLÈLE : chaque `getSetting` est une transaction
     // IndexedDB distincte, et cette fonction est attendue par le tout premier `beforeEach`
-    // du routeur — avant la parallélisation, treize allers-retours en file d'attente
+    // du routeur — avant la parallélisation, des allers-retours en file d'attente
     // retardaient d'autant le premier écran (sensible sur la tablette cible). Aucune ne
     // dépend d'une autre en LECTURE ; la seule dépendance est à l'affectation (`locale` a
     // besoin d'`onboarded`), et l'ordre des affectations ci-dessous est conservé tel quel.
@@ -98,6 +106,9 @@ export const useSettingsStore = defineStore('settings', () => {
       storedCurrency,
       storedWeekStart,
       storedBadgeColorHistory,
+      storedRowNotification,
+      storedRowNotificationAsked,
+      storedKeepScreenOn,
     ] = await Promise.all([
       getSetting('firstName'),
       getSetting('defaultTechnique'),
@@ -114,6 +125,9 @@ export const useSettingsStore = defineStore('settings', () => {
       getSetting('currency'),
       getSetting('weekStart'),
       getSetting('badgeColorHistory'),
+      getSetting('rowNotification'),
+      getSetting('rowNotificationAsked'),
+      getSetting('keepScreenOn'),
     ])
     firstName.value = storedFirstName ?? ''
     defaultTechnique.value = storedTechnique ?? 'knitting'
@@ -140,6 +154,9 @@ export const useSettingsStore = defineStore('settings', () => {
     currency.value = storedCurrency ?? DEFAULT_CURRENCY
     weekStart.value = storedWeekStart ?? 1
     badgeColorHistory.value = storedBadgeColorHistory ?? []
+    rowNotification.value = storedRowNotification ?? true
+    rowNotificationAsked.value = storedRowNotificationAsked ?? false
+    keepScreenOn.value = storedKeepScreenOn ?? true
     loaded.value = true
   }
 
@@ -259,6 +276,21 @@ export const useSettingsStore = defineStore('settings', () => {
     await setSetting('weekStart', value)
   }
 
+  async function saveRowNotification(value) {
+    rowNotification.value = value
+    await setSetting('rowNotification', value)
+  }
+
+  async function markRowNotificationAsked() {
+    rowNotificationAsked.value = true
+    await setSetting('rowNotificationAsked', true)
+  }
+
+  async function saveKeepScreenOn(value) {
+    keepScreenOn.value = value
+    await setSetting('keepScreenOn', value)
+  }
+
   // Historique des couleurs retenues dans le composeur de badge (spec 2026-09-16 wizard ;
   // couleur RÉELLE depuis le 16/09, plus seulement la teinte — cf. commentaire de
   // déclaration ci-dessus) : global à l'app (pas par projet), pour retrouver la même
@@ -326,6 +358,9 @@ export const useSettingsStore = defineStore('settings', () => {
     unitSystem,
     currency,
     weekStart,
+    rowNotification,
+    rowNotificationAsked,
+    keepScreenOn,
     load,
     completeOnboarding,
     markSwipeHintSeen,
@@ -339,6 +374,9 @@ export const useSettingsStore = defineStore('settings', () => {
     saveAccentHue,
     e2eSetAccentHue,
     saveWeekStart,
+    saveRowNotification,
+    markRowNotificationAsked,
+    saveKeepScreenOn,
     rememberBadgeColor,
     saveProfile,
     saveUnits,

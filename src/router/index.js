@@ -68,7 +68,7 @@ const router = createRouter({
     { path: '/stash/:id/edit', name: 'stash-edit', component: () => import('../views/YarnEditView.vue') },
     { path: '/stash/import-ravelry', name: 'stash-import-ravelry', component: () => import('../views/RavelryImportView.vue') },
     { path: '/library', name: 'library', component: () => import('../views/LibraryView.vue') },
-    // `?format=rowtine` : porte « Importer au format Rowtine » (23/09), passée en prop.
+    // `?format=rowtine` : porte « Importer un fichier Rowtine » (23/09), passée en prop.
     { path: '/import-local', name: 'import-local', component: () => import('../views/LocalPdfImportView.vue'), props: (route) => ({ format: route.query.format === 'rowtine' ? 'rowtine' : 'pdf' }) },
     { path: '/pattern/new', name: 'pattern-new', component: () => import('../views/PatternCreateView.vue') },
     { path: '/pattern/:id', name: 'pattern', component: () => import('../views/PatternView.vue') },
@@ -81,6 +81,7 @@ const router = createRouter({
     { path: '/guide', name: 'guide', component: () => import('../views/GuideView.vue') },
     { path: '/calculator', name: 'calculator', component: () => import('../views/CalculatorView.vue') },
     { path: '/needle-gauge', name: 'needle-gauge', component: () => import('../views/NeedleGaugeView.vue') },
+    { path: '/stitch-memo', name: 'stitch-memo', component: () => import('../views/StitchMemoView.vue') },
     { path: '/counters', name: 'counters', component: () => import('../views/IndependentCounterView.vue') },
     { path: '/stats', name: 'stats', component: () => import('../views/StatsView.vue') },
     { path: '/expenses', name: 'expenses', component: () => import('../views/ExpensesView.vue') },

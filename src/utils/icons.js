@@ -139,6 +139,10 @@ export const ICONS = {
       '<path d="M12 4.8a5.2 5.2 0 0 0-3 9.4c.6.5 1 1.1 1 1.8v.6h4v-.6c0-.7.4-1.3 1-1.8a5.2 5.2 0 0 0-3-9.4z"/>' +
       '<path d="M10.3 19.4h3.4M10.8 21h2.4"/>',
   },
+  // Tuile Mémo des techniques de points : crochet + boucle de fil.
+  'tab-stitches': {
+    body: '<path d="M7 20 16.2 6.4a1.8 1.8 0 1 0-2.6-1.9"/><path d="M14 13.5c2.6-.4 4.5.8 4.5 2.6 0 2-2.3 3.4-5 3.4"/>',
+  },
   'tab-sections': {
     body: '<rect x="4.5" y="5" width="15" height="4" rx="1.2"/><rect x="4.5" y="11" width="15" height="4" rx="1.2"/><path d="M4.5 18.5h9"/>',
   },

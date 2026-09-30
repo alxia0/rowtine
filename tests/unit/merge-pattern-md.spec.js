@@ -76,6 +76,11 @@ describe('mergePatternFromMd', () => {
     expect(merged.patronMd).toEqual({ hash: 'oldhash' })
   })
 
+  it('le live garde stitchPins (sélection du mémo des points, hors du périmètre du MD)', () => {
+    const merged = mergePatternFromMd(liveEntity({ stitchPins: ['cr-sc'] }), mdPattern())
+    expect(merged.stitchPins).toEqual(['cr-sc'])
+  })
+
   it("MD sans author (vide) : l'auteur live n'est PAS écrasé", () => {
     const merged = mergePatternFromMd(liveEntity(), mdPattern({ author: '' }))
     expect(merged.author).toBe('Ancienne autrice')

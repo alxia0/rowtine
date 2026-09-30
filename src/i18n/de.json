@@ -55,6 +55,7 @@
     "toolCounter": "Zähler",
     "toolCalc": "Rechner",
     "toolNeedle": "Nadeln",
+    "toolStitches": "Maschen",
     "statsLink": "Zeitstatistik anzeigen",
     "recentSessions": "Letzte Sitzungen",
     "sessionsLink": "Alle Sitzungen ansehen"
@@ -261,6 +262,25 @@
     "knitting": "Stricken",
     "crochet": "Häkeln"
   },
+  "rowNotif": {
+    "title": "Reihe {index}/{total}, {section}",
+    "next": "Danach: {text}",
+    "nextIn": "Danach, {section}: {text}",
+    "check": "Reihe abhaken",
+    "channel": "Aktuelle Reihe",
+    "closedTitle": "Rowtine wurde geschlossen",
+    "closedText": "Tippen, um bei deiner Reihe weiterzumachen",
+    "chartTitle": "Denk an das Diagramm, {section}",
+    "chartRow": "Reihe {row}/{rows} des Diagramms",
+    "chartText": "Tippen, um das Diagramm zu sehen",
+    "chartDone": "Diagramm erledigt",
+    "counterTitle": "Wiederholung {count}/{total}, {section}",
+    "counterLabel": "Wiederholung {count} / {total}",
+    "setting": "Aktuelle Reihe in den Benachrichtigungen",
+    "settingHint": "Zeigt beim Arbeiten nach einer Anleitung den aktuellen Schritt an, mit einer Schaltfläche, um weiterzumachen, ohne die App zu öffnen.",
+    "settingDenied": "Die Benachrichtigungen von Rowtine sind in Android ausgeschaltet. Tippen, um die Einstellungen zu öffnen.",
+    "settingAsk": "Rowtine darf noch keine Benachrichtigungen anzeigen. Tippen, um es zu erlauben."
+  },
   "project": {
     "newTitle": "Neues Projekt",
     "editTitle": "Projekt bearbeiten",
@@ -299,6 +319,8 @@
     "gaugeHint": "Deine auf 10×10 cm gemessene Maschenprobe. Dient als Referenz, um deine Spannung zu prüfen und später die Anleitung anzupassen, falls sie abweicht.",
     "gaugeStitchesImperial": "Maschen / 4 Zoll",
     "gaugeRowsImperial": "Reihen / 4 Zoll",
+    "gaugeStitchesValue": "{n} M",
+    "gaugeRowsValue": "{n} Reihen",
     "gaugeHintImperial": "Deine auf 4 × 4 Zoll gemessene Maschenprobe. Dient als Referenz, um deine Spannung zu prüfen und später die Anleitung anzupassen, falls sie abweicht.",
     "sizesPlaceholder": "S, M, L",
     "activeSize": "Gestrickte Größe",
@@ -647,7 +669,8 @@
     "all": "Alle",
     "add": "Anleitung hinzufügen",
     "importPdf": "PDF-Anleitung importieren",
-    "importRowtine": "Im Rowtine-Format importieren",
+    "importRowtine": "Rowtine-Datei importieren",
+    "importRowtineHint": "Erstelle sie am Computer auf {site} und kopiere sie dann auf dein Smartphone.",
     "importing": "PDF wird gelesen…",
     "importDone": "PDF importiert. Prüfe und ergänze die Angaben.",
     "addManual": "Manuell erstellen",
@@ -717,8 +740,8 @@
   },
   "importLocal": {
     "title": "PDF importieren",
-    "titleRowtine": "Im Rowtine-Format importieren",
-    "leadRowtine": "Eine bereits im Rowtine-Format vorbereitete Anleitung: Text und Bilder werden unverändert importiert, auf deinem Gerät, offline.",
+    "titleRowtine": "Rowtine-Datei importieren",
+    "leadRowtine": "Eine bereits in einer Rowtine-Datei vorbereitete Anleitung: Text und Bilder werden unverändert importiert, auf deinem Gerät, offline.",
     "pickRowtine": ".rowtine- oder .zip-Datei auswählen",
     "lead": "Die Anleitung wird auf deinem Gerät analysiert: kostenlos, offline, originalgetreu zum PDF.",
     "leadNext": "Die Anleitung wird direkt in deiner Bibliothek gespeichert; du kannst die Abschnitte bei Bedarf später korrigieren.",
@@ -930,6 +953,8 @@
     "saved": "Einstellungen gespeichert.",
     "appearance": "Erscheinungsbild",
     "weekStart": "Erster Wochentag",
+    "keepScreenOn": "Bildschirm beim Verfolgen eingeschaltet lassen",
+    "keepScreenOnHint": "Der Bildschirm bleibt an, solange du nach einer Anleitung arbeitest.",
     "language": "Sprache",
     "unitsAndCurrency": "Einheiten und Währung",
     "unitsMetric": "Metrisch (m, g)",
@@ -1249,6 +1274,7 @@
         "label": "Tipps",
         "sub": "Tipps zur Anleitung"
       },
+      "stitches": { "label": "Merkhilfe: Maschentechniken", "sub": "Deine ausgewählten Maschen", "subEmpty": "Wähle Maschen zum Nachschlagen" },
       "h3": {
         "gauge": "Maschenprobe",
         "needles": "Nadeln/Haken",
@@ -1323,6 +1349,28 @@
       "addChartStep": "+ Diagramm",
       "chartLabel": "Diagramm"
     }
+  },
+  "stitchMemo": {
+    "title": "Merkhilfe: Maschentechniken",
+    "pick": "Maschen auswählen",
+    "edit": "Maschen ändern",
+    "empty": "Für diese Anleitung sind noch keine Maschen gewählt. Wähle die, an die du erinnert werden möchtest: Sie bleiben hier.",
+    "search": "Masche suchen",
+    "suggested": "Vorschläge für diese Anleitung",
+    "noResult": "Keine passende Masche",
+    "done": "Fertig",
+    "craft": { "crochet": "Häkeln", "knitting": "Stricken" },
+    "group": {
+      "base": "Grundmaschen",
+      "shaping": "Zu- und Abnahmen",
+      "construction": "Aufbau",
+      "texture": "Struktur- und Zierstiche",
+      "cast-on": "Maschenanschläge",
+      "bind-off": "Abketten",
+      "pattern": "Muster",
+      "technique": "Techniken"
+    },
+    "expand": "Schritte anzeigen"
   },
   "storage": {
     "writeFailed": "Nicht genügend Speicherplatz: Deine letzte Änderung konnte nicht gespeichert werden.",

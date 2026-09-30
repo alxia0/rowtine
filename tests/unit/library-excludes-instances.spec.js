@@ -87,11 +87,11 @@ describe('LibraryView — exclut les instances de projet', () => {
     expect(dialog.exists()).toBe(true)
     expect(dialog.attributes('aria-modal')).toBe('true')
     const opts = dialog.findAll('.pas__opt')
-    expect(opts.map((o) => o.text())).toEqual([
-      tk('pattern.importPdf'),
-      tk('pattern.importRowtine'),
-      tk('pattern.addManual'),
-    ])
+    expect(opts.length).toBe(3)
+    expect(opts[0].text()).toBe(tk('pattern.importPdf'))
+    // L'option Rowtine porte en plus sa sous-ligne (convertisseur du site, 29/09).
+    expect(opts[1].find('.pas__opt-title').text()).toBe(tk('pattern.importRowtine'))
+    expect(opts[2].text()).toBe(tk('pattern.addManual'))
     expect(w.text()).not.toContain('Import IA')
 
     // Deux inputs fichier, toujours focalisables (pas display:none, pas disabled).

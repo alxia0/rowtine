@@ -3,7 +3,8 @@ import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick 
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useCropperStore } from '@/stores/cropper'
-import { renderBadge, computeBadgeGeometry, createBadgeCanvas, statValue, buildRawStatLines, yarnLabel, countGroups } from '@/utils/badge-render'
+import { renderBadge, computeBadgeGeometry, createBadgeCanvas, BADGE_EXPORT_SCALE, statValue, buildRawStatLines, yarnLabel, countGroups, compositionSummary } from '@/utils/badge-render'
+import { normalizeComposition } from '@/constants/compositions'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import { useSettingsStore } from '@/stores/settings'
 import { resizeDataUrl } from '@/utils/image-resize'
@@ -41,7 +42,7 @@ const effectiveTheme = useEffectiveTheme()
 
 const TEMPLATE_KEYS = ['vertical', 'horizontal', 'minimal', 'double']
 const TEMPLATE_ICON = { vertical: 'badgeVertical', horizontal: 'badgeHorizontal', minimal: 'badgeMinimal', double: 'badgeDouble' }
-const STAT_KEYS = ['totalTime', 'startedOn', 'yarns', 'progress', 'bestStreak', 'sessionsCount']
+const STAT_KEYS = ['totalTime', 'startedOn', 'yarns', 'progress', 'bestStreak', 'sessionsCount', 'composition']
 
 // Défaut du gabarit ET de la photo (étape Photo) : la photo de couverture du projet si elle
 // existe (résolue une seule fois, à l'ouverture — cf. resolveCover). Avec couverture : gabarit
@@ -77,7 +78,10 @@ const progressAvailable = props.project.status !== 'done' && !!props.stats?.rows
 // `ballsUsed`, retour Julien, test réel Pixel). Les autres statistiques restent toujours
 // cochées par défaut, quelle que soit leur valeur (sauf `progress`, cf. `progressAvailable`
 // ci-dessus : absente de STAT_KEYS filtré plutôt que décochée quand non calculable).
-const selectedStats = ref(STAT_KEYS.filter((k) => (k !== 'yarns' || props.yarnUsage.length > 0) && (k !== 'progress' || progressAvailable)))
+// Bandeau des matières (intent du 28/09) : proposé seulement si une laine liée a une matière
+// renseignée, et alors coché par défaut comme les statistiques.
+const compositionAvailable = props.yarnUsage.some((u) => normalizeComposition(u.yarn?.composition).length > 0)
+const selectedStats = ref(STAT_KEYS.filter((k) => (k !== 'yarns' || props.yarnUsage.length > 0) && (k !== 'progress' || progressAvailable) && (k !== 'composition' || compositionAvailable)))
 const includeTechnique = ref(!!props.project.technique)
 // La technique n'est PLUS jamais une ligne de stats, pour aucun des 4 gabarits (chantier
 // « badge corrections typo/zoom » 19/09, Task 4 : `renderBadge`, badge-render.js, filtre
@@ -124,13 +128,14 @@ const badgeLocale = ref(locale.value)
 // le texte du badge, comme celui des pastilles, suit la langue choisie DANS l'assistant, cf.
 // commentaire ci-dessus sur `badgeLocale`.
 // Pastilles génériques de l'onglet Infos : `yarns` en est exclue (pastille dédiée plus bas,
-// sa valeur est une liste), `startedOn` disparaît pour un projet SANS aucune date — sinon
+// sa valeur est une liste), `composition` aussi (pastille dédiée du bandeau des matières), `startedOn` disparaît pour un projet SANS aucune date — sinon
 // une pastille vide, invisible mais cliquable (cf. `startedOnParts`, badge-render.js, qui ne
 // produit alors aucune ligne non plus) — et `progress` disparaît selon `progressAvailable`
 // (cf. son commentaire, ci-dessus). Calculé une fois plutôt qu'à chaque rendu du template.
 const genericPillKeys = computed(() =>
   STAT_KEYS.filter(
     (k) => k !== 'yarns'
+      && k !== 'composition'
       && (k !== 'startedOn' || !!(props.project.startedAt || props.project.finishedAt))
       && (k !== 'progress' || progressAvailable),
   ),
@@ -150,8 +155,12 @@ const techniqueAriaLabel = computed(() => `${t('project.stats.technique')} : ${t
 // valeur est une liste (une entrée par laine), pas une chaîne unique comme les autres clés.
 // `yarnLabel` (badge-render.js) : même construction que la ligne dessinée sur le badge,
 // jamais dupliquée localement.
-const yarnsSummaryText = computed(() => props.yarnUsage.map((u) => yarnLabel(u.yarn)).join(', '))
+// « · » entre deux laines : le libellé d'une laine contient déjà une virgule (« Marque Modèle, Coloris »).
+const yarnsSummaryText = computed(() => props.yarnUsage.map((u) => yarnLabel(u.yarn)).join(' · '))
 const yarnsAriaLabel = computed(() => `${t('project.stats.yarns')} : ${yarnsSummaryText.value}`)
+// Pastille dédiée 'composition' (bandeau des matières) : son texte est le bandeau lui-même,
+// dans la langue du badge ; son `aria-label` (« Composition : … », posé dans le gabarit) le rattache à son libellé.
+const compositionSummaryText = computed(() => compositionSummary(props.yarnUsage, t, badgeLocale.value))
 
 // Carte calendaire du projet (revue 17/09) : optionnelle, visible seulement si le projet a
 // des données de grille (`stats.grid.columns` non vide — un projet sans aucune session n'en
@@ -377,6 +386,8 @@ const pairCount = computed(() =>
 const freeTextLineCount = computed(() =>
   badgeText.value && badgeText.value.trim() ? 1 : 0,
 )
+// Bandeau des matières : 1 ligne réservée, même approximation que `freeTextLineCount` ci-dessus.
+const compositionBandLines = computed(() => (compositionAvailable && selectedStats.value.includes('composition') ? 1 : 0))
 // Géométrie CALCULÉE (photoSlot(s) + statsArea), dépendante du/des ratio(s) choisi(s) — cf.
 // computeBadgeGeometry (badge-render.js). Remplace l'ancien accès direct à
 // BADGE_TEMPLATES[key], qui ne portait plus que canvas/orientation (la géométrie fine).
@@ -386,15 +397,15 @@ const freeTextLineCount = computed(() =>
 // `pairCount.value` (nombre de GROUPES, cf. son commentaire ci-dessus), plus
 // `statLineCount.value` : les deux ne coïncident plus dès que `startedOn` (projet terminé)
 // est sélectionné, ses deux phrases comptant pour 2 dans `statLineCount` mais 1 seul groupe.
-// `weeksCount` (Task « marge date/calendrier », 20/09) est le 9e et dernier : `props.stats?.grid?.columns?.length || 0`,
+// `weeksCount` (Task « marge date/calendrier », 20/09) est le 9e : `props.stats?.grid?.columns?.length || 0`,
 // la même source que lit `hasCalendarData` (ligne ~147, qui n'en retient qu'un booléen — un
 // booléen ne peut pas fournir un compte de semaines). Reparsée ici volontairement, pas la
 // valeur de `hasCalendarData` elle-même : les deux dérivent de la même donnée sans que l'une
-// réutilise l'autre.
+// réutilise l'autre. `compositionBandLines` (bandeau des matières, 29/09) est le 10e et dernier.
 const currentTemplate = computed(() => computeBadgeGeometry(
   templateKey.value, photoRatioParam.value, statLineCount.value, 1,
   hasCalendarData.value && includeCalendar.value, 0, freeTextLineCount.value,
-  pairCount.value, props.stats?.grid?.columns?.length || 0,
+  pairCount.value, props.stats?.grid?.columns?.length || 0, compositionBandLines.value,
 ))
 const hasPhotoSlot = computed(() => !!currentTemplate.value.photoSlot || !!currentTemplate.value.photoSlots)
 
@@ -763,12 +774,15 @@ async function generate() {
     includeCalendar: hasCalendarData.value && includeCalendar.value,
     unitSystem: settings.unitSystem,
     includeTechnique: includeTechnique.value, // cf. le commentaire de l'appel d'`updatePreview` plus haut
+    // Double définition pour le partage (texte net au zoom) ; la prévisu reste à l'échelle 1.
+    scale: BADGE_EXPORT_SCALE,
   })
   // Plafond d'image OBLIGATOIRE avant d'entrer dans `project.photos[]` : `renderBadge`
-  // sort un JPEG 1080×1620 en qualité 0,9, très au-dessus du plafond (1280 px / q 0,8) que
-  // `resizeDataUrl` impose à TOUTE autre porte d'entrée de photo (addPhoto → photo.js, kit
-  // .zip, synchro patron.md). Mêmes valeurs par défaut que ces appels, pour ne pas créer
-  // une deuxième règle. `resultUrl` montre la version RÉELLEMENT enregistrée.
+  // sort ici un JPEG en double définition (`BADGE_EXPORT_SCALE`, plafonné à 4096 px, q 0,92),
+  // très au-dessus du plafond (1280 px / q 0,8) que `resizeDataUrl` impose à TOUTE autre
+  // porte d'entrée de photo (addPhoto → photo.js, kit .zip, synchro patron.md). Mêmes valeurs
+  // par défaut que ces appels, pour ne pas créer une deuxième règle. `resultUrl` montre la
+  // version RÉELLEMENT enregistrée ; le partage, lui, reçoit `url` (cf. le `return` final).
   const saved = await resizeDataUrl(url)
   // Remplace l'entrée de CETTE session si elle existe déjà, sinon l'ajoute — cf.
   // commentaire de `generatedPhotoIndex` plus haut.
@@ -784,7 +798,9 @@ async function generate() {
   // chaque clic de pastille, cf. pickColor ci-dessus).
   await settings.rememberBadgeColor(badgeColor.value)
   emit('saved')
-  return saved
+  // Pleine définition pour le partage : repasser par le plafond galerie réduirait l'image
+  // et la recompresserait une seconde fois en JPEG.
+  return url
 }
 
 // Pincer pour zoomer sur la prévisu, IN PLACE (Task 5, chantier « badge corrections
@@ -1013,7 +1029,8 @@ watch(zoomScale, () => {
 
 // Bouton Partager persistant (bas de chaque onglet) : confirmation → génération (TOUJOURS —
 // l'utilisatrice a pu modifier un réglage depuis la dernière génération, cf. `generate()`,
-// qui remplace l'entrée précédente au lieu d'empiler) → partage OS.
+// qui remplace l'entrée précédente au lieu d'empiler) → partage OS de l'image pleine
+// définition renvoyée par `generate()` (la galerie garde la version plafonnée).
 async function confirmShare() {
   sharing.value = true
   try {
@@ -1222,6 +1239,16 @@ async function confirmShare() {
               :aria-label="yarnsAriaLabel"
               @click="toggleStat('yarns')"
             >{{ yarnsSummaryText }}</button>
+            <button
+              v-if="compositionAvailable"
+              type="button"
+              class="bdg__pill"
+              data-test="badge-composition"
+              :class="{ 'bdg__pill--on': selectedStats.includes('composition') }"
+              :aria-pressed="selectedStats.includes('composition')"
+              :aria-label="`${t('yarn.composition')} : ${compositionSummaryText}`"
+              @click="toggleStat('composition')"
+            >{{ compositionSummaryText }}</button>
           </div>
           <p class="bdg__subhead">{{ t('project.stats.badge.language') }}</p>
           <div class="bdg__languages">

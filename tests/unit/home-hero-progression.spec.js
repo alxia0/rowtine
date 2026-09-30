@@ -16,6 +16,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
+import { usePatternsStore } from '@/stores/patterns'
+import { useSectionsStore } from '@/stores/sections'
 import i18n from '@/i18n'
 
 const nav = vi.hoisted(() => ({
@@ -161,5 +163,61 @@ describe('HomeView — héros « Reprendre » : progression masquée à 0 % (pr�
     } finally {
       i18n.global.locale.value = before
     }
+  })
+})
+
+describe('HomeView — héros « Reprendre » : patrons chargés après le montage', () => {
+  // Protège : l'avancement d'un patron structuré apparaît dès que les patrons arrivent (démarrage à froid).
+  it('le pourcentage s\'affiche quand les patrons arrivent après le montage', async () => {
+    const reader = { sections: [{ id: 'a', title: 'A', steps: [{ t: 'r1' }, { t: 'r2' }] }] }
+    const patternId = await db.patterns.add({ name: 'Bonnet', reader })
+    await db.projects.update(projectId, { patternId, readerState: { size: 0, done: { 'a#0': true }, counters: {} } })
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const patterns = usePatternsStore()
+    // Chargement des patrons bloqué : App.vue n'a pas fini au montage de l'accueil.
+    vi.spyOn(patterns, 'load').mockImplementation(() => new Promise(() => {}))
+    const w = mount(HomeView, { global: { plugins: [pinia, i18n], stubs: { ProjectCard: true, StitchProgress: true } } })
+    const tile = await resumeTile(w)
+    await waitHomeReady(w)
+    expect(tile.find('.resume__pct').exists()).toBe(false)
+
+    patterns.patterns = [{ id: patternId, name: 'Bonnet', reader }]
+    patterns.loaded = true
+    await vi.waitFor(() => expect(w.find('.resume__pct').text()).toContain('50'), { timeout: 10000 })
+  })
+
+  // Protège : pas de pourcentage « reader » avant la lecture des sections (il serait remplacé juste après).
+  it('aucun pourcentage reader tant que les sections ne sont pas lues', async () => {
+    const reader = { sections: [{ id: 'a', title: 'A', steps: [{ t: 'r1' }, { t: 'r2' }] }] }
+    const patternId = await db.patterns.add({ name: 'Bonnet', reader })
+    await db.projects.update(projectId, { patternId, readerState: { size: 0, done: { 'a#0': true }, counters: {} } })
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const patterns = usePatternsStore()
+    patterns.patterns = [{ id: patternId, name: 'Bonnet', reader }]
+    patterns.loaded = true
+    vi.spyOn(useSectionsStore(), 'progressByProject').mockImplementation(() => new Promise(() => {}))
+    const w = mount(HomeView, { global: { plugins: [pinia, i18n], stubs: { ProjectCard: true, StitchProgress: true } } })
+    await new Promise((r) => setTimeout(r, 200))
+    expect(w.find('.resume__pct').exists()).toBe(false)
+  })
+
+  // Protège : une lecture des sections qui échoue ne prive pas l'accueil du repli reader.
+  it('le pourcentage reader s\'affiche même si la lecture des sections échoue', async () => {
+    const reader = { sections: [{ id: 'a', title: 'A', steps: [{ t: 'r1' }, { t: 'r2' }] }] }
+    const patternId = await db.patterns.add({ name: 'Bonnet', reader })
+    await db.projects.update(projectId, { patternId, readerState: { size: 0, done: { 'a#0': true }, counters: {} } })
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const patterns = usePatternsStore()
+    patterns.patterns = [{ id: patternId, name: 'Bonnet', reader }]
+    patterns.loaded = true
+    vi.spyOn(useSectionsStore(), 'progressByProject').mockRejectedValue(new Error('lecture impossible'))
+    const w = mount(HomeView, { global: { config: { errorHandler: () => {} }, plugins: [pinia, i18n], stubs: { ProjectCard: true, StitchProgress: true } } })
+    await vi.waitFor(() => expect(w.find('.resume__pct').text()).toContain('50'), { timeout: 10000 })
   })
 })

@@ -240,6 +240,12 @@ describe('serializePattern', () => {
     expect(galFile.data).toBe('ABCD')
   })
 
+  it('conserve stitchPins dans patron.json', () => {
+    const result = serializePattern({ id: 9, name: 'Écharpe', photos: [], stitchPins: ['cr-sc', 'kn-k2tog'] })
+    const json = JSON.parse(result.files.find((f) => f.path.endsWith('/patron.json')).data)
+    expect(json.stitchPins).toEqual(['cr-sc', 'kn-k2tog'])
+  })
+
   it('serializePattern émet patron.md + patronMd.hash dans patron.json', () => {
     const pattern = {
       id: 1,
@@ -392,6 +398,14 @@ describe('serializeSettings', () => {
     const written = JSON.parse(out.data)
     expect(written).not.toHaveProperty('safFolderLabel')
     expect(written.firstName).toBe('Alexia')  // le reste passe toujours
+  })
+
+  // Protège : la permission Android déjà demandée est propre à l'appareil, `rowNotification` (préférence) part.
+  it('rowNotificationAsked ne part jamais dans reglages.json, rowNotification oui', () => {
+    const out = serializeSettings({ rowNotificationAsked: true, rowNotification: false })
+    const written = JSON.parse(out.data)
+    expect(written).not.toHaveProperty('rowNotificationAsked')
+    expect(written.rowNotification).toBe(false)
   })
 
   // Lot du 23/09/2026 : `tourProjectId`/`tourPatternId` (visite guidée) sont LOCAUX à

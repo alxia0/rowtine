@@ -24,8 +24,30 @@ const nav = vi.hoisted(() => ({
 }))
 vi.mock('vue-router', () => ({ useRoute: () => ({ params: {}, query: {} }), useRouter: () => nav.router }))
 
+const rowNotif = vi.hoisted(() => ({
+  available: vi.fn(() => false),
+  check: vi.fn(async () => 'granted'),
+  request: vi.fn(async () => 'granted'),
+  openSettings: vi.fn(async () => {}),
+}))
+vi.mock('@/native/row-notification', () => ({
+  isRowNotificationAvailable: () => rowNotif.available(),
+  checkRowNotificationPermission: () => rowNotif.check(),
+  requestRowNotificationPermission: () => rowNotif.request(),
+  openRowNotificationSettings: () => rowNotif.openSettings(),
+}))
+
+const keepAwake = vi.hoisted(() => ({ available: vi.fn(() => false) }))
+vi.mock('@/native/keep-awake', () => ({ isKeepScreenOnAvailable: () => keepAwake.available() }))
+
+const capApp = vi.hoisted(() => ({ listeners: {}, removeResume: null, addListener: null }))
+vi.mock('@capacitor/app', () => ({ App: { addListener: (...a) => capApp.addListener(...a) } }))
+
 import { KOFI_URL, GITHUB_ISSUES_URL } from '@/constants/app-links'
 import SettingsView from '@/views/SettingsView.vue'
+
+// Laisse finir une bascule en cours (le clic est ignoré tant qu'elle n'est pas terminée).
+const settle = () => new Promise((r) => setTimeout(r, 50))
 
 function mountView() {
   return mount(SettingsView, {
@@ -40,6 +62,19 @@ function mountView() {
 }
 
 beforeEach(async () => {
+  rowNotif.available.mockReturnValue(false)
+  keepAwake.available.mockReturnValue(false)
+  rowNotif.check.mockResolvedValue('granted')
+  rowNotif.request.mockResolvedValue('granted')
+  rowNotif.openSettings.mockClear()
+  rowNotif.request.mockClear()
+  rowNotif.check.mockClear()
+  capApp.listeners = {}
+  capApp.removeResume = vi.fn()
+  capApp.addListener = vi.fn(async (name, cb) => {
+    capApp.listeners[name] = cb
+    return { remove: capApp.removeResume }
+  })
   setActivePinia(createPinia())
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
@@ -148,6 +183,189 @@ describe('SettingsView', () => {
       const reloaded = useSettingsStore()
       await reloaded.load()
       expect(reloaded.weekStart).toBe(0)
+    })
+  })
+
+  // Réglage « Rang en cours dans les notifications » : natif seulement, permission lue au montage et au resume.
+  describe('interrupteur « Rang en cours dans les notifications »', () => {
+    it('est absent hors natif', async () => {
+      const w = mountView()
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-switch"]').exists()).toBe(false)
+    })
+
+    it('est présent en natif, actif par défaut, et sa bascule enregistre le réglage', async () => {
+      rowNotif.available.mockReturnValue(true)
+      const w = mountView()
+      await flushPromises()
+      const sw = w.get('[data-test="row-notif-switch"]')
+      expect(sw.attributes('role')).toBe('switch')
+      expect(sw.attributes('aria-checked')).toBe('true')
+      await sw.trigger('click')
+      await vi.waitFor(() => expect(useSettingsStore().rowNotification).toBe(false))
+      expect(useSettingsStore().rowNotification).toBe(false)
+      expect(w.get('[data-test="row-notif-switch"]').attributes('aria-checked')).toBe('false')
+      await settle()
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await vi.waitFor(() => expect(useSettingsStore().rowNotification).toBe(true))
+    })
+
+    it('activer alors que la permission est à demander la demande, et un refus affiche l\'aide', async () => {
+      rowNotif.available.mockReturnValue(true)
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      await store.saveRowNotification(false)
+      await flushPromises()
+      rowNotif.check.mockResolvedValue('prompt')
+      rowNotif.request.mockResolvedValue('denied')
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await vi.waitFor(() => expect(rowNotif.request).toHaveBeenCalledTimes(1))
+      await vi.waitFor(() => expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(true))
+    })
+
+    it('permission à demander : request puis markRowNotificationAsked ; déjà accordée : request non appelé', async () => {
+      rowNotif.available.mockReturnValue(true)
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      await store.saveRowNotification(false)
+      rowNotif.check.mockResolvedValue('prompt')
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await vi.waitFor(() => expect(store.rowNotificationAsked).toBe(true))
+      expect(rowNotif.request).toHaveBeenCalledTimes(1)
+      await settle()
+
+      await store.saveRowNotification(false)
+      rowNotif.request.mockClear()
+      rowNotif.check.mockResolvedValue('granted')
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await vi.waitFor(() => expect(store.rowNotification).toBe(true))
+      await flushPromises()
+      expect(rowNotif.request).not.toHaveBeenCalled()
+    })
+
+    it('permission refusée : le libellé d\'aide est là et son clic ouvre les réglages Android', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('denied')
+      const w = mountView()
+      await flushPromises()
+      const denied = w.get('[data-test="row-notif-denied"]')
+      expect(denied.text()).toBe(i18n.global.t('rowNotif.settingDenied'))
+      await denied.trigger('click')
+      expect(rowNotif.openSettings).toHaveBeenCalledTimes(1)
+    })
+
+    it('retour des réglages Android (resume) : la permission est relue, l\'aide disparaît si accordée', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('denied')
+      const w = mountView()
+      await vi.waitFor(() => expect(capApp.listeners.resume).toBeTypeOf('function'))
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(true)
+      rowNotif.check.mockResolvedValue('granted')
+      await capApp.listeners.resume()
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(false)
+    })
+
+    it('démontage : écouteur resume retiré ; hors natif : aucun écouteur', async () => {
+      const web = mountView()
+      await flushPromises()
+      expect(capApp.addListener).not.toHaveBeenCalled()
+      web.unmount()
+
+      rowNotif.available.mockReturnValue(true)
+      const w = mountView()
+      await vi.waitFor(() => expect(capApp.listeners.resume).toBeTypeOf('function'))
+      const resume = capApp.listeners.resume
+      w.unmount()
+      expect(capApp.removeResume).toHaveBeenCalledTimes(1)
+      rowNotif.check.mockClear()
+      await resume()
+      expect(rowNotif.check).not.toHaveBeenCalled()
+    })
+
+    it('refus unique (prompt, déjà demandée) : action qui redemande la permission', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('prompt')
+      const w = mountView()
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(false)
+      await useSettingsStore().markRowNotificationAsked()
+      await flushPromises()
+      const ask = w.get('[data-test="row-notif-ask"]')
+      expect(ask.text()).toBe(i18n.global.t('rowNotif.settingAsk'))
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(false)
+      rowNotif.request.mockResolvedValue('denied')
+      await ask.trigger('click')
+      await flushPromises()
+      expect(rowNotif.request).toHaveBeenCalledTimes(1)
+      expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(false)
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(true)
+    })
+
+    it('refus unique puis accord : plus ni action ni aide', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('prompt')
+      const w = mountView()
+      await flushPromises()
+      await useSettingsStore().markRowNotificationAsked()
+      await flushPromises()
+      rowNotif.request.mockResolvedValue('granted')
+      await w.get('[data-test="row-notif-ask"]').trigger('click')
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(false)
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(false)
+    })
+
+    it('refus unique mais réglage désactivé : pas d\'action', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('prompt')
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      await store.markRowNotificationAsked()
+      await store.saveRowNotification(false)
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(false)
+    })
+
+    it('permission refusée mais réglage désactivé : pas de libellé d\'aide', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('denied')
+      const w = mountView()
+      await flushPromises()
+      await useSettingsStore().saveRowNotification(false)
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(false)
+    })
+  })
+
+  // Réglage « Garder l'écran allumé pendant le suivi » : natif seulement, inactif par défaut.
+  describe('interrupteur « Garder l\'écran allumé pendant le suivi »', () => {
+    it('est absent hors natif', async () => {
+      const w = mountView()
+      await flushPromises()
+      expect(w.find('[data-test="keep-screen-switch"]').exists()).toBe(false)
+    })
+
+    it('est présent en natif, actif par défaut, et sa bascule enregistre le réglage', async () => {
+      keepAwake.available.mockReturnValue(true)
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      const sw = w.get('[data-test="keep-screen-switch"]')
+      expect(sw.attributes('role')).toBe('switch')
+      expect(sw.attributes('aria-checked')).toBe('true')
+      expect(w.get('#keep-screen-title').text()).toBe(i18n.global.t('settings.keepScreenOn'))
+      await sw.trigger('click')
+      await vi.waitFor(() => expect(store.keepScreenOn).toBe(false))
+      await vi.waitFor(() =>
+        expect(w.get('[data-test="keep-screen-switch"]').attributes('aria-checked')).toBe('false'),
+      )
+      await w.get('[data-test="keep-screen-switch"]').trigger('click')
+      await vi.waitFor(() => expect(store.keepScreenOn).toBe(true))
     })
   })
 

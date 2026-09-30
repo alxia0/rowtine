@@ -18,11 +18,16 @@ import { scrollBehavior } from '@/utils/scroll-behavior'
 import { patternCoverOf } from '@/utils/pattern-cover'
 import { useSmartBack } from '@/composables/useSmartBack'
 import { useSplitReader } from '@/composables/useSplitReader'
-import { repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
+import { useRowNotification } from '@/composables/useRowNotification'
+import { useKeepScreenOn } from '@/composables/useKeepScreenOn'
+import { withStepIds, isRowStep, currentStep, repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
 import { sectionKind } from '@/utils/section-kinds'
+import { withStitchMemo, PICK_STITCHES_EVENT, STITCH_MEMO_TAB } from '@/utils/stitch-memo'
+import { resolveStitches } from '@/content/stitch-memo'
 import { resolveOpenSyncTarget } from '@/utils/resolve-open-sync-target'
 import { syncPatronMdOnOpen } from '@/backup/sync-on-open'
 import { openPdfExternally } from '@/utils/open-pdf'
+import { inCheckZone } from '@/utils/card-check-zone'
 import { SESSION_NO_SECTION } from '@/constants/session'
 import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
@@ -30,6 +35,7 @@ import ReaderLine from '@/components/ReaderLine.vue'
 import StepImages from '@/components/StepImages.vue'
 import ReaderChart from '@/components/ReaderChart.vue'
 import ReaderSheet from '@/components/ReaderSheet.vue'
+import StitchPicker from '@/components/StitchPicker.vue'
 import ChartStage from '@/components/ChartStage.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import SkeletonScreen from '@/components/SkeletonScreen.vue'
@@ -41,7 +47,7 @@ import ReaderTour from '@/components/ReaderTour.vue'
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 // Libellé réservé de tuile d'aide-mémoire (titre/sous-titre) localisé si buildReference a
 // émis une clé i18n stable (titleKey/subKey), repli sur le libellé FR figé sinon — cf.
 // src/utils/reader-reference.js (zéro-dépendance, ne PAS y importer i18n).
@@ -471,12 +477,7 @@ function persist({ worked = false } = {}) {
 
 /* ── dérivés ── */
 // Sections avec ids d'items générés (stables par version des données) : `${sec.id}#${i}`.
-const sections = computed(() =>
-  (reader.value?.sections || []).map((sec) => ({
-    ...sec,
-    steps: sec.steps.map((s, i) => ({ ...s, id: `${sec.id}#${i}` })),
-  })),
-)
+const sections = computed(() => withStepIds(reader.value?.sections || []))
 const allSteps = computed(() => sections.value.flatMap((s) => s.steps))
 const abbrKeys = computed(() => Object.keys(reader.value?.reference?.abbr || {}))
 const sizeLabel = computed(() => (st.size != null ? reader.value?.sizeLabels?.[st.size] : null))
@@ -534,12 +535,14 @@ function isDone(step) {
   return !!st.done[step.id]
 }
 const isCountable = (step) => !step.note && !step.chart // rangs + compteurs
-const isRow = (step) => !step.note && !step.chart && !step.repeat // rangs cochables (nav préc/suiv)
+const isRow = isRowStep // rangs cochables (nav préc/suiv)
 
 const countableSteps = computed(() => allSteps.value.filter(isCountable))
 const doneCount = computed(() => countableSteps.value.filter(isDone).length)
 const progressPct = computed(() => (countableSteps.value.length ? Math.round((doneCount.value / countableSteps.value.length) * 100) : 0))
-const currentStepId = computed(() => allSteps.value.find((s) => isRow(s) && !st.done[s.id])?.id || null)
+// Étape en cours : premier rang non coché OU compteur non atteint (spec 30/09). La navigation
+// préc/suiv (`isRow`) reste sur les seuls rangs.
+const currentStepId = computed(() => currentStep(sections.value, st)?.step.id || null)
 
 function sectionCountable(sec) {
   return sec.steps.filter(isCountable)
@@ -571,13 +574,34 @@ function toggleDone(id) {
   // Après avoir coché, recentrer l'écran sur le prochain rang à travailler (#6).
   if (st.done[id]) nextTick(() => resume())
 }
+// Notification Android du rang en cours (projet seulement) : son bouton repasse par
+// toggleDone ci-dessus (rang) ou bumpCounter ci-dessous (« +1 » d'un compteur) ; le rappel
+// de diagramme suit la même règle de taille que l'affichage (chartVisible). Permission
+// demandée une fois le lecteur prêt, hors visite guidée ; aucune notification tant que la
+// visite dure (elle n'écrit rien).
+useRowNotification({
+  enabled: ctx === 'project',
+  project,
+  reader,
+  state: st,
+  toggleDone,
+  bumpCounter,
+  isChartVisible: chartVisible,
+  canAskPermission: computed(() => ready.value && !tourRequested.value),
+  suspended: tourRequested,
+})
+// Écran gardé allumé pendant le suivi d'un projet, si le réglage est actif (retiré au démontage).
+useKeepScreenOn({ enabled: ctx === 'project' })
 function counterVal(step) {
   return Math.min(st.counters[step.id] || 0, stepTotal(step))
 }
 function bumpCounter(step, delta) {
   const total = stepTotal(step)
-  st.counters[step.id] = Math.max(0, Math.min(total, counterVal(step) + delta))
+  const before = counterVal(step)
+  st.counters[step.id] = Math.max(0, Math.min(total, before + delta))
   persist({ worked: true })
+  // Total atteint : recentrer sur l'étape suivante, comme après un cochage.
+  if (total > 0 && before < total && st.counters[step.id] >= total) nextTick(() => resume())
 }
 function chartRow(secId) {
   const row = st.chartRows[secId] || 1
@@ -765,9 +789,27 @@ async function finishTour() {
 /* ── panneaux ── */
 const sheetOpen = ref(false)
 const sheetTab = ref('')
+// Aide-mémoire AFFICHÉ : la référence du patron (absente sur un patron manuel) + le mémo des
+// points épinglés. Les infobulles d'abréviation restent sur `reader.reference`, jamais sur ceci.
+const helpReference = computed(() =>
+  reader.value ? withStitchMemo(reader.value.reference || null, resolveStitches(pattern.value?.stitchPins, locale.value)) : null,
+)
+const pickerOpen = ref(false)
+function openStitchPicker() {
+  sheetOpen.value = false
+  pickerOpen.value = true
+}
+// Sélection du mémo des points : propre au PATRON (champ de premier niveau, hors `reader`,
+// qui est remplacé en bloc par la synchro MD et la correction). Écrite à chaque bascule,
+// y compris en aperçu bibliothèque : ce n'est pas de la progression.
+async function saveStitchPins(next) {
+  if (pattern.value?.id == null) return
+  pattern.value = { ...pattern.value, stitchPins: next }
+  await patternsStore.setStitchPins(pattern.value.id, next)
+}
 function openHelp(tab) {
-  if (!reader.value.reference) return
-  sheetTab.value = tab || reader.value.reference.tabs[0].id
+  if (!helpReference.value) return
+  sheetTab.value = tab || helpReference.value.tabs[0].id
   sheetOpen.value = true
 }
 
@@ -825,18 +867,33 @@ function popTechnique() {
 // `#` de `step.id` suffit donc à les distinguer par construction.
 const fixTarget = ref(null)
 // Un appui sur une carte pose le voile ; sur une autre carte, il s'y déplace.
-// ⚠️ Aucun appui sur un CONTRÔLE de la carte ne pose le voile : la case à
-// cocher (.rcheck), les abréviations (.rl-abbr, ce sont des <button>), les
-// boutons du compteur de répétition et toute la barre du diagramme continuent
-// de faire ce qu'ils faisaient. Un seul prédicat plutôt qu'une liste de classes :
-// une classe oubliée deviendrait un geste volé, alors qu'un contrôle non prévu
-// se comporte ici correctement par défaut.
+// Deux règles passent avant, dans cet ordre :
+// 1. ⚠️ Un appui sur un CONTRÔLE de la carte garde son effet et ne pose jamais
+//    le voile : la case à cocher (.rcheck), les abréviations (.rl-abbr, ce sont
+//    des <button>), les boutons du compteur de répétition et toute la barre du
+//    diagramme. Un seul prédicat plutôt qu'une liste de classes : une classe
+//    oubliée deviendrait un geste volé, alors qu'un contrôle non prévu se
+//    comporte ici correctement par défaut. Cette règle vaut aussi dans le tiers
+//    gauche ci-dessous.
+// 2. Sur une carte cochable (rang/action, `checkable`) SEULEMENT, un appui dans
+//    le premier tiers gauche de la carte, sur toute sa hauteur, coche ou décoche
+//    la case comme `.rcheck` lui-même (inCheckZone, card-check-zone.js) : en
+//    tricotant, on vise la case sans précision. Ce geste ne pose ni ne retire
+//    aucun voile, comme un appui sur la case. Mesuré sur `currentTarget` (la
+//    carte), jamais sur `target` (un fragment du texte).
 // `target` : un `step` (id `sec.id#i`) pour les 4 types de carte, un `sec`
 // (id brut) pour un titre de section — les deux exposent un
 // `.id`, `onCardTap` n'a besoin de rien d'autre.
-function onCardTap(e, target) {
+function onCardTap(e, target, checkable = false) {
   if (readOnly) return
   if (e.target.closest('button, a, input, select, textarea')) return
+  if (checkable) {
+    const box = e.currentTarget.getBoundingClientRect()
+    if (inCheckZone(e.clientX, box.left, box.width)) {
+      toggleDone(target.id)
+      return
+    }
+  }
   fixTarget.value = target.id
 }
 // Partir corriger : la session est mise en PAUSE à l'instant du départ (le temps passé dans
@@ -914,6 +971,13 @@ function onDocClick(e) {
 }
 function onKey(e) {
   if (e.key === 'Escape') {
+    // Focus sur le corps de page : le keydown du sélecteur ne reçoit rien, on ferme ici et
+    // on rend la main à l'aide-mémoire comme le fait sa propre touche Échap.
+    if (pickerOpen.value) {
+      pickerOpen.value = false
+      openHelp(STITCH_MEMO_TAB)
+      return
+    }
     pop.open = false
     sheetOpen.value = false
   }
@@ -941,7 +1005,7 @@ function onKey(e) {
            en paysage tant qu'on n'avait pas fait défiler. C'est aussi l'ordre logique — à la
            réouverture d'un patron commencé, « revenir à mon étape » est la 1re chose voulue. -->
       <div v-if="!readOnly && currentStepId" class="chips">
-        <button class="chip chip--resume" @click="resume"><AppIcon name="resume" :size="16" /> {{ t('reader.resume') }}</button>
+        <button class="chip chip--resume" @click="resume()"><AppIcon name="resume" :size="16" /> {{ t('reader.resume') }}</button>
       </div>
 
       <!-- Couverture du PDF : ouvre la visu comme elle ouvre le PDF. Après la puce
@@ -1006,14 +1070,14 @@ function onKey(e) {
       </button>
 
       <!-- Aide-mémoire (tuiles) -->
-      <section v-if="reader.reference" class="amblock">
+      <section v-if="helpReference" class="amblock">
         <div class="amblock__head">
           <h2>{{ t('reader.help') }}</h2>
           <span class="amblock__sub">{{ t('reader.helpSub') }}</span>
         </div>
         <div class="amgrid">
           <button
-            v-for="tile in reader.reference.tiles"
+            v-for="tile in helpReference.tiles"
             :key="tile.tab"
             class="amtile"
             :class="{ 'amtile--feature': tile.feature }"
@@ -1159,7 +1223,7 @@ function onKey(e) {
           <!-- RÉPÉTITION : texte verbatim + compteur (interactif en projet). Aperçu lecture
                seule : marqueur .rmark--rep en premier enfant — .rstep est déjà flex, il se
                place donc à gauche du corps sans CSS supplémentaire. -->
-          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDone(step) }" @click="onCardTap($event, step)">
+          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDone(step), 'rstep--cur': !readOnly && currentStepId === step.id }" @click="onCardTap($event, step)">
             <span v-if="readOnly" class="rmark rmark--rep" aria-hidden="true"><AppIcon name="counter" :size="16" /></span>
             <div class="rstep__body">
               <p class="rstep__p"><ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" /></p>
@@ -1195,7 +1259,7 @@ function onKey(e) {
             :id="'rstep-' + step.id"
             class="rstep"
             :class="{ 'rstep--done': !readOnly && st.done[step.id], 'rstep--cur': !readOnly && currentStepId === step.id }"
-            @click="onCardTap($event, step)"
+            @click="onCardTap($event, step, true)"
           >
             <button
               v-if="!readOnly"
@@ -1221,10 +1285,10 @@ function onKey(e) {
       </section>
 
       <!-- Aide-mémoire rappelé en bas -->
-      <section v-if="reader.reference" class="amblock">
+      <section v-if="helpReference" class="amblock">
         <div class="amblock__head"><h2>{{ t('reader.help') }}</h2><span class="amblock__sub">{{ t('reader.helpAlways') }}</span></div>
         <div class="amgrid">
-          <button v-for="tile in reader.reference.tiles" :key="'b' + tile.tab" class="amtile" :class="{ 'amtile--feature': tile.feature }" @click="openHelp(tile.tab)">
+          <button v-for="tile in helpReference.tiles" :key="'b' + tile.tab" class="amtile" :class="{ 'amtile--feature': tile.feature }" @click="openHelp(tile.tab)">
             <span class="amtile__ic"><AppIcon :name="`tab-${tile.tab}`" :size="22" /></span>
             <span class="amtile__txt"><span class="amtile__t">{{ lbl(tile, 'titleKey', 'title') }}</span><span class="amtile__s">{{ lbl(tile, 'subKey', 'sub') }}</span></span>
             <span v-if="tile.feature" class="amtile__go"><AppIcon name="chevronRight" :size="18" /></span>
@@ -1269,7 +1333,7 @@ function onKey(e) {
 
       <!-- accès rapides compacts (icône seule + aria-label) pour tenir sur une rangée -->
       <button v-if="hasChart" class="fab fab--chart" :aria-label="t('reader.chart.short')" @click="goToChart"><AppIcon name="chart" :size="20" /></button>
-      <button v-if="reader.reference" class="fab fab--ref" :aria-label="t('reader.help')" @click="openHelp()"><AppIcon name="book" :size="20" /></button>
+      <button v-if="helpReference" class="fab fab--ref" :aria-label="t('reader.help')" @click="openHelp()"><AppIcon name="book" :size="20" /></button>
 
       <!-- Retour en haut : DANS `.actionbar`, mais retiré du flux de la rangée — il se pose
            AU-DESSUS du bouton aide-mémoire (retour d'usage, 01/08). Motif : sur téléphone,
@@ -1326,18 +1390,29 @@ function onKey(e) {
 
     <!-- panneau aide-mémoire (uniquement si le reader a un aide-mémoire) -->
     <ReaderSheet
-      v-if="reader.reference"
-      :reference="reader.reference"
+      v-if="helpReference"
+      :reference="helpReference"
       :size-labels="reader.sizeLabels"
       :size-index="st.size"
       v-model:open="sheetOpen"
       v-model:active-tab="sheetTab"
+      @action="(e) => e === PICK_STITCHES_EVENT && openStitchPicker()"
       @open-chart="
         () => {
           sheetOpen = false
           goToChart()
         }
       "
+    />
+
+    <StitchPicker
+      v-if="reader"
+      v-model:open="pickerOpen"
+      :pins="pattern?.stitchPins || []"
+      :craft="pattern?.type === 'crochet' ? 'crochet' : 'knitting'"
+      :abbr-keys="Object.keys(reader.reference?.abbr || {})"
+      @update:pins="saveStitchPins"
+      @update:open="(o) => { if (!o) openHelp(STITCH_MEMO_TAB) }"
     />
 
     <!-- tooltip abréviation -->

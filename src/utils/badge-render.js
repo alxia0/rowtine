@@ -12,6 +12,7 @@ import { drawStitchMotif, STITCH_MOTIF_HEIGHT } from '@/utils/badge-stitch-motif
 import { ICONS } from '@/utils/icons'
 import { formatLength, formatSkeins } from '@/utils/units'
 import { parseDecimal } from '@/utils/decimal'
+import { normalizeComposition, compositionLabel } from '@/constants/compositions'
 
 // Parse tolérant du format `hsl(h s% l%)` (CSS Color 4, sans virgules — celui que produisent
 // COLOR_PALETTE et ColorPickerDialog). Repli neutre si la chaîne est absente/mal formée.
@@ -72,6 +73,15 @@ function autoTextColor(bandRgb) {
 export function createBadgeCanvas() {
   return document.createElement('canvas')
 }
+
+// Échelle du badge partagé : la mise en page reste en unités logiques (1080 de large pour le
+// Vertical), le canevas physique est multiplié pour que le texte reste net au zoom.
+export const BADGE_EXPORT_SCALE = 2
+// Plafond du grand côté physique du canevas : au-delà, les vieilles tablettes (Nexus 7)
+// risquent de ne pas pouvoir allouer le bitmap.
+const BADGE_MAX_DIM = 4096
+// Qualité JPEG de l'export.
+const BADGE_JPEG_QUALITY = 0.92
 
 // Gabarits : seulement la taille de canvas et l'orientation — la géométrie du/des slot(s)
 // photo et du cartouche de texte est CALCULÉE (cf. computeBadgeGeometry ci-dessous), pas
@@ -165,6 +175,21 @@ const FREE_TEXT_GAP = 24 // espace entre le bas du bloc stats+calendrier et la 1
 // STACK_LABEL_BASELINE_OFFSET : aucune métrique ascent/descent fiable partout) — laisse aussi
 // de la place, sous la dernière ligne, à la descendante avant la réserve DATE_ROW_H qui suit.
 const FREE_TEXT_BASELINE_OFFSET = 26
+
+// Bandeau des matières (décision Julien 29/09) : pleine largeur du cartouche, entre deux
+// filets, police plus grande que les valeurs de stats (26px) pour qu'il ressorte. Même
+// mécanique que le texte libre ci-dessus (bloc réservé par-dessus la géométrie, dessiné à
+// l'abscisse du titre), mais placé AVANT le calendrier, cf. `statsAreaWithCalendar`.
+const COMPO_BAND_FONT = 'bold 30px sans-serif'
+const COMPO_BAND_LINE_H = 38
+const COMPO_BAND_PAD = 16 // entre un filet et le texte
+const COMPO_BAND_GAP = 16 // avant et après le bandeau
+const COMPO_BAND_RULE = 1.5 // épaisseur des filets
+const COMPO_BAND_BASELINE_OFFSET = 28
+// Hauteur totale réservée (écarts compris) pour `lines` lignes ; 0 sans bandeau.
+function compositionBandHeight(lines) {
+  return lines ? COMPO_BAND_GAP * 2 + COMPO_BAND_PAD * 2 + lines * COMPO_BAND_LINE_H : 0
+}
 
 // Gabarit Horizontal SEULEMENT : la photo n'est plus jamais rétrécie pour faire de la place
 // au texte (comme les gabarits portrait depuis le 17/09) — c'est le CANEVAS qui s'élargit si
@@ -283,8 +308,22 @@ function textWidthForCalendar(colW, includeCalendar) {
 // déjà disponible (`area.h - contentH`) si elle suffit, sinon `statsArea.h` grandit pour
 // l'accueillir — c'est CETTE valeur, jamais `area.h` telle quelle, que l'appelant doit relire
 // pour dimensionner son canevas (cf. les 4 branches de computeBadgeGeometry ci-dessous).
-function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount = 1, weeksCount = 0) {
+// `bandH` (bandeau des matières, décision Julien 29/09 ; hauteur `compositionBandHeight`, écarts
+// compris) : zone PLEINE LARGEUR (`area.w`, jamais la seule colonne des stats) réservée DANS le
+// contenu, à une place qui dépend du mode — sous les stats sans calendrier, entre les stats et
+// le calendrier en mode empilé, sous le titre (au-dessus des stats ET du calendrier) en mode
+// côte à côte. Contrairement au texte libre (`reserveFreeTextBlock`, réservé après coup sous
+// tout le reste), le bandeau doit passer AVANT le calendrier : il ne peut donc être réservé
+// qu'ici, où le calendrier est placé. Renvoie en plus `compositionBand` (rectangle du bandeau,
+// filets compris, sans les écarts `COMPO_BAND_GAP` ; `null` sans bandeau) et `statsTopOffset`
+// (décalage vertical des stats sous le bandeau, non nul en mode côte à côte seulement, lu par
+// `renderBadge` pour ne jamais recalculer le mode lui-même). Par défaut 0 : chaque branche
+// garde alors exactement ses calculs d'avant ce paramètre, résultat bit-à-bit identique.
+function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount = 1, weeksCount = 0, bandH = 0) {
   const layout = calendarLayout(area.w, includeCalendar)
+  // Rectangle du bandeau pour une zone réservée démarrant à `zoneTop` (bandeau entre ses deux
+  // écarts `COMPO_BAND_GAP`) ; `null` sans bandeau — jamais un rectangle vide.
+  const bandAt = (zoneTop) => (bandH ? { x: area.x, y: zoneTop + COMPO_BAND_GAP, w: area.w, h: bandH - COMPO_BAND_GAP * 2 } : null)
   // `contentBottom` (Task 5, texte libre) : bord bas RÉEL du contenu (les stats seules, ou le
   // plus grand des deux — stats/calendrier — en mode côte à côte), AVANT la réserve
   // `TEXT_PAD + DATE_ROW_H` de la ligne date/rowtine.app qui suit — jamais `textBottom`
@@ -297,7 +336,18 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
   // avant toute considération de calendrier — c'est `reserveFreeTextBlock` (plus bas) qui lit
   // ce champ pour ancrer le texte libre, jamais un recalcul APRÈS coup depuis `textBottom`.
   const statsOnlyBottom = area.y + contentH - TEXT_PAD - DATE_ROW_H
-  if (layout.mode === 'none') return { statsArea: area, calendarArea: null, textBottom: area.y + area.h, contentBottom: statsOnlyBottom }
+  // Sans calendrier : bandeau juste sous le bas réel des stats ; tout ce qui suit (texte libre,
+  // ancré sur `contentBottom` par `reserveFreeTextBlock`, puis ligne date) descend de `bandH`.
+  if (layout.mode === 'none') {
+    return {
+      statsArea: bandH ? { ...area, h: area.h + bandH } : area,
+      calendarArea: null,
+      textBottom: area.y + area.h + bandH,
+      contentBottom: statsOnlyBottom + bandH,
+      compositionBand: bandAt(statsOnlyBottom),
+      statsTopOffset: 0,
+    }
+  }
   if (layout.mode === 'side') {
     const calendarX = area.x + layout.textW + CALENDAR_GAP
     // Le calendrier commence SOUS le bloc titre, jamais à côté de lui (retour Julien, 18/09) :
@@ -307,7 +357,16 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
     // `TITLE_TO_STATS_GAP` — le style empilé n'en a pas besoin, la hauteur de rangée intègre
     // déjà son propre rythme visuel).
     const titleOffset = titleBlockHeight(titleLineCount)
-    const calendarTop = area.y + titleOffset
+    // Bandeau des matières en mode côte à côte : sous la rangée du titre, à l'endroit EXACT où
+    // `renderBadge` commençait les stats (`textTop + condensedTitleRowHeight`) — jamais à
+    // `area.y + titleOffset` (repère du calendrier ci-dessous), qui tombe AU-DESSUS de la ligne
+    // de base du titre (il ne compte pas `TEXT_PAD`) : le bandeau y chevaucherait le titre. Les
+    // stats (`statsTopOffset`) et le calendrier démarrent alors tous deux sous le bandeau, le
+    // calendrier au même haut que les stats (sinon son centrage pourrait le remonter sous le
+    // bandeau). `statsBottom` : bas réel des stats, décalé d'autant.
+    const bandTop = area.y + TEXT_PAD + condensedTitleRowHeight(titleLineCount)
+    const calendarTop = bandH ? bandTop + bandH : area.y + titleOffset
+    const statsBottom = statsOnlyBottom + bandH
     // Plafonné à la hauteur RÉELLE de la grille (Task « marge date/calendrier », 20/09) : le
     // budget hérité du bloc stats (`area.h - TEXT_PAD`) est presque toujours plus généreux que
     // ce dont le calendrier a besoin en mode `side` — `drawCalendar` centre alors sa grille dans
@@ -329,7 +388,7 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
     // que `calendarY + calendarH` (borné par `maxOffset`, cf. juste après) ne dépasse jamais
     // `statsOnlyBottom` : ce plafond garantit que cette hypothèse reste toujours vraie, jamais
     // un pari.
-    const naturalDateLineY = statsOnlyBottom + CALENDAR_STACK_GAP
+    const naturalDateLineY = statsBottom + CALENDAR_STACK_GAP
     const zoneH = naturalDateLineY - calendarTop
     const rawOffset = Math.floor(Math.max(0, (zoneH - calendarH) / 2))
     // Plafond (jamais dépassé) : un calendrier assez grand pour que ce nouveau centrage plus
@@ -338,7 +397,7 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
     // basculer `rawTextBottom` sur le calendrier — ce cas (calendrier presque aussi haut que la
     // zone) restait déjà proche de son ancrage d'origine avant cette tâche, ce plafond ne fait
     // que garder cet invariant intact.
-    const maxOffset = Math.max(0, statsOnlyBottom - calendarTop - calendarH)
+    const maxOffset = Math.max(0, statsBottom - calendarTop - calendarH)
     const calendarY = calendarTop + Math.min(rawOffset, maxOffset)
     // La ligne date/rowtine.app reste TOUJOURS la toute dernière chose du cartouche (retour
     // Julien, 18/09) : dérivée du bas RÉEL du calendrier (+ un vrai espace, `CALENDAR_STACK_GAP`),
@@ -356,7 +415,7 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
     // `calendarArea.h` aurait réintroduit la moitié de la marge qu'on cherche justement à
     // retirer. Repéré par les tests de non-régression « projet complet » (stats à 5
     // lignes/groupes, calendrier à une seule semaine).
-    const rawTextBottom = Math.max(statsOnlyBottom, calendarY + calendarH) + CALENDAR_STACK_GAP + TEXT_PAD
+    const rawTextBottom = Math.max(statsBottom, calendarY + calendarH) + CALENDAR_STACK_GAP + TEXT_PAD
     // Plancher à `area.h` (revue, correctif après-coup) : avant cette tâche, `calendarH` valait
     // TOUJOURS `area.h - TEXT_PAD` (jamais plafonné), ce qui garantissait implicitement
     // `textBottom - area.y > area.h` par construction (la chaîne d'additions le forçait). Une
@@ -380,7 +439,9 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
       // Le plus haut des deux (stats seules à côté, ou calendrier) — cf. commentaire de
       // `statsOnlyBottom` ci-dessus : brief Task 5, « peu importe lequel des deux est le plus
       // haut ».
-      contentBottom: Math.max(statsOnlyBottom, calendarY + calendarH),
+      contentBottom: Math.max(statsBottom, calendarY + calendarH),
+      compositionBand: bandAt(bandTop),
+      statsTopOffset: bandH,
     }
   }
   // Mode empilé : `contentH` inclut déjà la réserve pour la ligne date/rowtine.app à sa toute
@@ -389,7 +450,13 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
   // cette réserve pour placer le calendrier juste après les VRAIES lignes de texte, la ligne
   // date étant repositionnée après lui (même principe que le mode `side` ci-dessus).
   const statsOnlyH = contentH - DATE_ROW_H
-  const calendarY = area.y + statsOnlyH + CALENDAR_STACK_TOP_GAP
+  // Bandeau des matières : zone réservée juste sous le bas RÉEL des stats (`statsOnlyBottom`,
+  // même ancrage qu'en mode `none`, filet à `COMPO_BAND_GAP` des stats), le calendrier suit
+  // directement la zone. L'ancienne place du calendrier (`statsOnlyH + CALENDAR_STACK_TOP_GAP`,
+  // soit `TEXT_PAD` plus bas) laissait ~92 px au-dessus du filet contre 16 px en dessous. Sans
+  // bandeau, l'expression d'origine reste telle quelle.
+  const bandTop = bandH ? statsOnlyBottom : area.y + statsOnlyH + CALENDAR_STACK_TOP_GAP
+  const calendarY = bandTop + bandH
   const textBottom = calendarY + CALENDAR_STACK_HEIGHT + CALENDAR_STACK_GAP + TEXT_PAD
   const totalH = Math.max(area.h, textBottom - area.y)
   return {
@@ -399,6 +466,8 @@ function statsAreaWithCalendar(area, contentH, includeCalendar, titleLineCount =
     // Le calendrier empilé est TOUJOURS sous les stats ici (par construction, cf. `calendarY`
     // ci-dessus) : son propre bas est donc TOUJOURS le bas réel du contenu.
     contentBottom: calendarY + CALENDAR_STACK_HEIGHT,
+    compositionBand: bandAt(bandTop),
+    statsTopOffset: 0,
   }
 }
 
@@ -477,13 +546,18 @@ function reserveFreeTextBlock(base, freeTextLineCount) {
   // positionner) — jamais renvoyé tel quel à l'appelant final de `computeBadgeGeometry`, y
   // compris dans ce repli à 0 ligne (sinon son absence dans l'autre branche, juste en dessous,
   // deviendrait une asymétrie silencieuse selon `freeTextLineCount`).
-  if (!freeTextLineCount) return { statsArea: base.statsArea, calendarArea: base.calendarArea, textBottom: base.textBottom, freeTextTop: null }
+  // `compositionBand`/`statsTopOffset` (bandeau des matières) : déjà placés par
+  // `statsAreaWithCalendar`, au-dessus du texte libre dans tous les modes — propagés tels quels.
+  const { compositionBand, statsTopOffset } = base
+  if (!freeTextLineCount) return { statsArea: base.statsArea, calendarArea: base.calendarArea, textBottom: base.textBottom, freeTextTop: null, compositionBand, statsTopOffset }
   const h = FREE_TEXT_GAP + freeTextLineCount * FREE_TEXT_LINE_H
   return {
     statsArea: { ...base.statsArea, h: base.statsArea.h + h },
     calendarArea: base.calendarArea,
     textBottom: base.textBottom + h,
     freeTextTop: base.contentBottom,
+    compositionBand,
+    statsTopOffset,
   }
 }
 
@@ -516,14 +590,22 @@ function reserveFreeTextBlock(base, freeTextLineCount) {
 // * STACK_PAIR_GAP` (l'écart supplémentaire entre deux groupes différents, cf. commentaire de
 // `statsBlockHeight` ci-dessus). Par défaut 0 : tout appel existant qui l'omet garde un
 // résultat bit-à-bit identique.
-// `weeksCount` (Task « marge date/calendrier », 20/09, 9e et dernier paramètre) : nombre de
+// `weeksCount` (Task « marge date/calendrier », 20/09, 9e paramètre) : nombre de
 // semaines (colonnes) de la grille calendaire, transmis à `statsAreaWithCalendar` pour plafonner
 // la hauteur réservée au calendrier en mode `side` à sa hauteur RÉELLE (cf. `calendarRealHeight`,
 // badge-calendar.js) au lieu du budget hérité du bloc stats. Par défaut 0 : `statsAreaWithCalendar`
 // retombe alors sur l'ancien comportement (calendrier prenant toute la hauteur disponible), donc
 // tout appel existant qui omet ce paramètre garde un résultat bit-à-bit identique.
-export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount = 0, titleLineCount = 1, includeCalendar = false, requiredTextWidth = 0, freeTextLineCount = 0, pairCount = 0, weeksCount = 0) {
+// `compositionBandLines` (bandeau des matières, décision Julien 29/09, 10e et dernier paramètre) :
+// nombre de lignes du bandeau PLEINE LARGEUR des matières (wrappé à `titleMaxWidth` par
+// `renderBadge`), réservé par `statsAreaWithCalendar` avant le calendrier (cf. son commentaire).
+// Le résultat porte en plus `compositionBand` (`{ x, y, w, h }` en repère canvas, `null` sans
+// bandeau) et `statsTopOffset` (décalage des stats sous le bandeau, mode côte à côte seulement).
+// Par défaut 0 : `compositionBand` à `null`, `statsTopOffset` à 0, et tout appel existant qui
+// omet ce paramètre garde un résultat bit-à-bit identique pour tous les autres champs.
+export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount = 0, titleLineCount = 1, includeCalendar = false, requiredTextWidth = 0, freeTextLineCount = 0, pairCount = 0, weeksCount = 0, compositionBandLines = 0) {
   const tpl = BADGE_TEMPLATES[templateKey] || BADGE_TEMPLATES.vertical
+  const bandH = compositionBandHeight(compositionBandLines)
   // `tpl.canvas.h` n'est PAS lu ici : la hauteur réelle est TOUJOURS dérivée du contenu (photo
   // ancrée + texte), jamais d'une valeur fixe de gabarit — pour Horizontal aussi depuis le
   // correctif du 17/09 soir (elle l'était encore avant, cf. git blame). `BADGE_TEMPLATES.*.canvas.h`
@@ -539,9 +621,9 @@ export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount 
     // Cas courant (`requiredTextWidth` sous le plancher) : `colW === baseW - MARGIN * 2`, donc
     // `colW + MARGIN * 2 === baseW` — résultat bit à bit identique à avant ce correctif.
     const canvasW = Math.max(baseW, colW + MARGIN * 2)
-    const base = statsAreaWithCalendar({ x: MARGIN, y: MARGIN, w: colW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount)
-    const { statsArea, calendarArea, textBottom, freeTextTop } = reserveFreeTextBlock(base, freeTextLineCount)
-    return { canvas: { w: canvasW, h: MARGIN * 2 + statsArea.h }, photoSlot: null, statsArea, calendarArea, textBottom, freeTextTop }
+    const base = statsAreaWithCalendar({ x: MARGIN, y: MARGIN, w: colW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount, bandH)
+    const { statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset } = reserveFreeTextBlock(base, freeTextLineCount)
+    return { canvas: { w: canvasW, h: MARGIN * 2 + statsArea.h }, photoSlot: null, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset }
   }
   if (tpl.double) {
     const [r1, r2] = Array.isArray(photoRatio) ? photoRatio : [photoRatio, photoRatio]
@@ -558,9 +640,9 @@ export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount 
     // potentiellement différentes si les deux photos ont des ratios différents).
     const statsY = MARGIN + Math.max(s1.h, s2.h) + GAP
     const contentH = contentHeightFor(statLineCount, titleLineCount, pairCount)
-    const base = statsAreaWithCalendar({ x: 0, y: statsY, w: canvasW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount)
-    const { statsArea, calendarArea, textBottom, freeTextTop } = reserveFreeTextBlock(base, freeTextLineCount)
-    return { canvas: { w: canvasW, h: statsY + statsArea.h }, photoSlots, statsArea, calendarArea, textBottom, freeTextTop }
+    const base = statsAreaWithCalendar({ x: 0, y: statsY, w: canvasW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount, bandH)
+    const { statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset } = reserveFreeTextBlock(base, freeTextLineCount)
+    return { canvas: { w: canvasW, h: statsY + statsArea.h }, photoSlots, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset }
   }
   if (tpl.orientation === 'landscape') {
     // Plancher 600 pour la hauteur de la photo (17/09 : elle ne doit plus jamais être rétrécie
@@ -577,11 +659,11 @@ export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount 
     // Cartouche calculé à `x = 0` D'ABORD : sa HAUTEUR (celle qu'on doit connaître pour
     // dimensionner la photo) n'en dépend pas — seuls `statsArea.x`/`calendarArea.x` en dépendent
     // (vérifié en lisant `statsAreaWithCalendar`/`reserveFreeTextBlock` : aucun autre champ ne
-    // relit `area.x`), décalés à la toute fin une fois `statsX` connu plutôt que refaits avec le
+    // relit `area.x` ; `compositionBand.x` en dépend de la même façon), décalés à la toute fin une fois `statsX` connu plutôt que refaits avec le
     // bon `x` d'entrée — un second appel donnerait un résultat strictement identique ici (la
     // dépendance à `area.x` y est purement additive) mais referait tout le calcul pour rien.
-    const base = statsAreaWithCalendar({ x: 0, y: 0, w: colW, h: Math.max(minH, contentH) }, contentH, includeCalendar, titleLineCount, weeksCount)
-    const { statsArea: statsArea0, calendarArea: calendarArea0, textBottom, freeTextTop } = reserveFreeTextBlock(base, freeTextLineCount)
+    const base = statsAreaWithCalendar({ x: 0, y: 0, w: colW, h: Math.max(minH, contentH) }, contentH, includeCalendar, titleLineCount, weeksCount, bandH)
+    const { statsArea: statsArea0, calendarArea: calendarArea0, textBottom, freeTextTop, compositionBand: compositionBand0, statsTopOffset } = reserveFreeTextBlock(base, freeTextLineCount)
     const canvasH = statsArea0.h
     // `max(600, canvasH - MARGIN*2)` : en pratique, la branche `slot600.h` (600) ne l'emporte
     // JAMAIS — c'est `minH` (ci-dessus, déjà injecté dans `area.h` avant `statsArea0.h`) qui
@@ -598,8 +680,9 @@ export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount 
     const canvasW = statsX + colW
     const statsArea = { ...statsArea0, x: statsArea0.x + statsX }
     const calendarArea = calendarArea0 ? { ...calendarArea0, x: calendarArea0.x + statsX } : null
+    const compositionBand = compositionBand0 ? { ...compositionBand0, x: compositionBand0.x + statsX } : null
     const photoSlot = { x: MARGIN, y: (canvasH - photoH) / 2, w: photoW, h: photoH, aspect: photoRatio }
-    return { canvas: { w: canvasW, h: canvasH }, photoSlot, statsArea, calendarArea, textBottom, freeTextTop }
+    return { canvas: { w: canvasW, h: canvasH }, photoSlot, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset }
   }
   // portrait (vertical) : largeur ANCRÉE (bord à bord des marges) et élargie si le texte
   // l'exige (retour Julien, 18/09 — même traitement que Deux images, cf. `textColumnWidth`),
@@ -611,9 +694,9 @@ export function computeBadgeGeometry(templateKey, photoRatio = 1, statLineCount 
   const photoSlot = { x: MARGIN, y: MARGIN, w: slot.w, h: slot.h, aspect: photoRatio }
   const statsY = MARGIN + slot.h + GAP
   const contentH = contentHeightFor(statLineCount, titleLineCount, pairCount)
-  const base = statsAreaWithCalendar({ x: 0, y: statsY, w: canvasW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount)
-  const { statsArea, calendarArea, textBottom, freeTextTop } = reserveFreeTextBlock(base, freeTextLineCount)
-  return { canvas: { w: canvasW, h: statsY + statsArea.h }, photoSlot, statsArea, calendarArea, textBottom, freeTextTop }
+  const base = statsAreaWithCalendar({ x: 0, y: statsY, w: canvasW, h: contentH }, contentH, includeCalendar, titleLineCount, weeksCount, bandH)
+  const { statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset } = reserveFreeTextBlock(base, freeTextLineCount)
+  return { canvas: { w: canvasW, h: statsY + statsArea.h }, photoSlot, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset }
 }
 
 // Découpe `text` en lignes qui tiennent chacune dans `maxWidth`, avec la police déjà posée sur
@@ -667,24 +750,46 @@ function splitLongWord(ctx, word, maxWidth) {
   return lines
 }
 
-// Libellé « marque modèle » d'une laine, tel qu'affiché à la fois sur le badge (statLines
+// Libellé « marque modèle, coloris » d'une laine, tel qu'affiché à la fois sur le badge (statLines
 // ci-dessous) et sur la pastille dédiée de l'onglet Infos (BadgeComposer.vue,
 // `yarnsSummaryText`) — une seule construction, pour que les deux ne divergent jamais.
+// Identité « marque + modèle » (spec 18/09) complétée du COLORIS (intent du 28/09, décision
+// Julien 29/09) : deux coloris du même modèle donnaient deux lignes identiques sur le badge.
+// Séparateur « , » : le « · » sépare déjà le libellé de sa valeur, et un tiret long est proscrit
+// sur une image partagée.
 // Champs VIDES écartés avant la jointure (même discipline que `labelOf` dans
 // db/purchases-reprise.js) : `model` est facultatif (`emptyYarn()` le pose à ''), une
 // concaténation naïve donnerait « Drops  · 4 pelotes » (double espace) sur le badge.
-// Repli sur `colorName` quand marque ET modèle sont vides — cas ATTEIGNABLE : le `<select>`
-// de marque de StashView.vue ouvre sur `<option value="">` et `save()` n'exige que
-// `colorName`, seul champ réellement obligatoire d'une fiche laine (le reste de l'app assume
-// déjà ce vide, cf. `brand || '—'` dans YarnCard.vue/ProjectDetailView.vue/ProjectEditView.vue).
-// Sans ce repli la ligne du badge démarrait sur un séparateur orphelin (« · 4 pelotes ») et
-// la pastille « Laine(s) » restait vide, invisible mais cliquable. Repli sur le NOM DU
-// COLORIS et non sur « — » : la décision « identité = marque + modèle » (spec 18/09) porte
-// sur les champs à PRIVILÉGIER quand ils existent, et un tiret long sur une image partagée
-// est précisément ce que proscrit la règle du séparateur ci-dessous.
+// Repli sur le coloris seul quand marque ET modèle sont vides, jamais deux fois — cas
+// ATTEIGNABLE : le `<select>` de marque de StashView.vue ouvre sur `<option value="">` et
+// `save()` n'exige que `colorName`, seul champ réellement obligatoire d'une fiche laine (le
+// reste de l'app assume déjà ce vide, cf. `brand || '—'` dans YarnCard.vue/ProjectDetailView.vue/
+// ProjectEditView.vue). Sans ce repli la ligne du badge démarrait sur un séparateur orphelin
+// (« · 4 pelotes ») et la pastille « Laine(s) » restait vide, invisible mais cliquable. Repli sur
+// le coloris et non sur « — » : marque + modèle sont à PRIVILÉGIER quand ils existent, pas à
+// remplacer par un tiret long.
 export function yarnLabel(yarn) {
-  const label = [yarn?.brand, yarn?.model].map((s) => String(s ?? '').trim()).filter(Boolean).join(' ')
-  return label || String(yarn?.colorName ?? '').trim()
+  const identity = [yarn?.brand, yarn?.model].map((s) => String(s ?? '').trim()).filter(Boolean).join(' ')
+  const color = String(yarn?.colorName ?? '').trim()
+  if (!identity) return color
+  return color ? `${identity}, ${color}` : identity
+}
+
+// Matières de l'ouvrage (intent du 28/09) : union dédoublonnée des compositions des laines
+// liées, dans l'ordre de première apparition, traduites dans la langue du BADGE (`locale`),
+// jamais celle de l'app. Jamais de pourcentage, jamais de libellé « Composition » (décisions
+// Julien 29/09). Chaîne vide si aucune laine n'a de composition : rien n'est inventé.
+export function compositionSummary(yarnUsage, t, locale) {
+  const seen = new Set()
+  const materials = []
+  for (const { yarn } of yarnUsage || []) {
+    for (const m of normalizeComposition(yarn?.composition)) {
+      if (seen.has(m)) continue
+      seen.add(m)
+      materials.push(m)
+    }
+  }
+  return materials.map((m) => compositionLabel(m, (key) => t(key, {}, { locale }))).join(' · ')
 }
 
 // Une seule logique pour « Commencé le / Terminé le », partagée par `statValue` (pastille,
@@ -1057,8 +1162,10 @@ function drawStackedBlocks(ctx, rows, { left, top, rowH, textColor, maxWidth }) 
 // seul endroit qui la connaît (`statValue`), jamais dupliquée chez l'appelant. Défaut `true`
 // (et non `false` comme `includeCalendar`) : tout appel existant qui l'omet garde le
 // comportement d'avant ce correctif. `onGeometry` (optionnel) : reçoit la géométrie réelle
-// (`computeBadgeGeometry`, texte mesuré), même sans contexte 2D.
-export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem, onGeometry }) {
+// (`computeBadgeGeometry`, texte mesuré), même sans contexte 2D. `scale` (défaut 1, prévisu) :
+// multiplie le canevas PHYSIQUE (export partagé, cf. `BADGE_EXPORT_SCALE`), plafonné à
+// `BADGE_MAX_DIM` ; mise en page et `onGeometry` restent en unités logiques.
+export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem, onGeometry, scale = 1 }) {
   const ctx = canvas.getContext('2d')
 
   // Technique (Task 2, chantier « badge cartouche condensé » 18/09c ; universel aux 4 gabarits
@@ -1095,8 +1202,15 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // documente partout ailleurs. Chaîne vide (jamais `null`) quand il n'y a rien à dessiner : un
   // seul test de vérité (`if (techniqueLabel)`) aux deux endroits.
   const techniqueLabel = includeTechnique ? statValue('technique', stats, t, locale, project) : ''
+  // Bandeau des matières (décision Julien 29/09) : piloté par la clé `'composition'` de
+  // `statKeys` (pastille du composeur), qui ne produit AUCUNE ligne de stats (`statLines` n'a
+  // pas de cas pour elle). Chaîne vide si la clé est décochée ou si aucune matière n'est connue.
+  const compositionText = (statKeys || []).includes('composition') ? compositionSummary(yarnUsage, t, locale) : ''
   let titleLines = [project?.name || '']
   let freeTextLines = rawFreeTextLines
+  // Lignes du bandeau : wrappées plus bas, à la largeur du titre ; sans contexte 2D, une ligne
+  // non wrappée (même repli que `freeTextLines` ci-dessus, et que la prévisu du composeur).
+  let compositionLines = compositionText ? [compositionText] : []
   // Blocs empilés, libellés DÉJÀ répartis sur leurs sous-lignes (`wrapStackedLabels`) — calculés
   // ici, en phase de mesure, puis relus DEUX fois : pour le `statLineCount` transmis à la
   // géométrie (nombre de sous-lignes, jamais de paires) et pour le dessin lui-même. Reste `null`
@@ -1178,6 +1292,9 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
     // par mot à cette largeur alors qu'il tient en une seule ligne à la largeur pleine.
     ctx.font = '40px sans-serif'
     freeTextLines = rawFreeTextLines.flatMap((line) => wrapText(ctx, line, titleMaxWidth))
+    // Bandeau des matières : pleine largeur du cartouche lui aussi, à sa propre police.
+    ctx.font = COMPO_BAND_FONT
+    compositionLines = compositionText ? wrapText(ctx, compositionText, titleMaxWidth) : []
     // `statsMaxWidth` vaut exactement le `right - left`/`left` que `drawStackedBlocks` recevra
     // plus bas (`statsArea.w - TEXT_PAD * 2`, dans les trois modes de calendrier) : mesurer ici
     // et dessiner là-bas portent donc sur la MÊME largeur, condition pour que la hauteur
@@ -1199,8 +1316,9 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // `pairCount` (Task 9, dernier argument) : nombre de GROUPES (jamais de paires ni de
   // sous-lignes, cf. `geometryStatLineCount` juste au-dessus — Task 13 : les deux phrases de
   // `startedOn` ne comptent que pour UN groupe, cf. `countGroups`).
-  const geometry = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0)
-  const { canvas: canvasSize, photoSlot, photoSlots, statsArea, calendarArea, textBottom, freeTextTop } = geometry
+  // `compositionLines.length` (10e argument) : lignes du bandeau des matières, 0 sans bandeau.
+  const geometry = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0, compositionLines.length)
+  const { canvas: canvasSize, photoSlot, photoSlots, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset } = geometry
   const { w, h } = canvasSize
   // Le canevas est dimensionné ICI, AVANT le retour anticipé qui suit — comme avant ce
   // changement (17/09) — parce que jsdom (tests) ne fournit pas de contexte 2D natif : le
@@ -1208,13 +1326,17 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // chaque changement de réglage, et le composant lit `canvas.width`/`height` et la géométrie
   // remontée par `onGeometry` (bouton « Modifier », cf. `onPreviewClick`/`previewFixStyle`)
   // même quand aucun dessin n'a eu lieu.
-  canvas.width = w
-  canvas.height = h
+  const pixelScale = Math.max(1, Math.min(scale, BADGE_MAX_DIM / Math.max(w, h)))
+  canvas.width = Math.round(w * pixelScale)
+  canvas.height = Math.round(h * pixelScale)
   // Géométrie RÉELLE (texte mesuré) pour la prévisu ; la valeur de retour reste la dataURL.
   onGeometry?.(geometry)
   // jsdom (tests) ne fournit pas de contexte 2D natif : sortie silencieuse plutôt qu'une
   // exception — les navigateurs réels ont toujours ce contexte.
   if (!ctx) return null
+  // Le redimensionnement ci-dessus a réinitialisé la transformation : l'échelle se pose ici,
+  // avant tout dessin, et tout le reste dessine en unités logiques.
+  if (pixelScale !== 1) ctx.scale(pixelScale, pixelScale)
   const { h: hue, s, l } = parseHsl(color)
   // Deux arrêts de LA MÊME couleur (teinte + saturation conservées), juste plus clair en
   // haut et plus sombre en bas — donne l'effet dégradé sans jamais dénaturer la couleur
@@ -1320,13 +1442,31 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // petite (`STACK_ROW_H`) par stat plutôt que l'ancienne `LINE_HEIGHT` (64px) — UNIQUE chemin
   // de dessin depuis ce chantier (19/09) : plus de distinction par gabarit, `stackedRows` (déjà
   // wrappé en phase de mesure) est passé TEL QUEL à `drawStackedBlocks`.
+  // `statsTopOffset` : non nul seulement quand le bandeau des matières passe entre le titre et
+  // les stats (mode côte à côte), lu dans la géométrie, jamais redéduit du mode ici.
   drawStackedBlocks(ctx, stackedRows || [], {
     left: textX,
-    top: textTop + condensedTitleRowHeight(titleLines.length),
+    top: textTop + condensedTitleRowHeight(titleLines.length) + statsTopOffset,
     rowH: STACK_ROW_H,
     textColor,
     maxWidth: statsMaxWidth,
   })
+
+  // Bandeau des matières : deux filets pleine largeur (même opacité que la pastille
+  // Technique), les matières seules entre eux, à l'abscisse du titre.
+  if (compositionLines.length && compositionBand) {
+    ctx.save()
+    ctx.globalAlpha = 0.4
+    ctx.fillStyle = textColor
+    ctx.fillRect(textX, compositionBand.y, compositionBand.w - TEXT_PAD * 2, COMPO_BAND_RULE)
+    ctx.fillRect(textX, compositionBand.y + compositionBand.h - COMPO_BAND_RULE, compositionBand.w - TEXT_PAD * 2, COMPO_BAND_RULE)
+    ctx.restore()
+    ctx.font = COMPO_BAND_FONT
+    ctx.fillStyle = textColor
+    compositionLines.forEach((line, i) => {
+      ctx.fillText(line, textX, compositionBand.y + COMPO_BAND_PAD + COMPO_BAND_BASELINE_OFFSET + i * COMPO_BAND_LINE_H)
+    })
+  }
 
   // Texte libre (Task 5, chantier « badge cartouche condensé » 18/09c ; universel aux 4
   // gabarits depuis le 19/09). Bloc À PART, dessiné APRÈS le bloc stats+calendrier et AVANT la
@@ -1392,5 +1532,5 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
     })
   }
 
-  return canvas.toDataURL('image/jpeg', 0.9)
+  return canvas.toDataURL('image/jpeg', BADGE_JPEG_QUALITY)
 }

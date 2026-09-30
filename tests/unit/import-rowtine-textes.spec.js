@@ -64,6 +64,14 @@ describe('textes des portes d’import PDF et Rowtine', () => {
     expect(lire(LOCALES[locale], 'warnings.zip.missingImage')).toBeTypeOf('string')
   })
 
+  // L'adresse du convertisseur vient de app-links.js (une par langue), jamais recopiée ici.
+  it.each(Object.keys(LOCALES))('la sous-ligne de la porte Rowtine interpole le lien du site (%s)', (locale) => {
+    const s = lire(LOCALES[locale], 'pattern.importRowtineHint')
+    expect(s).toBeTypeOf('string')
+    expect(s).toContain('{site}')
+    expect(s).not.toContain('rowtine.app')
+  })
+
   it.each(Object.keys(LOCALES))('le message « PDF scanné » propose le contact, adresse interpolée (%s)', (locale) => {
     const s = lire(LOCALES[locale], 'importLocal.scanned')
     expect(s).toBeTypeOf('string')

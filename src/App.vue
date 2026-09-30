@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
-import { RouterView } from 'vue-router'
+import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import NavProgress from '@/components/NavProgress.vue'
 import SnackBar from '@/components/SnackBar.vue'
@@ -27,6 +27,9 @@ import { classifySyncReport } from '@/backup/sync-report-decision'
 import { composeBackupFailureReport } from '@/backup/failure-report'
 import { copyToClipboard } from '@/utils/copy-to-clipboard'
 import { scheduleWarmup } from '@/utils/warmup'
+import { rowNotificationTarget, canApplyPendingRowTarget } from '@/utils/row-notification'
+import { isRowNotificationAvailable, onOpenProject, takeLaunchProject } from '@/native/row-notification'
+import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { folderGateHandlesBack } from '@/utils/folder-gate-back'
 import { versionGuardHandlesBack } from '@/utils/version-guard-back'
 import { ensureReprise } from '@/db/purchases-reprise'
@@ -64,6 +67,8 @@ const syncReportStore = useSyncReportStore()
 const backupFailureStore = useBackupFailureStore()
 const folderChangeStore = useFolderChangeStore()
 const { t } = useI18n()
+const router = useRouter()
+const noticeQueue = useNoticeQueueStore()
 
 // Bandeau bloquant de décision (avenant 04/08/2026) : visibilité
 // pilotée ICI, pas par BackupDecisionPrompt lui-même — `maybeOfferRestore` calcule
@@ -170,6 +175,79 @@ watch(
   },
 )
 
+// Appui sur la notification du rang en cours : rouvre le lecteur du projet. Aucune porte
+// d'entrée n'est contournée : la cible (une seule, la dernière gagne) reste EN ATTENTE
+// jusqu'à ce que la séquence de démarrage soit finie (après maybeOfferRestore), que
+// l'onboarding soit fait et qu'aucun message de la file ne tienne l'écran (garde-fou de
+// version, porte du dossier, décision de sauvegarde...). Un appui pendant une porte est
+// donc différé, pas perdu. Tout est silencieux en cas d'échec.
+// Fenêtre résiduelle : la porte du dossier n'expose aucun signal de fin d'évaluation
+// (`hasFolder()` asynchrone) ; elle est en pratique tranchée bien avant la fin de la
+// séquence de démarrage (plusieurs attentes la précèdent), sans garantie stricte.
+const pendingProjectId = ref(null)
+const startupDone = ref(false)
+const rowNoticeOpen = () => canApplyPendingRowTarget({
+  startupDone: startupDone.value,
+  onboarded: settingsStore.onboarded,
+  activeNotice: noticeQueue.active,
+})
+
+async function applyPendingRowTarget() {
+  try {
+    if (pendingProjectId.value === null || !rowNoticeOpen()) return
+    const projectId = pendingProjectId.value
+    pendingProjectId.value = null
+    await router.isReady()
+    // Les portes se relisent APRÈS l'attente du routeur : elles ont pu s'ouvrir entre-temps.
+    if (!rowNoticeOpen()) {
+      if (pendingProjectId.value === null) pendingProjectId.value = projectId
+      return
+    }
+    // La corbeille est une table à part : un projet supprimé n'est plus dans ce store.
+    const exists = projectsStore.projects.some((p) => String(p.id) === String(projectId))
+    const target = rowNotificationTarget(projectId, router.currentRoute.value, exists)
+    if (target) await router.push(target)
+  } catch {
+    // Échec silencieux : le lecteur reste où il est.
+  }
+}
+watch(
+  () => [pendingProjectId.value, startupDone.value, settingsStore.onboarded, noticeQueue.active],
+  applyPendingRowTarget,
+)
+
+function openProjectFromNotification(projectId) {
+  if (projectId === null || projectId === undefined) return
+  pendingProjectId.value = projectId
+  applyPendingRowTarget()
+}
+
+// Après le chargement des projets : écoute les appuis en cours de session, PUIS rattrape
+// l'appui arrivé avant tout écouteur (lancement à froid, ou processus mort dont la tâche
+// est ramenée des récents), que le plugin a retenu. Dans cet ordre : un appui entre les
+// deux serait sinon retenu sans être jamais rendu.
+let stopOpenProject = null
+let unmounted = false
+function startRowNotificationRouting() {
+  if (!isRowNotificationAvailable()) return
+  onOpenProject(({ projectId } = {}) => openProjectFromNotification(projectId))
+    .then((off) => {
+      if (unmounted) off?.()
+      else stopOpenProject = off
+      return takeLaunchProject()
+    })
+    .then(openProjectFromNotification)
+    .catch(() => {})
+}
+onBeforeUnmount(() => {
+  unmounted = true
+  try {
+    stopOpenProject?.()
+  } catch {
+    // rien à faire
+  }
+})
+
 onMounted(async () => {
   await patternsStore.load()                         // déclenche migrateReadersIfNeeded
   // Le patron libre doit naître dans la langue CHOISIE par l'utilisatrice à l'écran
@@ -191,6 +269,7 @@ onMounted(async () => {
   const fid = settingsStore.onboarded ? await patternsStore.ensureFreePattern(settingsStore.locale) : null
   await projectsStore.load()
   await projectsStore.migrateFreeProjects(fid)
+  startRowNotificationRouting()
 
   // Durcissement stockage : demander la persistance OS + alerter si presque plein
   // (au plus 1×/24h, sinon on matraque l'utilisateur à chaque lancement).
@@ -210,6 +289,8 @@ onMounted(async () => {
   // garde anti-course).
   const restoreOffered = await maybeOfferRestore()
   if (!restoreOffered) runPatronMdSync()
+  // Fin de la séquence des portes de démarrage : une notification en attente peut s'ouvrir.
+  startupDone.value = true
 
   // Reprise du budget (31/07) : reconstruit l'historique d'achat des fiches saisies
   // avant cette fonctionnalité, une seule fois. APRÈS le chargement des réglages (la devise en dépend)

@@ -23,6 +23,7 @@ import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { useDismissMenu } from '@/composables/useDismissMenu'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { pickAndCropImage } from '@/utils/photo'
+import { needleTexts, gaugeText as gaugeTextOf } from '@/utils/project-tiles'
 import { Capacitor } from '@capacitor/core'
 import { Filesystem, Directory } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
@@ -352,21 +353,9 @@ onMounted(loadAll)
 watch(() => route.params.id, (id) => { if (id != null) loadAll() })
 
 const hasGauge = computed(() => project.value?.gaugeStitches || project.value?.gaugeRows)
-const gaugeText = computed(() =>
-  [project.value?.gaugeStitches && `${project.value.gaugeStitches} m`, project.value?.gaugeRows && `${project.value.gaugeRows} rg`]
-    .filter(Boolean)
-    .join(' × '),
-)
-// Liste d'aiguilles : nouveau format needles[] ; repli sur les scalaires hérités si le
-// projet n'a pas encore été migré. On ne garde que les entrées renseignées, formatées.
-const needleList = computed(() => {
-  const p = project.value
-  if (!p) return []
-  const raw = Array.isArray(p.needles) ? p.needles : [{ mm: p.needleMm || '', us: p.needleUs || '' }]
-  return raw
-    .map((n) => [n.mm && `${n.mm} mm`, n.us].filter(Boolean).join(' · '))
-    .filter(Boolean)
-})
+const gaugeText = computed(() => gaugeTextOf(project.value, t, locale.value))
+// Liste d'aiguilles formatée : cf. `needleTexts` (utils/project-tiles.js).
+const needleList = computed(() => needleTexts(project.value, locale.value))
 const hasNeedle = computed(() => needleList.value.length > 0)
 const isCrochet = computed(() => project.value?.technique === 'crochet')
 const isDone = computed(() => project.value?.status === 'done')

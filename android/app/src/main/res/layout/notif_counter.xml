@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stepper du compteur dans la notification du rang en cours (vue repliée, et bas de la vue
+     dépliée) : moins, « Répétition k / N », plus. Vue sur mesure (RemoteViews), gonflée par
+     SystemUI : textes aux styles de notification, icônes teintées par @color/notif_counter_icon
+     (doublée dans values-night), pour suivre le thème clair ou sombre. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notif_counter_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ImageButton
+        android:id="@+id/notif_counter_minus"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_notif_minus"
+        android:tint="@color/notif_counter_icon" />
+
+    <TextView
+        android:id="@+id/notif_counter_label"
+        style="@style/TextAppearance.Compat.Notification.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:singleLine="true" />
+
+    <ImageButton
+        android:id="@+id/notif_counter_plus"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_notif_plus"
+        android:tint="@color/notif_counter_icon" />
+</LinearLayout>

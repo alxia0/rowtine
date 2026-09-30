@@ -2,7 +2,7 @@
 // Une ligne d'instruction du lecteur : rend le texte en jetons (sans v-html) —
 // chiffres multi-tailles filtrés selon la taille, abréviations cliquables (tooltip).
 import { computed } from 'vue'
-import { tokenizeLine, formatSizes, pickCount } from '@/utils/reader'
+import { tokenizeLine, countText } from '@/utils/reader'
 
 const props = defineProps({
   line: { type: Object, required: true },
@@ -12,16 +12,6 @@ const props = defineProps({
 const emit = defineEmits(['abbr'])
 
 const tokens = computed(() => tokenizeLine(props.line.t, props.line.c || [], props.abbrKeys))
-// `pickCount` rend `null` quand `sizeIndex` sort du vecteur (taille mémorisée sur un patron
-// qui a depuis PERDU des tailles : `st.size` est restauré sans être borné, ReaderView.vue:357).
-// Sans ce repli, `String(null)` imprimait le mot « null » à la place du nombre de mailles —
-// « Monter null m ». On retombe alors sur l'affichage multi-tailles, qui reste vrai.
-const countText = (values) => {
-  if (props.sizeIndex == null) return formatSizes(values)
-  const picked = pickCount(values, props.sizeIndex)
-  return picked == null ? formatSizes(values) : String(picked)
-}
-
 function onAbbr(e, key) {
   emit('abbr', { key, rect: e.target.getBoundingClientRect() })
 }
@@ -34,7 +24,7 @@ function onAbbr(e, key) {
         v-if="tk.type === 'count'"
         class="rl-num"
         :class="sizeIndex == null ? 'rl-num--all' : 'rl-num--picked'"
-        >{{ countText(tk.values) }}</span
+        >{{ countText(tk.values, props.sizeIndex) }}</span
       >
       <button v-else-if="tk.type === 'abbr'" type="button" class="rl-abbr" @click="onAbbr($event, tk.key)">{{ tk.text }}</button>
       <template v-else>{{ tk.text }}</template>

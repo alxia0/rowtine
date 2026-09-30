@@ -26,9 +26,15 @@ import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { GUIDE_SECTION_BIBLIOTHEQUE } from '@/constants/guide-sections'
+import { converterUrlFor } from '@/constants/app-links'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+// Sous-ligne de l'option d'import d'un fichier .rowtine : où fabriquer ce fichier. L'adresse
+// suit la langue de l'app ; le texte affiché la reprend sans `https://` ni barre finale, pour
+// qu'elle se lise et se retape telle quelle sur l'ordinateur.
+const converterUrl = computed(() => converterUrlFor(locale.value))
+const converterLabel = computed(() => converterUrl.value.replace(/^https:\/\//, '').replace(/\/$/, ''))
 const patternsStore = usePatternsStore()
 const trashStore = useTrashStore()
 const projectsStore = useProjectsStore()
@@ -322,13 +328,30 @@ function open(id) {
               </span>
               <input type="file" :accept="PDF_ACCEPT" class="lib-import__input lib-import__input--pdf" @change="onImportFile($event)" />
             </label>
+            <!-- Sous-ligne (29/09) : un fichier .rowtine se fabrique sur le site, depuis
+                 l'ordinateur ; le dire ici, AVANT l'appui, puisque ce label ouvre directement
+                 le sélecteur. Le lien est un contenu interactif du label : l'appui dessus ouvre
+                 le navigateur système (motif `target="_blank"`, cf. GuideView.vue), pas le
+                 sélecteur. Le nom accessible du champ reste le seul libellé, la sous-ligne en
+                 est la description. -->
             <label class="pas__opt lib-import">
               <AppIcon name="book" :size="20" />
-              <span class="pas__opt-body">{{ t('pattern.importRowtine') }}</span>
+              <span class="pas__opt-body pas__opt-body--stack">
+                <span id="pas-rowtine-title" class="pas__opt-title">{{ t('pattern.importRowtine') }}</span>
+                <i18n-t id="pas-rowtine-hint" keypath="pattern.importRowtineHint" tag="span" class="pas__opt-hint">
+                  <template #site>
+                    <a class="pas__opt-link" :href="converterUrl" target="_blank" rel="noopener"
+                      >{{ converterLabel }}<AppIcon name="externalLink" :size="12" class="pas__opt-link-icon"
+                    /></a>
+                  </template>
+                </i18n-t>
+              </span>
               <input
                 type="file"
                 :accept="ROWTINE_ACCEPT"
                 class="lib-import__input lib-import__input--rowtine"
+                aria-labelledby="pas-rowtine-title"
+                aria-describedby="pas-rowtine-hint"
                 @change="onImportFile($event, 'rowtine')"
               />
             </label>
@@ -417,9 +440,13 @@ function open(id) {
   text-align: left;
   cursor: pointer;
 }
-/* Option « Importer un PDF » : libellé uniquement (un seul nœud de texte depuis le
-   retrait du rappel, 17/08 — plus besoin d'empiler deux lignes). */
+/* Option « Importer un PDF » : libellé seul (rappel retiré le 17/08). L'option .rowtine
+   empile libellé et sous-ligne (29/09). */
 .pas__opt-body { display: flex; min-width: 0; }
+.pas__opt-body--stack { flex-direction: column; gap: 2px; }
+.pas__opt-hint { font-weight: 400; font-size: 13px; line-height: 1.4; color: var(--ink-70); }
+.pas__opt-link { color: var(--brand-deep); font-weight: 600; overflow-wrap: anywhere; }
+.pas__opt-link-icon { margin-left: 2px; vertical-align: -1px; }
 .fade-enter-active, .fade-leave-active { transition: opacity var(--motion-fast); }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 

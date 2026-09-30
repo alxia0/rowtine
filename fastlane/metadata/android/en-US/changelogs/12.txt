@@ -1,0 +1,5 @@
+Stitch techniques memo: basic and common knitting and crochet stitches and techniques, in the Tools and in the reader's cheat sheet.
+The current row in a notification while you follow a pattern: check off the row, count repeats, chart reminder, without opening the app.
+The screen stays on while you follow a pattern.
+Badge: each yarn's colorway and the project's fibres.
+Various improvements and fixes.

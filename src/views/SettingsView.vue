@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -26,6 +26,13 @@ import { generatePalette, hueGradientCss, presetHuesFor } from '@/theme/palette'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
 import { ymdLocal } from '@/utils/time-periods'
 import { useStartTour } from '@/composables/useStartTour'
+import {
+  isRowNotificationAvailable,
+  checkRowNotificationPermission,
+  requestRowNotificationPermission,
+  openRowNotificationSettings,
+} from '@/native/row-notification'
+import { isKeepScreenOnAvailable } from '@/native/keep-awake'
 
 const { t } = useI18n()
 const settings = useSettingsStore()
@@ -61,9 +68,85 @@ const firstName = ref(settings.firstName)
 const technique = ref(settings.defaultTechnique)
 const showTrash = ref(false)
 
-onMounted(() => {
+// Notification du rang en cours (natif seulement) : `denied` = notifications coupées dans Android.
+// `prompt` après une demande déjà faite = refus unique (Android redemandera) : une action
+// relance la demande, sans quoi l'interrupteur resterait allumé sans rien produire.
+const rowNotifAvailable = isRowNotificationAvailable()
+const rowNotifPermission = ref('granted')
+const rowNotifDenied = computed(() => settings.rowNotification && rowNotifPermission.value === 'denied')
+const rowNotifAsk = computed(
+  () => settings.rowNotification && rowNotifPermission.value === 'prompt' && settings.rowNotificationAsked,
+)
+
+let viewDisposed = false
+let removeResume = null
+async function refreshRowNotifPermission() {
+  if (viewDisposed) return
+  const state = await checkRowNotificationPermission()
+  if (!viewDisposed) rowNotifPermission.value = state
+}
+
+onMounted(async () => {
   trash.load()
+  if (rowNotifAvailable) await refreshRowNotifPermission()
 })
+
+// Retour au premier plan (souvent depuis les réglages Android ouverts par l'aide) : l'état
+// de la permission est relu, l'aide ne reste pas affichée à tort.
+if (rowNotifAvailable) {
+  import('@capacitor/app')
+    .then(({ App }) => App.addListener('resume', () => refreshRowNotifPermission().catch(() => {})))
+    .then((handle) => {
+      if (viewDisposed) Promise.resolve(handle?.remove?.()).catch(() => {})
+      else removeResume = handle
+    })
+    .catch(() => {})
+}
+onBeforeUnmount(() => {
+  viewDisposed = true
+  Promise.resolve(removeResume?.remove?.()).catch(() => {})
+  removeResume = null
+})
+
+let rowNotifBusy = false
+async function toggleRowNotification() {
+  if (rowNotifBusy) return
+  rowNotifBusy = true
+  try {
+    await applyRowNotification()
+  } finally {
+    rowNotifBusy = false
+  }
+}
+async function askRowNotification() {
+  if (rowNotifBusy) return
+  rowNotifBusy = true
+  try {
+    const state = await requestRowNotificationPermission()
+    if (!viewDisposed) rowNotifPermission.value = state
+  } finally {
+    rowNotifBusy = false
+  }
+}
+async function applyRowNotification() {
+  const next = !settings.rowNotification
+  await settings.saveRowNotification(next)
+  if (!next) return
+  let state = await checkRowNotificationPermission()
+  if (state === 'prompt') {
+    state = await requestRowNotificationPermission()
+    await settings.markRowNotificationAsked()
+  }
+  rowNotifPermission.value = state
+}
+
+// Écran allumé pendant le suivi (natif seulement) : le réglage seul, le lecteur l'applique.
+// Pas de garde anti double appui : aucune demande de permission, deux appuis rapprochés
+// s'écrivent dans l'ordre et l'interrupteur reflète toujours le dernier.
+const keepScreenAvailable = isKeepScreenOnAvailable()
+function toggleKeepScreenOn() {
+  settings.saveKeepScreenOn(!settings.keepScreenOn)
+}
 
 async function saveProfile() {
   await settings.saveProfile({ firstName: firstName.value, technique: technique.value })
@@ -290,6 +373,66 @@ function fmtDate(iso) {
       </div>
     </section>
 
+    <!-- Rang en cours dans les notifications : seulement dans l'APK (le plugin natif n'existe pas
+         sur le web). Interrupteur `role="switch"` nommé par le titre du bloc. -->
+    <section v-if="rowNotifAvailable" class="block">
+      <div class="switch-row">
+        <h2 id="row-notif-title" class="block__title switch-row__title">{{ t('rowNotif.setting') }}</h2>
+        <button
+          type="button"
+          class="switch"
+          :class="{ 'switch--on': settings.rowNotification }"
+          role="switch"
+          :aria-checked="settings.rowNotification ? 'true' : 'false'"
+          aria-labelledby="row-notif-title"
+          data-test="row-notif-switch"
+          @click="toggleRowNotification"
+        >
+          <span class="switch__thumb"></span>
+        </button>
+      </div>
+      <p class="muted small">{{ t('rowNotif.settingHint') }}</p>
+      <button
+        v-if="rowNotifAsk"
+        type="button"
+        class="row-notif-action small"
+        data-test="row-notif-ask"
+        @click="askRowNotification"
+      >
+        {{ t('rowNotif.settingAsk') }}
+      </button>
+      <button
+        v-if="rowNotifDenied"
+        type="button"
+        class="row-notif-action small"
+        data-test="row-notif-denied"
+        @click="openRowNotificationSettings"
+      >
+        {{ t('rowNotif.settingDenied') }}
+      </button>
+    </section>
+
+    <!-- Écran allumé pendant le suivi d'un projet : seulement dans l'APK, même interrupteur
+         que ci-dessus. -->
+    <section v-if="keepScreenAvailable" class="block">
+      <div class="switch-row">
+        <h2 id="keep-screen-title" class="block__title switch-row__title">{{ t('settings.keepScreenOn') }}</h2>
+        <button
+          type="button"
+          class="switch"
+          :class="{ 'switch--on': settings.keepScreenOn }"
+          role="switch"
+          :aria-checked="settings.keepScreenOn ? 'true' : 'false'"
+          aria-labelledby="keep-screen-title"
+          data-test="keep-screen-switch"
+          @click="toggleKeepScreenOn"
+        >
+          <span class="switch__thumb"></span>
+        </button>
+      </div>
+      <p class="muted small">{{ t('settings.keepScreenOnHint') }}</p>
+    </section>
+
     <!-- Langue -->
     <section class="block">
       <h2 class="block__title" id="language-title">{{ t('settings.language') }}</h2>
@@ -479,6 +622,14 @@ function fmtDate(iso) {
 /* fond --sage : solide, ne suit PAS la teinte → texte clair statique --on-solid (jamais
    le --on-accent flippant de la bande chaude claire) */
 .toggle__opt--on { background: var(--sage); color: var(--on-solid); }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-2); }
+.switch-row__title { margin-bottom: 0; }
+.switch { flex: none; position: relative; overflow: visible; width: 48px; height: 28px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--bg); padding: 0; }
+.switch::after { content: ''; position: absolute; inset: -10px -4px; } /* zone tactile 48px, aspect inchangé */
+.switch__thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink-55); transition: transform 0.15s; }
+.switch--on { background: var(--sage); border-color: var(--sage); }
+.switch--on .switch__thumb { transform: translateX(20px); background: var(--on-solid); }
+.row-notif-action { display: block; margin-top: var(--sp-2); padding: 0; border: none; background: transparent; color: var(--ink); text-align: left; text-decoration: underline; }
 .accent-swatches { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .accent-swatch { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--line); padding: 0; cursor: pointer; }
 .accent-swatch--on { border-color: var(--ink); box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--ink); }

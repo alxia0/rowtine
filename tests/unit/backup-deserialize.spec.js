@@ -234,6 +234,15 @@ describe('round-trip serializePattern → deserializePattern', () => {
     expect(restored.pdf).toBeUndefined()
   })
 
+  it('patron avec stitchPins : la sélection du mémo des points survit à l’aller-retour', () => {
+    const pattern = { id: 11, name: 'Bonnet', photos: [], stitchPins: ['cr-sc', 'kn-k2tog'] }
+    const result = serializePattern(pattern)
+    const patronJson = mainJson(result.files, result.dir, 'patron.json')
+    const filesByName = toFilesByName(result.files, result.dir, 'patron.json')
+
+    expect(deserializePattern(patronJson, filesByName)).toEqual(pattern)
+  })
+
   it('patron builtin (flags additionnels préservés)', () => {
     const pattern = { id: 1, name: 'Libre', photos: [], builtin: true }
     const result = serializePattern(pattern)

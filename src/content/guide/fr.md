@@ -44,9 +44,9 @@ d'exemple dans le lecteur avec des bulles d'explication.
 
 ## 1. L'accueil : ton tableau de bord
 
-![L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur et Aiguilles](images/fr/01-accueil.webp)
+![L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur, Aiguilles et Points](images/fr/01-accueil.webp)
 
-*L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les trois outils sont à portée de pouce.*
+*L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les quatre outils sont à portée de pouce.*
 
 En ouvrant l'app, tu retrouves :
 - **Ton dernier projet**, avec un bouton **Reprendre** pour repartir directement
@@ -64,7 +64,7 @@ En ouvrant l'app, tu retrouves :
   que si le projet a au moins une laine et qu'elles portent toutes l'étiquette Vegan.
 - Sur un projet **Terminé**, la tuile affiche sa **date de fin** juste après la technique et la taille (« Tricot · M · Terminé le 15/07/2026 ») dès qu'une date a été saisie. Elle se renseigne toute seule quand tu marques le projet Terminé (voir point 2), et n'apparaît jamais sur un projet Abandonné.
 - Un accès rapide aux **outils** (calculateur de mailles, compteur libre, aide
-  aiguilles/crochet), au bouton **+ Créer un projet** et au bouton **Importer un
+  aiguilles/crochet, mémo des techniques de points), au bouton **+ Créer un projet** et au bouton **Importer un
   PDF**, qui ouvre ta **Bibliothèque de patrons** directement sur l'ajout d'un patron.
 - Au tout début, tant que l'app ne contient que les exemples, l'accueil va à
   l'essentiel : une carte **Importer un patron PDF** prend la place de la tuile
@@ -166,7 +166,7 @@ Sessions, qu'une session se rectifie ou s'efface. L'écran reste volontairement 
 
 ### Partager un badge de ton projet
 
-![Écran de partage du badge pour le projet "Sweater for me" : la photo du pull, Temps total 32 h 07 min, Avancement 67 %, 30 sessions et la carte calendaire.](images/fr/02c-badge-partage.webp)
+![Écran de partage du badge de « Sweater for me » : la photo du pull, Acrylique · Polyester · Coton, 32 h 07 min, trois laines avec leur coloris, dont 8 pelotes (1,36 km), avancement 64 %, 30 sessions](images/fr/02c-badge-partage.webp)
 
 *L'écran de partage, ouvert depuis l'onglet Stats ou le menu de la fiche projet.*
 
@@ -184,12 +184,18 @@ Le tiroir de réglages a trois onglets :
 - **Couleur** : une palette de teintes, un bouton + pour en choisir une autre librement,
   et, au-dessus, les dernières couleurs que tu as réellement utilisées pour un badge.
 - **Infos** : ce que le badge doit contenir. Chaque pastille montre la valeur réelle du
-  projet (temps total, dates de début et de fin, laines utilisées avec leurs pelotes,
-  avancement tant que le projet est en cours, meilleure série, nombre de sessions, technique crochet ou tricot) :
-  appuie dessus pour l'inclure ou la retirer. La pastille **Carte calendaire** ajoute la
-  grille des jours travaillés. Tu y choisis aussi la **langue** du texte du badge,
-  indépendante de celle de l'app (pratique pour l'envoyer à quelqu'un qui ne parle pas la
-  tienne), et une ligne de **texte libre**, 80 caractères au plus.
+  projet (temps total, dates de début et de fin, laines utilisées avec leur coloris et
+  leurs pelotes, avancement tant que le projet est en cours, meilleure série, nombre de
+  sessions, technique crochet ou tricot) : appuie dessus pour l'inclure ou la retirer.
+  Chaque laine s'y nomme par sa marque, son modèle et son coloris : deux coloris du même
+  modèle restent bien distincts. Dès qu'une laine du projet a une composition notée, une
+  pastille de plus liste les **matières** de l'ouvrage (« Coton · Laine »), sans
+  pourcentage. Cochée d'office, elle ajoute au badge un bandeau pleine largeur, entre
+  deux filets, au-dessus de la carte calendaire (sous les chiffres si tu ne gardes pas
+  la carte). La pastille **Carte calendaire** ajoute la grille des jours travaillés. Tu
+  y choisis aussi la **langue** du texte du badge, indépendante de celle de l'app
+  (pratique pour l'envoyer à quelqu'un qui ne parle pas la tienne : les matières se
+  traduisent avec elle), et une ligne de **texte libre**, 80 caractères au plus.
 
 Pour changer une photo, appuie dessus sur l'aperçu : un bouton **Modifier** apparaît,
 qui propose une photo du projet ou une image de ta galerie, le format (carré, horizontal
@@ -203,9 +209,9 @@ dupliqué.
 
 ## 3. Le patron qui s'adapte à toi : le lecteur interactif
 
-![Le patron Bonnet Torsade ouvert dans le projet Bonnet d'hiver : « Revenir à mon étape », puis le sommaire du lecteur (une puce par section), « 1. Choisis ta taille » proposant S 50-52, M 54-56 déjà retenue et L 58-60, et le chrono en bas](images/fr/03a-lecteur-haut.webp)
+![Bonnet Torsade dans le lecteur : « Revenir à mon étape », puis la couverture, un bonnet torsadé à pompon posé sur une table en bois, et « 1. Choisis ta taille », M 54-56 retenue, le chrono en bas](images/fr/03a-lecteur-haut.webp)
 
-*En haut du lecteur : le sommaire des sections, puis le choix de la taille, à faire une fois pour tout le patron, et l'aide-mémoire (matériel, tableau des tailles, techniques, abréviations) à portée de main.*
+*En haut du lecteur : la couverture du patron, qui s'agrandit d'un appui, puis le choix de la taille, à faire une fois pour tout le patron. L'aide-mémoire et le sommaire des sections suivent juste en dessous.*
 
 ![Le compteur « Rang du diagramme » affiche 1 / 24, au-dessus du bouton d'ajout d'un compteur de répétition, des repères m. 8, m. 1 (début) et rang 24 (fin), puis du quadrillage de points et de torsades](images/fr/03b-lecteur-diagramme.webp)
 
@@ -217,7 +223,8 @@ importé et vérifié), tu obtiens :
 
 - **Le sélecteur de taille** : tu choisis ta taille une fois, et **tous les
   chiffres du patron se filtrent automatiquement** pour toi (mailles, rangs, longueurs) : chaque ligne affiche les chiffres de ta taille, sans les « 104 (108) 112… » à décoder.
-- **Le suivi pas à pas** : chaque étape est cochable, avec une barre de
+- **Le suivi pas à pas** : chaque étape est cochable, d'un appui sur sa case ou
+  n'importe où dans le tiers gauche de sa carte, avec une barre de
   progression globale et par section, et des compteurs de répétition intégrés
   (« − 3/12 + ») qui disparaissent tout seuls s'ils ne concernent pas ta taille.
 - **Le diagramme interactif** : le diagramme du patron (extrait tel quel du PDF
@@ -227,14 +234,67 @@ importé et vérifié), tu obtiens :
   utilisent le même diagramme.
 - **L'aide-mémoire** : les abréviations du patron s'affichent en infobulle dès
   que tu les touches, sans quitter ton rang ; un panneau complet regroupe aussi
-  les techniques (avec tutoriels vidéo), le matériel et l'échantillon, le
+  les techniques du patron (avec le lien vers sa vidéo quand il en donne une), le matériel et l'échantillon, le
   tableau des tailles, la liste des abréviations, et les **conseils et astuces**
-  donnés par le patron.
+  donnés par le patron. S'y ajoute toujours la tuile **Mémo : techniques de
+  points**, même sur un patron qui n'a pas d'aide-mémoire à lui : les fiches des
+  points que tu choisis (détails juste après cette liste).
 - **Le sommaire** : une rangée de puces, une par section, reste visible en haut
   du fil du lecteur. Un appui y amène directement à la section, et la puce de ta section active se marque d'elle-même : tu sais toujours où tu en es. Un
   patron d'une seule section ne l'affiche pas : il n'y aurait rien à résumer.
+- **La couverture et les photos du patron** : tout en haut du lecteur, la
+  couverture de ton PDF s'affiche telle que la créatrice l'a composée ; un appui
+  l'ouvre en grand. Quand la première page porte aussi des instructions, l'app
+  n'en garde que la photo, le titre et le descriptif. Les photos du PDF se
+  placent sous l'étape qui les précède dans le patron, en grand et jamais
+  recadrées (une série de photos pas à pas se range sur deux colonnes). Un appui
+  ouvre chacune en plein écran, sur laquelle tu peux zoomer. Pour un patron créé à la main,
+  la couverture est la photo que tu as désignée d'une étoile.
 - Tu peux consulter un patron en lecture (aperçu depuis la bibliothèque) **ou**
   suivre ta progression réelle depuis un projet. Les deux accès existent, et ta progression est toujours sauvegardée.
+  Dans l'aperçu, rien ne se coche encore, mais chaque ligne porte un petit repère
+  qui annonce ce qu'elle deviendra pendant le suivi. Une légende les explique
+  en haut de l'aperçu : **Pendant le suivi :** « se coche » pour une étape,
+  « se compte » pour une répétition, « à lire » pour une note.
+
+### Le mémo des techniques de points
+
+Un point oublié en plein rang, un montage dont tu ne retrouves plus le geste ? Le
+**mémo des techniques de points** rassemble une quarantaine de fiches, au crochet
+comme au tricot : pour chacune, son nom, ses abréviations, les étapes numérotées
+et une astuce. Elles sont dans l'app et se lisent sans connexion.
+
+![L'aide-mémoire sur l'onglet Mémo : techniques de points, après Abréviations et Conseils : le bouton Modifier les points en tête, puis la fiche Maille endroit, m. end., ses cinq étapes et son astuce](images/fr/03j-memo-points.webp)
+
+*L'onglet du mémo, une fois des points choisis : « Modifier les points » en tête, puis une fiche par point, avec ses abréviations, ses étapes numérotées et une astuce.*
+
+**Choisir tes points.** Dans l'aide-mémoire du lecteur, touche la tuile **Mémo :
+techniques de points**. Tant qu'aucun point n'est choisi, l'onglet explique à quoi
+il sert : appuie sur **Choisir les points**. Le sélecteur s'ouvre alors :
+- en tête, **Suggérés pour ce patron** propose les points dont l'app a reconnu
+  les abréviations dans le glossaire du patron ;
+- le champ **Rechercher un point** retrouve une fiche par son nom ou par son
+  abréviation ;
+- les onglets **Crochet** et **Tricot** rangent toutes les fiches par famille
+  (mailles de base, augmentations et diminutions, montages…), et le sélecteur
+  s'ouvre sur la technique du patron.
+
+Coche les points que tu veux garder sous la main : chaque case s'enregistre
+aussitôt. **Terminé** te ramène à l'onglet du mémo, avec une fiche par point
+choisi.
+
+![Le sélecteur Mémo : techniques de points, onglet Tricot : le champ Rechercher un point, Suggérés pour ce patron avec Maille endroit et Maille envers cochées, Montages, Rabattages, et le bouton Terminé](images/fr/03k-memo-selecteur.webp)
+
+*Le sélecteur : en tête, les points reconnus dans le glossaire du patron, cochés ici, puis toutes les fiches de la technique, rangées par famille. Chaque case s'enregistre aussitôt.*
+
+**Rangé avec le patron.** Ta sélection appartient au patron, pas à un projet : tu
+la retrouves dans l'aperçu depuis la bibliothèque comme dans chacun des projets
+qui suivent ce patron, et elle part avec ta sauvegarde. Pour la changer ensuite,
+le bouton **Modifier les points**, en tête de l'onglet, rouvre le même
+sélecteur : décocher un point retire sa fiche.
+
+Hors de tout patron, le mémo complet se consulte aussi depuis l'accueil, par la
+tuile **Points** des outils (point 6).
 
 ### Le diagramme en plein écran, et comment bien le « caler »
 
@@ -319,6 +379,12 @@ veux la reformuler. Tu n'as pas à sortir du projet pour la réparer.
 **Appuie sur la carte** qui porte la ligne. Un voile se pose dessus, avec deux
 boutons : **Corriger** et **Fermer**. L'écran de correction s'ouvre alors directement **sur cette ligne-là** : tu n'as pas à la chercher dans tout le patron.
 
+Sur une étape à cocher, appuie **au milieu ou à droite** de la carte. Son tiers
+gauche, sur toute la hauteur, sert à cocher : un appui y coche ou décoche l'étape,
+comme la case elle-même, sans poser de voile. Pas besoin de viser la petite case
+pendant que tu tricotes. Les notes, les répétitions, les diagrammes et les titres de
+section ne changent pas : le voile s'y pose où que tu appuies.
+
 Le voile ne gêne pas ton tricot : il se retire tout seul au bout de trois
 secondes, et un appui n'importe où ailleurs le fait partir. Appuyer sur une
 autre carte l'y déplace. Et aucun appui sur un **contrôle** de la carte ne le
@@ -386,12 +452,18 @@ régler : c'est le même écran, simplement plus à l'aise.
   Dès la fin de l'import, un bilan « Ton patron est importé » compte ce que l'app a
   trouvé (sections, étapes à cocher, tailles, diagrammes), rappelle de relire le patron
   avant de commencer, et le bouton **Prévisualiser le patron** t'emmène directement le
-  parcourir, section par section.
+  parcourir, section par section. Les repères de l'aperçu t'aident à cette relecture :
+  une ligne marquée « à lire » qui devrait se cocher, ou l'inverse, se voit d'un coup
+  d'œil, et se corrige dans l'éditeur.
   (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)
-- **Importer au format {app}** : dans « + Ajouter un patron », ce choix
+- **Importer un fichier {app}** : dans « + Ajouter un patron », ce choix
   accepte un fichier **.rowtine**, c'est-à-dire un patron déjà mis au
   format de {app} (son texte et ses images). Il entre tel quel dans ta
   bibliothèque, sans passer par la lecture d'un PDF, et toujours sans connexion.
+  Ce fichier se crée depuis l'ordinateur, avec le convertisseur du site
+  (rowtine.app/fr/convertisseur) : il lit le PDF de ton patron et te laisse
+  le corriger sur grand écran. Copie ensuite le fichier sur ton téléphone
+  (câble, cloud, courriel…), puis choisis-le ici.
 - **Créer un patron à la main** : dans « + Ajouter un patron », le choix
   **Créer manuellement** ouvre un écran dédié (nom, type, catégorie, tailles,
   source, auteur…) avec une seule rubrique **Photos** pour ses images. Sur la
@@ -532,9 +604,9 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
 
 ## 5. Ton stock de laine
 
-![10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, le champ Rechercher une laine…, les boutons Filtrer et Trier, Ajouter une laine et Import Ravelry, puis Drops · Moutarde, ×4 · 165 m · 200 g, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 m · 300 g, toutes deux libres](images/fr/05-stock.webp)
+![10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, Filtrer, Trier, Ajouter une laine, Import Ravelry, puis Drops · Moutarde, ×4 · 660 m · 200 g, et Hobbii · Sauge, ×6 · 1 272 m · 300 g, libres](images/fr/05-stock.webp)
 
-*Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec son état, libre ou réservée par un projet.*
+*Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec le métrage et le poids de tout le lot, et son état, libre ou réservée par un projet.*
 
 - **Ajouter une pelote** : marque, épaisseur (avec une aide pour comprendre les
   catégories d'épaisseur), composition (choisie dans une liste ; si ta matière
@@ -580,6 +652,9 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
 - **Le récapitulatif** en haut de l'écran : nombre de pelotes, longueur et
   poids cumulés (qui basculent tout seuls en km et en kg quand les totaux
   deviennent importants), et la valeur totale de ton stock.
+- **Les cartes** : chacune donne le nombre de pelotes, puis le métrage et le poids
+  **du lot entier** : 4 pelotes de 165 m s'affichent 660 m. Le métrage d'une
+  seule pelote se lit sur la fiche de la laine.
 - **Rechercher, filtrer, trier** : un champ de recherche et les boutons
   **Filtrer** et **Trier** en haut du stock. Filtrer ouvre une fenêtre à deux
   niveaux : la liste de sept critères (**Marque**, **Label**, **Épaisseur**, **Poids de pelote**, **Couleur**, **Composition**, **État** : libre, réservée ou utilisée), puis, pour le critère touché, ses valeurs. Un seul choix par critère, mais les critères se
@@ -595,6 +670,15 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
   de pelotes sont **réservées** à un projet et combien sont **libres**. Tu ne
   peux pas descendre la quantité en dessous de ce qui est déjà réservé (l'app
   te dit combien de pelotes sont retenues) ; et elle t'avertit si restaurer un projet depuis la corbeille remet en cause tes réserves de laine. Le projet revient quand même, avec une réservation réduite et un message qui te l'explique.
+- **Les pelotes entamées sont également comptées** : partout où tu comptes des pelotes, tu peux saisir
+  un nombre à virgule, 2,5 pour deux pelotes et demie, 0,5 pour un reste entamé.
+  Ça vaut pour la quantité en stock, une ligne d'achat ou de cadeau, les pelotes
+  que tu réserves à un projet, et la fenêtre qui s'ouvre quand tu passes à
+  **Terminé** un projet auquel des laines sont réservées (« Combien de pelotes
+  as-tu réellement utilisées ? ») : le reste retourne dans ton stock. Même chose
+  pour un projet **Abandonné**, où tu indiques les pelotes perdues. L'app garde
+  deux chiffres après la virgule (un quart de pelote, c'est 0,25) et affiche
+  partout ces nombres avec le séparateur de ta langue.
 - **La fiche d'une laine** : un appui sur sa carte l'ouvre en plein écran.
   Elle rassemble tout ce que tu as noté (marque, coloris, rangement, métrage,
   quantité, prix, achats, composition, notes), ses caractéristiques, son état
@@ -717,6 +801,11 @@ l'accueil :
   pour être rattrapé (cette laine n'ira pas avec ce patron), et rappelle
   toujours qu'un échantillon reste à tricoter pour vérifier : c'est un point
   de départ, pas une garantie. Le champ des rangs est facultatif.
+- **Mémo : techniques de points** : la tuile **Points** ouvre toutes les fiches
+  du mémo, en simple consultation : les points de base et les points les plus courants, au crochet comme au tricot. Cherche un point par son nom ou son
+  abréviation, passe de l'onglet Crochet à l'onglet Tricot, et touche une fiche
+  pour déplier ses étapes. Pour garder certains points sous la main pendant un
+  ouvrage, choisis-les depuis l'aide-mémoire du lecteur (point 3).
 
 ## 7. Statistiques
 
@@ -804,6 +893,20 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
   - **Un dossier de sauvegarde ne sert qu'à un seul appareil.** Le poser dans un
     dossier synchronisé pour en avoir une copie ailleurs est une bonne idée ; t'en servir depuis un téléphone **et** une tablette n'en est pas une : chacun effacerait le travail de l'autre. Pour un second appareil, il lui faut son propre
     dossier.
+- **Pendant le suivi d'un patron** : deux interrupteurs, **actifs
+  d'office**. Coupe-les ici si tu n'en veux pas.
+  - **Rang en cours dans les notifications** : tant que le lecteur d'un projet
+    est ouvert, une notification montre ton étape en cours et la suivante. Elle
+    te laisse avancer sans rouvrir l'app : « Cocher le rang » pour une étape, un
+    bouton moins et un bouton plus autour de « Répétition 4 / 8 » pour un
+    compteur, « Diagramme traité » pour le rappel d'un diagramme. Android te
+    demande une seule fois l'autorisation d'afficher des notifications, à la
+    première ouverture du lecteur ; si tu l'as refusée, les Réglages te le
+    signalent et t'ouvrent les paramètres d'Android pour la donner.
+  - **Garder l'écran allumé pendant le suivi** : l'écran ne se met pas en
+    veille tant que le lecteur d'un projet est ouvert, même si tu ne touches
+    pas ton appareil pendant de longues minutes, aiguilles en main. Il retrouve
+    sa mise en veille habituelle dès que tu quittes le lecteur.
 - **Aide** : « Revoir la visite guidée » rouvre le bonnet d'exemple dans le
   lecteur avec ses bulles d'explication, et le recrée si tu l'as supprimé.
 - **Contribuer** : lien vers le code source (l'app est open source), et deux autres

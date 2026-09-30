@@ -5,7 +5,8 @@
 // (.zip) » (route import-zip, B2) — la feuille reste à 3 choix.
 // 08/08 : la feuille passe à 2 choix, l'import .zip devient une porte de service cachée.
 // 23/09 : il redevient visible, la feuille a **3** choix (import PDF, « Importer au format
-// Rowtine » pour un .rowtine ou un .zip, ajout manuel).
+// Rowtine » pour un .rowtine ou un .zip, ajout manuel). 29/09 : libellé « Importer un
+// fichier Rowtine », avec une sous-ligne qui renvoie au convertisseur du site.
 //
 // Piège de cette tâche : le 1er choix (« Importer un patron PDF ») est un
 // <label class="btn"> enveloppant un <input type="file"> masqué — le sélecteur de
@@ -38,7 +39,7 @@ test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 3 choix', a
   // ce test à tort.
   await expect(page.getByText('Importer un patron PDF')).toHaveCount(0)
   await expect(page.getByText('Importer un patron (.zip)')).toHaveCount(0)
-  await expect(page.getByText('Importer au format Rowtine')).toHaveCount(0)
+  await expect(page.getByText('Importer un fichier Rowtine')).toHaveCount(0)
   await expect(page.getByText(/Import IA/)).toHaveCount(0)
   await expect(page.getByText('Créer manuellement')).toHaveCount(0)
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -50,7 +51,7 @@ test('un seul bouton d’ajout visible ; le tap ouvre une feuille à 3 choix', a
   const dialog = page.getByRole('dialog')
   await expect(dialog).toBeVisible()
   await expect(dialog).toContainText('Importer un patron PDF')
-  await expect(dialog).toContainText('Importer au format Rowtine')
+  await expect(dialog).toContainText('Importer un fichier Rowtine')
   await expect(dialog).toContainText('Créer manuellement')
   // Le texte d'avertissement retiré ne doit plus apparaître dans la
   // feuille. Ancré sur un fragment stable du texte français, pas sur la clé JSON — un
@@ -107,12 +108,27 @@ test('🚩 le tap sur « Importer un patron PDF » dans la feuille ouvre le VRAI
   await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
 })
 
-test('le tap sur « Importer au format Rowtine » ouvre lui aussi le sélecteur natif', async ({ page }) => {
+test('le tap sur « Importer un fichier Rowtine » ouvre lui aussi le sélecteur natif', async ({ page }) => {
   await openAddPatternSheet(page)
   const chooserPromise = page.waitForEvent('filechooser')
   await page.locator('label.lib-import').filter({ has: page.locator('.lib-import__input--rowtine') }).click()
   const chooser = await chooserPromise
   expect(chooser.isMultiple()).toBe(false)
+})
+
+// Protège la sous-ligne qui dit où obtenir un fichier Rowtine, sans brouiller le nom du champ.
+test('« Importer un fichier Rowtine » : la sous-ligne renvoie au convertisseur du site', async ({ page }) => {
+  await openAddPatternSheet(page)
+  const input = page.locator('.lib-import__input--rowtine')
+  await expect(input).toHaveAccessibleName('Importer un fichier Rowtine')
+  // Espace facultative avant la virgule : Chromium en compte une à la frontière de l'icône.
+  await expect(input).toHaveAccessibleDescription(
+    /^Crée-le depuis l'ordinateur sur rowtine\.app\/fr\/convertisseur ?, puis copie-le sur ton téléphone\.$/,
+  )
+  const lien = page.getByRole('dialog').getByRole('link', { name: 'rowtine.app/fr/convertisseur' })
+  await expect(lien).toHaveAttribute('href', 'https://rowtine.app/fr/convertisseur/')
+  await expect(lien).toHaveAttribute('target', '_blank')
+  await expect(lien).toHaveAttribute('rel', 'noopener')
 })
 
 // Protège l'entrée de l'accueil allégé : la carte d'import mène à la Bibliothèque, feuille d'ajout ouverte.

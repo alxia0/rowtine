@@ -22,7 +22,11 @@ vi.mock('vue-router', () => ({
   useRouter: () => nav.router,
 }))
 
+const keepAwake = vi.hoisted(() => ({ setKeepScreenOn: vi.fn(async () => {}) }))
+vi.mock('@/native/keep-awake', () => keepAwake)
+
 import ReaderView from '@/views/ReaderView.vue'
+import { useSettingsStore } from '@/stores/settings'
 
 // Reader simple : aucune taille, aucun aide-mémoire (reference absent)
 const SIMPLE_READER = {
@@ -81,15 +85,17 @@ afterEach(() => {
   while (wrappers.length) wrappers.pop().unmount()
 })
 
-describe('ReaderView — reader simple (sans tailles ni aide-mémoire)', () => {
-  it("n'affiche ni carte de taille ni aide-mémoire, mais montre les étapes", async () => {
+describe('ReaderView — reader simple (sans tailles ni référence du patron)', () => {
+  it("n'affiche pas de carte de taille, et l'aide-mémoire se limite au mémo des points", async () => {
     await seedSimpleProject()
     const w = mountReader()
     await settle()
     expect(w.find('.szcard').exists()).toBe(false)
-    expect(w.find('.amblock').exists()).toBe(false)
+    const tiles = w.findAll('.amtile') // une grille en haut, une rappelée en bas
+    expect(tiles.length).toBeGreaterThan(0)
+    for (const tile of tiles) expect(tile.text()).toContain(i18n.global.t('reader.reference.stitches.label'))
     expect(w.text()).toContain('Rang un')
-    expect(w.find('.fab--ref').exists()).toBe(false)
+    expect(w.find('.fab--ref').exists()).toBe(true)
   })
 })
 
@@ -237,5 +243,36 @@ describe('ReaderView — couverture en tête', () => {
     const w = mountReader()
     await settle()
     expect(w.find('.rcover').exists()).toBe(false)
+  })
+})
+
+// Écran allumé : tenu par le lecteur d'un projet seulement, jamais par l'aperçu d'un patron.
+describe('ReaderView — écran allumé pendant le suivi', () => {
+  beforeEach(() => keepAwake.setKeepScreenOn.mockClear())
+
+  it('projet : suit le réglage, retiré au démontage', async () => {
+    await seedSimpleProject()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    useSettingsStore().keepScreenOn = true
+    const w = mountReader(pinia)
+    await settle()
+    expect(keepAwake.setKeepScreenOn).toHaveBeenLastCalledWith(true)
+    w.unmount()
+    wrappers.splice(wrappers.indexOf(w), 1)
+    expect(keepAwake.setKeepScreenOn).toHaveBeenLastCalledWith(false)
+  })
+
+  it('aperçu d\'un patron : aucun appel, même réglage actif', async () => {
+    const { patternId } = await seedSimpleProject()
+    nav.route = { name: 'pattern-read', params: { id: String(patternId) }, query: {} }
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    useSettingsStore().keepScreenOn = true
+    const w = mountReader(pinia)
+    await settle()
+    w.unmount()
+    wrappers.splice(wrappers.indexOf(w), 1)
+    expect(keepAwake.setKeepScreenOn).not.toHaveBeenCalled()
   })
 })

@@ -419,7 +419,7 @@ export async function completeOnboarding(page, { firstName = 'Alex', technique =
 }
 
 // Bibliothèque (P2) : un seul bouton « Ajouter un patron » ouvre une feuille du bas à 3
-// choix (import PDF, « Importer au format Rowtine » depuis le 23/09, ajout manuel) ; les
+// choix (import PDF, « Importer un fichier Rowtine » depuis le 23/09, ajout manuel) ; les
 // anciens boutons ne sont plus directement présents sur /library. À appeler avant toute
 // interaction avec `.lib-import__input--pdf` / `.lib-import__input--rowtine` ou le bouton
 // « Créer manuellement » de la feuille.

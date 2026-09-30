@@ -94,6 +94,24 @@ export function guideUrlFor(locale) {
   return GUIDE_URLS[locale] ?? GUIDE_URLS.en
 }
 
+// Page du CONVERTISSEUR du site (patron PDF → fichier .rowtine, corrigé sur ordinateur),
+// une par langue de l'interface. Lue par la sous-ligne de l'option « Importer un fichier
+// Rowtine » (feuille d'ajout, LibraryView.vue). VÉRIFIÉES EN LIGNE le 29/09/2026 avec un agent
+// de navigateur : HTTP 200 et titre propre à chaque langue. L'adresse sans langue
+// (`/convertisseur/`) répond 403 : pas de raccourci possible. Table plate, même doctrine que
+// `GUIDE_URLS` ci-dessus.
+export const CONVERTER_URLS = {
+  fr: 'https://rowtine.app/fr/convertisseur/',
+  en: 'https://rowtine.app/en/convertisseur/',
+  de: 'https://rowtine.app/de/convertisseur/',
+  es: 'https://rowtine.app/es/convertisseur/',
+}
+
+// Même résolution et même repli sur l'anglais que `guideUrlFor`.
+export function converterUrlFor(locale) {
+  return CONVERTER_URLS[locale] ?? CONVERTER_URLS.en
+}
+
 // Page de dons « offrez-moi un café ». Adresse FOURNIE le 05/08/2026, le compte
 // Ko-fi étant ouvert et en état de recevoir — elle n'est PAS déduite du nom de l'app ni
 // devinée, malgré la ressemblance (le pseudo Ko-fi et le nom de l'app sont deux réservations

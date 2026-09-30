@@ -71,6 +71,11 @@ describe('StashView — écran vide accueillant', () => {
     expect(meta).not.toContain('250 g')
   })
 
+  it('stock vide en métrique : la carte exemple montre le métrage total du lot (5 × 175 m)', () => {
+    const meta = mountView([], { unitSystem: 'metric' }).find('.ycard--example .ycard__meta').text()
+    expect(meta).toContain('875 m')
+  })
+
   it('stock vide : recherche, tri et compteurs sont DÉMONTÉS (pas juste invisibles)', () => {
     const w = mountView([])
     expect(w.find('input[placeholder="Rechercher une laine…"]').exists()).toBe(false)

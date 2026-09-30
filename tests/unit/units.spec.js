@@ -7,6 +7,16 @@ import { formatLength, formatWeight, formatSkeins } from '@/utils/units'
 const FR_GROUP = new Intl.NumberFormat('fr').format(1000).replace(/\d/g, '')
 
 describe('formatLength', () => {
+  // Protège : le cumul d'une carte de laine reste en mètres, jamais en km (décision du 29/09).
+  it('profil lot : jamais de bascule en km, séparateur de milliers', () => {
+    expect(formatLength(3500, { locale: 'fr', profile: 'lot' })).toEqual({ text: `3${FR_GROUP}500`, unitKey: 'yarn.unit.m' })
+    expect(formatLength(999.5, { locale: 'fr', profile: 'lot' })).toEqual({ text: `1${FR_GROUP}000`, unitKey: 'yarn.unit.m' })
+    expect(formatLength(850, { locale: 'fr', profile: 'lot' })).toEqual({ text: '850', unitKey: 'yarn.unit.m' })
+  })
+  it('profil lot en impérial : yards entiers, jamais de mile ni de décimale', () => {
+    expect(formatLength(1000, { locale: 'en', system: 'imperial', profile: 'lot' })).toEqual({ text: '1,094', unitKey: 'yarn.unit.yd' })
+  })
+
   it('reste en mètres sous le seuil', () => {
     expect(formatLength(850, { locale: 'fr' })).toEqual({ text: '850', unitKey: 'yarn.unit.m' })
   })

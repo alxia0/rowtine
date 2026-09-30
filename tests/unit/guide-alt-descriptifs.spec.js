@@ -73,8 +73,8 @@ describe('les descriptions d images du guide décrivent au lieu de nommer', () =
     expect(fautives.map(f => f.nom)).toEqual([])
   })
 
-  it.each(LANGUES)('%s : les 28 captures en portent une', langue => {
-    expect(figures(langue)).toHaveLength(28)
+  it.each(LANGUES)('%s : les 30 captures en portent une', langue => {
+    expect(figures(langue)).toHaveLength(30)
   })
 
   // Le motif est lui-même éprouvé, sinon une garde aveugle passerait au vert : les deux

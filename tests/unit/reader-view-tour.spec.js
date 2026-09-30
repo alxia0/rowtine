@@ -107,7 +107,7 @@ describe('ReaderView, visite guidée (?tour=1)', () => {
     const w = mountReader(pinia)
     await settle()
 
-    const bulle = () => w.find('[role="dialog"]')
+    const bulle = () => w.find('.tour__bubble')
     expect(bulle().exists()).toBe(true)
     expect(w.find('.tour__title').text()).toBe(tk('tour.size.title'))
     expect(w.findAll('.tour__dot')).toHaveLength(3)
@@ -171,7 +171,7 @@ describe('ReaderView, visite guidée (?tour=1)', () => {
     await w.find('[data-test="tour-skip"]').trigger('click')
     await settle()
 
-    expect(w.find('[role="dialog"]').exists()).toBe(false)
+    expect(w.find('.tour__bubble').exists()).toBe(false)
     expect(nav.router.replace).toHaveBeenCalledWith({ query: {} })
     expect(active.projectId).toBe(projectId)
   })
@@ -198,7 +198,7 @@ describe('ReaderView, visite guidée (?tour=1)', () => {
     await w.find('[data-test="tour-skip"]').trigger('click')
     await settle()
 
-    expect(w.find('[role="dialog"]').exists()).toBe(false)
+    expect(w.find('.tour__bubble').exists()).toBe(false)
     expect(document.activeElement).toBe(w.find('.rhdr__back').element)
   })
 
@@ -210,11 +210,11 @@ describe('ReaderView, visite guidée (?tour=1)', () => {
     const w = mountReader(pinia)
     await settle()
     expect(file.requesters).toContain(NOTICE.READER_TOUR)
-    expect(w.find('[role="dialog"]').exists()).toBe(false)
+    expect(w.find('.tour__bubble').exists()).toBe(false)
 
     file.withdraw(NOTICE.SYNC_REPORT)
     await settle()
-    expect(w.find('[role="dialog"]').exists()).toBe(true)
+    expect(w.find('.tour__bubble').exists()).toBe(true)
   })
 
   it('sans ?tour=1, pas de visite et le chrono s ouvre au montage (comportement inchangé)', async () => {

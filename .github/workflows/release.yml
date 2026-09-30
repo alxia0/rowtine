@@ -81,6 +81,17 @@ jobs:
           track: alpha
           status: completed
 
+      - name: Update Google Play phone screenshots
+        if: env.HAS_PLAY_SA == 'true'
+        # A listing permission missing on the service account must not block the release.
+        continue-on-error: true
+        env:
+          PLAY_SA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          printf '%s' "$PLAY_SA" > "$RUNNER_TEMP/play-sa.json"
+          pip install --quiet requests cryptography
+          python3 .github/play/phone-screenshots.py "$RUNNER_TEMP/play-sa.json"
+
       - name: Attach APK and AAB to the GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

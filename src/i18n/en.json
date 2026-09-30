@@ -55,6 +55,7 @@
     "toolCounter": "Counter",
     "toolCalc": "Calculator",
     "toolNeedle": "Needles",
+    "toolStitches": "Stitches",
     "statsLink": "View time statistics",
     "recentSessions": "Recent sessions",
     "sessionsLink": "View all sessions"
@@ -261,6 +262,25 @@
     "knitting": "Knitting",
     "crochet": "Crochet"
   },
+  "rowNotif": {
+    "title": "Row {index}/{total}, {section}",
+    "next": "Next: {text}",
+    "nextIn": "Next, {section}: {text}",
+    "check": "Check off row",
+    "channel": "Current row",
+    "closedTitle": "Rowtine was closed",
+    "closedText": "Tap to pick up your row",
+    "chartTitle": "Remember the chart, {section}",
+    "chartRow": "Chart row {row}/{rows}",
+    "chartText": "Tap to see the chart",
+    "chartDone": "Chart done",
+    "counterTitle": "Repeat {count}/{total}, {section}",
+    "counterLabel": "Repeat {count} / {total}",
+    "setting": "Current row in notifications",
+    "settingHint": "Shows the current step while you follow a pattern, with a button to move on without opening the app.",
+    "settingDenied": "Rowtine notifications are turned off in Android. Tap to open settings.",
+    "settingAsk": "Rowtine isn't allowed to show notifications yet. Tap to allow it."
+  },
   "project": {
     "newTitle": "New project",
     "editTitle": "Edit project",
@@ -299,6 +319,8 @@
     "gaugeHint": "Your swatch measured over 10×10 cm. Used to check your tension and, later, to adapt the pattern if it differs.",
     "gaugeStitchesImperial": "Stitches / 4 in",
     "gaugeRowsImperial": "Rows / 4 in",
+    "gaugeStitchesValue": "{n} sts",
+    "gaugeRowsValue": "{n} rows",
     "gaugeHintImperial": "Your swatch measured over 4 × 4 in. Used as a reference to check your tension and, later, to adapt the pattern if it differs.",
     "sizesPlaceholder": "S, M, L",
     "activeSize": "Knitted size",
@@ -591,7 +613,8 @@
     "all": "All",
     "add": "Add pattern",
     "importPdf": "Import a PDF pattern",
-    "importRowtine": "Import in Rowtine format",
+    "importRowtine": "Import a Rowtine file",
+    "importRowtineHint": "Create it from a computer at {site}, then copy it to your phone.",
     "importing": "Reading PDF…",
     "importDone": "PDF imported. Review and complete the info.",
     "addManual": "Create manually",
@@ -661,8 +684,8 @@
   },
   "importLocal": {
     "title": "Import a PDF",
-    "titleRowtine": "Import in Rowtine format",
-    "leadRowtine": "A pattern already prepared in the Rowtine format: text and images are imported as is, on your device, offline.",
+    "titleRowtine": "Import a Rowtine file",
+    "leadRowtine": "A pattern already prepared in a Rowtine file: text and images are imported as is, on your device, offline.",
     "pickRowtine": "Choose a .rowtine or .zip file",
     "lead": "The pattern is parsed on your device: free, offline, faithful to the PDF.",
     "leadNext": "The pattern is saved straight into your library; you'll be able to fix the sections afterwards if needed.",
@@ -866,6 +889,8 @@
     "saved": "Settings saved.",
     "appearance": "Appearance",
     "weekStart": "First day of the week",
+    "keepScreenOn": "Keep the screen on while tracking",
+    "keepScreenOnHint": "The screen stays on as long as you are following a pattern.",
     "language": "Language",
     "unitsAndCurrency": "Units and currency",
     "unitsMetric": "Metric (m, g)",
@@ -1165,6 +1190,7 @@
       "tech": { "label": "Techniques", "sub": "Stitches & methods" },
       "abbr": { "label": "Abbreviations", "sub": "The pattern glossary" },
       "tips": { "label": "Tips", "sub": "Pattern tips" },
+      "stitches": { "label": "Stitch techniques memo", "sub": "The stitches you picked", "subEmpty": "Pick the stitches to keep at hand" },
       "h3": {
         "gauge": "Gauge",
         "needles": "Needles/Hook",
@@ -1239,6 +1265,28 @@
       "addChartStep": "+ Chart",
       "chartLabel": "Chart"
     }
+  },
+  "stitchMemo": {
+    "title": "Stitch techniques memo",
+    "pick": "Choose stitches",
+    "edit": "Edit stitches",
+    "empty": "No stitches chosen for this pattern yet. Pick the ones you want a reminder for: they will stay here.",
+    "search": "Search a stitch",
+    "suggested": "Suggested for this pattern",
+    "noResult": "No matching stitch",
+    "done": "Done",
+    "craft": { "crochet": "Crochet", "knitting": "Knitting" },
+    "group": {
+      "base": "Basic stitches",
+      "shaping": "Increases and decreases",
+      "construction": "Construction",
+      "texture": "Textured and fancy stitches",
+      "cast-on": "Cast-ons",
+      "bind-off": "Bind-offs",
+      "pattern": "Stitch patterns",
+      "technique": "Techniques"
+    },
+    "expand": "Show the steps"
   },
   "storage": {
     "writeFailed": "Not enough space: your last change could not be saved.",

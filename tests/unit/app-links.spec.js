@@ -2,7 +2,7 @@
 // CHAÎNES LITTÉRALES, jamais à la table réimportée : itérer sur la table testée par elle-même
 // ne rougirait pas si une adresse était cassée dans app-links.js.
 import { describe, it, expect } from 'vitest'
-import { CONTACT_EMAIL, guideUrlFor, websiteUrlFor } from '@/constants/app-links'
+import { CONTACT_EMAIL, converterUrlFor, guideUrlFor, websiteUrlFor } from '@/constants/app-links'
 
 // Le site suit la langue de l'APP (une adresse par langue), pas celle du navigateur.
 describe('app-links — adresses du site web (une par langue, VÉRIFIÉES 12/08/2026)', () => {
@@ -43,6 +43,24 @@ describe('app-links — adresses du guide en ligne (une par langue, VÉRIFIÉES 
   // que `fallbackLocale` (src/i18n/index.js) et `FALLBACK_ORDER` (src/content/guide/index.js).
   it("langue inconnue ('xx') : repli explicite sur l'anglais, jamais une adresse cassée", () => {
     expect(guideUrlFor('xx')).toBe('https://rowtine.app/en/guide/')
+  })
+})
+
+describe('app-links : adresses du convertisseur du site (une par langue, VÉRIFIÉES 29/09/2026)', () => {
+  it('fr → https://rowtine.app/fr/convertisseur/', () => {
+    expect(converterUrlFor('fr')).toBe('https://rowtine.app/fr/convertisseur/')
+  })
+  it('en → https://rowtine.app/en/convertisseur/', () => {
+    expect(converterUrlFor('en')).toBe('https://rowtine.app/en/convertisseur/')
+  })
+  it('de → https://rowtine.app/de/convertisseur/', () => {
+    expect(converterUrlFor('de')).toBe('https://rowtine.app/de/convertisseur/')
+  })
+  it('es → https://rowtine.app/es/convertisseur/', () => {
+    expect(converterUrlFor('es')).toBe('https://rowtine.app/es/convertisseur/')
+  })
+  it("langue inconnue ('xx') : repli explicite sur l'anglais, jamais une adresse cassée", () => {
+    expect(converterUrlFor('xx')).toBe('https://rowtine.app/en/convertisseur/')
   })
 })
 

@@ -3,6 +3,7 @@
 //  C : un vecteur de valeurs par taille tout-à-zéro (artefact d'import) ne doit PLUS s'afficher
 //      (« 0 (0) 0 (0)… »), même règle que les rangs du lecteur (isBlankCount).
 //  B : les longues séries de valeurs par taille portent overflow-wrap pour ne jamais déborder.
+//  Blocs génériques : étapes numérotées, astuce, message clé i18n, bouton d'action qui émet son événement.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import i18n from '@/i18n'
@@ -111,5 +112,30 @@ describe('ReaderSheet — lien vidéo (bloc yt)', () => {
 
   it('garde le lien pour une URL https', () => {
     expect(mountYt('https://example.org/v').find('a.rs__yt').attributes('href')).toBe('https://example.org/v')
+  })
+})
+
+describe('blocs génériques étapes et action', () => {
+  function mountBlocks(blocks) {
+    return mount(ReaderSheet, {
+      props: { reference: { abbrFull: [], tabs: [{ id: 'stitches', labelKey: 'reader.reference.stitches.label', blocks }] }, open: true, activeTab: 'stitches' },
+      global: { plugins: [i18n] },
+    })
+  }
+  it('rend les étapes en liste numérotée et l’astuce', () => {
+    const w = mountBlocks([{ h3: 'Maille serrée', steps: ['a', 'b'], tip: 'astuce' }])
+    expect(w.findAll('ol li').map((li) => li.text())).toEqual(['a', 'b'])
+    expect(w.text()).toContain('astuce')
+  })
+  it('un bloc action émet son événement', async () => {
+    const w = mountBlocks([{ action: { event: 'pick-stitches', labelKey: 'stitchMemo.pick' } }])
+    const btn = w.get('button.rs__action')
+    expect(btn.text()).toBe(i18n.global.t('stitchMemo.pick'))
+    await btn.trigger('click')
+    expect(w.emitted('action')).toEqual([['pick-stitches']])
+  })
+  it('mutedKey est traduit', () => {
+    const w = mountBlocks([{ mutedKey: 'stitchMemo.empty' }])
+    expect(w.text()).toContain(i18n.global.t('stitchMemo.empty'))
   })
 })

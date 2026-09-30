@@ -46,9 +46,9 @@ Beispielmütze im Lesemodus mit Erklärblasen.
 
 ## 1. Start: deine Übersicht
 
-![Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt die Zopfmütze, gestrickte Größe M, die Kacheln In Arbeit 1 und Diese Woche 0 h, unter Letzte Sitzungen die Wintermütze von heute (0:06), dann die Werkzeuge Zähler, Rechner und Nadeln](images/de/01-accueil.webp)
+![Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt die Zopfmütze, gestrickte Größe M, die Kacheln In Arbeit 1 und Diese Woche 0 h, unter Letzte Sitzungen die Wintermütze von heute (0:06), dann die Werkzeuge Zähler, Rechner, Nadeln und Maschen](images/de/01-accueil.webp)
 
-*Start: Die Kachel „Fortsetzen“ bringt dich zurück zu dem Werkstück, an dem du zuletzt gearbeitet hast, die Übersicht fasst das Wichtigste bis hin zu den letzten Sitzungen zusammen, und die drei Werkzeuge sind in Griffweite.*
+*Start: Die Kachel „Fortsetzen“ bringt dich zurück zu dem Werkstück, an dem du zuletzt gearbeitet hast, die Übersicht fasst das Wichtigste bis hin zu den letzten Sitzungen zusammen, und die vier Werkzeuge sind in Griffweite.*
 
 Beim Öffnen der App findest du:
 - **Dein letztes Projekt**, mit einer Schaltfläche **Fortsetzen**, um
@@ -77,7 +77,7 @@ Beim Öffnen der App findest du:
   Projekt auf Fertig setzt (siehe Punkt 2), und erscheint nie bei einem
   aufgegebenen Projekt.
 - Schneller Zugriff auf die **Werkzeuge** (Maschenrechner, freier Zähler,
-  Nadel-/Häkelnadelhilfe), die Schaltfläche **+ Projekt erstellen** und die
+  Nadel-/Häkelnadelhilfe, Merkhilfe für Maschentechniken), die Schaltfläche **+ Projekt erstellen** und die
   Schaltfläche **PDF importieren**, die deine **Anleitungen** direkt beim
   Hinzufügen einer Anleitung öffnet.
 - Ganz am Anfang, solange die App nur die Beispiele enthält, beschränkt sich der
@@ -197,7 +197,7 @@ ist bewusst einfach gehalten, ohne Filter und ohne Gruppierung.
 
 ### Ein Abzeichen deines Projekts teilen
 
-![Bildschirm zum Teilen des Abzeichens für das Projekt „Sweater for me“: das Foto des Pullovers, Gesamtzeit 32 h 07 min, Fortschritt 67 %, 30 Sitzungen und die Kalenderkarte.](images/de/02c-badge-partage.webp)
+![Teilen des Abzeichens von „Sweater for me“: das Foto des Pullovers, Acryl · Polyester · Baumwolle, 32 h 07 min, drei Garne mit Farbton, darunter 8 Knäuel (1,36 km), Fortschritt 64 %, 30 Sitzungen](images/de/02c-badge-partage.webp)
 
 *Der Bildschirm zum Teilen, geöffnet über den Reiter Statistik oder das Menü der Projektseite.*
 
@@ -217,14 +217,20 @@ Der Einstellungsbereich hat drei Reiter:
   andere Farbe und darüber, unter **Zuletzt verwendet**, die letzten Farben, die du
   tatsächlich für ein Abzeichen benutzt hast.
 - **Infos**: was das Abzeichen enthalten soll. Jede Angabe zeigt den echten Wert des
-  Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihren Knäueln,
-  Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der Sitzungen, Technik
-  Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder wieder
-  herauszunehmen. Die Angabe **Kalenderkarte**
-  fügt das Raster der gearbeiteten Tage hinzu. Hier wählst du auch die **Sprache**
-  des Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem
-  zu schicken, der deine nicht spricht), und eine Zeile **Freitext (optional)**,
-  höchstens 80 Zeichen.
+  Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihrer Farbe und
+  ihren Knäueln, Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der
+  Sitzungen, Technik Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder
+  wieder herauszunehmen. Jedes Garn erscheint dort mit Marke, Garnname und Farbe:
+  Zwei Farben desselben Garns bleiben klar unterscheidbar. Sobald ein Garn des
+  Projekts ein eingetragenes Material hat, listet eine weitere Angabe die
+  **Materialien** des Werkstücks auf („Baumwolle · Wolle“), ohne Prozentangaben.
+  Von Anfang an ausgewählt, fügt sie dem Abzeichen ein Band über die ganze Breite
+  hinzu, zwischen zwei feinen Linien, über der Kalenderkarte (unter den Zahlen,
+  wenn du die Karte weglässt). Die Angabe **Kalenderkarte** fügt das Raster der
+  gearbeiteten Tage hinzu. Hier wählst du auch die **Sprache** des
+  Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem
+  zu schicken, der deine nicht spricht: Die Materialien werden mit ihr
+  übersetzt), und eine Zeile **Freitext (optional)**, höchstens 80 Zeichen.
 
 Um ein Foto zu wechseln, tippst du es in der Vorschau an: Eine Schaltfläche
 **Bearbeiten** erscheint, die dir ein Foto des Projekts oder ein Bild aus deiner
@@ -239,9 +245,9 @@ wird das vorige Abzeichen ersetzt, nicht verdoppelt.
 
 ## 3. Die Anleitung, die sich dir anpasst: der interaktive Lesemodus
 
-![Die Anleitung Zopfmütze, im Projekt Wintermütze geöffnet: „Zu meinem Schritt“, dann das Inhaltsverzeichnis des Lesemodus (ein Punkt pro Abschnitt), „1. Wähle deine Größe“ mit S 50-52, M 54-56 bereits gewählt und L 58-60, und unten der Timer](images/de/03a-lecteur-haut.webp)
+![Zopfmütze im Lesemodus: „Zu meinem Schritt“, dann das Cover, eine Zopfmütze mit Bommel auf einem Holztisch, darunter „1. Wähle deine Größe“ mit M 54-56 gewählt, und unten der Timer](images/de/03a-lecteur-haut.webp)
 
-*Oben im Lesemodus: das Inhaltsverzeichnis der Abschnitte, dann die Größenwahl, einmal für die ganze Anleitung, und das Merkblatt (Material, Größentabelle, Techniken, Abkürzungen) in Griffweite.*
+*Oben im Lesemodus: das Cover der Anleitung, das sich mit einem Tippen vergrößert, dann die Größenwahl, einmal für die ganze Anleitung. Das Merkblatt und das Inhaltsverzeichnis der Abschnitte folgen direkt darunter.*
 
 ![Der Zähler Diagrammreihe steht auf 1 von 24, darunter die Schaltfläche Wiederholungszähler hinzufügen und das Raster der Zopfmütze: Punkte in Spalten und ein Zopfmuster, mit Masche 1 als Anfang rechts und Masche 8 links.](images/de/03b-lecteur-diagramme.webp)
 
@@ -256,7 +262,8 @@ vor, ebenso jede importierte und geprüfte Anleitung), bekommst du:
   Reihen, Längen): Jede Zeile zeigt dir die Werte deiner Größe, ohne dass du
   eine Notation wie „104 (108) 112…“ entziffern musst.
 - **Die Schritt-für-Schritt-Begleitung**: Jeden Schritt kannst du
-  abhaken, mit einem Fortschrittsbalken fürs Ganze und einem
+  abhaken, indem du sein Kästchen oder eine beliebige Stelle im linken
+  Drittel seiner Karte antippst, mit einem Fortschrittsbalken fürs Ganze und einem
   je Abschnitt sowie eingebauten Wiederholungszählern
   („− 3/12 +“), die von selbst verschwinden, falls sie nicht zu deiner
   gewählten Größe gehören.
@@ -268,19 +275,76 @@ vor, ebenso jede importierte und geprüfte Anleitung), bekommst du:
   allen Abschnitten geteilt wird, die dasselbe Diagramm verwenden.
 - **Das Merkblatt**: Die Abkürzungen der Anleitung erscheinen als
   Sprechblase, sobald du sie antippst, ohne dass du deine aktuelle Reihe
-  verlässt; ein vollständiges Panel bündelt außerdem die Techniken (mit
-  Video-Anleitungen), Material und Maschenprobe, die Größentabelle, die
+  verlässt; ein vollständiges Panel bündelt außerdem die Techniken der Anleitung (mit dem Link zu
+  ihrem Video, wenn sie eines angibt), Material und Maschenprobe, die Größentabelle, die
   Liste der Abkürzungen sowie die von der Anleitung gegebenen **Tipps und
-  Tricks**.
+  Tricks**. Dazu kommt immer die Kachel **Merkhilfe: Maschentechniken**, auch
+  bei einer Anleitung ohne eigenes Merkblatt: Sie enthält die Karten der
+  Maschen, die du auswählst (mehr dazu direkt nach dieser Liste).
 - **Das Inhaltsverzeichnis**: eine Reihe von Punkten, einer pro Abschnitt,
   bleibt oben im Fluss des Lesemodus sichtbar. Ein Antippen bringt dich
   direkt zum Abschnitt, und der Punkt deines aktiven Abschnitts markiert
   sich von selbst: Du weißt immer, wo du gerade bist. Eine Anleitung mit
   nur einem Abschnitt zeigt es nicht: Es gäbe nichts zusammenzufassen.
+- **Das Cover und die Fotos der Anleitung**: Ganz oben im Lesemodus erscheint
+  das Cover deines PDFs so, wie die Designerin es gestaltet hat; ein Tippen
+  öffnet es groß. Trägt die erste Seite auch Anweisungen, behält die App nur
+  ihr Foto, den Titel und die Beschreibung. Die Fotos des PDFs stehen unter dem
+  Schritt, der ihnen in der Anleitung vorausgeht, groß und nie beschnitten
+  (eine Reihe von Schritt-für-Schritt-Fotos ordnet sich in zwei Spalten). Ein
+  Tippen öffnet jedes im Vollbild, wo du hineinzoomen kannst. Bei einer von
+  Hand angelegten Anleitung ist das Cover das Foto, das du mit einem Stern
+  markiert hast.
 - Eine Anleitung kannst du lesend ansehen (Vorschau aus dem Bildschirm
   „Anleitungen“) **oder** deinen tatsächlichen Fortschritt von einem Projekt aus
   verfolgen. Beide Zugänge bestehen nebeneinander, und dein Fortschritt
-  wird immer gespeichert.
+  wird immer gespeichert. In der Vorschau lässt sich noch nichts abhaken,
+  aber jede Zeile trägt ein kleines Zeichen, das ankündigt, was sie beim
+  Verfolgen wird. Eine Legende oben in der Vorschau erklärt sie: **Beim
+  Verfolgen:** „wird abgehakt“ für einen Schritt, „wird gezählt“ für eine
+  Wiederholung, „nur zum Lesen“ für eine Notiz.
+
+### Die Merkhilfe für Maschentechniken
+
+Mitten in der Reihe eine Masche vergessen, oder weißt du nicht mehr, wie ein
+Anschlag geht? Die **Merkhilfe für Maschentechniken** versammelt rund vierzig
+Karten, fürs Häkeln wie fürs Stricken: Jede nennt den Namen der Masche, ihre
+Abkürzungen, nummerierte Schritte und einen Tipp. Die Karten stecken in der
+App und lassen sich ohne Internetverbindung lesen.
+
+![Das Merkblatt auf dem Reiter Merkhilfe: Maschentechniken, nach Abkürzungen und Tipps: oben die Schaltfläche Maschen ändern, dann die Karte Rechte Masche, re M, mit fünf Schritten und ihrem Tipp](images/de/03j-memo-points.webp)
+
+*Der Reiter der Merkhilfe, sobald Maschen ausgewählt sind: „Maschen ändern“ ganz oben, dann eine Karte pro Masche, mit ihren Abkürzungen, nummerierten Schritten und einem Tipp.*
+
+**Deine Maschen auswählen.** Tippe im Merkblatt des Lesemodus auf die Kachel
+**Merkhilfe: Maschentechniken**. Solange keine Masche ausgewählt ist, erklärt
+der Reiter, wozu er dient: Tippe auf **Maschen auswählen**. Dann öffnet sich die
+Auswahl:
+- ganz oben schlägt **Vorschläge für diese Anleitung** die Maschen vor, deren
+  Abkürzungen die App im Abkürzungsverzeichnis der Anleitung erkannt hat;
+- das Feld **Masche suchen** findet eine Karte über ihren Namen oder ihre
+  Abkürzung;
+- die Reiter **Häkeln** und **Stricken** ordnen alle Karten nach Familien
+  (Grundmaschen, Zu- und Abnahmen, Maschenanschläge…), und die Auswahl öffnet
+  sich auf der Technik der Anleitung.
+
+Hake die Maschen ab, die du griffbereit haben willst: Jedes Kästchen wird
+sofort gespeichert. **Fertig** bringt dich zurück zum Reiter der Merkhilfe, mit
+einer Karte pro ausgewählter Masche.
+
+![Die Auswahl Merkhilfe: Maschentechniken auf dem Reiter Stricken: das Feld Masche suchen, Vorschläge für diese Anleitung mit Rechte Masche und Linke Masche abgehakt, Maschenanschläge, Abketten, Fertig](images/de/03k-memo-selecteur.webp)
+
+*Die Auswahl: Oben stehen die im Abkürzungsverzeichnis erkannten Maschen, hier abgehakt, dann alle Karten der Technik, nach Familien geordnet. Jedes Kästchen wird sofort gespeichert.*
+
+**Bei der Anleitung gespeichert.** Deine Auswahl gehört zur Anleitung, nicht zu
+einem Projekt: Du findest sie in der Vorschau aus dem Bildschirm „Anleitungen“
+ebenso wie in jedem Projekt, das dieser Anleitung folgt, und sie wandert mit in
+deine Sicherung. Um sie später zu ändern, öffnet die Schaltfläche **Maschen
+ändern** oben im Reiter dieselbe Auswahl wieder: Nimmst du den Haken bei einer
+Masche weg, verschwindet ihre Karte.
+
+Auch ohne Anleitung lässt sich die ganze Merkhilfe vom Start aus nachschlagen,
+über die Kachel **Maschen** bei den Werkzeugen (Punkt 6).
 
 ### Das Diagramm im Vollbild, und wie du es richtig „ausrichtest“
 
@@ -394,6 +458,14 @@ zwei Schaltflächen: **Korrigieren** und **Schließen**. Der Korrektur-Bildschir
 öffnet sich dann direkt **auf dieser Zeile**: Du musst sie nicht in der ganzen
 Anleitung suchen.
 
+Bei einem Schritt zum Abhaken tippst du **in die Mitte oder rechts** auf die
+Karte. Ihr linkes Drittel dient auf ganzer Höhe zum Abhaken: Ein Tippen dort
+hakt den Schritt ab oder nimmt den Haken weg, genau wie das Kästchen selbst,
+ohne den Schleier anzulegen. Du musst beim Stricken nicht auf das kleine
+Kästchen zielen. Bei Notizen, Wiederholungen, Diagrammen und
+Abschnittstiteln ändert sich nichts: Dort legt sich der Schleier an, wo immer
+du tippst.
+
 Der Schleier stört dein Stricken nicht: er zieht sich nach drei Sekunden von
 selbst zurück, und ein Tippen an anderer Stelle schickt ihn weg. Tippst du auf
 eine andere Karte, wandert er dorthin. Und kein Tippen auf ein **Bedienelement**
@@ -478,14 +550,21 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   importiert“ auf, was die App gefunden hat (Abschnitte, abzuhakende
   Schritte, Größen, Diagramme), erinnert dich daran, die Anleitung vor dem
   Start durchzulesen, und die Schaltfläche **Anleitung ansehen** bringt
-  dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen.
+  dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen. Die
+  Zeichen der Vorschau helfen dir beim Gegenlesen: Eine Zeile mit „nur zum
+  Lesen“, die sich abhaken lassen sollte, oder umgekehrt, fällt auf einen
+  Blick auf und lässt sich im Editor korrigieren.
   (Das Lesen erkennt auch die runden und eckigen Raster von
   Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)
-- **Im {app}-Format importieren**: Unter „Anleitung hinzufügen“ nimmt diese
+- **{app}-Datei importieren**: Unter „Anleitung hinzufügen“ nimmt diese
   Option eine **.rowtine**-Datei an, also eine Anleitung, die
   schon im {app}-Format vorbereitet ist (Text und Bilder). Sie kommt
   unverändert in deine Anleitungen, ohne dass ein PDF gelesen wird, und
   weiterhin offline.
+  Diese Datei erstellst du am Computer, mit dem Konverter der Website
+  (rowtine.app/de/convertisseur): Er liest das PDF deiner Anleitung und lässt
+  dich sie auf dem großen Bildschirm korrigieren. Kopiere die Datei dann auf
+  dein Smartphone (Kabel, Cloud, E-Mail…) und wähle sie hier aus.
 - **Eine Anleitung von Hand anlegen**: Unter „Anleitung hinzufügen“ öffnet
   die Wahl **Manuell erstellen** einen eigenen Bildschirm (Name, Typ,
   Kategorie, Größen, Quelle, Autor…) mit einer einzigen Rubrik **Fotos**
@@ -672,9 +751,9 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
 
 ## 5. Dein Garnvorrat
 
-![10 Knäuel, 1,932 km, 500 g und 31 € ausgegeben oben, das Feld „Garn suchen…“, die Schaltflächen Filtern und Sortieren, darunter Garn hinzufügen und Von Ravelry importieren untereinander, dann Drops · Moutarde, ×4 · 165 m · 200 g, mit einem kleinen Blatt markiert, und Hobbii · Sauge, ×6 · 212 m · 300 g, beide frei](images/de/05-stock.webp)
+![10 Knäuel, 1,932 km, 500 g, 31 € ausgegeben, Filtern, Sortieren, Garn hinzufügen, Von Ravelry importieren, dann Drops · Moutarde, ×4 · 660 m · 200 g, und Hobbii · Sauge, ×6 · 1.272 m · 300 g, frei](images/de/05-stock.webp)
 
-*Der Vorrat: die Summen oben (Knäuel, Länge, Gewicht, Wert), dann eine Karte pro Garn mit ihrem Status, frei oder für ein Projekt reserviert.*
+*Der Vorrat: die Summen oben (Knäuel, Länge, Gewicht, Wert), dann eine Karte pro Garn mit Lauflänge und Gewicht aller Knäuel zusammen und ihrem Status, frei oder für ein Projekt reserviert.*
 
 - **Ein Knäuel hinzufügen**: Marke, Stärke (mit einer Hilfe zum
   Verständnis der Stärkekategorien), Material (aus einer Liste gewählt;
@@ -726,6 +805,9 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
 - **Die Zusammenfassung** oben im Bildschirm: Anzahl der Knäuel,
   Gesamtlänge und -gewicht (die sich von selbst in km und kg umschalten,
   sobald die Summen groß werden), sowie der Gesamtwert deines Vorrats.
+- **Die Karten**: Jede zeigt die Anzahl der Knäuel, dann Lauflänge und
+  Gewicht **aller Knäuel zusammen**: 4 Knäuel zu 165 m erscheinen als 660 m.
+  Die Lauflänge eines einzelnen Knäuels steht auf der Vollbildkarte des Garns.
 - **Suchen, filtern, sortieren**: ein Suchfeld und die Schaltflächen
   **Filtern** und **Sortieren** oben im Vorrat. Filtern öffnet ein Fenster
   mit zwei Ebenen: die Liste der sieben Kriterien (**Marke**, **Label**,
@@ -750,6 +832,16 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
   Papierkorb deine Garnreservierungen infrage stellt. Das Projekt kommt
   trotzdem zurück, aber mit einer verringerten Reservierung und einer
   Meldung, die es dir erklärt.
+- **Angefangene Knäuel zählen auch**: Überall, wo du Knäuel zählst, kannst
+  du eine Kommazahl eingeben, 2,5 für zweieinhalb Knäuel, 0,5 für einen
+  angefangenen Rest. Das gilt für die Menge im Vorrat, eine Kauf- oder
+  Geschenkzeile, die Knäuel, die du für ein Projekt reservierst, und das
+  Fenster, das sich öffnet, wenn du ein Projekt mit reservierten Garnen auf
+  **Fertig** setzt („Wie viele Knäuel hast du tatsächlich verwendet?“): Der
+  Rest geht zurück in deinen Vorrat. Ebenso bei einem Projekt, das du auf
+  **Abgebrochen** setzt: Dort gibst du die verlorenen Knäuel an. Die App
+  behält zwei Nachkommastellen (ein Viertelknäuel ist 0,25) und zeigt diese
+  Zahlen überall mit dem Dezimaltrennzeichen deiner Sprache an.
 - **Die Karte eines Garns**: Ein Tipp auf seine Kachel öffnet sie im
   Vollbild. Sie versammelt alles, was du notiert hast (Marke, Farbe,
   Aufbewahrungsort, Lauflänge, Menge, Preis, Käufe, Material, Notizen),
@@ -891,6 +983,12 @@ zu sein, erreichbar vom Start aus:
   Anleitung), und erinnert dich stets daran, dass dir eine Maschenprobe
   zur Kontrolle bleibt: ein Ausgangspunkt, keine Garantie. Das Feld für
   die Reihen ist optional.
+- **Merkhilfe: Maschentechniken**: Die Kachel **Maschen** öffnet alle Karten
+  der Merkhilfe, nur zum Nachschlagen: die Grundmaschen und die gängigsten Maschen, beim Häkeln wie beim Stricken. Suche eine Masche über ihren Namen oder
+  ihre Abkürzung, wechsle zwischen den Reitern Häkeln und Stricken, und tippe
+  auf eine Karte, um ihre Schritte aufzuklappen. Um bestimmte Maschen während
+  eines Werkstücks griffbereit zu haben, wählst du sie im Merkblatt des
+  Lesemodus aus (Punkt 3).
 
 ## 7. Statistik
 
@@ -1016,6 +1114,22 @@ Aktion.
     einem Tablet aus zu benutzen, ist es nicht: Jedes Gerät würde die
     Arbeit des anderen löschen. Ein zweites Gerät braucht seinen eigenen
     Ordner.
+- **Beim Arbeiten nach einer Anleitung**: zwei Schalter,
+  **standardmäßig an**. Schalte sie hier aus, wenn du sie nicht möchtest.
+  - **Aktuelle Reihe in den Benachrichtigungen**: Solange der Lesemodus eines
+    Projekts geöffnet ist, zeigt eine Benachrichtigung deinen aktuellen
+    Schritt und den nächsten. Damit kommst du weiter, ohne die App wieder zu
+    öffnen: „Reihe abhaken“ für einen Schritt, eine Minus- und eine
+    Plus-Schaltfläche rund um „Wiederholung 4 / 8“ für einen Zähler,
+    „Diagramm erledigt“ für die Erinnerung an ein Diagramm. Android fragt dich
+    nur einmal um Erlaubnis, Benachrichtigungen anzuzeigen, beim ersten Öffnen
+    des Lesemodus; hast du abgelehnt, weisen dich die Einstellungen darauf hin
+    und öffnen die Android-Einstellungen, um sie zu erteilen.
+  - **Bildschirm beim Verfolgen eingeschaltet lassen**: Der Bildschirm geht
+    nicht in den Ruhezustand, solange der Lesemodus eines Projekts geöffnet
+    ist, auch wenn du dein Gerät minutenlang nicht berührst, die Nadeln in der
+    Hand. Sobald du den Lesemodus verlässt, gilt wieder der gewohnte
+    Ruhezustand.
 - **Hilfe**: „Geführte Tour erneut ansehen“ öffnet die Beispielmütze
   wieder im Lesemodus mit ihren Erklärblasen, und legt sie neu an, falls
   du sie gelöscht hast.

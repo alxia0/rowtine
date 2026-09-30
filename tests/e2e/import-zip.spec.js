@@ -1,5 +1,5 @@
 // Import au format Rowtine (.rowtine ou .zip : patron .md + images). Porte visible depuis le
-// 23/09 : option « Importer au format Rowtine » de la feuille d'ajout, écran d'import en mode
+// 23/09 : option « Importer un fichier Rowtine » de la feuille d'ajout, écran d'import en mode
 // `?format=rowtine`. Garde unitaire associée : tests/unit/local-import-zip-door.spec.js.
 import { test, expect } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
@@ -13,13 +13,13 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/library')
 })
 
-test('« Importer au format Rowtine » importe le kit et mène à la fiche patron', async ({ page }) => {
+test('« Importer un fichier Rowtine » importe le kit et mène à la fiche patron', async ({ page }) => {
   await openAddPatternSheet(page)
-  await expect(page.getByRole('dialog')).toContainText('Importer au format Rowtine')
+  await expect(page.getByRole('dialog')).toContainText('Importer un fichier Rowtine')
   await page.locator('.pas__options .lib-import__input--rowtine').setInputFiles(FIXTURE)
   // L'écran d'import est bien en mode Rowtine (la requête de route arrive jusqu'à la prop).
   await expect(page).toHaveURL(/\/import-local\?format=rowtine$/)
-  await expect(page.getByRole('heading', { name: 'Importer au format Rowtine' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Importer un fichier Rowtine' })).toBeVisible()
   // Le patron du kit a des sections : le bouton principal du bloc de réussite est
   // « Prévisualiser le patron » (mène au lecteur) ; un retour arrière ramène sur la fiche.
   await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()

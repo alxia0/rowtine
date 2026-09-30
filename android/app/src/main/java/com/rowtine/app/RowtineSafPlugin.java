@@ -125,7 +125,13 @@ public class RowtineSafPlugin extends Plugin {
         // `EXTRA_INITIAL_URI` n'est qu'une SUGGESTION : si `Documents` n'existe pas sur un
         // appareil, le sélecteur retombe de lui-même sur un emplacement valide plutôt que
         // d'échouer. Aucun repli à écrire ici.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        //
+        // Gate sur R (Android 11), pas O : la restriction citée plus haut (bouton
+        // « Utiliser ce dossier » grisé sur la racine `primary:`) n'existe qu'à partir
+        // d'Android 11 (scoped storage). En dessous, l'extra n'apporte rien : mesuré sur
+        // émulateur API 28, le sélecteur atterrit sur « Récents » avec ou sans lui. Il n'est
+        // pas la cause du sélecteur muet d'Android 9 remonté par F-Droid.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Uri initialUri = DocumentsContract.buildDocumentUri(
                     "com.android.externalstorage.documents", "primary:Documents");
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri);

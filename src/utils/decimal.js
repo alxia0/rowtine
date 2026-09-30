@@ -28,3 +28,21 @@ export function filtrerSaisieDecimale(v) {
   }
   return out
 }
+
+// Affiche une valeur décimale SAISIE en texte libre (diamètre d'aiguille, échantillon) avec le
+// séparateur de la langue de l'app : « 4.5 » s'écrit « 4,5 » en fr/de/es, « 4.5 » en en, quelle
+// que soit la saisie. La donnée stockée n'est jamais réécrite. Autant de décimales que la saisie
+// (ni arrondi ni zéro ajouté). Une saisie qui n'est pas un nombre seul (« 4-4.5 », « 4 mm ») est
+// rendue telle quelle : mieux vaut un séparateur étranger qu'une valeur perdue.
+export function formatDecimalText(raw, locale) {
+  const s = String(raw ?? '').trim()
+  if (!/^\d+(?:[.,]\d+)?$/.test(s)) return s
+  const frac = (s.split(/[.,]/)[1] || '').length
+  // Au-delà de 20 décimales, Intl.NumberFormat lève une RangeError : rendu tel quel.
+  if (frac > 20) return s
+  return new Intl.NumberFormat(locale || 'fr', {
+    minimumFractionDigits: frac,
+    maximumFractionDigits: frac,
+    useGrouping: false,
+  }).format(parseDecimal(s))
+}

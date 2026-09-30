@@ -135,10 +135,10 @@
         {
           "type": "image",
           "src": "01-accueil",
-          "alt": "Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt die Zopfmütze, gestrickte Größe M, die Kacheln In Arbeit 1 und Diese Woche 0 h, unter Letzte Sitzungen die Wintermütze von heute (0:06), dann die Werkzeuge Zähler, Rechner und Nadeln",
+          "alt": "Der Start von {app}: „Hallo Camille!“, die Kachel Fortsetzen zeigt die Zopfmütze, gestrickte Größe M, die Kacheln In Arbeit 1 und Diese Woche 0 h, unter Letzte Sitzungen die Wintermütze von heute (0:06), dann die Werkzeuge Zähler, Rechner, Nadeln und Maschen",
           "caption": [
             {
-              "text": "Start: Die Kachel „Fortsetzen“ bringt dich zurück zu dem Werkstück, an dem du zuletzt gearbeitet hast, die Übersicht fasst das Wichtigste bis hin zu den letzten Sitzungen zusammen, und die drei Werkzeuge sind in Griffweite.",
+              "text": "Start: Die Kachel „Fortsetzen“ bringt dich zurück zu dem Werkstück, an dem du zuletzt gearbeitet hast, die Übersicht fasst das Wichtigste bis hin zu den letzten Sitzungen zusammen, und die vier Werkzeuge sind in Griffweite.",
               "bold": false,
               "italic": false
             }
@@ -336,7 +336,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (Maschenrechner, freier Zähler, Nadel-/Häkelnadelhilfe), die Schaltfläche ",
+                  "text": " (Maschenrechner, freier Zähler, Nadel-/Häkelnadelhilfe, Merkhilfe für Maschentechniken), die Schaltfläche ",
                   "bold": false,
                   "italic": false
                 },
@@ -891,7 +891,7 @@
         {
           "type": "image",
           "src": "02c-badge-partage",
-          "alt": "Bildschirm zum Teilen des Abzeichens für das Projekt „Sweater for me“: das Foto des Pullovers, Gesamtzeit 32 h 07 min, Fortschritt 67 %, 30 Sitzungen und die Kalenderkarte.",
+          "alt": "Teilen des Abzeichens von „Sweater for me“: das Foto des Pullovers, Acryl · Polyester · Baumwolle, 32 h 07 min, drei Garne mit Farbton, darunter 8 Knäuel (1,36 km), Fortschritt 64 %, 30 Sitzungen",
           "caption": [
             {
               "text": "Der Bildschirm zum Teilen, geöffnet über den Reiter Statistik oder das Menü der Projektseite.",
@@ -1042,7 +1042,17 @@
                   "italic": false
                 },
                 {
-                  "text": ": was das Abzeichen enthalten soll. Jede Angabe zeigt den echten Wert des Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihren Knäueln, Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der Sitzungen, Technik Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder wieder herauszunehmen. Die Angabe ",
+                  "text": ": was das Abzeichen enthalten soll. Jede Angabe zeigt den echten Wert des Projekts (Gesamtzeit, Start- und Enddatum, verwendete Garne mit ihrer Farbe und ihren Knäueln, Fortschritt, solange das Projekt läuft, beste Serie, Anzahl der Sitzungen, Technik Stricken oder Häkeln): Tippe sie an, um sie aufzunehmen oder wieder herauszunehmen. Jedes Garn erscheint dort mit Marke, Garnname und Farbe: Zwei Farben desselben Garns bleiben klar unterscheidbar. Sobald ein Garn des Projekts ein eingetragenes Material hat, listet eine weitere Angabe die ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Materialien",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " des Werkstücks auf („Baumwolle · Wolle“), ohne Prozentangaben. Von Anfang an ausgewählt, fügt sie dem Abzeichen ein Band über die ganze Breite hinzu, zwischen zwei feinen Linien, über der Kalenderkarte (unter den Zahlen, wenn du die Karte weglässt). Die Angabe ",
                   "bold": false,
                   "italic": false
                 },
@@ -1062,7 +1072,7 @@
                   "italic": false
                 },
                 {
-                  "text": " des Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem zu schicken, der deine nicht spricht), und eine Zeile ",
+                  "text": " des Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem zu schicken, der deine nicht spricht: Die Materialien werden mit ihr übersetzt), und eine Zeile ",
                   "bold": false,
                   "italic": false
                 },
@@ -1176,10 +1186,10 @@
         {
           "type": "image",
           "src": "03a-lecteur-haut",
-          "alt": "Die Anleitung Zopfmütze, im Projekt Wintermütze geöffnet: „Zu meinem Schritt“, dann das Inhaltsverzeichnis des Lesemodus (ein Punkt pro Abschnitt), „1. Wähle deine Größe“ mit S 50-52, M 54-56 bereits gewählt und L 58-60, und unten der Timer",
+          "alt": "Zopfmütze im Lesemodus: „Zu meinem Schritt“, dann das Cover, eine Zopfmütze mit Bommel auf einem Holztisch, darunter „1. Wähle deine Größe“ mit M 54-56 gewählt, und unten der Timer",
           "caption": [
             {
-              "text": "Oben im Lesemodus: das Inhaltsverzeichnis der Abschnitte, dann die Größenwahl, einmal für die ganze Anleitung, und das Merkblatt (Material, Größentabelle, Techniken, Abkürzungen) in Griffweite.",
+              "text": "Oben im Lesemodus: das Cover der Anleitung, das sich mit einem Tippen vergrößert, dann die Größenwahl, einmal für die ganze Anleitung. Das Merkblatt und das Inhaltsverzeichnis der Abschnitte folgen direkt darunter.",
               "bold": false,
               "italic": false
             }
@@ -1244,7 +1254,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": Jeden Schritt kannst du abhaken, mit einem Fortschrittsbalken fürs Ganze und einem je Abschnitt sowie eingebauten Wiederholungszählern („− 3/12 +“), die von selbst verschwinden, falls sie nicht zu deiner gewählten Größe gehören.",
+                  "text": ": Jeden Schritt kannst du abhaken, indem du sein Kästchen oder eine beliebige Stelle im linken Drittel seiner Karte antippst, mit einem Fortschrittsbalken fürs Ganze und einem je Abschnitt sowie eingebauten Wiederholungszählern („− 3/12 +“), die von selbst verschwinden, falls sie nicht zu deiner gewählten Größe gehören.",
                   "bold": false,
                   "italic": false
                 }
@@ -1284,7 +1294,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": Die Abkürzungen der Anleitung erscheinen als Sprechblase, sobald du sie antippst, ohne dass du deine aktuelle Reihe verlässt; ein vollständiges Panel bündelt außerdem die Techniken (mit Video-Anleitungen), Material und Maschenprobe, die Größentabelle, die Liste der Abkürzungen sowie die von der Anleitung gegebenen ",
+                  "text": ": Die Abkürzungen der Anleitung erscheinen als Sprechblase, sobald du sie antippst, ohne dass du deine aktuelle Reihe verlässt; ein vollständiges Panel bündelt außerdem die Techniken der Anleitung (mit dem Link zu ihrem Video, wenn sie eines angibt), Material und Maschenprobe, die Größentabelle, die Liste der Abkürzungen sowie die von der Anleitung gegebenen ",
                   "bold": false,
                   "italic": false
                 },
@@ -1294,7 +1304,17 @@
                   "italic": false
                 },
                 {
-                  "text": ".",
+                  "text": ". Dazu kommt immer die Kachel ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Merkhilfe: Maschentechniken",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", auch bei einer Anleitung ohne eigenes Merkblatt: Sie enthält die Karten der Maschen, die du auswählst (mehr dazu direkt nach dieser Liste).",
                   "bold": false,
                   "italic": false
                 }
@@ -1319,6 +1339,21 @@
             {
               "spans": [
                 {
+                  "text": "Das Cover und die Fotos der Anleitung",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Ganz oben im Lesemodus erscheint das Cover deines PDFs so, wie die Designerin es gestaltet hat; ein Tippen öffnet es groß. Trägt die erste Seite auch Anweisungen, behält die App nur ihr Foto, den Titel und die Beschreibung. Die Fotos des PDFs stehen unter dem Schritt, der ihnen in der Anleitung vorausgeht, groß und nie beschnitten (eine Reihe von Schritt-für-Schritt-Fotos ordnet sich in zwei Spalten). Ein Tippen öffnet jedes im Vollbild, wo du hineinzoomen kannst. Bei einer von Hand angelegten Anleitung ist das Cover das Foto, das du mit einem Stern markiert hast.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Eine Anleitung kannst du lesend ansehen (Vorschau aus dem Bildschirm „Anleitungen“) ",
                   "bold": false,
                   "italic": false
@@ -1329,12 +1364,252 @@
                   "italic": false
                 },
                 {
-                  "text": " deinen tatsächlichen Fortschritt von einem Projekt aus verfolgen. Beide Zugänge bestehen nebeneinander, und dein Fortschritt wird immer gespeichert.",
+                  "text": " deinen tatsächlichen Fortschritt von einem Projekt aus verfolgen. Beide Zugänge bestehen nebeneinander, und dein Fortschritt wird immer gespeichert. In der Vorschau lässt sich noch nichts abhaken, aber jede Zeile trägt ein kleines Zeichen, das ankündigt, was sie beim Verfolgen wird. Eine Legende oben in der Vorschau erklärt sie: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Beim Verfolgen:",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " „wird abgehakt“ für einen Schritt, „wird gezählt“ für eine Wiederholung, „nur zum Lesen“ für eine Notiz.",
                   "bold": false,
                   "italic": false
                 }
               ],
               "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Die Merkhilfe für Maschentechniken",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Mitten in der Reihe eine Masche vergessen, oder weißt du nicht mehr, wie ein Anschlag geht? Die ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Merkhilfe für Maschentechniken",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " versammelt rund vierzig Karten, fürs Häkeln wie fürs Stricken: Jede nennt den Namen der Masche, ihre Abkürzungen, nummerierte Schritte und einen Tipp. Die Karten stecken in der App und lassen sich ohne Internetverbindung lesen.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03j-memo-points",
+          "alt": "Das Merkblatt auf dem Reiter Merkhilfe: Maschentechniken, nach Abkürzungen und Tipps: oben die Schaltfläche Maschen ändern, dann die Karte Rechte Masche, re M, mit fünf Schritten und ihrem Tipp",
+          "caption": [
+            {
+              "text": "Der Reiter der Merkhilfe, sobald Maschen ausgewählt sind: „Maschen ändern“ ganz oben, dann eine Karte pro Masche, mit ihren Abkürzungen, nummerierten Schritten und einem Tipp.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Deine Maschen auswählen.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Tippe im Merkblatt des Lesemodus auf die Kachel ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Merkhilfe: Maschentechniken",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". Solange keine Masche ausgewählt ist, erklärt der Reiter, wozu er dient: Tippe auf ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Maschen auswählen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". Dann öffnet sich die Auswahl:",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "ganz oben schlägt ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vorschläge für diese Anleitung",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " die Maschen vor, deren Abkürzungen die App im Abkürzungsverzeichnis der Anleitung erkannt hat;",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "das Feld ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Masche suchen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " findet eine Karte über ihren Namen oder ihre Abkürzung;",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "die Reiter ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Häkeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stricken",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ordnen alle Karten nach Familien (Grundmaschen, Zu- und Abnahmen, Maschenanschläge…), und die Auswahl öffnet sich auf der Technik der Anleitung.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Hake die Maschen ab, die du griffbereit haben willst: Jedes Kästchen wird sofort gespeichert. ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Fertig",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " bringt dich zurück zum Reiter der Merkhilfe, mit einer Karte pro ausgewählter Masche.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03k-memo-selecteur",
+          "alt": "Die Auswahl Merkhilfe: Maschentechniken auf dem Reiter Stricken: das Feld Masche suchen, Vorschläge für diese Anleitung mit Rechte Masche und Linke Masche abgehakt, Maschenanschläge, Abketten, Fertig",
+          "caption": [
+            {
+              "text": "Die Auswahl: Oben stehen die im Abkürzungsverzeichnis erkannten Maschen, hier abgehakt, dann alle Karten der Technik, nach Familien geordnet. Jedes Kästchen wird sofort gespeichert.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Bei der Anleitung gespeichert.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Deine Auswahl gehört zur Anleitung, nicht zu einem Projekt: Du findest sie in der Vorschau aus dem Bildschirm „Anleitungen“ ebenso wie in jedem Projekt, das dieser Anleitung folgt, und sie wandert mit in deine Sicherung. Um sie später zu ändern, öffnet die Schaltfläche ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Maschen ändern",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " oben im Reiter dieselbe Auswahl wieder: Nimmst du den Haken bei einer Masche weg, verschwindet ihre Karte.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Auch ohne Anleitung lässt sich die ganze Merkhilfe vom Start aus nachschlagen, über die Kachel ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Maschen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " bei den Werkzeugen (Punkt 6).",
+              "bold": false,
+              "italic": false
             }
           ]
         },
@@ -1786,6 +2061,26 @@
           "type": "paragraph",
           "spans": [
             {
+              "text": "Bei einem Schritt zum Abhaken tippst du ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "in die Mitte oder rechts",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " auf die Karte. Ihr linkes Drittel dient auf ganzer Höhe zum Abhaken: Ein Tippen dort hakt den Schritt ab oder nimmt den Haken weg, genau wie das Kästchen selbst, ohne den Schleier anzulegen. Du musst beim Stricken nicht auf das kleine Kästchen zielen. Bei Notizen, Wiederholungen, Diagrammen und Abschnittstiteln ändert sich nichts: Dort legt sich der Schleier an, wo immer du tippst.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
               "text": "Der Schleier stört dein Stricken nicht: er zieht sich nach drei Sekunden von selbst zurück, und ein Tippen an anderer Stelle schickt ihn weg. Tippst du auf eine andere Karte, wandert er dorthin. Und kein Tippen auf ein ",
               "bold": false,
               "italic": false
@@ -2125,7 +2420,7 @@
                   "italic": false
                 },
                 {
-                  "text": " bringt dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen. (Das Lesen erkennt auch die runden und eckigen Raster von Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)",
+                  "text": " bringt dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen. Die Zeichen der Vorschau helfen dir beim Gegenlesen: Eine Zeile mit „nur zum Lesen“, die sich abhaken lassen sollte, oder umgekehrt, fällt auf einen Blick auf und lässt sich im Editor korrigieren. (Das Lesen erkennt auch die runden und eckigen Raster von Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)",
                   "bold": false,
                   "italic": false
                 }
@@ -2135,7 +2430,7 @@
             {
               "spans": [
                 {
-                  "text": "Im {app}-Format importieren",
+                  "text": "{app}-Datei importieren",
                   "bold": true,
                   "italic": false
                 },
@@ -2150,7 +2445,7 @@
                   "italic": false
                 },
                 {
-                  "text": "-Datei an, also eine Anleitung, die schon im {app}-Format vorbereitet ist (Text und Bilder). Sie kommt unverändert in deine Anleitungen, ohne dass ein PDF gelesen wird, und weiterhin offline.",
+                  "text": "-Datei an, also eine Anleitung, die schon im {app}-Format vorbereitet ist (Text und Bilder). Sie kommt unverändert in deine Anleitungen, ohne dass ein PDF gelesen wird, und weiterhin offline. Diese Datei erstellst du am Computer, mit dem Konverter der Website (rowtine.app/de/convertisseur): Er liest das PDF deiner Anleitung und lässt dich sie auf dem großen Bildschirm korrigieren. Kopiere die Datei dann auf dein Smartphone (Kabel, Cloud, E-Mail…) und wähle sie hier aus.",
                   "bold": false,
                   "italic": false
                 }
@@ -3169,10 +3464,10 @@
         {
           "type": "image",
           "src": "05-stock",
-          "alt": "10 Knäuel, 1,932 km, 500 g und 31 € ausgegeben oben, das Feld „Garn suchen…“, die Schaltflächen Filtern und Sortieren, darunter Garn hinzufügen und Von Ravelry importieren untereinander, dann Drops · Moutarde, ×4 · 165 m · 200 g, mit einem kleinen Blatt markiert, und Hobbii · Sauge, ×6 · 212 m · 300 g, beide frei",
+          "alt": "10 Knäuel, 1,932 km, 500 g, 31 € ausgegeben, Filtern, Sortieren, Garn hinzufügen, Von Ravelry importieren, dann Drops · Moutarde, ×4 · 660 m · 200 g, und Hobbii · Sauge, ×6 · 1.272 m · 300 g, frei",
           "caption": [
             {
-              "text": "Der Vorrat: die Summen oben (Knäuel, Länge, Gewicht, Wert), dann eine Karte pro Garn mit ihrem Status, frei oder für ein Projekt reserviert.",
+              "text": "Der Vorrat: die Summen oben (Knäuel, Länge, Gewicht, Wert), dann eine Karte pro Garn mit Lauflänge und Gewicht aller Knäuel zusammen und ihrem Status, frei oder für ein Projekt reserviert.",
               "bold": false,
               "italic": false
             }
@@ -3467,6 +3762,31 @@
             {
               "spans": [
                 {
+                  "text": "Die Karten",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Jede zeigt die Anzahl der Knäuel, dann Lauflänge und Gewicht ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "aller Knäuel zusammen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": 4 Knäuel zu 165 m erscheinen als 660 m. Die Lauflänge eines einzelnen Knäuels steht auf der Vollbildkarte des Garns.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Suchen, filtern, sortieren",
                   "bold": true,
                   "italic": false
@@ -3663,6 +3983,41 @@
                 },
                 {
                   "text": " sind. Du kannst die Menge nicht unter das bereits Reservierte senken (die App zeigt dir an, wie viele Knäuel zurückgehalten werden); und sie warnt dich, falls das Wiederherstellen eines Projekts aus dem Papierkorb deine Garnreservierungen infrage stellt. Das Projekt kommt trotzdem zurück, aber mit einer verringerten Reservierung und einer Meldung, die es dir erklärt.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Angefangene Knäuel zählen auch",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Überall, wo du Knäuel zählst, kannst du eine Kommazahl eingeben, 2,5 für zweieinhalb Knäuel, 0,5 für einen angefangenen Rest. Das gilt für die Menge im Vorrat, eine Kauf- oder Geschenkzeile, die Knäuel, die du für ein Projekt reservierst, und das Fenster, das sich öffnet, wenn du ein Projekt mit reservierten Garnen auf ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Fertig",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " setzt („Wie viele Knäuel hast du tatsächlich verwendet?“): Der Rest geht zurück in deinen Vorrat. Ebenso bei einem Projekt, das du auf ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Abgebrochen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " setzt: Dort gibst du die verlorenen Knäuel an. Die App behält zwei Nachkommastellen (ein Viertelknäuel ist 0,25) und zeigt diese Zahlen überall mit dem Dezimaltrennzeichen deiner Sprache an.",
                   "bold": false,
                   "italic": false
                 }
@@ -4320,6 +4675,31 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Merkhilfe: Maschentechniken",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Die Kachel ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Maschen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet alle Karten der Merkhilfe, nur zum Nachschlagen: die Grundmaschen und die gängigsten Maschen, beim Häkeln wie beim Stricken. Suche eine Masche über ihren Namen oder ihre Abkürzung, wechsle zwischen den Reitern Häkeln und Stricken, und tippe auf eine Karte, um ihre Schritte aufzuklappen. Um bestimmte Maschen während eines Werkstücks griffbereit zu haben, wählst du sie im Merkblatt des Lesemodus aus (Punkt 3).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         }
@@ -4893,6 +5273,65 @@
                       },
                       {
                         "text": " einem Tablet aus zu benutzen, ist es nicht: Jedes Gerät würde die Arbeit des anderen löschen. Ein zweites Gerät braucht seinen eigenen Ordner.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Beim Arbeiten nach einer Anleitung",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": zwei Schalter, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "standardmäßig an",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Schalte sie hier aus, wenn du sie nicht möchtest.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Aktuelle Reihe in den Benachrichtigungen",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": Solange der Lesemodus eines Projekts geöffnet ist, zeigt eine Benachrichtigung deinen aktuellen Schritt und den nächsten. Damit kommst du weiter, ohne die App wieder zu öffnen: „Reihe abhaken“ für einen Schritt, eine Minus- und eine Plus-Schaltfläche rund um „Wiederholung 4 / 8“ für einen Zähler, „Diagramm erledigt“ für die Erinnerung an ein Diagramm. Android fragt dich nur einmal um Erlaubnis, Benachrichtigungen anzuzeigen, beim ersten Öffnen des Lesemodus; hast du abgelehnt, weisen dich die Einstellungen darauf hin und öffnen die Android-Einstellungen, um sie zu erteilen.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Bildschirm beim Verfolgen eingeschaltet lassen",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ": Der Bildschirm geht nicht in den Ruhezustand, solange der Lesemodus eines Projekts geöffnet ist, auch wenn du dein Gerät minutenlang nicht berührst, die Nadeln in der Hand. Sobald du den Lesemodus verlässt, gilt wieder der gewohnte Ruhezustand.",
                         "bold": false,
                         "italic": false
                       }

@@ -1,9 +1,10 @@
 <script setup>
 // Panneau « Aide-mémoire » : bottom-sheet à onglets rendant des blocs déclaratifs
-// (paragraphes, listes, tableau de tailles, valeurs par taille, tuto vidéo, ouverture diagramme).
-import { computed } from 'vue'
+// (paragraphes, étapes numérotées et astuce, message par clé i18n, tableau de tailles, valeurs par
+// taille, tuto vidéo, ouverture diagramme, bouton d'action qui émet `action`).
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatSizes, isBlankCount, pickCount, sizeLabelText } from '@/utils/reader'
+import { countText, isBlankCount, sizeLabelText } from '@/utils/reader'
 import AppIcon from '@/components/AppIcon.vue'
 import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { sanitizeUrl } from '@/utils/safe-url'
@@ -15,7 +16,7 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   activeTab: { type: String, default: '' },
 })
-const emit = defineEmits(['update:open', 'update:activeTab', 'open-chart'])
+const emit = defineEmits(['update:open', 'update:activeTab', 'open-chart', 'action'])
 const { t } = useI18n()
 
 const tabs = computed(() => props.reference.tabs || [])
@@ -26,13 +27,28 @@ const current = computed(() => tabs.value.find((x) => x.id === props.activeTab) 
 // de clé et ressort donc tel quel, dans la langue source).
 const lbl = (o, keyField, fallbackField) => (o && o[keyField] ? t(o[keyField]) : o?.[fallbackField])
 
-// Même repli que ReaderLine.vue (`countText`) : une taille mémorisée hors du vecteur (patron
+// Repli de `countText` (reader.js) : une taille mémorisée hors du vecteur (patron
 // qui a perdu des tailles, `st.size` restauré sans borne) affichait « undefined cm ».
 const perSizeText = (row) => {
-  const picked = pickCount(row.values, props.sizeIndex)
-  const v = picked == null ? formatSizes(row.values) : picked
-  return v + ' ' + (row.unit || '')
+  return countText(row.values, props.sizeIndex) + ' ' + (row.unit || '')
 }
+
+// Bande d'onglets : l'onglet actif (le mémo est le dernier) doit être visible à l'ouverture
+// et quand il change, sans faire défiler la page. `scrollIntoView` absent : rien à faire.
+const tabsEl = ref(null)
+function revealActiveTab() {
+  const el = tabsEl.value?.querySelector('.rs__tab--on')
+  if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+}
+watch(
+  () => [props.open, props.activeTab],
+  async ([open]) => {
+    if (!open) return
+    await nextTick()
+    revealActiveTab()
+  },
+  { flush: 'post' },
+)
 
 // Piège au Tab + restitution au déclencheur à la fermeture (dette audit UX 16/07,
 // composable partagé). Le keydown est posé sur la CARTE (`<aside role="dialog">`),
@@ -49,7 +65,7 @@ useDialogFocusReturn(() => props.open)
         <h2>{{ $t('reader.help') }}</h2>
         <button class="rs__close" :aria-label="$t('common.close')" @click="emit('update:open', false)"><AppIcon name="close" :size="18" /></button>
       </div>
-      <div class="rs__tabs" role="tablist">
+      <div ref="tabsEl" class="rs__tabs" role="tablist">
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -67,6 +83,11 @@ useDialogFocusReturn(() => props.open)
           <h3 v-if="b.h3">{{ lbl(b, 'h3Key', 'h3') }}</h3>
           <p v-for="(p, j) in b.p || []" :key="'p' + j">{{ p }}</p>
           <p v-for="(m, j) in b.muted || []" :key="'m' + j" class="rs__muted">{{ m }}</p>
+          <p v-if="b.mutedKey" class="rs__muted">{{ $t(b.mutedKey) }}</p>
+          <ol v-if="b.steps && b.steps.length" class="rs__steps">
+            <li v-for="(s, j) in b.steps" :key="'s' + j">{{ s }}</li>
+          </ol>
+          <p v-if="b.tip" class="rs__muted rs__tip">{{ b.tip }}</p>
 
           <!-- valeurs par taille — on masque les vecteurs tout-zéro (artefact d'import,
                même règle que les rangs du lecteur via isBlankCount) -->
@@ -106,6 +127,7 @@ useDialogFocusReturn(() => props.open)
           <!-- `yt.url` vient tel quel d'un patron.json : liste blanche http/https, un lien refusé n'est pas rendu -->
           <a v-if="b.yt && sanitizeUrl(b.yt.url)" class="rs__yt" :href="sanitizeUrl(b.yt.url)" target="_blank" rel="noopener"><AppIcon name="play" :size="16" aria-hidden="true" /> {{ b.yt.label }}</a>
           <button v-if="b.openChart" class="rs__yt" type="button" @click="emit('open-chart')"><AppIcon name="chart" :size="17" /> {{ $t('reader.chart.open') }}</button>
+          <button v-if="b.action" class="rs__yt rs__action" type="button" @click="emit('action', b.action.event)">{{ $t(b.action.labelKey) }}</button>
         </div>
       </div>
     </aside>
@@ -141,11 +163,14 @@ useDialogFocusReturn(() => props.open)
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
-  transition: transform var(--motion-base);
+  /* Fermé : ni lisible ni focalisable (même motif que le sélecteur de points). */
+  visibility: hidden;
+  transition: transform var(--motion-base), visibility var(--motion-base);
   padding-bottom: var(--sa-bottom);
 }
 .rs--on {
   transform: translateY(0);
+  visibility: visible;
 }
 .rs__grip {
   width: 44px;
@@ -246,6 +271,18 @@ useDialogFocusReturn(() => props.open)
   font-size: 13.5px;
   color: var(--brand-deep);
   text-decoration: none;
+}
+.rs__steps {
+  margin: var(--sp-2) 0 0;
+  padding-left: 1.4em;
+  font-size: 14px;
+}
+.rs__steps li {
+  margin: var(--sp-1) 0;
+  overflow-wrap: anywhere;
+}
+.rs__tip {
+  margin-top: var(--sp-2);
 }
 .rs__tablewrap {
   overflow-x: auto;

@@ -73,6 +73,10 @@ const IDENTICAL_VALUE_ALLOWED = {
     'stats.heatmap.projectLine', // "{name} — {duration}" — MÊME motif que stats.heatmap.cell juste au-dessus : {name} et {duration} portent déjà toute la traduction (11/08)
   ],
   en: [
+    // Mémo des techniques de points : mots anglais identiques au français (Crochet, Construction, Techniques).
+    'stitchMemo.craft.crochet',
+    'stitchMemo.group.construction',
+    'stitchMemo.group.technique',
     'yarn.unit.yd', // "yards" — mot entier, pas un symbole ("Yards" en allemand, "yardas" en espagnol)
     'project.sizesPlaceholder', // "S, M, L" — mesuré identique en fr/en/de/es (29/07) : reconduit aussi dans les compartiments 'de' et 'es' ci-dessous, ce n'est plus une exception anglaise seule
 

@@ -14,6 +14,7 @@ import en from '@/i18n/en.json'
 import de from '@/i18n/de.json'
 import es from '@/i18n/es.json'
 import { buildReference } from '@/utils/reader-reference'
+import { resolveStitch } from '@/content/stitch-memo'
 import { useProjectsStore } from '@/stores/projects'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -183,6 +184,47 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     await counter.findAll('.rcount__btn')[1].trigger('click')
     await settle()
     expect(w.find('.rcount__val').text()).toBe('1 / 3')
+  })
+
+  // Un compteur non atteint est l'étape en cours : mise en évidence, puce et reprise s'y arrêtent.
+  it('l\'étape en cours s\'arrête sur un compteur de répétition non atteint', async () => {
+    await seedProject(FIX_READER, { readerState: { size: 1, done: { 's1#0': true, 's1#1': true } } })
+    const w = mountReader()
+    await settle()
+    const cur = w.findAll('.rstep--cur')
+    expect(cur.length).toBe(1)
+    expect(cur[0].classes()).toContain('rstep--rep')
+    expect(cur[0].attributes('id')).toBe('rstep-s1#2')
+    scrollCalls = []
+    await w.find('.chip--resume').trigger('click')
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#2')
+    expect(scrollCalls.at(-1).opts.block).toBe('center')
+    expect(scrollCalls.at(-1).opts.behavior).toBe('smooth')
+  })
+
+  // Atteindre le total d'un compteur recentre sur l'étape suivante, comme un cochage.
+  it('le + qui atteint le total recentre sur l\'étape suivante', async () => {
+    const readerRep = {
+      ...FIX_READER,
+      sections: [
+        {
+          id: 's1', title: 'Section 1',
+          steps: [{ t: 'Rang un.' }, { t: 'Répéter {{0}} fois.', total: [2, 3, 4], c: [[2, 3, 4]], repeat: true }, { t: 'Rang trois.' }],
+        },
+      ],
+    }
+    await seedProject(readerRep, { readerState: { size: 0, done: { 's1#0': true } } })
+    const w = mountReader()
+    await settle()
+    scrollCalls = []
+    const plus = () => w.find('.rcount').findAll('.rcount__btn')[1]
+    await plus().trigger('click')
+    await settle()
+    expect(scrollCalls).toEqual([])
+    await plus().trigger('click')
+    await settle()
+    expect(scrollCalls).toEqual([{ id: 'rstep-s1#2', opts: { behavior: 'smooth', block: 'center' } }])
+    expect(w.find('#rstep-s1\\#2').classes()).toContain('rstep--cur')
   })
 
   // Revue du passage multilingue (29/07) : les deux boutons du compteur portaient
@@ -595,6 +637,111 @@ describe('ReaderView — cible de section à l’ouverture (?section=, #9)', () 
     mountReader()
     await settle()
     expect(scrollCalls).toEqual([])
+  })
+})
+
+describe('ReaderView — mémo des techniques de points', () => {
+  it('un patron sans reference montre quand même la tuile du mémo et le bouton d’aide', async () => {
+    const { reference: _omit, ...noRef } = FIX_READER
+    await seedProject(noRef)
+    const w = mountReader()
+    await settle()
+    expect(w.find('.amtile').text()).toContain(i18n.global.t('reader.reference.stitches.label'))
+    expect(w.find('.fab--ref').exists()).toBe(true)
+  })
+  it('affiche la fiche d’un point épinglé dans le panneau', async () => {
+    const { patternId } = await seedLibrary()
+    await db.patterns.update(patternId, { stitchPins: ['cr-sc'] })
+    const w = mountReader()
+    await settle()
+    const tile = w.findAll('.amtile').find((x) => x.text().includes(i18n.global.t('reader.reference.stitches.label')))
+    await tile.trigger('click')
+    await settle()
+    expect(w.get('.rs').text()).toContain(resolveStitch('cr-sc', 'fr').name)
+  })
+  it('en aperçu bibliothèque, choisir un point l’enregistre avec le patron et l’affiche dans le mémo', async () => {
+    const { patternId } = await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const label = i18n.global.t('reader.reference.stitches.label')
+    await w.findAll('.amtile').find((x) => x.text().includes(label)).trigger('click')
+    await settle()
+    const pick = w.findAll('.rs__action').find((b) => b.text() === i18n.global.t('stitchMemo.pick'))
+    await pick.trigger('click')
+    await settle()
+    await w.findAll('.sp [role="tab"]').find((b) => b.text() === i18n.global.t('stitchMemo.craft.crochet')).trigger('click')
+    await w.get('.sp [data-stitch="cr-sc"] input').setValue(true)
+    await settle()
+    expect((await db.patterns.get(patternId)).stitchPins).toEqual(['cr-sc'])
+    await w.get('.sp__done').trigger('click')
+    await settle()
+    expect(w.get('.rs').text()).toContain(resolveStitch('cr-sc', 'fr').name)
+  })
+  it('une sélection faite se remodifie : « Modifier les points » en tête du mémo rouvre le sélecteur', async () => {
+    const { patternId } = await seedLibrary()
+    await db.patterns.update(patternId, { stitchPins: ['cr-sc', 'kn-knit'] })
+    const w = mountReader()
+    await settle()
+    const label = i18n.global.t('reader.reference.stitches.label')
+    await w.findAll('.amtile').find((x) => x.text().includes(label)).trigger('click')
+    await settle()
+    const first = w.get('.rs__scroll .rs__block')
+    expect(first.find('.rs__action').text()).toBe(i18n.global.t('stitchMemo.edit'))
+    await first.get('.rs__action').trigger('click')
+    await settle()
+    await w.findAll('.sp [role="tab"]').find((b) => b.text() === i18n.global.t('stitchMemo.craft.crochet')).trigger('click')
+    await w.get('.sp [data-stitch="cr-sc"] input').setValue(false)
+    await settle()
+    expect((await db.patterns.get(patternId)).stitchPins).toEqual(['kn-knit'])
+  })
+  it('Échap sur le sélecteur rouvre l’aide-mémoire sur l’onglet du mémo, sans la refermer', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const label = i18n.global.t('reader.reference.stitches.label')
+    await w.findAll('.amtile').find((x) => x.text().includes(label)).trigger('click')
+    await settle()
+    await w.findAll('.rs__action').find((b) => b.text() === i18n.global.t('stitchMemo.pick')).trigger('click')
+    await settle()
+    await w.get('.sp input[type="search"]').trigger('keydown', { key: 'Escape' })
+    await settle()
+    expect(w.get('.sp').classes()).not.toContain('sp--on')
+    expect(w.get('.rs').classes()).toContain('rs--on')
+    expect(w.get('.rs__tab--on').text()).toBe(label)
+  })
+})
+
+describe('ReaderView — mémo : focus sur le corps de page', () => {
+  async function openPicker(w) {
+    const label = i18n.global.t('reader.reference.stitches.label')
+    await w.findAll('.amtile').find((x) => x.text().includes(label)).trigger('click')
+    await settle()
+    await w.findAll('.rs__action').find((b) => b.text() === i18n.global.t('stitchMemo.pick')).trigger('click')
+    await settle()
+    return label
+  }
+  it('Échap avec le focus hors du sélecteur le ferme et rouvre l’aide-mémoire sur le mémo', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const label = await openPicker(w)
+    expect(w.get('.sp').classes()).toContain('sp--on')
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle()
+    expect(w.get('.sp').classes()).not.toContain('sp--on')
+    expect(w.get('.rs').classes()).toContain('rs--on')
+    expect(w.get('.rs__tab--on').text()).toBe(label)
+  })
+  it('l’aide-mémoire fait défiler la bande d’onglets jusqu’à l’onglet actif', async () => {
+    await seedLibrary()
+    const w = mountReader()
+    await settle()
+    const label = await openPicker(w)
+    await w.get('.sp__done').trigger('click')
+    await settle()
+    const i = Element.prototype.scrollIntoView.mock.contexts.findIndex((el) => el.classList?.contains('rs__tab--on') && el.textContent.trim() === label)
+    expect(i).toBeGreaterThan(-1)
+    expect(Element.prototype.scrollIntoView.mock.calls[i][0]).toEqual({ inline: 'nearest', block: 'nearest' })
   })
 })
 

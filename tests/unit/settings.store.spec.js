@@ -2,7 +2,7 @@
 // Unitaire — réglages : valeurs par défaut, onboarding, profil, persistance Dexie.
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { db } from '@/db/db'
+import { db, getSetting } from '@/db/db'
 import { useSettingsStore } from '@/stores/settings'
 
 beforeEach(async () => {
@@ -160,6 +160,46 @@ describe('store settings', () => {
     const reloaded = useSettingsStore()
     await reloaded.load()
     expect(reloaded.weekStart).toBe(0)
+  })
+
+  // Rang en cours dans les notifications : défauts, persistance, écriture des deux clés.
+  it('rowNotification vaut true et rowNotificationAsked false par défaut sur une base vierge', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    expect(store.rowNotification).toBe(true)
+    expect(store.rowNotificationAsked).toBe(false)
+  })
+
+  it('saveRowNotification écrit la clé et markRowNotificationAsked écrit true (résiste à une nouvelle instance)', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    await store.saveRowNotification(false)
+    await store.markRowNotificationAsked()
+    expect(store.rowNotification).toBe(false)
+    expect(store.rowNotificationAsked).toBe(true)
+    expect(await getSetting('rowNotification')).toBe(false)
+    expect(await getSetting('rowNotificationAsked')).toBe(true)
+
+    setActivePinia(createPinia())
+    const reloaded = useSettingsStore()
+    await reloaded.load()
+    expect(reloaded.rowNotification).toBe(false)
+    expect(reloaded.rowNotificationAsked).toBe(true)
+  })
+
+  // Écran allumé pendant le suivi : actif par défaut (opt-out), refus persisté.
+  it('keepScreenOn vaut true par défaut et saveKeepScreenOn le persiste', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    expect(store.keepScreenOn).toBe(true)
+    await store.saveKeepScreenOn(false)
+    expect(store.keepScreenOn).toBe(false)
+    expect(await getSetting('keepScreenOn')).toBe(false)
+
+    setActivePinia(createPinia())
+    const reloaded = useSettingsStore()
+    await reloaded.load()
+    expect(reloaded.keepScreenOn).toBe(false)
   })
 
   // T2 (31/08) — teinte d'accent : défaut DYNAMIQUE par thème (rose 320 sombre / bleu 230

@@ -55,6 +55,7 @@
     "toolCounter": "Compteur",
     "toolCalc": "Calculateur",
     "toolNeedle": "Aiguilles",
+    "toolStitches": "Points",
     "statsLink": "Voir les statistiques de temps",
     "recentSessions": "Dernières sessions",
     "sessionsLink": "Voir toutes les sessions"
@@ -261,6 +262,25 @@
     "knitting": "Tricot",
     "crochet": "Crochet"
   },
+  "rowNotif": {
+    "title": "Rang {index}/{total}, {section}",
+    "next": "Ensuite : {text}",
+    "nextIn": "Ensuite, {section} : {text}",
+    "check": "Cocher le rang",
+    "channel": "Rang en cours",
+    "closedTitle": "Rowtine a été fermée",
+    "closedText": "Touche pour reprendre ton rang",
+    "chartTitle": "Pense au diagramme, {section}",
+    "chartRow": "Rang {row}/{rows} du diagramme",
+    "chartText": "Touche pour voir le diagramme",
+    "chartDone": "Diagramme traité",
+    "counterTitle": "Répétition {count}/{total}, {section}",
+    "counterLabel": "Répétition {count} / {total}",
+    "setting": "Rang en cours dans les notifications",
+    "settingHint": "Affiche l'étape en cours pendant le suivi d'un patron, avec un bouton pour avancer sans ouvrir l'app.",
+    "settingDenied": "Les notifications de Rowtine sont coupées dans Android. Touche pour ouvrir les réglages.",
+    "settingAsk": "Rowtine n'a pas encore le droit d'afficher des notifications. Touche pour l'autoriser."
+  },
   "project": {
     "newTitle": "Nouveau projet",
     "editTitle": "Modifier le projet",
@@ -299,6 +319,8 @@
     "gaugeHint": "Ton échantillon mesuré sur 10×10 cm. Sert de référence pour vérifier ta tension et, plus tard, adapter le patron si elle diffère.",
     "gaugeStitchesImperial": "Mailles / 4 po",
     "gaugeRowsImperial": "Rangs / 4 po",
+    "gaugeStitchesValue": "{n} m",
+    "gaugeRowsValue": "{n} rg",
     "gaugeHintImperial": "Ton échantillon mesuré sur 4 × 4 po. Sert de référence pour vérifier ta tension et, plus tard, adapter le patron si elle diffère.",
     "sizesPlaceholder": "S, M, L",
     "activeSize": "Taille tricotée",
@@ -611,7 +633,8 @@
     "all": "Tous",
     "add": "Ajouter un patron",
     "importPdf": "Importer un patron PDF",
-    "importRowtine": "Importer au format Rowtine",
+    "importRowtine": "Importer un fichier Rowtine",
+    "importRowtineHint": "Crée-le depuis l'ordinateur sur {site}, puis copie-le sur ton téléphone.",
     "importing": "Lecture du PDF…",
     "importDone": "PDF importé. Vérifie et complète les infos.",
     "addManual": "Créer manuellement",
@@ -681,8 +704,8 @@
   },
   "importLocal": {
     "title": "Importer un PDF",
-    "titleRowtine": "Importer au format Rowtine",
-    "leadRowtine": "Un patron déjà préparé au format Rowtine : texte et images sont importés tels quels, sur ton appareil, hors-ligne.",
+    "titleRowtine": "Importer un fichier Rowtine",
+    "leadRowtine": "Un patron déjà préparé dans un fichier Rowtine : texte et images sont importés tels quels, sur ton appareil, hors-ligne.",
     "pickRowtine": "Choisir un fichier .rowtine ou .zip",
     "lead": "Le patron est analysé sur ton appareil : gratuit, hors-ligne, fidèle au PDF.",
     "leadNext": "Le patron est enregistré directement dans ta bibliothèque ; tu pourras corriger les sections ensuite si besoin.",
@@ -886,6 +909,8 @@
     "saved": "Réglages enregistrés.",
     "appearance": "Apparence",
     "weekStart": "Premier jour de la semaine",
+    "keepScreenOn": "Garder l'écran allumé pendant le suivi",
+    "keepScreenOnHint": "L'écran ne s'éteint pas tant que le suivi d'un patron est ouvert.",
     "language": "Langue",
     "unitsAndCurrency": "Unités et devise",
     "unitsMetric": "Métrique (m, g)",
@@ -1185,6 +1210,7 @@
       "tech": { "label": "Techniques", "sub": "Points & méthodes" },
       "abbr": { "label": "Abréviations", "sub": "Le glossaire du patron" },
       "tips": { "label": "Conseils", "sub": "Astuces du patron" },
+      "stitches": { "label": "Mémo : techniques de points", "sub": "Les points que tu as choisis", "subEmpty": "Choisis les points à garder sous la main" },
       "h3": {
         "gauge": "Échantillon",
         "needles": "Aiguilles/Crochet",
@@ -1259,6 +1285,28 @@
       "addChartStep": "+ Diagramme",
       "chartLabel": "Diagramme"
     }
+  },
+  "stitchMemo": {
+    "title": "Mémo : techniques de points",
+    "pick": "Choisir les points",
+    "edit": "Modifier les points",
+    "empty": "Aucun point choisi pour ce patron. Choisis ceux dont tu veux te rafraîchir la mémoire : ils resteront ici.",
+    "search": "Rechercher un point",
+    "suggested": "Suggérés pour ce patron",
+    "noResult": "Aucun point ne correspond",
+    "done": "Terminé",
+    "craft": { "crochet": "Crochet", "knitting": "Tricot" },
+    "group": {
+      "base": "Mailles de base",
+      "shaping": "Augmentations et diminutions",
+      "construction": "Construction",
+      "texture": "Points en relief et fantaisie",
+      "cast-on": "Montages",
+      "bind-off": "Rabattages",
+      "pattern": "Points",
+      "technique": "Techniques"
+    },
+    "expand": "Afficher les étapes"
   },
   "storage": {
     "writeFailed": "Espace insuffisant : ta dernière modification n'a pas pu être enregistrée.",

@@ -418,6 +418,102 @@ export function checkableStepsOf(sec) {
   return sec.steps.map((s, i) => ({ ...s, id: `${sec.id}#${i}` })).filter(isCheckable)
 }
 
+// Copie des sections avec l'id de chaque step, `<secId>#<index dans le tableau complet>` (notes
+// et diagrammes compris : même numérotation que `checkableStepsOf`, donc que `st.done`).
+export function withStepIds(sections) {
+  return sections.map((sec) => ({
+    ...sec,
+    steps: sec.steps.map((s, i) => ({ ...s, id: `${sec.id}#${i}` })),
+  }))
+}
+
+// Rang cochable au sens du lecteur (navigation préc/suiv) : ni note, ni diagramme, ni compteur
+// de répétition.
+export function isRowStep(step) {
+  return !!step && !step.note && !step.chart && !step.repeat
+}
+
+// Étape suivie par le lecteur et la notification : rang texte ou compteur de répétition (même
+// ensemble que `isCheckable`, écrit ici dans les termes de la spec notification).
+export function isTrackedStep(step) {
+  return isRowStep(step) || !!step?.repeat
+}
+
+// Une étape suivie compte-t-elle pour la taille `size` ? Un compteur dont le total vaut 0
+// pour cette taille n'est pas une étape (rien à répéter) : il est sauté par `stepPosition` et
+// transparent pour `chartBefore`.
+function isStepForSize(step, size) {
+  return isTrackedStep(step) && !(step.repeat && repeatTotal(step, size) === 0)
+}
+
+// Étapes des sections (passées par `withStepIds`) à plat, dans l'ordre global du patron.
+function flatSteps(sections) {
+  return sections.flatMap((section) => section.steps.map((step) => ({ step, section })))
+}
+
+// Une étape suivie est-elle faite selon `state` ({ done, counters, size }) ? Règle unique de
+// `stepIsDone` : un compteur au total 0 pour la taille est fait d'office.
+function trackedDone(step, state) {
+  const { done, counters, size } = state || {}
+  return stepIsDone(step, done || {}, counters || {}, size ?? null)
+}
+
+// Première étape suivie non faite dans l'ordre global, avec sa section, ou `null` quand tout
+// est fait. Source de l'étape en cours du lecteur (puce, recentrage, mise en évidence).
+export function currentStep(sections, state) {
+  return flatSteps(sections).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || null
+}
+
+// Première étape suivie non faite APRÈS `stepId` dans l'ordre global ; `null` s'il n'y en a
+// plus, ou si `stepId` est introuvable.
+export function nextStepAfter(sections, state, stepId) {
+  const flat = flatSteps(sections)
+  const at = flat.findIndex(({ step }) => step.id === stepId)
+  if (at < 0) return null
+  return flat.slice(at + 1).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || null
+}
+
+// Position « k/N » d'une étape parmi les étapes suivies de sa section pour la taille `size`
+// (`index` 1-based, 0 si absente).
+export function stepPosition(section, stepId, size = null) {
+  const tracked = section.steps.filter((s) => isStepForSize(s, size))
+  return { index: tracked.findIndex((s) => s.id === stepId) + 1, total: tracked.length }
+}
+
+// Diagramme franchi juste avant l'étape `stepId` : en remontant l'ordre global, notes
+// ignorées, le plus proche diagramme dont la section est visible (`isVisible(section)`, règle
+// de taille du lecteur) rencontré avant toute étape suivie ou le début du patron. Un
+// diagramme invisible est ignoré (on continue de remonter), de même qu'un compteur dont le
+// total vaut 0 pour la taille `size` (pas une étape pour cette taille). `null` sinon, ou si
+// `stepId` est introuvable.
+export function chartBefore(sections, stepId, isVisible = () => true, size = null) {
+  const flat = flatSteps(sections)
+  const at = flat.findIndex(({ step }) => step.id === stepId)
+  for (let i = at - 1; i >= 0; i--) {
+    const { step, section } = flat[i]
+    if (isStepForSize(step, size)) return null
+    if (step.chart && isVisible(section)) return { step, section }
+  }
+  return null
+}
+
+// Texte d'un chiffre multi-taille : toutes les tailles sans taille choisie, sinon la valeur de la
+// taille. Repli sur toutes les tailles quand `sizeIndex` sort du vecteur (taille mémorisée sur un
+// patron qui a perdu des tailles) : sans lui, on imprimerait « null ».
+export function countText(values, sizeIndex) {
+  if (sizeIndex == null) return formatSizes(values)
+  const picked = pickCount(values, sizeIndex)
+  return picked == null ? formatSizes(values) : String(picked)
+}
+
+// Texte brut d'un step (placeholders `{{i}}` remplacés selon la taille, sans abréviations).
+export function stepPlainText(step, sizeIndex) {
+  return tokenizeLine(step.t, step.c || [], [])
+    .map((tk) => (tk.type === 'count' ? countText(tk.values, sizeIndex) : tk.text))
+    .join('')
+    .trim()
+}
+
 // Un step est-il fait, compte tenu de `size` (répartition des répétitions par taille) ? Un
 // step à répétition (`step.repeat`) est fait quand son compteur atteint `repeatTotal` (ou
 // d'emblée si ce total vaut 0 — rien à répéter) ; un step simple, quand il est coché dans
@@ -466,6 +562,26 @@ export function readerProgress(reader, state = {}) {
   const total = sections.reduce((a, s) => a + s.total, 0)
   const doneTotal = sections.reduce((a, s) => a + s.done, 0)
   return { sections, done: doneTotal, total, pct: total ? Math.round((doneTotal / total) * 100) : 0 }
+}
+
+// Complète la carte d'avancement { projectId: { done, total } } issue des sections par la
+// progression du lecteur, pour les projets dont le patron est structuré (`readerState`) : sans
+// ce repli, l'accueil n'affiche aucun avancement pour eux. `patternOf(project)` rend le patron
+// lié, ou null tant que les patrons ne sont pas chargés. Pure et sans effet sur l'entrée : la
+// vue la rejoue dès que les patrons arrivent, quel que soit l'ordre des chargements au
+// démarrage (intent du 27/09).
+export function withReaderProgress(sectionMap, projects, patternOf) {
+  const map = { ...sectionMap }
+  for (const p of projects || []) {
+    if (map[p.id] && map[p.id].total > 0) continue
+    if (p.patternId == null) continue
+    const pat = patternOf(p)
+    const reader = pat ? patternToReader(pat) : null
+    if (!reader) continue
+    const prog = readerProgress(reader, p.readerState)
+    if (prog.total > 0) map[p.id] = { done: prog.done, total: prog.total }
+  }
+  return map
 }
 
 // Validation légère d'un objet `reader` (test de non-régression sur les patrons seed).

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Teinte des boutons moins et plus de la notification d'un compteur, mode sombre. -->
+<resources>
+    <color name="notif_counter_icon">#FFFFFFFF</color>
+</resources>

@@ -135,10 +135,10 @@
         {
           "type": "image",
           "src": "01-accueil",
-          "alt": "L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur et Aiguilles",
+          "alt": "L'accueil de {app} : « Bonjour Camille ! », la tuile Reprendre sur Bonnet Torsade en taille M, les tuiles 1 en cours et 0 h cette semaine, la dernière session sur Bonnet d'hiver aujourd'hui (0:06), puis les outils Compteur, Calculateur, Aiguilles et Points",
           "caption": [
             {
-              "text": "L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les trois outils sont à portée de pouce.",
+              "text": "L'accueil : la tuile « Reprendre » ramène au dernier ouvrage travaillé, le tableau de bord résume l'essentiel jusqu'aux dernières sessions, et les quatre outils sont à portée de pouce.",
               "bold": false,
               "italic": false
             }
@@ -336,7 +336,7 @@
                   "italic": false
                 },
                 {
-                  "text": " (calculateur de mailles, compteur libre, aide aiguilles/crochet), au bouton ",
+                  "text": " (calculateur de mailles, compteur libre, aide aiguilles/crochet, mémo des techniques de points), au bouton ",
                   "bold": false,
                   "italic": false
                 },
@@ -881,7 +881,7 @@
         {
           "type": "image",
           "src": "02c-badge-partage",
-          "alt": "Écran de partage du badge pour le projet \"Sweater for me\" : la photo du pull, Temps total 32 h 07 min, Avancement 67 %, 30 sessions et la carte calendaire.",
+          "alt": "Écran de partage du badge de « Sweater for me » : la photo du pull, Acrylique · Polyester · Coton, 32 h 07 min, trois laines avec leur coloris, dont 8 pelotes (1,36 km), avancement 64 %, 30 sessions",
           "caption": [
             {
               "text": "L'écran de partage, ouvert depuis l'onglet Stats ou le menu de la fiche projet.",
@@ -1022,7 +1022,17 @@
                   "italic": false
                 },
                 {
-                  "text": " : ce que le badge doit contenir. Chaque pastille montre la valeur réelle du projet (temps total, dates de début et de fin, laines utilisées avec leurs pelotes, avancement tant que le projet est en cours, meilleure série, nombre de sessions, technique crochet ou tricot) : appuie dessus pour l'inclure ou la retirer. La pastille ",
+                  "text": " : ce que le badge doit contenir. Chaque pastille montre la valeur réelle du projet (temps total, dates de début et de fin, laines utilisées avec leur coloris et leurs pelotes, avancement tant que le projet est en cours, meilleure série, nombre de sessions, technique crochet ou tricot) : appuie dessus pour l'inclure ou la retirer. Chaque laine s'y nomme par sa marque, son modèle et son coloris : deux coloris du même modèle restent bien distincts. Dès qu'une laine du projet a une composition notée, une pastille de plus liste les ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "matières",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de l'ouvrage (« Coton · Laine »), sans pourcentage. Cochée d'office, elle ajoute au badge un bandeau pleine largeur, entre deux filets, au-dessus de la carte calendaire (sous les chiffres si tu ne gardes pas la carte). La pastille ",
                   "bold": false,
                   "italic": false
                 },
@@ -1042,7 +1052,7 @@
                   "italic": false
                 },
                 {
-                  "text": " du texte du badge, indépendante de celle de l'app (pratique pour l'envoyer à quelqu'un qui ne parle pas la tienne), et une ligne de ",
+                  "text": " du texte du badge, indépendante de celle de l'app (pratique pour l'envoyer à quelqu'un qui ne parle pas la tienne : les matières se traduisent avec elle), et une ligne de ",
                   "bold": false,
                   "italic": false
                 },
@@ -1126,10 +1136,10 @@
         {
           "type": "image",
           "src": "03a-lecteur-haut",
-          "alt": "Le patron Bonnet Torsade ouvert dans le projet Bonnet d'hiver : « Revenir à mon étape », puis le sommaire du lecteur (une puce par section), « 1. Choisis ta taille » proposant S 50-52, M 54-56 déjà retenue et L 58-60, et le chrono en bas",
+          "alt": "Bonnet Torsade dans le lecteur : « Revenir à mon étape », puis la couverture, un bonnet torsadé à pompon posé sur une table en bois, et « 1. Choisis ta taille », M 54-56 retenue, le chrono en bas",
           "caption": [
             {
-              "text": "En haut du lecteur : le sommaire des sections, puis le choix de la taille, à faire une fois pour tout le patron, et l'aide-mémoire (matériel, tableau des tailles, techniques, abréviations) à portée de main.",
+              "text": "En haut du lecteur : la couverture du patron, qui s'agrandit d'un appui, puis le choix de la taille, à faire une fois pour tout le patron. L'aide-mémoire et le sommaire des sections suivent juste en dessous.",
               "bold": false,
               "italic": false
             }
@@ -1194,7 +1204,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : chaque étape est cochable, avec une barre de progression globale et par section, et des compteurs de répétition intégrés (« − 3/12 + ») qui disparaissent tout seuls s'ils ne concernent pas ta taille.",
+                  "text": " : chaque étape est cochable, d'un appui sur sa case ou n'importe où dans le tiers gauche de sa carte, avec une barre de progression globale et par section, et des compteurs de répétition intégrés (« − 3/12 + ») qui disparaissent tout seuls s'ils ne concernent pas ta taille.",
                   "bold": false,
                   "italic": false
                 }
@@ -1234,7 +1244,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : les abréviations du patron s'affichent en infobulle dès que tu les touches, sans quitter ton rang ; un panneau complet regroupe aussi les techniques (avec tutoriels vidéo), le matériel et l'échantillon, le tableau des tailles, la liste des abréviations, et les ",
+                  "text": " : les abréviations du patron s'affichent en infobulle dès que tu les touches, sans quitter ton rang ; un panneau complet regroupe aussi les techniques du patron (avec le lien vers sa vidéo quand il en donne une), le matériel et l'échantillon, le tableau des tailles, la liste des abréviations, et les ",
                   "bold": false,
                   "italic": false
                 },
@@ -1244,7 +1254,17 @@
                   "italic": false
                 },
                 {
-                  "text": " donnés par le patron.",
+                  "text": " donnés par le patron. S'y ajoute toujours la tuile ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mémo : techniques de points",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", même sur un patron qui n'a pas d'aide-mémoire à lui : les fiches des points que tu choisis (détails juste après cette liste).",
                   "bold": false,
                   "italic": false
                 }
@@ -1269,6 +1289,21 @@
             {
               "spans": [
                 {
+                  "text": "La couverture et les photos du patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : tout en haut du lecteur, la couverture de ton PDF s'affiche telle que la créatrice l'a composée ; un appui l'ouvre en grand. Quand la première page porte aussi des instructions, l'app n'en garde que la photo, le titre et le descriptif. Les photos du PDF se placent sous l'étape qui les précède dans le patron, en grand et jamais recadrées (une série de photos pas à pas se range sur deux colonnes). Un appui ouvre chacune en plein écran, sur laquelle tu peux zoomer. Pour un patron créé à la main, la couverture est la photo que tu as désignée d'une étoile.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Tu peux consulter un patron en lecture (aperçu depuis la bibliothèque) ",
                   "bold": false,
                   "italic": false
@@ -1279,12 +1314,252 @@
                   "italic": false
                 },
                 {
-                  "text": " suivre ta progression réelle depuis un projet. Les deux accès existent, et ta progression est toujours sauvegardée.",
+                  "text": " suivre ta progression réelle depuis un projet. Les deux accès existent, et ta progression est toujours sauvegardée. Dans l'aperçu, rien ne se coche encore, mais chaque ligne porte un petit repère qui annonce ce qu'elle deviendra pendant le suivi. Une légende les explique en haut de l'aperçu : ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Pendant le suivi :",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " « se coche » pour une étape, « se compte » pour une répétition, « à lire » pour une note.",
                   "bold": false,
                   "italic": false
                 }
               ],
               "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Le mémo des techniques de points",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Un point oublié en plein rang, un montage dont tu ne retrouves plus le geste ? Le ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "mémo des techniques de points",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " rassemble une quarantaine de fiches, au crochet comme au tricot : pour chacune, son nom, ses abréviations, les étapes numérotées et une astuce. Elles sont dans l'app et se lisent sans connexion.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03j-memo-points",
+          "alt": "L'aide-mémoire sur l'onglet Mémo : techniques de points, après Abréviations et Conseils : le bouton Modifier les points en tête, puis la fiche Maille endroit, m. end., ses cinq étapes et son astuce",
+          "caption": [
+            {
+              "text": "L'onglet du mémo, une fois des points choisis : « Modifier les points » en tête, puis une fiche par point, avec ses abréviations, ses étapes numérotées et une astuce.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Choisir tes points.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Dans l'aide-mémoire du lecteur, touche la tuile ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Mémo : techniques de points",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". Tant qu'aucun point n'est choisi, l'onglet explique à quoi il sert : appuie sur ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Choisir les points",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ". Le sélecteur s'ouvre alors :",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "en tête, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Suggérés pour ce patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " propose les points dont l'app a reconnu les abréviations dans le glossaire du patron ;",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "le champ ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Rechercher un point",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " retrouve une fiche par son nom ou par son abréviation ;",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "les onglets ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Crochet",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Tricot",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " rangent toutes les fiches par famille (mailles de base, augmentations et diminutions, montages…), et le sélecteur s'ouvre sur la technique du patron.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Coche les points que tu veux garder sous la main : chaque case s'enregistre aussitôt. ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Terminé",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " te ramène à l'onglet du mémo, avec une fiche par point choisi.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03k-memo-selecteur",
+          "alt": "Le sélecteur Mémo : techniques de points, onglet Tricot : le champ Rechercher un point, Suggérés pour ce patron avec Maille endroit et Maille envers cochées, Montages, Rabattages, et le bouton Terminé",
+          "caption": [
+            {
+              "text": "Le sélecteur : en tête, les points reconnus dans le glossaire du patron, cochés ici, puis toutes les fiches de la technique, rangées par famille. Chaque case s'enregistre aussitôt.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Rangé avec le patron.",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " Ta sélection appartient au patron, pas à un projet : tu la retrouves dans l'aperçu depuis la bibliothèque comme dans chacun des projets qui suivent ce patron, et elle part avec ta sauvegarde. Pour la changer ensuite, le bouton ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Modifier les points",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", en tête de l'onglet, rouvre le même sélecteur : décocher un point retire sa fiche.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Hors de tout patron, le mémo complet se consulte aussi depuis l'accueil, par la tuile ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Points",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " des outils (point 6).",
+              "bold": false,
+              "italic": false
             }
           ]
         },
@@ -1746,6 +2021,26 @@
           "type": "paragraph",
           "spans": [
             {
+              "text": "Sur une étape à cocher, appuie ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "au milieu ou à droite",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " de la carte. Son tiers gauche, sur toute la hauteur, sert à cocher : un appui y coche ou décoche l'étape, comme la case elle-même, sans poser de voile. Pas besoin de viser la petite case pendant que tu tricotes. Les notes, les répétitions, les diagrammes et les titres de section ne changent pas : le voile s'y pose où que tu appuies.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
               "text": "Le voile ne gêne pas ton tricot : il se retire tout seul au bout de trois secondes, et un appui n'importe où ailleurs le fait partir. Appuyer sur une autre carte l'y déplace. Et aucun appui sur un ",
               "bold": false,
               "italic": false
@@ -2085,7 +2380,7 @@
                   "italic": false
                 },
                 {
-                  "text": " t'emmène directement le parcourir, section par section. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)",
+                  "text": " t'emmène directement le parcourir, section par section. Les repères de l'aperçu t'aident à cette relecture : une ligne marquée « à lire » qui devrait se cocher, ou l'inverse, se voit d'un coup d'œil, et se corrige dans l'éditeur. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)",
                   "bold": false,
                   "italic": false
                 }
@@ -2095,7 +2390,7 @@
             {
               "spans": [
                 {
-                  "text": "Importer au format {app}",
+                  "text": "Importer un fichier {app}",
                   "bold": true,
                   "italic": false
                 },
@@ -2110,7 +2405,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", c'est-à-dire un patron déjà mis au format de {app} (son texte et ses images). Il entre tel quel dans ta bibliothèque, sans passer par la lecture d'un PDF, et toujours sans connexion.",
+                  "text": ", c'est-à-dire un patron déjà mis au format de {app} (son texte et ses images). Il entre tel quel dans ta bibliothèque, sans passer par la lecture d'un PDF, et toujours sans connexion. Ce fichier se crée depuis l'ordinateur, avec le convertisseur du site (rowtine.app/fr/convertisseur) : il lit le PDF de ton patron et te laisse le corriger sur grand écran. Copie ensuite le fichier sur ton téléphone (câble, cloud, courriel…), puis choisis-le ici.",
                   "bold": false,
                   "italic": false
                 }
@@ -3129,10 +3424,10 @@
         {
           "type": "image",
           "src": "05-stock",
-          "alt": "10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, le champ Rechercher une laine…, les boutons Filtrer et Trier, Ajouter une laine et Import Ravelry, puis Drops · Moutarde, ×4 · 165 m · 200 g, marquée d'une petite feuille, et Hobbii · Sauge, ×6 · 212 m · 300 g, toutes deux libres",
+          "alt": "10 pelotes, 1,932 km, 500 g et 31 € dépensés en tête, Filtrer, Trier, Ajouter une laine, Import Ravelry, puis Drops · Moutarde, ×4 · 660 m · 200 g, et Hobbii · Sauge, ×6 · 1 272 m · 300 g, libres",
           "caption": [
             {
-              "text": "Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec son état, libre ou réservée par un projet.",
+              "text": "Le stock : les totaux en tête (pelotes, longueur, poids, valeur), puis une carte par laine avec le métrage et le poids de tout le lot, et son état, libre ou réservée par un projet.",
               "bold": false,
               "italic": false
             }
@@ -3427,6 +3722,31 @@
             {
               "spans": [
                 {
+                  "text": "Les cartes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : chacune donne le nombre de pelotes, puis le métrage et le poids ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "du lot entier",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : 4 pelotes de 165 m s'affichent 660 m. Le métrage d'une seule pelote se lit sur la fiche de la laine.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Rechercher, filtrer, trier",
                   "bold": true,
                   "italic": false
@@ -3623,6 +3943,41 @@
                 },
                 {
                   "text": ". Tu ne peux pas descendre la quantité en dessous de ce qui est déjà réservé (l'app te dit combien de pelotes sont retenues) ; et elle t'avertit si restaurer un projet depuis la corbeille remet en cause tes réserves de laine. Le projet revient quand même, avec une réservation réduite et un message qui te l'explique.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Les pelotes entamées sont également comptées",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : partout où tu comptes des pelotes, tu peux saisir un nombre à virgule, 2,5 pour deux pelotes et demie, 0,5 pour un reste entamé. Ça vaut pour la quantité en stock, une ligne d'achat ou de cadeau, les pelotes que tu réserves à un projet, et la fenêtre qui s'ouvre quand tu passes à ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Terminé",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " un projet auquel des laines sont réservées (« Combien de pelotes as-tu réellement utilisées ? ») : le reste retourne dans ton stock. Même chose pour un projet ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Abandonné",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", où tu indiques les pelotes perdues. L'app garde deux chiffres après la virgule (un quart de pelote, c'est 0,25) et affiche partout ces nombres avec le séparateur de ta langue.",
                   "bold": false,
                   "italic": false
                 }
@@ -4280,6 +4635,31 @@
                 }
               ],
               "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Mémo : techniques de points",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : la tuile ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Points",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre toutes les fiches du mémo, en simple consultation : les points de base et les points les plus courants, au crochet comme au tricot. Cherche un point par son nom ou son abréviation, passe de l'onglet Crochet à l'onglet Tricot, et touche une fiche pour déplier ses étapes. Pour garder certains points sous la main pendant un ouvrage, choisis-les depuis l'aide-mémoire du lecteur (point 3).",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
             }
           ]
         }
@@ -4848,6 +5228,65 @@
                       },
                       {
                         "text": " une tablette n'en est pas une : chacun effacerait le travail de l'autre. Pour un second appareil, il lui faut son propre dossier.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "Pendant le suivi d'un patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : deux interrupteurs, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "actifs d'office",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Coupe-les ici si tu n'en veux pas.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "Rang en cours dans les notifications",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " : tant que le lecteur d'un projet est ouvert, une notification montre ton étape en cours et la suivante. Elle te laisse avancer sans rouvrir l'app : « Cocher le rang » pour une étape, un bouton moins et un bouton plus autour de « Répétition 4 / 8 » pour un compteur, « Diagramme traité » pour le rappel d'un diagramme. Android te demande une seule fois l'autorisation d'afficher des notifications, à la première ouverture du lecteur ; si tu l'as refusée, les Réglages te le signalent et t'ouvrent les paramètres d'Android pour la donner.",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "Garder l'écran allumé pendant le suivi",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " : l'écran ne se met pas en veille tant que le lecteur d'un projet est ouvert, même si tu ne touches pas ton appareil pendant de longues minutes, aiguilles en main. Il retrouve sa mise en veille habituelle dès que tu quittes le lecteur.",
                         "bold": false,
                         "italic": false
                       }

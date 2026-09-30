@@ -43,9 +43,9 @@ bubbles.
 
 ## 1. Home: your dashboard
 
-![{app}'s home screen: "Hello Camille!", the Resume tile on Cable Beanie knitted size M, the tiles 1 in progress and 0 h this week, the latest session on Winter Beanie today (0:06), then the Counter, Calculator and Needles tools](images/en/01-accueil.webp)
+![{app}'s home screen: "Hello Camille!", the Resume tile on Cable Beanie knitted size M, the tiles 1 in progress and 0 h this week, the latest session on Winter Beanie today (0:06), then the Counter, Calculator, Needles and Stitches tools](images/en/01-accueil.webp)
 
-*Home: the "Resume" tile jumps back to the last piece you worked on, the dashboard sums up the essentials, recent sessions included, and the three tools are within thumb's reach.*
+*Home: the "Resume" tile jumps back to the last piece you worked on, the dashboard sums up the essentials, recent sessions included, and the four tools are within thumb's reach.*
 
 Opening the app, you'll find:
 - **Your last project**, with a **Resume** button to pick up exactly
@@ -70,7 +70,7 @@ Opening the app, you'll find:
   a date has been entered. It fills in on its own when you mark the
   project Finished (see point 2), and never appears on an Abandoned project.
 - Quick access to the **tools** (stitch calculator, free counter,
-  needle/hook helper), the **+ Create a project** button and the **Import a
+  needle/hook helper, stitch techniques memo), the **+ Create a project** button and the **Import a
   PDF** button, which opens your **Pattern library** straight on adding a pattern.
 - At the very start, while the app only holds the examples, the home screen
   keeps to the essentials: an **Import a PDF pattern** card takes the place of
@@ -183,7 +183,7 @@ deliberately simple, with no filters and no grouping.
 
 ### Share a badge of your project
 
-![The badge sharing screen for the project "Sweater for me": the sweater photo, Total time 32 h 07 min, Progress 67%, 30 sessions and the calendar map.](images/en/02c-badge-partage.webp)
+![Badge sharing screen for "Sweater for me": the sweater photo, Acrylic · Polyester · Cotton, 32 h 07 min, three yarns with their colorway, including 8 skeins (1,487 yards), progress 64%, 30 sessions](images/en/02c-badge-partage.webp)
 
 *The sharing screen, opened from the Stats tab or the project sheet's menu.*
 
@@ -201,13 +201,19 @@ The settings drawer has three tabs:
 - **Color**: a palette of hues, a + button to pick any other colour freely, and,
   above it, the last colours you actually used for a badge.
 - **Info**: what the badge should contain. Each chip shows the project's real value
-  (total time, start and end dates, yarns used with their skeins, progress while the
-  project is still ongoing, best streak, number of sessions, crochet or knitting
-  technique): tap it to include it or take it out. The **Calendar map** chip adds the
-  grid of the days you worked. This is also where you choose the **Language** of the
-  badge's text, independent of the app's (handy for sending it to someone who doesn't
-  speak yours), and a line of your own under **Free text (optional)**, 80 characters
-  at most.
+  (total time, start and end dates, yarns used with their colourway and skeins,
+  progress while the project is still ongoing, best streak, number of sessions,
+  crochet or knitting technique): tap it to include it or take it out. Each yarn is
+  named there by its brand, its yarn name and its colourway: two colourways of the
+  same yarn stay clearly apart. As soon as one of the project's yarns has a
+  composition noted, one more chip lists the **fibres** of the piece ("Cotton ·
+  Wool"), without percentages. Ticked from the start, it adds a full-width band to
+  the badge, between two thin rules, above the calendar map (below the figures if
+  you leave the map out). The **Calendar map** chip adds the grid of the days you
+  worked. This is also where you choose the **Language** of the badge's text,
+  independent of the app's (handy for sending it to someone who doesn't speak
+  yours: the fibres are translated with it), and a line of your own under **Free
+  text (optional)**, 80 characters at most.
 
 To change a photo, tap it on the preview: an **Edit** button appears, offering a
 project photo or an image from your gallery, then the shape (square, horizontal or
@@ -221,9 +227,9 @@ replaced, not duplicated.
 
 ## 3. The pattern that adapts to you: the interactive reader
 
-![The Cable Beanie pattern opened inside the Winter Beanie project: "Back to my step", then the reader's contents (one dot per section), "1. Choose your size" offering S 50-52, M 54-56 already picked and L 58-60, and the timer at the bottom](images/en/03a-lecteur-haut.webp)
+![Cable Beanie in the reader: "Back to my step", then the cover, a cabled hat with a pompom on a wooden table, and "1. Choose your size", with M 54-56 picked, and the timer at the bottom](images/en/03a-lecteur-haut.webp)
 
-*Top of the reader: the contents of the sections, then the size choice, made once for the whole pattern, and the cheat sheet (materials, size table, techniques, abbreviations) within reach.*
+*Top of the reader: the pattern's cover, which enlarges with a tap, then the size choice, made once for the whole pattern. The cheat sheet and the contents of the sections follow just below.*
 
 ![The Chart row counter sits at 1 / 24, above the button that adds a repeat counter, the st. 8, st. 1 (start) and row 24 (end) markers, and the grid of dots and cable crossings](images/en/03b-lecteur-diagramme.webp)
 
@@ -237,7 +243,8 @@ imported and checked pattern), it gives you:
   pattern filters itself automatically** for you (stitches, rows,
   lengths). Every line shows the figures for your size, with no
   "104 (108) 112…" to decode.
-- **Step-by-step tracking**: check off each step, with an overall and
+- **Step-by-step tracking**: check off each step by tapping its box or
+  anywhere in the left third of its card, with an overall and
   per-section progress bar, and built-in repeat counters
   ("− 3/12 +") that disappear on their own if they don't apply to your
   chosen size.
@@ -249,17 +256,69 @@ imported and checked pattern), it gives you:
   chart.
 - **The cheat sheet**: the pattern's abbreviations pop up as a tooltip
   as soon as you tap them, without leaving your current row; a full
-  panel also groups the techniques (with video tutorials), materials
+  panel also groups the pattern's techniques (with a link to its video when the pattern gives one), materials
   and gauge, the size table, the list of abbreviations, and the
-  **tips and tricks** given by the pattern.
+  **tips and tricks** given by the pattern. The **Stitch techniques memo**
+  tile is always there too, even on a pattern with no cheat sheet of its
+  own: it holds the cards for the stitches you choose (details right after
+  this list).
 - **The contents**: a row of dots, one per section, stays visible at
   the top of the reader's flow. Tapping one takes you straight to that
   section, and the dot of your active section marks itself: you always know
   where you are. A single-section pattern doesn't show it: there would be
   nothing to summarise.
+- **The pattern's cover and photos**: at the very top of the reader, your
+  PDF's cover appears just as the designer laid it out; a tap opens it full
+  size. When the first page also carries instructions, the app keeps only its
+  photo, title and description. The PDF's photos sit under the step that comes
+  before them in the pattern, large and never cropped (a series of step-by-step
+  photos is laid out in two columns). A tap opens each one full screen, where
+  you can zoom in. For a pattern you created by hand, the cover is the photo
+  you marked with a star.
 - You can read a pattern (previewed from the library) **or** follow
   your real progress from a project. Both paths exist, and your
-  progress is always saved.
+  progress is always saved. In the preview, nothing can be checked off
+  yet, but each line carries a small marker announcing what it will become
+  while you track. A legend at the top of the preview explains them:
+  **While tracking:** "gets checked" for a step, "gets counted" for a
+  repeat, "to read" for a note.
+
+### The stitch techniques memo
+
+Forgotten a stitch halfway along a row, or lost the knack of a cast-on? The
+**stitch techniques memo** gathers some forty cards, for crochet as well as
+knitting: each one gives the stitch's name, its abbreviations, numbered steps
+and a tip. They live inside the app and can be read offline.
+
+![The cheat sheet on the Stitch techniques memo tab, after Abbreviations and Tips: the Edit stitches button at the top, then the Knit 2 together card, k2tog, with its five steps and its tip](images/en/03j-memo-points.webp)
+
+*The memo tab once stitches are chosen: "Edit stitches" at the top, then one card per stitch, with its abbreviations, numbered steps and a tip.*
+
+**Choosing your stitches.** In the reader's cheat sheet, tap the **Stitch
+techniques memo** tile. As long as no stitch is chosen, the tab explains what
+it is for: tap **Choose stitches**. The picker then opens:
+- at the top, **Suggested for this pattern** offers the stitches whose
+  abbreviations the app recognised in the pattern's glossary;
+- the **Search a stitch** field finds a card by its name or its abbreviation;
+- the **Crochet** and **Knitting** tabs sort every card by family (basic
+  stitches, increases and decreases, cast-ons…), and the picker opens on the
+  pattern's craft.
+
+Tick the stitches you want to keep at hand: each box is saved straight away.
+**Done** takes you back to the memo tab, with one card per chosen stitch.
+
+![The Stitch techniques memo picker on the Knitting tab: the Search a stitch field, Suggested for this pattern with Knit 2 together ticked, then Cast-ons, Bind-offs, Basic stitches and the Done button](images/en/03k-memo-selecteur.webp)
+
+*The picker: the stitches recognised in the pattern's glossary come first, ticked here, then every card for the craft, sorted by family. Each box is saved straight away.*
+
+**Kept with the pattern.** Your selection belongs to the pattern, not to a
+project: you find it in the preview from the library as well as in every
+project that follows this pattern, and it travels with your backup. To change
+it later, the **Edit stitches** button, at the top of the tab, reopens the same
+picker: unticking a stitch removes its card.
+
+Outside any pattern, the full memo can also be browsed from Home, through the
+**Stitches** tile among the tools (point 6).
 
 ### The full-screen chart, and how to align it well
 
@@ -360,6 +419,12 @@ you want to reword it. You don't have to leave the project to repair it.
 **Fix** and **Close**. The correction screen then opens straight **on that
 line**: you don't have to hunt for it through the whole pattern.
 
+On a step you check off, tap **in the middle or on the right** of the card. Its
+left third, over its full height, is for checking: a tap there checks or unchecks
+the step, just like the box itself, without bringing up the veil. No need to aim
+for the little box while you knit. Notes, repeats, charts and section titles
+don't change: the veil settles on them wherever you tap.
+
 The veil doesn't get in the way of your knitting: it withdraws on its own after
 three seconds, and a tap anywhere else sends it away. Tapping another card moves
 it there. And no tap on a **control** of the card puts it up: ticking a row or
@@ -442,12 +507,19 @@ just more comfortable.
   what the app found (sections, steps to tick off, sizes, charts), reminds you
   to read the pattern through before you start, and the **Preview the
   pattern** button takes you straight there to browse it, section by section.
+  The preview's markers help you with that read-through: a line marked "to
+  read" that should be checked off, or the other way round, stands out at a
+  glance, and you fix it in the editor.
   (The reading also recognises the round and square grids of granny patterns,
   never perfectly: the read-through remains essential.)
-- **Import in {app} format**: in "+ Add pattern", this option takes a
+- **Import a {app} file**: in "+ Add pattern", this option takes a
   **.rowtine** file, that is a pattern already prepared in the
   {app} format (its text and images). It goes into your library as is,
   without reading any PDF, and still offline.
+  You create this file from a computer, with the converter on the website
+  (rowtine.app/en/convertisseur): it reads your pattern's PDF and lets you
+  correct it on a big screen. Then copy the file to your phone (cable,
+  cloud, email…) and pick it here.
 - **Create a pattern by hand**: in "+ Add pattern", the **Create manually**
   choice opens a dedicated screen (name, type, category, sizes, source,
   author…) with a single **Photos** section for its images. On the pattern's
@@ -615,9 +687,9 @@ and asks for confirmation: nothing gets lost by mistake here either.
 
 ## 5. Your yarn stash
 
-![10 skeins, 1,932 yards, 31.25 pounds and 31 $ spent across the top, the Search yarn… field, the Filter and Sort buttons, then Add yarn and Import from Ravelry side by side, then Drops · Moutarde, ×4 · 165 yards · 12.5 pounds with a small leaf, and Hobbii · Sauge, ×6 · 212 yards · 18.75 pounds, both marked Free](images/en/05-stock.webp)
+![10 skeins, 1,932 yards, 31.25 pounds, 31 $ spent, Filter, Sort, Add yarn, Import from Ravelry, Drops · Moutarde, ×4 · 660 yards · 12.5 pounds, Hobbii · Sauge, ×6 · 1,272 yards · 18.75 pounds, Free](images/en/05-stock.webp)
 
-*The stash: totals up top (skeins, length, weight, value), then one card per yarn with its status, free or reserved by a project.*
+*The stash: totals up top (skeins, length, weight, value), then one card per yarn with the length and weight of the whole lot, and its status, free or reserved by a project.*
 
 - **Add a skein**: brand, weight (with help understanding the weight
   categories), fibre content (picked from a list; if your fibre isn't
@@ -667,6 +739,9 @@ and asks for confirmation: nothing gets lost by mistake here either.
 - **The summary** at the top of the screen: number of skeins, total
   length and weight (switching on their own to km and kg once your
   totals get large), and your stash's total value.
+- **The cards**: each one gives the number of skeins, then the length and
+  weight **of the whole lot**: 4 skeins of 165 yd show 660 yd. The length of
+  a single skein is on the yarn's page.
 - **Search, filter, sort**: a search field and the **Filter** and **Sort**
   buttons at the top of the stash. Filter opens a two-level window: the list
   of seven criteria (**Brand**, **Label**, **Weight**, **Skein weight**,
@@ -687,6 +762,15 @@ and asks for confirmation: nothing gets lost by mistake here either.
   restoring a project from the trash puts your yarn reservations at
   risk. The project comes back regardless, with a reduced
   reservation and a message explaining it to you.
+- **Partly used skeins count too**: wherever you count skeins, you can
+  enter a decimal number, 2.5 for two and a half skeins, 0.5 for a partly
+  used leftover. That goes for the quantity in your stash, a purchase or gift
+  line, the skeins you reserve for a project, and the window that opens when
+  you set a project with reserved yarn to **Finished** ("How many skeins did
+  you actually use?"): the rest goes back into your stash. Same for an
+  **Abandoned** project, where you enter the skeins that were lost. The app
+  keeps two decimal places (a quarter skein is 0.25) and shows these numbers
+  everywhere with your language's decimal separator.
 - **A yarn's page**: tapping its card opens it full screen. It gathers
   everything you noted (brand, colourway, storage, length, quantity,
   price, purchases, composition, notes), its characteristics, its status
@@ -814,6 +898,11 @@ from Home:
   make up (this yarn won't work with this pattern), and always
   reminds you that a swatch still needs knitting to check: it's a
   starting point, not a guarantee. The rows field is optional.
+- **Stitch techniques memo**: the **Stitches** tile opens every card in the
+  memo, for reading only: the basic stitches and the most common ones, in crochet and in knitting. Search for a stitch by its name or abbreviation,
+  switch between the Crochet and Knitting tabs, and tap a card to unfold its
+  steps. To keep some stitches at hand while you work on a piece, choose them
+  from the reader's cheat sheet (point 3).
 
 ## 7. Statistics
 
@@ -928,6 +1017,19 @@ doesn't count: it takes a **logged** action.
     folder so you have a copy elsewhere is a good idea; using it from a
     phone **and** a tablet is not: each would wipe out the other's work.
     A second device needs a folder of its own.
+- **While following a pattern**: two switches, **on by
+  default**. Turn them off here if you don't want them.
+  - **Current row in notifications**: while a project's reader is open, a
+    notification shows your current step and the next one. It lets you move on
+    without reopening the app: "Check off row" for a step, a minus button and a
+    plus button around "Repeat 4 / 8" for a counter, "Chart done" for a chart
+    reminder. Android asks you only once for permission to show notifications,
+    the first time you open the reader; if you refused, Settings tell you so
+    and open Android's settings for you to grant it.
+  - **Keep the screen on while tracking**: the screen doesn't go to sleep
+    while a project's reader is open, even if you don't touch your device for
+    long minutes, needles in hand. It goes back to its usual sleep timer as
+    soon as you leave the reader.
 - **Help**: "Replay the guided tour" reopens the sample hat in the reader
   with its explanation bubbles, and recreates it if you've deleted it.
 - **Contribute**: a link to the source code (the app is open source), and

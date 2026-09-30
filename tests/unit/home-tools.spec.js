@@ -33,4 +33,12 @@ describe('HomeView — tuile Outils « Aiguilles »', () => {
     await btn.trigger('click')
     expect(nav.router.push).toHaveBeenCalledWith({ name: 'needle-gauge' })
   })
+
+  it('la tuile Points navigue vers stitch-memo au clic', async () => {
+    const w = mountHome()
+    const btn = w.findAll('.tool').find((b) => b.text().includes(tk('home.toolStitches')))
+    expect(btn).toBeTruthy()
+    await btn.trigger('click')
+    expect(nav.router.push).toHaveBeenCalledWith({ name: 'stitch-memo' })
+  })
 })

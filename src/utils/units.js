@@ -18,10 +18,12 @@
 //     onces passent en livres à 16 oz.
 // Zéros de fin supprimés partout : 2 000 m s'écrit « 2 km », jamais « 2,000 km ».
 //
-// DEUX PROFILS, parce qu'un cumul et une pelote n'ont pas les mêmes besoins :
+// TROIS PROFILS, parce qu'un cumul et une pelote n'ont pas les mêmes besoins :
 //   - 'total'  : récap du stock, tuile d'accueil, poids cumulé d'une carte → bascule autorisée ;
 //   - 'detail' : métrage d'une pelote, fiche détail → JAMAIS de bascule (« 1,2 km » pour un
-//     écheveau serait absurde), mais des décimales en impérial car la conversion en produit.
+//     écheveau serait absurde), mais des décimales en impérial car la conversion en produit ;
+//   - 'lot'    : cumul d'une carte de laine → JAMAIS de bascule (« 3 500 m », pas « 3,5 km »,
+//                décision du 29/09), séparateur de milliers, valeur entière (yards compris).
 
 import { parseDecimal } from '@/utils/decimal'
 
@@ -70,7 +72,7 @@ function formatMetricScaled(v, locale, profile, unitKey, scaledUnitKey) {
   // Le seuil se compare à la valeur ARRONDIE : sinon 999,5 reste « sous 1000 » pour la
   // bascule alors que l'affichage l'arrondit à 1 000 — un nombre à 4 chiffres avec la
   // mauvaise unité (correctif de revue finale).
-  if (profile === 'detail' || Math.abs(rounded) < THRESHOLD) {
+  if (profile === 'detail' || profile === 'lot' || Math.abs(rounded) < THRESHOLD) {
     const grouping = profile === 'detail' ? false : undefined
     return { text: fmt(rounded, locale, 0, grouping), unitKey }
   }
@@ -83,7 +85,7 @@ export function formatLength(meters, { locale, system, profile = 'total' } = {})
   const v = num(meters)
   if (isImperial(system)) {
     const yd = v / M_PER_YD
-    // Jamais de mile : les milliers de yards se lisent au séparateur de milliers (profil total
+    // Jamais de mile : les milliers de yards se lisent au séparateur de milliers (profils total et lot
     // seulement — le détail n'en a pas besoin, cf. `fmt`).
     const decimals = profile === 'detail' ? 2 : 0
     const grouping = profile === 'detail' ? false : undefined

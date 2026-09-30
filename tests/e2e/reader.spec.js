@@ -266,3 +266,26 @@ test('lecteur projet : le surtitre du bandeau n’est pas rogné à l’état pl
   // + max-height) : les descendantes (g, p, q, y, j) seraient rognées à l'état plein.
   expect(overflow.scrollHeight).toBeLessThanOrEqual(overflow.clientHeight)
 })
+
+test('projet : épingler un point du mémo depuis le lecteur, il survit au rechargement', async ({ page }) => {
+  await openProjectReader(page)
+  const openMemo = async () => {
+    await page.getByRole('button', { name: /Mémo : techniques de points/ }).first().click()
+    await expect(page.locator('.rs--on')).toBeVisible()
+  }
+  await openMemo()
+  await page.locator('.rs').getByRole('button', { name: 'Choisir les points' }).click()
+  const picker = page.locator('.sp--on')
+  await expect(picker).toBeVisible()
+  await picker.getByRole('tab', { name: 'Tricot' }).click()
+  // Le point est aussi suggéré pour ce patron : la case existe deux fois, la première suffit.
+  await picker.locator('[data-stitch="kn-knit"]').first().click()
+  await picker.getByRole('button', { name: 'Terminé' }).click()
+  await expect(page.locator('.sp--on')).toHaveCount(0)
+  await expect(page.locator('.rs--on')).toContainText('Maille endroit')
+
+  await page.reload()
+  await expect(page).toHaveURL(/\/project\/\d+\/read/)
+  await openMemo()
+  await expect(page.locator('.rs--on')).toContainText('Maille endroit')
+})

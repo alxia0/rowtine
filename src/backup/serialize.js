@@ -43,6 +43,9 @@ export const EXCLUDED_SETTINGS_KEYS = [
   // cette fonctionnalité.
   'tourProjectId',
   'tourPatternId',
+  // Permission de notification déjà demandée (29/09/2026) : état propre à cet appareil, la
+  // permission Android ne voyage pas avec une sauvegarde. `rowNotification` (préférence) part.
+  'rowNotificationAsked',
 ]
 
 // Une data URL que `parseDataUrl` REFUSE (il n'accepte que la forme base64) ne peut pas

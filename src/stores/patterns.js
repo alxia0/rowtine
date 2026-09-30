@@ -87,6 +87,15 @@ export const usePatternsStore = defineStore('patterns', () => {
     await db.patterns.update(Number(id), plain(data))
     await load()
   }
+  // Épinglage du mémo des points : écriture ciblée. `update()` relit toute la bibliothèque
+  // (PDF en base64 compris) : trop lourd pour une bascule à chaque case cochée.
+  async function setStitchPins(id, pins) {
+    const n = Number(id)
+    const next = plain(pins)
+    await db.patterns.update(n, { stitchPins: next })
+    const mem = patterns.value.find((p) => p.id === n)
+    if (mem) mem.stitchPins = next
+  }
   async function remove(id) {
     const p = await db.patterns.get(Number(id))
     await db.patterns.delete(Number(id))
@@ -192,5 +201,5 @@ export const usePatternsStore = defineStore('patterns', () => {
     return newId
   }
 
-  return { patterns, loaded, load, get, add, update, remove, restore, seedSamplesIfEmpty, migrateReadersIfNeeded, freePatternId, ensureFreePattern, libraryPatterns, selectablePatterns, forkForProject }
+  return { patterns, loaded, load, get, add, update, setStitchPins, remove, restore, seedSamplesIfEmpty, migrateReadersIfNeeded, freePatternId, ensureFreePattern, libraryPatterns, selectablePatterns, forkForProject }
 })

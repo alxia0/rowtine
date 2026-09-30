@@ -37,6 +37,12 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Bouton « Cocher le rang » de la notification du rang en cours
+             (RowNotificationPlugin). Visé par un intent explicite de l'app seule. -->
+        <receiver
+            android:name=".RowNotificationReceiver"
+            android:exported="false" />
     </application>
 
     <!-- Permissions -->
@@ -54,6 +60,13 @@
          dans son AndroidManifest.xml) ; Google Play l'avait signalée comme inutilisée,
          retirée le 17/09/2026. Ne pas la rajouter sans un usage réel qui la consomme. -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Notification du rang en cours (spec 2026-09-29, RowNotificationPlugin) : permission
+         d'exécution sur Android 13+, demandée une fois à la première ouverture du lecteur
+         d'un projet, coupable dans les Réglages. Sans elle, rien n'est affiché. Ignorée
+         sous Android 13. Aucune autre permission liée (pas d'alarme exacte, pas de
+         démarrage au boot, pas de service de premier plan). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

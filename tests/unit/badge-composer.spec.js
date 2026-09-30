@@ -16,7 +16,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { COLOR_PALETTE } from '@/constants/swatch'
 import { pickImage } from '@/utils/photo'
 import { shareImageDataUrl } from '@/utils/share-badge'
-import { computeBadgeGeometry, buildRawStatLines } from '@/utils/badge-render'
+import { computeBadgeGeometry, buildRawStatLines, BADGE_EXPORT_SCALE } from '@/utils/badge-render'
 import { makeTk } from './helpers/i18n-router'
 
 const tk = makeTk(i18n)
@@ -91,6 +91,7 @@ function stubCanvas() {
     // Vertical/Horizontal (Task 2, badge-render.js#drawTechniqueBadge) — tracé de sa bordure.
     save() {}, restore() {}, beginPath() {}, moveTo() {}, arcTo() {}, closePath() {}, clip() {},
     stroke(...a) { calls.push(['stroke', ...a]) },
+    scale(...a) { calls.push(['scale', ...a]) },
   }
   const fake = {
     width: 0, height: 0,
@@ -1390,11 +1391,25 @@ describe('BadgeComposer', () => {
 
     await triggerShare(wrapper)
 
-    expect(projectsStore.update).toHaveBeenCalled()
+    // La galerie garde la version plafonnée, le partage reçoit la pleine définition.
+    expect(projectsStore.update.mock.calls[0][1].photos).toEqual(['data:image/jpeg;base64,BADGE-RESIZED'])
     expect(shareImageDataUrl).toHaveBeenCalledWith(
-      'data:image/jpeg;base64,BADGE-RESIZED',
+      'data:image/jpeg;base64,BADGE',
       expect.objectContaining({ filename: 'badge-29.jpg' }),
     )
+  })
+
+  // Protège le câblage de l'échelle : génération en double définition, prévisu à l'échelle 1.
+  it('génération à BADGE_EXPORT_SCALE, prévisu sans scale', async () => {
+    stubCanvas()
+    const project = { id: 30, name: 'X', photos: [], technique: 'knitting' }
+    const { wrapper, projectsStore } = mountComposer(project)
+    projectsStore.update = vi.fn().mockResolvedValue(undefined)
+    await wrapper.vm.updatePreview()
+    expect(renderBadgeSpy.mock.calls.at(-1)[1].scale).toBeUndefined()
+
+    await triggerShare(wrapper)
+    expect(renderBadgeSpy.mock.calls.at(-1)[1].scale).toBe(BADGE_EXPORT_SCALE)
   })
 
   it('bouton « Modifier » : la position utilise les dimensions RÉELLES du canevas, jamais la prédiction du composant (ne peut plus désynchroniser après un retour à la ligne réel)', async () => {
@@ -1471,6 +1486,18 @@ describe('BadgeComposer', () => {
     expect(pill.text()).toContain('Rico Creative')
   })
 
+  it('pastille Laines : chaque laine avec son coloris', async () => {
+    stubCanvas()
+    const yarnUsage = [
+      { yarn: { brand: 'DROPS', model: 'Merino', colorName: 'Moutarde' }, balls: 4 },
+      { yarn: { brand: 'DROPS', model: 'Merino', colorName: 'Écru' }, balls: 2 },
+    ]
+    const { wrapper } = mountComposer({ id: 43, name: 'X', photos: [] }, { yarnUsage })
+    await flushPromises()
+    await wrapper.find('[data-test="badge-tab-infos"]').trigger('click')
+    expect(wrapper.find('[data-test="badge-yarns"]').text()).toBe('DROPS Merino, Moutarde · DROPS Merino, Écru')
+  })
+
   // Un projet créé mais jamais travaillé n'a ni `startedAt` ni `finishedAt` : la pastille
   // « Dates » afficherait « Commencé le » suivi de rien (et le badge la même ligne creuse).
   it('onglet Infos : pastille « Dates » absente si le projet n’a aucune date', async () => {
@@ -1489,6 +1516,43 @@ describe('BadgeComposer', () => {
     await flushPromises()
     await wrapper.find('[data-test="badge-tab-infos"]').trigger('click')
     expect(wrapper.find('[data-test="badge-yarns"]').exists()).toBe(false)
+  })
+
+  describe('pastille Composition', () => {
+    // Protège : pastille dédiée au bandeau des matières, proposée et cochée seulement si une matière est connue.
+    async function openInfos(yarnUsage) {
+      stubCanvas()
+      const { wrapper } = mountComposer({ id: 44, name: 'X', photos: [] }, { yarnUsage })
+      await flushPromises()
+      await wrapper.find('[data-test="badge-tab-infos"]').trigger('click')
+      return wrapper
+    }
+
+    it('cochée par défaut quand une laine a une composition, un clic la décoche', async () => {
+      const wrapper = await openInfos([{ yarn: { brand: 'DROPS', model: 'Merino', composition: ['laine'] }, balls: 2 }])
+      const pill = wrapper.find('[data-test="badge-composition"]')
+      expect(pill.exists()).toBe(true)
+      expect(pill.attributes('aria-pressed')).toBe('true')
+      await pill.trigger('click')
+      expect(wrapper.find('[data-test="badge-composition"]').attributes('aria-pressed')).toBe('false')
+    })
+
+    it('porte un libellé accessible « Libellé : valeur »', async () => {
+      const wrapper = await openInfos([{ yarn: { brand: 'DROPS', model: 'Merino', composition: ['laine'] }, balls: 2 }])
+      const pill = wrapper.find('[data-test="badge-composition"]')
+      expect(pill.attributes('aria-label')).toBe(`${i18n.global.t('yarn.composition')} : ${pill.text()}`)
+    })
+
+    it('absente quand aucune laine n\'a de composition', async () => {
+      const wrapper = await openInfos([{ yarn: { brand: 'DROPS', model: 'Merino' }, balls: 2 }])
+      expect(wrapper.find('[data-test="badge-composition"]').exists()).toBe(false)
+    })
+
+    it('une seule pastille, jamais dans les pastilles génériques', async () => {
+      const wrapper = await openInfos([{ yarn: { brand: 'DROPS', model: 'Merino', composition: ['laine'] }, balls: 2 }])
+      expect(wrapper.findAll('[data-test="badge-composition"]')).toHaveLength(1)
+      expect(wrapper.find('[data-test="badge-stat-composition"]').exists()).toBe(false)
+    })
   })
 
   describe('option Avancement (progress)', () => {

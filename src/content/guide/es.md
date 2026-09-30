@@ -45,9 +45,9 @@ burbujas de explicación.
 
 ## 1. Inicio: tu panel de control
 
-![El inicio de {app}: «¡Hola, Camille!», la ficha Continuar sobre Gorro de Trenzas en talla tejida M, las fichas En curso 1 y Esta semana 0 h, la última sesión de Gorro de invierno hoy (0:06), y luego las herramientas Contador, Calculadora y Agujas](images/es/01-accueil.webp)
+![El inicio de {app}: «¡Hola, Camille!», la ficha Continuar sobre Gorro de Trenzas en talla tejida M, las fichas En curso 1 y Esta semana 0 h, la última sesión de Gorro de invierno hoy (0:06), y luego las herramientas Contador, Calculadora, Agujas y Puntos](images/es/01-accueil.webp)
 
-*Inicio: la ficha «Continuar» te lleva a la última pieza en la que trabajaste, el panel resume lo esencial hasta las últimas sesiones, y las tres herramientas están a mano.*
+*Inicio: la ficha «Continuar» te lleva a la última pieza en la que trabajaste, el panel resume lo esencial hasta las últimas sesiones, y las cuatro herramientas están a mano.*
 
 Al abrir la app encuentras:
 - **Tu último proyecto**, con un botón **Continuar** para retomarlo justo
@@ -74,7 +74,7 @@ Al abrir la app encuentras:
   proyecto como Terminado (ver punto 2), y nunca aparece en un proyecto
   Abandonado.
 - Acceso rápido a las **herramientas** (calculadora de puntos, contador
-  libre, ayuda de agujas o ganchillo), al botón **+ Crear un proyecto** y al
+  libre, ayuda de agujas o ganchillo, memo de técnicas de puntos), al botón **+ Crear un proyecto** y al
   botón **Importar un PDF**, que abre tu **Biblioteca de patrones** directamente
   en la opción de añadir un patrón.
 - Al principio, mientras la app solo contiene los ejemplos, el inicio va a lo
@@ -194,7 +194,7 @@ deliberadamente sencilla, sin filtros ni agrupaciones.
 
 ### Compartir una insignia de tu proyecto
 
-![Pantalla para compartir la insignia del proyecto «Sweater for me»: la foto del jersey, Tiempo total 32 h 07 min, Avance 67 %, 30 sesiones y el mapa de calendario.](images/es/02c-badge-partage.webp)
+![Pantalla para compartir la insignia de «Sweater for me»: la foto del jersey, Acrílico · Polyester · Algodón, 32 h 07 min, tres lanas con su color, 8 ovillos (1,36 km), avance 64 %, 30 sesiones](images/es/02c-badge-partage.webp)
 
 *La pantalla para compartir, abierta desde la pestaña Estadísticas o el menú de la ficha del proyecto.*
 
@@ -213,12 +213,19 @@ El cajón de ajustes tiene tres pestañas:
 - **Color**: una paleta de tonos, un botón + para elegir otro libremente y, encima, los
   últimos colores que has usado de verdad en una insignia.
 - **Info**: lo que la insignia debe contener. Cada pastilla muestra el valor real del
-  proyecto (tiempo total, fechas de inicio y de fin, lanas usadas con sus ovillos, avance
-  mientras el proyecto está en curso, mejor racha, número de sesiones, técnica punto o
-  ganchillo): tócala para incluirla o quitarla. La pastilla **Mapa de calendario** añade la
-  cuadrícula de los días trabajados. Ahí eliges también el **Idioma** del texto de la
-  insignia, independiente del de la app (práctico para enviársela a alguien que no habla
-  el tuyo), y una línea de **Texto libre (opcional)**, de 80 caracteres como máximo.
+  proyecto (tiempo total, fechas de inicio y de fin, lanas usadas con su color y sus
+  ovillos, avance mientras el proyecto está en curso, mejor racha, número de sesiones,
+  técnica punto o ganchillo): tócala para incluirla o quitarla. Cada lana aparece con
+  su marca, su modelo y su color: dos colores del mismo modelo se distinguen bien. En
+  cuanto una lana del proyecto tiene una composición anotada, una pastilla más enumera
+  los **materiales** de la labor («Algodón · Lana»), sin porcentajes. Marcada de
+  entrada, añade a la insignia una banda a todo lo ancho, entre dos filetes, encima
+  del mapa de calendario (debajo de las cifras si no conservas el mapa). La pastilla
+  **Mapa de calendario** añade la cuadrícula de los días trabajados. Ahí eliges
+  también el **Idioma** del texto de la insignia, independiente del de la app
+  (práctico para enviársela a alguien que no habla el tuyo: los materiales se
+  traducen con él), y una línea de **Texto libre (opcional)**, de 80 caracteres como
+  máximo.
 
 Para cambiar una foto, tócala en la vista previa: aparece un botón **Editar**, que te
 propone una foto del proyecto o una imagen de tu galería, el formato (cuadrado, horizontal
@@ -231,9 +238,9 @@ compartir, la insignia anterior de esa misma apertura se sustituye, no se duplic
 
 ## 3. El patrón que se adapta a ti: el lector interactivo
 
-![El patrón Gorro de Trenzas abierto dentro del proyecto Gorro de invierno: «Volver a mi paso», luego el índice del lector (un punto por sección), «1. Elige tu talla» con S 50-52, M 54-56 ya marcada y L 58-60, y el cronómetro abajo](images/es/03a-lecteur-haut.webp)
+![Gorro de Trenzas en el lector: «Volver a mi paso», luego la portada, un gorro de trenzas con pompón sobre una mesa de madera, y «1. Elige tu talla», con M 54-56 marcada, y el cronómetro abajo](images/es/03a-lecteur-haut.webp)
 
-*Arriba del lector: el índice de las secciones, y luego la elección de talla, una sola vez para todo el patrón, y la guía rápida (materiales, tabla de tallas, técnicas, abreviaturas) a mano.*
+*Arriba del lector: la portada del patrón, que se amplía con un toque, y luego la elección de talla, una sola vez para todo el patrón. La guía rápida y el índice de las secciones siguen justo debajo.*
 
 ![El contador Fila del diagrama marca 1 de 24, debajo el botón Añadir un contador de repetición y la cuadrícula del gorro: columnas de puntos y un motivo de trenza, con el punto 1 como inicio a la derecha y el punto 8 a la izquierda.](images/es/03b-lecteur-diagramme.webp)
 
@@ -247,7 +254,8 @@ que cualquier patrón importado y verificado), te ofrece:
   cifras del patrón se filtran automáticamente** en consecuencia
   (puntos, filas, largos): cada línea muestra las cifras de tu talla,
   sin las notaciones «104 (108) 112…» que había que descifrar.
-- **El seguimiento paso a paso**: cada paso lo puedes marcar, con una
+- **El seguimiento paso a paso**: cada paso lo puedes marcar tocando su
+  casilla o cualquier punto del tercio izquierdo de su tarjeta, con una
   barra de progreso global y por sección, y contadores de repetición
   integrados («− 3/12 +») que desaparecen solos si no corresponden a tu
   talla elegida.
@@ -258,16 +266,69 @@ que cualquier patrón importado y verificado), te ofrece:
   compartido entre las secciones que usan el mismo diagrama.
 - **La guía rápida**: las abreviaturas del patrón aparecen en una
   burbuja en cuanto las tocas, sin que salgas de tu fila en curso; un
-  panel completo agrupa además las técnicas (con tutoriales en vídeo),
+  panel completo agrupa además las técnicas del patrón (con el enlace a su vídeo cuando el patrón lo incluye),
   los materiales y la muestra, la tabla de tallas, la lista de
-  abreviaturas, y los **consejos y trucos** que da el patrón.
+  abreviaturas, y los **consejos y trucos** que da el patrón. Siempre se suma
+  la ficha **Memo: técnicas de puntos**, incluso en un patrón sin guía rápida
+  propia: guarda las fichas de los puntos que elijas (más detalles justo después
+  de esta lista).
 - **El índice**: una fila de puntos, uno por sección, sigue visible arriba
   del hilo del lector. Un toque te lleva directamente a esa sección, y el
   punto de tu sección activa se marca solo: siempre sabes dónde estás. Un
   patrón de una sola sección no lo muestra: no habría nada que resumir.
+- **La portada y las fotos del patrón**: arriba del todo del lector, la
+  portada de tu PDF aparece tal como la compuso la diseñadora; un toque la
+  abre en grande. Cuando la primera página lleva también instrucciones, la
+  app solo conserva la foto, el título y la descripción. Las fotos del PDF
+  se colocan debajo del paso que las precede en el patrón, en grande y nunca
+  recortadas (una serie de fotos paso a paso se ordena en dos columnas). Un
+  toque abre cada una a pantalla completa, donde puedes hacer zoom. En un
+  patrón creado a mano, la portada es la foto que marcaste con una estrella.
 - Un patrón lo puedes consultar en modo lectura (vista previa desde la
   biblioteca) **o** seguir tu progreso real desde un proyecto. Los dos
-  accesos existen, y tu progreso siempre se guarda.
+  accesos existen, y tu progreso siempre se guarda. En la vista previa
+  todavía no se marca nada, pero cada línea lleva una pequeña señal que
+  anuncia en qué se convertirá durante el seguimiento. Una leyenda las
+  explica arriba de la vista previa: **Durante el seguimiento:** «se marca»
+  para un paso, «se cuenta» para una repetición, «para leer» para una nota.
+
+### El memo de técnicas de puntos
+
+¿Se te ha olvidado un punto en mitad de la fila, o ya no recuerdas cómo se hace
+un montaje? El **memo de técnicas de puntos** reúne unas cuarenta fichas, tanto
+de ganchillo como de punto: cada una da el nombre del punto, sus abreviaturas,
+los pasos numerados y un truco. Van dentro de la app y se leen sin conexión.
+
+![La guía rápida en la pestaña Memo: técnicas de puntos, tras Abreviaturas y Consejos: arriba el botón Modificar puntos, luego la ficha Punto derecho, d, der, pd, con sus cinco pasos y su truco](images/es/03j-memo-points.webp)
+
+*La pestaña del memo, una vez elegidos los puntos: «Modificar puntos» arriba, y luego una ficha por punto, con sus abreviaturas, sus pasos numerados y un truco.*
+
+**Elegir tus puntos.** En la guía rápida del lector, toca la ficha **Memo:
+técnicas de puntos**. Mientras no hayas elegido ningún punto, la pestaña explica
+para qué sirve: toca **Elegir puntos**. Se abre entonces el selector:
+- arriba, **Sugeridos para este patrón** propone los puntos cuyas abreviaturas
+  la app ha reconocido en el glosario del patrón;
+- el campo **Buscar un punto** encuentra una ficha por su nombre o su
+  abreviatura;
+- las pestañas **Ganchillo** y **Punto** ordenan todas las fichas por familia
+  (puntos básicos, aumentos y disminuciones, montajes…), y el selector se abre
+  en la técnica del patrón.
+
+Marca los puntos que quieras tener a mano: cada casilla se guarda al momento.
+**Listo** te devuelve a la pestaña del memo, con una ficha por punto elegido.
+
+![El selector Memo: técnicas de puntos en la pestaña Punto: el campo Buscar un punto, Sugeridos para este patrón con Punto derecho y Punto revés marcados, luego Montajes, Cierres y el botón Listo](images/es/03k-memo-selecteur.webp)
+
+*El selector: arriba, los puntos reconocidos en el glosario del patrón, marcados aquí, y luego todas las fichas de la técnica, ordenadas por familia. Cada casilla se guarda al momento.*
+
+**Guardado con el patrón.** Tu selección pertenece al patrón, no a un proyecto:
+la encuentras en la vista previa desde la biblioteca igual que en cada proyecto
+que sigue ese patrón, y viaja con tu copia de seguridad. Para cambiarla después,
+el botón **Modificar puntos**, arriba de la pestaña, vuelve a abrir el mismo
+selector: al desmarcar un punto, su ficha desaparece.
+
+Fuera de cualquier patrón, el memo completo también se consulta desde el
+Inicio, con la ficha **Puntos** de las herramientas (punto 6).
 
 ### El diagrama a pantalla completa, y cómo «calibrarlo» bien
 
@@ -373,6 +434,12 @@ quieres reformularla. No hace falta salir del proyecto para arreglarla.
 botones: **Corregir** y **Cerrar**. La pantalla de corrección se abre entonces
 directamente **en esa línea**: no tienes que buscarla por todo el patrón.
 
+En un paso para marcar, toca **en el centro o a la derecha** de la tarjeta. Su
+tercio izquierdo, en toda su altura, sirve para marcar: un toque ahí marca o
+desmarca el paso, igual que la propia casilla, sin poner el velo. No hace falta
+apuntar a la casilla pequeña mientras tejes. Las notas, las repeticiones, los
+diagramas y los títulos de sección no cambian: el velo se pone donde toques.
+
 El velo no estorba tu labor: se retira solo al cabo de tres segundos, y un toque
 en cualquier otro sitio lo hace desaparecer. Tocar otra tarjeta lo desplaza allí.
 Y ningún toque en un **control** de la tarjeta lo pone: marcar una vuelta o tocar
@@ -455,13 +522,19 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   lo que la app ha encontrado (secciones, pasos para marcar, tallas,
   diagramas), te recuerda que releas el patrón antes de empezar, y el botón
   **Previsualizar el patrón** te lleva directamente a recorrerlo, sección
-  por sección.
+  por sección. Las señales de la vista previa te ayudan en ese repaso: una
+  línea con la señal «para leer» que debería marcarse, o al revés, salta a
+  la vista, y se corrige en el editor.
   (La lectura también reconoce las rejillas redondas y cuadradas de los
   patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)
-- **Importar en formato {app}**: en «+ Añadir un patrón», esta opción
+- **Importar un archivo {app}**: en «+ Añadir un patrón», esta opción
   acepta un archivo **.rowtine**, es decir, un patrón ya preparado
   en el formato de {app} (su texto y sus imágenes). Entra tal cual en tu
   biblioteca, sin leer ningún PDF, y siempre sin conexión.
+  Este archivo se crea desde el ordenador, con el conversor del sitio web
+  (rowtine.app/es/convertisseur): lee el PDF de tu patrón y te deja
+  corregirlo en pantalla grande. Copia después el archivo en tu teléfono
+  (cable, nube, correo…) y elígelo aquí.
 - **Crear un patrón a mano**: en «+ Añadir un patrón», la opción
   **Crear manualmente** abre una pantalla propia (nombre, tipo, categoría,
   tallas, fuente, autor…) con un único apartado **Fotos** para sus imágenes.
@@ -636,9 +709,9 @@ nada por error.
 
 ## 5. Tu stock de lana
 
-![10 ovillos, 1,932 km, 500 g y 31 € gastados arriba, el campo Buscar una lana…, los botones Filtrar y Ordenar, debajo Añadir una lana e Importar de Ravelry uno encima del otro, luego Drops · Moutarde, ×4 · 165 m · 200 g, marcada con una pequeña hoja, y Hobbii · Sauge, ×6 · 212 m · 300 g, ambas libres](images/es/05-stock.webp)
+![10 ovillos, 1,932 km, 500 g y 31 € gastados arriba, Filtrar, Ordenar, Añadir una lana, Importar de Ravelry, luego Drops · Moutarde, ×4 · 660 m · 200 g, y Hobbii · Sauge, ×6 · 1272 m · 300 g, libres](images/es/05-stock.webp)
 
-*El stock: los totales arriba (ovillos, longitud, peso, valor), y luego una ficha por lana con su estado, libre o reservada por un proyecto.*
+*El stock: los totales arriba (ovillos, longitud, peso, valor), y luego una ficha por lana con el metraje y el peso de todo el lote, y su estado, libre o reservada por un proyecto.*
 
 - **Añadir un ovillo**: marca, grosor (con una ayuda para entender las
   categorías de grosor), composición (elegida en una lista; si un
@@ -690,6 +763,9 @@ nada por error.
 - **El resumen** en la parte superior de la pantalla: número de
   ovillos, longitud y peso acumulados (que cambian solos a km y kg
   cuando los totales crecen), y el valor total de tu stock.
+- **Las tarjetas**: cada una indica el número de ovillos, y luego el
+  metraje y el peso **del lote entero**: 4 ovillos de 165 m se muestran
+  como 660 m. El metraje de un solo ovillo se lee en la ficha de la lana.
 - **Buscar, filtrar, ordenar**: un campo de búsqueda y los botones
   **Filtrar** y **Ordenar** en la parte superior del stock. Filtrar abre una
   ventana de dos niveles: la lista de siete criterios (**Marca**,
@@ -711,6 +787,16 @@ nada por error.
   avisa si restaurar un proyecto desde la papelera pone en duda tus
   reservas de lana. El proyecto vuelve igualmente, con una
   reserva reducida y un mensaje que te lo explica.
+- **Los ovillos empezados también cuentan**: dondequiera que cuentes
+  ovillos, puedes escribir un número con decimales, 2,5 para dos ovillos y
+  medio, 0,5 para un resto empezado. Vale para la cantidad en stock, una
+  línea de compra o de regalo, los ovillos que reservas para un proyecto, y
+  la ventana que se abre cuando pasas a **Terminado** un proyecto con lanas
+  reservadas («¿Cuántos ovillos has utilizado realmente?»): el resto vuelve
+  a tu stock. Lo mismo para un proyecto **Abandonado**, donde indicas los
+  ovillos perdidos. La app guarda dos decimales (un cuarto de ovillo es
+  0,25) y muestra estos números en todas partes con el separador decimal de
+  tu idioma.
 - **La ficha de una lana**: al tocar su tarjeta se abre a pantalla
   completa. Reúne todo lo que anotaste (marca, color, ubicación, metraje,
   cantidad, precio, compras, composición, notas), sus características, su
@@ -841,6 +927,11 @@ accesibles desde el inicio:
   no combina con ese patrón), y te recuerda siempre que te queda por
   tejer una muestra para comprobarlo: es un punto de partida, no una
   garantía. El campo de las filas es opcional.
+- **Memo: técnicas de puntos**: la ficha **Puntos** abre todas las fichas del
+  memo, solo para consultar: los puntos básicos y los más habituales, de ganchillo y de punto. Busca un punto por su nombre o su abreviatura,
+  pasa de la pestaña Ganchillo a la pestaña Punto, y toca una ficha para
+  desplegar sus pasos. Para tener ciertos puntos a mano mientras tejes una
+  pieza, elígelos desde la guía rápida del lector (punto 3).
 
 ## 7. Estadísticas
 
@@ -959,6 +1050,20 @@ no cuenta: se necesita una acción **registrada**.
     idea; usarla desde un teléfono **y** una tableta no lo es: cada uno
     borraría el trabajo del otro. Un segundo dispositivo necesita su
     propia carpeta.
+- **Mientras sigues un patrón**: dos interruptores, **activados
+  de serie**. Desactívalos aquí si no los quieres.
+  - **Fila en curso en las notificaciones**: mientras el lector de un proyecto
+    está abierto, una notificación muestra tu paso en curso y el siguiente. Te
+    deja avanzar sin volver a abrir la app: «Marcar la fila» para un paso, un
+    botón menos y un botón más alrededor de «Repetición 4 / 8» para un
+    contador, «Diagrama hecho» para el recordatorio de un diagrama. Android te
+    pide una sola vez permiso para mostrar notificaciones, la primera vez que
+    abres el lector; si lo rechazaste, los Ajustes te lo indican y te abren los
+    ajustes de Android para concederlo.
+  - **Mantener la pantalla encendida durante el seguimiento**: la pantalla no
+    entra en reposo mientras el lector de un proyecto está abierto, aunque no
+    toques tu dispositivo durante largos minutos, con las agujas en la mano.
+    Vuelve a su reposo habitual en cuanto sales del lector.
 - **Ayuda**: «Repetir la visita guiada» vuelve a abrir el gorro de ejemplo
   en el lector con sus burbujas de explicación, y lo vuelve a crear si lo
   has eliminado.

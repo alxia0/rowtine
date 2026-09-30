@@ -55,6 +55,7 @@
     "toolCounter": "Contador",
     "toolCalc": "Calculadora",
     "toolNeedle": "Agujas",
+    "toolStitches": "Puntos",
     "statsLink": "Ver estadísticas de tiempo",
     "recentSessions": "Últimas sesiones",
     "sessionsLink": "Ver todas las sesiones"
@@ -261,6 +262,25 @@
     "knitting": "Punto",
     "crochet": "Ganchillo"
   },
+  "rowNotif": {
+    "title": "Fila {index}/{total}, {section}",
+    "next": "Después: {text}",
+    "nextIn": "Después, {section}: {text}",
+    "check": "Marcar la fila",
+    "channel": "Fila en curso",
+    "closedTitle": "Rowtine se ha cerrado",
+    "closedText": "Toca para retomar tu fila",
+    "chartTitle": "Recuerda el diagrama, {section}",
+    "chartRow": "Fila {row}/{rows} del diagrama",
+    "chartText": "Toca para ver el diagrama",
+    "chartDone": "Diagrama hecho",
+    "counterTitle": "Repetición {count}/{total}, {section}",
+    "counterLabel": "Repetición {count} / {total}",
+    "setting": "Fila en curso en las notificaciones",
+    "settingHint": "Muestra el paso en curso mientras sigues un patrón, con un botón para avanzar sin abrir la app.",
+    "settingDenied": "Las notificaciones de Rowtine están desactivadas en Android. Toca para abrir los ajustes.",
+    "settingAsk": "Rowtine aún no puede mostrar notificaciones. Toca para permitirlo."
+  },
   "project": {
     "newTitle": "Nuevo proyecto",
     "editTitle": "Editar proyecto",
@@ -299,6 +319,8 @@
     "gaugeHint": "Tu muestra medida en 10×10 cm. Sirve de referencia para comprobar tu tensión y, más adelante, adaptar el patrón si difiere.",
     "gaugeStitchesImperial": "Puntos / 4 pulg.",
     "gaugeRowsImperial": "Filas / 4 pulg.",
+    "gaugeStitchesValue": "{n} p.",
+    "gaugeRowsValue": "{n} vueltas",
     "gaugeHintImperial": "Tu muestra medida en 4 × 4 pulg. Sirve de referencia para comprobar tu tensión y, más adelante, adaptar el patrón si difiere.",
     "sizesPlaceholder": "S, M, L",
     "activeSize": "Talla tejida",
@@ -647,7 +669,8 @@
     "all": "Todos",
     "add": "Añadir un patrón",
     "importPdf": "Importar un patrón en PDF",
-    "importRowtine": "Importar en formato Rowtine",
+    "importRowtine": "Importar un archivo Rowtine",
+    "importRowtineHint": "Créalo desde el ordenador en {site} y luego cópialo en tu teléfono.",
     "importing": "Leyendo el PDF…",
     "importDone": "PDF importado. Revisa y completa la información.",
     "addManual": "Crear manualmente",
@@ -717,8 +740,8 @@
   },
   "importLocal": {
     "title": "Importar un PDF",
-    "titleRowtine": "Importar en formato Rowtine",
-    "leadRowtine": "Un patrón ya preparado en formato Rowtine: el texto y las imágenes se importan tal cual, en tu dispositivo, sin conexión.",
+    "titleRowtine": "Importar un archivo Rowtine",
+    "leadRowtine": "Un patrón ya preparado en un archivo Rowtine: el texto y las imágenes se importan tal cual, en tu dispositivo, sin conexión.",
     "pickRowtine": "Elegir un archivo .rowtine o .zip",
     "lead": "El patrón se analiza en tu dispositivo: gratis, sin conexión y fiel al PDF.",
     "leadNext": "El patrón se guarda directamente en tu biblioteca; después podrás corregir las secciones si es necesario.",
@@ -930,6 +953,8 @@
     "saved": "Ajustes guardados.",
     "appearance": "Apariencia",
     "weekStart": "Primer día de la semana",
+    "keepScreenOn": "Mantener la pantalla encendida durante el seguimiento",
+    "keepScreenOnHint": "La pantalla no se apaga mientras sigues un patrón.",
     "language": "Idioma",
     "unitsAndCurrency": "Unidades y moneda",
     "unitsMetric": "Métrico (m, g)",
@@ -1249,6 +1274,7 @@
         "label": "Consejos",
         "sub": "Trucos del patrón"
       },
+      "stitches": { "label": "Memo: técnicas de puntos", "sub": "Los puntos que elegiste", "subEmpty": "Elige los puntos que quieres tener a mano" },
       "h3": {
         "gauge": "Muestra",
         "needles": "Agujas/Ganchillo",
@@ -1323,6 +1349,28 @@
       "addChartStep": "+ Diagrama",
       "chartLabel": "Diagrama"
     }
+  },
+  "stitchMemo": {
+    "title": "Memo: técnicas de puntos",
+    "pick": "Elegir puntos",
+    "edit": "Modificar puntos",
+    "empty": "Aún no has elegido puntos para este patrón. Elige los que quieras recordar: se quedarán aquí.",
+    "search": "Buscar un punto",
+    "suggested": "Sugeridos para este patrón",
+    "noResult": "Ningún punto coincide",
+    "done": "Listo",
+    "craft": { "crochet": "Ganchillo", "knitting": "Punto" },
+    "group": {
+      "base": "Puntos básicos",
+      "shaping": "Aumentos y disminuciones",
+      "construction": "Construcción",
+      "texture": "Puntos de relieve y fantasía",
+      "cast-on": "Montajes",
+      "bind-off": "Cierres",
+      "pattern": "Puntos",
+      "technique": "Técnicas"
+    },
+    "expand": "Mostrar los pasos"
   },
   "storage": {
     "writeFailed": "Espacio insuficiente: tu último cambio no se ha podido guardar.",

@@ -1,0 +1,5 @@
+Mémo des techniques de points : les points et techniques de base et courants, tricot et crochet, dans les outils et dans l'aide-mémoire du lecteur.
+Le rang en cours dans une notification pendant le suivi : cocher le rang, compter les répétitions, rappel du diagramme, sans ouvrir l'app.
+L'écran reste allumé pendant le suivi.
+Badge : coloris de chaque laine et matières de l'ouvrage.
+Diverses améliorations et correctifs.
