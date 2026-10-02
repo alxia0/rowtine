@@ -76,7 +76,7 @@ import { W, WARNING_CODES } from '@/utils/pattern-md/warning-codes'
 import { isDirty } from '@/utils/correction-dirty'
 import { sectionTitleLabel, isSingleSize, slug } from '@/utils/reader'
 import { normalizeReaderForSave, resizeReferenceSizeTable } from '@/utils/reader-edit'
-import { stepLine, sectionLine, sectionTitleAtLine, imageAnchorLine } from '@/utils/pattern-md/step-line'
+import { stepLine, sectionLine, sectionTitleAtLine, imageAnchorLine, imageAnchorStepText } from '@/utils/pattern-md/step-line'
 // Le PRÉFIXE de titre, jamais une regex `/^##\s+/` recopiée ici : md-line-type.js l'exporte
 // précisément pour que la même syntaxe ne soit pas décrite à deux endroits (son commentaire
 // de tête le dit — deux formes voisines dérivent au premier ajustement de dialecte, et
@@ -379,6 +379,14 @@ function toggleGallery() {
 // `imageAnchorLine` reparcourrait tout `draftMd` à CHAQUE frappe même galerie repliée (le
 // seul rendu qui le lit, le bouton, est de toute façon absent tant qu'elle l'est).
 const galleryInsertLine = computed(() => (galleryOpen.value ? imageAnchorLine(draftMd.value, cursorLine.value) : null))
+// Étape visée, dite dans la phrase d'aide de la bande : la bande est loin du curseur,
+// l'utilisatrice doit savoir où l'image va atterrir avant d'appuyer. Tronquée : une étape
+// peut faire plusieurs lignes d'écran.
+const galleryInsertStep = computed(() => {
+  const text = galleryOpen.value ? imageAnchorStepText(draftMd.value, cursorLine.value) : null
+  if (!text) return null
+  return text.length > 60 ? `${text.slice(0, 59).trimEnd()}…` : text
+})
 
 // Insertion d'une image de galerie DANS LE TEXTE (retour terrain 27/08/2026, distinct de
 // « Suivre comme diagramme » : IMMÉDIAT, comme une frappe — pas une pendingOp différée à
@@ -1243,6 +1251,58 @@ function onCancel() {
   <AppHeader :title="t('correction.title')" back />
   <main v-if="pattern" class="correct">
     <div class="correct__body">
+      <section class="gallery-strip card">
+        <button
+          type="button"
+          class="gallery-strip__toggle"
+          :aria-expanded="galleryOpen"
+          @click="toggleGallery"
+        >
+          <AppIcon name="camera" :size="18" />
+          <span>{{ t('correction.galleryToggle', { count: galleryRows.length }) }}</span>
+          <AppIcon :name="galleryOpen ? 'chevronUp' : 'chevronDown'" :size="16" />
+        </button>
+        <p v-if="galleryOpen && galleryRows.length" class="gallery-strip__hint">
+          {{ galleryInsertStep ? t('correction.galleryInsertTarget', { step: galleryInsertStep }) : t('correction.galleryInsertHint') }}
+        </p>
+        <div v-if="galleryOpen" class="gallery-strip__list">
+          <div v-for="row in galleryRows" :key="row.idx" class="gallery-strip__row">
+            <img
+              :src="row.src"
+              class="gallery-strip__img"
+              :alt="row.page > 0 ? t('patternExtras.fromPage', { n: row.page }) : t('patternExtras.addedImage')"
+            />
+            <button type="button" class="gallery-strip__del" :aria-label="t('common.delete')" @click="removeGalleryImage(row.idx)">
+              <AppIcon name="close" :size="15" />
+            </button>
+            <button
+              v-if="!row.pending"
+              type="button"
+              class="gallery-strip__insert"
+              :disabled="!galleryInsertLine"
+              @click="insertGalleryImageIntoText(row)"
+            >
+              {{ t('correction.insertIntoText') }}
+            </button>
+            <button
+              type="button"
+              class="gallery-strip__promote"
+              aria-haspopup="menu"
+              @click="openGalleryShapeMenu(row, $event.currentTarget)"
+            >
+              {{ t('correction.followAsChart') }}
+            </button>
+          </div>
+          <button
+            type="button"
+            class="gallery-strip__add btn"
+            @click="addGalleryImage"
+          >
+            <AppIcon name="plus" :size="18" /> {{ t('patternExtras.addImage') }}
+          </button>
+          <PdfPagePickerDialog v-if="pattern?.pdf" v-model:open="galleryPdfPickerOpen" :pdf="pattern.pdf" @pick="onGalleryPdfPagePicked" />
+        </div>
+      </section>
       <CorrectionHelp />
       <FieldHelp
         for="correction-sizes"
@@ -1360,56 +1420,6 @@ function onCancel() {
               </div>
             </template>
           </div>
-        </div>
-      </section>
-
-      <section class="gallery-strip card">
-        <button
-          type="button"
-          class="gallery-strip__toggle"
-          :aria-expanded="galleryOpen"
-          @click="toggleGallery"
-        >
-          <AppIcon name="camera" :size="18" />
-          <span>{{ t('correction.galleryToggle', { count: galleryRows.length }) }}</span>
-          <AppIcon :name="galleryOpen ? 'chevronUp' : 'chevronDown'" :size="16" />
-        </button>
-        <div v-if="galleryOpen" class="gallery-strip__list">
-          <div v-for="row in galleryRows" :key="row.idx" class="gallery-strip__row">
-            <img
-              :src="row.src"
-              class="gallery-strip__img"
-              :alt="row.page > 0 ? t('patternExtras.fromPage', { n: row.page }) : t('patternExtras.addedImage')"
-            />
-            <button type="button" class="gallery-strip__del" :aria-label="t('common.delete')" @click="removeGalleryImage(row.idx)">
-              <AppIcon name="close" :size="15" />
-            </button>
-            <button
-              v-if="!row.pending"
-              type="button"
-              class="gallery-strip__insert"
-              :disabled="!galleryInsertLine"
-              @click="insertGalleryImageIntoText(row)"
-            >
-              {{ t('correction.insertIntoText') }}
-            </button>
-            <button
-              type="button"
-              class="gallery-strip__promote"
-              aria-haspopup="menu"
-              @click="openGalleryShapeMenu(row, $event.currentTarget)"
-            >
-              {{ t('correction.followAsChart') }}
-            </button>
-          </div>
-          <button
-            type="button"
-            class="gallery-strip__add btn"
-            @click="addGalleryImage"
-          >
-            <AppIcon name="plus" :size="18" /> {{ t('patternExtras.addImage') }}
-          </button>
-          <PdfPagePickerDialog v-if="pattern?.pdf" v-model:open="galleryPdfPickerOpen" :pdf="pattern.pdf" @pick="onGalleryPdfPagePicked" />
         </div>
       </section>
     </div>
@@ -1630,8 +1640,9 @@ function onCancel() {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  margin-top: var(--sp-4);
+  margin-bottom: var(--sp-4);
 }
+.gallery-strip__hint { margin: 0; font-size: 14px; color: var(--ink-70); }
 .gallery-strip__toggle {
   display: flex;
   align-items: center;
@@ -1703,6 +1714,10 @@ function onCancel() {
 .correct__actions {
   position: sticky;
   bottom: 0;
+  /* Au-dessus de la barre de balisage (`.rte__bar`, 35) : quand la galerie dépliée
+     repousse l'éditeur en bas d'écran, la barre recouvrait Annuler/Enregistrer
+     (vu sur le Huawei le 30/09). Sous AppHeader (40). */
+  z-index: 36;
   display: flex;
   gap: var(--sp-2);
   /* Retour terrain (Nexus 7, second tour) : bandeau abaissé, retour terrain

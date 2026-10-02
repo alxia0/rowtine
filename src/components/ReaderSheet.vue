@@ -130,6 +130,12 @@ useDialogFocusReturn(() => props.open)
           <button v-if="b.action" class="rs__yt rs__action" type="button" @click="emit('action', b.action.event)">{{ $t(b.action.labelKey) }}</button>
         </div>
       </div>
+      <!-- Pied de volet optionnel (slot) : le lecteur y pose l'interrupteur « Garder
+           l'écran allumé » (spec 2026-10-01) — un réglage de suivi atteint sans quitter
+           le projet ni toucher au chrono. -->
+      <div v-if="$slots.footer" class="rs__foot">
+        <slot name="footer" />
+      </div>
     </aside>
   </div>
 </template>
@@ -224,6 +230,11 @@ useDialogFocusReturn(() => props.open)
   overflow-y: auto;
   padding: 0 var(--sp-4) var(--sp-6);
   -webkit-overflow-scrolling: touch;
+}
+/* Pied de volet (slot footer) : séparé du contenu défilant, toujours visible. */
+.rs__foot {
+  border-top: 1px solid var(--line-soft);
+  padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + var(--sa-bottom, 0px));
 }
 .rs__block {
   background: var(--tile);

@@ -289,3 +289,41 @@ test('projet : épingler un point du mémo depuis le lecteur, il survit au recha
   await openMemo()
   await expect(page.locator('.rs--on')).toContainText('Maille endroit')
 })
+
+/* ── Reprise sur le dernier geste (intent 2026-09-30) ──
+   Julie tricote hors ordre : à la réouverture, le lecteur l'emmène sur le dernier rang
+   qu'elle a travaillé (pas sur le premier non coché du patron), avec une pill temporaire
+   qui explique la place. Qui suit l'ordre retrouve son étape en cours, surlignée, juste
+   après le rang atterri. */
+test('reprise : atterrit sur le dernier rang travaillé (hors ordre), badge à l’appui', async ({ page }) => {
+  await openProjectReader(page)
+  // Julie attaque la fin : elle coche « Rentrer les fils » (Finitions) et ne touche à rien d'autre.
+  const rentrer = page.locator('.rstep', { hasText: 'Rentrer les fils' })
+  await rentrer.scrollIntoViewIfNeeded()
+  await rentrer.locator('.rcheck').click()
+  await expect(rentrer).toHaveClass(/rstep--done/)
+  await page.locator('.rhdr__back').click()
+  await expect(page).toHaveURL(/\/project\/\d+$/)
+  await page.getByRole('button', { name: /Suivre le patron/ }).click()
+  await expect(page).toHaveURL(/\/project\/\d+\/read/)
+  // La pill explique le placement, puis la carte du dernier geste est bien à l'écran —
+  // alors que le premier non coché du patron (Bordure) est tout en haut, ailleurs.
+  await expect(page.locator('.rbadge')).toHaveText('Dernier rang travaillé')
+  await expect(page.locator('.rstep--done', { hasText: 'Rentrer les fils' })).toBeInViewport({ ratio: 0.5 })
+})
+
+test('reprise : qui suit l’ordre retrouve son rang coché à l’écran et l’étape en cours surlignée', async ({ page }) => {
+  await openProjectReader(page)
+  await page.locator('.rcheck').first().click()
+  await page.locator('.rhdr__back').click()
+  await expect(page).toHaveURL(/\/project\/\d+$/)
+  await page.getByRole('button', { name: /Suivre le patron/ }).click()
+  await expect(page).toHaveURL(/\/project\/\d+\/read/)
+  await expect(page.locator('.rbadge')).toHaveText('Dernier rang travaillé')
+  // Atterrissage sur le dernier geste (« Monter … », rang 1)…
+  await expect(page.locator('.rstep--done', { hasText: 'Monter' }).first()).toBeInViewport({ ratio: 0.5 })
+  // …et l'étape en cours (rang 2, premier non coché) surlignée, à portée d'écran.
+  const cur = page.locator('.rstep--cur')
+  await expect(cur).toBeVisible()
+  await expect(cur).toBeInViewport()
+})

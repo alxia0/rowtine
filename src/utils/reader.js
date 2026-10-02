@@ -459,9 +459,32 @@ function trackedDone(step, state) {
 }
 
 // Première étape suivie non faite dans l'ordre global, avec sa section, ou `null` quand tout
-// est fait. Source de l'étape en cours du lecteur (puce, recentrage, mise en évidence).
-export function currentStep(sections, state) {
+// est fait. Socle historique de l'étape en cours — voir `currentStep` pour la règle du dernier
+// geste qui s'appuie dessus en repli.
+function firstTrackedTodo(sections, state) {
   return flatSteps(sections).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || null
+}
+
+// Étape en cours du lecteur (puce, recentrage, mise en évidence, notification). L'état peut
+// porter `last` ({ kind:'step'|'chart', id }) : la trace du DERNIER geste de progression
+// (intent 2026-09-30 — Julie tricote hors ordre). Règle :
+//   1. `last` absent/inexploitable (kind≠step, id introuvable, étape non suivie) → premier non
+//      fait (comportement historique, et repli des cas 2-3) ;
+//   2. dernière étape travaillée non faite (rang décoché à refaire, compteur en cours) → ELLE ;
+//   3. faite → première non faite APRÈS elle ; rien d'après → repli du cas 1 (première non
+//      faite du patron, même située avant last : Julie finit la tête, elle retombe sur le corps).
+// Pour qui suit l'ordre du patron, les cas 2-3 équivalent exactement au comportement
+// historique. La règle « faite » est TOUJOURS `trackedDone` (jamais `done` brut) : un compteur
+// sous son total n'est pas fait, un compteur au total 0 pour la taille l'est d'office.
+export function currentStep(sections, state) {
+  const fallback = firstTrackedTodo(sections, state)
+  const lastId = state?.last?.kind === 'step' ? state.last.id : null
+  if (lastId == null) return fallback
+  const flat = flatSteps(sections)
+  const at = flat.findIndex(({ step }) => step.id === lastId)
+  if (at < 0 || !isTrackedStep(flat[at].step)) return fallback
+  if (!trackedDone(flat[at].step, state)) return flat[at]
+  return flat.slice(at + 1).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || fallback
 }
 
 // Première étape suivie non faite APRÈS `stepId` dans l'ordre global ; `null` s'il n'y en a
@@ -471,6 +494,27 @@ export function nextStepAfter(sections, state, stepId) {
   const at = flat.findIndex(({ step }) => step.id === stepId)
   if (at < 0) return null
   return flat.slice(at + 1).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || null
+}
+
+// Cible d'atterrissage de la reprise (intent 2026-09-30) : la dernière place travaillée selon
+// `state.last`, ou `null` — l'appelant retombe alors sur le comportement historique (premier
+// non fait), sans badge. `kind 'step'` : l'étape doit encore exister ET être suivie (jamais une
+// note). `kind 'chart'` : la section doit porter une étape diagramme ET une grille effective —
+// `reader` ne sert qu'au repli grille globale `reader.chart` (patrons hérités seedés avant le
+// multi-grilles : SABAI, Twist Loop). Pur : aucun DOM ici.
+export function lastPlace(sections, state, reader = null) {
+  const last = state?.last
+  if (!last?.id) return null
+  if (last.kind === 'step') {
+    const found = flatSteps(sections).find(({ step }) => step.id === last.id && isTrackedStep(step))
+    return found ? { kind: 'step', step: found.step, section: found.section } : null
+  }
+  if (last.kind === 'chart') {
+    const sec = sections.find((s) => s.id === last.id)
+    const hasChart = !!sec && sec.steps.some((st) => st.chart) && !!(sec.chart || reader?.chart)
+    return hasChart ? { kind: 'chart', section: sec } : null
+  }
+  return null
 }
 
 // Position « k/N » d'une étape parmi les étapes suivies de sa section pour la taille `size`

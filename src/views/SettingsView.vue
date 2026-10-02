@@ -31,8 +31,12 @@ import {
   checkRowNotificationPermission,
   requestRowNotificationPermission,
   openRowNotificationSettings,
+  isBatteryOptimizationIgnored,
 } from '@/native/row-notification'
+import { verifyRowNotificationAuthorization } from '@/utils/row-notification-activation'
 import { isKeepScreenOnAvailable } from '@/native/keep-awake'
+import RowNotifOnboardingDialog from '@/components/RowNotifOnboardingDialog.vue'
+import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 
 const { t } = useI18n()
 const settings = useSettingsStore()
@@ -71,31 +75,45 @@ const showTrash = ref(false)
 // Notification du rang en cours (natif seulement) : `denied` = notifications coupées dans Android.
 // `prompt` après une demande déjà faite = refus unique (Android redemandera) : une action
 // relance la demande, sans quoi l'interrupteur resterait allumé sans rien produire.
+// `batteryIgnoring` : l'exclusion des optimisations de batterie (spec 2026-10-01) —
+// sans elle la notification s'afficherait pour ne plus marcher en arrière-plan.
 const rowNotifAvailable = isRowNotificationAvailable()
 const rowNotifPermission = ref('granted')
+const batteryIgnoring = ref(true)
 const rowNotifDenied = computed(() => settings.rowNotification && rowNotifPermission.value === 'denied')
 const rowNotifAsk = computed(
   () => settings.rowNotification && rowNotifPermission.value === 'prompt' && settings.rowNotificationAsked,
 )
+// Ordre d'affichage des lignes d'état (la première vraie seule) : POST refusée, POST à
+// demander, puis exemption d'arrière-plan manquante.
+const rowNotifBattery = computed(
+  () => settings.rowNotification && rowNotifPermission.value === 'granted' && !batteryIgnoring.value,
+)
+const onboardingOpen = ref(false)
 
 let viewDisposed = false
 let removeResume = null
-async function refreshRowNotifPermission() {
+async function refreshRowNotifState() {
   if (viewDisposed) return
-  const state = await checkRowNotificationPermission()
-  if (!viewDisposed) rowNotifPermission.value = state
+  const state = await verifyRowNotificationAuthorization({
+    checkPermission: checkRowNotificationPermission,
+    checkBattery: isBatteryOptimizationIgnored,
+  })
+  if (viewDisposed) return
+  rowNotifPermission.value = state.permission
+  batteryIgnoring.value = state.battery.ignoring
 }
 
 onMounted(async () => {
   trash.load()
-  if (rowNotifAvailable) await refreshRowNotifPermission()
+  if (rowNotifAvailable) await refreshRowNotifState()
 })
 
 // Retour au premier plan (souvent depuis les réglages Android ouverts par l'aide) : l'état
-// de la permission est relu, l'aide ne reste pas affichée à tort.
+// des permissions est relu, l'aide ne reste pas affichée à tort.
 if (rowNotifAvailable) {
   import('@capacitor/app')
-    .then(({ App }) => App.addListener('resume', () => refreshRowNotifPermission().catch(() => {})))
+    .then(({ App }) => App.addListener('resume', () => refreshRowNotifState().catch(() => {})))
     .then((handle) => {
       if (viewDisposed) Promise.resolve(handle?.remove?.()).catch(() => {})
       else removeResume = handle
@@ -128,25 +146,32 @@ async function askRowNotification() {
     rowNotifBusy = false
   }
 }
+// L'activation ne s'écrit JAMAIS ici : la pop-up d'onboarding pilote le service
+// (src/utils/row-notification-activation.js) et le réglage ne devient vrai qu'après les
+// deux autorisations (spec 2026-10-01 : l'interrupteur de l'app ne ment jamais).
 async function applyRowNotification() {
   const next = !settings.rowNotification
-  await settings.saveRowNotification(next)
-  if (!next) return
-  let state = await checkRowNotificationPermission()
-  if (state === 'prompt') {
-    state = await requestRowNotificationPermission()
-    await settings.markRowNotificationAsked()
+  if (!next) {
+    await settings.saveRowNotification(false)
+    return
   }
-  rowNotifPermission.value = state
+  onboardingOpen.value = true
+}
+// La pop-up ne se ferme pas elle-même : c'est au parent de basculer open (composant
+// émetteur). Puis l'état effectif est relu pour les lignes d'aide.
+async function onOnboardingAuthorized() {
+  onboardingOpen.value = false
+  await refreshRowNotifState()
+}
+async function onOnboardingDisabled() {
+  onboardingOpen.value = false
+  await refreshRowNotifState()
 }
 
-// Écran allumé pendant le suivi (natif seulement) : le réglage seul, le lecteur l'applique.
-// Pas de garde anti double appui : aucune demande de permission, deux appuis rapprochés
-// s'écrivent dans l'ordre et l'interrupteur reflète toujours le dernier.
+// Écran allumé pendant le suivi (natif seulement) : l'interrupteur est le composant
+// partagé KeepScreenOnSwitchRow (Réglages + volet d'aide-mémoire du lecteur), qui écrit
+// le réglage global lui-même ; le lecteur l'applique (useKeepScreenOn).
 const keepScreenAvailable = isKeepScreenOnAvailable()
-function toggleKeepScreenOn() {
-  settings.saveKeepScreenOn(!settings.keepScreenOn)
-}
 
 async function saveProfile() {
   await settings.saveProfile({ firstName: firstName.value, technique: technique.value })
@@ -402,6 +427,15 @@ function fmtDate(iso) {
         {{ t('rowNotif.settingAsk') }}
       </button>
       <button
+        v-if="rowNotifBattery"
+        type="button"
+        class="row-notif-action small"
+        data-test="row-notif-battery"
+        @click="onboardingOpen = true"
+      >
+        {{ t('rowNotif.settingBattery') }}
+      </button>
+      <button
         v-if="rowNotifDenied"
         type="button"
         class="row-notif-action small"
@@ -412,25 +446,12 @@ function fmtDate(iso) {
       </button>
     </section>
 
-    <!-- Écran allumé pendant le suivi d'un projet : seulement dans l'APK, même interrupteur
-         que ci-dessus. -->
+    <!-- Écran allumé pendant le suivi d'un projet : seulement dans l'APK. La rangée
+         interrupteur est le composant partagé avec le volet d'aide-mémoire du lecteur
+         (spec 2026-10-01) : un seul réglage global, deux endroits qui l'écrivent. -->
     <section v-if="keepScreenAvailable" class="block">
-      <div class="switch-row">
-        <h2 id="keep-screen-title" class="block__title switch-row__title">{{ t('settings.keepScreenOn') }}</h2>
-        <button
-          type="button"
-          class="switch"
-          :class="{ 'switch--on': settings.keepScreenOn }"
-          role="switch"
-          :aria-checked="settings.keepScreenOn ? 'true' : 'false'"
-          aria-labelledby="keep-screen-title"
-          data-test="keep-screen-switch"
-          @click="toggleKeepScreenOn"
-        >
-          <span class="switch__thumb"></span>
-        </button>
-      </div>
-      <p class="muted small">{{ t('settings.keepScreenOnHint') }}</p>
+      <KeepScreenOnSwitchRow heading-id="keep-screen-title" />
+      <p class="muted small mt">{{ t('settings.keepScreenOnHint') }}</p>
     </section>
 
     <!-- Langue -->
@@ -585,6 +606,10 @@ function fmtDate(iso) {
       </a>
     </section>
 
+    <!-- Onboarding de la notification (spec 2026-10-01) : ouvert par la bascule du bloc
+         ci-dessus ou par la ligne d'état « autorisation retirée ». Il pilote le service
+         d'activation ; ici on se contente de relire l'état effectif à chaque issue. -->
+    <RowNotifOnboardingDialog :open="onboardingOpen" @authorized="onOnboardingAuthorized" @disabled="onOnboardingDisabled" />
     <ConfirmDialog
       :open="pendingCurrency !== null"
       :title="t('settings.currencyChangeTitle')"

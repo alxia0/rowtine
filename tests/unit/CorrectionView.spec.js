@@ -1405,6 +1405,34 @@ describe('CorrectionView — insérer une image de galerie dans le texte', () =>
     expect(persisted.gallery ?? []).toEqual([])
   })
 
+  // La bande galerie passe avant le texte : sous l'éditeur d'un long patron, elle restait invisible.
+  it('la bande galerie précède l’éditeur de texte', async () => {
+    const { w } = await mountView({ pattern: { gallery: [] } })
+    const strip = w.find('.gallery-strip').element
+    const editor = w.find('.rte-stub').element
+    expect(strip.compareDocumentPosition(editor) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('la bande dit comment activer l’insertion, puis sous quelle étape l’image ira', async () => {
+    const reader = fixtureReader()
+    const { w } = await mountView({
+      pattern: { id: 7, name: 'Pull', reader, gallery: [{ src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 }] },
+    })
+    await openGalleryStrip(w)
+    expect(w.find('.gallery-strip__hint').text()).toBe(tk('correction.galleryInsertHint'))
+
+    const md = readerToEditable(reader).md
+    const lineNumber = md.split('\n').findIndex((l) => l.includes('Tricoter au point mousse.')) + 1
+    await setCursorLine(w, lineNumber)
+    expect(w.find('.gallery-strip__hint').text()).toBe(tk('correction.galleryInsertTarget', { step: 'Tricoter au point mousse.' }))
+  })
+
+  it('pas d’aide à l’insertion quand la galerie est vide', async () => {
+    const { w } = await mountView({ pattern: { gallery: [] } })
+    await openGalleryStrip(w)
+    expect(w.find('.gallery-strip__hint').exists()).toBe(false)
+  })
+
   it('n’apparaît pas sur une ligne de galerie déjà promue en diagramme en attente', async () => {
     const { w } = await mountView({ pattern: { gallery: [{ src: 'data:image/png;base64,A', page: 1, w: 10, h: 10 }] } })
     await openGalleryStrip(w)

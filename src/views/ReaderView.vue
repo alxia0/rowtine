@@ -1,9 +1,15 @@
+<script>
+// Garde de session (spec 2026-10-01) : le rattrapage de l'autorisation de notification n'est
+// proposé qu'une fois par lancement de l'app, pas par montage de lecteur.
+let notifOnboardingCheckedThisSession = false
+</script>
+
 <script setup>
 // Lecteur de patron. Deux contextes :
 //  - biblio  (/pattern/:id/read)  : APERÇU EN LECTURE SEULE (pas de coches, progression, taille ni chrono)
 //  - projet  (/project/:id/read)  : SUIVI INTERACTIF — choix de taille, progression (project.readerState),
 //    compteurs, diagramme, et un chrono discret qui alimente les sessions.
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { usePatternsStore } from '@/stores/patterns'
@@ -20,7 +26,14 @@ import { useSmartBack } from '@/composables/useSmartBack'
 import { useSplitReader } from '@/composables/useSplitReader'
 import { useRowNotification } from '@/composables/useRowNotification'
 import { useKeepScreenOn } from '@/composables/useKeepScreenOn'
-import { withStepIds, isRowStep, currentStep, repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
+import { useSettingsStore } from '@/stores/settings'
+import {
+  checkRowNotificationPermission,
+  isBatteryOptimizationIgnored,
+  isRowNotificationAvailable,
+} from '@/native/row-notification'
+import { verifyRowNotificationAuthorization } from '@/utils/row-notification-activation'
+import { withStepIds, isRowStep, currentStep, lastPlace, nextStepAfter, repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
 import { sectionKind } from '@/utils/section-kinds'
 import { withStitchMemo, PICK_STITCHES_EVENT, STITCH_MEMO_TAB } from '@/utils/stitch-memo'
 import { resolveStitches } from '@/content/stitch-memo'
@@ -44,6 +57,8 @@ import ReaderFixOverlay from '@/components/ReaderFixOverlay.vue'
 import ReaderToc from '@/components/ReaderToc.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
 import ReaderTour from '@/components/ReaderTour.vue'
+import RowNotifOnboardingDialog from '@/components/RowNotifOnboardingDialog.vue'
+import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -124,7 +139,7 @@ const tourHasSlot = useNoticeSlot(
   computed(() => ready.value && tourRequested.value),
 )
 
-const st = reactive({ size: null, done: {}, counters: {}, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
+const st = reactive({ size: null, done: {}, counters: {}, last: null, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
 
 // Bandeau compact au défilement (P2/T2) : le gros titre + le surtitre (nom du projet,
 // ou « Aperçu du patron ») rétrécissent une fois qu'on a commencé à défiler — sur l'écran
@@ -234,25 +249,32 @@ onMounted(async () => {
   reader.value = pattern.value.reader
   loadState()
   ready.value = true
-  // Cible d'ouverture (#9) : une section explicite dans l'URL (clic depuis l'onglet Sections
-  // de la fiche projet, `?section=<id>`) PRIME sur la reprise auto au rang en cours — cette
-  // dernière reste inchangée : elle ne s'active que si le suivi est déjà entamé (doneCount>0 ;
-  // patron vierge : on reste en haut pour lire la présentation, cf. #6 ci-dessous).
+  // Cible d'ouverture (#9 + intent 2026-09-30) : une section explicite dans l'URL (clic depuis
+  // l'onglet Sections de la fiche projet) PRIME sur toute reprise. Reprise (pas de ?section=,
+  // ou cible de section disparue — correction qui a renommé le titre) : la dernière place
+  // travaillée (`st.last` résolvable par lastPlace) avec badge explicatif ; les progressions
+  // sans trace du dernier geste (héritage) replient sur le comportement historique — centrage
+  // sur l'étape en cours, uniquement si le suivi est entamé (doneCount>0 ; patron vierge : on
+  // reste en haut pour lire la présentation, cf. #6). Pendant la visite guidée : chemin
+  // historique, jamais de badge (la visite n'affiche rien d'autre que ses bulles).
+  const landResume = () => {
+    const landed = tourRequested.value ? null : goToLastWorked('auto')
+    if (landed) flashResumeBadge(landed)
+    else if (doneCount.value > 0) resume('auto')
+  }
   if (route.query.section) {
     nextTick(() => {
       // La cible de section peut ne plus exister : une correction (retour de l'écran
       // de correction) a pu renommer le titre visé par `?section=`, l'id DOM change
-      // avec lui. Repli sur le rang en cours plutôt que de rester en haut du patron —
-      // sans risque pour le chemin existant depuis l'onglet Sections, où l'élément est
-      // toujours là.
+      // avec lui. Repli sur la reprise du dernier geste plutôt que de rester en haut
+      // du patron — sans risque pour le chemin existant depuis l'onglet Sections, où
+      // l'élément est toujours là.
       const el = document.getElementById(scrollTargetId(route.query, currentStepId.value))
       if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' })
-      else if (doneCount.value > 0) resume('auto')
+      else landResume()
     })
-  } else if (doneCount.value > 0) {
-    // Reprise : si le suivi est déjà entamé, centrer l'écran sur le rang en cours (#6).
-    // (Ouverture d'un patron vierge : on reste en haut pour lire la présentation.)
-    nextTick(() => resume('auto'))
+  } else {
+    nextTick(landResume)
   }
   // Le saut ci-dessus (reprise sur un projet en cours, ou cible de section) peut déjà avoir
   // défilé la page avant que l'écouteur de scroll ne soit posé (juste en dessous) : on
@@ -291,6 +313,7 @@ onMounted(async () => {
 })
 onBeforeUnmount(() => {
   isMounted = false
+  clearResumeBadge()
   window.removeEventListener('click', onDocClick)
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('scroll', updateScrolled)
@@ -368,6 +391,14 @@ async function toggleTimerFromReader() {
   }
 }
 
+// Instantané « décochage sans perte » écrit par la bascule « section faite » de la fiche
+// projet (section-mark.js via ProjectDetailView.onToggleSection) : le lecteur ne le lit pas,
+// mais persist() reconstruit un snapshot en whitelist — sans ce report, la première coche
+// détruirait sectionSnap en silence (défaut découvert au passage, intent 2026-09-30-reprise).
+// Réinitialisé à chaque loadState (lecture de la vérité Dexie/localStorage), jamais réactif :
+// il ne peut pas changer PENDANT une session lecteur (la bascule vit sur un autre écran).
+let savedSectionSnap = null
+
 function loadState() {
   let saved
   // Taille bornée aux tailles du patron : un index hérité d'un AUTRE patron (patron lié changé
@@ -392,6 +423,11 @@ function loadState() {
   st.size = validSize(saved.size)
   st.done = saved.done || {}
   st.counters = saved.counters || {}
+  savedSectionSnap = saved.sectionSnap || null
+  // Trace du dernier geste de progression (intent 2026-09-30). Copie neuve, jamais un alias
+  // du `readerState` vivant (même règle que les maps ci-dessus) ; les progressions d'avant
+  // le chantier n'en portent pas : st.last = null → repli sur le comportement historique.
+  st.last = saved.last ? { ...saved.last } : null
   // Copie neuve (jamais un alias du `readerState` vivant de Dexie/localStorage) : la
   // migration `chartRow` nu → `chartRows` a été retirée le 13/08/2026 (ménage pré-1.0,
   // réserve produit acceptée) — plus aucun producteur de ce format hérité.
@@ -464,10 +500,13 @@ function persist({ worked = false } = {}) {
     size: st.size,
     done: { ...st.done },
     counters: { ...st.counters },
+    last: st.last ? { ...st.last } : null,
     chartRows: { ...st.chartRows },
     chartReps: { ...st.chartReps },
     chartFrames: { ...st.chartFrames },
     chartCurtains: { ...st.chartCurtains },
+    // Report tel quel (jamais lu par le lecteur) : voir savedSectionSnap ci-dessus.
+    ...(savedSectionSnap ? { sectionSnap: savedSectionSnap } : {}),
   }
   // `.catch` : une écriture qui échoue ne doit jamais empoisonner la file (sinon les persist
   // suivants seraient ignorés + rejet non géré).
@@ -568,17 +607,25 @@ function selectSize(i) {
 function toggleDone(id) {
   st.done[id] = !st.done[id]
   if (!st.done[id]) delete st.done[id]
+  // Cocher ET décocher posent la trace du dernier geste (intent 2026-09-30) : la reprise
+  // atterrit sur ce rang et l'étape en cours le suit.
+  markStepGesture(id)
   // Décocher compte AUSSI comme du tricot : c'est une correction en cours de session, donc bien
   // la preuve qu'on travaille CE projet en ce moment.
   persist({ worked: true })
-  // Après avoir coché, recentrer l'écran sur le prochain rang à travailler (#6).
-  if (st.done[id]) nextTick(() => resume())
+  // Après avoir coché, recentrer l'écran sur le prochain rang à travailler (#6) — via
+  // resumeAfterGesture : plus rien après le dernier geste = pas de défilement.
+  if (st.done[id]) nextTick(() => resumeAfterGesture())
 }
 // Notification Android du rang en cours (projet seulement) : son bouton repasse par
 // toggleDone ci-dessus (rang) ou bumpCounter ci-dessous (« +1 » d'un compteur) ; le rappel
-// de diagramme suit la même règle de taille que l'affichage (chartVisible). Permission
-// demandée une fois le lecteur prêt, hors visite guidée ; aucune notification tant que la
-// visite dure (elle n'écrit rien).
+// de diagramme suit la même règle de taille que l'affichage (chartVisible). L'ACTIVATION
+// ne vit plus ici (pop-up d'onboarding, spec 2026-10-01) ; la porte d'affichage
+// (batteryIgnoring) suit l'état d'autorisation relu ci-dessous.
+const settings = useSettingsStore()
+const batteryIgnoring = ref(true)
+const onboardingOpen = ref(false)
+const lecteurPret = computed(() => ready.value && !tourRequested.value)
 useRowNotification({
   enabled: ctx === 'project',
   project,
@@ -587,11 +634,64 @@ useRowNotification({
   toggleDone,
   bumpCounter,
   isChartVisible: chartVisible,
-  canAskPermission: computed(() => ready.value && !tourRequested.value),
+  ready: lecteurPret,
   suspended: tourRequested,
+  batteryIgnoring,
 })
 // Écran gardé allumé pendant le suivi d'un projet, si le réglage est actif (retiré au démontage).
 useKeepScreenOn({ enabled: ctx === 'project' })
+
+/* ── rattrapage de l'autorisation de notification (spec 2026-10-01) ── */
+// Réglage true mais état effectif incomplet (restauration sur appareil neuf, autorisation
+// retirée dans le système) : pop-up d'onboarding une fois PAR LANCEMENT de l'app (garde
+// module-scope — « Désactiver » persiste false, donc elle ne revient pas tant que rien
+// n'est réactivé). La relecture au retour au premier plan tient la porte d'affichage à
+// jour sans rouvrir la pop-up.
+async function verifierAutorisationNotif() {
+  if (ctx !== 'project') return null
+  const state = await verifyRowNotificationAuthorization({
+    checkPermission: checkRowNotificationPermission,
+    checkBattery: isBatteryOptimizationIgnored,
+  })
+  batteryIgnoring.value = state.battery.ignoring
+  return state
+}
+watch(
+  lecteurPret,
+  (ok) => {
+    // Ni l'aperçu bibliothèque ni un réglage faux ne consomment la garde de session :
+    // elle ne tombe qu'au premier lecteur de projet où la vérification a lieu.
+    if (!ok || ctx !== 'project' || notifOnboardingCheckedThisSession) return
+    if (!settings.rowNotification) return
+    notifOnboardingCheckedThisSession = true
+    verifierAutorisationNotif().then((state) => {
+      if (state && !state.ok) onboardingOpen.value = true
+    })
+  },
+  { immediate: true },
+)
+let removeResumeNotif = null
+// Démontage passé pendant le chargement du pont : l'écouteur reçu trop tard est retiré
+// aussitôt, sinon il survivrait au lecteur (un orphelin par ouverture).
+let resumeNotifDisposed = false
+if (ctx === 'project' && isRowNotificationAvailable()) {
+  import('@capacitor/app')
+    .then(({ App }) =>
+      App.addListener('resume', () => {
+        if (settings.rowNotification) verifierAutorisationNotif().catch(() => {})
+      }),
+    )
+    .then((handle) => {
+      if (resumeNotifDisposed) Promise.resolve(handle?.remove?.()).catch(() => {})
+      else removeResumeNotif = handle
+    })
+    .catch(() => {})
+}
+onBeforeUnmount(() => {
+  resumeNotifDisposed = true
+  Promise.resolve(removeResumeNotif?.remove?.()).catch(() => {})
+  removeResumeNotif = null
+})
 function counterVal(step) {
   return Math.min(st.counters[step.id] || 0, stepTotal(step))
 }
@@ -599,9 +699,12 @@ function bumpCounter(step, delta) {
   const total = stepTotal(step)
   const before = counterVal(step)
   st.counters[step.id] = Math.max(0, Math.min(total, before + delta))
+  // Plus ET moins posent la trace du dernier geste (intent 2026-09-30), comme un cochage.
+  markStepGesture(step.id)
   persist({ worked: true })
-  // Total atteint : recentrer sur l'étape suivante, comme après un cochage.
-  if (total > 0 && before < total && st.counters[step.id] >= total) nextTick(() => resume())
+  // Total atteint : recentrer sur l'étape suivante, comme après un cochage (sans repli —
+  // resumeAfterGesture).
+  if (total > 0 && before < total && st.counters[step.id] >= total) nextTick(() => resumeAfterGesture())
 }
 function chartRow(secId) {
   const row = st.chartRows[secId] || 1
@@ -621,13 +724,30 @@ function setChartRow(secId, r) {
   if (cur) st.chartCurtains[secId] = retractCurtain(cur)
   // Avancer dans une grille est la façon de tricoter un patron suivi au diagramme : c'est
   // exactement l'équivalent d'un rang coché côté texte.
+  markChartGesture(secId)
   persist({ worked: true })
 }
 function chartRep(secId) {
   return st.chartReps[secId] || 1
 }
+// Geste de progression SUR UNE ÉTAPE (coche, décoche, compteur plus/moins) : trace du dernier
+// geste (intent 2026-09-30) + effacement du badge. `st.last` est toujours REMPLACÉ, jamais
+// muté en place — le computed de la notification s'abonne au remplacement de la propriété.
+function markStepGesture(id) {
+  st.last = { kind: 'step', id }
+  clearResumeBadge()
+}
+// Geste de progression DANS une grille (rang, rideau, répétition) : trace du dernier geste
+// (intent 2026-09-30, kind 'chart' — la reprise atterrira sur la carte de CE diagramme) +
+// effacement du badge. Regroupé : les trois setters partagent la même règle, `persist` reste
+// chez chacun (worked diffère d'un appel à l'autre).
+function markChartGesture(secId) {
+  st.last = { kind: 'chart', id: secId }
+  clearResumeBadge()
+}
 function setChartRep(secId, r) {
   st.chartReps[secId] = r
+  markChartGesture(secId)
   persist({ worked: true })
 }
 function chartFrame(secId) {
@@ -645,6 +765,7 @@ function setChartCurtain(secId, curtain) {
   if (curtain) st.chartCurtains[secId] = curtain
   else delete st.chartCurtains[secId]
   // Le rideau matérialise le rang où l'on en est dans la grille : le bouger, c'est avancer.
+  markChartGesture(secId)
   persist({ worked: true })
 }
 // readOnly est une const booléenne (calculée une fois depuis route.name), pas une ref :
@@ -702,6 +823,76 @@ async function requestRows(sec) {
 function resume(behavior = 'smooth') {
   const id = currentStepId.value
   if (id) document.getElementById('rstep-' + id)?.scrollIntoView({ behavior, block: 'center' })
+}
+
+/* ── reprise sur le dernier geste (intent 2026-09-30) ── */
+
+// Recentrage APRÈS un geste de progression (cochage, compteur atteint) : la première étape
+// non faite APRÈS le dernier geste, SANS repli — plus rien après = pas de défilement (finir la
+// tête ne doit pas ramener brutalement au corps). Le recentrage historique visait l'étape en
+// cours, qui depuis le chantier « reprise » replie vers le premier non fait du patron : un
+// yank indésirable ici. Pour qui suit l'ordre : identique à l'ancien comportement.
+function resumeAfterGesture(behavior = 'smooth') {
+  const lp = st.last?.kind === 'step' ? nextStepAfter(sections.value, st, st.last.id) : null
+  if (lp) document.getElementById('rstep-' + lp.step.id)?.scrollIntoView({ behavior, block: 'center' })
+}
+
+// Atterrissage de la reprise (montage, repli de `?section=`) : la dernière place travaillée
+// résolue par lastPlace — étape → carte du rang ; grille → volet focus s'il est épinglé
+// (même geste que goToChart), sinon carte du diagramme, repli ancre de section. Renvoie la
+// sorte de cible atteinte ('step'|'chart') ou null (rien de résolvable : l'appelant retombe
+// sur le chemin historique, sans badge).
+function goToLastWorked(behavior = 'smooth') {
+  const lp = lastPlace(sections.value, st, reader.value)
+  if (!lp) return null
+  if (lp.kind === 'step') {
+    document.getElementById('rstep-' + lp.step.id)?.scrollIntoView({ behavior, block: 'center' })
+    return 'step'
+  }
+  if (splitMode.value && activeChartSection.value?.id === lp.section.id) {
+    focusPane()
+    return 'chart'
+  }
+  const card = document.getElementById('rchart-' + lp.section.id)
+  if (card) {
+    card.scrollIntoView({ behavior, block: 'center' })
+    return 'chart'
+  }
+  const secEl = document.getElementById('rsec-' + lp.section.id)
+  if (secEl) {
+    secEl.scrollIntoView({ behavior, block: 'start' })
+    return 'chart'
+  }
+  return null
+}
+
+// Badge de reprise : pill flottante sous l'en-tête qui explique POURQUOI le lecteur est placé
+// là, puis s'efface. Un timer seul la lève (5 s) ; tout geste de progression la lève aussi
+// (elle n'a plus de sens une fois qu'on retricote). Jamais pendant la visite guidée, qui
+// n'affiche rien d'autre que ses bulles. Aucun glyphe : le texte porte tout le sens.
+const RESUME_BADGE_MS = 5000
+const resumeBadge = ref(null)
+let resumeBadgeTimer = null
+function flashResumeBadge(kind) {
+  if (tourRequested.value) return
+  resumeBadge.value = kind
+  clearTimeout(resumeBadgeTimer)
+  resumeBadgeTimer = setTimeout(() => {
+    resumeBadge.value = null
+  }, RESUME_BADGE_MS)
+}
+function clearResumeBadge() {
+  clearTimeout(resumeBadgeTimer)
+  resumeBadge.value = null
+}
+
+// Puce « Revenir à mon étape » : centrage sur l'étape en cours (qui suit le dernier geste
+// depuis le chantier « reprise ») + badge — il explique la place visée, d'un geste comme de
+// l'autre.
+function resumeToCurrent() {
+  if (!currentStepId.value) return
+  resume()
+  flashResumeBadge('step')
 }
 
 // Sommaire : clic sur une entrée → réutilisation de l'ancre existante (`?section=<id>`,
@@ -999,13 +1190,22 @@ function onKey(e) {
       <span class="rhdr__pct">{{ progressPct }} %</span>
     </div>
 
+    <!-- Badge de reprise (intent 2026-09-30) : explique pourquoi le lecteur est placé sur le
+         dernier rang travaillé / la dernière grille, puis s'efface. role=status + aria-live :
+         annoncé par les lecteurs d'écran sans voler le focus. Aucun glyphe ni icône. -->
+    <Transition name="rbadge">
+      <div v-if="resumeBadge" class="rbadge" role="status" aria-live="polite">
+        {{ resumeBadge === 'chart' ? t('reader.resumeBadgeChart') : t('reader.resumeBadgeStep') }}
+      </div>
+    </Transition>
+
     <main class="screen">
       <!-- Placée en TÊTE du contenu, avant la carte de taille : plus bas dans le flux, elle
            atterrissait vers y≈300 et la barre d'action fixe (84px, z-index 40) la recouvrait
            en paysage tant qu'on n'avait pas fait défiler. C'est aussi l'ordre logique — à la
            réouverture d'un patron commencé, « revenir à mon étape » est la 1re chose voulue. -->
       <div v-if="!readOnly && currentStepId" class="chips">
-        <button class="chip chip--resume" @click="resume()"><AppIcon name="resume" :size="16" /> {{ t('reader.resume') }}</button>
+        <button class="chip chip--resume" @click="resumeToCurrent()"><AppIcon name="resume" :size="16" /> {{ t('reader.resume') }}</button>
       </div>
 
       <!-- Couverture du PDF : ouvre la visu comme elle ouvre le PDF. Après la puce
@@ -1403,6 +1603,17 @@ function onKey(e) {
           goToChart()
         }
       "
+    >
+      <template v-if="ctx === 'project'" #footer>
+        <KeepScreenOnSwitchRow heading-id="am-keep-screen-title" />
+      </template>
+    </ReaderSheet>
+
+    <RowNotifOnboardingDialog
+      v-if="ctx === 'project'"
+      :open="onboardingOpen"
+      @authorized="onboardingOpen = false; verifierAutorisationNotif()"
+      @disabled="onboardingOpen = false; verifierAutorisationNotif()"
     />
 
     <StitchPicker
@@ -1473,6 +1684,42 @@ html[data-theme='dark'] .rhdr {
   border-radius: var(--r-md);
   font-size: 22px;
   box-shadow: var(--clay-sm);
+}
+/* Badge de reprise : pill flottante SOUS l'en-tête (en-tête plein ~70 px de haut, compact ~60 :
+   72 px sous la safe-area passe dans les deux états), centrée, NON interactive — elle explique
+   un placement, elle ne doit ni voler un tap ni retenir le focus. Au-dessus de l'en-tête
+   collant (z 30) pour ne pas passer dessous au défilement, sous le volet de diagramme (35),
+   la barre d'action (40) et les dialogues (60). */
+.rbadge {
+  position: fixed;
+  top: calc(var(--sa-top) + 72px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 32;
+  pointer-events: none;
+  max-width: min(88vw, 420px);
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--tile);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: var(--clay-sm);
+}
+.rbadge-enter-active,
+.rbadge-leave-active {
+  transition: opacity var(--motion-base), transform var(--motion-base);
+}
+.rbadge-enter-from,
+.rbadge-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -6px);
+}
+.rbadge-enter-to,
+.rbadge-leave-from {
+  transform: translate(-50%, 0);
 }
 .rhdr__eyebrow {
   display: block;

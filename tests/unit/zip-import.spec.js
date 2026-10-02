@@ -73,6 +73,20 @@ describe('unzipToPattern', () => {
     expect(pattern.photos[0]).toMatch(/^data:image\/png;base64,/)
   })
 
+  // Le PDF du convertisseur du site alimente « Depuis le PDF du patron » dans la galerie.
+  it('original.pdf devient le PDF du patron, à la racine comme à côté du patron', async () => {
+    const pdf = strToU8('%PDF-1.4 fake')
+    const expected = `data:application/pdf;base64,${bytesToBase64(pdf)}`
+    expect((await unzipToPattern(buildZip({ 'original.pdf': pdf }))).pattern.pdf).toBe(expected)
+    const kit = zipSync({ 'kit/patron.md': strToU8(MD), 'kit/img/chart.png': pngBytes(), 'kit/original.pdf': pdf })
+    expect((await unzipToPattern(kit)).pattern.pdf).toBe(expected)
+  })
+
+  it('sans original.pdf → pas de PDF', async () => {
+    const { pattern } = await unzipToPattern(buildZip())
+    expect(pattern.pdf || '').toBe('')
+  })
+
   it('sans cover → photos vide', async () => {
     const { pattern } = await unzipToPattern(buildZip())
     expect(pattern.photos).toEqual([])

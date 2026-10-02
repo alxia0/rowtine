@@ -1,0 +1,4 @@
+Notificación del seguimiento: una pulsación en un botón se conserva aunque Android haya cerrado o congelado la app.
+Notificación activada solo a petición, con una ventana emergente para el permiso en segundo plano.
+Al reabrir un proyecto se vuelve a la última fila trabajada: un patrón se puede trabajar en desorden.
+Ficha del proyecto: interruptor para mantener la pantalla encendida mientras trabajas.

@@ -1,0 +1,4 @@
+Tracking notification: a button tap is kept even if Android has closed or frozen the app.
+Notification turned on only on request, with a background permission pop-up.
+Reopening a project lands on the last row you worked on: a pattern can be worked out of order.
+Project page: a switch to keep the screen on while you work.

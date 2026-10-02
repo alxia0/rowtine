@@ -1,0 +1,4 @@
+Notification du suivi : l'appui sur un bouton est retenu même si Android a fermé ou figé l'app.
+Notification activée uniquement sur demande, avec une pop-up d'autorisation d'arrière-plan.
+Reprise d'un projet sur le dernier rang travaillé : un patron peut se traiter dans le désordre.
+Fiche projet : interrupteur pour garder l'écran allumé pendant le travail.

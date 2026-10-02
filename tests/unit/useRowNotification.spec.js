@@ -15,6 +15,9 @@ const native = vi.hoisted(() => ({
   requestRowNotificationPermission: vi.fn(async () => 'granted'),
   onRowAction: vi.fn(),
   isRowNotificationAvailable: vi.fn(() => true),
+  readPendingRowAction: vi.fn(async () => null),
+  clearPendingRowAction: vi.fn(async () => {}),
+  ackRowAction: vi.fn(async () => {}),
 }))
 vi.mock('@/native/row-notification', () => native)
 const capApp = vi.hoisted(() => ({ listeners: {}, removeResume: null, addListener: null }))
@@ -39,12 +42,19 @@ function setup({
   projectId = 7,
   canAsk = false,
   suspended = false,
+  batteryIgnoring = true,
   readerData = READER,
   isChartVisible,
 } = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const settings = useSettingsStore()
+  // Opt-in (01/10) : le défaut du store est false — ces tests fixent le comportement du
+  // lecteur quand la notification EST activée, ils la posent donc explicitement.
+  // `Asked` aussi : l'ancien demandeur auto (askPermissionOnce, retiré au lot suivant)
+  // doit rester inerte entre les deux tâches.
+  settings.rowNotification = true
+  settings.rowNotificationAsked = true
   const project = ref({ id: projectId, name: 'Pull test' })
   const reader = ref(readerData)
   const state = reactive({ size: null, done: { ...done }, counters: { ...counters }, chartRows: {} })
@@ -60,6 +70,7 @@ function setup({
   })
   const canAskPermission = ref(canAsk)
   const suspendedRef = ref(suspended)
+  const batteryIgnoringRef = ref(batteryIgnoring)
   const Host = defineComponent({
     setup() {
       useRowNotification({
@@ -70,14 +81,15 @@ function setup({
         toggleDone,
         bumpCounter,
         isChartVisible,
-        canAskPermission,
+        ready: canAskPermission,
         suspended: suspendedRef,
+        batteryIgnoring: batteryIgnoringRef,
       })
       return () => null
     },
   })
   const wrapper = mount(Host, { global: { plugins: [createTestI18n(), pinia] } })
-  return { wrapper, settings, project, reader, state, toggleDone, bumpCounter, canAskPermission, suspended: suspendedRef }
+  return { wrapper, settings, project, reader, state, toggleDone, bumpCounter, canAskPermission, suspended: suspendedRef, batteryIgnoring: batteryIgnoringRef }
 }
 
 const i18n = createTestI18n()
@@ -99,6 +111,43 @@ beforeEach(() => {
   capApp.addListener = vi.fn(async (name, cb) => {
     capApp.listeners[name] = cb
     return { remove: capApp.removeResume }
+  })
+})
+
+describe('useRowNotification : porte d\'autorisation (spec 2026-10-01)', () => {
+  it('batteryIgnoring faux : rien ne s\'affiche ; repassé vrai, la notification repart', async () => {
+    const { batteryIgnoring } = setup({ batteryIgnoring: false })
+    await flushPromises()
+    expect(native.showRowNotification).not.toHaveBeenCalled()
+    // Le watch du payload émet null → cancelRowNotification à vide : inoffensif, rien
+    // n'était affiché.
+    batteryIgnoring.value = true
+    await flushPromises()
+    expect(native.showRowNotification).toHaveBeenCalledTimes(1)
+  })
+
+  it('porte d\'affichage SEULEMENT : le rejeu d\'un appui retenu s\'applique, pop-up ouverte ou pas', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { batteryIgnoring, canAskPermission, toggleDone } = setup({ batteryIgnoring: false, canAsk: false })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+    // La charge du rejeu est partie hors porte : un show a suivi le cochage.
+    expect(native.showRowNotification).not.toHaveBeenCalled()
+    // La porte se rouvre : l'affichage suit.
+    batteryIgnoring.value = true
+    await flushPromises()
+    expect(lastShown().stepId).toBe('devant#1')
+  })
+
+  it('plus AUCUNE demande automatique : la pop-up d\'onboarding est le seul chemin', async () => {
+    native.checkRowNotificationPermission.mockResolvedValue('prompt')
+    const { canAskPermission } = setup({ canAsk: true })
+    await flushPromises()
+    expect(native.checkRowNotificationPermission).not.toHaveBeenCalled()
+    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
   })
 })
 
@@ -463,86 +512,269 @@ describe('useRowNotification : démontage', () => {
   })
 })
 
-describe('useRowNotification : permission', () => {
-  it('canAskPermission faux (visite guidée) : aucune demande', async () => {
-    setup({ canAsk: false })
+describe('useRowNotification : appui retenu quand l’app a été fermée', () => {
+  it('lecteur prêt, appui visant l’étape courante : toggleDone, puis effacement', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, toggleDone } = setup({ canAsk: false })
+    canAskPermission.value = true
     await flushPromises()
-    expect(native.checkRowNotificationPermission).not.toHaveBeenCalled()
-    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+    // Le cochage passe l'étape suivante dans la notification.
+    expect(lastShown().stepId).toBe('devant#1')
   })
 
-  it('devient vrai, jamais demandée, état prompt : request puis demande retenue, et charge renvoyée si accordée', async () => {
-    native.checkRowNotificationPermission.mockImplementation(async () => 'prompt')
-    let askedDuringRequest
-    const { settings, canAskPermission } = setup({ canAsk: false })
-    native.requestRowNotificationPermission.mockImplementation(async () => {
-      askedDuringRequest = settings.rowNotificationAsked
-      return 'granted'
+  it('compteur retenu : bumpCounter(step, delta) borné, jamais toggleDone', async () => {
+    native.readPendingRowAction.mockResolvedValue({ projectId: 7, stepId: 'dos#1', delta: 1 })
+    const plus = setup(onCounter)
+    plus.canAskPermission.value = true
+    await flushPromises()
+    expect(plus.bumpCounter).toHaveBeenCalledTimes(1)
+    expect(plus.bumpCounter.mock.calls[0][0]).toMatchObject({ id: 'dos#1', repeat: true })
+    expect(plus.bumpCounter.mock.calls[0][1]).toBe(1)
+    expect(plus.toggleDone).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+
+    native.readPendingRowAction.mockResolvedValue({ projectId: 7, stepId: 'dos#1', delta: -1 })
+    const minus = setup({ ...onCounter, counters: { 'dos#1': 2 } })
+    minus.canAskPermission.value = true
+    await flushPromises()
+    expect(minus.bumpCounter).toHaveBeenCalledTimes(1)
+    expect(minus.bumpCounter.mock.calls[0][1]).toBe(-1)
+  })
+
+  it('diagramme retenu : acquitté, la charge passe à l’étape, rien d’écrit', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'motif#0', delta: 1 })
+    const { canAskPermission, toggleDone, bumpCounter } = setup(onChart)
+    canAskPermission.value = true
+    await flushPromises()
+    expect(lastShown()).toMatchObject({ kind: 'row', stepId: 'manche#0' })
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(bumpCounter).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('appui périmé (stepId ≠ charge) : effacé, ignoré en silence', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#1', delta: 1 })
+    const { canAskPermission, toggleDone, bumpCounter } = setup({ canAsk: false })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(bumpCounter).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('charge nulle (tout est coché) : effacé sans application', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, toggleDone } = setup({
+      canAsk: false,
+      done: { 'devant#0': true, 'devant#1': true, 'dos#0': true },
     })
-    await flushPromises()
-    expect(native.showRowNotification).toHaveBeenCalledTimes(1)
     canAskPermission.value = true
     await flushPromises()
-    expect(native.requestRowNotificationPermission).toHaveBeenCalledTimes(1)
-    expect(askedDuringRequest).toBe(false)
-    expect(settings.rowNotificationAsked).toBe(true)
-    expect(native.showRowNotification).toHaveBeenCalledTimes(2)
-    expect(lastShown().stepId).toBe('devant#0')
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
   })
 
-  it('état déjà tranché (denied) : pas de request, demande retenue quand même', async () => {
-    native.checkRowNotificationPermission.mockImplementation(async () => 'denied')
-    const { settings } = setup({ canAsk: true })
-    await flushPromises()
-    expect(native.checkRowNotificationPermission).toHaveBeenCalledTimes(1)
-    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
-    expect(settings.rowNotificationAsked).toBe(true)
-  })
-
-  it('déjà demandée : rien', async () => {
-    const { settings, canAskPermission } = setup({ canAsk: false })
-    settings.rowNotificationAsked = true
+  it('appui d’un autre projet : ni application, ni effacement', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 8, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, toggleDone } = setup({ canAsk: false })
     canAskPermission.value = true
     await flushPromises()
-    expect(native.checkRowNotificationPermission).not.toHaveBeenCalled()
-    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).not.toHaveBeenCalled()
   })
 
-  it('bascules rapprochées de canAskPermission : une seule demande', async () => {
-    native.checkRowNotificationPermission.mockImplementation(async () => 'prompt')
-    const { canAskPermission } = setup({ canAsk: true })
+  it('visite guidée au moment de l’application : rien, entrée conservée ; appliqué au retour', async () => {
+    native.readPendingRowAction.mockResolvedValue({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, suspended, toggleDone } = setup({ canAsk: false, suspended: true })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).not.toHaveBeenCalled()
+    // Retour de la visite guidée : le même signal redevient vrai, le rejeu repart.
+    suspended.value = false
     canAskPermission.value = false
     await flushPromises()
     canAskPermission.value = true
     await flushPromises()
-    expect(native.requestRowNotificationPermission).toHaveBeenCalledTimes(1)
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
   })
 
-  it('hors natif : ni check, ni request, demande jamais retenue', async () => {
-    native.isRowNotificationAvailable.mockImplementation(() => false)
-    const { settings } = setup({ canAsk: true })
+  it('réglage notifications coupé : le rejeu applique quand même la progression', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, settings, toggleDone } = setup({ canAsk: false })
     await flushPromises()
-    expect(native.checkRowNotificationPermission).not.toHaveBeenCalled()
-    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
-    expect(settings.rowNotificationAsked).toBe(false)
-  })
-
-  it('démontage pendant la vérification : pas de request', async () => {
-    let resolve
-    native.checkRowNotificationPermission.mockImplementation(() => new Promise((r) => (resolve = r)))
-    const { wrapper } = setup({ canAsk: true })
-    await flushPromises()
-    wrapper.unmount()
-    resolve('prompt')
-    await flushPromises()
-    expect(native.requestRowNotificationPermission).not.toHaveBeenCalled()
-  })
-
-  it('réglage coupé : aucune demande', async () => {
-    const { settings, canAskPermission } = setup({ canAsk: false })
+    expect(native.showRowNotification).toHaveBeenCalledTimes(1)
     settings.rowNotification = false
+    await flushPromises()
+    native.showRowNotification.mockClear()
     canAskPermission.value = true
     await flushPromises()
-    expect(native.checkRowNotificationPermission).not.toHaveBeenCalled()
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    // La progression avance ; l'affichage, lui, reste coupé.
+    expect(native.showRowNotification).not.toHaveBeenCalled()
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('lecture rejetée : rien, pas d’effacement, aucune promesse rejetée non gérée', async () => {
+    const unhandled = []
+    const onUnhandled = (err) => unhandled.push(err)
+    process.on('unhandledRejection', onUnhandled)
+    try {
+      native.readPendingRowAction.mockRejectedValueOnce(new Error('plugin absent'))
+      const { canAskPermission, toggleDone } = setup({ canAsk: false })
+      canAskPermission.value = true
+      await flushPromises()
+      expect(toggleDone).not.toHaveBeenCalled()
+      expect(native.clearPendingRowAction).not.toHaveBeenCalled()
+    } finally {
+      process.off('unhandledRejection', onUnhandled)
+    }
+    expect(unhandled).toEqual([])
+  })
+
+  it('deux déclencheurs rapprochés : une seule application', async () => {
+    let resolveRead
+    native.readPendingRowAction.mockImplementationOnce(
+      () => new Promise((resolve) => { resolveRead = resolve }),
+    )
+    const { canAskPermission, toggleDone, state } = setup({ canAsk: false })
+    canAskPermission.value = true
+    await flushPromises()
+    // Première lecture en vol, promise retenue ; le signal repart pendant ce temps.
+    expect(resolveRead).toBeTypeOf('function')
+    canAskPermission.value = false
+    await flushPromises()
+    canAskPermission.value = true
+    await flushPromises()
+    resolveRead({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(state.done['devant#0']).toBe(true)
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('useRowNotification : suit le dernier geste (intent 2026-09-30)', () => {
+  it('le REMPLACEMENT de st.last fait recalculer la notification (Julie saute de section)', async () => {
+    const { state } = setup({ done: { 'devant#0': true } })
+    await flushPromises()
+    expect(lastShown().stepId).toBe('devant#1')
+    // Julie coche « Rang trois » (dos#0) sans avoir tricoté devant#1 : le dernier geste la
+    // place là, la notification le suit — st.last est toujours remplacé (jamais muté), la
+    // simple lecture de la propriété doit suffire à abonner le computed.
+    state.last = { kind: 'step', id: 'dos#0' }
+    await flushPromises()
+    expect(native.showRowNotification).toHaveBeenCalledTimes(2)
+    expect(lastShown().stepId).toBe('dos#0')
+  })
+})
+
+describe('useRowNotification : acquittement et déduplication des appuis (spec 2026-10-01 appui-webview-gele)', () => {
+  it('appui appliqué : acquitté avec son tapId', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-ack-1' })
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-ack-1')
+  })
+
+  it('appui sans tapId (ancien format) : appliqué, aucun acquittement', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(native.ackRowAction).not.toHaveBeenCalled()
+  })
+
+  it('appui rejeté (autre projet) : acquitté, rien appliqué, charge reposée', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    native.showRowNotification.mockClear()
+    action({ projectId: 99, stepId: 'devant#0', delta: 1, tapId: 'T-rej-1' })
+    await flushPromises()
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-rej-1')
+    // Le repli natif a pu remplacer la notification : le JS repose sa charge courante.
+    expect(native.showRowNotification).toHaveBeenCalledTimes(1)
+  })
+
+  it('appui caduc (étape dépassée) : acquitté, rien appliqué, charge reposée', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    native.showRowNotification.mockClear()
+    action({ projectId: 7, stepId: 'dos#0', delta: 1, tapId: 'T-cad-1' })
+    await flushPromises()
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-cad-1')
+    expect(native.showRowNotification).toHaveBeenCalledTimes(1)
+  })
+
+  it('visite guidée : acquitté SANS effacer l\'entrée retenue (keep), rien appliqué', async () => {
+    const { toggleDone } = setup({ suspended: true })
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-susp-1' })
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-susp-1', { keep: true })
+  })
+
+  it('porte d\'affichage fermée (batteryIgnoring faux) : l\'appui en file est appliqué, jamais effacé à tort', async () => {
+    const { toggleDone } = setup({ batteryIgnoring: false })
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-gate-1' })
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-gate-1')
+  })
+
+  it('lecteur pas prêt (reader nul) : acquitté SANS effacer l\'entrée retenue (keep), rien appliqué', async () => {
+    const { reader, toggleDone } = setup()
+    await flushPromises()
+    reader.value = null
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-noreader-1' })
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-noreader-1', { keep: true })
+  })
+
+  it('même tapId reçu deux fois : appliqué une seule fois, second acquitté', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-dbl-1' })
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-dbl-1' })
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(native.ackRowAction).toHaveBeenCalledTimes(2)
+  })
+
+  it('événement PUIS rejeu du même tapId : un seul comptage, entrée effacée sans être appliquée', async () => {
+    const { canAskPermission, toggleDone } = setup({ canAsk: false })
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-ord-1' })
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-ord-1' })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejeu PUIS événement du même tapId : un seul comptage', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-ord-2' })
+    const { canAskPermission, toggleDone } = setup({ canAsk: false })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    action({ projectId: 7, stepId: 'devant#0', delta: 1, tapId: 'T-ord-2' })
+    expect(toggleDone).toHaveBeenCalledTimes(1)
+    expect(native.ackRowAction).toHaveBeenCalledWith('T-ord-2')
+  })
+
+  it('entrée retenue sans tapId (processus mort, ancien format) : rejouée comme avant', async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'devant#0', delta: 1 })
+    const { canAskPermission, toggleDone } = setup({ canAsk: false })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledWith('devant#0')
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
   })
 })

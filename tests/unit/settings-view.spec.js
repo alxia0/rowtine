@@ -29,12 +29,16 @@ const rowNotif = vi.hoisted(() => ({
   check: vi.fn(async () => 'granted'),
   request: vi.fn(async () => 'granted'),
   openSettings: vi.fn(async () => {}),
+  checkBattery: vi.fn(async () => ({ ignoring: true })),
+  requestBattery: vi.fn(async () => ({ ignoring: true, fallback: false })),
 }))
 vi.mock('@/native/row-notification', () => ({
   isRowNotificationAvailable: () => rowNotif.available(),
   checkRowNotificationPermission: () => rowNotif.check(),
   requestRowNotificationPermission: () => rowNotif.request(),
   openRowNotificationSettings: () => rowNotif.openSettings(),
+  isBatteryOptimizationIgnored: () => rowNotif.checkBattery(),
+  requestIgnoreBatteryOptimizations: () => rowNotif.requestBattery(),
 }))
 
 const keepAwake = vi.hoisted(() => ({ available: vi.fn(() => false) }))
@@ -69,6 +73,8 @@ beforeEach(async () => {
   rowNotif.openSettings.mockClear()
   rowNotif.request.mockClear()
   rowNotif.check.mockClear()
+  rowNotif.checkBattery.mockResolvedValue({ ignoring: true })
+  rowNotif.requestBattery.mockResolvedValue({ ignoring: true, fallback: false })
   capApp.listeners = {}
   capApp.removeResume = vi.fn()
   capApp.addListener = vi.fn(async (name, cb) => {
@@ -186,7 +192,10 @@ describe('SettingsView', () => {
     })
   })
 
-  // Réglage « Rang en cours dans les notifications » : natif seulement, permission lue au montage et au resume.
+  // Réglage « Rang en cours dans les notifications » : natif seulement, opt-in (spec
+  // 2026-10-01). La bascule ON ouvre la pop-up d'onboarding, qui SEULE écrit true (après
+  // les deux autorisations) ; OFF écrit false directement. Lignes d'état lues au montage
+  // et au resume.
   describe('interrupteur « Rang en cours dans les notifications »', () => {
     it('est absent hors natif', async () => {
       const w = mountView()
@@ -194,61 +203,110 @@ describe('SettingsView', () => {
       expect(w.find('[data-test="row-notif-switch"]').exists()).toBe(false)
     })
 
-    it('est présent en natif, actif par défaut, et sa bascule enregistre le réglage', async () => {
+    it('base vierge : désactivée ; la bascule ON ouvre la pop-up, « Autoriser » active', async () => {
       rowNotif.available.mockReturnValue(true)
       const w = mountView()
       await flushPromises()
+      const store = useSettingsStore()
+      expect(store.rowNotification).toBe(false)
       const sw = w.get('[data-test="row-notif-switch"]')
       expect(sw.attributes('role')).toBe('switch')
-      expect(sw.attributes('aria-checked')).toBe('true')
+      expect(sw.attributes('aria-checked')).toBe('false')
       await sw.trigger('click')
-      await vi.waitFor(() => expect(useSettingsStore().rowNotification).toBe(false))
-      expect(useSettingsStore().rowNotification).toBe(false)
-      expect(w.get('[data-test="row-notif-switch"]').attributes('aria-checked')).toBe('false')
+      await flushPromises()
+      // La bascule n'a rien écrit : la pop-up pilote.
+      expect(store.rowNotification).toBe(false)
+      const dlg = w.get('[data-test="row-notif-onboarding"]')
+      await dlg.get('[data-test="row-notif-onboarding-allow"]').trigger('click')
+      await flushPromises()
       await settle()
-      await w.get('[data-test="row-notif-switch"]').trigger('click')
-      await vi.waitFor(() => expect(useSettingsStore().rowNotification).toBe(true))
+      await vi.waitFor(() => expect(store.rowNotification).toBe(true))
+      expect(w.find('[data-test="row-notif-onboarding"]').exists()).toBe(false)
+      await vi.waitFor(() => expect(w.get('[data-test="row-notif-switch"]').attributes('aria-checked')).toBe('true'))
     })
 
-    it('activer alors que la permission est à demander la demande, et un refus affiche l\'aide', async () => {
+    it('bascule OFF écrit false directement, sans pop-up', async () => {
       rowNotif.available.mockReturnValue(true)
       const w = mountView()
       await flushPromises()
       const store = useSettingsStore()
-      await store.saveRowNotification(false)
+      await store.saveRowNotification(true)
       await flushPromises()
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await vi.waitFor(() => expect(store.rowNotification).toBe(false))
+      expect(w.find('[data-test="row-notif-onboarding"]').exists()).toBe(false)
+    })
+
+    it('pop-up « Désactiver la notification » : réglage false, pop-up fermée', async () => {
+      rowNotif.available.mockReturnValue(true)
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      // La bascule ON ouvre la pop-up ; on change d'avis : « Désactiver la notification ».
+      await w.get('[data-test="row-notif-switch"]').trigger('click')
+      await flushPromises()
+      await w.get('[data-test="row-notif-onboarding-disable"]').trigger('click')
+      await flushPromises()
+      await settle()
+      await vi.waitFor(() => expect(store.rowNotification).toBe(false))
+      expect(w.find('[data-test="row-notif-onboarding"]').exists()).toBe(false)
+    })
+
+    it('POST refusée dans la pop-up : réglage false, snackbar, pop-up fermée', async () => {
+      rowNotif.available.mockReturnValue(true)
       rowNotif.check.mockResolvedValue('prompt')
       rowNotif.request.mockResolvedValue('denied')
-      await w.get('[data-test="row-notif-switch"]').trigger('click')
-      await vi.waitFor(() => expect(rowNotif.request).toHaveBeenCalledTimes(1))
-      await vi.waitFor(() => expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(true))
-    })
-
-    it('permission à demander : request puis markRowNotificationAsked ; déjà accordée : request non appelé', async () => {
-      rowNotif.available.mockReturnValue(true)
       const w = mountView()
       await flushPromises()
       const store = useSettingsStore()
-      await store.saveRowNotification(false)
-      rowNotif.check.mockResolvedValue('prompt')
       await w.get('[data-test="row-notif-switch"]').trigger('click')
-      await vi.waitFor(() => expect(store.rowNotificationAsked).toBe(true))
-      expect(rowNotif.request).toHaveBeenCalledTimes(1)
-      await settle()
-
-      await store.saveRowNotification(false)
-      rowNotif.request.mockClear()
-      rowNotif.check.mockResolvedValue('granted')
-      await w.get('[data-test="row-notif-switch"]').trigger('click')
-      await vi.waitFor(() => expect(store.rowNotification).toBe(true))
       await flushPromises()
-      expect(rowNotif.request).not.toHaveBeenCalled()
+      await w.get('[data-test="row-notif-onboarding-allow"]').trigger('click')
+      await flushPromises()
+      await settle()
+      await vi.waitFor(() => expect(store.rowNotification).toBe(false))
+      expect(store.rowNotificationAsked).toBe(true)
+      const snackbar = useSnackbarStore()
+      expect(snackbar.visible).toBe(true)
+      expect(snackbar.message).toBe(i18n.global.t('rowNotif.onboardingPermissionRefused'))
+      expect(w.find('[data-test="row-notif-onboarding"]').exists()).toBe(false)
+    })
+
+    it('réglage true et exemption d\'arrière-plan absente : ligne d\'état qui rouvre la pop-up', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.checkBattery.mockResolvedValue({ ignoring: false })
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      await store.saveRowNotification(true)
+      await flushPromises()
+      const ligne = w.get('[data-test="row-notif-battery"]')
+      expect(ligne.text()).toBe(i18n.global.t('rowNotif.settingBattery'))
+      await ligne.trigger('click')
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-onboarding"]').exists()).toBe(true)
+    })
+
+    it('réglage true et exemption absente, mais POST à demander : la ligne POST passe devant', async () => {
+      rowNotif.available.mockReturnValue(true)
+      rowNotif.check.mockResolvedValue('prompt')
+      rowNotif.checkBattery.mockResolvedValue({ ignoring: false })
+      const w = mountView()
+      await flushPromises()
+      const store = useSettingsStore()
+      await store.markRowNotificationAsked()
+      await store.saveRowNotification(true)
+      await flushPromises()
+      expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(true)
+      expect(w.find('[data-test="row-notif-battery"]').exists()).toBe(false)
     })
 
     it('permission refusée : le libellé d\'aide est là et son clic ouvre les réglages Android', async () => {
       rowNotif.available.mockReturnValue(true)
       rowNotif.check.mockResolvedValue('denied')
       const w = mountView()
+      await flushPromises()
+      await useSettingsStore().saveRowNotification(true)
       await flushPromises()
       const denied = w.get('[data-test="row-notif-denied"]')
       expect(denied.text()).toBe(i18n.global.t('rowNotif.settingDenied'))
@@ -261,6 +319,8 @@ describe('SettingsView', () => {
       rowNotif.check.mockResolvedValue('denied')
       const w = mountView()
       await vi.waitFor(() => expect(capApp.listeners.resume).toBeTypeOf('function'))
+      await flushPromises()
+      await useSettingsStore().saveRowNotification(true)
       await flushPromises()
       expect(w.find('[data-test="row-notif-denied"]').exists()).toBe(true)
       rowNotif.check.mockResolvedValue('granted')
@@ -293,6 +353,7 @@ describe('SettingsView', () => {
       await flushPromises()
       expect(w.find('[data-test="row-notif-ask"]').exists()).toBe(false)
       await useSettingsStore().markRowNotificationAsked()
+      await useSettingsStore().saveRowNotification(true)
       await flushPromises()
       const ask = w.get('[data-test="row-notif-ask"]')
       expect(ask.text()).toBe(i18n.global.t('rowNotif.settingAsk'))
@@ -311,6 +372,7 @@ describe('SettingsView', () => {
       const w = mountView()
       await flushPromises()
       await useSettingsStore().markRowNotificationAsked()
+      await useSettingsStore().saveRowNotification(true)
       await flushPromises()
       rowNotif.request.mockResolvedValue('granted')
       await w.get('[data-test="row-notif-ask"]').trigger('click')

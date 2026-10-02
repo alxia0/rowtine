@@ -163,10 +163,10 @@ describe('store settings', () => {
   })
 
   // Rang en cours dans les notifications : défauts, persistance, écriture des deux clés.
-  it('rowNotification vaut true et rowNotificationAsked false par défaut sur une base vierge', async () => {
+  it('rowNotification vaut false (opt-in, 01/10) et rowNotificationAsked false par défaut sur une base vierge', async () => {
     const store = useSettingsStore()
     await store.load()
-    expect(store.rowNotification).toBe(true)
+    expect(store.rowNotification).toBe(false)
     expect(store.rowNotificationAsked).toBe(false)
   })
 

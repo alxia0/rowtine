@@ -646,9 +646,9 @@ Korrektur zu dieser Anleitung zurückkehren zu müssen. (Diese
 Anleitung liest du dagegen *vor* dem Öffnen des Bildschirms, um zu wissen, ob
 du dich darauf einlassen willst.)
 
-![Unter den 3 Schritten ordnet die Tabelle Kategorie / Was daraus in deinem Projekt wird die Zeilen Schritt, Notiz, Referenz und Zähler mit ihren Erklärungen; die nächste Zeile ist angeschnitten](images/de/04d-correction-aide.webp)
+![In der aufgeklappten Hilfe beschreibt der Abschnitt Die Leisten „Diagramme“ und „Fotos der Anleitung“ jede Leiste, die Fotoleiste oben, danach beginnt die Tabelle Kategorie / Was daraus wird](images/de/04d-correction-aide.webp)
 
-*Die Hilfe „Wie du die Anleitung korrigierst“ aufgeklappt: ihre 3 Schritte, dann der Anfang der Tabelle „Wozu jede Kategorie dient“.*
+*Die Hilfe „Wie du die Anleitung korrigierst“ aufgeklappt: der Abschnitt zu den Leisten „Diagramme“ und „Fotos der Anleitung“ (diese steht oben auf dem Bildschirm), dann der Anfang der Tabelle „Wozu jede Kategorie dient“.*
 
 **Wie du die Kategorie einer Zeile änderst:**
 
@@ -736,11 +736,13 @@ Verfolgen.
 ein Bild ein kleines Direktmenü: es **als Diagramm verfolgen**, falls es
 noch keins ist, sonst seinen **Typ ändern**, es auf ein bloßes Bild
 zurückstufen (**Nur ein Bild**), oder es **in die Fotos der Anleitung
-schicken**. Im Band „Fotos der Anleitung“ lässt sich jedes Bild
+schicken**. Im Band „Fotos der Anleitung“, ganz oben auf dem Korrekturbildschirm, lässt sich jedes Bild
 löschen, in den Text einfügen oder als Diagramm verfolgen: die drei
-Gesten an einem Ort.
+Gesten an einem Ort. Zum Einfügen setze zuerst den Cursor auf einen
+Schritt im Text: Das Band sagt dir dann, unter welchem Schritt das Bild
+landen wird.
 
-![Über der Kategorienleiste ist eine Abschnittsüberschrift angeschnitten, darunter die Notizzeile Tipp: die feuchte Mütze über eine Schüssel spannen, damit die Kappe schön rund wird, und unten Abbrechen und Speichern](images/de/04e-correction-diagrammes.webp)
+![Unter der Kategorienleiste zeigt die Leiste Diagramme (1) aufgeklappt Rumpf und Zopf, seinen Stand Interaktives Diagramm und die Schaltflächen Typ ändern, Nur ein Bild und In die Fotos senden](images/de/04e-correction-diagrammes.webp)
 
 *Das Band „Diagramme (1)“ aufgeklappt: der Abschnitt „Rumpf und Zopf“, sein aktueller Stand („Interaktives Diagramm“) und die Schaltflächen „Typ ändern“ und „Nur ein Bild“.*
 
@@ -1114,22 +1116,47 @@ Aktion.
     einem Tablet aus zu benutzen, ist es nicht: Jedes Gerät würde die
     Arbeit des anderen löschen. Ein zweites Gerät braucht seinen eigenen
     Ordner.
-- **Beim Arbeiten nach einer Anleitung**: zwei Schalter,
-  **standardmäßig an**. Schalte sie hier aus, wenn du sie nicht möchtest.
-  - **Aktuelle Reihe in den Benachrichtigungen**: Solange der Lesemodus eines
-    Projekts geöffnet ist, zeigt eine Benachrichtigung deinen aktuellen
-    Schritt und den nächsten. Damit kommst du weiter, ohne die App wieder zu
-    öffnen: „Reihe abhaken“ für einen Schritt, eine Minus- und eine
-    Plus-Schaltfläche rund um „Wiederholung 4 / 8“ für einen Zähler,
-    „Diagramm erledigt“ für die Erinnerung an ein Diagramm. Android fragt dich
-    nur einmal um Erlaubnis, Benachrichtigungen anzuzeigen, beim ersten Öffnen
-    des Lesemodus; hast du abgelehnt, weisen dich die Einstellungen darauf hin
-    und öffnen die Android-Einstellungen, um sie zu erteilen.
+- **Beim Arbeiten nach einer Anleitung**: Der Bildschirm bleibt **von
+  Haus aus** an, und die Benachrichtigung zur aktuellen Reihe schaltet sich
+  ein, **wenn du sie verlangst**.
+  - **Aktuelle Reihe in den Benachrichtigungen**: Du schaltest sie in den
+    Einstellungen ein. Solange der Lesemodus eines Projekts geöffnet ist, zeigt
+    eine Benachrichtigung deinen aktuellen Schritt und den nächsten und lässt
+    dich weiterkommen, ohne die App wieder zu öffnen: „Reihe abhaken“ für einen
+    Schritt, eine Minus- und eine Plus-Schaltfläche rund um „Wiederholung 4 / 8“
+    für einen Zähler, „Diagramm erledigt“ für die Erinnerung an ein Diagramm.
+    Beim Einschalten erklärt dir ein Pop-up die einzige Einstellung, die die
+    Schaltfläche zuverlässig macht, und Android fragt dich um die Erlaubnis,
+    Benachrichtigungen anzuzeigen (nur einmal), dann um die Erlaubnis, {app} im
+    Hintergrund laufen zu lassen. Ohne sie schließt Android {app} nach einer
+    Weile, und die Schaltfläche reagiert nicht mehr. Lehnst du ab, bleibt die
+    Benachrichtigung ausgeschaltet; du schaltest sie jederzeit in den
+    Einstellungen wieder ein, wo eine Zeile auch eine später entzogene
+    Erlaubnis anzeigt.
+    Beendet oder friert Android {app} im Hintergrund trotzdem ein, was auf
+    manchen Telefonen schnell passiert, geht ein Tipp auf eine
+    Benachrichtigungsschaltfläche nicht verloren: Die Benachrichtigung merkt
+    sich ihn und meldet „Tippen gespeichert“; der Lesemodus wendet ihn beim
+    nächsten Öffnen des Projekts an, wenn die angetippte Stufe noch die
+    aktuelle ist. Bei manchen Marken kann eine zusätzliche Einstellung nötig
+    sein; die genauen Namen variieren je nach Marke und Android-Version:
+    **Google Pixel und Standard-Android**, Einstellungen > Apps > {app} >
+    Akku > Ohne Einschränkung; **Samsung**, Einstellungen > Apps > {app} >
+    Akku > Nicht optimiert; **Xiaomi**, Einstellungen > Apps > Apps
+    verwalten > {app}, Autostart aktiviert, Energiesparmodus auf Keine
+    Einschränkung und {app} in den zuletzt verwendeten Apps fixieren;
+    **Oppo, Realme und OnePlus**, Einstellungen > Apps > App-Verwaltung >
+    {app}, Startberechtigung mit Automatischem Start und Indirektem Start,
+    dann Akku > Hintergrundaktivität erlauben; **Huawei**, Einstellungen >
+    Apps > Apps > {app} > Akku > App-Start > Manuell verwalten, mit allen
+    drei Schaltern.
   - **Bildschirm beim Verfolgen eingeschaltet lassen**: Der Bildschirm geht
     nicht in den Ruhezustand, solange der Lesemodus eines Projekts geöffnet
     ist, auch wenn du dein Gerät minutenlang nicht berührst, die Nadeln in der
     Hand. Sobald du den Lesemodus verlässt, gilt wieder der gewohnte
-    Ruhezustand.
+    Ruhezustand. Das ist die Standardeinstellung; du schaltest sie in den
+    Einstellungen aus, oder ohne das Verfolgen zu verlassen, im Merkzettel-Panel
+    des Lesemodus, das denselben Schalter trägt.
 - **Hilfe**: „Geführte Tour erneut ansehen“ öffnet die Beispielmütze
   wieder im Lesemodus mit ihren Erklärblasen, und legt sie neu an, falls
   du sie gelöscht hast.

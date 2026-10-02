@@ -14,6 +14,51 @@
 // privacy-policy.fr.js.
 export const RELEASE_NOTES_FR = [
   {
+    version: '1.4.1',
+    notes: [
+      "Notification du suivi : l'appui sur un bouton est retenu même si Android a fermé ou figé l'app.",
+      "Notification activée uniquement sur demande, avec une pop-up d'autorisation d'arrière-plan.",
+      "Reprise d'un projet sur le dernier rang travaillé : un patron peut se traiter dans le désordre.",
+      "Fiche projet : interrupteur « Garder l'écran allumé » accessible pendant le travail.",
+    ],
+  },
+  {
+    version: '1.4.0',
+    notes: [
+      "Mémo des techniques de points : les points et techniques de base et courants, tricot et crochet (montages, rabattages, points), dans les outils et dans l'aide-mémoire du lecteur ; choix des points à garder sous la main pour chaque patron.",
+      "Le rang en cours dans une notification pendant le suivi : cocher le rang, compter les répétitions (moins et plus), rappel du diagramme, visible sur l'écran de verrouillage. À activer dans les Réglages, avec l'autorisation d'arrière-plan qui rend le bouton fiable.",
+      "L'écran reste allumé pendant le suivi. Actif d'office ; réglable dans les Réglages et depuis l'aide-mémoire du suivi.",
+      "Lecteur : l'étape en cours s'arrête aussi sur les compteurs de répétition, et toucher le tiers gauche d'une carte d'étape la coche.",
+      "Badge : coloris de chaque laine, matières de l'ouvrage au-dessus du calendrier, image plus nette.",
+      'Stock de laines : chaque carte affiche le métrage total du lot.',
+      "Fiche projet : unités de l'échantillon traduites, diamètre d'aiguille écrit avec le séparateur décimal de la langue.",
+      'Guide mis à jour.',
+    ],
+  },
+  {
+    version: '1.3.3',
+    notes: [
+      'Quantités de laine décimales (ex. 2,5 pelotes) : stock, achats, réservations, consommation par projet, export CSV et partage.',
+      'Import PDF : les images du patron sont mieux conservées, et les patrons mieux lus, allemands en particulier.',
+      "Visu du patron : images d'étape en grand, couverture du PDF en tête, aperçu amélioré.",
+      "Diverses améliorations de l'interface et divers correctifs.",
+    ],
+  },
+  {
+    version: '1.3.2',
+    notes: [
+      'Import du stock de laines depuis un export Ravelry (.xlsx) : statut, couleur, achats, notes, lieu de rangement et « Acheté chez » sur chaque achat.',
+      "Corrections d'affichage diverses.",
+    ],
+  },
+  {
+    version: '1.3.1',
+    notes: [
+      'Photos HEIC/HEIF acceptées (Android 9 ou plus).',
+      'Menu du stock de laines amélioré.',
+    ],
+  },
+  {
     version: '1.3.0',
     notes: [
       "Nouvel onglet Stats sur chaque projet : temps total, sessions, pelotes utilisées, période, meilleure série de jours et carte calendaire.",

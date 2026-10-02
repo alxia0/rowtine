@@ -4,12 +4,15 @@ import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.widget.RemoteViews;
 
+import androidx.activity.result.ActivityResult;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationChannelCompat;
@@ -21,9 +24,15 @@ import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 // Notification permanente du rang en cours (spec 2026-09-29-notification-rang-en-cours).
 // Le lecteur (JS) est le seul à écrire : ce plugin affiche ce qu'on lui donne et renvoie
@@ -51,6 +60,21 @@ public class RowNotificationPlugin extends Plugin {
     static final String EXTRA_DELTA = "delta";
     static final String EXTRA_CLOSED_TITLE = "closedTitle";
     static final String EXTRA_CLOSED_TEXT = "closedText";
+    // Libellés de la notification « appui retenu » (processus mort, spec
+    // 2026-09-30-notification-appui-attente) : voyagent en extras comme closed*, le JS
+    // les fournit (i18n) à chaque show.
+    static final String EXTRA_PENDING_TITLE = "pendingTitle";
+    static final String EXTRA_PENDING_TEXT = "pendingText";
+    // Appui retenu (clé unique, écrasée à chaque nouvel appui — la notification de
+    // remplacement n'a pas de bouton, « dernier gagne » par sûreté). Receiver et activité
+    // partagent le même processus : ne JAMAIS déclarer android:process sur le receiver,
+    // la lecture SharedPreferences n'y survivrait pas (impasse MODE_MULTI_PROCESS).
+    private static final String PREFS_ROW = "row-notification";
+    private static final String KEY_PENDING = "pendingRowAction";
+    // Écriture (receiver, thread principal) contre lecture puis effacement (méthodes du
+    // plugin, thread des plugins) : sans verrou, un effacement pourrait emporter l'entrée
+    // d'un appui plus récent écrite entre sa lecture et son remove.
+    private static final Object PREFS_LOCK = new Object();
     private static final String ALIAS = "notifications";
 
     // Instance vivante lue par le receiver : null = processus neuf ou activité détruite.
@@ -60,7 +84,39 @@ public class RowNotificationPlugin extends Plugin {
     // valeurs voyagent donc aussi en extras de l'intent du bouton.
     static volatile String closedTitle = null;
     static volatile String closedText = null;
+    static volatile String pendingTitle = null;
+    static volatile String pendingText = null;
     static volatile long projectId = -1;
+
+    // Acquittement des appuis reçus en processus vivant (spec 2026-10-01
+    // appui-webview-gele). Un tapId = « <démarrage du processus>-<numéro> » : unique d'un
+    // processus à l'autre, numéro croissant dans un processus. Le JS acquitte dès qu'il a
+    // pris sa décision ; un acquittement d'un numéro plus récent vaut pour les plus
+    // anciens (JS vivant). Un WebView gelé n'acquitte pas : le minuteur du receiver conclut.
+    static final long ACK_GRACE_MS = 1500;
+    private static final String TAP_PREFIX = System.currentTimeMillis() + "-";
+    private static final AtomicLong tapSeq = new AtomicLong(0);
+    private static volatile long ackedSeq = 0;
+
+    static String newTapId() {
+        return TAP_PREFIX + tapSeq.incrementAndGet();
+    }
+
+    // Numéro d'un tapId de CE processus, ou -1 (autre processus, format inconnu).
+    static long seqOf(String tapId) {
+        if (tapId == null || !tapId.startsWith(TAP_PREFIX)) return -1;
+        try {
+            return Long.parseLong(tapId.substring(TAP_PREFIX.length()));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    // Vrai si le JS a répondu à cet appui, ou à un appui plus récent.
+    static boolean isAcked(String tapId) {
+        long seq = seqOf(tapId);
+        return seq >= 0 && seq <= ackedSeq;
+    }
 
     @Override
     public void load() {
@@ -107,10 +163,12 @@ public class RowNotificationPlugin extends Plugin {
         }
     }
 
-    // Aucun écouteur JS (lecteur pas encore à l'écoute, page rechargée) : l'appui serait
-    // perdu en silence, sans rétention. La notification est effacée ; le lecteur la
-    // repose au retour au premier plan ou au prochain changement de rang.
-    void fireRowAction(long projectId, String stepId, int delta) {
+    // Aucun écouteur JS (lecteur pas encore à l'écoute, page rechargée) : l'événement n'a
+    // pas de destinataire, mais l'appui est déjà retenu (écrit par le receiver avant
+    // l'émission). La notification est effacée ; faute d'acquittement, le receiver affiche
+    // « Appui retenu » à ACK_GRACE_MS, et le lecteur rejouera l'entrée à l'ouverture du
+    // projet puis reposera sa charge.
+    void fireRowAction(long projectId, String stepId, int delta, String tapId) {
         if (!hasListeners("rowAction")) {
             NotificationManagerCompat.from(getContext()).cancel(NOTIF_ID);
             return;
@@ -119,6 +177,7 @@ public class RowNotificationPlugin extends Plugin {
         data.put("projectId", projectId);
         data.put("stepId", stepId);
         data.put("delta", delta);
+        data.put("tapId", tapId);
         notifyListeners("rowAction", data);
     }
 
@@ -190,6 +249,9 @@ public class RowNotificationPlugin extends Plugin {
     private boolean canPost() {
         Context ctx = getContext();
         if (!notificationsEnabled(ctx)) return false;
+        // Exemption batterie (spec 2026-10-01) : sans elle, la notification s'afficherait
+        // pour disparaître à la première mise en arrière-plan — porte finale côté natif.
+        if (!isIgnoringBatteryOptimizations()) return false;
         return (
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ActivityCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
@@ -246,6 +308,8 @@ public class RowNotificationPlugin extends Plugin {
         projectId = id;
         closedTitle = call.getString("closedTitle");
         closedText = call.getString("closedText");
+        pendingTitle = call.getString("pendingTitle");
+        pendingText = call.getString("pendingText");
 
         if (!canPost()) {
             call.resolve();
@@ -297,7 +361,8 @@ public class RowNotificationPlugin extends Plugin {
     }
 
     // Intent d'un bouton de la notification vers RowNotificationReceiver. Les valeurs de
-    // closedTitle/closedText voyagent aussi : le receiver en a besoin si le processus est mort.
+    // closedTitle/closedText et pendingTitle/pendingText voyagent aussi : le receiver en a
+    // besoin si le processus est mort.
     private static PendingIntent rowPendingIntent(Context ctx, int requestCode, long id, String stepId, int delta) {
         Intent intent = new Intent(ctx, RowNotificationReceiver.class);
         intent.setAction(ACTION_ROW);
@@ -306,6 +371,8 @@ public class RowNotificationPlugin extends Plugin {
         intent.putExtra(EXTRA_DELTA, delta);
         intent.putExtra(EXTRA_CLOSED_TITLE, closedTitle);
         intent.putExtra(EXTRA_CLOSED_TEXT, closedText);
+        intent.putExtra(EXTRA_PENDING_TITLE, pendingTitle);
+        intent.putExtra(EXTRA_PENDING_TEXT, pendingText);
         return PendingIntent.getBroadcast(ctx, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
@@ -353,6 +420,83 @@ public class RowNotificationPlugin extends Plugin {
         }
     }
 
+    // Exclusion des optimisations de batterie (spec 2026-10-01) : ce qui laisse le processus
+    // survivre en arrière-plan verrouillé (doze), donc les boutons de la notification
+    // fonctionner. Disponible dès l'API 23 (minSdk 24) : pas de garde de version.
+    private boolean isIgnoringBatteryOptimizations() {
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        return pm != null && pm.isIgnoringBatteryOptimizations(getContext().getPackageName());
+    }
+
+    @PluginMethod
+    public void isIgnoringBatteryOptimizations(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("ignoring", isIgnoringBatteryOptimizations());
+        call.resolve(result);
+    }
+
+    // Demande d'exemption. Dialogue système direct d'abord (résultat FIABLE au retour :
+    // relecture du PowerManager, jamais le resultCode du dialogue, identique quel que soit
+    // le choix). Sinon replis : liste des optimisations, puis infos app — le résultat
+    // immédiat de ces écrans n'est PAS fiable (la liste revient presque aussitôt) :
+    // `fallback:true` le dit, le JS ne décide rien dessus, seule la relecture au retour au
+    // premier plan compte. Aucun rejet ne fuit : échec total → {ignoring:false, fallback:true}.
+    @PluginMethod
+    public void requestIgnoreBatteryOptimizations(PluginCall call) {
+        if (isIgnoringBatteryOptimizations()) {
+            JSObject done = new JSObject();
+            done.put("ignoring", true);
+            done.put("fallback", false);
+            call.resolve(done);
+            return;
+        }
+        String pkg = getContext().getPackageName();
+        try {
+            Intent direct = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            direct.setData(Uri.fromParts("package", pkg, null));
+            startActivityForResult(call, direct, "batteryDirectCallback");
+            return;
+        } catch (Exception ignored) {
+            // ROM sans le dialogue direct : repli ci-dessous.
+        }
+        try {
+            startActivityForResult(
+                call,
+                new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                "batteryFallbackCallback"
+            );
+            return;
+        } catch (Exception ignored) {
+            // Repli suivant.
+        }
+        try {
+            Intent details = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            details.setData(Uri.fromParts("package", pkg, null));
+            startActivityForResult(call, details, "batteryFallbackCallback");
+        } catch (Exception e) {
+            JSObject none = new JSObject();
+            none.put("ignoring", false);
+            none.put("fallback", true);
+            call.resolve(none);
+        }
+    }
+
+    @ActivityCallback
+    private void batteryDirectCallback(PluginCall call, ActivityResult result) {
+        JSObject done = new JSObject();
+        done.put("ignoring", isIgnoringBatteryOptimizations());
+        done.put("fallback", false);
+        call.resolve(done);
+    }
+
+    @ActivityCallback
+    private void batteryFallbackCallback(PluginCall call, ActivityResult result) {
+        JSObject done = new JSObject();
+        done.put("ignoring", isIgnoringBatteryOptimizations());
+        done.put("fallback", true);
+        call.resolve(done);
+    }
+
     // Démarrage à froid depuis la notification : le projet retenu par handleOnNewIntent,
     // sinon l'extra de l'intent de lancement, une seule fois (même principe que
     // SafeArea.get()). Lu et retiré sur le thread UI, où vit l'intent de l'activité. Une
@@ -392,5 +536,114 @@ public class RowNotificationPlugin extends Plugin {
             }
             call.resolve(result);
         });
+    }
+
+    // Appui retenu par le receiver (processus mort, ou processus vivant tant que le JS ne l'a
+    // pas traité) : {projectId, stepId, delta, tapId?}, ou rien.
+    // Lecture SANS effacement : un lecteur d'un AUTRE projet doit pouvoir laisser
+    // l'entrée en place. SharedPreferences est thread-safe : pas besoin du thread UI de
+    // takeLaunchProject (qui lit, lui, l'intent de l'activité).
+    @PluginMethod
+    public void readPendingRowAction(PluginCall call) {
+        JSObject pending = readPendingRowAction(getContext());
+        if (pending == null) call.resolve();
+        else call.resolve(pending);
+    }
+
+    // Acquittement d'un appui par le JS : plus de repli « Appui retenu ». `keep` vrai :
+    // l'entrée retenue reste (appui non traité, à rejouer). Sinon elle est effacée si c'est
+    // bien CELLE de ce tapId (jamais celle d'un appui plus récent). Idempotente.
+    @PluginMethod
+    public void ackRowAction(PluginCall call) {
+        String tapId = call.getString("tapId");
+        boolean keep = Boolean.TRUE.equals(call.getBoolean("keep", false));
+        long seq = seqOf(tapId);
+        if (seq > ackedSeq) ackedSeq = seq;
+        // Le JS a répondu : les veilles du receiver jusqu'à ce numéro rendent leur broadcast.
+        RowNotificationReceiver.releaseAcked(ackedSeq);
+        if (!keep && tapId != null) {
+            synchronized (PREFS_LOCK) {
+                SharedPreferences prefs = getContext().getSharedPreferences(PREFS_ROW, Context.MODE_PRIVATE);
+                String raw = prefs.getString(KEY_PENDING, null);
+                if (raw != null) {
+                    try {
+                        if (tapId.equals(new JSONObject(raw).optString("tapId", null))) {
+                            prefs.edit().remove(KEY_PENDING).commit();
+                        }
+                    } catch (JSONException e) {
+                        // Entrée illisible : sera oubliée à la prochaine lecture.
+                    }
+                }
+            }
+        }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void clearPendingRowAction(PluginCall call) {
+        synchronized (PREFS_LOCK) {
+            getContext().getSharedPreferences(PREFS_ROW, Context.MODE_PRIVATE)
+                .edit().remove(KEY_PENDING).commit();
+        }
+        call.resolve();
+    }
+
+    // Retient l'appui d'un bouton, écrit par le receiver AVANT les gardes d'affichage et
+    // avant toute émission au JS : processus mort (sans tapId) comme processus vivant (avec
+    // le tapId de l'événement rowAction, qui évite de compter l'appui deux fois). commit()
+    // bloquant : le processus est tuable dès la fin du receiver. Tampon d'un appui DÉJÀ
+    // ÉMIS : le lecteur seul écrit la progression, le natif n'interprète jamais cette entrée.
+    static void savePendingRowAction(Context ctx, long projectId, String stepId, int delta) {
+        savePendingRowAction(ctx, projectId, stepId, delta, null);
+    }
+
+    static void savePendingRowAction(Context ctx, long projectId, String stepId, int delta, String tapId) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("v", 1);
+            json.put("ts", System.currentTimeMillis());
+            json.put("projectId", projectId);
+            json.put("stepId", stepId);
+            json.put("delta", delta);
+            if (tapId != null) json.put("tapId", tapId);
+            synchronized (PREFS_LOCK) {
+                ctx.getSharedPreferences(PREFS_ROW, Context.MODE_PRIVATE)
+                    .edit().putString(KEY_PENDING, json.toString()).commit();
+            }
+        } catch (JSONException e) {
+            // Clés constantes : impossible en pratique. Pas d'appui retenu, comme avant.
+        }
+    }
+
+    // Sous PREFS_LOCK : une entrée illisible est effacée, jamais celle écrite entre-temps.
+    private static JSObject readPendingRowAction(Context ctx) {
+        synchronized (PREFS_LOCK) {
+            SharedPreferences prefs = ctx.getSharedPreferences(PREFS_ROW, Context.MODE_PRIVATE);
+            String raw = prefs.getString(KEY_PENDING, null);
+            if (raw == null) return null;
+            try {
+                JSONObject json = new JSONObject(raw);
+                if (json.optInt("v", -1) != 1) return forgetPending(prefs);
+                long id = json.optLong("projectId", -1);
+                String stepId = json.optString("stepId", null);
+                if (stepId == null || id <= 0) return forgetPending(prefs);
+                JSObject pending = new JSObject();
+                pending.put("projectId", id);
+                pending.put("stepId", stepId);
+                pending.put("delta", json.optInt("delta", 1));
+                String tapId = json.optString("tapId", "");
+                if (!tapId.isEmpty()) pending.put("tapId", tapId);
+                return pending;
+            } catch (JSONException e) {
+                return forgetPending(prefs);
+            }
+        }
+    }
+
+    // Entrée illisible ou de version inconnue : effacée, rendue comme absente. Appelée sous
+    // PREFS_LOCK.
+    private static JSObject forgetPending(SharedPreferences prefs) {
+        prefs.edit().remove(KEY_PENDING).commit();
+        return null;
     }
 }

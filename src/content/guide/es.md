@@ -612,9 +612,9 @@ momento sin dejar tu trabajo, sin tener que volver a esta guía
 en plena corrección. (Esta guía, en cambio, se lee *antes* de abrir la
 pantalla, para saber si quieres lanzarte.)
 
-![Bajo los 3 pasos, la tabla Categoría / Qué se obtiene en tu proyecto alinea Paso (una casilla para marcar mientras tejes), Nota, Referencia y Contador con sus definiciones; la fila siguiente queda cortada](images/es/04d-correction-aide.webp)
+![En la ayuda desplegada, la sección Las bandas «Diagramas» y «Fotos del patrón» describe cada banda, la de fotos arriba, y después empieza la tabla Categoría / Qué se obtiene en tu proyecto](images/es/04d-correction-aide.webp)
 
-*La ayuda «Cómo corregir el patrón» desplegada: sus 3 pasos, y luego el comienzo de la tabla «Para qué sirve cada categoría».*
+*La ayuda «Cómo corregir el patrón» desplegada: la sección sobre las bandas «Diagramas» y «Fotos del patrón» (esta última está arriba de la pantalla), y luego el comienzo de la tabla «Para qué sirve cada categoría».*
 
 **Cómo cambiar la categoría de una línea:**
 
@@ -695,10 +695,12 @@ imagen se une a las fotos del patrón, lista para insertarse o seguirse.
 imagen abre un pequeño menú inmediato: **seguirla como diagrama** si aún
 no lo es, o **cambiar su tipo** en caso contrario, rebajarla a simple
 ilustración (**Solo una imagen**), o **enviarla a las fotos** del patrón.
-En la banda «Fotos del patrón», cada imagen se elimina, se inserta en el
-texto o se sigue como diagrama: los tres gestos en el mismo sitio.
+En la banda «Fotos del patrón», arriba del todo en la pantalla de corrección,
+cada imagen se elimina, se inserta en el texto o se sigue como diagrama: los tres
+gestos en el mismo sitio. Para insertarla, coloca primero el cursor en un
+paso del texto: la banda te dice entonces debajo de qué paso irá la imagen.
 
-![Sobre la barra de categorías asoma una casilla, Esconder los hilos por el revés, y debajo la línea de nota Truco: dejar secar el gorro húmedo sobre un bol para redondear la copa, con Cancelar y Guardar al pie](images/es/04e-correction-diagrammes.webp)
+![Bajo la barra de categorías, la banda Diagramas (1) desplegada muestra Cuerpo y trenza, su estado Diagrama interactivo y los botones Cambiar tipo, Solo una imagen y Enviar a las fotos](images/es/04e-correction-diagrammes.webp)
 
 *El panel «Diagramas (1)» desplegado: la sección «Cuerpo y trenza», su estado actual («Diagrama interactivo») y los botones «Cambiar tipo» y «Solo una imagen».*
 
@@ -1050,20 +1052,43 @@ no cuenta: se necesita una acción **registrada**.
     idea; usarla desde un teléfono **y** una tableta no lo es: cada uno
     borraría el trabajo del otro. Un segundo dispositivo necesita su
     propia carpeta.
-- **Mientras sigues un patrón**: dos interruptores, **activados
-  de serie**. Desactívalos aquí si no los quieres.
-  - **Fila en curso en las notificaciones**: mientras el lector de un proyecto
-    está abierto, una notificación muestra tu paso en curso y el siguiente. Te
-    deja avanzar sin volver a abrir la app: «Marcar la fila» para un paso, un
-    botón menos y un botón más alrededor de «Repetición 4 / 8» para un
-    contador, «Diagrama hecho» para el recordatorio de un diagrama. Android te
-    pide una sola vez permiso para mostrar notificaciones, la primera vez que
-    abres el lector; si lo rechazaste, los Ajustes te lo indican y te abren los
-    ajustes de Android para concederlo.
+- **Mientras sigues un patrón**: la pantalla se queda encendida **de serie**, y
+  la notificación de la fila en curso se activa **cuando la pides**.
+  - **Fila en curso en las notificaciones**: la activas en los Ajustes. Mientras
+    el lector de un proyecto está abierto, una notificación muestra tu paso en
+    curso y el siguiente, y te deja avanzar sin volver a abrir la app: «Marcar
+    la fila» para un paso, un botón menos y un botón más alrededor de
+    «Repetición 4 / 8» para un contador, «Diagrama hecho» para el recordatorio
+    de un diagrama. Al activarla, una ventana emergente te explica el único
+    ajuste que hace fiable el botón, y Android te pide permiso para mostrar
+    notificaciones (una sola vez), y después para dejar que {app} funcione en
+    segundo plano. Sin él, Android cierra {app} al cabo de un rato y el botón
+    deja de responder. Si lo rechazas, la notificación sigue desactivada; la
+    reactivas cuando quieras en los Ajustes, donde una línea indica también un
+    permiso retirado más tarde.
+    Si Android cierra o congela {app} en segundo plano de todos modos, algo que
+    ocurre rápido en algunos teléfonos, un toque en un botón de la notificación
+    no se pierde: la notificación lo guarda y te anuncia
+    «Toque guardado»; el lector lo aplica la próxima vez que abras el proyecto,
+    si el paso apuntado sigue siendo el actual. En algunas marcas puede hacer
+    falta un ajuste adicional; los nombres exactos varían según la marca y la
+    versión de Android:
+    **Google Pixel y Android puro**, Ajustes > Aplicaciones > {app} > Batería >
+    Sin restricciones; **Samsung**, Ajustes > Aplicaciones > {app} > Batería >
+    Sin optimizar; **Xiaomi**, Ajustes > Aplicaciones > Gestionar aplicaciones
+    > {app}, Inicio automático activado, ahorro de batería en Sin
+    restricciones y {app} fijada en las apps recientes; **Oppo, Realme y
+    OnePlus**, Ajustes > Aplicaciones > Gestión de aplicaciones > {app},
+    Permiso de inicio con Inicio automático e Inicio indirecto, y después
+    Batería > Permitir actividad en segundo plano; **Huawei**, Ajustes >
+    Aplicaciones > Aplicaciones > {app} > Batería > Inicio de aplicaciones >
+    Gestionar manualmente, con los tres interruptores.
   - **Mantener la pantalla encendida durante el seguimiento**: la pantalla no
     entra en reposo mientras el lector de un proyecto está abierto, aunque no
     toques tu dispositivo durante largos minutos, con las agujas en la mano.
-    Vuelve a su reposo habitual en cuanto sales del lector.
+    Vuelve a su reposo habitual en cuanto sales del lector. Es el ajuste de
+    serie; lo desactivas en los Ajustes, o sin salir del seguimiento, en el
+    panel de recordatorio del lector, que lleva el mismo interruptor.
 - **Ayuda**: «Repetir la visita guiada» vuelve a abrir el gorro de ejemplo
   en el lector con sus burbujas de explicación, y lo vuelve a crear si lo
   has eliminado.

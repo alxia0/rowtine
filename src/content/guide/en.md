@@ -594,9 +594,9 @@ leaving your work, without having to come back to this guide in the
 middle of a correction. (This guide, for its part, is meant to be read *before*
 you open the screen, to decide whether you want to take it on.)
 
-![Below the 3 steps, the Category / What it becomes in your project table lines up Step (a checkbox to tick as you knit), then Note, Reference, Counter and Section, each with its own definition](images/en/04d-correction-aide.webp)
+![In the unfolded help, the section The “Diagrams” and “Pattern photos” strips describes each strip, the photos one sitting at the top of the screen, then the Category / What it becomes table begins](images/en/04d-correction-aide.webp)
 
-*The "How to correct the pattern" help unfolded: its 3 steps, then the start of the "What each category does" table.*
+*The "How to correct the pattern" help unfolded: the section on the "Diagrams" and "Pattern photos" strips (the latter sits at the top of the screen), then the start of the "What each category does" table.*
 
 **Changing a line's category:**
 
@@ -674,10 +674,12 @@ photos, ready to be inserted or followed.
 immediate menu: **follow it as a chart** if it isn't one yet, or
 **change its type** otherwise, bring it back down to a mere illustration (**Just an
 image**), or **send it to the pattern's photos**. In the "Pattern photos"
-band, every image can be deleted, inserted into the text, or followed as a
-chart: the three gestures in the same place.
+band, at the very top of the correction screen, every image can be deleted,
+inserted into the text, or followed as a chart: the three gestures in the same place.
+To insert one, first place the cursor on a step of the text: the band then
+tells you which step the image will go under.
 
-![Under the category bar, a clipped tick line and then Weave in ends on the wrong side, followed by the note line Tip: block the damp beanie over a bowl to round out the crown, above Cancel and Save](images/en/04e-correction-diagrammes.webp)
+![Under the category bar, the unfolded Diagrams (1) strip shows the Body and cable chart, its state Interactive chart, and the buttons Change type, Just an image and Send to photos](images/en/04e-correction-diagrammes.webp)
 
 *The "Diagrams (1)" banner unfolded: the "Body and cable" section, where it currently stands ("Interactive chart") and the "Change type" and "Just an image" buttons.*
 
@@ -1017,19 +1019,38 @@ doesn't count: it takes a **logged** action.
     folder so you have a copy elsewhere is a good idea; using it from a
     phone **and** a tablet is not: each would wipe out the other's work.
     A second device needs a folder of its own.
-- **While following a pattern**: two switches, **on by
-  default**. Turn them off here if you don't want them.
-  - **Current row in notifications**: while a project's reader is open, a
-    notification shows your current step and the next one. It lets you move on
-    without reopening the app: "Check off row" for a step, a minus button and a
-    plus button around "Repeat 4 / 8" for a counter, "Chart done" for a chart
-    reminder. Android asks you only once for permission to show notifications,
-    the first time you open the reader; if you refused, Settings tell you so
-    and open Android's settings for you to grant it.
+- **While following a pattern**: the screen stays on **by default**, and the
+  current-row notification turns on **when you ask for it**.
+  - **Current row in notifications**: you turn it on in Settings. While a
+    project's reader is open, a notification shows your current step and the
+    next one, and lets you move on without reopening the app: "Check off row"
+    for a step, a minus button and a plus button around "Repeat 4 / 8" for a
+    counter, "Chart done" for a chart reminder. When you turn it on, a pop-up
+    explains the one setting that makes the button reliable, and Android asks
+    you for permission to show notifications (only once), then for permission
+    to let {app} run in the background. Without it, Android closes {app}
+    after a while and the button stops responding. If you refuse, the
+    notification stays off; you can turn it back on whenever you like in
+    Settings, where a line also flags a permission withdrawn later.
+    If Android closes or freezes {app} in the background anyway, which happens
+    quickly on some phones, a tap on a notification button is not lost: the notification keeps it and tells you "Tap saved"; the reader
+    applies it the next time you open the project, if the targeted step is
+    still the current one. On some brands, an extra setting may be needed;
+    exact names vary by brand and Android version:
+    **Google Pixel and stock Android**, Settings > Apps > {app} > Battery >
+    Unrestricted; **Samsung**, Settings > Apps > {app} > Battery > Not
+    optimized; **Xiaomi**, Settings > Apps > Manage apps > {app}, Autostart
+    on, Battery saver set to No restrictions, and {app} pinned in Recents;
+    **Oppo, Realme and OnePlus**, Settings > Apps > App management > {app},
+    Launch permission with Auto-launch and Secondary launch, then Battery >
+    Allow background activity; **Huawei**, Settings > Apps > Apps > {app} >
+    Battery > App launch > Manage manually, with all three switches.
   - **Keep the screen on while tracking**: the screen doesn't go to sleep
     while a project's reader is open, even if you don't touch your device for
     long minutes, needles in hand. It goes back to its usual sleep timer as
-    soon as you leave the reader.
+    soon as you leave the reader. This is the default setting; you turn it off
+    in Settings, or without leaving the tracking, in the reader's memo panel,
+    which carries the same switch.
 - **Help**: "Replay the guided tour" reopens the sample hat in the reader
   with its explanation bubbles, and recreates it if you've deleted it.
 - **Contribute**: a link to the source code (the app is open source), and

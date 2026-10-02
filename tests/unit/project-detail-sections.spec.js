@@ -7,6 +7,7 @@
 // tests/e2e/stats-journal-jours-actifs.spec.js, transposée à l'idiome des tests unitaires
 // (cf. vitest.config.js : timeout explicite, plafonné sous le testTimeout de 20000 ms).
 import { describe, it, expect, vi } from 'vitest'
+import { useSettingsStore } from '@/stores/settings'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import fr from '@/i18n/fr.json'
@@ -15,6 +16,12 @@ import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
 const i18n = createTestI18n()
+
+// Le pont keep-awake n'existe qu'en natif : la rangée « écran allumé » ne se rend que s'il répond.
+vi.mock('@/native/keep-awake', () => ({
+  isKeepScreenOnAvailable: () => true,
+  setKeepScreenOn: async () => {},
+}))
 
 async function mountDetail(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 2' }]) {
   await db.patterns.clear(); await db.projects.clear()
@@ -30,6 +37,15 @@ async function mountDetail(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 
 }
 
 describe('ProjectDetailView — onglet Sections unifié', () => {
+  it('l\'interrupteur « écran allumé » est sur la fiche et bascule le réglage global', async () => {
+    const { w } = await mountDetail()
+    await vi.waitFor(() => expect(w.find('[data-test="keep-screen-switch"]').exists()).toBe(true), { timeout: 10000 })
+    const settings = useSettingsStore()
+    const avant = settings.keepScreenOn
+    await w.find('[data-test="keep-screen-switch"]').trigger('click')
+    await vi.waitFor(() => expect(settings.keepScreenOn).toBe(!avant), { timeout: 10000 })
+  })
+
   it('affiche l\'aperçu reader (dérivé) et pas le formulaire de section manuelle', async () => {
     const { w } = await mountDetail()
     await vi.waitFor(() => expect(w.findAll('.rovw').length).toBeGreaterThan(0), { timeout: 10000 }) // aperçu reader présent

@@ -55,7 +55,7 @@
 // repli en tête de document plutôt qu'un curseur posé dans la mauvaise
 // section.
 import { slug } from '../reader.js'
-import { lineType, h2Title, H2_PREFIXE_RE } from './md-line-type.js'
+import { lineType, h2Title, H2_PREFIXE_RE, NOTE_RE } from './md-line-type.js'
 
 // Cette ligne brute ouvre-t-elle une étape ?
 function opensStep(raw) {
@@ -142,18 +142,38 @@ export function sectionTitleAtLine(md, lineNumber) {
 // jamais entre deux images existantes.
 export function imageAnchorLine(md, cursorLine) {
   const { lines, start } = linesAndStart(md, cursorLine)
+  const i = anchorStepIndex(lines, start)
+  if (i === -1) return null
+  let last = i
+  while (last + 1 < lines.length && lineType(lines[last + 1]) === 'image' && /^\s/.test(lines[last + 1])) {
+    last += 1
+  }
+  return last + 1
+}
+
+// Index (0-based) de l'étape à laquelle imageAnchorLine accroche l'image, ou -1.
+function anchorStepIndex(lines, start) {
   for (let i = start; i >= 0; i -= 1) {
     const type = lineType(lines[i])
-    if (type === 'section') return null
-    if (type === 'rang' || type === 'compteur' || type === 'note') {
-      let last = i
-      while (last + 1 < lines.length && lineType(lines[last + 1]) === 'image' && /^\s/.test(lines[last + 1])) {
-        last += 1
-      }
-      return last + 1
-    }
+    if (type === 'section') return -1
+    if (type === 'rang' || type === 'compteur' || type === 'note') return i
   }
-  return null
+  return -1
+}
+
+// Texte nu de l'étape visée par imageAnchorLine (sans `- `, `> `, préfixe de compteur ou
+// de répétition importée `× `, ni gras), ou `null` : la bande galerie de l'écran de correction dit où l'image va atterrir.
+export function imageAnchorStepText(md, cursorLine) {
+  const { lines, start } = linesAndStart(md, cursorLine)
+  const i = anchorStepIndex(lines, start)
+  if (i === -1) return null
+  return lines[i]
+    .replace(/^-\s+/, '')
+    .replace(NOTE_RE, '')
+    .replace(/^\{[^}]*\}\s*/, '')
+    .replace(/^×\s+/, '')
+    .replace(/\*\*/g, '')
+    .trim()
 }
 
 export { h2Title }

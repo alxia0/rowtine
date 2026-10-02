@@ -207,3 +207,15 @@ describe.each([
     expect(wrapper.text()).not.toContain('{app}')
   })
 })
+
+// Le journal suit chaque version publiée, dans les quatre langues (la 1.4.0 y avait été oubliée).
+describe('AboutView — journal des nouveautés à jour', () => {
+  it('commence par la version du paquet, avec les mêmes versions dans les quatre langues', () => {
+    expect(RELEASE_NOTES_FR[0].version).toContain(APP_VERSION)
+    // Les libellés de version se traduisent (« 1.1 à 1.2.3 ») : on compare la forme, entrée par entrée.
+    for (const notes of [RELEASE_NOTES_EN, RELEASE_NOTES_DE, RELEASE_NOTES_ES]) {
+      expect(notes).toHaveLength(RELEASE_NOTES_FR.length)
+      notes.forEach((e, i) => expect(e.notes).toHaveLength(RELEASE_NOTES_FR[i].notes.length))
+    }
+  })
+})

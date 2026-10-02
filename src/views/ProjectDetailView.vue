@@ -56,6 +56,7 @@ import StitchProgress from '@/components/StitchProgress.vue'
 import SkeletonScreen from '@/components/SkeletonScreen.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
+import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 import BadgeComposer from '@/components/BadgeComposer.vue'
 
 const route = useRoute()
@@ -858,6 +859,8 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             <StitchProgress :technique="isCrochet ? 'crochet' : 'knitting'" :done="readerOverview.done" :total="readerOverview.total" />
           </div>
           <button v-if="!isDone" class="btn btn--primary btn--block reader-btn" @click="openReader"><AppIcon name="book" :size="18" /> {{ t('reader.followPattern') }}</button>
+          <!-- Même réglage global que dans le volet d'aide-mémoire du lecteur et les Réglages. -->
+          <div class="rovw-keep"><KeepScreenOnSwitchRow heading-id="project-keep-screen-title" /></div>
           <div v-for="s in readerOverview.sections" :key="s.id" class="rovw">
             <button class="rovw__main" @click="openSection(s)">
               <span class="rovw__ic"><AppIcon :name="s.kind" :size="20" /></span>
@@ -1222,6 +1225,9 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
 .edit-btn { margin-top: var(--sp-5); }
 .list { display: flex; flex-direction: column; gap: var(--sp-2); }
 .subhead { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin: var(--sp-5) 0 var(--sp-2); }
+.rovw-keep { margin: var(--sp-3) 0 var(--sp-4); padding: var(--sp-3) var(--sp-1) 0; border-top: 1px solid var(--line-soft); }
+/* Réglage secondaire : libellé de corps de texte, pas un titre de section. */
+.rovw-keep :deep(.ksos-row__title) { font-family: inherit; font-size: 15px; font-weight: 600; }
 .counters-block { margin-top: var(--sp-6); padding: var(--sp-4) var(--sp-4) var(--sp-3); background: rgba(58, 46, 40, 0.035); border: 1px solid var(--line-soft); border-radius: var(--r-lg); }
 /* En sombre, la teinte encre à 3,5 % (pensée pour un fond crème) devient quasi
    invisible sur --bg déjà très sombre : on bascule sur une touche claire, même

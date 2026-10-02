@@ -113,6 +113,8 @@ export async function resolvePatternImagesFromZip(pattern, byPath, byBase) {
 // Aucun de ces plafonds n'écarte un kit légitime : le format est un `patron.md` (quelques
 // dizaines de Ko) plus ses photos, que `resizeDataUrl` replafonne de toute façon à
 // 1280px/JPEG juste après l'extraction. Ils ne protègent QUE la décompression elle-même.
+// Seule exception : `original.pdf` (PDF source, non replafonné). Au-delà de 50 Mo, il fait
+// refuser tout le kit (`zip-too-big`) ; le convertisseur du site doit rester en dessous.
 const MAX_ZIP_ENTRY_BYTES = 50 * 1024 * 1024
 const MAX_ZIP_TOTAL_BYTES = 150 * 1024 * 1024
 const MAX_ZIP_ENTRIES = 4096
@@ -210,6 +212,13 @@ export async function unzipToPattern(zipBytes) {
   pattern.photos = coverName
     ? [await resizeDataUrl(fileToDataUrl(coverName, bytesToBase64(entries[coverName])))]
     : []
+
+  // 5 bis) PDF d'origine : `original.pdf` (même nom que dans les sauvegardes, cf.
+  // backup/deserialize.js), à la racine ou à côté du patron comme la couverture. Le
+  // convertisseur du site l'y dépose ; sans lui, la galerie ne peut rien prendre dans les
+  // pages du patron (« Depuis le PDF du patron » exige `pattern.pdf`).
+  const pdfName = names.find((n) => n === 'original.pdf') || (mdDir ? names.find((n) => n === `${mdDir}original.pdf`) : undefined)
+  if (pdfName) pattern.pdf = fileToDataUrl('original.pdf', bytesToBase64(entries[pdfName]))
 
   // 6) Sizes : aligné sur LocalPdfImportView.currentPattern — « Taille unique » ne
   // s'affiche PAS comme une taille sur la fiche/carte (sizes vide plutôt que

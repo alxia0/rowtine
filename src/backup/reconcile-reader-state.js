@@ -6,13 +6,15 @@
 // jamais de fausse progression, jamais de perte silencieuse — tout écart est
 // compté dans `report` plutôt que deviné.
 import { stepTextToMd } from '@/utils/pattern-md/line'
+import { isTrackedStep } from '@/utils/reader'
 
 function freshState() {
   // Sortie = modèle vivant PUR (multi-grilles 09/07 + calage 10/07) : trois maps
   // indexées par `section.id`. Plus de `chartRow` nu hérité — `persist()`
   // (ReaderView.vue) ne l'écrit plus, et la migration legacy correspondante a été
-  // retirée le 13/08/2026 (ménage pré-1.0, réserve produit acceptée).
-  return { size: 0, done: {}, counters: {}, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} }
+  // retirée le 13/08/2026 (ménage pré-1.0, réserve produit acceptée). `last` : trace
+  // du dernier geste de progression (intent 2026-09-30), transférée ou jetée plus bas.
+  return { size: 0, done: {}, counters: {}, last: null, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} }
 }
 
 function freshReport() {
@@ -31,6 +33,11 @@ function freshReport() {
     chartFramesLost: 0,
     chartCurtainsKept: 0,
     chartCurtainsLost: 0,
+    // Trace du dernier geste (intent 2026-09-30) : aide à la navigation, pas de la
+    // progression — mais comptée comme tout le reste (loi du module : tout écart
+    // est compté, jamais deviné). Diagnostique, aucune UI requise.
+    lastKept: 0,
+    lastLost: 0,
   }
 }
 
@@ -294,6 +301,44 @@ export function reconcileReaderState(oldReader, oldState, newReader, precomputed
     }
     state.chartCurtains[secId] = curtain
     report.chartCurtainsKept++
+  }
+
+  // --- 6) last : la trace du dernier geste de progression (intent 2026-09-30) ---
+  // Cible de la reprise (« dernier rang travaillé »). Aide à la navigation, pas de la
+  // progression : elle se transfère quand la cible se RETROUVE, se jette sinon — jamais
+  // de cible fabriquée. kind 'step' : même identité section × contenu que done/counters
+  // (l'id d'exécution change dès qu'un step est inséré), et l'étape retrouvée doit être
+  // suivie (jamais atterrir sur une note devenue note). kind 'chart' : la section est
+  // stable par id, même prédicat que le transfert des grilles.
+  const oldLast = safeOldState.last && typeof safeOldState.last === 'object' ? safeOldState.last : null
+  if (oldLast?.kind === 'step' && typeof oldLast.id === 'string') {
+    const sectionId = oldLast.id.split('#')[0]
+    // Garde : un id sans index (`corps`, donnée corrompue à la main) donnerait
+    // Number('') === 0 — un entier valide, qui viserait steps[0] : une cible devinée,
+    // ce que la loi du module interdit. L'index doit exister ET être entier ≥ 0.
+    const idxPart = oldLast.id.slice(sectionId.length + 1)
+    const oldStepIndex = Number(idxPart)
+    const oldSection = oldSectionById.get(sectionId)
+    const oldStep =
+      idxPart !== '' && Number.isInteger(oldStepIndex) && oldStepIndex >= 0 ? oldSection?.steps?.[oldStepIndex] : null
+    const match = oldStep ? resolveMatch(sectionId, textKey(oldStep), oldIndex, newIndex, safeNewReader) : null
+    if (match && isTrackedStep(match.newStep)) {
+      state.last = { kind: 'step', id: `${sectionId}#${match.idx}` }
+      report.lastKept++
+    } else {
+      report.lastLost++
+    }
+  } else if (oldLast?.kind === 'chart' && typeof oldLast.id === 'string') {
+    const sec = newSectionById.get(oldLast.id)
+    if (sec && isChartSection(sec, safeNewReader)) {
+      state.last = { kind: 'chart', id: oldLast.id }
+      report.lastKept++
+    } else {
+      report.lastLost++
+    }
+  } else if (oldLast) {
+    // kind inconnu ou id non textuel : compté perdu, jamais deviné.
+    report.lastLost++
   }
 
   return { state, report }

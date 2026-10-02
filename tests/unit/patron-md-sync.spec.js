@@ -458,7 +458,7 @@ describe('syncPatronMd', () => {
     expect(lus.filter((p) => /film\.mp4$|original\.pdf$/.test(p))).toEqual([])
 
     // Même dossier, image référencée annoncée au-delà du plafond : non lue, signalée manquante.
-    const chartFile = (await storage.readdir(dir)).find((e) => /\.png$/.test(e.name)).name
+    const chartFile = (await storage.readdir(dir)).find((e) => e.name.endsWith('.png')).name
     const baseReaddir = storage.readdir.bind(storage)
     storage.readdir = async (p) =>
       (await baseReaddir(p)).map((e) => (e.name === chartFile ? { ...e, size: 64 * 1024 * 1024 + 1 } : e))

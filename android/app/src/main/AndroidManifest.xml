@@ -68,5 +68,14 @@
          démarrage au boot, pas de service de premier plan). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Exclusion des optimisations de batterie (spec 2026-10-01, RowNotificationPlugin) :
+         demandée à l'activation de la notification du rang en cours, via le dialogue système
+         ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS. C'est elle qui laisse le processus
+         survivre en arrière-plan verrouillé (doze), donc le bouton « Cocher le rang »
+         fonctionner. Sans elle, l'appui est seulement RETENU (RowNotificationReceiver).
+         L'app est hors Play : la politique Play qui encadre cette permission ne s'applique
+         pas. Ne pas la réutiliser pour autre chose. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 </manifest>

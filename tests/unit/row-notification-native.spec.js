@@ -19,6 +19,8 @@ function pluginQuiRejette() {
     requestPermissions: vi.fn(rejet),
     openSettings: vi.fn(rejet),
     takeLaunchProject: vi.fn(rejet),
+    isIgnoringBatteryOptimizations: vi.fn(rejet),
+    requestIgnoreBatteryOptimizations: vi.fn(rejet),
     addListener: vi.fn(rejet),
   }
 }
@@ -136,5 +138,97 @@ describe('row-notification (pont natif)', () => {
     await expect(mod.takeLaunchProject()).resolves.toBeNull()
     await expect(mod.takeLaunchProject()).resolves.toBeNull()
     await expect(mod.takeLaunchProject()).resolves.toBe(42)
+  })
+
+  it('readPendingRowAction : l’appui retenu passe tel quel, l’effacement est délégué', async () => {
+    const plugin = {
+      readPendingRowAction: vi.fn(() => Promise.resolve({ projectId: 7, stepId: 'sec#2', delta: -1 })),
+      clearPendingRowAction: vi.fn(() => Promise.resolve()),
+    }
+    const mod = await importerAvecMock(plugin)
+    await expect(mod.readPendingRowAction()).resolves.toEqual({ projectId: 7, stepId: 'sec#2', delta: -1 })
+    expect(plugin.readPendingRowAction).toHaveBeenCalledTimes(1)
+    await expect(mod.clearPendingRowAction()).resolves.toBeUndefined()
+    expect(plugin.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('readPendingRowAction : rien de retenu (objet vide), rejet du plugin, hors natif : null sans lever', async () => {
+    const vide = await importerAvecMock({ readPendingRowAction: vi.fn(() => Promise.resolve({})) })
+    await expect(vide.readPendingRowAction()).resolves.toBeNull()
+
+    const rejet = await importerAvecMock({ readPendingRowAction: vi.fn(() => Promise.reject(new Error('absent'))) })
+    await expect(rejet.readPendingRowAction()).resolves.toBeNull()
+
+    const hors = await importerAvecMock(
+      { readPendingRowAction: vi.fn(() => Promise.resolve({ stepId: 'x' })) },
+      { natif: false },
+    )
+    await expect(hors.readPendingRowAction()).resolves.toBeNull()
+  })
+
+  it('readPendingRowAction : le tapId est transmis quand le natif en fournit un, absent sinon', async () => {
+    const avec = await importerAvecMock({
+      readPendingRowAction: vi.fn(() => Promise.resolve({ projectId: 7, stepId: 'sec#2', delta: 1, tapId: '17-3' })),
+    })
+    await expect(avec.readPendingRowAction()).resolves.toEqual({ projectId: 7, stepId: 'sec#2', delta: 1, tapId: '17-3' })
+    const sans = await importerAvecMock({
+      readPendingRowAction: vi.fn(() => Promise.resolve({ projectId: 7, stepId: 'sec#2', delta: 1, tapId: '' })),
+    })
+    const lu = await sans.readPendingRowAction()
+    expect(lu).toEqual({ projectId: 7, stepId: 'sec#2', delta: 1 })
+    expect('tapId' in lu).toBe(false)
+  })
+
+  it('ackRowAction : transmet tapId et keep au plugin ; no-op hors natif, sans tapId, plugin absent ou rejet', async () => {
+    const plugin = { ackRowAction: vi.fn(() => Promise.resolve()) }
+    const mod = await importerAvecMock(plugin)
+    await mod.ackRowAction('17-3')
+    expect(plugin.ackRowAction).toHaveBeenLastCalledWith({ tapId: '17-3', keep: false })
+    await mod.ackRowAction('17-4', { keep: true })
+    expect(plugin.ackRowAction).toHaveBeenLastCalledWith({ tapId: '17-4', keep: true })
+    plugin.ackRowAction.mockClear()
+    await expect(mod.ackRowAction('')).resolves.toBeUndefined()
+    await expect(mod.ackRowAction(undefined)).resolves.toBeUndefined()
+    expect(plugin.ackRowAction).not.toHaveBeenCalled()
+
+    const hors = { ackRowAction: vi.fn(() => Promise.resolve()) }
+    const modHors = await importerAvecMock(hors, { natif: false })
+    await expect(modHors.ackRowAction('17-3')).resolves.toBeUndefined()
+    expect(hors.ackRowAction).not.toHaveBeenCalled()
+
+    const rejet = await importerAvecMock({ ackRowAction: vi.fn(() => Promise.reject(new Error('absent'))) })
+    await expect(rejet.ackRowAction('17-3')).resolves.toBeUndefined()
+  })
+
+  it('hors natif : la contrainte batterie n\'existe pas, tout se résout « ignoré »', async () => {
+    const plugin = {
+      isIgnoringBatteryOptimizations: vi.fn(() => Promise.resolve({ ignoring: false })),
+      requestIgnoreBatteryOptimizations: vi.fn(() => Promise.resolve({ ignoring: false, fallback: true })),
+    }
+    const mod = await importerAvecMock(plugin, { natif: false })
+    await expect(mod.isBatteryOptimizationIgnored()).resolves.toEqual({ ignoring: true })
+    await expect(mod.requestIgnoreBatteryOptimizations()).resolves.toEqual({ ignoring: true, fallback: false })
+    expect(plugin.isIgnoringBatteryOptimizations).not.toHaveBeenCalled()
+    expect(plugin.requestIgnoreBatteryOptimizations).not.toHaveBeenCalled()
+  })
+
+  it('en natif : les réponses du plugin passent telles quelles', async () => {
+    const plugin = {
+      isIgnoringBatteryOptimizations: vi.fn(() => Promise.resolve({ ignoring: false })),
+      requestIgnoreBatteryOptimizations: vi.fn(() => Promise.resolve({ ignoring: true, fallback: false })),
+    }
+    const mod = await importerAvecMock(plugin)
+    await expect(mod.isBatteryOptimizationIgnored()).resolves.toEqual({ ignoring: false })
+    await expect(mod.requestIgnoreBatteryOptimizations()).resolves.toEqual({ ignoring: true, fallback: false })
+  })
+
+  it('plugin d\'avant ce lot (méthode absente) ou rejet : lu « ignoré », jamais de blocage fantôme', async () => {
+    const absent = await importerAvecMock({}) // ni l'une ni l'autre : call() rend undefined
+    await expect(absent.isBatteryOptimizationIgnored()).resolves.toEqual({ ignoring: true })
+    await expect(absent.requestIgnoreBatteryOptimizations()).resolves.toEqual({ ignoring: true, fallback: false })
+
+    const rejet = await importerAvecMock(pluginQuiRejette())
+    await expect(rejet.isBatteryOptimizationIgnored()).resolves.toEqual({ ignoring: true })
+    await expect(rejet.requestIgnoreBatteryOptimizations()).resolves.toEqual({ ignoring: true, fallback: false })
   })
 })

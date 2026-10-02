@@ -74,9 +74,14 @@ export const useSettingsStore = defineStore('settings', () => {
   // à l'intérieur d'une fonction pure). Portée : la grille calendaire, les barres par jour de
   // semaine et le total hebdomadaire de l'Accueil — « tout ce qui parle de semaine ».
   const weekStart = ref(1) // 0 | 1
-  // Notification du rang en cours (29/09) : active par défaut ; `Asked` retient que la
-  // permission Android a déjà été demandée une fois (pas de nouvelle demande en boucle).
-  const rowNotification = ref(true)
+  // Notification du rang en cours (29/09 ; opt-in depuis le 01/10 — intent Alexia) :
+  // désactivée par défaut. L'activation passe par la pop-up d'onboarding
+  // (RowNotifOnboardingDialog) qui obtient les DEUX autorisations (afficher des
+  // notifications, tourner en arrière-plan) AVANT d'écrire true : le réglage true
+  // implique toujours les deux, l'interrupteur de l'app ne ment jamais.
+  // `Asked` retient que la permission Android a déjà été demandée une fois (pas de
+  // nouvelle demande en boucle).
+  const rowNotification = ref(false)
   const rowNotificationAsked = ref(false)
   // Écran gardé allumé pendant le suivi d'un projet (30/09) : actif par défaut (opt-out,
   // décision de Julien du 30/09). Préférence, elle part dans la sauvegarde. Appliquée par le
@@ -154,7 +159,7 @@ export const useSettingsStore = defineStore('settings', () => {
     currency.value = storedCurrency ?? DEFAULT_CURRENCY
     weekStart.value = storedWeekStart ?? 1
     badgeColorHistory.value = storedBadgeColorHistory ?? []
-    rowNotification.value = storedRowNotification ?? true
+    rowNotification.value = storedRowNotification ?? false
     rowNotificationAsked.value = storedRowNotificationAsked ?? false
     keepScreenOn.value = storedKeepScreenOn ?? true
     loaded.value = true

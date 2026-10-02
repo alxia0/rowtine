@@ -523,6 +523,37 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     expect(p.activeSize).toBe('L') // synchro taille active du projet
   })
 
+  // La bascule « section faite » de la fiche projet écrit `sectionSnap` dans readerState
+  // (instantané « décochage sans perte », section-mark.js). persist() du lecteur reconstruit
+  // un snapshot en whitelist : sans report, la première coche détruirait l'instantané en
+  // silence. (intent 2026-09-30-reprise — défaut découvert au passage.)
+  it('persist() préserve sectionSnap écrit hors lecteur', async () => {
+    const { projectId } = await seedProject(FIX_READER, {
+      readerState: { done: {}, counters: {}, sectionSnap: { s1: { done: { 's1#1': true }, counters: { 's1#2': 1 } } } },
+    })
+    const w = mountReader()
+    await settle()
+    await w.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    await settle()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.done['s1#0']).toBe(true)
+    expect(p.readerState.sectionSnap).toEqual({ s1: { done: { 's1#1': true }, counters: { 's1#2': 1 } } })
+  })
+
+  it('persist() n\'invente pas de sectionSnap quand il n\'y en avait pas', async () => {
+    const { projectId } = await seedProject()
+    const w = mountReader()
+    await settle()
+    await w.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    await settle()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.sectionSnap).toBeUndefined()
+  })
+
   // Une taille enregistrée hors des tailles du patron (patron changé) ne doit pas être restaurée.
   it('readerState.size hors bornes : aucune taille retenue, activeSize jamais écrit undefined', async () => {
     const { projectId } = await seedProject(FIX_READER, { readerState: { size: 5 } })
@@ -918,5 +949,182 @@ describe('i18n reader — collision « Reprendre » levée (chip navigation vs c
   it('le chrono garde bien « Reprendre »/« Resume » (c’est le mot juste pour un minuteur)', () => {
     expect(fr.reader.chronoResume).toBe('Reprendre')
     expect(en.reader.chronoResume).toBe('Resume')
+  })
+})
+
+/* ── Reprise sur le dernier geste (intent 2026-09-30) ──
+   Julie tricote hors ordre : à la réouverture, le lecteur atterrit sur la dernière place
+   travaillée (readerState.last) avec une pill explicative temporaire, l'étape en cours (puce,
+   surlignage) suit le dernier geste, et le recentrage après cochage ne replie jamais vers le
+   premier non fait du patron. Héritage (pas de last) : comportement historique exact. */
+describe('ReaderView — reprise sur le dernier geste', () => {
+  const flushPersist = async () => {
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    await settle()
+  }
+
+  it('cocher puis décocher posent la trace du dernier geste, persistée', async () => {
+    const { projectId } = await seedProject()
+    const w = mountReader()
+    await settle()
+    await w.findAll('.rcheck')[1].trigger('click') // s1#1
+    await flushPersist()
+    let p = await db.projects.get(projectId)
+    expect(p.readerState.last).toEqual({ kind: 'step', id: 's1#1' })
+    await w.findAll('.rcheck')[1].trigger('click') // décoche : même trace, le geste compte
+    await flushPersist()
+    p = await db.projects.get(projectId)
+    expect(p.readerState.last).toEqual({ kind: 'step', id: 's1#1' })
+  })
+
+  it('compteur plus ET moins posent la trace du dernier geste', async () => {
+    const { projectId } = await seedProject()
+    const w = mountReader()
+    await settle()
+    const counter = w.findAll('.rstep--rep')[0]
+    await counter.findAll('.rcount__btn')[1].trigger('click') // plus
+    await counter.findAll('.rcount__btn')[0].trigger('click') // moins
+    await flushPersist()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.last).toEqual({ kind: 'step', id: 's1#2' })
+  })
+
+  it('rang de grille et répétition de grille posent la trace (kind chart)', async () => {
+    const readerRep = {
+      ...FIX_READER,
+      chart: { ...FIX_READER.chart, reps: 2 },
+    }
+    const { projectId } = await seedProject(readerRep)
+    const w = mountReader()
+    await settle()
+    await w.find('.chart__next').trigger('click') // rang de grille suivant
+    await flushPersist()
+    let p = await db.projects.get(projectId)
+    expect(p.readerState.last).toEqual({ kind: 'chart', id: 's1' })
+    const repNext = w.findAll('.chart__btn').find((b) => b.attributes('aria-label') === tk('reader.chart.repNext'))
+    await repNext.trigger('click') // répétition suivante
+    await flushPersist()
+    p = await db.projects.get(projectId)
+    expect(p.readerState.last).toEqual({ kind: 'chart', id: 's1' })
+  })
+
+  it('à la réouverture : atterrissage sur le dernier rang travaillé + badge', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    const w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#1')
+    expect(scrollCalls.at(-1).opts).toEqual({ behavior: 'auto', block: 'center' })
+    expect(w.find('.rbadge').text()).toBe(tk('reader.resumeBadgeStep'))
+  })
+
+  it('à la réouverture : dernière grille travaillée → carte du diagramme + badge chart', async () => {
+    await seedProject(FIX_READER, { readerState: { chartRows: { s1: 3 }, last: { kind: 'chart', id: 's1' } } })
+    const w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rchart-s1')
+    expect(w.find('.rbadge').text()).toBe(tk('reader.resumeBadgeChart'))
+  })
+
+  it('progression sans trace du dernier geste (héritage) → chemin historique, pas de badge', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#0': true } } })
+    const w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#1') // premier non coché, comme avant
+    expect(w.find('.rbadge').exists()).toBe(false)
+  })
+
+  it('?section= garde la priorité ; cible de section disparue → repli sur le dernier geste', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    nav.route = { name: 'project-read', params: nav.route.params, query: { section: 's1' } }
+    let w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rsec-s1')
+    expect(w.find('.rbadge').exists()).toBe(false)
+    wrappers.pop().unmount()
+    // Titre renommé par une correction : l'id DOM de la cible change, la section visée n'est plus trouvée.
+    nav.route = { name: 'project-read', params: nav.route.params, query: { section: 'section-absente' } }
+    w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#1')
+    expect(w.find('.rbadge').text()).toBe(tk('reader.resumeBadgeStep'))
+  })
+
+  it('patron entièrement fait : atterrit quand même sur le dernier geste + badge', async () => {
+    await seedProject(FIX_READER, {
+      readerState: { done: { 's1#0': true, 's1#1': true }, counters: { 's1#2': 2 }, last: { kind: 'step', id: 's1#1' } },
+    })
+    const w = mountReader()
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#1')
+    expect(w.find('.rbadge').exists()).toBe(true)
+  })
+
+  it('le badge s\'efface dès qu\'un geste de progression survient', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    const w = mountReader()
+    await settle()
+    expect(w.find('.rbadge').exists()).toBe(true)
+    await w.findAll('.rcheck')[0].trigger('click')
+    expect(w.find('.rbadge').exists()).toBe(false)
+  })
+
+  // fake-indexeddb commite ses transactions via setTimeout : on ne passe l'horloge en fake
+  // QU'APRÈS que montage et Dexie soient stabilisés, et on n'y fait aucune écriture pendant —
+  // sinon les transactions en vol meurent avec l'horloge fake et empoisonnent tous les tests
+  // suivants (constaté : « Hook timed out » en cascade). Le badge du montage a été armé sous
+  // vraies horloge : la puce le réarme DANS l'horloge fake (un clic, zéro écriture).
+  it('le badge s\'efface après 5 s', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    const w = mountReader()
+    await settle()
+    vi.useFakeTimers()
+    try {
+      await w.find('.chip--resume').trigger('click')
+      expect(w.find('.rbadge').exists()).toBe(true)
+      vi.advanceTimersByTime(5000)
+      await flushPromises()
+      expect(w.find('.rbadge').exists()).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('visite guidée : jamais de badge, chemin d\'atterrissage historique', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    nav.route = { name: 'project-read', params: nav.route.params, query: { tour: '1' } }
+    const w = mountReader()
+    await settle()
+    expect(w.find('.tour__bubble').exists()).toBe(true)
+    expect(w.find('.rbadge').exists()).toBe(false)
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#2') // étape en cours (historique), pas le dernier geste
+  })
+
+  it('recentrage après cochage vise la première non faite APRÈS le dernier geste, sans repli', async () => {
+    // Tout est fait après s1#1 : cocher s1#0 ne doit provoquer AUCUN nouveau défilement
+    // (le repli « premier non fait du patron » est réservé à l'étape en cours, pas au recentrage).
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, counters: { 's1#2': 2 } } })
+    const w = mountReader()
+    await settle()
+    const afterMount = scrollCalls.length
+    await w.findAll('.rcheck')[0].trigger('click') // coche s1#0 : plus rien après s1#0... s1#1/s1#2 déjà faits
+    await settle()
+    expect(scrollCalls.length).toBe(afterMount)
+    // Cas ordinaire : cocher s1#0 sur un patron presque vierge → recentrage sur s1#1.
+    await seedProject(FIX_READER, { readerState: { done: {} } })
+    const w2 = mountReader()
+    await settle()
+    await w2.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#1')
+  })
+
+  it('puce « Revenir à mon étape » : centrage sur l\'étape en cours + badge', async () => {
+    await seedProject(FIX_READER, { readerState: { done: { 's1#1': true }, last: { kind: 'step', id: 's1#1' } } })
+    const w = mountReader()
+    await settle()
+    await w.find('.chip--resume').trigger('click')
+    expect(scrollCalls.at(-1).id).toBe('rstep-s1#2')
+    expect(w.find('.rbadge').text()).toBe(tk('reader.resumeBadgeStep'))
   })
 })

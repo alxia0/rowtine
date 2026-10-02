@@ -72,6 +72,54 @@ describe('findSizeVectors', () => {
   })
 })
 
+// « - » (ou « – ») tient la place d'une taille non concernée : il compte comme une valeur.
+describe('findSizeVectors — tiret pour une taille non concernée (Juna V Neck)', () => {
+  it('lit le tiret comme une valeur, seul ou entre parenthèses', () => {
+    const v = findSizeVectors('(= 11th augmentation pour le col en V = - (-) - (38) 42 (46) 48 m pour le dev-G)')
+    expect(v).toHaveLength(1)
+    expect(v[0].values).toEqual(['-', '-', '-', '38', '42', '46', '48'])
+    expect(findSizeVectors('Monter – (40) 42 (–) 46 m.')[0].values).toEqual(['–', '40', '42', '–', '46'])
+  })
+  it('un tiret suivi d’un nombre reste une puce ou une plage, jamais une valeur', () => {
+    expect(findSizeVectors('- 20 (22) 24 m')[0].values).toEqual(['20', '22', '24'])
+    expect(findSizeVectors('80-85 (85-90) 90-95 cm')[0].values).toEqual(['80-85', '85-90', '90-95'])
+  })
+  it('lit aussi le tiret final (Dorthea, 9 tailles)', () => {
+    expect(findSizeVectors('Taille 1 (-) - (-) - (-) - (-) -')[0].values).toEqual(['1', '-', '-', '-', '-', '-', '-', '-', '-'])
+  })
+  it('un tiret de ponctuation après la suite n’en fait pas partie', () => {
+    expect(findSizeVectors('Rangs 20 (22) 24 - travaillez en PDBR')[0].values).toEqual(['20', '22', '24'])
+    expect(findSizeVectors('= - (-) - (38) 42 (46) 48 - suite')[0].values).toEqual(['-', '-', '-', '38', '42', '46', '48'])
+  })
+  it('sans tiret dans une parenthèse, l’ancienne lecture reste (amigurumi, plage de rangs)', () => {
+    expect(findSizeVectors('Tour 2: aug - (12)')).toEqual([])
+    expect(findSizeVectors('Rangs 7 - (18, 22, 26) (30, 34, 38): rép rangs 3 - 6.')[0].values)
+      .toEqual(['18', '22', '26', '30', '34', '38'])
+  })
+  it('forme Hobbii, virgules avec ou sans espace dans les parenthèses', () => {
+    const huit = ['17', '18', '-', '-', '3', '-', '-', '-']
+    expect(findSizeVectors('tricoter (17, 18, -, -) (3, -, -, -) m end')[0].values).toEqual(huit)
+    expect(findSizeVectors('tricoter (17,18,-,-) (3,-,-,-) m end')[0].values).toEqual(huit)
+  })
+  it('un tiret typographique suivi d’un mot après la suite est de la ponctuation', () => {
+    expect(findSizeVectors('36 (38) 40 (-) – suite')[0].values).toEqual(['36', '38', '40', '-'])
+  })
+  it('des tirets sans aucun nombre ne font pas un vecteur', () => {
+    expect(findSizeVectors('texte - (-) - suite')).toEqual([])
+  })
+  it('ne backtrack pas sur une longue suite de tirets et de groupes non fermés (ReDoS)', () => {
+    const evil = '1 ' + '- (- '.repeat(300)
+    const t0 = performance.now()
+    findSizeVectors(evil)
+    expect(performance.now() - t0).toBeLessThan(500)
+  })
+  it('applySizeVectors : le vecteur à tirets de la bonne longueur devient un repère', () => {
+    const { t, c } = applySizeVectors('col en V = - (-) - (38) 42 (46) 48 m', 7)
+    expect(t).toBe('col en V = {{0}} m')
+    expect(c).toEqual([['-', '-', '-', '38', '42', '46', '48']])
+  })
+})
+
 // Vecteurs DROPS imbriqués (témoin pennine-es-3cb3c709, corrigé 04/09) : la
 // convention DROPS des patrons à nombreuses tailles écrit les vecteurs par groupes de 4
 // séparés par des parenthèses — « 6-7-8-9 (10-11-12-13) 14-15-16-17 » = 12 valeurs. Avant

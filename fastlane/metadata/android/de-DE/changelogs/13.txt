@@ -1,0 +1,4 @@
+Benachrichtigung beim Arbeiten: Ein Tipp auf eine Schaltfläche geht nicht verloren, auch wenn Android die App geschlossen oder eingefroren hat.
+Die Benachrichtigung wird nur auf Wunsch aktiviert, mit einem Pop-up für die Hintergrunderlaubnis.
+Beim Öffnen eines Projekts geht es bei der zuletzt bearbeiteten Reihe weiter: Eine Anleitung lässt sich in beliebiger Reihenfolge abarbeiten.
+Projektseite: Schalter, um den Bildschirm während der Arbeit anzulassen.

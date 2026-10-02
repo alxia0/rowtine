@@ -529,9 +529,9 @@ informations que le tableau ci-dessus (les catégories, et les huit sous-catégo
 d'aide-mémoire). Tu peux la déplier à tout moment sans quitter ton travail, sans avoir à revenir sur ce guide en pleine correction. (Le guide, lui, se lit
 *avant* d'ouvrir l'écran, pour savoir si tu veux t'y lancer.)
 
-![Sous les 3 étapes, le tableau Catégorie / Ce que ça donne dans ton projet aligne Étape (une case à cocher pendant le tricot), puis Note, Aide-mémoire et Compteur, chacune avec sa définition](images/fr/04d-correction-aide.webp)
+![Dans l'aide dépliée, la section Les bandes « Diagrammes » et « Photos du patron » décrit chaque bande, dont celle des photos en haut de l'écran, puis le tableau Catégorie / Ce que ça donne commence](images/fr/04d-correction-aide.webp)
 
-*L'aide « Comment corriger le patron » dépliée : ses 3 étapes, puis le début du tableau « À quoi sert chaque catégorie ».*
+*L'aide « Comment corriger le patron » dépliée : la section sur les bandes « Diagrammes » et « Photos du patron » (cette dernière est en haut de l'écran), puis le début du tableau « À quoi sert chaque catégorie ».*
 
 **Comment changer la catégorie d'une ligne :**
 
@@ -592,9 +592,9 @@ rejoint les photos du patron, prête à être insérée ou suivie.
 
 **Le menu d'une image.** Dans le texte de l'éditeur, un appui sur une image
 ouvre un petit menu immédiat : la **suivre comme diagramme** si elle ne l'est pas encore, ou **changer son type** sinon, la rabaisser au rang de simple illustration (**Juste une image**), ou l'**envoyer vers les photos** du patron.
-Dans la bande « Photos du patron », chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit.
+Dans la bande « Photos du patron », tout en haut de l'écran de correction, chaque image se supprime, s'insère dans le texte ou se suit comme diagramme : les trois gestes au même endroit. Pour l'insérer, pose d'abord le curseur sur une étape du texte : la bande te dit alors sous quelle étape l'image ira.
 
-![En haut de l'écran de correction, les deux flèches et le bouton « Modifier le texte », la barre de catégories, puis la ligne de note « Astuce : faire sécher le bonnet humide sur un saladier pour arrondir la calotte »](images/fr/04e-correction-diagrammes.webp)
+![Sous la barre de catégories, la bande Diagrammes (1) dépliée montre Corps et torsade, son état Diagramme interactif et les boutons Changer le type, Juste une image et Envoyer vers les photos](images/fr/04e-correction-diagrammes.webp)
 
 *La bande « Diagrammes (1) » dépliée : la section « Corps et torsade », son état actuel (« Diagramme interactif ») et les boutons « Changer le type » et « Juste une image ».*
 
@@ -893,20 +893,44 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
   - **Un dossier de sauvegarde ne sert qu'à un seul appareil.** Le poser dans un
     dossier synchronisé pour en avoir une copie ailleurs est une bonne idée ; t'en servir depuis un téléphone **et** une tablette n'en est pas une : chacun effacerait le travail de l'autre. Pour un second appareil, il lui faut son propre
     dossier.
-- **Pendant le suivi d'un patron** : deux interrupteurs, **actifs
-  d'office**. Coupe-les ici si tu n'en veux pas.
-  - **Rang en cours dans les notifications** : tant que le lecteur d'un projet
-    est ouvert, une notification montre ton étape en cours et la suivante. Elle
-    te laisse avancer sans rouvrir l'app : « Cocher le rang » pour une étape, un
-    bouton moins et un bouton plus autour de « Répétition 4 / 8 » pour un
-    compteur, « Diagramme traité » pour le rappel d'un diagramme. Android te
-    demande une seule fois l'autorisation d'afficher des notifications, à la
-    première ouverture du lecteur ; si tu l'as refusée, les Réglages te le
-    signalent et t'ouvrent les paramètres d'Android pour la donner.
+- **Pendant le suivi d'un patron** : l'écran reste allumé **d'office**, et la
+  notification du rang en cours s'active **quand tu la demandes**.
+  - **Rang en cours dans les notifications** : tu l'actives dans les Réglages.
+    Tant que le lecteur d'un projet est ouvert, une notification montre ton
+    étape en cours et la suivante, et te laisse avancer sans rouvrir l'app :
+    « Cocher le rang » pour une étape, un bouton moins et un bouton plus autour
+    de « Répétition 4 / 8 » pour un compteur, « Diagramme traité » pour le
+    rappel d'un diagramme. À l'activation, une pop-up t'explique le seul réglage
+    qui rend le bouton fiable, et Android te demande l'autorisation
+    d'afficher des notifications (une seule fois), puis celle de laisser {app}
+    tourner en arrière-plan. Sans elle, Android ferme {app} au bout d'un
+    moment et le bouton ne répond plus. Si tu refuses, la notification reste
+    désactivée ; tu la réactives quand tu veux dans les Réglages, où une ligne
+    signale aussi une autorisation retirée plus tard.
+    Si Android ferme ou fige quand même {app} en arrière-plan, ce qui arrive vite sur
+    certains téléphones, un appui sur un bouton de la notification n'est pas
+    perdu : la notification le retient et t'annonce
+    « Appui retenu » ; le lecteur l'applique à la prochaine ouverture du
+    projet, si l'étape visée est toujours l'étape en cours. Sur certaines
+    marques, un réglage supplémentaire peut être nécessaire ; les noms exacts
+    varient selon la marque et la version d'Android :
+    **Pixel et Android d'origine**, Paramètres > Applications > {app} >
+    Batterie > Sans restriction ; **Samsung**, Paramètres > Applications >
+    {app} > Batterie > Non optimisée ; **Xiaomi**, Paramètres > Applications >
+    Gérer les applications > {app}, Démarrage automatique activé, économiseur
+    de batterie sur Aucune restriction, et {app} verrouillée dans les apps
+    récentes ; **Oppo, Realme et OnePlus**, Paramètres > Applications >
+    Gestion des applications > {app}, Autorisation de lancement avec Démarrage
+    automatique et Démarrage indirect, puis Batterie > Autoriser l'activité en
+    arrière-plan ; **Huawei**, Paramètres > Applications > Applications >
+    {app} > Batterie > Lancement de l'app > Gestion manuelle, avec les trois
+    commutateurs.
   - **Garder l'écran allumé pendant le suivi** : l'écran ne se met pas en
     veille tant que le lecteur d'un projet est ouvert, même si tu ne touches
     pas ton appareil pendant de longues minutes, aiguilles en main. Il retrouve
-    sa mise en veille habituelle dès que tu quittes le lecteur.
+    sa mise en veille habituelle dès que tu quittes le lecteur. C'est le réglage
+    d'office ; tu le coupes dans les Réglages, ou sans quitter le suivi, dans le
+    volet d'aide-mémoire du lecteur qui porte le même interrupteur.
 - **Aide** : « Revoir la visite guidée » rouvre le bonnet d'exemple dans le
   lecteur avec ses bulles d'explication, et le recrée si tu l'as supprimé.
 - **Contribuer** : lien vers le code source (l'app est open source), et deux autres

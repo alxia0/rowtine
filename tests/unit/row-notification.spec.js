@@ -33,6 +33,8 @@ describe('buildRowNotification', () => {
     expect(p.channelName).toBe(t('rowNotif.channel'))
     expect(p.closedTitle).toBe(t('rowNotif.closedTitle'))
     expect(p.closedText).toBe(t('rowNotif.closedText'))
+    expect(p.pendingTitle).toBe(t('rowNotif.pendingTitle'))
+    expect(p.pendingText).toBe(t('rowNotif.pendingText'))
   })
 
   it('sans taille choisie, toutes les tailles', () => {
@@ -293,5 +295,47 @@ describe('canApplyPendingRowTarget', () => {
     expect(canApplyPendingRowTarget({ ...ok, startupDone: false })).toBe(false)
     expect(canApplyPendingRowTarget({ ...ok, onboarded: false })).toBe(false)
     expect(canApplyPendingRowTarget({ ...ok, activeNotice: 'folderGate' })).toBe(false)
+  })
+})
+
+/* ── La notification suit le dernier geste (intent 2026-09-30) ──
+   Julie tricote hors ordre : la notification doit proposer le rang qui suit SON dernier
+   cochage (ou rester sur son compteur en cours), pas le premier non coché du patron. Sans
+   `last` (progression héritée) : comportement historique exact. */
+describe('buildRowNotification — suit le dernier geste', () => {
+  it('Julie : dernier coché au milieu de SA section → rang suivant dans SA section, pas le premier non fait du patron', () => {
+    // Sans last : premier non coché = devant#0. Avec last (dos#0 coché) : dos#1.
+    const legacy = build(reader, { size: 0, done: { 'presentation#0': true, 'dos#0': true } })
+    expect(legacy.stepId).toBe('devant#0')
+    const julie = build(reader, {
+      size: 0,
+      done: { 'presentation#0': true, 'dos#0': true },
+      last: { kind: 'step', id: 'dos#0' },
+    })
+    expect(julie.kind).toBe('row')
+    expect(julie.stepId).toBe('dos#1')
+    expect(julie.title).toBe(t('rowNotif.title', { index: 2, total: 2, section: 'Dos' }))
+  })
+
+  it('compteur en cours : la notification reste sur le compteur, pas sur ce qui le suit', () => {
+    // Sans last, l'étape en cours serait dos#0 (premier non coché). Avec last = compteur à
+    // 3/8 : la notification reste le stepper du compteur.
+    const legacy = build(mixed, { size: 0, done: {}, counters: { 'dos#1': 3 } })
+    expect(legacy.stepId).toBe('dos#0')
+    const julie = build(mixed, { size: 0, done: {}, counters: { 'dos#1': 3 }, last: { kind: 'step', id: 'dos#1' } })
+    expect(julie.kind).toBe('counter')
+    expect(julie.stepId).toBe('dos#1')
+    expect(julie.counter.label).toBe(t('rowNotif.counterLabel', { count: 3, total: 8 }))
+  })
+
+  it('compteur atteint puis dernier geste dessus : passe à ce qui suit dans la section', () => {
+    const p = build(mixed, { size: 0, done: { 'dos#0': true }, counters: { 'dos#1': 8 }, last: { kind: 'step', id: 'dos#1' } })
+    expect(p.kind).toBe('row')
+    expect(p.stepId).toBe('dos#2')
+  })
+
+  it('last de kind chart ou inexploitable : comportement historique', () => {
+    expect(build(mixed, { size: 0, done: {}, last: { kind: 'chart', id: 'motif' } }).stepId).toBe('dos#0')
+    expect(build(mixed, { size: 0, done: {}, last: { kind: 'step', id: 'perdu#0' } }).stepId).toBe('dos#0')
   })
 })

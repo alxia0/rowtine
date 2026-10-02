@@ -2952,10 +2952,10 @@
         {
           "type": "image",
           "src": "04d-correction-aide",
-          "alt": "Below the 3 steps, the Category / What it becomes in your project table lines up Step (a checkbox to tick as you knit), then Note, Reference, Counter and Section, each with its own definition",
+          "alt": "In the unfolded help, the section The “Diagrams” and “Pattern photos” strips describes each strip, the photos one sitting at the top of the screen, then the Category / What it becomes table begins",
           "caption": [
             {
-              "text": "The \"How to correct the pattern\" help unfolded: its 3 steps, then the start of the \"What each category does\" table.",
+              "text": "The \"How to correct the pattern\" help unfolded: the section on the \"Diagrams\" and \"Pattern photos\" strips (the latter sits at the top of the screen), then the start of the \"What each category does\" table.",
               "bold": false,
               "italic": false
             }
@@ -3351,7 +3351,7 @@
               "italic": false
             },
             {
-              "text": ". In the \"Pattern photos\" band, every image can be deleted, inserted into the text, or followed as a chart: the three gestures in the same place.",
+              "text": ". In the \"Pattern photos\" band, at the very top of the correction screen, every image can be deleted, inserted into the text, or followed as a chart: the three gestures in the same place. To insert one, first place the cursor on a step of the text: the band then tells you which step the image will go under.",
               "bold": false,
               "italic": false
             }
@@ -3360,7 +3360,7 @@
         {
           "type": "image",
           "src": "04e-correction-diagrammes",
-          "alt": "Under the category bar, a clipped tick line and then Weave in ends on the wrong side, followed by the note line Tip: block the damp beanie over a bowl to round out the crown, above Cancel and Save",
+          "alt": "Under the category bar, the unfolded Diagrams (1) strip shows the Body and cable chart, its state Interactive chart, and the buttons Change type, Just an image and Send to photos",
           "caption": [
             {
               "text": "The \"Diagrams (1)\" banner unfolded: the \"Body and cable\" section, where it currently stands (\"Interactive chart\") and the \"Change type\" and \"Just an image\" buttons.",
@@ -5245,17 +5245,27 @@
                   "italic": false
                 },
                 {
-                  "text": ": two switches, ",
+                  "text": ": the screen stays on ",
                   "bold": false,
                   "italic": false
                 },
                 {
-                  "text": "on by default",
+                  "text": "by default",
                   "bold": true,
                   "italic": false
                 },
                 {
-                  "text": ". Turn them off here if you don't want them.",
+                  "text": ", and the current-row notification turns on ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "when you ask for it",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
                   "bold": false,
                   "italic": false
                 }
@@ -5271,7 +5281,57 @@
                         "italic": false
                       },
                       {
-                        "text": ": while a project's reader is open, a notification shows your current step and the next one. It lets you move on without reopening the app: \"Check off row\" for a step, a minus button and a plus button around \"Repeat 4 / 8\" for a counter, \"Chart done\" for a chart reminder. Android asks you only once for permission to show notifications, the first time you open the reader; if you refused, Settings tell you so and open Android's settings for you to grant it.",
+                        "text": ": you turn it on in Settings. While a project's reader is open, a notification shows your current step and the next one, and lets you move on without reopening the app: \"Check off row\" for a step, a minus button and a plus button around \"Repeat 4 / 8\" for a counter, \"Chart done\" for a chart reminder. When you turn it on, a pop-up explains the one setting that makes the button reliable, and Android asks you for permission to show notifications (only once), then for permission to let {app} run in the background. Without it, Android closes {app} after a while and the button stops responding. If you refuse, the notification stays off; you can turn it back on whenever you like in Settings, where a line also flags a permission withdrawn later. If Android closes or freezes {app} in the background anyway, which happens quickly on some phones, a tap on a notification button is not lost: the notification keeps it and tells you \"Tap saved\"; the reader applies it the next time you open the project, if the targeted step is still the current one. On some brands, an extra setting may be needed; exact names vary by brand and Android version: ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Google Pixel and stock Android",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ", Settings > Apps > {app} > Battery > Unrestricted; ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Samsung",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ", Settings > Apps > {app} > Battery > Not optimized; ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Xiaomi",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ", Settings > Apps > Manage apps > {app}, Autostart on, Battery saver set to No restrictions, and {app} pinned in Recents; ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Oppo, Realme and OnePlus",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ", Settings > Apps > App management > {app}, Launch permission with Auto-launch and Secondary launch, then Battery > Allow background activity; ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "Huawei",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": ", Settings > Apps > Apps > {app} > Battery > App launch > Manage manually, with all three switches.",
                         "bold": false,
                         "italic": false
                       }
@@ -5286,7 +5346,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": the screen doesn't go to sleep while a project's reader is open, even if you don't touch your device for long minutes, needles in hand. It goes back to its usual sleep timer as soon as you leave the reader.",
+                        "text": ": the screen doesn't go to sleep while a project's reader is open, even if you don't touch your device for long minutes, needles in hand. It goes back to its usual sleep timer as soon as you leave the reader. This is the default setting; you turn it off in Settings, or without leaving the tracking, in the reader's memo panel, which carries the same switch.",
                         "bold": false,
                         "italic": false
                       }

@@ -2,6 +2,16 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.4.1]
+
+- Tracking notification: a button tap is kept even if Android has closed or
+  frozen the app.
+- Notification turned on only on request, with a background permission
+  pop-up (replaces "on by default").
+- Reopening a project lands on the last row you worked on: a pattern can be
+  worked out of order.
+- Project page: a "Keep the screen on" switch, available while you work.
+
 ## [1.4.0]
 
 - Stitch memo: basic and common knitting and crochet techniques (cast-ons,

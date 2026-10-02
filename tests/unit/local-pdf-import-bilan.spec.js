@@ -85,9 +85,9 @@ describe('bloc de réussite : bilan du patron', () => {
     const { w } = mountViewWithSavedId(20)
     await pick(w)
     const texts = tileTexts(w)
-    expect(texts.some((t) => /^2 /.test(t) && t.includes('section'))).toBe(true) // 2 sections
-    expect(texts.some((t) => /^5 /.test(t) && t.includes('étape'))).toBe(true) // 3 + 2 étapes
-    expect(texts.some((t) => /^2 /.test(t) && t.includes('taille'))).toBe(true) // 2 tailles
+    expect(texts.some((t) => t.startsWith('2 ') && t.includes('section'))).toBe(true) // 2 sections
+    expect(texts.some((t) => t.startsWith('5 ') && t.includes('étape'))).toBe(true) // 3 + 2 étapes
+    expect(texts.some((t) => t.startsWith('2 ') && t.includes('taille'))).toBe(true) // 2 tailles
   })
 
   it('la tuile diagrammes n’apparaît que si le patron en a au moins un', async () => {
@@ -110,7 +110,7 @@ describe('bloc de réussite : bilan du patron', () => {
     const { w: avecDiagramme } = mountViewWithSavedId(22)
     await pick(avecDiagramme)
     const texts = tileTexts(avecDiagramme)
-    expect(texts.some((t) => /^1 /.test(t) && t.includes('diagramme'))).toBe(true)
+    expect(texts.some((t) => t.startsWith('1 ') && t.includes('diagramme'))).toBe(true)
   })
 
   it('taille unique : la tuile affiche « 1 » et le libellé dédié, pas le pluriel générique', async () => {

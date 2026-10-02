@@ -69,6 +69,45 @@ const VEC_RE = new RegExp(
 )
 const NUM_RE = new RegExp(NUM, 'g')
 
+// Tiret qui TIENT LA PLACE d'une taille non concernée (« = - (-) - (38) 42 (46) 48 m »,
+// Juna V Neck ; « (17, 18, -, -) (3, -, -, -) », Hobbii) : il compte comme une valeur.
+// Grammaire À PART de VEC_RE, qui reste inchangé : mesuré sur le corpus (30/09), un tiret
+// admis partout fabriquait des vecteurs fictifs (amigurumi « aug - (12) », plage
+// « Rangs 7 - (18, 22, 26) » lue comme la valeur 7 puis « - »). Gardes :
+//  - jamais suivi d'un chiffre (« - 20 (22) » est une puce, « 80 - 85 » une plage, déjà
+//    lue par les nombres) : disjoint des nombres, donc aucune partition à explorer ;
+//  - jamais précédé d'un nombre (« 7 - (18…) » est une plage, « 24 - travaillez » de la
+//    ponctuation) ni collé à un mot (« dev-G ») ; un tiret final après une parenthèse
+//    « (-) - (-) - » reste lu (Dorthea, 9 tailles) ;
+//  - le match n'est retenu que s'il porte un tiret DANS un groupe et au moins un nombre
+//    (cf. findSizeVectors) ; il remplace alors les vecteurs de VEC_RE qu'il contient.
+const DASH_LB = String.raw`(?<![\wÀ-ɏ]|\d\s*)`
+const DASH = String.raw`${DASH_LB}[-–—](?!\s*\d)`
+// Hors parenthèses, un tiret TYPOGRAPHIQUE suivi d'un mot (« (-) – suite ») est de la
+// ponctuation. Le tiret simple reste lu (« (-) - fois », Dorthea) : rien ne le distingue
+// de « (-) - travaillez », limite assumée (la suite n'a alors pas le bon nombre de tailles
+// et reste en texte, comme avant).
+const FREE_DASH = String.raw`${DASH_LB}(?:-|[–—](?!\s*[A-Za-zÀ-ɏ]))(?!\s*\d)`
+const DASHED_VAL = String.raw`(?:${VEC_NUM_DEC}|${FREE_DASH})`
+const DASHED_FREE_RUN = String.raw`(?:${DASHED_VAL}(?:\s+${DASHED_VAL}){0,23}\s*)?`
+const DASHED_TAIL_RUN = String.raw`(?:${DASHED_VAL}(?:${TAIL_SEP}${DASHED_VAL}){0,23}\s*)?`
+const DASHED_GROUP_VAL = String.raw`(?:${VEC_NUM}|${DASH})`
+const DASHED_GROUP = String.raw`\(\s*${DASHED_GROUP_VAL}(?:\s*[,;]\s*${DASHED_GROUP_VAL})*\s*\)`
+const DASHED_VEC_RE = new RegExp(String.raw`${DASHED_FREE_RUN}(?:${DASHED_GROUP}\s*${DASHED_TAIL_RUN})+`, 'g')
+const DASHED_VAL_RE = new RegExp(`${NUM}|${DASH}`, 'g')
+// Valeurs d'un match DASHED_VEC_RE. Dans une parenthèse, la virgule SÉPARE toujours (la
+// grammaire y admet « (17,18,-,-) ») : on découpe donc chaque groupe sur [,;] au lieu de
+// laisser NUM lire « 17,18 » comme un décimal. Hors groupe, NUM garde la virgule décimale.
+function dashedValues(span) {
+  const values = []
+  for (const piece of span.split(/(\([^)]*\))/)) {
+    if (piece.startsWith('(')) values.push(...piece.slice(1, -1).split(/[,;]/).map((v) => v.trim()))
+    else values.push(...(piece.match(DASHED_VAL_RE) || []))
+  }
+  return values.map((v) => v.replace(/\s+/g, ''))
+}
+const DASH_IN_GROUP_RE = /[(,;]\s*[-–—]\s*[,;)]/
+
 // Légende de diagramme « Corazón color 1 (019) » (points/couleurs d'un jacquard, répétée
 // 1×/couleur) : un run libre à UNE valeur (l'index N de la légende) suivi d'un groupe à UNE
 // valeur en notation « code produit » (3 chiffres) ne doit PAS être lu comme un vrai vecteur
@@ -159,6 +198,21 @@ export function findSizeVectors(line) {
     ) {
       out.push({ start: m.index, end: m.index + trimmed.length, values })
     }
+  }
+  DASHED_VEC_RE.lastIndex = 0
+  while ((m = DASHED_VEC_RE.exec(src))) {
+    if (/(?:^|[^\p{L}])[x×*]\s*$/u.test(src.slice(0, m.index))) continue // même garde que VEC_RE
+    const trimmed = m[0].replace(/\s+$/, '')
+    if (!DASH_IN_GROUP_RE.test(trimmed)) continue
+    const values = dashedValues(trimmed)
+    if (values.length < 2 || !values.some((v) => /\d/.test(v))) continue
+    const start = m.index
+    const end = m.index + trimmed.length
+    const overlapping = out.filter((v) => start < v.end && end > v.start)
+    // Ne remplace que des vecteurs qu'il CONTIENT (jamais un run à crochets plus large).
+    if (overlapping.some((v) => v.start < start || v.end > end)) continue
+    for (const v of overlapping) out.splice(out.indexOf(v), 1)
+    out.push({ start, end, values })
   }
   SLASH_VEC_RE.lastIndex = 0
   while ((m = SLASH_VEC_RE.exec(src))) {

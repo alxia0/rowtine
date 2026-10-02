@@ -5,7 +5,7 @@
 // indentées de deux espaces (`  ![](…)`) alors qu'un diagramme ou une image de
 // galerie ne l'est pas.
 import { describe, it, expect } from 'vitest'
-import { stepLine, sectionLine, h2Title, sectionTitleAtLine, imageAnchorLine } from '@/utils/pattern-md/step-line'
+import { stepLine, sectionLine, h2Title, sectionTitleAtLine, imageAnchorLine, imageAnchorStepText } from '@/utils/pattern-md/step-line'
 
 const MD = [
   '## Corps',            // 1
@@ -166,5 +166,19 @@ describe('imageAnchorLine', () => {
   it('curseur avant tout titre de section : null', () => {
     const md = 'Texte libre avant toute section\n## Corps\n- rang 1\n'
     expect(imageAnchorLine(md, 1)).toBeNull()
+  })
+})
+
+// Texte affiché de l'étape visée par imageAnchorLine : dit où l'image va atterrir.
+describe('imageAnchorStepText', () => {
+  it('rend le texte nu de l’étape visée, sans son balisage', () => {
+    expect(imageAnchorStepText(MD, 4)).toBe('Rang 1 : tricoter.')
+    expect(imageAnchorStepText(MD, 9)).toBe('Remarque utile.')
+    expect(imageAnchorStepText('## Corps\n- {×3} **Rang 5** : répéter.\n', 2)).toBe('Rang 5 : répéter.')
+    expect(imageAnchorStepText('## Corps\n- × Rang 3 : répéter.\n', 2)).toBe('Rang 3 : répéter.')
+  })
+
+  it('aucune étape visée : null', () => {
+    expect(imageAnchorStepText('## Corps\n\n## Manches\n- Rang 1.\n', 2)).toBeNull()
   })
 })

@@ -475,7 +475,7 @@ describe('reconcileReaderState — robustesse (jamais de throw, jamais de perte 
   it('oldState vide/undefined → state neuf cohérent, report à zéro', () => {
     const newR = R([S('corps', [{ t: 'a' }])])
     const { state, report } = reconcileReaderState(undefined, undefined, newR)
-    expect(state).toEqual({ size: 0, done: {}, counters: {}, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
+    expect(state).toEqual({ size: 0, done: {}, counters: {}, last: null, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
     expect(report).toEqual({
       doneKept: 0,
       doneLost: 0,
@@ -490,6 +490,8 @@ describe('reconcileReaderState — robustesse (jamais de throw, jamais de perte 
       chartFramesLost: 0,
       chartCurtainsKept: 0,
       chartCurtainsLost: 0,
+      lastKept: 0,
+      lastLost: 0,
     })
   })
 
@@ -518,5 +520,79 @@ describe('reconcileReaderState — robustesse (jamais de throw, jamais de perte 
     expect(state.size).toBe(0)
     expect(state.done).toEqual({})
     expect(report.sizeReset).toBe(false)
+  })
+})
+
+/* ── last : la trace du dernier geste (intent 2026-09-30) ──
+   Aide à la navigation, pas de la progression : transférée quand la cible se retrouve
+   (même identité section × contenu que done, jamais une note), jetée et comptée sinon —
+   jamais de cible fabriquée. */
+describe('reconcileReaderState — last (dernier geste)', () => {
+  const oldR = () => R([S('corps', [{ t: 'monter' }, { t: 'rang endroit' }]), S('tete', [{ t: 'rang tête' }])])
+
+  it('étape inchangée : last suit le texte, même si l\'index a bougé', () => {
+    const newR = R([S('corps', [{ t: 'NOUVEAU' }, { t: 'monter' }, { t: 'rang endroit' }]), S('tete', [{ t: 'rang tête' }])])
+    const { state, report } = reconcileReaderState(oldR(), { done: {}, last: { kind: 'step', id: 'corps#1' } }, newR)
+    expect(state.last).toEqual({ kind: 'step', id: 'corps#2' })
+    expect(report.lastKept).toBe(1)
+    expect(report.lastLost).toBe(0)
+  })
+
+  it('texte modifié, étape supprimée ou ambiguë : last jeté et compté perdu', () => {
+    const modifie = R([S('corps', [{ t: 'monter' }, { t: 'rang endroit modifié' }])])
+    let r = reconcileReaderState(oldR(), { last: { kind: 'step', id: 'corps#1' } }, modifie)
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+
+    const supprime = R([S('corps', [{ t: 'monter' }])])
+    r = reconcileReaderState(oldR(), { last: { kind: 'step', id: 'corps#1' } }, supprime)
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+
+    const ambigu = R([S('corps', [{ t: 'monter' }, { t: 'x' }, { t: 'x' }])])
+    const oldAmbigu = R([S('corps', [{ t: 'x' }, { t: 'x' }])])
+    r = reconcileReaderState(oldAmbigu, { last: { kind: 'step', id: 'corps#0' } }, ambigu)
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+  })
+
+  it('étape devenue note : last jeté (ne jamais atterrir sur une note)', () => {
+    const newR = R([S('corps', [{ t: 'monter' }, { t: 'rang endroit', note: true }])])
+    const { state, report } = reconcileReaderState(oldR(), { last: { kind: 'step', id: 'corps#1' } }, newR)
+    expect(state.last).toBeNull()
+    expect(report.lastLost).toBe(1)
+  })
+
+  it('last kind chart : section qui reste une grille → gardé, sinon jeté', () => {
+    const grilles = { oldR: R([CHART('gr', { rows: 6 })]), newR: R([CHART('gr', { rows: 8 })]) }
+    let r = reconcileReaderState(grilles.oldR, { last: { kind: 'chart', id: 'gr' } }, grilles.newR)
+    expect(r.state.last).toEqual({ kind: 'chart', id: 'gr' })
+    expect(r.report.lastKept).toBe(1)
+
+    r = reconcileReaderState(oldR(), { last: { kind: 'chart', id: 'corps' } }, oldR())
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+  })
+
+  it('sans last, kind inconnu ou id non textuel : last null, compteurs intacts', () => {
+    let r = reconcileReaderState(oldR(), { done: { 'corps#0': true } }, oldR())
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastKept).toBe(0)
+    expect(r.report.lastLost).toBe(0)
+    r = reconcileReaderState(oldR(), { last: { kind: 'autre', id: 'x' } }, oldR())
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+    r = reconcileReaderState(oldR(), { last: { kind: 'step', id: 42 } }, oldR())
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+  })
+
+  it('id de step sans index (donnée corrompue) : last jeté, jamais deviné vers steps[0]', () => {
+    // 'corps' sans `#index` : Number('') vaudrait 0 — un entier valide, qui viserait steps[0].
+    // La garde complète (index présent ET entier ≥ 0) interdit cette cible fabriquée.
+    const r = reconcileReaderState(oldR(), { last: { kind: 'step', id: 'corps' } }, oldR())
+    expect(r.state.last).toBeNull()
+    expect(r.report.lastLost).toBe(1)
+    expect(r.state.done).toEqual({})
   })
 })

@@ -44,7 +44,7 @@ export function buildRowNotification({ project, reader, state, t }) {
   const chartRows = state?.chartRows || {}
   const acks = new Set(state?.chartAcks || [])
   const isChartVisible = state?.isChartVisible || always
-  const progress = { size, done, counters }
+  const progress = { size, done, counters, last: state?.last }
 
   const cur = currentStep(sections, progress)
   if (!cur) return null
@@ -55,6 +55,11 @@ export function buildRowNotification({ project, reader, state, t }) {
     channelName: t('rowNotif.channel'),
     closedTitle: t('rowNotif.closedTitle'),
     closedText: t('rowNotif.closedText'),
+    // Annonce « appui retenu » (processus mort) : le natif remplace la notification avec
+    // ces libellés quand un bouton est pressé sans lecteur pour écrire (spec
+    // 2026-09-30-notification-appui-attente).
+    pendingTitle: t('rowNotif.pendingTitle'),
+    pendingText: t('rowNotif.pendingText'),
   }
 
   const chart = chartBefore(sections, cur.step.id, isChartVisible, size)

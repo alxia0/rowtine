@@ -22,11 +22,46 @@ vi.mock('vue-router', () => ({
   useRouter: () => nav.router,
 }))
 
-const keepAwake = vi.hoisted(() => ({ setKeepScreenOn: vi.fn(async () => {}) }))
+const keepAwake = vi.hoisted(() => ({ setKeepScreenOn: vi.fn(async () => {}), isKeepScreenOnAvailable: vi.fn(() => true) }))
 vi.mock('@/native/keep-awake', () => keepAwake)
+
+// Pont natif de la notification : disponible à la demande, permission accordée, exemption
+// batterie pilotable ; tout le reste est inerte.
+const notif = vi.hoisted(() => ({
+  available: false,
+  battery: { ignoring: true },
+  removeResume: vi.fn(),
+  resumeCb: null,
+  added: 0,
+}))
+vi.mock('@/native/row-notification', () => ({
+  isRowNotificationAvailable: () => notif.available,
+  checkRowNotificationPermission: async () => 'granted',
+  isBatteryOptimizationIgnored: async () => notif.battery,
+  showRowNotification: async () => {},
+  cancelRowNotification: async () => {},
+  readPendingRowAction: async () => null,
+  clearPendingRowAction: async () => {},
+  onRowAction: async () => () => {},
+  requestRowNotificationPermission: async () => 'granted',
+  requestIgnoreBatteryOptimizations: async () => notif.battery,
+  openRowNotificationSettings: async () => {},
+  onOpenProject: async () => () => {},
+  takeLaunchProject: async () => null,
+}))
+vi.mock('@capacitor/app', () => ({
+  App: {
+    addListener: (_, cb) => {
+      notif.resumeCb = cb
+      notif.added++
+      return Promise.resolve({ remove: notif.removeResume })
+    },
+  },
+}))
 
 import ReaderView from '@/views/ReaderView.vue'
 import { useSettingsStore } from '@/stores/settings'
+import RowNotifOnboardingDialog from '@/components/RowNotifOnboardingDialog.vue'
 
 // Reader simple : aucune taille, aucun aide-mémoire (reference absent)
 const SIMPLE_READER = {
@@ -274,5 +309,43 @@ describe('ReaderView — écran allumé pendant le suivi', () => {
     w.unmount()
     wrappers.splice(wrappers.indexOf(w), 1)
     expect(keepAwake.setKeepScreenOn).not.toHaveBeenCalled()
+  })
+})
+
+describe('ReaderView — rattrapage de l\'autorisation de notification', () => {
+  beforeEach(() => {
+    notif.available = true
+    notif.battery = { ignoring: false }
+    notif.removeResume.mockClear()
+    notif.added = 0
+  })
+  afterEach(() => {
+    notif.available = false
+    notif.battery = { ignoring: true }
+  })
+
+  it('un aperçu bibliothèque ne consomme pas la garde de session : la pop-up s\'ouvre ensuite dans un projet', async () => {
+    const { patternId } = await seedSimpleProject()
+    nav.route = { name: 'pattern-read', params: { id: String(patternId) }, query: {} }
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    useSettingsStore().rowNotification = true
+    mountReader(pinia)
+    await settle()
+    await seedSimpleProject()
+    const w = mountReader(pinia)
+    await settle()
+    expect(w.findComponent(RowNotifOnboardingDialog).props('open')).toBe(true)
+  })
+
+  it('démonté avant la fin du chargement du pont : l\'écouteur resume reçu trop tard est retiré', async () => {
+    await seedSimpleProject()
+    const w = mountReader()
+    w.unmount() // avant que l'import dynamique de @capacitor/app n'ait abouti
+    wrappers.splice(wrappers.indexOf(w), 1)
+    await settle()
+    // Chaque écouteur posé (le lecteur, le composable de notification) est retiré.
+    expect(notif.added).toBeGreaterThan(0)
+    expect(notif.removeResume).toHaveBeenCalledTimes(notif.added)
   })
 })
