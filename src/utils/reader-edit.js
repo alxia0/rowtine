@@ -1,6 +1,7 @@
 // Helpers purs d'édition d'un objet `reader` (Lot B3). Aucune dépendance Vue/DOM.
 import { slug, fitSizeRowValues } from './reader'
 import { sectionKind } from './section-kinds'
+import { copiesOf } from './section-copies'
 
 export function emptyReaderStep(type = 'row') {
   if (type === 'note') return { t: '', note: true }
@@ -174,7 +175,7 @@ export function normalizeReaderForSave(reader, sizes = []) {
       let id = slug(sec.title) || `sec${si}`
       while (used.has(id)) id = `${id}-${si}`
       used.add(id)
-      return { id, kind: sectionKind(sec), title: String(sec.title ?? '').trim(), steps, ...(sec.chart ? { chart: sec.chart } : {}) }
+      return { id, kind: sectionKind(sec), ...(copiesOf(sec) > 1 ? { copies: copiesOf(sec) } : {}), title: String(sec.title ?? '').trim(), steps, ...(sec.chart ? { chart: sec.chart } : {}) }
     })
     .filter((sec) => sec.title || sec.steps.length)
   return { ...reader, sizeLabels, sections }

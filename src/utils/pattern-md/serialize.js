@@ -1,6 +1,7 @@
 // patternToMd : objet pattern (avec reader) → { md, files }.
 // Pur, imports relatifs (exécutable sous Node par le banc corpus).
 import { sectionKind, DEFAULT_KIND } from '../section-kinds'
+import { copiesOf } from '../section-copies'
 import { photoFileName, parseDataUrl } from '../../backup/naming'
 import { stepTextToMd, mdTextToStep } from './line'
 import { emitFrontMatter, mdScalar, mdSizeLabel } from './meta'
@@ -54,6 +55,13 @@ function titleNeedsKindTag(title) {
   return !title.trim() || reservedKey(title) != null || TITLE_KIND_RE.test(title.trimEnd())
 }
 
+// Suffixe d'exemplaires du tag de kind (` x2`) ; rien pour 1 exemplaire.
+// Validé par copiesOf : jamais de tag que le parseur ou le lecteur refuserait.
+function titleCopiesTag(sec) {
+  const copies = copiesOf(sec)
+  return copies < 2 ? '' : ` x${copies}`
+}
+
 export function patternToMd(pattern, { assetDir = 'img', galleryPrefix = 'galerie-' } = {}) {
   const reader = pattern?.reader || { sizeLabels: [], sections: [] }
   const n = (reader.sizeLabels || []).length
@@ -86,8 +94,9 @@ export function patternToMd(pattern, { assetDir = 'img', galleryPrefix = 'galeri
   for (const sec of sections) {
     const kind = sectionKind(sec)
     const title = mdScalar(sec.title)
-    const tagged = kind !== DEFAULT_KIND || titleNeedsKindTag(title)
-    out.push(`## ${title}${tagged ? ` {${kindToEn(kind)}}` : ''}`, '')
+    const copies = copiesOf(sec)
+    const tagged = kind !== DEFAULT_KIND || copies >= 2 || titleNeedsKindTag(title)
+    out.push(`## ${title}${tagged ? ` {${kindToEn(kind)}${titleCopiesTag(sec)}}` : ''}`, '')
     for (const st of sec.steps || []) {
       if (st.chart) {
         // Rétrocompat : patrons pré-multi-grilles où seul reader.chart (global) est renseigné,

@@ -9,7 +9,7 @@ vi.mock('@/utils/pdf', () => ({
   extractVectorRegions: vi.fn().mockResolvedValue([]),
   readFileAsDataUrl: vi.fn(),
 }))
-import { extractPages, extractDocMetaTitle, renderPdfPageToDataUrl, extractImagesWithPos, readFileAsDataUrl } from '@/utils/pdf'
+import { extractPages, extractDocMetaTitle, renderPdfPageToDataUrl, extractImagesWithPos, extractVectorRegions, readFileAsDataUrl } from '@/utils/pdf'
 import { parsePdfLocally } from '@/utils/pdf-import'
 
 const L = (text, o = {}) => ({ text, size: 10, bold: false, y: 0, ...o })
@@ -178,5 +178,47 @@ describe('parsePdfLocally', () => {
     // Sans la mise à jour de la condition de repli, detectChartPage aurait aussi déclenché
     // reader.chart page-entière (page 2 matche CHART_HINT_RE) — désormais évité.
     expect(out.reader.chart == null || out.reader.chart.img == null).toBe(true)
+  })
+})
+
+describe('parsePdfLocally avec pages choisies', () => {
+  const TWO = [NOMINAL[0], NOMINAL[0]]
+
+  // Protège : sans sélection, aucun argument nouveau ne part vers l'extraction.
+  it('sans pages : appels inchangés', async () => {
+    extractPages.mockResolvedValue(NOMINAL)
+    extractImagesWithPos.mockResolvedValue([])
+    await parsePdfLocally(FILE)
+    expect(extractPages.mock.calls[0]).toHaveLength(2)
+    expect(extractImagesWithPos.mock.calls[0]).toHaveLength(2)
+    expect(extractVectorRegions.mock.calls[0][2]).toEqual({ rasterBoxes: [] })
+  })
+
+  // Protège : l'extraction ne lit que les pages choisies, triées et sans doublon.
+  it('transmet les pages normalisées à chaque extraction', async () => {
+    extractPages.mockResolvedValue(TWO)
+    extractImagesWithPos.mockResolvedValue([])
+    await parsePdfLocally(FILE, { pages: [7, 3, 7] })
+    expect(extractPages.mock.calls[0][2]).toEqual({ pageNumbers: [3, 7] })
+    expect(extractImagesWithPos.mock.calls[0][2]).toEqual({ pageNumbers: [3, 7] })
+    expect(extractVectorRegions.mock.calls[0][2]).toEqual({ rasterBoxes: [], pageNumbers: [3, 7] })
+  })
+
+  // Protège : la couverture est la première page choisie, pas la page 1 du recueil.
+  it('couverture rendue depuis la première page choisie', async () => {
+    extractPages.mockResolvedValue(TWO)
+    extractImagesWithPos.mockResolvedValue([])
+    await parsePdfLocally(FILE, { pages: [3, 7] })
+    expect(renderPdfPageToDataUrl).toHaveBeenCalledWith(FILE, 3, 800, expect.objectContaining({ crop: expect.any(Function) }))
+  })
+
+  // Protège : une image de la galerie garde son numéro de page dans le PDF complet.
+  it('galerie aux numéros réels', async () => {
+    extractPages.mockResolvedValue(TWO)
+    // Image répétée (décoration) sur la 2e page choisie (page réelle 7) : elle finit en galerie, pas dans le fil.
+    extractImagesWithPos.mockResolvedValue([{ src: 'data:image/png;base64,A', page: 7, x: 0, y: 100, w: 400, h: 300, repeated: true }])
+    const out = await parsePdfLocally(FILE, { pages: [3, 7] })
+    const pagesInGallery = out.pattern.gallery.map((g) => g.page)
+    expect(pagesInGallery).toContain(7)
   })
 })

@@ -339,3 +339,92 @@ describe('buildRowNotification — suit le dernier geste', () => {
     expect(build(mixed, { size: 0, done: {}, last: { kind: 'step', id: 'perdu#0' } }).stepId).toBe('dos#0')
   })
 })
+
+describe('buildRowNotification : exemplaires', () => {
+  const sock = (extra = {}) => ({
+    sections: [
+      { id: 'pied', kind: 'pied', title: 'Pied', copies: 2, steps: [{ t: 'Rang un' }, { t: 'Rang deux' }, { t: 'Rang trois' }], ...extra },
+    ],
+  })
+  const copyLabel = (n) => t('reader.copies.title.chaussette', { n, total: 2 })
+
+  it("séquentiel, exemplaire 2 actif : étape courante de l'exemplaire 2, titre titleCopy, id pied#1@2", () => {
+    const p = build(sock(), { done: { 'pied#0': true, 'pied#1': true }, copyState: { 2: { done: { 'pied#0': true }, counters: {} } }, activeCopy: { pied: 2 } })
+    expect(p.kind).toBe('row')
+    expect(p.stepId).toBe('pied#1@2')
+    expect(p.title).toBe(t('rowNotif.titleCopy', { copy: copyLabel(2), index: 2, total: 3, section: 'Pied' }))
+    expect(p.text).toBe('Rang deux')
+  })
+
+  it("hors chaussette : libellé Exemplaire n / N", () => {
+    const manche = { sections: [{ id: 'm', kind: 'manche', title: 'Manche', copies: 2, steps: [{ t: 'A' }, { t: 'B' }] }] }
+    const p = build(manche, { done: {}, activeCopy: { m: 2 } })
+    expect(p.title).toBe(t('rowNotif.titleCopy', { copy: t('reader.copies.title.generic', { n: 2, total: 2 }), index: 1, total: 2, section: 'Manche' }))
+  })
+
+  it("exemplaire 1 actif : titre de copie mais id nu", () => {
+    const p = build(sock(), { done: {} })
+    expect(p.stepId).toBe('pied#0')
+    expect(p.title).toBe(t('rowNotif.titleCopy', { copy: copyLabel(1), index: 1, total: 3, section: 'Pied' }))
+  })
+
+  it("simultané : cible l'exemplaire en retard, la ligne Ensuite montre le rang de l'autre", () => {
+    const state = { done: { 'pied#0': true, 'pied#1': true }, copyState: { 2: { done: { 'pied#0': true }, counters: {} } } }
+    const p = build(sock(), { ...state, copyMode: 'simultaneous' })
+    expect(p.stepId).toBe('pied#1@2')
+    expect(p.bigText).toBe(`Rang deux\n\n${t('rowNotif.nextCopy', { copy: copyLabel(1), text: 'Rang trois' })}`)
+  })
+
+  it("simultané à égalité : l'exemplaire 1", () => {
+    expect(build(sock(), { done: {}, copyMode: 'simultaneous' }).stepId).toBe('pied#0')
+  })
+
+  it("last d'un autre exemplaire que celui de travail : ignoré", () => {
+    const p = build(sock(), { done: { 'pied#1': true }, activeCopy: { pied: 2 }, last: { kind: 'step', id: 'pied#1', copy: 1 } })
+    expect(p.stepId).toBe('pied#0@2')
+    const q = build(sock(), { done: { 'pied#0': true }, last: { kind: 'step', id: 'pied#0' } })
+    expect(q.stepId).toBe('pied#1')
+  })
+
+  it("séquentiel, exemplaire actif fini et l'autre non, dernière section : charge non nulle visant l'autre exemplaire", () => {
+    const all = { 'pied#0': true, 'pied#1': true, 'pied#2': true }
+    const p = build(sock(), { done: { 'pied#0': true }, copyState: { 2: { done: all, counters: {} } }, activeCopy: { pied: 2 } })
+    expect(p).not.toBeNull()
+    expect(p.stepId).toBe('pied#1')
+    expect(p.title).toBe(t('rowNotif.titleCopy', { copy: copyLabel(1), index: 2, total: 3, section: 'Pied' }))
+    const q = build(sock(), { done: all, copyState: { 2: { done: { 'pied#0': true }, counters: {} } }, activeCopy: { pied: 1 } })
+    expect(q.stepId).toBe('pied#1@2')
+  })
+
+  // Revue finale I1 : finir une section de la chaussette 1 mène à la section suivante, pas à sa chaussette 2.
+  it('séquentiel, section finie sur l\'exemplaire actif : la section suivante du même exemplaire', () => {
+    const r = {
+      sections: ['pointe', 'pied', 'talon'].map((k) => ({ id: k, kind: k, title: k, copies: 2, steps: [{ t: 'Rang un' }, { t: 'Rang deux' }] })),
+    }
+    const p = build(r, { done: { 'pointe#0': true, 'pointe#1': true }, last: { kind: 'step', id: 'pointe#1' } })
+    expect(p.stepId).toBe('pied#0')
+    expect(p.title).toBe(t('rowNotif.titleCopy', { copy: copyLabel(1), index: 1, total: 2, section: 'pied' }))
+  })
+
+  it('tout fait dans tous les exemplaires : null', () => {
+    const all = { 'pied#0': true, 'pied#1': true, 'pied#2': true }
+    expect(build(sock(), { done: all, copyState: { 2: { done: all, counters: {} } } })).toBeNull()
+  })
+
+  it("compteur d'un exemplaire : valeur de l'exemplaire visé et id suffixé", () => {
+    const r = { sections: [{ id: 'pied', kind: 'pied', title: 'Pied', copies: 2, steps: [{ t: 'x', repeat: true, total: [4] }] }] }
+    const p = build(r, { size: 0, counters: { 'pied#0': 4 }, copyState: { 2: { done: {}, counters: { 'pied#0': 1 } } }, activeCopy: { pied: 2 } })
+    expect(p.kind).toBe('counter')
+    expect(p.stepId).toBe('pied#0@2')
+    expect(p.counter.label).toBe(t('rowNotif.counterLabel', { count: 1, total: 4 }))
+  })
+
+  it('ne mute pas les entrées et un projet sans copies donne la même charge qu\'avant', () => {
+    const state = { done: { 'devant#0': true }, copyState: { 2: { done: { a: true }, counters: {} } } }
+    const snap = JSON.parse(JSON.stringify(state))
+    build(sock(), state)
+    expect(state).toEqual(snap)
+    const base = build(reader, { size: 1, done: { 'presentation#0': true } })
+    expect(build(reader, { size: 1, done: { 'presentation#0': true }, copyState: {}, activeCopy: {} })).toEqual(base)
+  })
+})

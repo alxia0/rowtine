@@ -1310,6 +1310,11 @@ describe('kindForTitle — bugs corpus DROPS', () => {
   it('« Rand » (allemand, bord/bordure) est classé bordure, pas pelote', () => {
     expect(kindForTitle('Rand')).toBe('bordure')
   })
+  it('« Côtes » / « Bord côtes » est classé bordure, ni « côté » ni les « cotes » de mesure', () => {
+    for (const t of ['CÔTES', 'Côtes 2x2', 'BORD CÔTES', 'LES CÔTES', 'CÔTE', 'Côtes croisées']) expect(kindForTitle(t), t).toBe('bordure')
+    expect(kindForTitle('CÔTÉ DROIT')).not.toBe('bordure')
+    expect(kindForTitle('Cotes')).not.toBe('bordure')
+  })
   it('« Rock » (allemand, jupe) est classé corps, pas pelote', () => {
     expect(kindForTitle('Rock')).toBe('corps')
   })
@@ -2592,5 +2597,39 @@ describe('variante par taille — herite du type de la section precedente', () =
     expect(echantillon.ref).toBe('echantillon')
     expect(variante).toBeTruthy()
     expect(variante.kind).not.toBe('echantillon')
+  })
+})
+
+// Types de section chaussette : un titre par ligne du relevé corpus, plus les faux amis.
+// Les titres déjà captés par `membre` (JAMBE, leg) gardent ce type : priorité à l'existant.
+describe('kindForTitle : types chaussette', () => {
+  const CAS = {
+    pointe: ['POINTE', 'FORMER LA POINTE', 'ORTEILS', 'Toe'],
+    pied: ['PIED', 'DESSUS DU PIED', 'SEMELLE', 'Foot'],
+    talon: ['TALON', 'TALONNETTE', 'Arrondi du talon', 'DIVISER LES MAILLES POUR LE TALON', 'Heel'],
+    jambe: ['TIGE'],
+    gousset: ['GOUSSET', 'Gusset', 'Gousset du pied'],
+  }
+  for (const [kind, titres] of Object.entries(CAS)) {
+    for (const t of titres) {
+      it(`« ${t} » donne ${kind}`, () => expect(kindForTitle(t)).toBe(kind))
+    }
+  }
+
+  it('les titres jambe/leg restent captés par membre (priorité à l\'existant)', () => {
+    expect(kindForTitle('JAMBE')).toBe('membre')
+    expect(kindForTitle('Leg')).toBe('membre')
+    expect(kindForTitle('Jambe de pantalon')).toBe('membre')
+  })
+
+  it('« DIMINUTION DU GOUSSET » reste techniques (règle « DIMINUTIONS » existante, prioritaire)', () => {
+    expect(kindForTitle('DIMINUTION DU GOUSSET')).toBe('techniques')
+  })
+
+  it('les faux amis ne basculent pas en chaussette', () => {
+    const CHAUSSETTE = ['pointe', 'pied', 'talon', 'jambe', 'gousset']
+    for (const t of ['Pied-de-poule', 'Pied de coq', 'Pointe de flèche', 'Legend', 'Footnote', 'Wheel', 'Wheelbarrow', 'Toed', 'Heelless', 'et à double pointe', 'doubles pointes', 'Tic Tac Toe', 'Atlas Happy Feet', 'Heel veel plezier']) {
+      expect(CHAUSSETTE, t).not.toContain(kindForTitle(t))
+    }
   })
 })

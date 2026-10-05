@@ -264,6 +264,9 @@
   },
   "rowNotif": {
     "title": "Rang {index}/{total}, {section}",
+    "titleCopy": "{copy} · rang {index}/{total} · {section}",
+    "sectionCopy": "{copy} · {section}",
+    "nextCopy": "Ensuite, {copy} : {text}",
     "next": "Ensuite : {text}",
     "nextIn": "Ensuite, {section} : {text}",
     "check": "Cocher le rang",
@@ -303,6 +306,7 @@
     "pattern": "Patron",
     "patternHint": "Le patron suivi pour ce projet. Le choisir importe ses sections dans le projet (tu suivras tes rangs dessus).",
     "patternSource": "Patron source",
+    "patternWithDesigner": "{name}, par {author}",
     "patternMissing": "Le patron de ce projet a été supprimé. Ta progression est conservée : restaure-le depuis la corbeille (Réglages) pour retrouver tes instructions.",
     "patternMissingShort": "Le patron de ce projet a été supprimé — restaure-le depuis la corbeille.",
     "patternChangeConfirm": "Changer de patron va remplacer les sections de ce projet et leur progression. Continuer ?",
@@ -432,7 +436,8 @@
         "recentColor": "Couleur récente",
         "textLabel": "Texte libre (optionnel)",
         "share": "Partager",
-        "calendar": "Carte calendaire"
+        "calendar": "Carte calendaire",
+        "pattern": "Patron"
       }
     },
     "galleryPattern": "Patron",
@@ -674,6 +679,7 @@
     "allSizes": "Toutes",
     "instrForSize": "Instructions pour la taille {size}",
     "by": "par",
+    "designerAdd": "Designer : ajouter",
     "addSection": "Ajouter la section",
     "createProject": "Créer un projet à partir de ce patron",
     "preview": "Prévisualiser le patron",
@@ -717,8 +723,7 @@
     "titleRowtine": "Importer un fichier Rowtine",
     "leadRowtine": "Un patron déjà préparé dans un fichier Rowtine : texte et images sont importés tels quels, sur ton appareil, hors-ligne.",
     "pickRowtine": "Choisir un fichier .rowtine ou .zip",
-    "lead": "Le patron est analysé sur ton appareil : gratuit, hors-ligne, fidèle au PDF.",
-    "leadNext": "Le patron est enregistré directement dans ta bibliothèque ; tu pourras corriger les sections ensuite si besoin.",
+    "lead": "Le patron est analysé sur ton appareil : gratuit, hors-ligne, fidèle au PDF. Il est enregistré directement dans ta bibliothèque.",
     "pick": "Choisir un fichier PDF",
     "waitingSync": "Synchronisation de la bibliothèque en cours, l'import démarre dès qu'elle se termine…",
     "parsing": "Analyse du PDF…",
@@ -739,16 +744,26 @@
     "cancelImport": "Interrompre l'import",
     "saved": "Patron importé dans la bibliothèque",
     "caveatTitle": "Relis le patron avant de commencer",
-    "caveatBody": "L'import n'est jamais parfait : vérifie les chiffres, les tailles et les répétitions, et corrige-les directement dans l'app.",
+    "caveatBody": "L'import n'est jamais parfait : vérifie les chiffres, les tailles et les répétitions.",
     "doneHowToFix": "Comment corriger ?",
     "viewPattern": "Voir le patron",
     "warnings": "{n} point(s) à vérifier",
-    "nextHint": "Parcours-le d'abord section par section et corrige son contenu si besoin. Tu lanceras ton projet depuis le patron.",
     "blockTitle": "Import risqué",
     "blockColumns": "Ce PDF semble présenté sur plus de 2 colonnes : le texte extrait sera mélangé.",
-    "blockMultiPattern": "Ce fichier semble contenir plusieurs patrons, ou un livre entier : Rowtine n'importe qu'un patron à la fois. Enregistre les pages du patron voulu dans un PDF à part, puis importe ce fichier.",
+    "blockMultiPattern": "Ce fichier semble contenir plusieurs patrons, ou un livre entier : Rowtine n'importe qu'un patron à la fois. Choisis les pages du patron que tu veux.",
+    "blockMultiPatternSubset": "Les pages choisies semblent encore contenir plusieurs patrons. Choisis seulement celles du patron que tu veux.",
+    "choosePages": "Choisir les pages",
+    "pickPagesLink": "Le PDF contient plusieurs patrons ? Choisir les pages",
     "blockLead": "L'import automatique a été suspendu. Tu peux l'importer quand même, mais il demandera sans doute une correction importante.",
     "importAnyway": "Importer quand même"
+  },
+  "pagesSelect": {
+    "title": "Choisis les pages du patron",
+    "hint": "Touche chaque page du patron que tu veux importer, sans oublier ses pages communes (matériel, abréviations).",
+    "count": "Aucune page choisie | {n} page choisie | {n} pages choisies",
+    "pageLabel": "Page {n}",
+    "confirm": "Importer ces pages",
+    "error": "Impossible d'afficher les pages de ce PDF."
   },
   "importCaveat": {
     "title": "Un patron importé se relit",
@@ -1236,9 +1251,10 @@
       }
     },
     "family": {
-      "vetement": "Parties de vêtement",
-      "accessoire": "Parties d'accessoire",
-      "amigurumi": "Parties de peluche",
+      "vetement": "Vêtements",
+      "accessoire": "Accessoires",
+      "chaussette": "Chaussettes",
+      "amigurumi": "Peluches",
       "technique": "Motifs & technique",
       "transversal": "Général"
     },
@@ -1254,6 +1270,12 @@
       "oreille": "Oreilles",
       "museau": "Museau",
       "queue": "Queue",
+      "cotes": "Bord-côtes",
+      "pointe": "Pointe",
+      "pied": "Pied",
+      "talon": "Talon",
+      "jambe": "Jambe / tige",
+      "gousset": "Gousset",
       "motif": "Motif",
       "dentelle": "Dentelle",
       "echantillon": "Échantillon",
@@ -1269,7 +1291,31 @@
       "finitions": "Finitions",
       "infos": "Infos et conseils",
       "autre": "Autre",
-      "pelote": "Générique"
+      "pelote": "Générique",
+      "repetable": "Générique répétable"
+    },
+    "copies": {
+      "label": "Exemplaires",
+      "one": "1 exemplaire",
+      "n": "{n} exemplaires",
+      "nTogether": "{n} exemplaires, en même temps",
+      "sequential": "L'une après l'autre",
+      "together": "Les deux en même temps",
+      "technique": "Mode de réalisation",
+      "resetTitle": "Changer de mode de réalisation ?",
+      "resetMsg": "La progression des chaussettes repart de zéro, pour les deux chaussettes. Les autres sections ne changent pas.",
+      "resetConfirm": "Recommencer",
+      "removeConfirm": "Retirer {n} exemplaire(s) efface leur progression. Continuer ?",
+      "next": {
+        "chaussette": "Chaussette suivante",
+        "generic": "Exemplaire suivant"
+      },
+      "title": {
+        "chaussette": "Chaussette {n} / {total}",
+        "generic": "Exemplaire {n} / {total}"
+      },
+      "gap": "Chaussette {n} : {rows} rang de retard | Chaussette {n} : {rows} rangs de retard",
+      "checkCopy": "Coche de la chaussette {n}"
     },
     "edit": {
       "addSection": "+ Ajouter une section",

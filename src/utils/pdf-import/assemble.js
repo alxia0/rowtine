@@ -2,6 +2,7 @@
 // confidence, stats }. Aucune dépendance pdfjs/DOM → testable et exécutable sous Node.
 import { validateReader, isSingleSize } from '../reader'
 import { normalizeReaderForSave } from '../reader-edit'
+import { applyPairedDefaults } from '../section-copies'
 import { segmentSections, detectTitle, kindForTitle, GENERIC_COVER_TITLE_RE, sectionHasRowLine } from './segment'
 import { restoreSpacedTitle } from './spaced-title'
 import { detectSizeLabels, findSizeVectors, applySizeVectors } from './sizes'
@@ -583,5 +584,8 @@ export function buildReaderFromPages(pages, { fileName = '', onMerge = null, doc
   // reader et pattern.reader partagent le même objet : lecteur, sommaire et MD voient
   // le même titre numéroté.
   numberDuplicateSectionTitles(reader.sections)
+  // Défaut à 2 exemplaires (manche/membre/oreille seuls, trio chaussette) : après la
+  // normalisation, qui conserve `copies`; le reader est déjà partagé avec pattern.reader.
+  reader.sections = applyPairedDefaults(reader.sections)
   return { pattern, reader, warnings, confidence, stats, blocking }
 }

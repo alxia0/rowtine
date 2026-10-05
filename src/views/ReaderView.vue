@@ -33,8 +33,9 @@ import {
   isRowNotificationAvailable,
 } from '@/native/row-notification'
 import { verifyRowNotificationAuthorization } from '@/utils/row-notification-activation'
-import { withStepIds, isRowStep, currentStep, lastPlace, nextStepAfter, repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel } from '@/utils/reader'
-import { sectionKind } from '@/utils/section-kinds'
+import { withStepIds, isRowStep, checkableStepsOf, currentStep, lastPlace, copyAfterFinish, alignSockActiveCopy, nextStepAfter, repeatTotal, scrollTargetId, retractCurtain, sizeLabelText, sectionTitleLabel, stepIsDone, workCopies, hasSockProgress, resetSockProgress, isTrackedStep } from '@/utils/reader'
+import { copiesOf, copyModeOf, copyView, activeCopyOf, laggingCopy, counterCopy, copiesSummary, sockPairSections } from '@/utils/section-copies'
+import { sectionKind, isSockKind, canWorkSimultaneously } from '@/utils/section-kinds'
 import { withStitchMemo, PICK_STITCHES_EVENT, STITCH_MEMO_TAB } from '@/utils/stitch-memo'
 import { resolveStitches } from '@/content/stitch-memo'
 import { resolveOpenSyncTarget } from '@/utils/resolve-open-sync-target'
@@ -57,6 +58,7 @@ import ReaderFixOverlay from '@/components/ReaderFixOverlay.vue'
 import ReaderToc from '@/components/ReaderToc.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
 import ReaderTour from '@/components/ReaderTour.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import RowNotifOnboardingDialog from '@/components/RowNotifOnboardingDialog.vue'
 import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 
@@ -139,7 +141,7 @@ const tourHasSlot = useNoticeSlot(
   computed(() => ready.value && tourRequested.value),
 )
 
-const st = reactive({ size: null, done: {}, counters: {}, last: null, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
+const st = reactive({ size: null, done: {}, counters: {}, copyState: {}, activeCopy: {}, copyMode: null, last: null, chartRows: {}, chartReps: {}, chartFrames: {}, chartCurtains: {} })
 
 // Bandeau compact au défilement (P2/T2) : le gros titre + le surtitre (nom du projet,
 // ou « Aperçu du patron ») rétrécissent une fois qu'on a commencé à défiler — sur l'écran
@@ -423,6 +425,13 @@ function loadState() {
   st.size = validSize(saved.size)
   st.done = saved.done || {}
   st.counters = saved.counters || {}
+  // Exemplaires 2+ des sections répétables et exemplaire actif : absents des anciens projets.
+  st.copyState = saved.copyState || {}
+  // Une partie de chaussette x2 sans exemplaire actif (ajoutée au patron pendant la chaussette 2)
+  // suit les autres parties (alignSockActiveCopy).
+  st.activeCopy = alignSockActiveCopy(sections.value, saved)
+  // Technique des chaussettes du projet (spec 2026-10-05) ; absente = l'une après l'autre.
+  st.copyMode = saved.copyMode === 'simultaneous' ? 'simultaneous' : null
   savedSectionSnap = saved.sectionSnap || null
   // Trace du dernier geste de progression (intent 2026-09-30). Copie neuve, jamais un alias
   // du `readerState` vivant (même règle que les maps ci-dessus) ; les progressions d'avant
@@ -466,6 +475,9 @@ async function refreshAfterSync() {
   // contenu du patron (reader.value, juste au-dessus) reste rafraîchi dans tous les
   // cas : lui seul reflète une édition PC, sans risque d'écraser un geste de suivi.
   if (!interactedSinceMount) loadState()
+  // Sans relecture de `st` : une partie de chaussette arrivée par la synchro suit quand même la
+  // chaussette en cours (alignSockActiveCopy ne touche à aucune progression).
+  else st.activeCopy = alignSockActiveCopy(sections.value, st)
 }
 // Sérialise les écritures : deux actions rapprochées (choisir taille + cocher) déclenchent
 // deux persist() concurrents ; sans file, l'écriture la plus ancienne peut atterrir en dernier
@@ -500,6 +512,11 @@ function persist({ worked = false } = {}) {
     size: st.size,
     done: { ...st.done },
     counters: { ...st.counters },
+    // Absents tant qu'aucune section répétable n'a servi : un projet sans exemplaires
+    // se sérialise comme avant.
+    ...(Object.keys(st.copyState).length ? { copyState: { ...st.copyState } } : {}),
+    ...(Object.keys(st.activeCopy).length ? { activeCopy: { ...st.activeCopy } } : {}),
+    ...(st.copyMode ? { copyMode: st.copyMode } : {}),
     last: st.last ? { ...st.last } : null,
     chartRows: { ...st.chartRows },
     chartReps: { ...st.chartReps },
@@ -551,7 +568,7 @@ function goToChart() {
     focusPane()
     return
   }
-  document.getElementById('rchart-' + sec.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  document.getElementById('rchart-' + sec.id)?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })
 }
 // Renvoi du fil vers le volet : on donne le focus au diagramme épinglé plutôt que de
 // faire défiler (le volet est fixe, il est déjà entièrement visible).
@@ -565,38 +582,170 @@ function focusPane() {
 function stepTotal(step) {
   return repeatTotal(step, st.size)
 }
-function isDone(step) {
+// Section d'une étape (ids `<section>#<index>`). Les ids d'étape sont communs à tous les
+// exemplaires : seul le conteneur de progression change (copyView).
+const sectionById = computed(() => new Map(sections.value.map((s) => [s.id, s])))
+function sectionOfStep(id) {
+  return sectionById.value.get(String(id).slice(0, String(id).lastIndexOf('#')))
+}
+// Simultané : les deux exemplaires sont visibles à la fois (pas d'exemplaire actif).
+const isSimul = (sec) => copiesOf(sec) > 1 && copyModeOf(sec, st.copyMode) === 'simultaneous'
+function isDoneIn(step, view) {
   if (step.note || step.chart) return true
-  if (step.repeat) {
-    const tot = stepTotal(step)
-    return tot === 0 ? true : (st.counters[step.id] || 0) >= tot
-  }
-  return !!st.done[step.id]
+  return stepIsDone(step, view.done, view.counters, st.size)
+}
+// Rangs faits d'un exemplaire dans la section, et exemplaire en retard (1 à égalité).
+const rowsDoneIn = (sec, c) => checkableStepsOf(sec).filter((x) => isDoneIn(x, copyView(st, c))).length
+const laggingOf = (sec) => laggingCopy(Array.from({ length: copiesOf(sec) }, (_, i) => rowsDoneIn(sec, i + 1)))
+// Exemplaire qui reçoit les gestes sans cible précise (compteurs, notification) : l'actif en
+// séquentiel, celui en retard en simultané.
+const workCopyOf = (sec) => (isSimul(sec) ? laggingOf(sec) : activeCopyOf(st, sec))
+// Exemplaire de travail d'une section (1 sans copies) et sa vue { done, counters }.
+const activeViewOf = (sec) => copyView(st, workCopyOf(sec))
+// Coche affichée : celle de l'exemplaire actif ; en simultané, faite quand les DEUX le sont.
+function isDoneFor(sec, step) {
+  if (isSimul(sec)) return [1, 2].every((c) => isDoneIn(step, copyView(st, c)))
+  return isDoneIn(step, activeViewOf(sec))
+}
+// Écart entre les deux exemplaires : { n: exemplaire en retard, rows } ou null à égalité.
+// (Le pluriel se règle par `count` : `n` est le numéro de chaussette, vue-i18n le lirait sinon.)
+function copyGap(sec) {
+  if (!isSimul(sec)) return null
+  const a = rowsDoneIn(sec, 1)
+  const b = rowsDoneIn(sec, 2)
+  return a === b ? null : { n: laggingCopy([a, b]), rows: Math.abs(a - b) }
 }
 const isCountable = (step) => !step.note && !step.chart // rangs + compteurs
 const isRow = isRowStep // rangs cochables (nav préc/suiv)
 
-const countableSteps = computed(() => allSteps.value.filter(isCountable))
-const doneCount = computed(() => countableSteps.value.filter(isDone).length)
-const progressPct = computed(() => (countableSteps.value.length ? Math.round((doneCount.value / countableSteps.value.length) * 100) : 0))
-// Étape en cours : premier rang non coché OU compteur non atteint (spec 30/09). La navigation
-// préc/suiv (`isRow`) reste sur les seuls rangs.
-const currentStepId = computed(() => currentStep(sections.value, st)?.step.id || null)
-
+// Progression TOUS exemplaires confondus (même règle que readerProgress, sinon l'en-tête et
+// l'onglet Sections de la fiche projet divergent).
 function sectionCountable(sec) {
   return sec.steps.filter(isCountable)
 }
 function sectionDoneCount(sec) {
-  return sectionCountable(sec).filter(isDone).length
+  const cs = sectionCountable(sec)
+  let n = 0
+  for (let c = 1; c <= copiesOf(sec); c++) {
+    const v = copyView(st, c)
+    n += cs.filter((x) => isDoneIn(x, v)).length
+  }
+  return n
 }
+function sectionTotalCount(sec) {
+  return sectionCountable(sec).length * copiesOf(sec)
+}
+const doneCount = computed(() => sections.value.reduce((a, sec) => a + sectionDoneCount(sec), 0))
+const totalCount = computed(() => sections.value.reduce((a, sec) => a + sectionTotalCount(sec), 0))
+const progressPct = computed(() => (totalCount.value ? Math.round((doneCount.value / totalCount.value) * 100) : 0))
+// État vu par la navigation (étape en cours, reprise) : pour chaque section séquentielle, la
+// progression de son exemplaire de travail (workCopies, même règle que la notification : l'actif,
+// ou l'exemplaire non complet quand tout l'actif est fait). Sans exemplaires, c'est `st` lui-même.
+const trackState = computed(() => {
+  if (!sections.value.some((sec) => copiesOf(sec) > 1)) return st
+  const works = workCopies(sections.value, st, st.size)
+  const done = {}
+  const counters = {}
+  // Comme la notification : un `last` posé sur un autre exemplaire que celui de travail d'une
+  // section séquentielle n'oriente pas l'étape en cours (sans `copy` : l'exemplaire 1).
+  let last = st.last
+  if (last?.kind === 'step') {
+    const lastSec = sectionOfStep(last.id)
+    if (lastSec && copiesOf(lastSec) > 1 && !isSimul(lastSec) && (last.copy || 1) !== works[lastSec.id]) last = null
+  }
+  for (const sec of sections.value) {
+    if (isSimul(sec)) {
+      // Simultané : une étape n'est « faite » que si elle l'est dans les deux exemplaires
+      // (le rang en cours est le premier où une chaussette reste à faire).
+      const v1 = copyView(st, 1)
+      const v2 = copyView(st, 2)
+      for (const step of sec.steps) {
+        if (v1.done[step.id] && v2.done[step.id]) done[step.id] = true
+        if (v1.counters[step.id] != null || v2.counters[step.id] != null) {
+          counters[step.id] = Math.min(v1.counters[step.id] || 0, v2.counters[step.id] || 0)
+        }
+      }
+      continue
+    }
+    const v = copyView(st, works[sec.id] || 1)
+    for (const step of sec.steps) {
+      if (v.done[step.id]) done[step.id] = v.done[step.id]
+      if (v.counters[step.id] != null) counters[step.id] = v.counters[step.id]
+    }
+  }
+  return { ...st, done, counters, last }
+})
+// Étape en cours : premier rang non coché OU compteur non atteint (spec 30/09). La navigation
+// préc/suiv (`isRow`) reste sur les seuls rangs.
+const currentStepId = computed(() => currentStep(sections.value, trackState.value)?.step.id || null)
+
 function sectionProgress(sec) {
-  return `${sectionDoneCount(sec)}/${sectionCountable(sec).length}`
+  return `${sectionDoneCount(sec)}/${sectionTotalCount(sec)}`
 }
 // Auto-complétion : une section est « faite » quand tous ses rangs sont cochés ET tous ses
-// compteurs de répétition atteints.
+// compteurs de répétition atteints, dans tous ses exemplaires.
 function sectionDone(sec) {
-  const cs = sectionCountable(sec)
-  return cs.length > 0 && cs.every(isDone)
+  const total = sectionTotalCount(sec)
+  return total > 0 && sectionDoneCount(sec) === total
+}
+
+// Aperçu lecture seule : la répétition demandée (« 2 exemplaires »).
+const copiesText = (c) => t(c.together ? 'reader.copies.nTogether' : 'reader.copies.n', { n: c.n })
+// En-tête d'exemplaires : séquentiel seulement (en simultané, les deux coches et l'écart).
+const showCopies = (sec) => copiesOf(sec) > 1 && copyModeOf(sec, st.copyMode) === 'sequential'
+// Technique des chaussettes du projet (spec 2026-10-05) : un choix pour tout le projet, en haut
+// du lecteur. Changer avec des rangs de chaussette faits remet ces parties à zéro, après
+// confirmation ; sans progression, la bascule est immédiate.
+const sockPairs = computed(() => sockPairSections(sections.value))
+const techMode = computed(() => (st.copyMode === 'simultaneous' ? 'simultaneous' : 'sequential'))
+const TECH_MODES = ['sequential', 'simultaneous']
+const techLabel = (m) => t(m === 'simultaneous' ? 'reader.copies.together' : 'reader.copies.sequential')
+const pendingTechnique = ref(null)
+const isSockPair = (sec) => canWorkSimultaneously(sectionKind(sec), copiesOf(sec))
+function requestTechnique(m) {
+  if (m === techMode.value) return
+  if (hasSockProgress(sockPairs.value, st)) pendingTechnique.value = m
+  else applyTechnique(m)
+}
+function applyTechnique(m) {
+  const next = resetSockProgress(sections.value, st)
+  st.done = next.done
+  st.counters = next.counters
+  st.copyState = next.copyState || {}
+  st.activeCopy = next.activeCopy || {}
+  st.chartRows = next.chartRows || {}
+  st.chartReps = next.chartReps || {}
+  st.chartCurtains = next.chartCurtains || {}
+  st.last = next.last ?? null
+  st.copyMode = m === 'simultaneous' ? 'simultaneous' : null
+  persist()
+}
+// Après remise à zéro : retour au premier rang de la première partie de chaussette.
+function confirmTechnique() {
+  const m = pendingTechnique.value
+  pendingTechnique.value = null
+  applyTechnique(m)
+  const first = sockPairs.value[0]?.steps.find(isTrackedStep)
+  if (first) nextTick(() => document.getElementById('rstep-' + first.id)?.scrollIntoView({ behavior: scrollBehavior(), block: 'center' }))
+}
+const copyKey = (sec) => (isSockKind(sectionKind(sec)) ? 'chaussette' : 'generic')
+function copyTitle(sec) {
+  return t('reader.copies.title.' + copyKey(sec), { n: activeCopyOf(st, sec), total: copiesOf(sec) })
+}
+function switchCopy(sec, c) {
+  st.activeCopy = { ...st.activeCopy, [sec.id]: c }
+  persist({ worked: true })
+}
+// Exemplaire suivant (boucle sur le 1 après le dernier). Effectif tout de suite ; si l'exemplaire
+// quitté n'est pas fini, confirmation légère annulable (snackbar « Annuler »).
+function nextCopy(sec) {
+  const from = activeCopyOf(st, sec)
+  const to = from >= copiesOf(sec) ? 1 : from + 1
+  const unfinished = sectionCountable(sec).some((x) => !isDoneIn(x, copyView(st, from)))
+  switchCopy(sec, to)
+  if (unfinished) {
+    snackbar.show(copyTitle(sec), { actionLabel: t('common.undo'), onAction: () => switchCopy(sec, from) })
+  }
 }
 
 /* ── actions ── */
@@ -604,18 +753,74 @@ function selectSize(i) {
   st.size = st.size === i ? null : i
   persist()
 }
-function toggleDone(id) {
-  st.done[id] = !st.done[id]
-  if (!st.done[id]) delete st.done[id]
+// Écrit dans la progression de l'exemplaire actif de la section de l'étape (exemplaire 1 =
+// `st.done` / `st.counters`, les autres = `st.copyState[c]`) ; `fn(done, counters)` les mute.
+function writeActiveView(id, fn, copy) {
+  const sec = sectionOfStep(id)
+  const c = copy ?? (sec ? workCopyOf(sec) : 1)
+  if (c <= 1) return fn(st.done, st.counters)
+  const v = copyView(st, c)
+  const done = { ...v.done }
+  const counters = { ...v.counters }
+  const r = fn(done, counters)
+  st.copyState = { ...st.copyState, [c]: { done, counters } }
+  return r
+}
+// `c` : exemplaire visé (coche directe en simultané) ; sinon l'exemplaire de travail, résolu
+// AVANT l'écriture (le dernier geste garde l'exemplaire touché).
+function toggleDone(id, c) {
+  const sec = sectionOfStep(id)
+  const copy = c ?? (sec ? workCopyOf(sec) : 1)
+  const checked = writeActiveView(
+    id,
+    (done) => {
+      done[id] = !done[id]
+      if (!done[id]) delete done[id]
+      return !!done[id]
+    },
+    copy,
+  )
   // Cocher ET décocher posent la trace du dernier geste (intent 2026-09-30) : la reprise
   // atterrit sur ce rang et l'étape en cours le suit.
-  markStepGesture(id)
+  markStepGesture(id, copy)
   // Décocher compte AUSSI comme du tricot : c'est une correction en cours de session, donc bien
   // la preuve qu'on travaille CE projet en ce moment.
   persist({ worked: true })
   // Après avoir coché, recentrer l'écran sur le prochain rang à travailler (#6) — via
   // resumeAfterGesture : plus rien après le dernier geste = pas de défilement.
-  if (st.done[id]) nextTick(() => resumeAfterGesture())
+  // En simultané, le rang reste « en cours » tant que l'autre chaussette n'est pas cochée : pas de défilement.
+  const step = sec?.steps.find((x) => x.id === id)
+  const rowComplete = !isSimul(sec) || !step || isDoneFor(sec, step)
+  if (checked && rowComplete) afterStepDone(sec, copy)
+}
+// Étape tout juste faite (rang coché, compteur au total). Séquentiel : si elle finit l'exemplaire
+// (sur toute la chaussette pour une chaussette en plusieurs sections, copyAfterFinish), on bascule
+// sa suite de sections sur l'exemplaire suivant non complet et on recentre sur son premier rang à
+// faire, au lieu d'enchaîner sur la section suivante. Sinon, recentrage après le geste.
+// `last` passe sur le rang visé de l'exemplaire suivant : celui du geste, posé sur l'exemplaire
+// quitté, serait écarté par trackState et l'étape en cours retomberait au premier non fait du
+// patron. « Annuler » rend les exemplaires et le `last` d'avant (coche du dernier rang par erreur).
+function afterStepDone(sec, copy) {
+  const next = sec ? copyAfterFinish(sections.value, sec, st, copy, st.size) : null
+  if (!next) return nextTick(() => resumeAfterGesture())
+  const prev = { last: st.last, activeCopy: st.activeCopy }
+  st.last = next.copy > 1 ? { kind: 'step', id: next.step.id, copy: next.copy } : { kind: 'step', id: next.step.id }
+  st.activeCopy = { ...st.activeCopy, ...Object.fromEntries(next.run.map((id) => [id, next.copy])) }
+  persist({ worked: true })
+  snackbar.show(copyTitle(sec), {
+    actionLabel: t('common.undo'),
+    onAction: () => {
+      st.last = prev.last
+      st.activeCopy = prev.activeCopy
+      persist({ worked: true })
+    },
+  })
+  nextTick(() => document.getElementById('rstep-' + next.step.id)?.scrollIntoView({ behavior: scrollBehavior(), block: 'center' }))
+}
+const toggleCopyDone = (stepId, c) => toggleDone(stepId, c)
+// Tap sur la zone d'un rang : coche l'exemplaire en retard en simultané, l'actif sinon.
+function tapRow(sec, step) {
+  toggleDone(step.id, sec ? workCopyOf(sec) : undefined)
 }
 // Notification Android du rang en cours (projet seulement) : son bouton repasse par
 // toggleDone ci-dessus (rang) ou bumpCounter ci-dessous (« +1 » d'un compteur) ; le rappel
@@ -692,19 +897,43 @@ onBeforeUnmount(() => {
   Promise.resolve(removeResumeNotif?.remove?.()).catch(() => {})
   removeResumeNotif = null
 })
-function counterVal(step) {
-  return Math.min(st.counters[step.id] || 0, stepTotal(step))
+// Exemplaire visé par un geste de compteur sans cible (`delta` : +1 plus, -1 moins). Simultané :
+// selon le compteur de CETTE étape (counterCopy : « + » le plus bas, « − » le plus haut) ;
+// sinon l'exemplaire de travail.
+function counterCopyOf(step, delta) {
+  const sec = sectionOfStep(step.id)
+  if (!sec) return 1
+  if (!isSimul(sec)) return workCopyOf(sec)
+  return counterCopy([counterVal(step, 1), counterVal(step, 2)], delta)
 }
-function bumpCounter(step, delta) {
+// Valeur affichée : celle de l'exemplaire `c`, sinon celle de l'exemplaire que vise « + ».
+function counterVal(step, c) {
+  const v = copyView(st, c ?? counterCopyOf(step, 1))
+  return Math.min(v.counters[step.id] || 0, stepTotal(step))
+}
+// Simultané : chaussette que vise « + », nommée dans le libellé du compteur.
+function counterCopyLabel(sec, step) {
+  return t('reader.copies.title.' + copyKey(sec), { n: counterCopyOf(step, 1), total: copiesOf(sec) })
+}
+// `c` : exemplaire visé (appui de la notification) ; sinon résolu AVANT l'écriture (le geste
+// peut faire changer l'exemplaire en retard, le dernier geste doit garder celui touché).
+function bumpCounter(step, delta, c) {
+  const copy = c ?? counterCopyOf(step, delta)
   const total = stepTotal(step)
-  const before = counterVal(step)
-  st.counters[step.id] = Math.max(0, Math.min(total, before + delta))
+  const before = counterVal(step, copy)
+  const after = Math.max(0, Math.min(total, before + delta))
+  writeActiveView(
+    step.id,
+    (_done, counters) => {
+      counters[step.id] = after
+    },
+    copy,
+  )
   // Plus ET moins posent la trace du dernier geste (intent 2026-09-30), comme un cochage.
-  markStepGesture(step.id)
+  markStepGesture(step.id, copy)
   persist({ worked: true })
-  // Total atteint : recentrer sur l'étape suivante, comme après un cochage (sans repli —
-  // resumeAfterGesture).
-  if (total > 0 && before < total && st.counters[step.id] >= total) nextTick(() => resumeAfterGesture())
+  // Total atteint : même suite qu'un cochage (afterStepDone).
+  if (total > 0 && before < total && after >= total) afterStepDone(sectionOfStep(step.id), copy)
 }
 function chartRow(secId) {
   const row = st.chartRows[secId] || 1
@@ -733,8 +962,11 @@ function chartRep(secId) {
 // Geste de progression SUR UNE ÉTAPE (coche, décoche, compteur plus/moins) : trace du dernier
 // geste (intent 2026-09-30) + effacement du badge. `st.last` est toujours REMPLACÉ, jamais
 // muté en place — le computed de la notification s'abonne au remplacement de la propriété.
-function markStepGesture(id) {
-  st.last = { kind: 'step', id }
+function markStepGesture(id, c) {
+  const sec = sectionOfStep(id)
+  const copy = c ?? (sec ? workCopyOf(sec) : 1)
+  // `copy` seulement au-delà de l'exemplaire 1 : un projet sans exemplaires garde son `last` d'avant.
+  st.last = copy > 1 ? { kind: 'step', id, copy } : { kind: 'step', id }
   clearResumeBadge()
 }
 // Geste de progression DANS une grille (rang, rideau, répétition) : trace du dernier geste
@@ -833,7 +1065,7 @@ function resume(behavior = 'smooth') {
 // cours, qui depuis le chantier « reprise » replie vers le premier non fait du patron : un
 // yank indésirable ici. Pour qui suit l'ordre : identique à l'ancien comportement.
 function resumeAfterGesture(behavior = 'smooth') {
-  const lp = st.last?.kind === 'step' ? nextStepAfter(sections.value, st, st.last.id) : null
+  const lp = st.last?.kind === 'step' ? nextStepAfter(sections.value, trackState.value, st.last.id) : null
   if (lp) document.getElementById('rstep-' + lp.step.id)?.scrollIntoView({ behavior, block: 'center' })
 }
 
@@ -843,7 +1075,7 @@ function resumeAfterGesture(behavior = 'smooth') {
 // sorte de cible atteinte ('step'|'chart') ou null (rien de résolvable : l'appelant retombe
 // sur le chemin historique, sans badge).
 function goToLastWorked(behavior = 'smooth') {
-  const lp = lastPlace(sections.value, st, reader.value)
+  const lp = lastPlace(sections.value, trackState.value, reader.value)
   if (!lp) return null
   if (lp.kind === 'step') {
     document.getElementById('rstep-' + lp.step.id)?.scrollIntoView({ behavior, block: 'center' })
@@ -1081,7 +1313,7 @@ function onCardTap(e, target, checkable = false) {
   if (checkable) {
     const box = e.currentTarget.getBoundingClientRect()
     if (inCheckZone(e.clientX, box.left, box.width)) {
-      toggleDone(target.id)
+      tapRow(sectionOfStep(target.id), target)
       return
     }
   }
@@ -1238,6 +1470,25 @@ function onKey(e) {
         </p>
       </section>
 
+      <!-- Technique des chaussettes (projet seulement, spec 2026-10-05) : même pastilles que la taille. -->
+      <section v-if="!readOnly && sockPairs.length" class="szcard techcard">
+        <h2 id="techcard-title">{{ t('reader.copies.technique') }}</h2>
+        <div class="szpills" role="radiogroup" aria-labelledby="techcard-title">
+          <button
+            v-for="m in TECH_MODES"
+            :key="m"
+            type="button"
+            role="radio"
+            class="szpill"
+            :class="{ 'szpill--on': techMode === m }"
+            :aria-checked="String(techMode === m)"
+            @click="requestTechnique(m)"
+          >
+            {{ techLabel(m) }}
+          </button>
+        </div>
+      </section>
+
       <p v-if="readOnly" class="ro-note">{{ t('reader.readOnlyNote') }}</p>
       <!-- Aperçu lecture seule : légende des marqueurs de suivi. Les marqueurs eux-mêmes
            sont décoratifs (aria-hidden), c'est ELLE qui porte le sens — texte réel, lisible
@@ -1322,6 +1573,16 @@ function onKey(e) {
             <template v-else>{{ sectionProgress(sec) }}</template>
           </span>
           <ReaderFixOverlay v-if="fixTarget === sec.id" @fix="startFixSection(sec)" @close="fixTarget = null" />
+        </div>
+        <div v-if="readOnly && copiesSummary(sec)" class="rsec__copies">
+          <span class="rsec__copy rsec__copy--ro"><AppIcon name="repeat" :size="14" /> {{ copiesText(copiesSummary(sec)) }}</span>
+        </div>
+        <div v-else-if="!readOnly && showCopies(sec)" class="rsec__copies">
+          <span class="rsec__copy">{{ copyTitle(sec) }}</span>
+          <button v-if="!isSockPair(sec)" type="button" class="rsec__copies-next" @click="nextCopy(sec)">{{ t('reader.copies.next.' + copyKey(sec)) }}</button>
+        </div>
+        <div v-else-if="!readOnly && copyGap(sec)" class="rsec__copies">
+          <span class="rsec__gap">{{ t('reader.copies.gap', { ...copyGap(sec), count: copyGap(sec).rows }) }}</span>
         </div>
 
         <template v-for="step in sec.steps" :key="step.id">
@@ -1423,7 +1684,7 @@ function onKey(e) {
           <!-- RÉPÉTITION : texte verbatim + compteur (interactif en projet). Aperçu lecture
                seule : marqueur .rmark--rep en premier enfant — .rstep est déjà flex, il se
                place donc à gauche du corps sans CSS supplémentaire. -->
-          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDone(step), 'rstep--cur': !readOnly && currentStepId === step.id }" @click="onCardTap($event, step)">
+          <article v-else-if="step.repeat" :id="'rstep-' + step.id" class="rstep rstep--rep" :class="{ 'rstep--done': !readOnly && isDoneFor(sec, step), 'rstep--cur': !readOnly && currentStepId === step.id }" @click="onCardTap($event, step)">
             <span v-if="readOnly" class="rmark rmark--rep" aria-hidden="true"><AppIcon name="counter" :size="16" /></span>
             <div class="rstep__body">
               <p class="rstep__p"><ReaderLine :line="step" :size-index="st.size" :abbr-keys="abbrKeys" @abbr="onAbbr" /></p>
@@ -1433,13 +1694,13 @@ function onKey(e) {
               <p v-if="step.every" class="rstep__cadence">{{ t('reader.cadenceEvery', { every: step.every }) }}</p>
               <StepImages v-if="step.imgs && step.imgs.length" :imgs="step.imgs" />
               <div v-if="!readOnly && !(st.size != null && stepTotal(step) === 0)" class="rcount">
-                <span class="rcount__lab">{{ t('reader.repeatCounter') }}<template v-if="st.size == null"> · {{ t('reader.pickSizeShort') }}</template></span>
+                <span class="rcount__lab">{{ t('reader.repeatCounter') }}<template v-if="isSimul(sec)"> · {{ counterCopyLabel(sec, step) }}</template><template v-if="st.size == null"> · {{ t('reader.pickSizeShort') }}</template></span>
                 <!-- Libellés d'accessibilité : une ACTION, jamais le glyphe affiché (revue finale
                      du passage multilingue, 29/07). « moins » / « plus » annoncés tels quels par
                      TalkBack ne disent pas ce que fait le bouton, et n'étaient de surcroît pas
                      traduits — la règle « jamais de glyphe dans l'UI » vaut aussi pour un
                      aria-label (leçon déjà tirée sur la case « section faite », 18/07). -->
-                <button class="rcount__btn" :disabled="counterVal(step) <= 0" :aria-label="t('reader.repeatMinus')" @click="bumpCounter(step, -1)"><AppIcon name="minus" :size="16" /></button>
+                <button class="rcount__btn" :disabled="counterVal(step, counterCopyOf(step, -1)) <= 0" :aria-label="t('reader.repeatMinus')" @click="bumpCounter(step, -1)"><AppIcon name="minus" :size="16" /></button>
                 <span class="rcount__val" :class="{ 'rcount__val--full': counterVal(step) >= stepTotal(step) }">{{ counterVal(step) }} / {{ stepTotal(step) }}</span>
                 <button class="rcount__btn" :disabled="counterVal(step) >= stepTotal(step)" :aria-label="t('reader.repeatPlus')" @click="bumpCounter(step, 1)"><AppIcon name="plus" :size="16" /></button>
               </div>
@@ -1458,14 +1719,29 @@ function onKey(e) {
             v-else-if="!step.chart"
             :id="'rstep-' + step.id"
             class="rstep"
-            :class="{ 'rstep--done': !readOnly && st.done[step.id], 'rstep--cur': !readOnly && currentStepId === step.id }"
+            :class="{ 'rstep--done': !readOnly && isDoneFor(sec, step), 'rstep--cur': !readOnly && currentStepId === step.id }"
             @click="onCardTap($event, step, true)"
           >
+            <div v-if="!readOnly && isSimul(sec)" class="rchecks">
+              <button
+                v-for="c in 2"
+                :key="c"
+                class="rcheck"
+                :class="{ 'rcheck--on': isDoneIn(step, copyView(st, c)) }"
+                role="checkbox"
+                :aria-checked="isDoneIn(step, copyView(st, c))"
+                :aria-label="t('reader.copies.checkCopy', { n: c })"
+                @click="toggleCopyDone(step.id, c)"
+              >
+                <span class="rcheck__n" aria-hidden="true">{{ c }}</span>
+                <AppIcon name="check" :size="18" />
+              </button>
+            </div>
             <button
-              v-if="!readOnly"
+              v-else-if="!readOnly"
               class="rcheck"
               role="checkbox"
-              :aria-checked="!!st.done[step.id]"
+              :aria-checked="isDoneFor(sec, step)"
               :aria-label="t('reader.markDone')"
               @click="toggleDone(step.id)"
             >
@@ -1608,6 +1884,17 @@ function onKey(e) {
         <KeepScreenOnSwitchRow heading-id="am-keep-screen-title" />
       </template>
     </ReaderSheet>
+
+    <ConfirmDialog
+      :open="pendingTechnique != null"
+      :title="t('reader.copies.resetTitle')"
+      :message="t('reader.copies.resetMsg')"
+      :confirm-label="t('reader.copies.resetConfirm')"
+      :cancel-label="t('common.cancel')"
+      danger
+      @confirm="confirmTechnique"
+      @cancel="pendingTechnique = null"
+    />
 
     <RowNotifOnboardingDialog
       v-if="ctx === 'project'"
@@ -1980,6 +2267,35 @@ html[data-theme='dark'] .rhdr {
 .rsec__prog--done {
   color: var(--sage-deep);
 }
+.rsec__copies {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-3);
+}
+.rsec__copy {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-70);
+  font-variant-numeric: tabular-nums;
+}
+.rsec__copy--ro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.rsec__copies-next {
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--ink-20, currentColor);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
 /* note d'information (non cochable) */
 .rnote {
   position: relative;
@@ -2165,12 +2481,42 @@ html[data-theme='dark'] .rstep--done {
   stroke-linejoin: round;
   opacity: 0;
 }
-.rstep--done .rcheck {
+.rchecks {
+  flex: none;
+  display: flex;
+  gap: var(--sp-1, 4px);
+}
+/* Repère texte 1 / 2 : visible tant que la coche n'est pas posée, remplacé par le trait. */
+.rcheck__n {
+  grid-area: 1 / 1;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-55);
+  line-height: 1;
+}
+/* Le chiffre et la coche se superposent dans la même cellule. La coche est rendue par AppIcon,
+   dont l'élément de grille est l'enveloppe `.app-icon`, pas le <svg> : c'est elle qu'on place,
+   sinon elle part sur une 2e ligne et le chiffre remonte dans la moitié haute de la case. */
+.rchecks .rcheck :deep(.app-icon) {
+  grid-area: 1 / 1;
+}
+.rcheck--on .rcheck__n {
+  display: none;
+}
+.rsec__gap {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-70);
+  font-variant-numeric: tabular-nums;
+}
+.rstep--done .rcheck,
+.rcheck--on {
   background: var(--sage);
   border-color: var(--sage);
   box-shadow: var(--clay-sm);
 }
-.rstep--done .rcheck :deep(svg) {
+.rstep--done .rcheck :deep(svg),
+.rcheck--on :deep(svg) {
   opacity: 1;
 }
 .rstep__body {

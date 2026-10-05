@@ -8,7 +8,7 @@
 // un contexte isolé par test → IndexedDB Dexie vide, pas de fuite d'état entre tests).
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { completeOnboarding, openDemoProjectFromHome } from './helpers'
+import { completeOnboarding, openDemoProjectFromHome, attendreFinFondu } from './helpers'
 
 // ───────────────────────── helpers locaux ──────────────────────────────────
 
@@ -76,6 +76,8 @@ test('projet Bonnet Torsade → suivi reader opérationnel (tailles + coches) [n
 
 test('projet libre — onglet Sections sans violation a11y bloquante', async ({ page }) => {
   await createFreeProject(page)
+  // Contraste mesuré après le fondu d'entrée de l'écran, jamais pendant (attendreFinFondu).
+  await attendreFinFondu(page)
 
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

@@ -264,6 +264,9 @@
   },
   "rowNotif": {
     "title": "Row {index}/{total}, {section}",
+    "titleCopy": "{copy} · row {index}/{total} · {section}",
+    "sectionCopy": "{copy} · {section}",
+    "nextCopy": "Next, {copy}: {text}",
     "next": "Next: {text}",
     "nextIn": "Next, {section}: {text}",
     "check": "Check off row",
@@ -303,6 +306,7 @@
     "pattern": "Pattern",
     "patternHint": "The pattern followed for this project. Choosing it imports its sections into the project (you track your rows on them).",
     "patternSource": "Source pattern",
+    "patternWithDesigner": "{name}, by {author}",
     "patternMissing": "This project's pattern was deleted. Your progress is safe: restore it from the trash (Settings) to get your instructions back.",
     "patternMissingShort": "This project's pattern was deleted — restore it from the trash.",
     "patternChangeConfirm": "Changing pattern will replace this project's sections and their progress. Continue?",
@@ -432,7 +436,8 @@
         "recentColor": "Recent color",
         "textLabel": "Free text (optional)",
         "share": "Share",
-        "calendar": "Calendar map"
+        "calendar": "Calendar map",
+        "pattern": "Pattern"
       }
     },
     "galleryPattern": "Pattern",
@@ -654,6 +659,7 @@
     "allSizes": "All",
     "instrForSize": "Instructions for size {size}",
     "by": "by",
+    "designerAdd": "Designer: add",
     "addSection": "Add section",
     "createProject": "Create a project from this pattern",
     "preview": "Preview the pattern",
@@ -697,8 +703,7 @@
     "titleRowtine": "Import a Rowtine file",
     "leadRowtine": "A pattern already prepared in a Rowtine file: text and images are imported as is, on your device, offline.",
     "pickRowtine": "Choose a .rowtine or .zip file",
-    "lead": "The pattern is parsed on your device: free, offline, faithful to the PDF.",
-    "leadNext": "The pattern is saved straight into your library; you'll be able to fix the sections afterwards if needed.",
+    "lead": "The pattern is parsed on your device: free, offline, faithful to the PDF. It is saved straight into your library.",
     "pick": "Choose a PDF file",
     "waitingSync": "Syncing your library, the import will start as soon as it's done…",
     "parsing": "Parsing the PDF…",
@@ -719,16 +724,26 @@
     "cancelImport": "Cancel the import",
     "saved": "Pattern imported into the library",
     "caveatTitle": "Read through the pattern before you start",
-    "caveatBody": "The import is never perfect: check the numbers, the sizes and the repeats, and fix them directly in the app.",
+    "caveatBody": "The import is never perfect: check the numbers, the sizes and the repeats.",
     "doneHowToFix": "How to fix it?",
     "viewPattern": "View the pattern",
     "warnings": "{n} point(s) to check",
-    "nextHint": "Go through it section by section first and fix its content if needed. You'll start your project from the pattern.",
     "blockTitle": "Risky import",
     "blockColumns": "This PDF looks laid out in more than 2 columns: the extracted text will be scrambled.",
-    "blockMultiPattern": "This file looks like it holds several patterns, or a whole book: Rowtine imports one pattern at a time. Save the pages of the pattern you want as a separate PDF, then import that file.",
+    "blockMultiPattern": "This file seems to contain several patterns, or a whole book: Rowtine imports one pattern at a time. Choose the pages of the pattern you want.",
+    "blockMultiPatternSubset": "The chosen pages still seem to contain several patterns. Choose only the pages of the pattern you want.",
+    "choosePages": "Choose the pages",
+    "pickPagesLink": "Does the PDF hold several patterns? Choose the pages",
     "blockLead": "Automatic import was paused. You can import it anyway, but it will likely need significant correction.",
     "importAnyway": "Import anyway"
+  },
+  "pagesSelect": {
+    "title": "Choose the pattern's pages",
+    "hint": "Tap each page of the pattern you want to import, including its shared pages (materials, abbreviations).",
+    "count": "No page selected | {n} page selected | {n} pages selected",
+    "pageLabel": "Page {n}",
+    "confirm": "Import these pages",
+    "error": "The pages of this PDF can't be displayed."
   },
   "importCaveat": {
     "title": "An imported pattern needs a read-through",
@@ -1216,9 +1231,10 @@
       }
     },
     "family": {
-      "vetement": "Garment parts",
-      "accessoire": "Accessory parts",
-      "amigurumi": "Toy parts",
+      "vetement": "Garments",
+      "accessoire": "Accessories",
+      "chaussette": "Socks",
+      "amigurumi": "Toys",
       "technique": "Stitch patterns & technique",
       "transversal": "General"
     },
@@ -1234,6 +1250,12 @@
       "oreille": "Ears",
       "museau": "Muzzle",
       "queue": "Tail",
+      "cotes": "Cuff",
+      "pointe": "Toe",
+      "pied": "Foot",
+      "talon": "Heel",
+      "jambe": "Leg / cuff",
+      "gousset": "Gusset",
       "motif": "Stitch pattern",
       "dentelle": "Lace",
       "echantillon": "Gauge",
@@ -1249,7 +1271,31 @@
       "finitions": "Finishing",
       "infos": "Info and tips",
       "autre": "Other",
-      "pelote": "Generic"
+      "pelote": "Generic",
+      "repetable": "Generic repeatable"
+    },
+    "copies": {
+      "label": "Copies",
+      "one": "1 copy",
+      "n": "{n} copies",
+      "nTogether": "{n} copies, at the same time",
+      "sequential": "One after the other",
+      "together": "Both at the same time",
+      "technique": "Working method",
+      "resetTitle": "Change working method?",
+      "resetMsg": "Sock progress starts over from zero, for both socks. Other sections are not affected.",
+      "resetConfirm": "Start over",
+      "removeConfirm": "Removing {n} copy(ies) erases their progress. Continue?",
+      "next": {
+        "chaussette": "Next sock",
+        "generic": "Next copy"
+      },
+      "title": {
+        "chaussette": "Sock {n} / {total}",
+        "generic": "Copy {n} / {total}"
+      },
+      "gap": "Sock {n}: {rows} row behind | Sock {n}: {rows} rows behind",
+      "checkCopy": "Tick for sock {n}"
     },
     "edit": {
       "addSection": "+ Add a section",

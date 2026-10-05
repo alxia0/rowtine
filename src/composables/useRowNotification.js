@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 import { buildRowNotification } from '@/utils/row-notification'
 import { withStepIds } from '@/utils/reader'
+import { parseCopyStepId, copiesOf, copyView } from '@/utils/section-copies'
 import {
   showRowNotification,
   cancelRowNotification,
@@ -88,6 +89,12 @@ export function useRowNotification({
         size: state.size,
         done: state.done,
         counters: state.counters,
+        // Exemplaires 2+ et exemplaire actif : buildRowNotification choisit, par section,
+        // l'exemplaire de travail (actif en séquentiel, en retard en simultané).
+        copyState: state.copyState,
+        activeCopy: state.activeCopy,
+        // Technique du projet, remplacée (jamais mutée) : lue ici, le computed y est abonné.
+        copyMode: state.copyMode,
         // Trace du dernier geste (intent 2026-09-30) : l'étape en cours — donc la
         // notification — suit le dernier rang travaillé, pas le premier non fait du patron.
         // Toujours REMPLACÉ (st.last = {…}), jamais muté : la lecture ci-dessous suffit à
@@ -115,6 +122,13 @@ export function useRowNotification({
     // Idem pour les compteurs et les positions de grille (mutés en place par le lecteur).
     Object.values(state.counters || {})
     Object.values(state.chartRows || {})
+    // Exemplaires : copyState / activeCopy sont REMPLACÉS par le lecteur, mais les lire en
+    // profondeur couvre aussi une mutation en place.
+    Object.values(state.copyState || {}).forEach((v) => {
+      Object.keys(v?.done || {})
+      Object.values(v?.counters || {})
+    })
+    Object.values(state.activeCopy || {})
     return buildRowNotification(chargeInputs())
   })
 
@@ -137,20 +151,35 @@ export function useRowNotification({
     send(p)
   }
 
+  // Même étape, quel que soit l'exemplaire visé : l'exemplaire en retard a pu changer entre
+  // l'émission de l'appui et son application (rejeu), l'appui reste adressé à son exemplaire.
+  const sameStep = (a, b) => parseCopyStepId(a).stepId === parseCopyStepId(b).stepId
+
   // Application d'un appui visant l'étape de la charge `p`, quel que soit le kind ; le
   // lecteur reste le seul écrivain. `delta` : -1 (moins) ou +1 (plus, et défaut).
-  function applyRowTap(p, stepId, delta) {
+  // `copy` : exemplaire visé par l'id d'appui (`sec#3@2`) ; ignoré sans erreur si la section
+  // n'a plus autant d'exemplaires. Sans exemplaires (projet ou section), le lecteur est appelé
+  // comme avant, sans cible.
+  function applyRowTap(p, rawId, delta) {
+    const { stepId, copy } = parseCopyStepId(rawId)
     if (p.kind === 'chart') {
       chartAcks.value = new Set([...chartAcks.value, stepId])
-    } else if (p.kind === 'counter') {
-      const step = withStepIds(reader.value?.sections || [])
-        .flatMap((sec) => sec.steps)
-        .find((s) => s.id === stepId)
-      if (step) bumpCounter(step, delta === -1 ? -1 : 1)
-    } else if (!state.done[stepId]) {
+      return
+    }
+    const sec = withStepIds(reader.value?.sections || []).find((s) => stepId.startsWith(s.id + '#'))
+    const multi = !!sec && copiesOf(sec) > 1
+    if (copy > 1 && (!multi || copy > copiesOf(sec))) return
+    if (p.kind === 'counter') {
+      const step = sec?.steps.find((s) => s.id === stepId)
+      if (!step) return
+      if (multi) bumpCounter(step, delta === -1 ? -1 : 1, copy)
+      else bumpCounter(step, delta === -1 ? -1 : 1)
+    } else if (!copyView(state, copy).done[stepId]) {
       // Filet, inatteignable en pratique : la charge d'un rang coché désigne déjà l'étape
-      // suivante, la garde du stepId a donc rejeté l'appui.
-      toggleDone(stepId)
+      // suivante, la garde du stepId a donc rejeté l'appui. Par exemplaire : un appui rejoué
+      // sur une coche déjà posée ne la décoche jamais.
+      if (multi) toggleDone(stepId, copy)
+      else toggleDone(stepId)
     }
   }
 
@@ -173,7 +202,7 @@ export function useRowNotification({
       return
     }
     const p = buildRowNotification(chargeInputs())
-    if (Number(projectId) !== Number(project.value.id) || !p || stepId !== p.stepId) {
+    if (Number(projectId) !== Number(project.value.id) || !p || !sameStep(stepId, p.stepId)) {
       // Rejeté : le repli natif a pu remplacer la notification par « Appui retenu », le
       // lecteur repose sa charge courante pour lui rendre ses boutons.
       ack(tapId)
@@ -218,7 +247,7 @@ export function useRowNotification({
       // payload (fabrique partagée ci-dessus, y compris chartAcks courant et la règle de
       // taille des diagrammes).
       const p = buildRowNotification(chargeInputs())
-      if (!p || tap.stepId !== p.stepId) {
+      if (!p || !sameStep(tap.stepId, p.stepId)) {
         // Appui caduc (tout est coché, étape dépassée, patron refondu ailleurs) :
         // effacé, ignoré en silence — l'objectif de l'appui est déjà atteint ou dépassé.
         clearPendingRowAction()

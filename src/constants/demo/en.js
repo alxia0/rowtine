@@ -18,6 +18,8 @@ const CHART_TORSADE = {
 /* ───────────────────────────── Cable Beanie (pattern for the in-progress project) ────── */
 const BONNET = {
   demoId: 'bonnet',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Cable Beanie',
   type: 'knitting',
   category: 'accessories',
@@ -106,6 +108,8 @@ const BONNET = {
 /* ───────────────────────────── Cloud Scarf (one size) ────────────────────────────────── */
 const ECHARPE = {
   demoId: 'echarpe',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Cloud Scarf',
   type: 'knitting',
   category: 'accessories',
@@ -163,6 +167,8 @@ const ECHARPE = {
 /* ───────────────────────────── Granny Bag (crochet) ──────────────────────────────────── */
 const SAC = {
   demoId: 'sac',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Granny Bag',
   type: 'crochet',
   category: 'accessories',

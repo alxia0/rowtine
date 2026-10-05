@@ -125,6 +125,7 @@ patternless projects, so it can never have a price of its own.
   knitted, and in brackets the pattern price, which you only pay once, even if you
   knit it three times. If a yarn has no price recorded, the app says so instead of
   pretending it was free.
+  The linked pattern is shown there with its designer ("by ...") when one is filled in.
 - **Photos**: your project photos, plus the pattern's original photos
   below them. You choose which one to use as the **cover photo** (by
   default, the pattern's first photo). Tap a photo to open it full
@@ -210,7 +211,8 @@ The settings drawer has three tabs:
   Wool"), without percentages. Ticked from the start, it adds a full-width band to
   the badge, between two thin rules, above the calendar map (below the figures if
   you leave the map out). The **Calendar map** chip adds the grid of the days you
-  worked. This is also where you choose the **Language** of the badge's text,
+  worked. The **Pattern** chip adds a line under the badge title, "Pattern name, by
+  Designer" (just the name if no designer is filled in). This is also where you choose the **Language** of the badge's text,
   independent of the app's (handy for sending it to someone who doesn't speak
   yours: the fibres are translated with it), and a line of your own under **Free
   text (optional)**, 80 characters at most.
@@ -248,6 +250,18 @@ imported and checked pattern), it gives you:
   per-section progress bar, and built-in repeat counters
   ("− 3/12 +") that disappear on their own if they don't apply to your
   chosen size.
+- **Sections with several copies**: a pair of socks, two sleeves or the ears or legs of an amigurumi
+  don't have to be written twice. In the pattern editor, set the number of copies of a
+  section; each copy keeps its own progress, and the section shows the total of all of them.
+  Outside socks, a doubled section is worked one copy after the other, with a button to move on to the next
+  copy. For a pair of socks, the working method is chosen in the project, with "Working method" at the top
+  of the reader, above the rows, or in the project sheet: "One after the other" (the whole of sock 1,
+  then sock 2 from its first part: ticking the last row of sock 1, all its parts included, takes you to sock 2, at its first part, with "Undo") or "Both at the same time" (each row then has one tick per sock,
+  and the gap between them is shown). The same pattern can therefore be knitted differently in another
+  project. Changing the working method after you have started asks for confirmation and sends the socks back
+  to zero, rows and charts included; the rest of the pattern stays as it is. The current-row notification follows the active copy (or the one
+  that is behind) and names it. A section to repeat that is not a sleeve, a sock part or an ear?
+  Give it the "Generic repeatable" type, then set its number of copies.
 - **The interactive chart**: the pattern's diagram (lifted straight
   from the original PDF) with a **band that follows your current
   row**, rows already done shown greyed out, and a "Row X of 52"
@@ -512,6 +526,13 @@ just more comfortable.
   glance, and you fix it in the editor.
   (The reading also recognises the round and square grids of granny patterns,
   never perfectly: the read-through remains essential.)
+  **A PDF that holds several patterns** (a collection, or a pattern written
+  out in several complete versions) is imported one pattern at a time. On the
+  import screen, tap "Does the PDF hold several patterns? Choose the pages",
+  pick your file, then tick on the thumbnails the pages of the pattern you want,
+  without forgetting its shared pages (materials, abbreviations). When the app
+  recognises a collection by itself, it offers you straight away to choose the
+  pages.
 - **Import a {app} file**: in "+ Add pattern", this option takes a
   **.rowtine** file, that is a pattern already prepared in the
   {app} format (its text and images). It goes into your library as is,
@@ -528,6 +549,9 @@ just more comfortable.
   pattern keeps the cover taken from its PDF.) And as soon as it has a photo,
   the **Preview the pattern** button appears: you can then follow an image
   as a chart, exactly as for an imported pattern.
+- **Set the designer**: when the reading did not find a pattern's designer, the
+  **Designer: add** link on the pattern's page opens the pattern edit form directly on the **Designer** field. It then
+  appears under the pattern in a project's **Details** tab, and on the badge.
 - **Find a pattern**: category buttons at the top of the library show
   you **how many patterns** each one holds, for an instant sense of
   where to look.

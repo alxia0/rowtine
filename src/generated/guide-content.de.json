@@ -588,7 +588,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": den Preis der Garne, die du dafür reserviert oder schon verstrickt hast, und in Klammern den Preis der Anleitung, den du nur einmal bezahlst, auch wenn du sie dreimal strickst. Fehlt bei einem Garn der Preis, sagt dir die App das, statt so zu tun, als wäre es kostenlos.",
+                  "text": ": den Preis der Garne, die du dafür reserviert oder schon verstrickt hast, und in Klammern den Preis der Anleitung, den du nur einmal bezahlst, auch wenn du sie dreimal strickst. Fehlt bei einem Garn der Preis, sagt dir die App das, statt so zu tun, als wäre es kostenlos. Die verknüpfte Anleitung erscheint dort mit ihrer Designerin oder ihrem Designer („von …“), sofern angegeben.",
                   "bold": false,
                   "italic": false
                 }
@@ -1062,7 +1062,17 @@
                   "italic": false
                 },
                 {
-                  "text": " fügt das Raster der gearbeiteten Tage hinzu. Hier wählst du auch die ",
+                  "text": " fügt das Raster der gearbeiteten Tage hinzu. Die Angabe ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Anleitung",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " fügt unter dem Titel des Abzeichens eine Zeile „Name der Anleitung, von Designer“ hinzu (nur den Namen, wenn kein Designer angegeben ist). Hier wählst du auch die ",
                   "bold": false,
                   "italic": false
                 },
@@ -1255,6 +1265,21 @@
                 },
                 {
                   "text": ": Jeden Schritt kannst du abhaken, indem du sein Kästchen oder eine beliebige Stelle im linken Drittel seiner Karte antippst, mit einem Fortschrittsbalken fürs Ganze und einem je Abschnitt sowie eingebauten Wiederholungszählern („− 3/12 +“), die von selbst verschwinden, falls sie nicht zu deiner gewählten Größe gehören.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Abschnitte mit mehreren Exemplaren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Ein Sockenpaar, zwei Ärmel oder die Ohren oder Beine eines Amigurumi müssen nicht doppelt geschrieben werden. Stelle im Editor der Anleitung die Anzahl der Exemplare eines Abschnitts ein; jedes Exemplar behält seinen eigenen Fortschritt, und der Abschnitt zeigt die Summe aller. Außerhalb von Socken wird ein verdoppelter Abschnitt nacheinander gearbeitet, mit einer Schaltfläche für das nächste Exemplar. Bei einem Sockenpaar wird die Arbeitsweise im Projekt gewählt, über „Arbeitsweise“ oben im Leser, über den Reihen, oder in der Projektkarte: „Nacheinander“ (die ganze Socke 1, dann Socke 2 ab ihrem ersten Teil: Wer die letzte Reihe von Socke 1 abhakt, alle Teile eingeschlossen, kommt zu Socke 2, zu ihrem ersten Teil, mit „Rückgängig“) oder „Beide gleichzeitig“ (jede Reihe hat dann ein Häkchen pro Socke, und der Abstand zwischen beiden wird angezeigt). Dieselbe Anleitung lässt sich also in einem anderen Projekt anders stricken. Wer die Arbeitsweise wechselt, nachdem er begonnen hat, muss bestätigen, und die Socken beginnen wieder bei null, Reihen und Diagramme eingeschlossen; der Rest der Anleitung bleibt unverändert. Die Benachrichtigung der aktuellen Reihe folgt dem aktiven Exemplar (oder dem, das zurückliegt) und nennt es. Ein Abschnitt zum Wiederholen, der weder Ärmel noch Sockenteil noch Ohr ist? Gib ihm den Typ „Generisch, wiederholbar“ und stelle dann die Anzahl der Exemplare ein.",
                   "bold": false,
                   "italic": false
                 }
@@ -2420,7 +2445,17 @@
                   "italic": false
                 },
                 {
-                  "text": " bringt dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen. Die Zeichen der Vorschau helfen dir beim Gegenlesen: Eine Zeile mit „nur zum Lesen“, die sich abhaken lassen sollte, oder umgekehrt, fällt auf einen Blick auf und lässt sich im Editor korrigieren. (Das Lesen erkennt auch die runden und eckigen Raster von Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)",
+                  "text": " bringt dich direkt dorthin, um sie Abschnitt für Abschnitt durchzugehen. Die Zeichen der Vorschau helfen dir beim Gegenlesen: Eine Zeile mit „nur zum Lesen“, die sich abhaken lassen sollte, oder umgekehrt, fällt auf einen Blick auf und lässt sich im Editor korrigieren. (Das Lesen erkennt auch die runden und eckigen Raster von Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.) ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ein PDF, das mehrere Anleitungen enthält",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (eine Sammlung oder eine Anleitung in mehreren vollständigen Fassungen), wird eine Anleitung nach der anderen importiert. Tippe im Importbildschirm auf „Enthält das PDF mehrere Anleitungen? Seiten wählen“, wähle deine Datei und hake dann auf den Vorschaubildern die Seiten der gewünschten Anleitung an, ohne ihre gemeinsamen Seiten (Material, Abkürzungen) zu vergessen. Erkennt die App eine Sammlung selbst, schlägt sie dir direkt vor, die Seiten zu wählen.",
                   "bold": false,
                   "italic": false
                 }
@@ -2501,6 +2536,51 @@
                 },
                 {
                   "text": ": Dort kannst du ein Bild wie ein Diagramm verfolgen, genau wie bei einer importierten Anleitung.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Designer angeben",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Hat das Einlesen die Designerin oder den Designer einer Anleitung nicht gefunden, öffnet der Link ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Designer: hinzufügen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " auf der Seite der Anleitung direkt das Bearbeitungsformular der Anleitung im Feld *",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Designer",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": "in",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": ". Danach erscheint der Name unter der Anleitung im Reiter ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "Details** eines Projekts und auf dem Abzeichen.",
                   "bold": false,
                   "italic": false
                 }

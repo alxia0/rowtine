@@ -4,6 +4,7 @@ import { validateReader } from '@/utils/reader'
 import { isKind } from '@/utils/section-kinds'
 import { PATTERN_CATEGORIES } from '@/constants/catalog'
 import { loadDemoContent, DEMO_PATTERN_DEMO_ID } from '@/constants/demo'
+import { sanitizeUrl } from '@/utils/safe-url'
 
 describe('contenu de démonstration — français', () => {
   it('expose trois patrons, deux projets et le patron libre', async () => {
@@ -12,6 +13,7 @@ describe('contenu de démonstration — français', () => {
     expect(projects.idea).toBeTruthy()
     expect(projects.wip).toBeTruthy()
     expect(freePattern.name).toBeTruthy()
+    expect(freePattern.author).toBeFalsy()
   })
 
   it('chaque patron porte un demoId stable, non traduit', async () => {
@@ -101,5 +103,18 @@ describe('contenu de démonstration — français', () => {
     // Un test qui ne rencontre jamais son cas ne prouve rien : au moins un patron doit
     // démontrer ce mécanisme (le Bonnet, ici).
     expect(vus).toBeGreaterThan(0)
+  })
+})
+
+describe('contenu de démonstration : designer des patrons', () => {
+  // Protège : chaque patron démo, dans chaque langue, porte son designer et un lien http(s) sûr.
+  it.each(['fr', 'en', 'de', 'es'])('%s : author et authorUrl sur les trois patrons', async (locale) => {
+    const { patterns } = await loadDemoContent(locale)
+    expect(patterns).toHaveLength(3)
+    for (const p of patterns) {
+      expect(p.author, p.demoId).toBe('Alexia O.')
+      expect(p.authorUrl, p.demoId).toBe('https://rowtine.app')
+      expect(sanitizeUrl(p.authorUrl)).toBe(p.authorUrl)
+    }
   })
 })

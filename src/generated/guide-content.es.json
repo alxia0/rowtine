@@ -588,7 +588,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": el precio de las lanas que le has reservado o ya tejido, y entre paréntesis el precio del patrón, que solo pagas una vez aunque tejas el mismo patrón tres veces. Si una lana no tiene precio anotado, la app te lo dice en lugar de hacer como si fuera gratis.",
+                  "text": ": el precio de las lanas que le has reservado o ya tejido, y entre paréntesis el precio del patrón, que solo pagas una vez aunque tejas el mismo patrón tres veces. Si una lana no tiene precio anotado, la app te lo dice en lugar de hacer como si fuera gratis. El patrón vinculado aparece ahí con su diseñador o diseñadora («por …») cuando está indicado.",
                   "bold": false,
                   "italic": false
                 }
@@ -1042,7 +1042,17 @@
                   "italic": false
                 },
                 {
-                  "text": " añade la cuadrícula de los días trabajados. Ahí eliges también el ",
+                  "text": " añade la cuadrícula de los días trabajados. La pastilla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Patrón",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " añade bajo el título de la insignia una línea «Nombre del patrón, por Diseñador» (solo el nombre si no hay diseñador indicado). Ahí eliges también el ",
                   "bold": false,
                   "italic": false
                 },
@@ -1205,6 +1215,21 @@
                 },
                 {
                   "text": ": cada paso lo puedes marcar tocando su casilla o cualquier punto del tercio izquierdo de su tarjeta, con una barra de progreso global y por sección, y contadores de repetición integrados («− 3/12 +») que desaparecen solos si no corresponden a tu talla elegida.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Secciones con varios ejemplares",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": un par de calcetines, dos mangas o las orejas o las patas de un amigurumi no hace falta escribirlos dos veces. En el editor del patrón, ajusta el número de ejemplares de una sección; cada ejemplar conserva su propio progreso, y la sección muestra el total de todos. Fuera de los calcetines, una sección duplicada se teje un ejemplar tras otro, con un botón para pasar al siguiente. Para un par de calcetines, el método de trabajo se elige en el proyecto, con «Método de trabajo» en la parte superior del lector, sobre las filas, o en la ficha del proyecto: «Uno tras otro» (todo el calcetín 1, luego el calcetín 2 desde su primera parte: marcar la última fila del calcetín 1, con todas sus partes, lleva al calcetín 2, a su primera parte, con «Deshacer») o «Los dos a la vez» (cada fila tiene entonces una marca por calcetín, y se muestra la diferencia entre los dos). Así, un mismo patrón puede tejerse de otra forma en otro proyecto. Cambiar de método de trabajo una vez empezado pide una confirmación y vuelve a poner los calcetines a cero, filas y diagramas incluidos; el resto del patrón no cambia. La notificación de la fila en curso sigue al ejemplar activo (o al que va con retraso) y lo nombra. ¿Una sección que repetir que no es una manga, ni una parte del calcetín, ni una oreja? Dale el tipo «Genérico repetible» y ajusta después su número de ejemplares.",
                   "bold": false,
                   "italic": false
                 }
@@ -2370,7 +2395,17 @@
                   "italic": false
                 },
                 {
-                  "text": " te lleva directamente a recorrerlo, sección por sección. Las señales de la vista previa te ayudan en ese repaso: una línea con la señal «para leer» que debería marcarse, o al revés, salta a la vista, y se corrige en el editor. (La lectura también reconoce las rejillas redondas y cuadradas de los patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)",
+                  "text": " te lleva directamente a recorrerlo, sección por sección. Las señales de la vista previa te ayudan en ese repaso: una línea con la señal «para leer» que debería marcarse, o al revés, salta a la vista, y se corrige en el editor. (La lectura también reconoce las rejillas redondas y cuadradas de los patrones granny, nunca perfectamente: el repaso sigue siendo obligado.) ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Un PDF que contiene varios patrones",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (una recopilación, o un patrón descrito en varias versiones completas) se importa un patrón cada vez. En la pantalla de importación, toca «¿El PDF contiene varios patrones? Elegir las páginas», elige tu archivo y marca en las miniaturas las páginas del patrón que quieres, sin olvidar sus páginas comunes (material, abreviaturas). Cuando la app reconoce por sí misma una recopilación, te propone directamente elegir las páginas.",
                   "bold": false,
                   "italic": false
                 }
@@ -2451,6 +2486,51 @@
                 },
                 {
                   "text": ": puedes entonces seguir una imagen como diagrama, exactamente igual que en un patrón importado.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Indicar el diseñador",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": cuando la lectura no ha encontrado el diseñador de un patrón, el enlace ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Diseñador/a: añadir",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", en la ficha del patrón, abre directamente el formulario de edición del patrón en el campo ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Diseñador/a",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Después aparece bajo el patrón en la pestaña ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Detalles",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de un proyecto y en la insignia.",
                   "bold": false,
                   "italic": false
                 }

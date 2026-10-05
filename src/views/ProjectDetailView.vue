@@ -23,6 +23,7 @@ import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { useDismissMenu } from '@/composables/useDismissMenu'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { pickAndCropImage } from '@/utils/photo'
+import { cleanDesignerName } from '@/utils/pattern-designer'
 import { needleTexts, gaugeText as gaugeTextOf } from '@/utils/project-tiles'
 import { Capacitor } from '@capacitor/core'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -82,6 +83,7 @@ const project = ref(null)
 const starCount = computed(() => clampStars(project.value?.stars))
 const loading = ref(true) // pour afficher un skeleton tant que les données chargent
 const linkedPattern = ref(null) // patron lié (lien dans Détails, photos dans Galerie)
+const linkedDesigner = computed(() => (linkedPattern.value?.builtin ? '' : cleanDesignerName(linkedPattern.value?.author)))
 const { open: menuOpen, triggerRef, menuRef } = useDismissMenu()
 const tab = ref(route.query.tab || 'sections')
 // Onglet d'entrée capturé une fois pour toutes ici (voir handleBackPressed plus bas) : `tab`
@@ -775,6 +777,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         <section v-if="linkedPattern" class="patron-source">
           <span class="patron-source__k">{{ t('project.patternSource') }}</span>
           <span class="patron-source__name">{{ linkedPattern.name }}</span>
+          <span v-if="linkedDesigner" class="patron-source__designer" data-test="project-pattern-designer">{{ t('pattern.by') }} {{ linkedDesigner }}</span>
           <span v-if="patternPriceText" class="patron-source__price" data-test="project-pattern-price">
             {{ t('project.patternPriceLabel') }} · {{ patternPriceText }}
           </span>
@@ -869,6 +872,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
                   <span class="rovw__title">{{ sectionTitleLabel(s, t) }}</span>
                   <span class="rovw__pct" :class="{ 'rovw__pct--done': s.complete }"><template v-if="s.complete"><AppIcon name="check" :size="13" /> {{ t('reader.sectionDone') }}</template><template v-else>{{ s.pct }} %</template></span>
                 </span>
+                <span v-if="s.copies" class="rovw__copies"><AppIcon name="repeat" :size="13" /> {{ t(s.copies.together ? 'reader.copies.nTogether' : 'reader.copies.n', { n: s.copies.n }) }}</span>
                 <span class="rovw__track"><span class="rovw__fill" :class="{ 'rovw__fill--done': s.complete }" :style="{ width: s.pct + '%' }"></span></span>
               </span>
             </button>
@@ -1111,6 +1115,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         :project="project"
         :stats="projectStats"
         :yarn-usage="badgeYarnUsage"
+        :pattern="linkedPattern"
         @saved="onBadgeSaved"
         @close="showBadgeComposer = false"
       />
@@ -1260,6 +1265,10 @@ html[data-theme='dark'] .counters-block {
 .patron-source { display: flex; flex-direction: column; gap: 2px; background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-3); box-shadow: var(--clay-sm); }
 .patron-source__k { font-size: 12px; color: var(--ink-55); text-transform: uppercase; letter-spacing: 0.04em; }
 .patron-source__name { font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+.patron-source__designer {
+  font-size: 12.5px;
+  color: var(--ink-55);
+}
 .patron-source__price {
   font-size: 12.5px;
   font-weight: 600;
@@ -1301,6 +1310,7 @@ html[data-theme='dark'] .counters-block {
 .rovw__title { font-weight: 600; color: var(--ink); }
 .rovw__pct { font-size: 12px; font-weight: 700; color: var(--ink-55); font-variant-numeric: tabular-nums; flex: none; }
 .rovw__pct--done { color: var(--sage-deep); }
+.rovw__copies { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: 12px; font-weight: 600; color: var(--ink-70); }
 .rovw__track { height: 7px; border-radius: var(--r-pill); background: var(--surface); box-shadow: var(--clay-press); overflow: hidden; }
 .rovw__fill { display: block; height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--brand-deep), var(--brand)); transition: width var(--motion-base); }
 .rovw__fill--done { background: linear-gradient(90deg, var(--sage-deep), var(--sage)); }

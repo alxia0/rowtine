@@ -268,7 +268,10 @@ const KIND_KEYWORDS = [
   // « SCHEMATIC » contient « hem » en sous-chaîne → section de schéma routée {border}) :
   // sans aucune frontière, l'alternative matchait n'importe où ; \p{L} (flag `u`) exige
   // « pas de lettre » de part et d'autre, comme « tails » de la famille queue ci-dessous.
-  ['bordure', /bordures?|borders?|\bbordes?\b|ourlets?|(?<![\p{L}])hems?(?![\p{L}])|poignets?|cuffs?|ceinture|waistband|b[üu]ndchen|bund\b|blende|ribkant|kant(?:en)?\b|^rand$|el[áa]stico|bordo|orlo|boord(?:en)?\b|[śs]ci[ąa]gacz|resori|mudd(?:ar)?|linning|\bbutton\s*band\b/iu],
+  // « côte(s) » (bord-côtes français : CÔTES, BORD CÔTES, Côtes 2x2) : accent circonflexe
+  // EXIGÉ, les « cotes » sans accent étant des mesures ; « côté » (côté droit) ne matche pas,
+  // la lettre « é » qui suit n'étant pas une frontière.
+  ['bordure', /bordures?|borders?|(?<![\p{L}])c[ôÔ]tes?(?![\p{L}])|\bbordes?\b|ourlets?|(?<![\p{L}])hems?(?![\p{L}])|poignets?|cuffs?|ceinture|waistband|b[üu]ndchen|bund\b|blende|ribkant|kant(?:en)?\b|^rand$|el[áa]stico|bordo|orlo|boord(?:en)?\b|[śs]ci[ąa]gacz|resori|mudd(?:ar)?|linning|\bbutton\s*band\b/iu],
   ['boutonniere', /boutonni[èe]res?|buttonholes?|boutonnage|knopfloch|knaphul|ojales?|asole|knoopsgat|dziurki|napinl[äa]vet|knapph[åa]l/i],
   // Nom d'un VÊTEMENT entier (jupe, robe, pull…) = la pièce principale = corps. Ces
   // titres sont des sections de TRAVAIL (rendus en rangs cochables) : sans eux, un
@@ -349,6 +352,19 @@ const KIND_KEYWORDS = [
   // (angle mort Unicode déjà documenté deux fois dans reflow.js). \p{L} (flag `u`) exige
   // « pas de lettre » autour, même famille de correctif que « hem » de la famille bordure.
   ['queue', /\bqueues?\b|(?<![\p{L}])tails?(?![\p{L}])|schwanz|\bhale(?:n)?\b|\bcola\b|\bcoda\b|staart|ogon|[żz][ąa]d[łl]o|h[äa]nt[äa]|svans/iu],
+  // Types chaussette (spec 2026-10-04), après les familles amigurumi et vêtement : en cas de
+  // conflit le type existant garde la priorité. Ancrage Unicode (`\p{L}`, flag `u`) : « leg »
+  // dans « legend », « foot » dans « footnote », « heel » dans « wheel » ne matchent pas.
+  // Exclus : « pied-de-poule/coq », « pointe de flèche », « (à) double pointe » (aiguilles),
+  // « Tic Tac Toe », « Happy Feet » (noms de laine), « heel veel » (néerlandais). `jambe`/`leg` n'ont pas
+  // d'alternative ici : `membre` (plus haut) les capte déjà et gagne ; seul « tige » mène
+  // à `jambe` à l'import (le type reste créable à l'édition et via le dialecte MD).
+  // `gousset` d'abord : « Gousset du pied/talon » est un gousset, pas un pied ni un talon.
+  ['gousset', /(?<![\p{L}])(?:goussets?|gussets?)(?![\p{L}])/iu],
+  ['pointe', /(?<![\p{L}])(?:(?<!doubles? )pointes?(?! de fl[èe]che)|orteils?|(?<!tac )toes?)(?![\p{L}])/iu],
+  ['pied', /(?<![\p{L}])(?:pieds?(?![ -]de[ -](?:poule|coq))|semelles?|foot|(?<!happy )feet)(?![\p{L}])/iu],
+  ['talon', /(?<![\p{L}])(?:talons?|talonnettes?|heels?(?! veel))(?![\p{L}])/iu],
+  ['jambe', /(?<![\p{L}])tiges?(?![\p{L}])/iu],
   // « Crin » (espagnol, crinière du cheval amigurumi, Hilda the Horse) : 3 pièces de
   // texture (mèches en chaînettes) cousues sur la tête, sans famille anatomique dédiée
   // (ni tête/oreille/museau/queue/membre) — rattachée à `motif` (texture/mèches).

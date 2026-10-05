@@ -105,7 +105,7 @@ describe('marque de sélection du popover Section (retour terrain)', () => {
     host.remove()
   })
 
-  // Régression (revue, familles « Parties d'accessoire ») : `corps` a
+  // Régression (revue, famille « Accessoires ») : `corps` a
   // désormais families: ['vetement', 'accessoire'] (section-kinds.js) — groupedSectionKinds
   // l'émet donc DEUX FOIS dans la liste aplatie (une fois par groupe de famille), et
   // sectionMenuItems préserve les deux occurrences. Le test « Manche » ci-dessus ne peut

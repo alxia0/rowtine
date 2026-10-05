@@ -2,6 +2,18 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.4.2]
+
+- Repeated sections: a section can be worked several times (socks, sleeves,
+  ears or legs of an amigurumi), and each copy keeps its own progress. By
+  default, sleeves, ears, limbs and legs are worked in pairs.
+- Pair of socks: knit them one after the other, or both at the same time,
+  row by row.
+- PDFs that hold several patterns can now be imported.
+- Pattern designer: shown on the pattern and on the shared badge.
+- New section types for socks (toe, foot, heel, leg, gusset, cuff) and a
+  "Generic repeatable" type.
+
 ## [1.4.1]
 
 - Tracking notification: a button tap is kept even if Android has closed or

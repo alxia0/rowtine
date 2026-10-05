@@ -11,6 +11,16 @@
 // allemande, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_DE = [
   {
+    version: '1.4.2',
+    notes: [
+      'Wiederholbare Abschnitte: Ein Abschnitt kann mehrmals gearbeitet werden (Socken, Ärmel, Ohren oder Beine eines Amigurumi), und jedes Exemplar behält seinen eigenen Fortschritt. Ärmel, Ohren, Gliedmaßen und Beine werden standardmäßig paarweise gearbeitet.',
+      'Sockenpaar: entweder nacheinander oder beide gleichzeitig, Reihe für Reihe.',
+      'PDFs mit mehreren Anleitungen lassen sich jetzt importieren.',
+      'Designer der Anleitung: auf der Anleitung und im geteilten Badge angezeigt.',
+      'Neue Abschnittstypen für Socken (Spitze, Fuß, Ferse, Schaft, Keil, Bündchen) und ein Typ „Generisch, wiederholbar“.',
+    ],
+  },
+  {
     version: '1.4.1',
     notes: [
       'Benachrichtigung beim Arbeiten: Ein Tipp auf eine Schaltfläche geht nicht verloren, auch wenn Android die App geschlossen oder eingefroren hat.',

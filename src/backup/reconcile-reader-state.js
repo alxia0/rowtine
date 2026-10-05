@@ -7,6 +7,7 @@
 // compté dans `report` plutôt que deviné.
 import { stepTextToMd } from '@/utils/pattern-md/line'
 import { isTrackedStep } from '@/utils/reader'
+import { copiesOf } from '@/utils/section-copies'
 
 function freshState() {
   // Sortie = modèle vivant PUR (multi-grilles 09/07 + calage 10/07) : trois maps
@@ -181,48 +182,65 @@ export function reconcileReaderState(oldReader, oldState, newReader, precomputed
   const oldIndex = precomputedIndex?.oldIndex || buildIndex(safeOldReader)
   const newIndex = precomputedIndex?.newIndex || buildIndex(safeNewReader)
 
-  // --- 3) done -------------------------------------------------------------
-  const oldDone = safeOldState.done && typeof safeOldState.done === 'object' ? safeOldState.done : {}
-  for (const [oldId, val] of Object.entries(oldDone)) {
-    if (!val) continue
-    const sectionId = oldId.split('#')[0]
-    const oldStepIndex = Number(oldId.slice(sectionId.length + 1))
-    const oldSection = oldSectionById.get(sectionId)
-    const oldStep = oldSection?.steps?.[oldStepIndex]
-    if (!oldStep) continue
-    const key = textKey(oldStep)
-    const match = resolveMatch(sectionId, key, oldIndex, newIndex, safeNewReader)
-    if (match) {
-      state.done[`${sectionId}#${match.idx}`] = true
-      report.doneKept++
-    } else {
-      report.doneLost++
-    }
-  }
-
-  // --- 4) counters -----------------------------------------------------------
-  const oldCounters =
-    safeOldState.counters && typeof safeOldState.counters === 'object' ? safeOldState.counters : {}
-  for (const [oldId, val] of Object.entries(oldCounters)) {
-    const sectionId = oldId.split('#')[0]
-    const oldStepIndex = Number(oldId.slice(sectionId.length + 1))
-    const oldSection = oldSectionById.get(sectionId)
-    const oldStep = oldSection?.steps?.[oldStepIndex]
-    if (!oldStep) continue
-    const key = textKey(oldStep)
-    const match = resolveMatch(sectionId, key, oldIndex, newIndex, safeNewReader)
-    if (match && isRepeatStep(match.newStep)) {
-      const newTotal = repeatTotalForSize(match.newStep, state.size)
-      if (newTotal == null) {
-        // Total non résolvable → on ne peut pas vérifier que la valeur ancienne reste
-        // dans les bornes. Conservateur : abandon plutôt que fausse progression.
-        report.countersLost++
+  // --- 3) done et 4) counters, par exemplaire ---------------------------------
+  // Même résolution par contenu pour chaque exemplaire : l'exemplaire 1 (done/counters)
+  // et chaque `copyState[c]` (mêmes ids d'étape `section#index`). Les compteurs du
+  // rapport s'additionnent.
+  function remapSlice(oldDone, oldCounters, copyIndex = 1) {
+    // Exemplaire retiré (copies réduit) : sa progression est perdue, comptée comme les autres.
+    const copyGone = (sectionId) => copyIndex > copiesOf((safeNewReader.sections || []).find((x) => x.id === sectionId))
+    const done = {}
+    const counters = {}
+    for (const [oldId, val] of Object.entries(oldDone)) {
+      if (!val) continue
+      const sectionId = oldId.split('#')[0]
+      const oldStepIndex = Number(oldId.slice(sectionId.length + 1))
+      const oldSection = oldSectionById.get(sectionId)
+      const oldStep = oldSection?.steps?.[oldStepIndex]
+      if (!oldStep) continue
+      const key = textKey(oldStep)
+      const match = resolveMatch(sectionId, key, oldIndex, newIndex, safeNewReader)
+      if (match && !copyGone(sectionId)) {
+        done[`${sectionId}#${match.idx}`] = true
+        report.doneKept++
       } else {
-        state.counters[`${sectionId}#${match.idx}`] = Math.min(val, newTotal)
-        report.countersKept++
+        report.doneLost++
       }
-    } else {
-      report.countersLost++
+    }
+    for (const [oldId, val] of Object.entries(oldCounters)) {
+      const sectionId = oldId.split('#')[0]
+      const oldStepIndex = Number(oldId.slice(sectionId.length + 1))
+      const oldSection = oldSectionById.get(sectionId)
+      const oldStep = oldSection?.steps?.[oldStepIndex]
+      if (!oldStep) continue
+      const key = textKey(oldStep)
+      const match = resolveMatch(sectionId, key, oldIndex, newIndex, safeNewReader)
+      if (match && !copyGone(sectionId) && isRepeatStep(match.newStep)) {
+        const newTotal = repeatTotalForSize(match.newStep, state.size)
+        if (newTotal == null) {
+          // Total non résolvable → on ne peut pas vérifier que la valeur ancienne reste
+          // dans les bornes. Conservateur : abandon plutôt que fausse progression.
+          report.countersLost++
+        } else {
+          counters[`${sectionId}#${match.idx}`] = Math.min(val, newTotal)
+          report.countersKept++
+        }
+      } else {
+        report.countersLost++
+      }
+    }
+    return { done, counters }
+  }
+  const objOr = (v) => (v && typeof v === 'object' ? v : {})
+
+  const slice1 = remapSlice(objOr(safeOldState.done), objOr(safeOldState.counters))
+  state.done = slice1.done
+  state.counters = slice1.counters
+  for (const [c, cs] of Object.entries(objOr(safeOldState.copyState))) {
+    const slice = remapSlice(objOr(cs?.done), objOr(cs?.counters), Number(c))
+    if (Object.keys(slice.done).length || Object.keys(slice.counters).length) {
+      state.copyState ??= {}
+      state.copyState[c] = slice
     }
   }
 
@@ -235,6 +253,20 @@ export function reconcileReaderState(oldReader, oldState, newReader, precomputed
   // est ABANDONNÉE et COMPTÉE (jamais de perte silencieuse, jamais de fausse progression).
   const newSections = Array.isArray(safeNewReader.sections) ? safeNewReader.sections : []
   const newSectionById = new Map(newSections.map((s) => [s.id, s]))
+
+  // activeCopy[secId] : exemplaire en cours (séquentiel). Gardé si la section existe encore
+  // et que l'exemplaire reste dans les bornes de ses exemplaires ; abandonné sinon.
+  for (const [secId, raw] of Object.entries(objOr(safeOldState.activeCopy))) {
+    const sec = newSectionById.get(secId)
+    const c = Number(raw)
+    if (sec && Number.isInteger(c) && c >= 1 && c <= copiesOf(sec)) {
+      state.activeCopy ??= {}
+      state.activeCopy[secId] = c
+    }
+  }
+
+  // copyMode : technique du projet (spec 2026-10-05), indépendante des étapes : reportée telle quelle.
+  if (safeOldState.copyMode === 'simultaneous') state.copyMode = 'simultaneous'
 
   // Source des rangs à transférer : la map `chartRows` du modèle actuel (multi-grilles
   // depuis le 09/07/2026). La compat avec l'ancien `chartRow` nu (< 09/07) a été retirée
@@ -324,6 +356,10 @@ export function reconcileReaderState(oldReader, oldState, newReader, precomputed
     const match = oldStep ? resolveMatch(sectionId, textKey(oldStep), oldIndex, newIndex, safeNewReader) : null
     if (match && isTrackedStep(match.newStep)) {
       state.last = { kind: 'step', id: `${sectionId}#${match.idx}` }
+      // Exemplaire du geste (2 et plus) : gardé tant que la nouvelle section l'a encore,
+      // omis sinon (lu alors comme l'exemplaire 1, jamais un exemplaire inexistant).
+      const copy = Number(oldLast.copy)
+      if (Number.isInteger(copy) && copy >= 2 && copy <= copiesOf(newSectionById.get(sectionId))) state.last.copy = copy
       report.lastKept++
     } else {
       report.lastLost++

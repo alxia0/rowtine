@@ -595,4 +595,55 @@ describe('reconcileReaderState — last (dernier geste)', () => {
     expect(r.report.lastLost).toBe(1)
     expect(r.state.done).toEqual({})
   })
+
+  describe('exemplaires (copyState, activeCopy)', () => {
+    const SP = (id, steps, copies = 2) => ({ id, title: id, kind: 'pied', copies, steps })
+    const oldRd = () => R([SP('p', [{ t: 'a' }, { t: 'b' }, { t: 'c' }])])
+    const newRd = () => R([SP('p', [{ t: 'z' }, { t: 'a' }, { t: 'b' }])])
+
+    it("remappe la coche de l'exemplaire 2 vers le nouvel index et la compte", () => {
+      const old = { done: { 'p#1': true }, copyState: { 2: { done: { 'p#1': true }, counters: {} } } }
+      const r = reconcileReaderState(oldRd(), old, newRd())
+      expect(r.state.done).toEqual({ 'p#2': true })
+      expect(r.state.copyState[2].done).toEqual({ 'p#2': true })
+      expect(r.report.doneKept).toBe(2)
+    })
+
+    it("compte perdue la coche d'exemplaire 2 sur une étape supprimée", () => {
+      const old = { copyState: { 2: { done: { 'p#2': true }, counters: {} } } }
+      const r = reconcileReaderState(oldRd(), old, newRd())
+      expect(r.state.copyState).toBeUndefined()
+      expect(r.report.doneLost).toBe(1)
+    })
+
+    it("compte perdue la progression d'un exemplaire retiré (copies réduit)", () => {
+      const old = { copyState: { 3: { done: { 'p#0': true }, counters: {} } } }
+      const fewer = R([SP('p', [{ t: 'a' }, { t: 'b' }, { t: 'c' }], 2)])
+      const r = reconcileReaderState(oldRd(), old, fewer)
+      expect(r.state.copyState).toBeUndefined()
+      expect(r.report.doneLost).toBe(1)
+    })
+
+    it("garde activeCopy si la section existe, l'abandonne sinon, le borne aux exemplaires", () => {
+      const old = { activeCopy: { p: 2, gone: 2 } }
+      expect(reconcileReaderState(oldRd(), old, newRd()).state.activeCopy).toEqual({ p: 2 })
+      const fewer = R([SP('p', [{ t: 'a' }], 1)])
+      expect(reconcileReaderState(oldRd(), old, fewer).state.activeCopy).toBeUndefined()
+    })
+
+    it('garde la technique du projet (copyMode) ; une valeur inconnue est abandonnée', () => {
+      const reader = { sections: [{ id: 'p', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'a' }] }] }
+      expect(reconcileReaderState(reader, { copyMode: 'simultaneous' }, reader).state.copyMode).toBe('simultaneous')
+      expect(reconcileReaderState(reader, { copyMode: 'together' }, reader).state.copyMode).toBeUndefined()
+    })
+
+    // Revue finale m1 : le dernier geste garde son exemplaire tant que la section l'a encore.
+    it('last.copy transféré avec l\'étape, omis si la section n\'a plus cet exemplaire', () => {
+      const last = { kind: 'step', id: 'p#1', copy: 2 }
+      expect(reconcileReaderState(oldRd(), { last }, newRd()).state.last).toEqual({ kind: 'step', id: 'p#2', copy: 2 })
+      const fewer = R([SP('p', [{ t: 'z' }, { t: 'a' }, { t: 'b' }], 1)])
+      expect(reconcileReaderState(oldRd(), { last }, fewer).state.last).toEqual({ kind: 'step', id: 'p#2' })
+      expect(reconcileReaderState(oldRd(), { last: { kind: 'step', id: 'p#1' } }, newRd()).state.last).toEqual({ kind: 'step', id: 'p#2' })
+    })
+  })
 })

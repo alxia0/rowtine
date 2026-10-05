@@ -17,6 +17,14 @@ export const SECTION_KINDS = [
   { key: 'oreille', families: ['amigurumi'] },
   { key: 'museau', families: ['amigurumi'] },
   { key: 'queue', families: ['amigurumi'] },
+  // Chaussette (une chaussette se découpe en parties que les patrons nomment). `cotes` double
+  // `bordure` (« Bordure / côtes ») pour la chaussette : le bord-côtes s'y fait deux fois.
+  { key: 'cotes', families: ['chaussette'] },
+  { key: 'pointe', families: ['chaussette'] },
+  { key: 'pied', families: ['chaussette'] },
+  { key: 'talon', families: ['chaussette'] },
+  { key: 'jambe', families: ['chaussette'] },
+  { key: 'gousset', families: ['chaussette'] },
   // Motifs & technique
   { key: 'motif', families: ['technique'] },
   { key: 'dentelle', families: ['technique'] },
@@ -41,9 +49,38 @@ export const SECTION_KINDS = [
   { key: 'infos', families: ['transversal'] },
   { key: 'autre', families: ['transversal'] },
   { key: 'pelote', families: ['transversal'] },
+  // Section générique à répéter, choisie à la main quand aucun type répétable ne convient.
+  { key: 'repetable', families: ['transversal'] },
 ]
 
-export const SECTION_FAMILIES = ['vetement', 'accessoire', 'amigurumi', 'technique', 'transversal']
+export const SECTION_FAMILIES = ['vetement', 'accessoire', 'chaussette', 'amigurumi', 'technique', 'transversal']
+
+// Types faits plusieurs fois (chaque exemplaire a sa propre progression). Les types
+// appariés démarrent à 2 exemplaires ; le simultané n'existe que pour les chaussettes.
+// `repetable` est répétable sans être apparié : l'import ne le pose jamais.
+export const PAIRED_KINDS = ['manche', 'membre', 'oreille', 'cotes', 'pointe', 'pied', 'talon', 'jambe', 'gousset']
+export const REPEATABLE_KINDS = [...PAIRED_KINDS, 'repetable']
+export const SIMULTANEOUS_KINDS = ['cotes', 'pointe', 'pied', 'talon', 'jambe', 'gousset']
+
+// Types chaussette : libellés « Chaussette n » plutôt qu'« Exemplaire n ».
+export function isSockKind(kind) {
+  return SIMULTANEOUS_KINDS.includes(kind)
+}
+
+export function isRepeatable(kind) {
+  return REPEATABLE_KINDS.includes(kind)
+}
+export function isPaired(kind) {
+  return PAIRED_KINDS.includes(kind)
+}
+// Choisi à la main, démarre à 2 exemplaires : les types appariés et `repetable` (qu'on ne
+// choisit que pour répéter).
+export function startsAtTwo(kind) {
+  return isPaired(kind) || kind === 'repetable'
+}
+export function canWorkSimultaneously(kind, copies) {
+  return SIMULTANEOUS_KINDS.includes(kind) && copies === 2
+}
 
 const KIND_KEYS = new Set(SECTION_KINDS.map((k) => k.key))
 
@@ -95,13 +132,9 @@ export function kindLabelKey(key) {
 // précède « Border » en anglais — un ordre figé serait faux dans une des deux langues.
 // Fonction pure : `labels` est injecté (section-kinds.js ne connaît pas i18n).
 export function groupedSectionKinds(labels, locale, { exclude = [] } = {}) {
-  const skip = new Set([...exclude, DEFAULT_KIND])
+  const skip = new Set(exclude)
   const byLabel = (a, b) => a.label.localeCompare(b.label, locale)
-  const groups = [{
-    family: null,
-    label: null,
-    items: [{ value: DEFAULT_KIND, label: labels.kinds[DEFAULT_KIND] }],
-  }]
+  const groups = []
   for (const family of SECTION_FAMILIES) {
     const items = SECTION_KINDS
       .filter((k) => k.families.includes(family) && !skip.has(k.key))

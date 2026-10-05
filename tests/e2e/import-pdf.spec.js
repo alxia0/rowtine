@@ -22,7 +22,8 @@ test('le bouton d’import mène à l’écran local, qui analyse et sauvegarde'
   // de réussite. Depuis la refonte du bilan (lot du 23/09/2026) : titre, bilan chiffré (bulle
   // en cartes), puis « Prévisualiser le patron » comme bouton principal (le fixture a des
   // sections) — plus de « Voir le patron » pour ce cas.
-  await expect(page.getByText('Ton patron est importé')).toBeVisible()
+  // L'analyse d'un PDF dépasse le délai par défaut sous parallélisme, même attente que pdf-gallery.spec.js.
+  await expect(page.getByText('Ton patron est importé')).toBeVisible({ timeout: 120_000 })
   const sectionsTile = page.locator('.done__tile').filter({ hasText: /section/ })
   await expect(sectionsTile.locator('.done__tile-val')).not.toHaveText('0')
   const stepsTile = page.locator('.done__tile').filter({ hasText: /étape/ })
@@ -49,7 +50,7 @@ test('🚩 écran au repos : nouvelle ligne visible, ET le tap sur le bouton ouv
   await page.goto('/import-local')
 
   await expect(page.getByText('Le patron est analysé sur ton appareil')).toBeVisible()
-  await expect(page.getByText('Le patron est enregistré directement dans ta bibliothèque')).toBeVisible()
+  await expect(page.getByText('Il est enregistré directement dans ta bibliothèque')).toBeVisible()
 
   const chooserPromise = page.waitForEvent('filechooser')
   await page.locator('label.file-pick').click()
@@ -62,4 +63,24 @@ test('🚩 écran au repos : nouvelle ligne visible, ET le tap sur le bouton ouv
   await chooser.setFiles(FIXTURE)
   await page.getByRole('button', { name: 'Prévisualiser le patron' }).click()
   await expect(page).toHaveURL(/\/pattern\/\d+\/read$/)
+})
+
+const FIXTURE_6P = fileURLToPath(new URL('./fixtures/BRUME V2 FR light.pdf', import.meta.url))
+
+test('choisir les pages : miniatures, sélection, import des seules pages choisies', async ({ page }) => {
+  await page.goto('/import-local')
+  // Cible tactile : le lien de choix des pages fait au moins 44 px de haut.
+  const box = await page.locator('.pick-pages').boundingBox()
+  expect(box.height).toBeGreaterThanOrEqual(44)
+  await page.locator('.pick-pages input[type=file]').setInputFiles(FIXTURE_6P)
+  const dialog = page.getByRole('dialog', { name: 'Choisis les pages du patron' })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: /^Page \d+$/ })).toHaveCount(6)
+  const importBtn = dialog.getByRole('button', { name: 'Importer ces pages' })
+  await expect(importBtn).toBeDisabled()
+  await dialog.getByRole('button', { name: 'Page 1', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Page 2', exact: true }).click()
+  await expect(dialog.getByText('2 pages choisies')).toBeVisible()
+  await importBtn.click()
+  await expect(page.getByText('Ton patron est importé')).toBeVisible({ timeout: 120_000 })
 })

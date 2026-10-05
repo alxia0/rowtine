@@ -9,7 +9,11 @@ import {
   countText,
   stepPlainText,
   sectionTitleLabel,
+  stepIsDone,
+  workCopies,
 } from './reader'
+import { copiesOf, copyModeOf, copyView, copyStepId } from './section-copies'
+import { sectionKind, isSockKind } from './section-kinds'
 
 const always = () => true
 
@@ -30,7 +34,12 @@ function nextLine(target, from, size, t) {
     : t('rowNotif.nextIn', { section: sectionTitleLabel(target.section, t), text })
 }
 
-// `state` : { size, done, counters, chartRows, chartAcks, isChartVisible }. `chartAcks` : ids
+// Première étape suivie non faite d'une section dans la vue d'un exemplaire, ou null.
+function todoIn(sec, view, size) {
+  return sec.steps.find((s) => !s.note && !s.chart && !stepIsDone(s, view.done, view.counters, size)) || null
+}
+
+// `state` : { size, done, counters, copyState, activeCopy, copyMode, chartRows, chartAcks, isChartVisible }. `chartAcks` : ids
 // des diagrammes acquittés (Set ou tableau) ; `isChartVisible(section)` : règle de taille du
 // lecteur (défaut : toujours visible). Retourne null quand aucune étape suivie ne reste (tout
 // fait, ou aucune étape suivie) : l'appelant annule alors la notification.
@@ -39,12 +48,39 @@ function nextLine(target, from, size, t) {
 export function buildRowNotification({ project, reader, state, t }) {
   const sections = withStepIds(reader?.sections || [])
   const size = typeof state?.size === 'number' ? state.size : null
-  const done = state?.done || {}
-  const counters = state?.counters || {}
+  let done = state?.done || {}
+  let counters = state?.counters || {}
   const chartRows = state?.chartRows || {}
   const acks = new Set(state?.chartAcks || [])
   const isChartVisible = state?.isChartVisible || always
-  const progress = { size, done, counters, last: state?.last }
+  // Sections à exemplaires : la progression vue est, pour chacune, celle de son exemplaire de
+  // travail (copies neuves, jamais de mutation des références de copyView). Sans exemplaires,
+  // rien ne change : mêmes objets qu'avant.
+  // Exemplaire de travail : même règle que le lecteur (workCopies).
+  let works = {}
+  if (sections.some((sec) => copiesOf(sec) > 1)) {
+    done = {}
+    counters = {}
+    works = workCopies(sections, state, size)
+    for (const sec of sections) {
+      const c = works[sec.id] || 1
+      const v = c > 1 ? copyView(state, c) : { done: state?.done || {}, counters: state?.counters || {} }
+      for (const step of sec.steps) {
+        if (v.done[step.id]) done[step.id] = v.done[step.id]
+        if (v.counters[step.id] != null) counters[step.id] = v.counters[step.id]
+      }
+    }
+  }
+  const workOf = (sec) => works[sec.id] || 1
+  // Un `last` posé sur un autre exemplaire que celui de travail n'oriente pas l'étape en cours ;
+  // un `last` ancien, sans `copy`, se lit comme l'exemplaire 1.
+  let last = state?.last
+  if (last?.kind === 'step') {
+    const at = String(last.id).lastIndexOf('#')
+    const lastSec = sections.find((sec) => sec.id === String(last.id).slice(0, at))
+    if (lastSec && (last.copy || 1) !== workOf(lastSec)) last = null
+  }
+  const progress = { size, done, counters, last }
 
   const cur = currentStep(sections, progress)
   if (!cur) return null
@@ -83,8 +119,27 @@ export function buildRowNotification({ project, reader, state, t }) {
   const text = stepText(cur.step, size, t, true)
   const body = stepText(cur.step, size, t)
   const next = nextStepAfter(sections, progress, cur.step.id)
-  const bigText = next ? `${body}\n\n${nextLine(next, cur.section, size, t)}` : body
-  const section = sectionTitleLabel(cur.section, t)
+  let nextText = next ? nextLine(next, cur.section, size, t) : null
+  const copies = copiesOf(cur.section)
+  const copy = workOf(cur.section)
+  const copyLabel = (n) =>
+    t('reader.copies.title.' + (isSockKind(sectionKind(cur.section)) ? 'chaussette' : 'generic'), { n, total: copies })
+  const stepKey = copyStepId(cur.step.id, copy)
+  let section = sectionTitleLabel(cur.section, t)
+  if (copies > 1) {
+    // Simultané : « Ensuite » montre le rang de l'autre exemplaire (le premier qui a encore à faire).
+    if (copyModeOf(cur.section, state?.copyMode) === 'simultaneous') {
+      for (let o = 1; o <= copies; o++) {
+        const todo = o === copy ? null : todoIn(cur.section, copyView(state, o), size)
+        if (todo) {
+          nextText = t('rowNotif.nextCopy', { copy: copyLabel(o), text: stepText(todo, size, t) })
+          break
+        }
+      }
+    }
+    section = t('rowNotif.sectionCopy', { copy: copyLabel(copy), section })
+  }
+  const bigText = nextText ? `${body}\n\n${nextText}` : body
 
   if (cur.step.repeat) {
     const count = Math.min(counters[cur.step.id] || 0, repeatTotal(cur.step, size))
@@ -93,7 +148,7 @@ export function buildRowNotification({ project, reader, state, t }) {
     return {
       ...common,
       kind: 'counter',
-      stepId: cur.step.id,
+      stepId: stepKey,
       title: t('rowNotif.counterTitle', { count, total, section }),
       text,
       bigText,
@@ -113,8 +168,11 @@ export function buildRowNotification({ project, reader, state, t }) {
   return {
     ...common,
     kind: 'row',
-    stepId: cur.step.id,
-    title: t('rowNotif.title', { index, total, section }),
+    stepId: stepKey,
+    title:
+      copies > 1
+        ? t('rowNotif.titleCopy', { copy: copyLabel(copy), index, total, section: sectionTitleLabel(cur.section, t) })
+        : t('rowNotif.title', { index, total, section }),
     text,
     bigText,
     actionLabel: t('rowNotif.check'),

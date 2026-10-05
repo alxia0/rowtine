@@ -222,6 +222,37 @@ describe('parsing tolérant', () => {
 })
 
 // Désambiguïsation par tag EN + compat FR héritée (le crux).
+describe('exemplaires portés par le tag de kind', () => {
+  const sec0 = (body) => mdToPattern(`---\nrowtine: 1\n---\n${body}`).pattern.reader.sections[0]
+  it("un ancien tag « together » se lit pour ses exemplaires, sans mode (technique du projet)", () => {
+    const r = mdToPattern(`---\nrowtine: 1\n---\n## Pointe {toe x2 together}\n- 1 rang`)
+    expect(r.warnings).toEqual([])
+    const s = r.pattern.reader.sections[0]
+    expect(s).toMatchObject({ kind: 'pointe', title: 'Pointe', copies: 2 })
+    expect(s.copyMode).toBeUndefined()
+  })
+  it('lit des exemplaires seuls', () => {
+    const s = sec0('## Manche {sleeve x4}\n- 1 rang')
+    expect(s).toMatchObject({ kind: 'manche', title: 'Manche', copies: 4 })
+    expect(s.copyMode).toBeUndefined()
+  })
+  it('un tag sans exemplaires ne pose ni copies ni copyMode', () => {
+    const s = sec0('## Pointe {toe}\n- 1 rang')
+    expect(s.copies).toBeUndefined()
+    expect(s.copyMode).toBeUndefined()
+  })
+  it('« x2 » dans le texte du titre reste dans le titre', () => {
+    const s = sec0('## Bonnet x2 {body}\n- 1 rang')
+    expect(s.title).toBe('Bonnet x2')
+    expect(s.kind).toBe('corps')
+  })
+  it('un nombre d\u2019exemplaires hors 2..99 est ignoré', () => {
+    expect(sec0('## Manche {sleeve x1}\n- 1 rang').copies).toBeUndefined()
+    expect(sec0('## Manche {sleeve x99}\n- 1 rang').copies).toBe(99)
+    expect(sec0('## Manche {sleeve x100}\n- 1 rang').copies).toBeUndefined()
+  })
+})
+
 describe('désambiguïsation bloc référence / section de travail (dialecte EN)', () => {
   it('tag de référence EN {materials} → bloc référence (flat.materials), pas une section', () => {
     const md = '---\nrowtine: 1\n---\n## Matériel {materials}\n\n- 4 anneaux marqueurs\n'

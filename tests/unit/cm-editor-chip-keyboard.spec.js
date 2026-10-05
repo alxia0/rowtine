@@ -101,7 +101,7 @@ describe('Puces du texte : ligne résolue au clic', () => {
     const item = [...document.querySelectorAll('.cm-menu-popover__item')].find((b) => b.textContent === 'Manche')
     item.click()
     const lignes = editor.getValue().split('\n')
-    expect(lignes[1]).toMatch(/^## Corps \{\w+\}$/)
+    expect(lignes[1]).toMatch(/^## Corps \{\w+( x\d+)?\}$/)
     expect(lignes[2]).toBe('## Bordure')
     document.querySelectorAll('.cm-menu-popover, .cm-menu-popover-scrim').forEach((el) => el.remove())
     host.remove()

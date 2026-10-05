@@ -542,6 +542,21 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     expect(p.readerState.sectionSnap).toEqual({ s1: { done: { 's1#1': true }, counters: { 's1#2': 1 } } })
   })
 
+  it('persist() conserve copyState et activeCopy, et un projet ancien n\'en gagne pas', async () => {
+    const { projectId } = await seedProject(FIX_READER, {
+      readerState: { done: {}, counters: {}, copyState: { 2: { done: { 's1#1': true }, counters: {} } }, activeCopy: { s1: 2 } },
+    })
+    const w = mountReader()
+    await settle()
+    await w.findAll('.rcheck')[0].trigger('click')
+    await settle()
+    await new Promise((r) => setTimeout(r, 0))
+    await settle()
+    const p = await db.projects.get(projectId)
+    expect(p.readerState.copyState).toEqual({ 2: { done: { 's1#1': true }, counters: {} } })
+    expect(p.readerState.activeCopy).toEqual({ s1: 2 })
+  })
+
   it('persist() n\'invente pas de sectionSnap quand il n\'y en avait pas', async () => {
     const { projectId } = await seedProject()
     const w = mountReader()
@@ -552,6 +567,8 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     await settle()
     const p = await db.projects.get(projectId)
     expect(p.readerState.sectionSnap).toBeUndefined()
+    expect(p.readerState.copyState).toBeUndefined()
+    expect(p.readerState.activeCopy).toBeUndefined()
   })
 
   // Une taille enregistrée hors des tailles du patron (patron changé) ne doit pas être restaurée.
@@ -596,6 +613,561 @@ describe('ReaderView — suivi de projet (interactif)', () => {
     await plus.trigger('click')
     await settle()
     expect(w.find('.rsec__prog--done').exists()).toBe(true)
+  })
+
+  describe('exemplaires en séquentiel', () => {
+    const copiesReader = (sec = {}) => ({
+      ...FIX_READER,
+      sections: [
+        { id: 'p1', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'Rang A' }, { t: 'Rang B' }], ...sec },
+      ],
+    })
+    const nextBtn = (w) => w.find('.rsec__copies-next')
+
+    it('affiche le titre d\'exemplaire et le bouton suivante ; cocher écrit dans done (exemplaire 1)', async () => {
+      const { projectId } = await seedProject(copiesReader({ kind: 'manche' }))
+      const w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 1, total: 2 }))
+      expect(nextBtn(w).text()).toBe(tk('reader.copies.next.generic'))
+      await w.findAll('.rcheck')[0].trigger('click')
+      await settle()
+      await new Promise((r) => setTimeout(r, 0))
+      await settle()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({ 'p1#0': true })
+      expect(p.readerState.copyState).toBeUndefined()
+    })
+
+    it('passer à l\'exemplaire 2 repart vide, écrit dans copyState[2] et retrouve les coches de l\'exemplaire 1', async () => {
+      const { projectId } = await seedProject(copiesReader({ kind: 'manche' }))
+      const w = mountReader()
+      await settle()
+      await w.findAll('.rcheck')[0].trigger('click')
+      await nextBtn(w).trigger('click')
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 2, total: 2 }))
+      expect(w.findAll('.rstep--done').length).toBe(0)
+      await w.findAll('.rcheck')[1].trigger('click')
+      await settle()
+      await new Promise((r) => setTimeout(r, 0))
+      await settle()
+      let p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({ 'p1#0': true })
+      expect(p.readerState.copyState[2].done).toEqual({ 'p1#1': true })
+      expect(p.readerState.activeCopy).toEqual({ p1: 2 })
+      // Dernier exemplaire : le bouton boucle sur le 1, dont les coches reviennent.
+      await nextBtn(w).trigger('click')
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 1, total: 2 }))
+      expect(w.findAll('.rstep--done').length).toBe(1)
+      expect(w.findAll('.rcheck')[0].attributes('aria-checked')).toBe('true')
+    })
+
+    it('« Annuler » du snackbar revient à l\'exemplaire précédent', async () => {
+      await seedProject(copiesReader({ kind: 'manche' }))
+      const w = mountReader()
+      await settle()
+      await nextBtn(w).trigger('click')
+      await settle()
+      const snackbar = useSnackbarStore()
+      expect(snackbar.visible).toBe(true)
+      expect(snackbar.actionLabel).toBe(tk('common.undo'))
+      snackbar.runAction()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 1, total: 2 }))
+    })
+
+    it('un exemplaire complet passe au suivant sans snackbar', async () => {
+      await seedProject(copiesReader({ kind: 'manche' }), { readerState: { done: { 'p1#0': true, 'p1#1': true } } })
+      const w = mountReader()
+      await settle()
+      await nextBtn(w).trigger('click')
+      await settle()
+      expect(useSnackbarStore().visible).toBe(false)
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 2, total: 2 }))
+    })
+
+    it("le dernier rang de la chaussette 1 mène à la chaussette 2, pas à la section suivante", async () => {
+      const reader = copiesReader()
+      reader.sections.unshift({ id: 'm', title: 'Montage', steps: [{ t: 'Rang M' }] })
+      reader.sections.push({ id: 'c', title: 'Corps', steps: [{ t: 'Rang Z' }] })
+      await seedProject(reader)
+      const w = mountReader()
+      await settle()
+      await w.findAll('.rcheck')[1].trigger('click')
+      await w.findAll('.rcheck')[2].trigger('click')
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.chaussette', { n: 2, total: 2 }))
+      expect(w.findAll('.rstep--done').length).toBe(0)
+      expect(scrollCalls.at(-1).id).toBe('rstep-p1#0')
+      // L'étape en cours suit la chaussette 2, même avec un rang non fait plus haut (hors ordre).
+      expect(w.findAll('.rstep--cur').map((x) => x.attributes('id'))).toEqual(['rstep-p1#0'])
+    })
+
+    it("« Annuler » après la bascule automatique revient à la chaussette 1, rangs cochés", async () => {
+      await seedProject(copiesReader())
+      const w = mountReader()
+      await settle()
+      await w.findAll('.rcheck')[0].trigger('click')
+      await w.findAll('.rcheck')[1].trigger('click')
+      await settle()
+      const snackbar = useSnackbarStore()
+      expect(snackbar.actionLabel).toBe(tk('common.undo'))
+      snackbar.runAction()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.chaussette', { n: 1, total: 2 }))
+      expect(w.findAll('.rstep--done').length).toBe(2)
+    })
+
+    it("chaussette en plusieurs sections : toute la chaussette 1, puis la chaussette 2 depuis sa première partie", async () => {
+      const sock = {
+        ...FIX_READER,
+        sections: ['pointe', 'pied', 'talon'].map((k) => ({ id: k, kind: k, title: k, copies: 2, steps: [{ t: 'Rang A' }] })),
+      }
+      await seedProject(sock)
+      const w = mountReader()
+      await settle()
+      const titles = () => w.findAll('.rsec__copy').map((x) => x.text())
+      const sock1 = tk('reader.copies.title.chaussette', { n: 1, total: 2 })
+      const sock2 = tk('reader.copies.title.chaussette', { n: 2, total: 2 })
+      await w.findAll('.rcheck')[0].trigger('click')
+      await settle()
+      expect(titles()).toEqual([sock1, sock1, sock1])
+      expect(w.findAll('.rstep--cur').map((x) => x.attributes('id'))).toEqual(['rstep-pied#0'])
+      await w.findAll('.rcheck')[1].trigger('click')
+      await w.findAll('.rcheck')[2].trigger('click')
+      await settle()
+      expect(titles()).toEqual([sock2, sock2, sock2])
+      expect(w.findAll('.rstep--cur').map((x) => x.attributes('id'))).toEqual(['rstep-pointe#0'])
+      expect(scrollCalls.at(-1).id).toBe('rstep-pointe#0')
+    })
+
+    it("un compteur qui finit l'exemplaire mène aussi à l'exemplaire suivant", async () => {
+      await seedProject(copiesReader({ steps: [{ repeat: true, t: 'rep {{0}}', total: [2, 2], c: [[2, 2]] }] }))
+      const w = mountReader()
+      await settle()
+      const plus = w.find('.rcount').findAll('.rcount__btn')[1]
+      await plus.trigger('click')
+      await plus.trigger('click')
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.chaussette', { n: 2, total: 2 }))
+      expect(scrollCalls.at(-1).id).toBe('rstep-p1#0')
+    })
+
+    it('un type non chaussette utilise les libellés génériques', async () => {
+      await seedProject(copiesReader({ kind: 'manche', copies: 3 }))
+      const w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.generic', { n: 1, total: 3 }))
+      expect(nextBtn(w).text()).toBe(tk('reader.copies.next.generic'))
+    })
+
+    it.each(['talon', 'jambe'])('le type %s porte le titre chaussette, sans bouton suivante', async (kind) => {
+      await seedProject(copiesReader({ kind }))
+      const w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.chaussette', { n: 1, total: 2 }))
+      expect(nextBtn(w).exists()).toBe(false)
+    })
+
+    it('aperçu bibliothèque : la répétition demandée, sans bouton', async () => {
+      await seedLibrary(copiesReader())
+      const w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.n', { n: 2 }))
+      expect(nextBtn(w).exists()).toBe(false)
+    })
+
+    it('sans copies : ni sous-titre ni bouton ; en simultané : pas de bouton', async () => {
+      await seedProject()
+      let w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copy').exists()).toBe(false)
+      expect(nextBtn(w).exists()).toBe(false)
+      w.unmount()
+      await seedProject(copiesReader(), { readerState: { copyMode: 'simultaneous' } })
+      w = mountReader()
+      await settle()
+      expect(nextBtn(w).exists()).toBe(false)
+    })
+
+    // Revue finale I1 : même étape en cours que la notification (section suivante, puis repli sur l'autre exemplaire).
+    it('étape en cours : section suivante de l\'exemplaire actif, puis exemplaire non complet quand tout l\'actif est fait', async () => {
+      const sock = {
+        ...FIX_READER,
+        sections: ['pointe', 'pied', 'talon'].map((k) => ({ id: k, kind: k, title: k, copies: 2, steps: [{ t: 'Rang A' }, { t: 'Rang B' }] })),
+      }
+      await seedProject(sock, { readerState: { done: { 'pointe#0': true, 'pointe#1': true }, last: { kind: 'step', id: 'pointe#1' } } })
+      let w = mountReader()
+      await settle()
+      expect(w.findAll('.rstep--cur').map((x) => x.attributes('id'))).toEqual(['rstep-pied#0'])
+      w.unmount()
+      const all = Object.fromEntries(['pointe', 'pied', 'talon'].flatMap((k) => [[`${k}#0`, true], [`${k}#1`, true]]))
+      await seedProject(sock, {
+        readerState: { done: all, copyState: { 2: { done: { 'pointe#0': true, 'pointe#1': true, 'pied#0': true, 'pied#1': true }, counters: {} } }, last: { kind: 'step', id: 'talon#1' } },
+      })
+      w = mountReader()
+      await settle()
+      expect(w.findAll('.rstep--cur').map((x) => x.attributes('id'))).toEqual(['rstep-talon#0'])
+    })
+
+    it('la progression somme les exemplaires : un exemplaire fini sur deux = 50 %', async () => {
+      await seedProject(copiesReader())
+      const w = mountReader()
+      await settle()
+      await w.findAll('.rcheck')[0].trigger('click')
+      await w.findAll('.rcheck')[1].trigger('click')
+      await settle()
+      expect(w.find('.rhdr__pct').text()).toBe('50 %')
+      expect(w.find('.rsec__prog').text()).toBe('2/4')
+    })
+  })
+
+  describe('technique des chaussettes du projet', () => {
+    const sockReader = () => ({
+      ...FIX_READER,
+      sections: [
+        { id: 'm', title: 'Montage', steps: [{ t: 'Rang M' }] },
+        { id: 'p', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'Rang A' }, { t: 'Rang B' }] },
+      ],
+    })
+    const opts = (w) => w.findAll('.techcard .szpill')
+    const settleAll = async () => {
+      await settle()
+      await new Promise((r) => setTimeout(r, 0))
+      await settle()
+    }
+
+    it('visible seulement avec des parties de chaussette à 2 exemplaires ; « l\'une après l\'autre » coché par défaut', async () => {
+      await seedProject(sockReader())
+      let w = mountReader()
+      await settle()
+      expect(w.find('.techcard h2').text()).toBe(tk('reader.copies.technique'))
+      expect(opts(w).map((b) => b.attributes('aria-checked'))).toEqual(['true', 'false'])
+      w.unmount()
+      await seedProject()
+      w = mountReader()
+      await settle()
+      expect(w.find('.techcard').exists()).toBe(false)
+    })
+
+    it('sans rang de chaussette fait : bascule immédiate, persistée, progression du montage gardée', async () => {
+      const { projectId } = await seedProject(sockReader(), { readerState: { done: { 'm#0': true } } })
+      const w = mountReader()
+      await settle()
+      await opts(w)[1].trigger('click')
+      await settleAll()
+      expect(w.findComponent({ name: 'ConfirmDialog' }).props('open')).toBe(false)
+      expect(w.findAll('.rstep').filter((s) => s.findAll('.rcheck').length === 2).length).toBe(2)
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.copyMode).toBe('simultaneous')
+      expect(p.readerState.done).toEqual({ 'm#0': true })
+    })
+
+    it('toucher la technique déjà choisie ne fait rien', async () => {
+      await seedProject(sockReader(), { readerState: { done: { 'p#0': true } } })
+      const w = mountReader()
+      await settle()
+      await opts(w)[0].trigger('click')
+      await settle()
+      expect(w.findComponent({ name: 'ConfirmDialog' }).props('open')).toBe(false)
+    })
+
+    it('avec un rang de chaussette fait : confirmation ; Annuler ne change rien, Recommencer remet les chaussettes à zéro', async () => {
+      const { projectId } = await seedProject(sockReader(), {
+        readerState: { done: { 'm#0': true, 'p#0': true }, copyMode: 'simultaneous' },
+      })
+      const w = mountReader()
+      await settle()
+      await opts(w)[0].trigger('click')
+      await settle()
+      const dlg = w.findComponent({ name: 'ConfirmDialog' })
+      expect(dlg.props('open')).toBe(true)
+      expect(dlg.props('message')).toBe(tk('reader.copies.resetMsg'))
+      dlg.vm.$emit('cancel')
+      await settleAll()
+      expect((await db.projects.get(projectId)).readerState.copyMode).toBe('simultaneous')
+      await opts(w)[0].trigger('click')
+      await settle()
+      w.findComponent({ name: 'ConfirmDialog' }).vm.$emit('confirm')
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.copyMode).toBeUndefined()
+      expect(p.readerState.done).toEqual({ 'm#0': true })
+      expect(w.find('.rsec__copy').text()).toBe(tk('reader.copies.title.chaussette', { n: 1, total: 2 }))
+    })
+
+    it('une partie de chaussette ajoutée pendant la chaussette 2 démarre aussi sur la chaussette 2', async () => {
+      const reader = {
+        ...FIX_READER,
+        sections: ['cotes', 'gousset', 'pied'].map((k) => ({ id: k, kind: k, title: k, copies: 2, steps: [{ t: 'Rang A' }] })),
+      }
+      await seedProject(reader, { readerState: { done: { 'cotes#0': true, 'pied#0': true }, activeCopy: { cotes: 2, pied: 2 } } })
+      const w = mountReader()
+      await settle()
+      const sock2 = tk('reader.copies.title.chaussette', { n: 2, total: 2 })
+      expect(w.findAll('.rsec__copy').map((x) => x.text())).toEqual([sock2, sock2, sock2])
+    })
+
+    it('une grille de chaussette entamée suffit à demander confirmation, et repart de zéro', async () => {
+      const { projectId } = await seedProject(sockReader(), {
+        readerState: { done: {}, chartRows: { p: 3, m: 2 }, chartReps: { p: 2 } },
+      })
+      const w = mountReader()
+      await settle()
+      await opts(w)[1].trigger('click')
+      await settle()
+      expect(w.findComponent({ name: 'ConfirmDialog' }).props('open')).toBe(true)
+      w.findComponent({ name: 'ConfirmDialog' }).vm.$emit('confirm')
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.copyMode).toBe('simultaneous')
+      expect(p.readerState.chartRows).toEqual({ m: 2 })
+      expect(p.readerState.chartReps).toEqual({})
+    })
+
+    it('« l\'une après l\'autre » : pas de bouton « Chaussette suivante » sur une partie de chaussette, gardé pour une manche', async () => {
+      await seedProject(sockReader())
+      let w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copies-next').exists()).toBe(false)
+      w.unmount()
+      await seedProject({ ...FIX_READER, sections: [{ id: 'mc', kind: 'manche', copies: 2, title: 'Manche', steps: [{ t: 'Rang A' }] }] })
+      w = mountReader()
+      await settle()
+      expect(w.find('.rsec__copies-next').exists()).toBe(true)
+    })
+  })
+
+  describe('exemplaires en simultané', () => {
+    const simulReader = (sec = {}) => ({
+      ...FIX_READER,
+      sections: [
+        {
+          id: 'p1',
+          kind: 'pied',
+          copies: 2,
+          title: 'Pied',
+          steps: [{ t: 'Rang A' }, { t: 'Rang B' }, { t: 'Rang C' }],
+          ...sec,
+        },
+      ],
+    })
+    // Le projet choisit la technique (readerState.copyMode), pas la section du patron.
+    const seedSim = (reader, extra = {}) =>
+      seedProject(reader, { ...extra, readerState: { copyMode: 'simultaneous', ...extra.readerState } })
+    const checks = (w, row) => w.findAll('.rstep')[row].findAll('.rcheck')
+    const settleAll = async () => {
+      await settle()
+      await new Promise((r) => setTimeout(r, 0))
+      await settle()
+    }
+    // Tap dans le premier tiers gauche de la carte (jsdom ne mesure rien : boîte simulée).
+    const tapZone = async (w, row) => {
+      const card = w.findAll('.rstep')[row]
+      card.element.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 40, right: 300, bottom: 40 })
+      await card.trigger('click', { clientX: 20 })
+      await settle()
+    }
+
+    it("le mode posé sur la section du patron n'a plus d'effet : une coche par rang", async () => {
+      await seedProject(simulReader({ copyMode: 'simultaneous' }))
+      const w = mountReader()
+      await settle()
+      expect(checks(w, 0).length).toBe(1)
+    })
+
+    it('rend deux coches par rang, repérées 1 et 2, nommées par checkCopy', async () => {
+      await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      const c = checks(w, 0)
+      expect(c.length).toBe(2)
+      expect(c[0].attributes('role')).toBe('checkbox')
+      expect(c[0].attributes('aria-label')).toBe(tk('reader.copies.checkCopy', { n: 1 }))
+      expect(c[1].attributes('aria-label')).toBe(tk('reader.copies.checkCopy', { n: 2 }))
+      expect(c[0].text()).toContain('1')
+      expect(c[1].text()).toContain('2')
+      expect(w.find('.rsec__copies-next').exists()).toBe(false)
+    })
+
+    it("le dernier geste porte l'exemplaire coché au-delà du 1 (last.copy), nu pour l'exemplaire 1", async () => {
+      const { projectId } = await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      await checks(w, 0)[1].trigger('click')
+      await settleAll()
+      expect((await db.projects.get(projectId)).readerState.last).toEqual({ kind: 'step', id: 'p1#0', copy: 2 })
+      await checks(w, 1)[0].trigger('click')
+      await settleAll()
+      expect((await db.projects.get(projectId)).readerState.last).toEqual({ kind: 'step', id: 'p1#1' })
+    })
+
+    it('chaque coche écrit dans son exemplaire ; le rang est fait quand les deux le sont', async () => {
+      const { projectId } = await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      await checks(w, 0)[0].trigger('click')
+      await settle()
+      expect(w.findAll('.rstep')[0].classes()).not.toContain('rstep--done')
+      expect(checks(w, 0)[0].attributes('aria-checked')).toBe('true')
+      expect(checks(w, 0)[1].attributes('aria-checked')).toBe('false')
+      await checks(w, 0)[1].trigger('click')
+      await settleAll()
+      expect(w.findAll('.rstep')[0].classes()).toContain('rstep--done')
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({ 'p1#0': true })
+      expect(p.readerState.copyState[2].done).toEqual({ 'p1#0': true })
+      expect(w.find('.rsec__prog').text()).toBe('2/6')
+    })
+
+    it('le tap sur la zone du rang coche l\'exemplaire en retard (1 à égalité)', async () => {
+      const { projectId } = await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      await tapZone(w, 0) // égalité : exemplaire 1
+      expect(checks(w, 0)[0].attributes('aria-checked')).toBe('true')
+      expect(checks(w, 0)[1].attributes('aria-checked')).toBe('false')
+      await tapZone(w, 0) // l'exemplaire 2 est en retard
+      expect(checks(w, 0)[1].attributes('aria-checked')).toBe('true')
+      await tapZone(w, 1) // égalité de nouveau : exemplaire 1
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({ 'p1#0': true, 'p1#1': true })
+      expect(p.readerState.copyState[2].done).toEqual({ 'p1#0': true })
+    })
+
+    it('l\'indicateur d\'écart apparaît quand les rangs faits diffèrent, disparaît à égalité', async () => {
+      await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      expect(w.find('.rsec__gap').exists()).toBe(false)
+      await checks(w, 0)[0].trigger('click')
+      await settle()
+      expect(w.find('.rsec__gap').text()).toBe(tk('reader.copies.gap', { n: 2, rows: 1, count: 1 }))
+      await checks(w, 1)[0].trigger('click')
+      await settle()
+      expect(w.find('.rsec__gap').text()).toBe(tk('reader.copies.gap', { n: 2, rows: 2, count: 2 }))
+      await checks(w, 0)[1].trigger('click')
+      await checks(w, 1)[1].trigger('click')
+      await settle()
+      expect(w.find('.rsec__gap').exists()).toBe(false)
+    })
+
+    it('une seule chaussette cochée ne recentre pas ; la seconde recentre sur le rang suivant', async () => {
+      await seedSim(simulReader())
+      const w = mountReader()
+      await settle()
+      const spy = Element.prototype.scrollIntoView
+      const centered = () => spy.mock.calls.filter((c) => c[0]?.block === 'center').length
+      const before = centered()
+      await checks(w, 0)[0].trigger('click')
+      await settle()
+      expect(centered()).toBe(before)
+      await checks(w, 0)[1].trigger('click')
+      await settle()
+      expect(centered()).toBe(before + 1)
+    })
+
+    it('séquentiel : cocher recentre comme avant', async () => {
+      await seedProject(simulReader())
+      const w = mountReader()
+      await settle()
+      const spy = Element.prototype.scrollIntoView
+      const centered = () => spy.mock.calls.filter((c) => c[0]?.block === 'center').length
+      const before = centered()
+      await checks(w, 0)[0].trigger('click')
+      await settle()
+      expect(centered()).toBe(before + 1)
+    })
+
+    it('tap en zone : décoche la copie en retard seulement, la copie 1 reste intacte', async () => {
+      const { projectId } = await seedSim(simulReader(), {
+        readerState: {
+          done: { 'p1#0': true, 'p1#1': true, 'p1#2': true },
+          copyState: { 2: { done: { 'p1#2': true }, counters: {} } },
+        },
+      })
+      const w = mountReader()
+      await settle()
+      await tapZone(w, 2)
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({ 'p1#0': true, 'p1#1': true, 'p1#2': true })
+      expect(p.readerState.copyState[2].done).toEqual({})
+    })
+
+    it('tap en zone à égalité complète : seul l\'exemplaire 1 est décoché pour ce rang', async () => {
+      const { projectId } = await seedSim(simulReader(), {
+        readerState: {
+          done: { 'p1#0': true },
+          copyState: { 2: { done: { 'p1#0': true }, counters: {} } },
+        },
+      })
+      const w = mountReader()
+      await settle()
+      await tapZone(w, 0)
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.done).toEqual({})
+      expect(p.readerState.copyState[2].done).toEqual({ 'p1#0': true })
+    })
+
+    // Revue finale I2 : le compteur nomme la chaussette visée, « + » suit le compteur en retard, « − » défait le dernier « + ».
+    it('compteur : « + » vise la chaussette au compteur le plus bas, « − » le plus haut, le libellé la nomme', async () => {
+      const { projectId } = await seedSim(simulReader({ steps: [{ t: 'Répéter {{0}} fois.', total: [3], c: [[3]], repeat: true }] }), {
+        readerState: { size: 0 },
+      })
+      const w = mountReader()
+      await settle()
+      const lab = () => w.find('.rcount__lab').text()
+      const val = () => w.find('.rcount__val').text()
+      const [minus, plus] = w.find('.rcount').findAll('.rcount__btn')
+      const sock = (n) => tk('reader.copies.title.chaussette', { n, total: 2 })
+      expect(lab()).toContain(sock(1))
+      expect(minus.attributes('disabled')).toBeDefined()
+      await plus.trigger('click')
+      await settle()
+      expect(lab()).toContain(sock(2))
+      expect(val()).toBe('0 / 3')
+      await plus.trigger('click')
+      await plus.trigger('click')
+      await settle()
+      let p = await db.projects.get(projectId)
+      expect([p.readerState.counters['p1#0'], p.readerState.copyState[2].counters['p1#0']]).toEqual([2, 1])
+      expect(p.readerState.last).toEqual({ kind: 'step', id: 'p1#0' })
+      await minus.trigger('click')
+      await minus.trigger('click')
+      await settleAll()
+      p = await db.projects.get(projectId)
+      expect([p.readerState.counters['p1#0'], p.readerState.copyState[2].counters['p1#0']]).toEqual([1, 0])
+      expect(lab()).toContain(sock(2))
+      expect(minus.attributes('disabled')).toBeUndefined()
+    })
+
+    // Revue finale m2 : le dernier geste garde l'exemplaire touché, même quand le geste change celui en retard.
+    it('« + » qui complète le compteur de la chaussette 1 : le dernier geste reste sur la chaussette 1', async () => {
+      const { projectId } = await seedProject(
+        simulReader({ steps: [{ t: 'Répéter {{0}} fois.', total: [1], c: [[1]], repeat: true }, { t: 'Rang A' }] }),
+        { readerState: { size: 0 } },
+      )
+      const w = mountReader()
+      await settle()
+      await w.find('.rcount').findAll('.rcount__btn')[1].trigger('click')
+      await settleAll()
+      const p = await db.projects.get(projectId)
+      expect(p.readerState.counters['p1#0']).toBe(1)
+      expect(p.readerState.last).toEqual({ kind: 'step', id: 'p1#0' })
+    })
+
+    it('séquentiel et sans copies : une seule coche par rang, pas d\'écart', async () => {
+      await seedProject(simulReader())
+      const w = mountReader()
+      await settle()
+      expect(checks(w, 0).length).toBe(1)
+      expect(w.find('.rsec__gap').exists()).toBe(false)
+    })
   })
 
   it('redirige si le patron du projet n’a pas de format lecteur', async () => {

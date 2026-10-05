@@ -35,17 +35,18 @@ async function releasePdf(task) {
 
 // Extraction structurée : une liste de lignes typées { text, size, bold, y } par page.
 // Base de l'import local (segmentation par mise en page).
-export async function extractPages(file, onPage) {
+export async function extractPages(file, onPage, { pageNumbers } = {}) {
   const data = await file.arrayBuffer()
   const task = openPdf(data)
   try {
     const doc = await task.promise
+    const list = selectedPageNumbers(doc.numPages, pageNumbers)
     const pages = []
-    for (let i = 1; i <= doc.numPages; i++) {
-      const page = await doc.getPage(i)
+    for (let i = 0; i < list.length; i++) {
+      const page = await doc.getPage(list[i])
       const content = await page.getTextContent()
       pages.push(itemsToLines(content.items, content.styles, { pageWidth: page.view?.[2] || 595 }))
-      onPage?.(i, doc.numPages)
+      onPage?.(i + 1, list.length)
     }
     return pages
   } finally {
@@ -123,6 +124,58 @@ export async function pdfPageCount(file) {
   const task = openPdf(data)
   try {
     return (await task.promise).numPages
+  } finally {
+    await releasePdf(task)
+  }
+}
+
+// Pages à parcourir (import d'une partie du PDF, spec 2026-10-04) : toutes par défaut, sinon
+// les numéros choisis qui existent dans ce document, dans leur ordre.
+export function selectedPageNumbers(numPages, pageNumbers) {
+  const all = Array.from({ length: numPages }, (_, i) => i + 1)
+  if (!Array.isArray(pageNumbers) || !pageNumbers.length) return all
+  return pageNumbers.filter((n) => Number.isInteger(n) && n >= 1 && n <= numPages)
+}
+
+// Miniatures du sélecteur de pages (PdfPagesSelectDialog.vue) : le PDF est ouvert UNE fois
+// pour toutes les pages, contrairement à renderPdfPageToDataUrl qui le rouvre à chaque appel
+// (un recueil de 60 pages sur la Nexus 7). Une page qui ne se rend pas donne '' : la case
+// garde son numéro. `isCancelled` est lu avant chaque page : fermer le sélecteur arrête tout.
+export async function renderPdfThumbnails(file, { maxWidth = 200, onCount, onThumb, isCancelled } = {}) {
+  const data = await file.arrayBuffer()
+  const task = openPdf(data)
+  try {
+    const doc = await task.promise
+    onCount?.(doc.numPages)
+    for (let n = 1; n <= doc.numPages; n++) {
+      if (isCancelled?.()) return
+      let url = ''
+      let page
+      let canvas
+      try {
+        page = await doc.getPage(n)
+        const base = page.getViewport({ scale: 1 })
+        const scale = Math.min(1, maxWidth / base.width)
+        const viewport = page.getViewport({ scale })
+        canvas = document.createElement('canvas')
+        canvas.width = Math.ceil(viewport.width)
+        canvas.height = Math.ceil(viewport.height)
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+        url = canvas.toDataURL('image/jpeg', 0.7) || ''
+      } catch {
+        url = ''
+      } finally {
+        // pdf.js garde l'operator list et les images décodées de la page jusqu'au destroy du
+        // document : sur un recueil illustré, on les libère page par page (best-effort).
+        try { page?.cleanup() } catch { /* best-effort */ }
+        if (canvas) {
+          canvas.width = 0
+          canvas.height = 0
+        }
+      }
+      if (isCancelled?.()) return
+      onThumb?.(n, url)
+    }
   } finally {
     await releasePdf(task)
   }
@@ -472,20 +525,22 @@ export async function extractImages(file) {
 // Comme extractImages, mais en suivant la CTM (pile save/restore + transform) pour situer
 // chaque image → [{ src, page, x, y, w, h }]. `y` = bord HAUT de l'image (points PDF, origine
 // bas-gauche). `w`/`h` = dimensions intrinsèques (px) pour le filtre taille. Best-effort → [].
-export async function extractImagesWithPos(file, onPage) {
+export async function extractImagesWithPos(file, onPage, { pageNumbers } = {}) {
   const candidates = []
   let task
   try {
     const data = await file.arrayBuffer()
     task = openPdf(data)
     const doc = await task.promise
-    for (let p = 1; p <= doc.numPages; p++) {
+    const list = selectedPageNumbers(doc.numPages, pageNumbers)
+    for (let idx = 0; idx < list.length; idx++) {
+      const p = list[idx]
       const page = await doc.getPage(p)
       let ops
       try {
         ops = await page.getOperatorList()
       } catch {
-        onPage?.(p, doc.numPages)
+        onPage?.(idx + 1, list.length)
         continue
       }
       let ctm = [1, 0, 0, 1, 0, 0]
@@ -548,7 +603,7 @@ export async function extractImagesWithPos(file, onPage) {
           /* image illisible : on ignore */
         }
       }
-      onPage?.(p, doc.numPages)
+      onPage?.(idx + 1, list.length)
     }
     return filterGalleryImages(candidates)
   } catch {
@@ -721,6 +776,7 @@ export async function extractVectorRegions(file, onPage, opts = {}) {
       }
     }).filter((r) => r.src)
   }
+  const { pageNumbers, ...clusterOpts } = opts
   let task
   try {
     const data = await file.arrayBuffer()
@@ -728,17 +784,19 @@ export async function extractVectorRegions(file, onPage, opts = {}) {
     const doc = await task.promise
     const allBoxes = []
     const pageDims = {}
-    for (let p = 1; p <= doc.numPages; p++) {
+    const list = selectedPageNumbers(doc.numPages, pageNumbers)
+    for (let idx = 0; idx < list.length; idx++) {
+      const p = list[idx]
       const page = await doc.getPage(p)
       const view = page.view || [0, 0, 595, 842]
       pageDims[p] = { x0: view[0], y0: view[1], x1: view[2], y1: view[3], w: view[2] - view[0], h: view[3] - view[1] }
       let ops
-      try { ops = await page.getOperatorList() } catch { onPage?.(p, doc.numPages); continue }
+      try { ops = await page.getOperatorList() } catch { onPage?.(idx + 1, list.length); continue }
       for (const b of collectPathBoxes(ops, pdfjs.OPS)) allBoxes.push({ page: p, ...b })
-      onPage?.(p, doc.numPages)
+      onPage?.(idx + 1, list.length)
     }
     const pageArea = Object.fromEntries(Object.entries(pageDims).map(([p, d]) => [p, d.w * d.h]))
-    const regions = clusterPathBoxes(allBoxes, { ...opts, pageArea }).slice(0, REGION_MAX)
+    const regions = clusterPathBoxes(allBoxes, { ...clusterOpts, pageArea }).slice(0, REGION_MAX)
     const scale = 2 // « retina » nominal — borné PAR PAGE par renderPageCanvas (clampRenderScale)
     const out = []
     // Regrouper les régions par page pour ne rendre chaque page qu'une fois.

@@ -71,3 +71,34 @@ describe('toggleSectionDone', () => {
     expect(toggleSectionDone(reader, state, 'zzz', 0)).toBe(state)
   })
 })
+
+describe('toggleSectionDone : exemplaires', () => {
+  const reader = { sizeLabels: ['S'], sections: [{ id: 'p', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'a' }, { t: 'b' }] }] }
+
+  it('cocher coche tous les exemplaires, décocher les vide, sans muter l\'entrée', () => {
+    const start = { done: {}, counters: {}, copyState: { 2: { done: {}, counters: {} } } }
+    const on = toggleSectionDone(reader, start, 'p', 0)
+    expect(on.done).toEqual({ 'p#0': true, 'p#1': true })
+    expect(on.copyState[2].done).toEqual({ 'p#0': true, 'p#1': true })
+    expect(start.copyState[2].done).toEqual({})
+    const off = toggleSectionDone(reader, on, 'p', 0)
+    expect(off.done).toEqual({})
+    expect(off.copyState[2].done).toEqual({})
+  })
+
+  it('un exemplaire seulement fait : cocher complète l\'autre, décocher restaure les deux', () => {
+    const start = { done: { 'p#0': true, 'p#1': true }, counters: {}, copyState: { 2: { done: { 'p#0': true }, counters: {} } } }
+    const on = toggleSectionDone(reader, start, 'p', 0)
+    expect(on.copyState[2].done).toEqual({ 'p#0': true, 'p#1': true })
+    const off = toggleSectionDone(reader, on, 'p', 0)
+    expect(off.done).toEqual({ 'p#0': true, 'p#1': true })
+    expect(off.copyState[2].done).toEqual({ 'p#0': true })
+    expect(off.sectionSnap.p).toBeUndefined()
+  })
+
+  it('une section à 1 exemplaire garde la forme historique (pas de copyState ni de copies)', () => {
+    const r1 = { sections: [{ id: 'c', kind: 'corps', title: 'C', steps: [{ t: 'a' }] }] }
+    const on = toggleSectionDone(r1, { done: {}, counters: {} }, 'c', 0)
+    expect(on).toEqual({ done: { 'c#0': true }, counters: {}, sectionSnap: { c: { done: {}, counters: {} } } })
+  })
+})

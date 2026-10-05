@@ -22,6 +22,7 @@ vi.mock('vue-router', () => ({ useRoute: () => nav.route, useRouter: () => nav.r
 
 import ProjectEditView from '@/views/ProjectEditView.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 async function seedProject(extra = {}) {
   const pid = await db.projects.add({
@@ -443,6 +444,104 @@ describe('ProjectEditView — bornes des dates', () => {
       expect(w.find(id).attributes('min')).toBe('1900-01-01')
       expect(w.find(id).attributes('max')).toBe(max)
     }
+    w.unmount()
+  })
+})
+
+describe('ProjectEditView — libellé des aiguilles', () => {
+  // Protège : le libellé aiguilles/crochets pointe vers le premier champ mm (labelOffsetAbove s'appuie sur field.labels).
+  it('le libellé a un for égal à l’id du premier champ mm', async () => {
+    await seedProject()
+    const w = mountEdit()
+    await waitHydrated(w)
+    const label = w.findAll('label.field-label').find((l) => l.text() === i18n.global.t('project.needles'))
+    const first = w.find('.needle-row input')
+    expect(first.attributes('id')).toBeTruthy()
+    expect(label.attributes('for')).toBe(first.attributes('id'))
+    expect(first.element.labels[0]).toBe(label.element)
+    w.unmount()
+  })
+})
+
+describe('ProjectEditView — technique des chaussettes', () => {
+  // Protège : la fiche écrit la même technique que le lecteur, sans écraser le reste du suivi.
+  const SOCK = { sections: [{ id: 'p', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'Rang A' }] }] }
+  const PLAIN = { sections: [{ id: 'c', title: 'Corps', steps: [{ t: 'Rang A' }] }] }
+  const save = async (w) => {
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+  }
+  const dlg = (w) => w.findAllComponents(ConfirmDialog).find((d) => d.props('title') === i18n.global.t('reader.copies.resetTitle'))
+
+  it("champ visible seulement pour un patron à parties de chaussette x2, « l'une après l'autre » par défaut", async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    await seedProject({ patternId: sockId })
+    let w = mountEdit()
+    await waitHydrated(w)
+    expect(w.find('select#techsel').element.value).toBe('sequential')
+    w.unmount()
+    const plainId = await db.patterns.add({ name: 'Pull', type: 'knitting', reader: PLAIN })
+    await seedProject({ patternId: plainId })
+    w = mountEdit()
+    await waitHydrated(w)
+    expect(w.find('select#techsel').exists()).toBe(false)
+    w.unmount()
+  })
+
+  it('le champ se trouve dans le bloc « Technique & matériel »', async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    await seedProject({ patternId: sockId })
+    const w = mountEdit()
+    await waitHydrated(w)
+    const card = w.findAll('section.card').find((c) => c.find('.card__title').text() === i18n.global.t('project.sectionGear'))
+    expect(card.find('select#techsel').exists()).toBe(true)
+    w.unmount()
+  })
+
+  it('création : « Les deux en même temps » écrit readerState.copyMode', async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    nav.route.params = {}
+    nav.route.query = { pattern: String(sockId) }
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('#name').setValue('Paire bleue')
+    await w.find('select#techsel').setValue('simultaneous')
+    await save(w)
+    const [p] = (await db.projects.toArray()).filter((x) => x.name === 'Paire bleue')
+    expect(p.readerState).toEqual({ copyMode: 'simultaneous' })
+    w.unmount()
+  })
+
+  it('modification sans rang de chaussette fait : enregistré sans dialogue, le reste du suivi intact', async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    const pid = await seedProject({ patternId: sockId, readerState: { size: 1, chartRows: { x: 2 }, done: { 'autre#0': true } } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('select#techsel').setValue('simultaneous')
+    await save(w)
+    expect(dlg(w).props('open')).toBe(false)
+    expect((await db.projects.get(pid)).readerState).toEqual({ size: 1, chartRows: { x: 2 }, done: { 'autre#0': true }, counters: {}, copyMode: 'simultaneous' })
+    w.unmount()
+  })
+
+  it('modification avec un rang de chaussette fait : Annuler ne change rien, Recommencer remet les chaussettes à zéro', async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    const pid = await seedProject({ patternId: sockId, readerState: { done: { 'p#0': true }, copyMode: 'simultaneous' } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('select#techsel').setValue('sequential')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(dlg(w).props('open')).toBe(true))
+    expect(dlg(w).props('message')).toBe(i18n.global.t('reader.copies.resetMsg'))
+    dlg(w).vm.$emit('cancel')
+    await flushPromises()
+    expect(nav.router.replace).not.toHaveBeenCalled()
+    expect((await db.projects.get(pid)).readerState).toEqual({ done: { 'p#0': true }, copyMode: 'simultaneous' })
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(dlg(w).props('open')).toBe(true))
+    dlg(w).vm.$emit('confirm')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    expect((await db.projects.get(pid)).readerState).toEqual({ done: {}, counters: {} })
     w.unmount()
   })
 })

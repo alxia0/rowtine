@@ -18,6 +18,12 @@ export const KIND_TO_EN = {
   oreille: 'ear',
   museau: 'muzzle',
   queue: 'tail',
+  cotes: 'cuff',
+  pointe: 'toe',
+  pied: 'foot',
+  talon: 'heel',
+  jambe: 'leg',
+  gousset: 'gusset',
   motif: 'motif',
   dentelle: 'lace',
   // Distinct de REF_TO_EN.echantillon ('gauge') : le kind de travail échantillon
@@ -42,6 +48,7 @@ export const KIND_TO_EN = {
   // vs blocs référence) — le round-trip KIND_TO_FR.info → 'infos' est sans collision.
   infos: 'info',
   autre: 'other',
+  repetable: 'repeated',
 }
 
 export const KIND_TO_FR = Object.fromEntries(

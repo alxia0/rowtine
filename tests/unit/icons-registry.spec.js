@@ -11,4 +11,8 @@ describe('icons — nouvelles entrées barre éditeur', () => {
     expect(hasIcon('move')).toBe(true)
     expect(ICONS.move.body).toContain('<path')
   })
+  it("repeat existe (puce d'exemplaires des sections répétables)", () => {
+    expect(hasIcon('repeat')).toBe(true)
+    expect(ICONS.repeat.body).toContain('<path')
+  })
 })

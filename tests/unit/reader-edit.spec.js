@@ -107,4 +107,14 @@ describe('reader-edit helpers', () => {
     expect(steps).toHaveLength(1)
     expect(Array.isArray(steps[0].imgs) && steps[0].imgs.length).toBeTruthy()
   })
+  it('conserve copies valides, retire copies d\u2019un kind non répétable, n\u2019écrit plus copyMode', () => {
+    const out = normalizeReaderForSave({ sizeLabels: [], sections: [
+      { id: '', kind: 'pied', title: 'Pied', copies: 2, copyMode: 'simultaneous', steps: [{ t: 'a' }] },
+      { id: '', kind: 'corps', title: 'Corps', copies: 3, copyMode: 'simultaneous', steps: [{ t: 'a' }] },
+    ] }, [])
+    expect(out.sections[0].copies).toBe(2)
+    expect(out.sections[0].copyMode).toBeUndefined()
+    expect(out.sections[1].copies).toBeUndefined()
+    expect(out.sections[1].copyMode).toBeUndefined()
+  })
 })

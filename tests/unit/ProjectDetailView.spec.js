@@ -409,6 +409,18 @@ describe('ProjectDetailView', () => {
     expect(w.find('.counters-block').exists()).toBe(true)
   })
 
+  it("l'onglet Sections somme les exemplaires : section à 2 exemplaires dont un fini, 50 %", async () => {
+    const patId = await db.patterns.add({
+      name: 'Chaussettes',
+      reader: { sizeLabels: [], sections: [{ id: 'p1', kind: 'pied', title: 'Pied', copies: 2, steps: [{ t: 'Rg 1' }, { t: 'Rg 2' }] }] },
+    })
+    await seedProject({ patternId: patId, readerState: { done: { 'p1#0': true, 'p1#1': true } } })
+    const w = mountDetail()
+    await flushPromises()
+    expect(w.find('.rovw__pct').text()).toBe('50 %')
+    expect(w.find('.rprog__frac').text()).toBe('2 / 4')
+  })
+
   describe('clic sur une section de l’aperçu → atterrit DANS cette section (#9)', () => {
     async function seedWithSections() {
       const patId = await db.patterns.add({
@@ -1079,6 +1091,44 @@ describe('fiche projet — prix du patron', () => {
   it('3. prix VIDE ⇒ AUCUNE ligne (pas une ligne vide)', async () => {
     const w = await monterAvecPrix({ price: '' })
     expect(w.find('[data-test="project-pattern-price"]').exists()).toBe(false)
+  })
+})
+
+describe('fiche projet : designer du patron source', () => {
+  async function monterAvecPatron(over) {
+    const patId = await db.patterns.add({ type: 'knitting', ...over })
+    const projectId = await db.projects.add({ name: 'Bonnet', patternId: patId })
+    route.params = { id: String(projectId) }
+    route.query = { tab: 'infos' }
+    const w = mount(ProjectDetailView, { global: { plugins: [i18nFr], stubs: { AppHeader: true } } })
+    await flushPromises()
+    await vi.waitFor(() => expect(w.vm.loading).toBe(false))
+    return w
+  }
+
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await db.delete()
+    await db.open()
+  })
+
+  // La fiche projet lit le designer en direct sur le patron lié, et rien sans designer ou sur le patron libre.
+  it('affiche « par <designer> » sous le patron source', async () => {
+    const w = await monterAvecPatron({ name: 'Bonnet', author: 'Sys Fredens' })
+    expect(w.find('[data-test="project-pattern-designer"]').text()).toContain('Sys Fredens')
+  })
+  it('sans designer ou patron libre : aucune ligne', async () => {
+    const a = await monterAvecPatron({ name: 'Bonnet', author: '' })
+    expect(a.find('[data-test="project-pattern-designer"]').exists()).toBe(false)
+    const b = await monterAvecPatron({ name: 'Libre', author: 'X', builtin: true })
+    expect(b.find('[data-test="project-pattern-designer"]').exists()).toBe(false)
+  })
+  // Protège : un author blanc ou non-chaîne ne laisse pas un « par » orphelin.
+  it('author blanc ou non-chaîne : aucune ligne', async () => {
+    const a = await monterAvecPatron({ name: 'Bonnet', author: '  ' })
+    expect(a.find('[data-test="project-pattern-designer"]').exists()).toBe(false)
+    const b = await monterAvecPatron({ name: 'Bonnet', author: 42 })
+    expect(b.find('[data-test="project-pattern-designer"]').exists()).toBe(false)
   })
 })
 

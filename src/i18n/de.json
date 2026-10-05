@@ -264,6 +264,9 @@
   },
   "rowNotif": {
     "title": "Reihe {index}/{total}, {section}",
+    "titleCopy": "{copy} · Reihe {index}/{total} · {section}",
+    "sectionCopy": "{copy} · {section}",
+    "nextCopy": "Danach, {copy}: {text}",
     "next": "Danach: {text}",
     "nextIn": "Danach, {section}: {text}",
     "check": "Reihe abhaken",
@@ -303,6 +306,7 @@
     "pattern": "Anleitung",
     "patternHint": "Die Anleitung, der du bei diesem Projekt folgst. Deine Auswahl importiert deren Abschnitte in das Projekt (du verfolgst darin deine Reihen).",
     "patternSource": "Ursprüngliche Anleitung",
+    "patternWithDesigner": "{name}, von {author}",
     "patternMissing": "Die Anleitung dieses Projekts wurde gelöscht. Dein Fortschritt bleibt erhalten: Stelle sie über den Papierkorb (Einstellungen) wieder her, um deine Anweisungen zurückzubekommen.",
     "patternMissingShort": "Die Anleitung dieses Projekts wurde gelöscht — stelle sie über den Papierkorb wieder her.",
     "patternChangeConfirm": "Ein Wechsel der Anleitung ersetzt die Abschnitte dieses Projekts und deren Fortschritt. Fortfahren?",
@@ -432,7 +436,8 @@
         "recentColor": "Zuletzt verwendete Farbe",
         "textLabel": "Freitext (optional)",
         "share": "Teilen",
-        "calendar": "Kalenderkarte"
+        "calendar": "Kalenderkarte",
+        "pattern": "Anleitung"
       }
     },
     "galleryPattern": "Anleitung",
@@ -710,6 +715,7 @@
     "allSizes": "Alle",
     "instrForSize": "Anweisungen für Größe {size}",
     "by": "von",
+    "designerAdd": "Designer: hinzufügen",
     "addSection": "Abschnitt hinzufügen",
     "createProject": "Projekt aus dieser Anleitung erstellen",
     "preview": "Anleitung ansehen",
@@ -753,8 +759,7 @@
     "titleRowtine": "Rowtine-Datei importieren",
     "leadRowtine": "Eine bereits in einer Rowtine-Datei vorbereitete Anleitung: Text und Bilder werden unverändert importiert, auf deinem Gerät, offline.",
     "pickRowtine": ".rowtine- oder .zip-Datei auswählen",
-    "lead": "Die Anleitung wird auf deinem Gerät analysiert: kostenlos, offline, originalgetreu zum PDF.",
-    "leadNext": "Die Anleitung wird direkt in deiner Bibliothek gespeichert; du kannst die Abschnitte bei Bedarf später korrigieren.",
+    "lead": "Die Anleitung wird auf deinem Gerät analysiert: kostenlos, offline, originalgetreu zum PDF. Sie wird direkt in deiner Bibliothek gespeichert.",
     "pick": "PDF-Datei auswählen",
     "waitingSync": "Bibliothek wird synchronisiert, der Import startet, sobald das fertig ist…",
     "parsing": "PDF wird analysiert…",
@@ -779,16 +784,26 @@
     "cancelImport": "Import abbrechen",
     "saved": "Anleitung in die Bibliothek importiert",
     "caveatTitle": "Lies die Anleitung durch, bevor du startest",
-    "caveatBody": "Der Import ist nie perfekt: Überprüfe die Zahlen, die Größen und die Wiederholungen und korrigiere sie direkt in der App.",
+    "caveatBody": "Der Import ist nie perfekt: Überprüfe die Zahlen, die Größen und die Wiederholungen.",
     "doneHowToFix": "Wie korrigiere ich?",
     "viewPattern": "Anleitung ansehen",
     "warnings": "{n} Punkt(e) zu prüfen",
-    "nextHint": "Geh sie zuerst Abschnitt für Abschnitt durch und korrigiere den Inhalt bei Bedarf. Du startest dein Projekt von der Anleitung aus.",
     "blockTitle": "Riskanter Import",
     "blockColumns": "Dieses PDF scheint mehr als 2 Spalten zu haben: Der extrahierte Text wird durcheinandergeraten.",
-    "blockMultiPattern": "Diese Datei scheint mehrere Anleitungen zu enthalten, oder ein ganzes Buch: Rowtine importiert jeweils nur eine Anleitung. Speichere die Seiten der gewünschten Anleitung als eigenes PDF und importiere dann diese Datei.",
+    "blockMultiPattern": "Diese Datei scheint mehrere Anleitungen oder ein ganzes Buch zu enthalten: Rowtine importiert jeweils eine Anleitung. Wähle die Seiten der gewünschten Anleitung.",
+    "blockMultiPatternSubset": "Die gewählten Seiten scheinen noch mehrere Anleitungen zu enthalten. Wähle nur die Seiten der gewünschten Anleitung.",
+    "choosePages": "Seiten wählen",
+    "pickPagesLink": "Enthält das PDF mehrere Anleitungen? Seiten wählen",
     "blockLead": "Der automatische Import wurde angehalten. Du kannst die Datei dennoch importieren, aber sie wird wahrscheinlich umfangreiche Korrekturen benötigen.",
     "importAnyway": "Trotzdem importieren"
+  },
+  "pagesSelect": {
+    "title": "Wähle die Seiten der Anleitung",
+    "hint": "Tippe jede Seite der Anleitung an, die du importieren willst, auch die gemeinsamen Seiten (Material, Abkürzungen).",
+    "count": "Keine Seite ausgewählt | {n} Seite ausgewählt | {n} Seiten ausgewählt",
+    "pageLabel": "Seite {n}",
+    "confirm": "Diese Seiten importieren",
+    "error": "Die Seiten dieses PDFs können nicht angezeigt werden."
   },
   "importCaveat": {
     "title": "Eine importierte Anleitung wird gegengelesen",
@@ -1300,9 +1315,10 @@
       }
     },
     "family": {
-      "vetement": "Kleidungsteile",
-      "accessoire": "Zubehörteile",
-      "amigurumi": "Stofftierteile",
+      "vetement": "Kleidung",
+      "accessoire": "Zubehör",
+      "chaussette": "Socken",
+      "amigurumi": "Stofftiere",
       "technique": "Muster & Technik",
       "transversal": "Allgemein"
     },
@@ -1318,6 +1334,12 @@
       "oreille": "Ohren",
       "museau": "Schnauze",
       "queue": "Schwanz",
+      "cotes": "Bündchen",
+      "pointe": "Spitze",
+      "pied": "Fuß",
+      "talon": "Ferse",
+      "jambe": "Schaft",
+      "gousset": "Keil",
       "motif": "Muster",
       "dentelle": "Spitze",
       "echantillon": "Maschenprobe",
@@ -1333,7 +1355,31 @@
       "finitions": "Abschluss",
       "infos": "Infos und Tipps",
       "autre": "Sonstiges",
-      "pelote": "Generisch"
+      "pelote": "Generisch",
+      "repetable": "Generisch, wiederholbar"
+    },
+    "copies": {
+      "label": "Exemplare",
+      "one": "1 Exemplar",
+      "n": "{n} Exemplare",
+      "nTogether": "{n} Exemplare, gleichzeitig",
+      "sequential": "Nacheinander",
+      "together": "Beide gleichzeitig",
+      "technique": "Arbeitsweise",
+      "resetTitle": "Arbeitsweise wechseln?",
+      "resetMsg": "Der Fortschritt der Socken beginnt wieder bei null, für beide Socken. Die anderen Abschnitte bleiben unverändert.",
+      "resetConfirm": "Neu beginnen",
+      "removeConfirm": "Das Entfernen von {n} Exemplar(en) löscht den Fortschritt. Fortfahren?",
+      "next": {
+        "chaussette": "Nächste Socke",
+        "generic": "Nächstes Exemplar"
+      },
+      "title": {
+        "chaussette": "Socke {n} / {total}",
+        "generic": "Exemplar {n} / {total}"
+      },
+      "gap": "Socke {n}: {rows} Reihe Rückstand | Socke {n}: {rows} Reihen Rückstand",
+      "checkCopy": "Abhaken für Socke {n}"
     },
     "edit": {
       "addSection": "+ Abschnitt hinzufügen",

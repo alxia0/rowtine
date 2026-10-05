@@ -1,7 +1,7 @@
 {
   "name": "rowtine",
-  "version": "1.4.1",
-  "buildNumber": 13,
+  "version": "1.4.2",
+  "buildNumber": 14,
   "private": true,
   "type": "module",
   "scripts": {

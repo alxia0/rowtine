@@ -264,6 +264,9 @@
   },
   "rowNotif": {
     "title": "Fila {index}/{total}, {section}",
+    "titleCopy": "{copy} · fila {index}/{total} · {section}",
+    "sectionCopy": "{copy} · {section}",
+    "nextCopy": "Después, {copy}: {text}",
     "next": "Después: {text}",
     "nextIn": "Después, {section}: {text}",
     "check": "Marcar la fila",
@@ -303,6 +306,7 @@
     "pattern": "Patrón",
     "patternHint": "El patrón que sigues en este proyecto. Elegirlo importa sus secciones al proyecto (llevarás el seguimiento de tus filas en ellas).",
     "patternSource": "Patrón de origen",
+    "patternWithDesigner": "{name}, de {author}",
     "patternMissing": "El patrón de este proyecto se ha eliminado. Tu progreso se conserva: restáuralo desde la papelera (Ajustes) para recuperar tus instrucciones.",
     "patternMissingShort": "El patrón de este proyecto se ha eliminado: restáuralo desde la papelera.",
     "patternChangeConfirm": "Cambiar de patrón sustituirá las secciones de este proyecto y su progreso. ¿Continuar?",
@@ -432,7 +436,8 @@
         "recentColor": "Color reciente",
         "textLabel": "Texto libre (opcional)",
         "share": "Compartir",
-        "calendar": "Mapa de calendario"
+        "calendar": "Mapa de calendario",
+        "pattern": "Patrón"
       }
     },
     "galleryPattern": "Patrón",
@@ -710,6 +715,7 @@
     "allSizes": "Todas",
     "instrForSize": "Instrucciones para la talla {size}",
     "by": "por",
+    "designerAdd": "Diseñador/a: añadir",
     "addSection": "Añadir la sección",
     "createProject": "Crear un proyecto a partir de este patrón",
     "preview": "Previsualizar el patrón",
@@ -753,8 +759,7 @@
     "titleRowtine": "Importar un archivo Rowtine",
     "leadRowtine": "Un patrón ya preparado en un archivo Rowtine: el texto y las imágenes se importan tal cual, en tu dispositivo, sin conexión.",
     "pickRowtine": "Elegir un archivo .rowtine o .zip",
-    "lead": "El patrón se analiza en tu dispositivo: gratis, sin conexión y fiel al PDF.",
-    "leadNext": "El patrón se guarda directamente en tu biblioteca; después podrás corregir las secciones si es necesario.",
+    "lead": "El patrón se analiza en tu dispositivo: gratis, sin conexión y fiel al PDF. Se guarda directamente en tu biblioteca.",
     "pick": "Elegir un archivo PDF",
     "waitingSync": "Sincronizando tu biblioteca, la importación empezará en cuanto termine…",
     "parsing": "Analizando el PDF…",
@@ -779,16 +784,26 @@
     "cancelImport": "Interrumpir la importación",
     "saved": "Patrón importado en la biblioteca",
     "caveatTitle": "Relee el patrón antes de empezar",
-    "caveatBody": "La importación nunca es perfecta: revisa los números, las tallas y las repeticiones, y corrígelos directamente en la app.",
+    "caveatBody": "La importación nunca es perfecta: revisa los números, las tallas y las repeticiones.",
     "doneHowToFix": "¿Cómo corregirlo?",
     "viewPattern": "Ver el patrón",
     "warnings": "{n} detalle(s) que revisar",
-    "nextHint": "Recórrelo primero sección por sección y corrige su contenido si hace falta. Iniciarás tu proyecto desde el patrón.",
     "blockTitle": "Importación arriesgada",
     "blockColumns": "Este PDF parece estar maquetado en más de 2 columnas: el texto extraído saldrá mezclado.",
-    "blockMultiPattern": "Este archivo parece contener varios patrones, o un libro entero: Rowtine importa un patrón cada vez. Guarda las páginas del patrón que quieres en un PDF aparte e importa ese archivo.",
+    "blockMultiPattern": "Este archivo parece contener varios patrones, o un libro entero: Rowtine importa un patrón cada vez. Elige las páginas del patrón que quieres.",
+    "blockMultiPatternSubset": "Las páginas elegidas parecen contener todavía varios patrones. Elige solo las del patrón que quieres.",
+    "choosePages": "Elegir las páginas",
+    "pickPagesLink": "¿El PDF contiene varios patrones? Elegir las páginas",
     "blockLead": "La importación automática se ha pausado. Puedes importarlo de todas formas, pero probablemente necesitará una corrección importante.",
     "importAnyway": "Importar de todas formas"
+  },
+  "pagesSelect": {
+    "title": "Elige las páginas del patrón",
+    "hint": "Toca cada página del patrón que quieres importar, sin olvidar sus páginas comunes (materiales, abreviaturas).",
+    "count": "Ninguna página elegida | {n} página elegida | {n} páginas elegidas",
+    "pageLabel": "Página {n}",
+    "confirm": "Importar estas páginas",
+    "error": "No se pueden mostrar las páginas de este PDF."
   },
   "importCaveat": {
     "title": "Un patrón importado se relee",
@@ -1300,9 +1315,10 @@
       }
     },
     "family": {
-      "vetement": "Partes de la prenda",
-      "accessoire": "Partes de accesorio",
-      "amigurumi": "Partes del amigurumi",
+      "vetement": "Prendas",
+      "accessoire": "Accesorios",
+      "chaussette": "Calcetines",
+      "amigurumi": "Amigurumis",
       "technique": "Puntos y técnica",
       "transversal": "General"
     },
@@ -1318,6 +1334,12 @@
       "oreille": "Orejas",
       "museau": "Hocico",
       "queue": "Cola",
+      "cotes": "Puño",
+      "pointe": "Puntera",
+      "pied": "Pie",
+      "talon": "Talón",
+      "jambe": "Caña",
+      "gousset": "Cuña",
       "motif": "Punto",
       "dentelle": "Calado",
       "echantillon": "Muestra",
@@ -1333,7 +1355,31 @@
       "finitions": "Acabados",
       "infos": "Info y consejos",
       "autre": "Otro",
-      "pelote": "Genérico"
+      "pelote": "Genérico",
+      "repetable": "Genérico repetible"
+    },
+    "copies": {
+      "label": "Ejemplares",
+      "one": "1 ejemplar",
+      "n": "{n} ejemplares",
+      "nTogether": "{n} ejemplares, a la vez",
+      "sequential": "Uno tras otro",
+      "together": "Los dos a la vez",
+      "technique": "Método de trabajo",
+      "resetTitle": "¿Cambiar de método de trabajo?",
+      "resetMsg": "El progreso de los calcetines vuelve a cero, para los dos calcetines. Las demás secciones no cambian.",
+      "resetConfirm": "Empezar de nuevo",
+      "removeConfirm": "Quitar {n} ejemplar(es) borra su progreso. ¿Continuar?",
+      "next": {
+        "chaussette": "Siguiente calcetín",
+        "generic": "Siguiente ejemplar"
+      },
+      "title": {
+        "chaussette": "Calcetín {n} / {total}",
+        "generic": "Ejemplar {n} / {total}"
+      },
+      "gap": "Calcetín {n}: {rows} fila de retraso | Calcetín {n}: {rows} filas de retraso",
+      "checkCopy": "Marca del calcetín {n}"
     },
     "edit": {
       "addSection": "+ Añadir una sección",

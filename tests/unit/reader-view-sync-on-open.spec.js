@@ -242,6 +242,38 @@ describe('ReaderView — synchro MD ciblée au montage', () => {
     expect(w.find('.rhdr__pct').text()).toBe(afterClick)
   })
 
+  // Une partie de chaussette arrivée par la synchro suit la chaussette en cours, même après un geste.
+  it('après un geste, une partie de chaussette ajoutée par la synchro suit la chaussette en cours', async () => {
+    const sock = (ids) => ({ sizeLabels: [], sections: ids.map((k) => ({ id: k, kind: k, title: k, copies: 2, steps: [{ t: 'Rang A' }, { t: 'Rang B' }] })) })
+    const patternId = await db.patterns.add({ name: 'P', type: 'knitting', reader: sock(['cotes', 'pied']) })
+    const projectId = await db.projects.add({
+      name: 'Proj',
+      technique: 'knitting',
+      patternId,
+      readerState: { done: { 'cotes#0': true, 'cotes#1': true, 'pied#0': true, 'pied#1': true }, activeCopy: { cotes: 2, pied: 2 } },
+    })
+    await db.patterns.update(patternId, { ownerProjectId: projectId })
+    nav.route = { name: 'project-read', params: { id: String(projectId) }, query: {} }
+    let resolveSync
+    syncOnOpen.fn.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveSync = resolve
+        }),
+    )
+    const w = mountReader()
+    await settle()
+    await w.find('.rcheck').trigger('click')
+    await settle()
+    await db.patterns.update(patternId, { reader: sock(['cotes', 'gousset', 'pied']) })
+    resolveSync()
+    await settle()
+    // La relecture après synchro est asynchrone (Dexie) : attendre la partie ajoutée, pas un délai.
+    await vi.waitFor(() => expect(w.findAll('.rsec__copy').length).toBe(3))
+    const sock2 = i18n.global.t('reader.copies.title.chaussette', { n: 2, total: 2 })
+    expect(w.findAll('.rsec__copy').map((x) => x.text())).toEqual([sock2, sock2, sock2])
+  })
+
   it("l'écran démonté avant la fin de la synchro de fond n'écrit plus dans une instance réutilisée", async () => {
     // Revue de code du 23/08/2026 (finding 6) : le `.then(refreshAfterSync)` n'avait
     // aucune garde de démontage — une navigation pendant la synchro pouvait faire

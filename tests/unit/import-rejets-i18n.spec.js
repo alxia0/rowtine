@@ -15,6 +15,15 @@ describe('i18n des refus d’import', () => {
       expect(np).not.toMatch(/[–—]/)
       expect(mp).not.toMatch(/[–—]/)
       expect(np).not.toMatch(/\|/) // vue-i18n lit « | » comme un pluriel
+      const sub = d.importLocal.blockMultiPatternSubset
+      expect(typeof sub).toBe('string')
+      expect(sub).not.toMatch(/[–—]/)
+      expect(sub).not.toMatch(/\|/)
     })
   }
+
+  // Protège : le refus recueil ne renvoie plus l'utilisatrice hors de l'app.
+  it('fr : blockMultiPattern n’invite plus à créer un PDF à part', () => {
+    expect(fr.importLocal.blockMultiPattern).not.toMatch(/PDF à part/)
+  })
 })

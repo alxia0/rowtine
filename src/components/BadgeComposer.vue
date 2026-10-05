@@ -22,6 +22,7 @@ import { shareImageDataUrl } from '@/utils/share-badge'
 import { debounce } from '@/utils/debounce'
 import { clamp } from '@/utils/badge-calendar'
 import { isProjectVegan } from '@/utils/yarn-usage'
+import { patternBadgeLine } from '@/utils/pattern-designer'
 
 // Configuration + génération du badge d'un projet. Monté localement (pas un store singleton
 // comme useCropperStore) : contrairement au recadreur, générique, ce composant a besoin du
@@ -31,6 +32,8 @@ const props = defineProps({
   project: { type: Object, required: true },
   stats: { type: Object, required: true },
   yarnUsage: { type: Array, default: () => [] },
+  // Patron lié au projet (designer du patron, 03/10) : source de la ligne « Patron » du badge.
+  pattern: { type: Object, default: null },
 })
 const emit = defineEmits(['saved', 'close'])
 
@@ -120,6 +123,11 @@ const generatedPhotoIndex = ref(null)
 // Langue du TEXTE du badge : pré-remplie sur la langue active de l'app, modifiable pour
 // CETTE génération seulement — ne persiste jamais dans settings.locale (spec 2026-09-16b, §4).
 const badgeLocale = ref(locale.value)
+// Ligne « Patron » (nom du patron, et son designer s'il est connu) sous le titre : décochée par
+// défaut, proposée seulement pour un vrai patron (jamais le patron libre).
+const includePattern = ref(false)
+const patternAvailable = computed(() => !!patternBadgeLine(props.pattern, t, badgeLocale.value))
+const patternLineText = () => (includePattern.value ? patternBadgeLine(props.pattern, t, badgeLocale.value) : '')
 
 // Valeurs RÉELLES du projet affichées sur les pastilles de l'onglet Infos — mêmes données que
 // celles utilisées par la prévisu canevas (`updatePreview` plus bas : stats RÉELLES depuis le
@@ -565,6 +573,7 @@ async function updatePreview() {
       // `renderBadge` de ce fichier (prévisu ET génération), sans quoi l'image partagée ne
       // dirait pas la même chose que la prévisu.
       includeTechnique: includeTechnique.value,
+      patternLine: patternLineText(),
       onGeometry: (g) => { previewGeometry.value = g },
     })
     await nextTick()
@@ -585,7 +594,7 @@ async function updatePreview() {
 const PREVIEW_DEBOUNCE_MS = 200
 const scheduleUpdatePreview = debounce(updatePreview, PREVIEW_DEBOUNCE_MS)
 watch(
-  [templateKey, badgeColor, selectedStats, photoDataUrl, photoDataUrl2, photoAspect, photoAspect2, badgeLocale, includeTechnique, badgeText, includeCalendar],
+  [templateKey, badgeColor, selectedStats, photoDataUrl, photoDataUrl2, photoAspect, photoAspect2, badgeLocale, includeTechnique, badgeText, includeCalendar, includePattern],
   scheduleUpdatePreview,
   { deep: true },
 )
@@ -774,6 +783,7 @@ async function generate() {
     includeCalendar: hasCalendarData.value && includeCalendar.value,
     unitSystem: settings.unitSystem,
     includeTechnique: includeTechnique.value, // cf. le commentaire de l'appel d'`updatePreview` plus haut
+    patternLine: patternLineText(),
     // Double définition pour le partage (texte net au zoom) ; la prévisu reste à l'échelle 1.
     scale: BADGE_EXPORT_SCALE,
   })
@@ -1229,6 +1239,15 @@ async function confirmShare() {
               :aria-pressed="includeCalendar"
               @click="includeCalendar = !includeCalendar"
             >{{ t('project.stats.badge.calendar') }}</button>
+            <button
+              v-if="patternAvailable"
+              type="button"
+              class="bdg__pill"
+              data-test="badge-pattern"
+              :class="{ 'bdg__pill--on': includePattern }"
+              :aria-pressed="includePattern"
+              @click="includePattern = !includePattern"
+            >{{ t('project.stats.badge.pattern') }}</button>
             <button
               v-if="yarnUsage.length"
               type="button"

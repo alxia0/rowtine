@@ -47,6 +47,13 @@
 //    cf. sticky-top.js) : un écran sans bandeau collant — l'onboarding, seule vue sans
 //    en-tête — doit quand même dégager la barre d'état, sinon le champ actif passe
 //    derrière l'horloge (retour du 31/08/2026, capture à l'appui).
+// 3bis. pour un champ ordinaire (pas une région `[contenteditable]`) qui a une étiquette
+//    associée (`field.labels[0]`, ce qui couvre FieldHelp, qui rend un vrai `<label for>`),
+//    l'écart entre le haut de l'étiquette et celui du champ s'ajoute à ce
+//    `scroll-margin-top` (cf. `labelOffsetAbove`) : c'est l'ÉTIQUETTE qui se cale sous le
+//    bandeau, et non le champ, dont le titre restait sinon à moitié masqué pendant la
+//    saisie (retour d'usage du 03/10/2026). Appliqué aussi dans une carte de dialogue :
+//    le bord haut de la carte y coupe l'étiquette de la même façon que le bandeau.
 // 4. `target.scrollIntoView({ block: 'start', behavior })` — `behavior` VAUT `'smooth'`,
 //    sauf sous « réduire les animations » où il vaut `'auto'` (cf. `scrollBehavior`,
 //    src/utils/scroll-behavior.js : `tokens.css` impose bien `scroll-behavior: auto
@@ -322,6 +329,29 @@ function isEditableRegion(el) {
   return el.hasAttribute('contenteditable') && el.getAttribute('contenteditable') !== 'false'
 }
 
+// Plafond de l'écart étiquette/champ : au-delà, l'étiquette n'est pas le titre posé
+// juste au-dessus du champ (elle vit ailleurs dans le formulaire) et ne doit pas le
+// faire descendre vers le clavier.
+const LABEL_OFFSET_MAX = 120
+
+// Distance (px) entre le haut de la première étiquette associée et le haut du champ,
+// lue sur la mise en page réelle (cf. étape 3bis en tête de fichier). 0 sans étiquette,
+// étiquette non rendue (rectangle nul), étiquette sous le champ ou au-delà du plafond.
+// `marginTop` (marge déjà posée sous les bandeaux) sert au garde-fou paysage : si marge +
+// écart + hauteur du champ dépassent 45 % de la fenêtre, le champ finirait sous le clavier,
+// on renonce à l'écart.
+export function labelOffsetAbove(field, marginTop = 0) {
+  const label = field.labels && field.labels[0]
+  if (!label) return 0
+  const labelRect = label.getBoundingClientRect()
+  if (labelRect.width === 0 && labelRect.height === 0) return 0
+  const offset = field.getBoundingClientRect().top - labelRect.top
+  if (offset <= 0 || offset > LABEL_OFFSET_MAX) return 0
+  const fieldHeight = field.getBoundingClientRect().height
+  if (marginTop + offset + fieldHeight > window.innerHeight * 0.45) return 0
+  return Math.round(offset)
+}
+
 // Rectangle du CURSEUR (ou de la sélection courante) à l'intérieur d'un
 // `[contenteditable]` — API standard (`Selection`/`Range`), aucune dépendance à
 // CodeMirror. `null` si rien d'exploitable (pas encore de sélection posée à ce point
@@ -421,9 +451,14 @@ export function recheckCaretMargin(t, c = container) {
   if (target !== t || container !== c || !c || removalArmed) return
   const headerH = isDocumentContainer(c) ? measureStickyTopHeight() : 0
   const marginTop = headerH + RESPIRATION_SOUS_BANDEAUX
-  t.style.scrollMarginTop = `${marginTop}px`
-  if (isEditableRegion(t)) scrollCaretIntoView(t, c, marginTop)
-  else t.scrollIntoView({ block: 'start', behavior: scrollBehavior() })
+  if (isEditableRegion(t)) {
+    t.style.scrollMarginTop = `${marginTop}px`
+    scrollCaretIntoView(t, c, marginTop)
+    return
+  }
+  // Étape 3bis : l'étiquette, pas le champ, vient se caler sous le bandeau.
+  t.style.scrollMarginTop = `${marginTop + labelOffsetAbove(t, marginTop)}px`
+  t.scrollIntoView({ block: 'start', behavior: scrollBehavior() })
 }
 
 function onFocusOut() {

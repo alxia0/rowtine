@@ -110,6 +110,18 @@ describe('PatternForm — retrait de l\'éditeur texte (Task D2)', () => {
     expect('sizes' in payload).toBe(false)
   })
 
+  // Protège : un nom de designer saisi avec espaces superflus est enregistré nettoyé.
+  it('auteur saisi avec espaces superflus : le submit renvoie le nom nettoyé', async () => {
+    const wrapper = mountForm(makeInitial())
+    await flushPromises()
+    await wrapper.find('#pat-author').setValue('  Sys   Fredens ')
+
+    await wrapper.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.emitted('submit')[0][0].author).toBe('Sys Fredens')
+  })
+
   it('reader absent dans initial → submit n\'invente aucun reader (pas de reconstruction par défaut)', async () => {
     const initial = { ...makeInitial(), reader: undefined }
     const wrapper = mountForm(initial)

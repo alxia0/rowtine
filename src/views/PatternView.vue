@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import PatternForm from '@/components/PatternForm.vue'
@@ -20,6 +20,7 @@ import { formatLocalDate } from '@/utils/date-format'
 import { formatMoney } from '@/utils/units'
 import { patternCoverIndexOf } from '@/utils/pattern-cover'
 import { sanitizeUrl } from '@/utils/safe-url'
+import { cleanDesignerName } from '@/utils/pattern-designer'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,6 +88,14 @@ async function onUpdate(data) {
   snackbar.show(t('pattern.saved'))
   router.replace({ query: {} })
 }
+
+const focusAuthor = ref(false)
+const hasDesigner = computed(() => !!cleanDesignerName(pattern.value?.author))
+function startDesigner() {
+  focusAuthor.value = true
+  editing.value = true
+}
+watch(editing, (v) => { if (!v) focusAuthor.value = false })
 function createProject() {
   router.push({ name: 'project-new', query: { pattern: pattern.value.id } })
 }
@@ -145,7 +154,7 @@ async function setCover(idx) {
         </button>
       </div>
 
-      <PatternForm v-if="editing" :initial="pattern" :submit-label="t('common.save')" @submit="onUpdate" @cancel="editing = false" />
+      <PatternForm v-if="editing" :initial="pattern" :focus-field="focusAuthor ? 'author' : ''" :submit-label="t('common.save')" @submit="onUpdate" @cancel="editing = false" />
 
       <template v-else>
         <p class="meta">
@@ -153,10 +162,13 @@ async function setCover(idx) {
           <template v-if="pattern.category"> · {{ categoryLabel(pattern) }}</template>
           <template v-if="pattern.sizes && pattern.sizes.length"> · {{ pattern.sizes.map((s) => sizeLabelText(s, t)).join(', ') }}</template>
         </p>
-        <p v-if="pattern.author" class="author">
-          {{ t('pattern.by') }} <strong>{{ pattern.author }}</strong>
-          <a v-if="safeAuthorUrl" :href="safeAuthorUrl" target="_blank" rel="noopener" class="author__link">{{ t('pattern.authorUrl') }} ↗</a>
+        <p v-if="hasDesigner" class="author">
+          {{ t('pattern.by') }} <strong>{{ cleanDesignerName(pattern.author) }}</strong>
+          <a v-if="safeAuthorUrl" :href="safeAuthorUrl" target="_blank" rel="noopener" class="author__link">{{ t('pattern.authorUrl') }}<AppIcon name="externalLink" :size="14" /></a>
         </p>
+        <template v-else>
+          <button type="button" class="designer-add" data-test="designer-add" @click="startDesigner">{{ t('pattern.designerAdd') }}</button>
+        </template>
         <p v-if="pattern.source" class="source">{{ t('pattern.source') }} : {{ pattern.source }}</p>
         <p v-if="priceLine" class="price" data-test="pattern-price-line">{{ priceLine }}</p>
 
@@ -218,7 +230,8 @@ async function setCover(idx) {
 .phdr__title { flex: 1; font-size: 21px; }
 .meta { color: var(--ink-55); margin: 0 0 var(--sp-2); }
 .author { color: var(--ink-70); font-size: 14px; margin: 0 0 var(--sp-2); }
-.author__link { display: inline-block; margin-left: var(--sp-2); color: var(--brand-deep); font-weight: 600; text-decoration: none; }
+.designer-add { display: inline-flex; align-items: center; min-height: 44px; background: none; border: 0; padding: 0; color: var(--ink-70); font-size: 14px; text-decoration: underline; margin: -14px 0 -6px; }
+.author__link { display: inline-flex; align-items: center; gap: var(--sp-1); vertical-align: middle; margin-left: var(--sp-2); color: var(--brand-deep); font-weight: 600; text-decoration: none; }
 .source { color: var(--ink-55); font-size: 13px; margin: 0 0 var(--sp-3); }
 .price { color: var(--ink-55); font-size: 13px; margin: 0 0 var(--sp-3); }
 .iwarn { display: flex; align-items: flex-start; gap: var(--sp-2); background: var(--tile); border: 1px solid var(--warning); border-radius: var(--r-md); box-shadow: var(--clay-sm); padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-4); margin-bottom: var(--sp-4); }

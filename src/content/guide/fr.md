@@ -113,6 +113,7 @@ de prix à lui.
   déjà tricotées, et entre parenthèses le prix du patron, que tu ne paies qu'une fois,
   même si tu tricotes le même patron trois fois. Si une laine n'a pas de prix noté, l'app
   te le dit au lieu de faire comme si elle était gratuite.
+  Le patron lié s'y affiche avec son designer (« par … ») quand il est renseigné.
 - **Photos** : tes photos du projet, plus les photos d'origine du patron en
   dessous. Tu choisis laquelle sert de **photo de couverture** (par défaut,
   la première photo du patron). Tape sur une photo pour l'ouvrir en plein
@@ -192,7 +193,9 @@ Le tiroir de réglages a trois onglets :
   pastille de plus liste les **matières** de l'ouvrage (« Coton · Laine »), sans
   pourcentage. Cochée d'office, elle ajoute au badge un bandeau pleine largeur, entre
   deux filets, au-dessus de la carte calendaire (sous les chiffres si tu ne gardes pas
-  la carte). La pastille **Carte calendaire** ajoute la grille des jours travaillés. Tu
+  la carte). La pastille **Carte calendaire** ajoute la grille des jours travaillés. La
+  pastille **Patron** ajoute sous le titre du badge une ligne « Nom du patron, par Designer »
+  (le nom seul si le designer n'est pas renseigné). Tu
   y choisis aussi la **langue** du texte du badge, indépendante de celle de l'app
   (pratique pour l'envoyer à quelqu'un qui ne parle pas la tienne : les matières se
   traduisent avec elle), et une ligne de **texte libre**, 80 caractères au plus.
@@ -227,6 +230,19 @@ importé et vérifié), tu obtiens :
   n'importe où dans le tiers gauche de sa carte, avec une barre de
   progression globale et par section, et des compteurs de répétition intégrés
   (« − 3/12 + ») qui disparaissent tout seuls s'ils ne concernent pas ta taille.
+- **Les sections à plusieurs exemplaires** : une paire de chaussettes, deux manches
+  ou les oreilles ou les pattes d'un amigurumi n'ont pas à être écrites deux fois. Dans l'éditeur du patron, règle le nombre
+  d'exemplaires d'une section ; chaque exemplaire garde sa propre progression, et la
+  section affiche le total de tous. Hors chaussettes, une section doublée se tricote l'une après l'autre, avec un
+  bouton pour passer à l'exemplaire suivant. Pour une paire de chaussettes, le mode de réalisation se
+  choisit dans le projet, avec « Mode de réalisation » en haut du lecteur, au-dessus des rangs,
+  ou dans la fiche du projet : « L'une après l'autre » (toute la chaussette 1, puis la chaussette 2
+  depuis sa première partie : cocher le dernier rang de la chaussette 1, toutes ses parties comprises, mène à la chaussette 2, à sa première partie, avec « Annuler ») ou « Les deux en même temps » (chaque rang a alors une coche par
+  chaussette, et l'écart entre les deux s'affiche). Un même patron peut donc se tricoter
+  autrement dans un autre projet. Changer de mode de réalisation après avoir commencé demande une
+  confirmation et fait repartir les chaussettes de zéro, rangs et diagrammes compris ; le reste du patron ne bouge pas. La notification du rang en cours suit l'exemplaire actif (ou celui qui a du retard) et le nomme.
+  Une section à répéter qui n'est ni une manche, ni une partie de chaussette, ni une oreille ? Donne-lui
+  le type « Générique répétable », puis règle son nombre d'exemplaires.
 - **Le diagramme interactif** : le diagramme du patron (extrait tel quel du PDF
   d'origine) avec une **bande qui suit le rang en cours**, les rangs déjà faits
   grisés, et un compteur « Rang X sur 52 ». Accessible directement dans la page
@@ -456,6 +472,12 @@ régler : c'est le même écran, simplement plus à l'aise.
   une ligne marquée « à lire » qui devrait se cocher, ou l'inverse, se voit d'un coup
   d'œil, et se corrige dans l'éditeur.
   (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)
+  **Un PDF qui contient plusieurs patrons** (un recueil, ou un patron décrit en
+  plusieurs versions complètes) s'importe un patron à la fois. Sur l'écran
+  d'import, touche « Le PDF contient plusieurs patrons ? Choisir les pages »,
+  choisis ton fichier, puis coche sur les miniatures les pages du patron voulu,
+  sans oublier ses pages communes (matériel, abréviations). Quand l'app reconnaît
+  elle-même un recueil, elle te propose directement de choisir les pages.
 - **Importer un fichier {app}** : dans « + Ajouter un patron », ce choix
   accepte un fichier **.rowtine**, c'est-à-dire un patron déjà mis au
   format de {app} (son texte et ses images). Il entre tel quel dans ta
@@ -473,6 +495,9 @@ régler : c'est le même écran, simplement plus à l'aise.
   dès qu'il a une photo, le bouton **Prévisualiser le patron** apparaît : tu
   peux alors y suivre une image comme un diagramme, exactement comme pour un
   patron importé.
+- **Indiquer le designer** : quand la lecture n'a pas trouvé le designer d'un patron,
+  le lien **Designer : ajouter**, sur la fiche du patron, ouvre directement le formulaire de modification sur le champ **Auteur·rice**. Il
+  s'affiche ensuite sous le patron dans l'onglet **Détails** d'un projet, et sur le badge.
 - **Retrouver un patron** : les pastilles de catégorie en haut de la
   bibliothèque affichent **le nombre de patrons** de chacune, pour savoir d'un
   coup d'œil où chercher.

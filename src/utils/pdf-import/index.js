@@ -1,10 +1,12 @@
 // Orchestrateur navigateur de l'import PDF local (voie par défaut) :
 // extraction pdfjs → refus nets (reject.js : scanné, pas un patron, plusieurs patrons) →
 // cœur pur (assemble) → images best-effort depuis le PDF de l'utilisatrice.
+// Pages choisies : cf. page-subset.js.
 import { extractPages, extractDocMetaTitle, renderPdfPageToDataUrl, extractImagesWithPos, extractVectorRegions, readFileAsDataUrl } from '@/utils/pdf'
 import { buildReaderFromPages } from './assemble'
 import { associateImages } from './associate'
 import { coverCropBox } from './cover-crop'
+import { normalizePageSelection, toSubsetPages, toRealPages } from './page-subset'
 import { promoteGridSections } from './promote-grids'
 import { detectRejection } from './reject'
 
@@ -75,11 +77,15 @@ function rejectedResult(rejected) {
   }
 }
 
-export async function parsePdfLocally(file, { onProgress } = {}) {
+export async function parsePdfLocally(file, { onProgress, pages: wanted } = {}) {
+  // Import d'une partie du PDF (spec 2026-10-04) : numéros du PDF complet. Vide = tout le PDF,
+  // et alors AUCUN argument de plus ne part vers l'extraction (comportement d'avant inchangé).
+  const pageNumbers = normalizePageSelection(wanted)
+  const subset = pageNumbers.length ? { pageNumbers } : null
   onProgress?.({ phase: 'extract', page: 0, total: 0 })
   let pages
   try {
-    pages = await extractPages(file, (page, total) => onProgress?.({ phase: 'extract', page, total }))
+    pages = await extractPages(file, (page, total) => onProgress?.({ phase: 'extract', page, total }), ...(subset ? [subset] : []))
   } catch {
     // Repli : extraction impossible (worker indispo…) → patron au nom du
     // fichier, reader vide mais valide, confiance basse. Le PDF est quand même
@@ -123,7 +129,7 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
   let vecRegions
   try {
     const res = await extractImagesWithPos(file, (page, total) =>
-      onProgress?.({ phase: 'images', page, total }))
+      onProgress?.({ phase: 'images', page, total }), ...(subset ? [subset] : []))
     imagesWithPos = Array.isArray(res) ? res : []
   } catch { imagesWithPos = [] }
   try {
@@ -132,9 +138,13 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
       page: im.page, x0: im.x, y0: im.y - im.h * 72 / 96, x1: im.x + im.w * 72 / 96, y1: im.y,
     }))
     const res = await extractVectorRegions(file, (page, total) =>
-      onProgress?.({ phase: 'images', page, total }), { rasterBoxes })
+      onProgress?.({ phase: 'images', page, total }), { rasterBoxes, ...(subset || {}) })
     vecRegions = Array.isArray(res) ? res : []
   } catch { vecRegions = [] }
+
+  // Le cœur pur indexe les pages par position : on lui présente le document réduit 1..k.
+  imagesWithPos = toSubsetPages(imagesWithPos, pageNumbers)
+  vecRegions = toSubsetPages(vecRegions, pageNumbers)
 
   // Couverture = rendu de la page 1. Si elle porte aussi les instructions, on n'en garde que la
   // photo principale et le titre-descriptif collé à elle (cover-crop.js). Rendue après
@@ -144,7 +154,7 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
   try {
     const crop = (pageWidth, pageHeight) =>
       (coverBox = coverCropBox({ lines: pages[0] || [], images: page1Images, pageWidth, pageHeight }))
-    out.pattern.photos = [await renderPdfPageToDataUrl(file, 1, 800, { crop })]
+    out.pattern.photos = [await renderPdfPageToDataUrl(file, pageNumbers[0] || 1, 800, { crop })]
   } catch {
     out.pattern.photos = []
     coverBox = null
@@ -175,15 +185,16 @@ export async function parsePdfLocally(file, { onProgress } = {}) {
     coverBox,
   })
   out.reader.sections = sections
-  out.pattern.gallery = gallery
+  out.pattern.gallery = toRealPages(gallery, pageNumbers)
   out.reader = promoteGridSections(out.reader, gridRegions, pages)
 
   // Option B : diagramme page-entière SEULEMENT en repli (aucune région vectorielle ni image-grille détectée).
   if (vecRegions.length === 0 && imageGrids.length === 0) {
     const chartPage = detectChartPage(pages)
     if (chartPage) {
+      const realChartPage = pageNumbers[chartPage - 1] || chartPage
       try {
-        out.reader.chart = { img: await renderPdfPageToDataUrl(file, chartPage), rows: 0, cols: 0, repeat: '', readDir: '' }
+        out.reader.chart = { img: await renderPdfPageToDataUrl(file, realChartPage), rows: 0, cols: 0, repeat: '', readDir: '' }
         const chartText = (pages[chartPage - 1] || []).map((l) => l.text).join(' ')
         const reps = detectChartReps(chartText)
         if (reps) out.reader.chart.reps = reps

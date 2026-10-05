@@ -155,7 +155,41 @@ describe('retagLine', () => {
     expect(retagLine('- Corps', 'section', { kind: 'pelote' })).toBe('## Corps')
   })
   it('vers section avec kind non défaut (balise EN anglicisée)', () => {
-    expect(retagLine('- Manches', 'section', { kind: 'manche' })).toBe('## Manches {sleeve}')
+    expect(retagLine('- Manches', 'section', { kind: 'corps' })).toBe('## Manches {body}')
+  })
+  it('vers un kind apparié sans suffixe antérieur : pose x2', () => {
+    expect(retagLine('## Manche {body}', 'section', { kind: 'manche' })).toBe('## Manche {sleeve x2}')
+  })
+  it('vers un kind non répétable : retire le suffixe d\u2019exemplaires', () => {
+    expect(retagLine('## Manche {sleeve x4}', 'section', { kind: 'corps' })).toBe('## Manche {body}')
+  })
+  it('une ligne {toe x2 together} requalifiée garde x2 et perd together', () => {
+    expect(retagLine('## Pointe {toe x2 together}', 'section', { kind: 'pointe' })).toBe('## Pointe {toe x2}')
+    expect(retagLine('## Pied {toe x2 together}', 'section', { kind: 'pied' })).toBe('## Pied {foot x2}')
+    expect(retagLine('## Pied {foot x2 together}', 'section', { kind: 'pied', copies: 2 })).toBe('## Pied {foot x2}')
+  })
+  it('conserve x4 vers un autre kind répétable, together jamais réémis', () => {
+    expect(retagLine('## M {sleeve x4}', 'section', { kind: 'membre' })).toBe('## M {limb x4}')
+    expect(retagLine('## P {toe x2 together}', 'section', { kind: 'manche' })).toBe('## P {sleeve x2}')
+  })
+  it('opts.copies règle le nombre d\u2019exemplaires, 1 retire le suffixe', () => {
+    expect(retagLine('## Pied {foot}', 'section', { kind: 'pied', copies: 3 })).toBe('## Pied {foot x3}')
+    expect(retagLine('## Pied {foot x3}', 'section', { kind: 'pied', copies: 1 })).toBe('## Pied {foot}')
+    expect(retagLine('## Pied {foot}', 'section', { kind: 'pied', copies: 40 })).toBe('## Pied {foot x40}')
+    expect(retagLine('## Pied {foot x40}', 'section', { kind: 'pied' })).toBe('## Pied {foot x40}')
+    expect(retagLine('## Pied {foot}', 'section', { kind: 'pied', copies: 150 })).toBe('## Pied {foot x99}')
+  })
+  it('choisir « Générique répétable » ou « Bord-côtes » à la main démarre à x2', () => {
+    expect(retagLine('## Motif A', 'section', { kind: 'repetable' })).toBe('## Motif A {repeated x2}')
+    expect(retagLine('## Côtes {border}', 'section', { kind: 'cotes' })).toBe('## Côtes {cuff x2}')
+    expect(retagLine('## Motif A {repeated x5}', 'section', { kind: 'repetable' })).toBe('## Motif A {repeated x5}')
+  })
+  it('opts.copies 3 sur un ancien together donne x3, un kind non répétable ne porte rien', () => {
+    expect(retagLine('## Pied {foot x2 together}', 'section', { kind: 'pied', copies: 3 })).toBe('## Pied {foot x3}')
+    expect(retagLine('## Corps {body}', 'section', { kind: 'corps', copies: 3 })).toBe('## Corps {body}')
+  })
+  it('stripMarkup d\u2019un titre à suffixe d\u2019exemplaires rend le titre nu', () => {
+    expect(stripMarkup('## Pointe {toe x2 together}')).toBe('Pointe')
   })
   it('vers section sans opts (kind non fourni = pas de {attr})', () => {
     expect(retagLine('- Corps', 'section')).toBe('## Corps')

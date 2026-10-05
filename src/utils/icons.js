@@ -62,6 +62,12 @@ export const ICONS = {
       '<rect x="4.2" y="4.2" width="6.4" height="6.4" rx="1.4"/><rect x="13.4" y="4.2" width="6.4" height="6.4" rx="1.4"/>' +
       '<rect x="4.2" y="13.4" width="6.4" height="6.4" rx="1.4"/><rect x="13.4" y="13.4" width="6.4" height="6.4" rx="1.4"/>',
   },
+  // Exemplaires d'une section répétable : deux flèches courbes en boucle.
+  repeat: {
+    body:
+      '<path d="M4.5 11.5V10a3.5 3.5 0 0 1 3.5-3.5h11"/><path d="M16 3.5l3 3-3 3"/>' +
+      '<path d="M19.5 12.5V14a3.5 3.5 0 0 1-3.5 3.5H5"/><path d="M8 14.5l-3 3 3 3"/>',
+  },
   chevronRight: { body: '<path d="M9 5l7 7-7 7"/>' },
   chevronLeft: { body: '<path d="M15 5l-7 7 7 7"/>' },
   chevronUp: { body: '<path d="M5 15l7-7 7 7"/>' },
@@ -152,6 +158,8 @@ export const ICONS = {
   manche: { body: '<path d="M8.5 5h4.2l1.1 6.2-1.4 8.3H8.6L7.3 11.2z"/><path d="M8.6 8.6h3.8"/>' },
   encolure: { body: '<path d="M6 5.6C7.6 10 9.6 12.4 12 12.4S16.4 10 18 5.6"/><path d="M6 5.6 7.8 4.6M18 5.6 16.2 4.6"/>' },
   bordure: { body: '<path d="M6.5 5.5v13M10 5.5v13M14 5.5v13M17.5 5.5v13"/>' },
+  // Bord-côtes de chaussette : même dessin que la bordure.
+  cotes: { body: '<path d="M6.5 5.5v13M10 5.5v13M14 5.5v13M17.5 5.5v13"/>' },
   accessoires: {
     body:
       '<path d="M5 15c0-4.1 3.1-7.4 7-7.4s7 3.3 7 7.4"/>' +
@@ -176,6 +184,13 @@ export const ICONS = {
     body: '<ellipse cx="12" cy="13.5" rx="6" ry="4.8"/><circle cx="12" cy="12.4" r="1.5" fill="currentColor" stroke="none"/><path d="M12 13.9v1.9"/>',
   },
   queue: { body: '<path d="M16.6 5.4C10 6.4 6 11 5.4 18.6c7.6-.6 12.2-4.6 13.2-13.2z"/><path d="M9 15c2-1 4-3 5.2-5.6"/>' },
+
+  // ─── Sections — Chaussette ───────────────────────────────────────────────
+  pointe: { body: '<path d="M6 19V9.5c0-2.5 1.8-4.5 4.2-4.5h1.3c3.6 0 6.5 3 6.5 6.7V19z"/><path d="M6 19h12"/>' },
+  pied: { body: '<path d="M7 4.5h5.5v8.2c0 1.2.8 2 2 2.4l3.5 1.2c.9.3 1.5 1.1 1.5 2v.7H7z"/>' },
+  talon: { body: '<path d="M8 4.5h8v8c0 4-2.2 7-5.6 7H8z"/><path d="M8 14.5h4"/>' },
+  jambe: { body: '<path d="M8.5 4.5h7v15h-7z"/><path d="M8.5 7.5h7M8.5 10.5h7"/>' },
+  gousset: { body: '<path d="M12 5 5.5 19h13z"/><path d="M12 10.5 9.6 16h4.8z"/>' },
 
   // ─── Sections — Motifs & technique ───────────────────────────────────────
   motif: { body: '<path d="M5 12c0-2.5 2-4.5 4.5-4.5S14 9.5 14 12s2 4.5 4.5 4.5"/><path d="M5 12c0 2.5 2 4.5 4.5 4.5"/>' },
@@ -265,6 +280,12 @@ export const ICONS = {
       '<path d="M8.6 8.8h6.8M8.6 11.9h4.4"/>',
   },
   autre: { body: '<path d="M4.6 11.7 11.2 5.1h5.9a1.8 1.8 0 0 1 1.8 1.8V13l-6.6 6.6a1.6 1.6 0 0 1-2.3 0L4.6 14a1.6 1.6 0 0 1 0-2.3z"/><circle cx="15" cy="9" r="1.15"/>' },
+  // Générique répétable : même dessin que la puce d'exemplaires.
+  repetable: {
+    body:
+      '<path d="M4.5 11.5V10a3.5 3.5 0 0 1 3.5-3.5h11"/><path d="M16 3.5l3 3-3 3"/>' +
+      '<path d="M19.5 12.5V14a3.5 3.5 0 0 1-3.5 3.5H5"/><path d="M8 14.5l-3 3 3 3"/>',
+  },
   pelote: {
     body:
       '<circle cx="12" cy="12" r="7.3"/>' +

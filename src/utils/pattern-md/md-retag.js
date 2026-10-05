@@ -2,8 +2,9 @@
 // menu de requalification de l'éditeur appellera ce module). Aucun
 // import DOM/CM6 ici : module chargeable tel quel par Vitest. × = U+00D7.
 import { emitStepCounter, parseStepCounter, parseSectionRepeat } from './counters.js'
-import { DEFAULT_KIND } from '../section-kinds.js'
-import { kindToEn } from './dialect.js'
+import { DEFAULT_KIND, isRepeatable, startsAtTwo } from '../section-kinds.js'
+import { MAX_COPIES } from '../section-copies.js'
+import { kindToEn, kindToFr } from './dialect.js'
 // NOTE_RE/BULLET_RE réutilisées depuis md-line-type.js (même syntaxe, recopiée à
 // l'identique jusqu'ici) : IMG_RE, elle, diffère réellement là-bas (`\s*` en tête
 // pour reconnaître une image indentée) et reste donc propre à ce fichier.
@@ -44,8 +45,27 @@ export function stripMarkup(line) {
   return raw
 }
 
+// Suffixe d'exemplaires d'un titre de section : ` xN` (2..MAX_COPIES) pour un kind répétable,
+// rien sinon. `opts.copies` impose le nombre (1 = aucun suffixe) ; sans lui, la ligne garde son
+// nombre, et un kind apparié sans suffixe antérieur reçoit `x2` seulement quand le kind CHANGE.
+// Un ancien `together` n'est jamais réémis (technique choisie dans le projet, spec 2026-10-05).
+function copiesSuffix(line, kind, opts = {}) {
+  if (!isRepeatable(kind)) return ''
+  const h2 = H2_RE.exec(String(line ?? ''))
+  const tm = h2 ? TITLE_KIND_RE.exec(parseSectionRepeat(h2[1]).title) : null
+  const copies = tm && tm[3] ? Number(tm[3]) : 0
+  if (opts.copies !== undefined) {
+    const n = Math.min(MAX_COPIES, Math.max(1, Math.trunc(Number(opts.copies)) || 1))
+    return n < 2 ? '' : ` x${n}`
+  }
+  if (copies >= 2 && copies <= MAX_COPIES) return ` x${copies}`
+  const before = tm ? kindToFr(tm[2]) : h2 ? DEFAULT_KIND : null
+  if (startsAtTwo(kind) && before !== kind) return ' x2'
+  return ''
+}
+
 // Réécrit UNE ligne MD vers `type` ∈ {rang, note, section, compteur-rep,
-// compteur-cadence, texte}. opts : { kind, times, every }. Idempotent : on
+// compteur-cadence, texte}. opts : { kind, times, every, copies }. Idempotent : on
 // strippe d'abord le balisage existant, puis on réémet pour le type cible —
 // requalifier deux fois de suite vers le même type est donc un no-op.
 export function retagLine(line, type, opts = {}) {
@@ -61,7 +81,7 @@ export function retagLine(line, type, opts = {}) {
       // l'ancien menu textarea, md-toolbar.js:setSectionKind). opts.kind est le
       // kind interne FR (menu de requalification, cf. cm-editor.js/SECTION_KINDS) ;
       // la balise émise dans le MD est anglicisée (dialecte, kindToEn).
-      const attr = opts.kind && opts.kind !== DEFAULT_KIND ? ` {${kindToEn(opts.kind)}}` : ''
+      const attr = opts.kind && opts.kind !== DEFAULT_KIND ? ` {${kindToEn(opts.kind)}${copiesSuffix(line, opts.kind, opts)}}` : ''
       return `## ${bare}${attr}`
     }
     case 'compteur-rep':

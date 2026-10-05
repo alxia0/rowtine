@@ -24,7 +24,7 @@
 // pas de fuite d'état entre tests (identique aux autres specs).
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { completeOnboarding, openAddPatternSheet } from './helpers'
+import { completeOnboarding, openAddPatternSheet, attendreFinFondu } from './helpers'
 
 // ─── Scénario A : création depuis la bibliothèque ─────────────────────────────
 
@@ -62,6 +62,8 @@ test("écran d'édition de patron — sans violation a11y bloquante (serious / c
   // état réel d'usage, pas seulement le squelette vide.
   await page.locator('#pat-name').fill('Audit Test')
   await page.getByPlaceholder('S, M, L').fill('S, M')
+  // Contraste mesuré après le fondu d'entrée de l'écran, jamais pendant (attendreFinFondu).
+  await attendreFinFondu(page)
 
   // Audit axe-core — seuils serious / critical uniquement (cf. convention projet).
   const results = await new AxeBuilder({ page })

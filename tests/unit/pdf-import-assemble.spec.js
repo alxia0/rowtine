@@ -1027,3 +1027,21 @@ describe('BRUME V2 : identité avec l’oracle', () => {
     expect(norm(engineParsed)).toBe(norm(idealParsed))
   })
 })
+
+describe('buildReaderFromPages — exemplaires par défaut des types appariés', () => {
+  const pagesWith = (...titles) => [[
+    L('Pull Exemple', { size: 24 }),
+    L('Corps', { bold: true, size: 14 }),
+    L('Rang 1 : monter 104 m.'),
+    ...titles.flatMap((t) => [L(t, { bold: true, size: 14 }), L('Rang 1 : monter 40 m.'), L('Tricoter 10 cm.')]),
+  ]]
+  it('une manche seule reçoit copies 2, jamais copyMode ; deux manches gauche/droite restent simples', () => {
+    const one = buildReaderFromPages(pagesWith('MANCHE'), { fileName: 'x.pdf' }).reader
+    const manche = one.sections.find((s) => s.kind === 'manche')
+    expect(manche.copies).toBe(2)
+    expect(one.sections.some((s) => s.copyMode)).toBe(false)
+    const two = buildReaderFromPages(pagesWith('MANCHE GAUCHE', 'MANCHE DROITE'), { fileName: 'x.pdf' }).reader
+    expect(two.sections.filter((s) => s.kind === 'manche')).toHaveLength(2)
+    expect(two.sections.every((s) => s.copies === undefined)).toBe(true)
+  })
+})

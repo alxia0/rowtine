@@ -1,0 +1,5 @@
+Sections répétables : une section peut se faire plusieurs fois, et chaque exemplaire garde sa progression. Par défaut, les manches, oreilles, membres et jambes se font par 2.
+Paire de chaussettes : confection soit l'une après l'autre, soit les deux en même temps rang par rang.
+Import possible des PDF multi-patrons.
+Designer du patron : affiché sur le patron et dans le badge partagé.
+Nouveaux types de section pour les chaussettes et un type « Générique répétable ».

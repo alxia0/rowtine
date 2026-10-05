@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import ImportProgress from '@/components/ImportProgress.vue'
+import PdfPagesSelectDialog from '@/components/PdfPagesSelectDialog.vue'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { parsePdfLocally } from '@/utils/pdf-import'
@@ -50,6 +51,12 @@ const error = ref('')
 const progress = useImportProgress()
 const result = ref(null) // { pattern, reader, warnings, confidence, stats, blocking, rejected, … } (cf. pdf-import/index.js)
 const savedId = ref(null)
+// Choix des pages (spec 2026-10-04) : le fichier en cours est gardé le temps de l'écran pour
+// pouvoir rouvrir le sélecteur sans repasser par le sélecteur de fichiers. `chosenPages` vaut
+// null pour un import du PDF entier.
+const currentFile = ref(null)
+const chosenPages = ref(null)
+const pagesDialogOpen = ref(false)
 // Portées par le bloc de réussite (savedId != null) : le nom vient du patron tel
 // qu'écrit en base (identique aux 2 voies, PDF et zip), le compte de warnings de la
 // liste que ce même enregistrement a poussée dans import-report.
@@ -83,9 +90,15 @@ const rejectMessage = computed(() => {
   const reason = result.value?.rejected?.reason
   if (reason === 'scanned') return t('importLocal.scanned', { email: CONTACT_EMAIL })
   if (reason === 'notPattern') return t('importLocal.notPattern', { email: CONTACT_EMAIL })
-  if (reason === 'multiPattern') return t('importLocal.blockMultiPattern')
+  if (reason === 'multiPattern') return t(chosenPages.value ? 'importLocal.blockMultiPatternSubset' : 'importLocal.blockMultiPattern')
   return ''
 })
+
+// Le bouton « Choisir les pages » du refus : sur un recueil, ou après une sélection déjà
+// faite (pour en choisir une autre), tant que le fichier est connu.
+const canChoosePages = computed(
+  () => !!currentFile.value && (result.value?.rejected?.reason === 'multiPattern' || !!chosenPages.value),
+)
 
 // Cœur d'import partagé par le sélecteur de fichier local ET par le relais depuis la
 // Bibliothèque (cf. useImportHandoff). parsePdfLocally n'est pas annulable : le jeton
@@ -97,8 +110,10 @@ const rejectMessage = computed(() => {
 // navigation automatique ensuite — l'écran RESTE affiché, un bloc de réussite prend
 // le relais (cf. template, savedId != null) avec le bouton « Voir le patron » qui
 // fait la navigation au clic.
-async function startImport(file) {
+async function startImport(file, { pages = null } = {}) {
   if (!file) return
+  currentFile.value = file
+  chosenPages.value = pages
   const token = ++importToken
   busy.value = true
   error.value = ''
@@ -142,7 +157,7 @@ async function startImport(file) {
   }
   progress.begin('local', file.size || 0)
   try {
-    const out = await parsePdfLocally(file, { onProgress: (e) => progress.report(e) })
+    const out = await parsePdfLocally(file, { onProgress: (e) => progress.report(e), ...(pages ? { pages } : {}) })
     if (token !== importToken) return // import interrompu entre-temps : résultat tardif ignoré
     result.value = out
     progress.end()
@@ -198,6 +213,26 @@ function onFile(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
   startImport(file)
+}
+
+// Lien « Le PDF contient plusieurs patrons ? » : on choisit le fichier, puis directement les
+// pages, sans analyser d'abord le PDF entier.
+function onFileForPages(e) {
+  const file = e.target.files?.[0]
+  e.target.value = ''
+  if (!file) return
+  importToken++
+  error.value = ''
+  result.value = null
+  savedId.value = null
+  importSuccess.clear()
+  currentFile.value = file
+  chosenPages.value = null
+  pagesDialogOpen.value = true
+}
+
+function onPagesChosen(pages) {
+  startImport(currentFile.value, { pages })
 }
 
 // Garde import↔synchro MD (repro nexus7_2026-08-25, cf. import-guard.js) : tant que cet
@@ -364,6 +399,9 @@ function abortImport() {
   result.value = null
   savedId.value = null
   importSuccess.clear() // rien n'est enregistré : aucun bloc de réussite à retrouver
+  currentFile.value = null
+  chosenPages.value = null
+  pagesDialogOpen.value = false
   progress.reset()
 }
 </script>
@@ -372,12 +410,18 @@ function abortImport() {
 <div>
   <AppHeader :title="t(isRowtine ? 'importLocal.titleRowtine' : 'importLocal.title')" back />
   <main class="screen">
-    <p class="lead">{{ t(isRowtine ? 'importLocal.leadRowtine' : 'importLocal.lead') }}</p>
-    <p class="lead">{{ t('importLocal.leadNext') }}</p>
+    <!-- Introduction avant l'import seulement : une fois le patron importé, l'écran ne garde que le
+         bilan, l'avertissement et l'action (le conseil de correction n'y figure qu'une fois). -->
+    <p v-if="savedId == null" class="lead">{{ t(isRowtine ? 'importLocal.leadRowtine' : 'importLocal.lead') }}</p>
 
     <label v-if="!busy && savedId == null" class="btn btn--primary btn--block file-pick">
       <AppIcon name="import" :size="18" /> {{ t(isRowtine ? 'importLocal.pickRowtine' : 'importLocal.pick') }}
       <input type="file" :accept="isRowtine ? ROWTINE_ACCEPT : PDF_ACCEPT" class="file-pick__input" @change="onFile" />
+    </label>
+    <!-- Hors du label principal : son <input> doit rester le premier champ fichier de l'écran. -->
+    <label v-if="!isRowtine && !busy && savedId == null && !canChoosePages" class="pick-pages">
+      {{ t('importLocal.pickPagesLink') }}
+      <input type="file" :accept="PDF_ACCEPT" class="file-pick__input" @change="onFileForPages" />
     </label>
 
     <!-- Synchro MD déjà en cours à l'ouverture de l'écran (cf. waitingSync) : l'écran
@@ -401,6 +445,9 @@ function abortImport() {
          fichier. -->
     <section v-if="result?.rejected" class="res mt3" role="alert">
       <p class="warn"><AppIcon name="warning" :size="15" /> {{ rejectMessage }}</p>
+      <button v-if="canChoosePages" type="button" class="btn btn--primary btn--block mt2" @click="pagesDialogOpen = true">
+        {{ t('importLocal.choosePages') }}
+      </button>
     </section>
 
     <!-- Import risqué (blocking) : le moteur a détecté un cas mal géré
@@ -493,8 +540,6 @@ function abortImport() {
       <button v-else type="button" class="btn btn--primary btn--block" @click="viewPattern">
         {{ t('importLocal.viewPattern') }}
       </button>
-
-      <p class="done__hint">{{ t('importLocal.nextHint') }}</p>
     </section>
 
     <!-- Bouton d'abandon : reachable dès qu'il y a quelque chose à annuler
@@ -505,6 +550,8 @@ function abortImport() {
     <button v-if="(busy || result) && !saving && savedId == null" class="btn btn--block mt2" @click="abortImport">
       <AppIcon name="close" :size="18" /> {{ t('importLocal.cancelImport') }}
     </button>
+
+    <PdfPagesSelectDialog v-if="currentFile" v-model:open="pagesDialogOpen" :file="currentFile" :initial="chosenPages || []" @confirm="onPagesChosen" />
   </main>
 </div>
 </template>
@@ -521,6 +568,10 @@ function abortImport() {
    < Chrome 105 — l'anneau n'y apparaissait jamais. Compromis assumé : `:focus-within` peut
    aussi s'allumer après un tap (pas seulement au clavier), acceptable pour un bouton d'import. */
 .file-pick:focus-within { outline: 2px solid var(--brand-deep); outline-offset: 2px; border-radius: var(--r-md); }
+/* Lien discret sous le bouton d'import. Même raison que .file-pick:focus-within : l'input réel
+   est masqué, l'anneau se porte sur le label. */
+.pick-pages { display: flex; align-items: center; justify-content: center; min-height: 44px; position: relative; text-align: center; font-size: 14px; color: var(--ink-70); text-decoration: underline; cursor: pointer; margin: 0 0 var(--sp-4); padding: var(--sp-2) 0; }
+.pick-pages:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: var(--r-sm); }
 .mt2 { margin-top: var(--sp-2); }
 .mt3 { margin-top: var(--sp-4); }
 .muted { color: var(--ink-55); font-size: 13px; }
@@ -557,7 +608,6 @@ function abortImport() {
    fond clair + bordure/texte ambre : sur le fond déjà teinté de .done__caveat, --surface
    tranchait (lavande sur ambre). Contraste mesuré ≥ 5.5:1 dans les deux thèmes. */
 .done__howto { margin-top: var(--sp-3); background: var(--tile); border-color: var(--warning); color: var(--warning); }
-.done__hint { text-align: center; color: var(--ink-70); font-size: 14px; line-height: 1.45; margin: calc(-1 * var(--sp-2)) 0 0; }
 .warn { color: var(--warning); font-size: 13.5px; margin: 0 0 var(--sp-3); }
 .block-reasons { margin: 0 0 var(--sp-2); padding-left: 1.1em; color: var(--ink-70); font-size: 13.5px; }
 .block-anyway { margin-top: var(--sp-2); }

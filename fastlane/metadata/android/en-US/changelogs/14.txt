@@ -1,0 +1,5 @@
+Repeated sections: a section can be worked several times, and each copy keeps its own progress. By default, sleeves, ears, limbs and legs are worked in pairs.
+Pair of socks: knit them one after the other, or both at the same time, row by row.
+PDFs that hold several patterns can now be imported.
+Pattern designer: shown on the pattern and on the shared badge.
+New section types for socks and a "Generic repeatable" type.

@@ -11,6 +11,7 @@
 // persistant fermable — jamais en snackbar, règle « jamais perdre d'info »).
 // L'abandon PENDANT la conversion (busy) reste possible et intact.
 import { describe, it, expect, vi } from 'vitest'
+import { defineComponent, h } from 'vue'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import fr from '@/i18n/fr.json'
@@ -73,7 +74,7 @@ async function pick(wrapper, file = new File(['x'], 'pull.pdf')) {
 describe('LocalPdfImportView', () => {
   it('écran au repos : dit ce qui se passe après l’analyse (enregistrement direct), et l’input reste enfant direct du label (sélecteur natif intact)', () => {
     const w = mountView()
-    expect(w.text()).toContain(fr.importLocal.leadNext)
+    expect(w.text()).toContain(fr.importLocal.lead)
     // 🚩 Garde anti-régression du piège : rien ne doit s'être glissé entre le <label>
     // et son <input> — le sélecteur de fichiers natif exige un enfant DIRECT.
     const label = w.find('label.file-pick')
@@ -344,6 +345,16 @@ describe('LocalPdfImportView', () => {
       expect(w.text()).toContain(fr.importLocal.caveatBody)
     })
 
+    // L'écran de réussite ne répète pas le conseil de correction : la carte ambre seule le porte.
+    it("après l'import, ni le texte d'introduction ni l'indication sous le bouton", async () => {
+      parsePdfLocally.mockResolvedValue(okResult({ warnings: [] }))
+      const { w } = mountViewWithSavedId(9)
+      await pick(w)
+      expect(w.find('.done').exists()).toBe(true)
+      expect(w.find('p.lead').exists()).toBe(false)
+      expect(w.find('.done__hint').exists()).toBe(false)
+    })
+
     it('avec des avertissements, la phrase fixe est là AUSSI, en plus du compte', async () => {
       parsePdfLocally.mockResolvedValue(okResult({ warnings: [{ code: 'x' }, { code: 'y' }] }))
       const { w } = mountViewWithSavedId(8)
@@ -380,5 +391,135 @@ describe('LocalPdfImportView', () => {
       expect(w.find('.done').exists()).toBe(false)
       expect(w.text()).not.toContain(fr.importLocal.caveatBody)
     })
+  })
+})
+
+// Stub explicite du dialogue de choix des pages : un stub `true` n'émettrait rien.
+const PagesDialogStub = defineComponent({
+  name: 'PdfPagesSelectDialog',
+  props: ['open', 'file', 'initial'],
+  emits: ['update:open', 'confirm'],
+  setup: (props) => () => h('div', { class: 'pages-dialog-stub', 'data-open': String(!!props.open) }),
+})
+
+function mountWithPages(props = {}) {
+  return mount(LocalPdfImportView, {
+    props,
+    global: { plugins: [createTestingPinia({ createSpy: vi.fn }), i18n], stubs: { ...stubs, PdfPagesSelectDialog: PagesDialogStub } },
+  })
+}
+
+async function pickForPages(w, file = new File(['x'], 'recueil.pdf')) {
+  const input = w.find('.pick-pages input[type=file]')
+  Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
+  await input.trigger('change')
+  await flushPromises()
+}
+
+const multiRejected = { pattern: null, reader: null, warnings: [], confidence: null, stats: null, blocking: null,
+  scanned: false, notPattern: false, notPatternReason: null, rejected: { reason: 'multiPattern', detail: null } }
+
+describe('choix des pages', () => {
+  // Protège : le lien est sur la porte PDF, absent de la porte .rowtine, et n'analyse rien.
+  it('lien permanent : visible porte PDF, ouvre le sélecteur sans lancer l’analyse', async () => {
+    parsePdfLocally.mockClear()
+    const w = mountWithPages()
+    expect(w.text()).toContain(fr.importLocal.pickPagesLink)
+    await pickForPages(w)
+    expect(parsePdfLocally).not.toHaveBeenCalled()
+    expect(w.findComponent(PagesDialogStub).props('open')).toBe(true)
+  })
+
+  it('lien permanent absent sur la porte .rowtine', () => {
+    const w = mountWithPages({ format: 'rowtine' })
+    expect(w.find('.pick-pages').exists()).toBe(false)
+  })
+
+  // Protège : valider la sélection lance l'import sur ces pages seulement.
+  it('confirm → parsePdfLocally(file, { onProgress, pages })', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(okResult())
+    const w = mountWithPages()
+    const file = new File(['x'], 'recueil.pdf')
+    await pickForPages(w, file)
+    w.findComponent(PagesDialogStub).vm.$emit('confirm', [2, 3])
+    await flushPromises()
+    expect(parsePdfLocally).toHaveBeenCalledWith(file, expect.objectContaining({ pages: [2, 3], onProgress: expect.any(Function) }))
+  })
+
+  // Protège : sans sélection, l'appel au moteur ne porte pas de clé `pages`.
+  it('import normal : aucune clé pages', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(okResult())
+    const w = mountWithPages()
+    await pick(w)
+    expect(Object.keys(parsePdfLocally.mock.calls[0][1])).toEqual(['onProgress'])
+  })
+
+  // Protège : le refus recueil propose d'agir, sur le fichier déjà choisi.
+  it('refus multiPattern → bouton « Choisir les pages » qui ouvre le sélecteur', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(multiRejected)
+    const w = mountWithPages()
+    await pick(w)
+    expect(w.text()).toContain(fr.importLocal.blockMultiPattern)
+    await findButtonByText(w, fr.importLocal.choosePages).trigger('click')
+    expect(w.findComponent(PagesDialogStub).props('open')).toBe(true)
+  })
+
+  // Protège : un seul appel à l'action quand le bouton du refus est là (le lien permanent s'efface).
+  it('refus multiPattern → lien permanent absent, bouton « Choisir les pages » présent', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(multiRejected)
+    const w = mountWithPages()
+    await pick(w)
+    expect(w.find('.pick-pages').exists()).toBe(false)
+    expect(findButtonByText(w, fr.importLocal.choosePages)).toBeTruthy()
+  })
+
+  // Protège : rouvrir après un sous-ensemble refusé reprend la sélection précédente.
+  it('rouvrir après un sous-ensemble refusé → le dialogue reçoit la sélection précédente', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(multiRejected)
+    const w = mountWithPages()
+    await pickForPages(w)
+    w.findComponent(PagesDialogStub).vm.$emit('confirm', [2, 3])
+    await flushPromises()
+    await findButtonByText(w, fr.importLocal.choosePages).trigger('click')
+    expect(w.findComponent(PagesDialogStub).props('initial')).toEqual([2, 3])
+  })
+
+  // Protège : un sous-ensemble encore « recueil » a son propre message.
+  it('sous-ensemble refusé multiPattern → message dédié', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(multiRejected)
+    const w = mountWithPages()
+    await pickForPages(w)
+    w.findComponent(PagesDialogStub).vm.$emit('confirm', [1, 2, 3, 4])
+    await flushPromises()
+    expect(w.text()).toContain(fr.importLocal.blockMultiPatternSubset)
+    expect(findButtonByText(w, fr.importLocal.choosePages)).toBeTruthy()
+  })
+
+  // Protège : après une sélection refusée pour une autre raison (scanné), on peut rechoisir.
+  it('sous-ensemble refusé scanné → bouton « Choisir les pages » présent', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue({ ...multiRejected, scanned: true, rejected: { reason: 'scanned', detail: null } })
+    const w = mountWithPages()
+    await pickForPages(w)
+    w.findComponent(PagesDialogStub).vm.$emit('confirm', [5])
+    await flushPromises()
+    expect(findButtonByText(w, fr.importLocal.choosePages)).toBeTruthy()
+  })
+
+  // Protège : interrompre oublie le fichier et la sélection.
+  it('interrompre après un refus : plus de bouton « Choisir les pages », sélecteur fermé', async () => {
+    parsePdfLocally.mockReset()
+    parsePdfLocally.mockResolvedValue(multiRejected)
+    const w = mountWithPages()
+    await pick(w)
+    await findButtonByText(w, fr.importLocal.cancelImport).trigger('click')
+    expect(findButtonByText(w, fr.importLocal.choosePages)).toBeUndefined()
+    expect(w.findComponent(PagesDialogStub).exists() && w.findComponent(PagesDialogStub).props('open')).toBeFalsy()
   })
 })

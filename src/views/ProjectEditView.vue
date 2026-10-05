@@ -25,7 +25,9 @@ import AppToggle from '@/components/AppToggle.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
 import { priceOwnerId } from '@/utils/pattern-price'
-import { patternToReader } from '@/utils/reader'
+import { patternToReader, withStepIds, hasSockProgress, resetSockProgress } from '@/utils/reader'
+import { sockPairSections } from '@/utils/section-copies'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { MIN_YEAR } from '@/utils/stats-grid'
 
 const route = useRoute()
@@ -228,6 +230,7 @@ onMounted(async () => {
         if (q != null) yarnQty[y.id] = q
       }
       patternSel.value = p.patternId != null ? String(p.patternId) : ''
+      techMode.value = p.readerState?.copyMode === 'simultaneous' ? 'simultaneous' : 'sequential'
       originalPatternId.value = p.patternId ?? null
     }
   } else if (route.query.pattern) {
@@ -250,6 +253,15 @@ onMounted(async () => {
   await nextTick()
   hydrating.value = false
 })
+
+// Technique des chaussettes (spec 2026-10-05) : même réglage que la carte du lecteur,
+// `readerState.copyMode`. Champ visible si le patron choisi a des parties de chaussette x2.
+const techMode = ref('sequential')
+const sockSections = computed(() => {
+  const pat = patternSel.value ? patternsStore.patterns.find((p) => p.id === Number(patternSel.value)) : null
+  return pat ? sockPairSections(withStepIds(patternToReader(pat)?.sections || [])) : []
+})
+const pendingResetSave = ref(false)
 
 const patternOptions = computed(() => patternsStore.selectablePatterns)
 
@@ -332,17 +344,17 @@ async function finishSave(projectId) {
 // laine. Enveloppe plutôt que try/finally autour du corps : même garantie, sans réindenter les
 // soixante-dix lignes de `saveProject()` ni ses retours anticipés.
 const saving = ref(false)
-async function save() {
+async function save(options) {
   if (saving.value) return
   saving.value = true
   try {
-    await saveProject()
+    await saveProject(options)
   } finally {
     saving.value = false
   }
 }
 
-async function saveProject() {
+async function saveProject({ resetConfirmed = false } = {}) {
   if (!form.name.trim()) {
     nameError.value = t('project.nameRequired')
     nameInput.value?.focus()
@@ -398,6 +410,24 @@ async function saveProject() {
       const i = pat ? (patternToReader(pat)?.sizeLabels || []).indexOf(payload.activeSize) : -1
       if (i >= 0) payload.readerState = { ...avant.readerState, size: i }
     }
+  }
+  // Technique des chaussettes : écrite sur l'état frais `avant`, comme la taille. Changer avec des
+  // rangs de chaussette faits demande confirmation, puis remet ces parties à zéro.
+  const wantedMode = sockSections.value.length && techMode.value === 'simultaneous' ? 'simultaneous' : undefined
+  if (isEdit.value && avant) {
+    const base = payload.readerState || avant.readerState || {}
+    if ((base.copyMode === 'simultaneous' ? 'simultaneous' : undefined) !== wantedMode) {
+      if (!patternChanged && hasSockProgress(sockSections.value, base) && !resetConfirmed) {
+        pendingResetSave.value = true
+        return
+      }
+      const next = resetSockProgress(sockSections.value, base)
+      if (wantedMode) next.copyMode = wantedMode
+      else delete next.copyMode
+      payload.readerState = next
+    }
+  } else if (!isEdit.value && wantedMode) {
+    payload.readerState = { copyMode: wantedMode }
   }
   // Un chrono qui tourne sur CE projet peut survivre à cet écran : `project-edit` reste
   // dans la « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que
@@ -552,9 +582,17 @@ async function saveProject() {
         </button>
       </div>
 
-      <label class="field-label mt">{{ isCrochet ? t('project.hooks') : t('project.needles') }}</label>
+      <div v-if="sockSections.length" class="mt">
+        <label class="field-label" for="techsel">{{ t('reader.copies.technique') }}</label>
+        <select id="techsel" v-model="techMode" class="input">
+          <option value="sequential">{{ t('reader.copies.sequential') }}</option>
+          <option value="simultaneous">{{ t('reader.copies.together') }}</option>
+        </select>
+      </div>
+
+      <label class="field-label mt" for="needle-mm-0">{{ isCrochet ? t('project.hooks') : t('project.needles') }}</label>
       <div v-for="(n, i) in form.needles" :key="i" class="needle-row">
-        <input v-model="n.mm" class="input" inputmode="decimal" :placeholder="isCrochet ? t('project.hookMm') : t('project.needleMm')" :aria-label="isCrochet ? t('project.hookMm') : t('project.needleMm')" />
+        <input :id="i === 0 ? 'needle-mm-0' : undefined" v-model="n.mm" class="input" inputmode="decimal" :placeholder="isCrochet ? t('project.hookMm') : t('project.needleMm')" :aria-label="isCrochet ? t('project.hookMm') : t('project.needleMm')" />
         <input v-model="n.us" class="input" :placeholder="isCrochet ? 'H / 5,0' : 'US 7'" :aria-label="isCrochet ? t('project.hookUs') : t('project.needleUs')" />
         <button v-if="form.needles.length > 1" type="button" class="needle-del" :aria-label="t('common.delete')" @click="removeNeedle(i)"><AppIcon name="close" :size="16" /></button>
       </div>
@@ -586,6 +624,7 @@ async function saveProject() {
         </select>
         <input v-else id="asize" v-model="form.activeSize" class="input" placeholder="M" />
       </div>
+
     </section>
 
     <section class="card">
@@ -614,10 +653,20 @@ async function saveProject() {
 
     <div class="actions">
       <button class="btn" @click="router.back()">{{ t('common.cancel') }}</button>
-      <button class="btn btn--primary" :disabled="saving" @click="save">{{ t('common.save') }}</button>
+      <button class="btn btn--primary" :disabled="saving" @click="save()">{{ t('common.save') }}</button>
     </div>
   </main>
 
+  <ConfirmDialog
+    :open="pendingResetSave"
+    :title="t('reader.copies.resetTitle')"
+    :message="t('reader.copies.resetMsg')"
+    :confirm-label="t('reader.copies.resetConfirm')"
+    :cancel-label="t('common.cancel')"
+    danger
+    @confirm="pendingResetSave = false; save({ resetConfirmed: true })"
+    @cancel="pendingResetSave = false"
+  />
   <!-- « Combien de pelotes as-tu réellement utilisées/perdues ? » (3ᵉ point d'entrée,
   posée à l'enregistrement si le statut choisi est Terminé/Abandonné et que des laines
   sont réservées — R2 + R3, cf. commentaire de `save()`). -->

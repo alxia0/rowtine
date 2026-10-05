@@ -11,7 +11,8 @@ import { retagSelection, mergeIntoReference } from '@/utils/pattern-md/md-retag-
 import { retagLine } from '@/utils/pattern-md/md-retag.js'
 import { parseStepCounter, parseSectionRepeat } from '@/utils/pattern-md/counters.js'
 import { resolveImageSrc } from '@/utils/pattern-md/resolve-image-src.js'
-import { groupedSectionKinds, DEFAULT_KIND } from '@/utils/section-kinds.js'
+import { groupedSectionKinds, DEFAULT_KIND, isRepeatable } from '@/utils/section-kinds.js'
+import { MAX_COPIES } from '@/utils/section-copies.js'
 import { ICONS } from '@/utils/icons'
 import { reservedKey, REF_TAG_TO_KEY, isTableSep, splitCells, isPipeLine } from '@/utils/pattern-md/refblocks.js'
 import { kindToFr } from '@/utils/pattern-md/dialect.js'
@@ -341,6 +342,26 @@ function editSectionKindOnLine(view, lineNumber, labels, anchorEl) {
   )
 }
 
+// Carte d'exemplaires de la puce : nombre libre (1 à MAX_COPIES, pré-rempli à la valeur courante,
+// 2 à 1 exemplaire). Réécrit la ligne par le même chemin que le menu Section (applyRetag),
+// avec le kind COURANT et opts.copies.
+async function editSectionCopiesOnLine(view, lineNumber, labels, anchorEl) {
+  const line = view.state.doc.line(lineNumber)
+  const lineFrom = line.from
+  const kind = currentSectionKind(line.text)
+  if (!isRepeatable(kind)) return
+  const cur = currentSectionCopies(line.text)
+  const result = await openCopiesPrompt({
+    labels: copiesLabels(labels),
+    cancelLabel: labels?.prompt?.cancel || FR_PROMPT_LABELS.cancel,
+    value: cur.copies > 1 ? cur.copies : 2,
+  })
+  anchorEl?.focus?.()
+  if (!result) return
+  view.dispatch({ selection: { anchor: view.state.doc.lineAt(lineFrom).from } })
+  applyRetag(view, 'section', { kind, copies: result.copies })
+}
+
 // La puce ne s'affiche qu'en mode enrichi (hideMarkup vrai) — en
 // mode brut, le `{×N}` / `{cadence X×N}` redevient du texte.
 // `labels` : propre à CHAQUE éditeur (cf. createCounterWidgetPlugin ci-dessous),
@@ -639,6 +660,27 @@ class SectionKindWidget extends WidgetType {
   // d'atteindre les écouteurs du span.
   ignoreEvent(event) {
     return !['mousedown', 'click', 'keydown', 'keyup'].includes(event.type)
+  }
+}
+
+// Puce d'exemplaires, posée juste après la puce de kind d'un titre de kind répétable. Même
+// contrat que SectionKindWidget (position dans eq, relecture de la ligne au clic). Nom
+// accessible : le réglage puis sa valeur (« Exemplaires : 2 exemplaires »), le texte seul ne
+// disant pas ce que la puce règle.
+class SectionCopiesWidget extends SectionKindWidget {
+  constructor(label, onEdit, from, ariaLabel) {
+    super(label, onEdit, from)
+    this.ariaLabel = ariaLabel
+  }
+  eq(other) {
+    return super.eq(other) && other.ariaLabel === this.ariaLabel
+  }
+  toDOM() {
+    const span = super.toDOM()
+    span.className = 'cm-section-kind-chip cm-section-copies-chip'
+    span.setAttribute('aria-label', this.ariaLabel)
+    span.insertAdjacentHTML('afterbegin', iconSvg('repeat', 14))
+    return span
   }
 }
 
@@ -1162,6 +1204,21 @@ function addLineMaskDecorations(builder, line, imageMap, view, labels, imageActi
     } else {
       builder.push(Decoration.widget({ widget, side: 1 }).range(ranges.suffixFrom))
     }
+    const kindOfLine = currentSectionKind(line.text)
+    if (isRepeatable(kindOfLine)) {
+      const copies = copiesLabels(labels)
+      const { copies: n } = currentSectionCopies(line.text)
+      // « ×N » comme la puce du compteur.
+      const chip = `×${n}`
+      const spelled = n === 1 ? copies.one : fillN(copies.n, n)
+      const copiesWidget = new SectionCopiesWidget(
+        chip,
+        (anchorEl) => editSectionCopiesOnLine(view, view.state.doc.lineAt(lineFrom).number, labels, anchorEl),
+        line.from,
+        `${copies.label} : ${spelled}`
+      )
+      builder.push(Decoration.widget({ widget: copiesWidget, side: 1 }).range(line.to))
+    }
     return
   }
   if (type === 'reference') {
@@ -1447,6 +1504,15 @@ const FR_TOOLBAR_LABELS = { ...fr.correction.toolbar, sections: FR_SECTIONS }
 // la clé common.cancel existante plutôt que d'en dupliquer
 // une sous correction.prompt.
 const FR_PROMPT_LABELS = { cancel: fr.common.cancel, ...fr.correction.prompt }
+
+// Repli FR de la puce d'exemplaires (banc tools/mdedit hors i18n), source unique
+// reader.copies.* de fr.json. Même forme que `labels.copies` fourni par ReaderTextEditor :
+// { label, one, n }, les gabarits portant
+// `{n}` (fillN).
+const FR_COPIES = Object.fromEntries(
+  ['label', 'one', 'n'].map((k) => [k, fr.reader.copies[k]])
+)
+const fillN = (template, n) => String(template).replace('{n}', n)
 
 // Inline le SVG d'une icône du registre (même rendu qu'AppIcon.vue) pour l'injecter
 // dans la barre HTML de l'éditeur (chaîne, pas un composant Vue). Décoratif :
@@ -1864,6 +1930,96 @@ export function openNumberPrompt(message, fallback, cancelLabel = FR_PROMPT_LABE
   })
 }
 
+// Carte d'exemplaires d'une section (puce « ×N ») : même carte qu'openNumberPrompt, un champ
+// numérique 1..MAX_COPIES (la technique des chaussettes est un choix du projet, pas du patron).
+// Une valeur hors bornes ne ferme pas la carte (même
+// contrat qu'openNumberPrompt). Résout { copies } ou `null` (Annuler, Échap, hors carte).
+export function openCopiesPrompt({ labels, cancelLabel = FR_PROMPT_LABELS.cancel, value = 2 }) {
+  ensureNumPromptStyles()
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div')
+    overlay.className = 'cm-numprompt'
+    const card = document.createElement('div')
+    card.className = 'cm-numprompt__card'
+    const uid = numpromptId()
+    card.setAttribute('role', 'dialog')
+    card.setAttribute('aria-modal', 'true')
+    card.setAttribute('aria-labelledby', uid)
+
+    const label = document.createElement('label')
+    label.id = uid
+    label.htmlFor = `${uid}-input`
+    label.className = 'cm-numprompt__label'
+    label.textContent = labels.label
+    const input = document.createElement('input')
+    input.id = `${uid}-input`
+    input.type = 'text'
+    input.className = 'cm-numprompt__input'
+    input.inputMode = 'numeric'
+    input.setAttribute('inputmode', 'numeric')
+    input.setAttribute('pattern', '[0-9]*')
+    input.value = String(value)
+    card.append(label, input)
+
+    const parsed = () => {
+      const raw = input.value.trim()
+      const n = /^\d+$/.test(raw) ? Number(raw) : NaN
+      return n >= 1 && n <= MAX_COPIES ? n : null
+    }
+
+    const actions = document.createElement('div')
+    actions.className = 'cm-numprompt__actions'
+    const cancelBtn = document.createElement('button')
+    cancelBtn.type = 'button'
+    cancelBtn.className = 'cm-numprompt__btn'
+    cancelBtn.textContent = cancelLabel
+    const okBtn = document.createElement('button')
+    okBtn.type = 'button'
+    okBtn.className = 'cm-numprompt__btn cm-numprompt__btn--primary'
+    okBtn.textContent = 'OK'
+    actions.append(cancelBtn, okBtn)
+    card.appendChild(actions)
+    overlay.appendChild(card)
+
+    function close(result) {
+      document.removeEventListener('keydown', onKeydown)
+      overlay.remove()
+      resolve(result)
+    }
+    function confirm() {
+      const n = parsed()
+      if (n === null) {
+        input.focus()
+        input.select()
+        return
+      }
+      close({ copies: n })
+    }
+    function onKeydown(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        close(null)
+        return
+      }
+      if (event.key === 'Enter' && event.target === input) {
+        event.preventDefault()
+        confirm()
+        return
+      }
+      trapTabFocus(event, card)
+    }
+    cancelBtn.addEventListener('click', () => close(null))
+    okBtn.addEventListener('click', confirm)
+    overlay.addEventListener('mousedown', (event) => {
+      if (event.target === overlay) close(null)
+    })
+    document.addEventListener('keydown', onKeydown)
+    document.body.appendChild(overlay)
+    input.focus()
+    input.select()
+  })
+}
+
 // Sœur d'openNumberPrompt ci-dessus, pour PLUSIEURS champs à la fois (Cadence
 // fusionne « Répéter tous les » et « fois » dans une
 // SEULE carte au lieu de 2 dialogues séquentiels). Même carte/overlay
@@ -2219,7 +2375,8 @@ function ensureMenuPopoverStyles() {
  * discret, sous le libellé — pensé pour expliquer POURQUOI un item est désactivé, ou
  * pour détailler un choix (cf. le sous-popover de type de diagramme, CorrectionView.vue).
  * @param {(value: string) => void} onSelect
- * @param {string|null} [selectedValue]
+ * @param {string|string[]|null} [selectedValue] Un tableau coche plusieurs valeurs, une par
+ *   groupe de radios (menu d'exemplaires : le nombre dans son groupe, le mode hors groupe).
  */
 export function openMenuPopover(anchorEl, items, onSelect, selectedValue) {
   ensureMenuPopoverStyles()
@@ -2253,6 +2410,7 @@ export function openMenuPopover(anchorEl, items, onSelect, selectedValue) {
   // posée sur CHAQUE item pour que les libellés restent alignés, cf. CSS
   // ensureMenuPopoverStyles).
   const hasSelection = selectedValue !== undefined
+  const selectedValues = Array.isArray(selectedValue) ? selectedValue : [selectedValue]
 
   // Une même `value` peut apparaître dans PLUSIEURS groupes consécutifs (ex.
   // section-kinds.js : `corps`/`bordure` appartiennent à deux familles, donc
@@ -2282,7 +2440,7 @@ export function openMenuPopover(anchorEl, items, onSelect, selectedValue) {
       currentGroup = null
       currentGroupLabel = undefined
     }
-    const isSelected = hasSelection && item.value === selectedValue && !alreadyMarked.has(item.value)
+    const isSelected = hasSelection && selectedValues.includes(item.value) && !alreadyMarked.has(item.value)
     if (isSelected) alreadyMarked.add(item.value)
     const btn = document.createElement('button')
     btn.type = 'button'
@@ -2522,8 +2680,21 @@ function currentSectionKind(lineText) {
   const h2 = H2_PREFIXE_RE.exec(lineText)
   if (!h2) return DEFAULT_KIND
   const sr = parseSectionRepeat(lineText.slice(h2[0].length))
-  const tag = LINE_TAG_RE.exec(sr.title)?.[1]
+  const tag = TITLE_KIND_RE.exec(sr.title)?.[2]
   return tag ? kindToFr(tag) : DEFAULT_KIND
+}
+
+// Exemplaires du titre `## … {kind xN}` : { copies } (1 sans suffixe).
+function currentSectionCopies(lineText) {
+  const h2 = H2_PREFIXE_RE.exec(lineText)
+  if (!h2) return { copies: 1 }
+  const tm = TITLE_KIND_RE.exec(parseSectionRepeat(lineText.slice(h2[0].length)).title)
+  return { copies: tm?.[3] ? Number(tm[3]) : 1 }
+}
+
+// Libellés d'exemplaires fournis par l'app, repli FR pour le banc mdedit.
+function copiesLabels(labels) {
+  return labels?.copies || FR_COPIES
 }
 
 // Libellé TRADUIT d'un kind de section (clé FR, ex. "corps") — pour l'indicateur « à

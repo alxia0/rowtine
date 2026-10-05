@@ -136,6 +136,11 @@ function editorLabels() {
     // barre (bouton Diagramme du menu Aide mémoire, balise Échantillon des
     // 7 libellés de référence).
     sections: groupedSectionKinds(kindLabels, locale.value, { exclude: ['diagramme', 'echantillon'] }),
+    // Puce et carte d'exemplaires (titres de kind répétable) : gabarits gardant `{n}`, que
+    // cm-editor remplit pour n'importe quel nombre (1 à 99).
+    copies: Object.fromEntries(
+      ['label', 'one', 'n'].map((k) => [k, t(`reader.copies.${k}`, { n: '{n}' })])
+    ),
     prompt: {
       cancel: t('common.cancel'),
       ...Object.fromEntries(PROMPT_LABEL_KEYS.map((key) => [key, t(`correction.prompt.${key}`)])),
@@ -1210,6 +1215,10 @@ html[data-theme='dark'] .rte .cm-line.cm-active-block {
   font-weight: 600;
   font-size: 0.85em;
   border: 1px solid rgba(95, 115, 88, 0.35);
+}
+.rte .cm-section-copies-chip svg {
+  vertical-align: -0.15em;
+  margin-right: 0.3em;
 }
 .rte .cm-row-check {
   display: inline-block;

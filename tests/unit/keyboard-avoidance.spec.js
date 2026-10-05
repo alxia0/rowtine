@@ -16,10 +16,16 @@ import {
   isTextField,
   findScrollContainer,
   installKeyboardAvoidance,
+  labelOffsetAbove,
 } from '@/utils/keyboard-avoidance'
 
 function nextFrame() {
   return new Promise((resolve) => requestAnimationFrame(() => resolve()))
+}
+
+// Rectangle de mise en page minimal pour `getBoundingClientRect` (jsdom renvoie des zéros).
+function rectAt(top, height = 20) {
+  return { top, bottom: top + height, height, left: 0, right: 300, width: 300, x: 0, y: top, toJSON() {} }
 }
 
 // Simule un conteneur RÉELLEMENT défilant : jsdom laisse toutes les dimensions de
@@ -130,6 +136,77 @@ describe('findScrollContainer — remonte au premier ancêtre RÉELLEMENT défil
     document.body.appendChild(panels)
     expect(findScrollContainer(field)).toBe(document.documentElement)
     panels.remove()
+  })
+})
+
+describe('labelOffsetAbove : distance entre le haut de l’étiquette et celui du champ', () => {
+  let els = []
+  afterEach(() => {
+    els.forEach((el) => el.remove())
+    els = []
+  })
+
+  function labelled(fieldTop, labelTops) {
+    const field = document.createElement('input')
+    field.id = `f-${Math.random().toString(36).slice(2)}`
+    vi.spyOn(field, 'getBoundingClientRect').mockReturnValue(rectAt(fieldTop, 44))
+    for (const top of labelTops) {
+      const label = document.createElement('label')
+      label.htmlFor = field.id
+      vi.spyOn(label, 'getBoundingClientRect').mockReturnValue(rectAt(top))
+      document.body.appendChild(label)
+      els.push(label)
+    }
+    document.body.appendChild(field)
+    els.push(field)
+    return field
+  }
+
+  // L'étiquette posée au-dessus du champ donne l'écart à ajouter au scroll-margin-top.
+  it('renvoie l’écart quand l’étiquette est au-dessus du champ', () => {
+    expect(labelOffsetAbove(labelled(140, [100]))).toBe(40)
+  })
+
+  // Un champ sans étiquette garde le calage historique.
+  it('renvoie 0 sans étiquette associée', () => {
+    expect(labelOffsetAbove(labelled(140, []))).toBe(0)
+  })
+
+  // Une étiquette sous le champ ne doit jamais le faire descendre.
+  it('renvoie 0 quand l’étiquette est sous le champ', () => {
+    expect(labelOffsetAbove(labelled(140, [190]))).toBe(0)
+  })
+
+  // Une étiquette lointaine (ailleurs dans le formulaire) est ignorée.
+  it('renvoie 0 quand l’étiquette est au-delà du plafond', () => {
+    expect(labelOffsetAbove(labelled(400, [100]))).toBe(0)
+  })
+
+  // Une étiquette non rendue (display:none, rectangle nul) est ignorée.
+  it('renvoie 0 quand l’étiquette n’a aucune mise en page', () => {
+    const field = labelled(60, [])
+    const label = document.createElement('label')
+    label.htmlFor = field.id
+    document.body.appendChild(label)
+    els.push(label)
+    expect(labelOffsetAbove(field)).toBe(0)
+  })
+
+  // Fenêtre basse (paysage) : le décalage ne doit pas pousser le champ dans la moitié basse.
+  it('renvoie 0 quand marge + écart + champ dépasseraient 45 % de la fenêtre (paysage)', () => {
+    const old = window.innerHeight
+    window.innerHeight = 360
+    try {
+      expect(labelOffsetAbove(labelled(140, [100]), 100)).toBe(0)
+      expect(labelOffsetAbove(labelled(140, [100]), 20)).toBe(40)
+    } finally {
+      window.innerHeight = old
+    }
+  })
+
+  // Plusieurs étiquettes : seule la première compte.
+  it('utilise la première étiquette quand le champ en a plusieurs', () => {
+    expect(labelOffsetAbove(labelled(140, [100, 130]))).toBe(40)
   })
 })
 
@@ -312,6 +389,64 @@ describe('mécanisme global (focusin/focusout posés une fois sur document)', ()
     await nextFrame()
     await nextFrame()
     expect(input.style.scrollMarginTop).toBe('117px') // 101 (bandeau réel) + 16 (respiration)
+  })
+
+  // Champ étiqueté : c'est l'étiquette, et non le champ, qui se cale sous le bandeau.
+  it('ajoute l’écart de l’étiquette au scroll-margin-top d’un champ étiqueté, et le retire au blur', async () => {
+    const header = document.createElement('header')
+    header.style.position = 'sticky'
+    header.style.top = '0px'
+    vi.spyOn(header, 'getBoundingClientRect').mockReturnValue({
+      height: 101, top: 0, bottom: 101, left: 0, right: 375, width: 375, x: 0, y: 0, toJSON() {},
+    })
+    document.body.appendChild(header)
+    cleanupEls.push(header)
+
+    const label = document.createElement('label')
+    label.htmlFor = 'kav-labelled'
+    vi.spyOn(label, 'getBoundingClientRect').mockReturnValue(rectAt(100))
+    document.body.appendChild(label)
+    cleanupEls.push(label)
+    const input = makeField('text')
+    input.id = 'kav-labelled'
+    vi.spyOn(input, 'getBoundingClientRect').mockReturnValue(rectAt(140, 44))
+    const bare = makeField('text')
+
+    input.focus()
+    await nextFrame()
+    await nextFrame()
+    expect(input.style.scrollMarginTop).toBe('157px') // 101 + 16 + 40 (étiquette au-dessus)
+    expect(input.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' })
+
+    bare.focus()
+    await nextFrame()
+    await nextFrame()
+    expect(input.style.scrollMarginTop).toBe('')
+    expect(bare.style.scrollMarginTop).toBe('117px') // sans étiquette : inchangé
+
+    bare.blur()
+    expect(bare.style.scrollMarginTop).toBe('')
+  })
+
+  // Dans une carte de dialogue aussi, l'étiquette ne doit pas passer sous le bord haut.
+  it('ajoute aussi l’écart de l’étiquette dans une carte de dialogue défilante', async () => {
+    const card = document.createElement('div')
+    card.style.overflowY = 'auto'
+    stubBox(card, { scrollWidth: 300, clientWidth: 300 })
+    document.body.appendChild(card)
+    cleanupEls.push(card)
+    const label = document.createElement('label')
+    vi.spyOn(label, 'getBoundingClientRect').mockReturnValue(rectAt(100))
+    const inCard = document.createElement('input')
+    inCard.scrollIntoView = vi.fn()
+    vi.spyOn(inCard, 'getBoundingClientRect').mockReturnValue(rectAt(130, 44))
+    label.appendChild(inCard) // étiquette englobante : `labels` la trouve aussi
+    card.appendChild(label)
+
+    inCard.focus()
+    await nextFrame()
+    await nextFrame()
+    expect(inCard.style.scrollMarginTop).toBe('46px') // 0 + 16 + 30
   })
 
   // Point relevé à la revue (avant ce lot, le champ hexa de ColorPickerDialog utilisait

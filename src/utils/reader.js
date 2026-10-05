@@ -2,6 +2,7 @@
 // tokenisation des lignes pour les abréviations, validation des données `reader`).
 // Aucune dépendance Vue/DOM ici : tout est testable unitairement.
 import { sectionKind } from './section-kinds'
+import { copiesOf, copyModeOf, copyView, activeCopyOf, laggingCopy, copiesSummary, sockPairSections } from './section-copies'
 
 // Notation multi-taille brute : [104,108,108,112,116,120] → "104 (108) 108 (112) 116 (120)".
 export function formatSizes(vals) {
@@ -496,6 +497,140 @@ export function nextStepAfter(sections, state, stepId) {
   return flat.slice(at + 1).find(({ step }) => isTrackedStep(step) && !trackedDone(step, state)) || null
 }
 
+// Exemplaire de travail de chaque section à exemplaires (`{ [idSection]: c }`, sections passées
+// par `withStepIds` ; une section sans exemplaires n'y figure pas) : l'actif en séquentiel, celui
+// en retard en simultané (le moins de rangs faits, 1 à égalité). Repli séquentiel, seulement quand
+// plus rien ne reste à faire sur aucun exemplaire de travail : le premier exemplaire non complet de
+// chaque section. Règle commune au lecteur (étape en cours) et à la notification.
+export function workCopies(sections, state, size = null) {
+  const todo = (sec, c) => {
+    const v = copyView(state, c)
+    return sec.steps.some((s) => isTrackedStep(s) && !stepIsDone(s, v.done, v.counters, size))
+  }
+  const works = {}
+  for (const sec of sections) {
+    const n = copiesOf(sec)
+    if (n <= 1) continue
+    if (copyModeOf(sec, state?.copyMode) === 'simultaneous') {
+      const rows = checkableStepsOf(sec)
+      works[sec.id] = laggingCopy(
+        Array.from({ length: n }, (_, i) => {
+          const v = copyView(state, i + 1)
+          return rows.filter((s) => stepIsDone(s, v.done, v.counters, size)).length
+        }),
+      )
+    } else {
+      works[sec.id] = activeCopyOf(state, sec)
+    }
+  }
+  if (sections.some((sec) => todo(sec, works[sec.id] || 1))) return works
+  for (const sec of sections) {
+    const n = copiesOf(sec)
+    if (n <= 1 || copyModeOf(sec, state?.copyMode) === 'simultaneous') continue
+    for (let c = 1; c <= n; c++) {
+      if (todo(sec, c)) {
+        works[sec.id] = c
+        break
+      }
+    }
+  }
+  return works
+}
+
+// Sections qui changent d'exemplaire ensemble (ids, ordre du patron) : pour une partie de
+// chaussette à 2 exemplaires, toutes celles du patron, même non voisines (une chaussette entière,
+// puis l'autre) ; sinon `sec` seule.
+function copyRun(sections, sec) {
+  const socks = sockPairSections(sections)
+  return socks.some((s) => s.id === sec.id) ? socks : [sec]
+}
+
+// Séquentiel : l'exemplaire `copy` vient d'être fini sur `sec` (dernier rang coché, dernier compteur
+// atteint) et sur toute sa suite (`copyRun`) → `{ copy, step, run }` : le prochain exemplaire non
+// complet (après `copy`, puis en boucle depuis le 1), sa première étape à faire dans la suite, et
+// les ids des sections à y basculer. `null` si l'exemplaire reste à faire dans la suite, si tout
+// est fait, ou hors séquentiel. Le lecteur y bascule au lieu d'enchaîner sur la section suivante.
+export function copyAfterFinish(sections, sec, state, copy, size = null) {
+  const n = copiesOf(sec)
+  if (n <= 1 || copyModeOf(sec, state?.copyMode) === 'simultaneous') return null
+  const run = copyRun(sections, sec)
+  const firstTodo = (c) => {
+    const v = copyView(state, c)
+    for (const s of run) {
+      const step = s.steps.find((x) => isTrackedStep(x) && !stepIsDone(x, v.done, v.counters, size))
+      if (step) return step
+    }
+    return null
+  }
+  if (firstTodo(copy)) return null
+  for (let k = 1; k < n; k++) {
+    const c = ((copy - 1 + k) % n) + 1
+    const step = firstTodo(c)
+    if (step) return { copy: c, step, run: run.map((s) => s.id) }
+  }
+  return null
+}
+
+// Changement de technique (spec 2026-10-05) : un rang coché ou un compteur entamé sur une partie
+// de chaussette à 2 exemplaires, pour l'un ou l'autre exemplaire, ou sa grille entamée (rang ou
+// répétition au-delà du premier, rideau avancé : un rideau replié ne couvre rien). Valeurs brutes,
+// pas `stepIsDone` : un compteur au total 0 pour la taille n'est pas du tricot fait.
+export function hasSockProgress(sections, state) {
+  return sockPairSections(sections).some(
+    (sec) =>
+      (state?.chartRows?.[sec.id] || 1) > 1 ||
+      (state?.chartReps?.[sec.id] || 1) > 1 ||
+      (!!state?.chartCurtains?.[sec.id] && curtainBand(state.chartCurtains[sec.id]).width > 0) ||
+      [1, 2].some((c) => {
+        const v = copyView(state, c)
+        return sec.steps.some((s) => isTrackedStep(s) && (!!v.done[s.id] || (v.counters[s.id] || 0) > 0))
+      }),
+  )
+}
+
+// État sans la progression des parties de chaussette, pour repartir de zéro après un changement
+// de technique : leurs étapes sortent de `done`, `counters` et `copyState`, leur `activeCopy` et
+// leur position de grille (`chartRows`, `chartReps`, `chartCurtains`) sont retirés, `last` aussi
+// s'il visait une de leurs étapes ou leur grille. Le cadrage (`chartFrames`) est de l'affichage :
+// gardé. Pur ; les autres sections gardent tout.
+export function resetSockProgress(sections, state) {
+  const socks = sockPairSections(sections)
+  const stepIds = new Set(socks.flatMap((sec) => sec.steps.map((s) => s.id)))
+  const secIds = new Set(socks.map((s) => s.id))
+  const strip = (m) => Object.fromEntries(Object.entries(m || {}).filter(([k]) => !stepIds.has(k)))
+  const next = { ...state, done: strip(state?.done), counters: strip(state?.counters) }
+  if (state?.copyState) {
+    next.copyState = Object.fromEntries(
+      Object.entries(state.copyState).map(([c, v]) => [c, { done: strip(v?.done), counters: strip(v?.counters) }]),
+    )
+  }
+  if (state?.activeCopy) {
+    next.activeCopy = Object.fromEntries(Object.entries(state.activeCopy).filter(([k]) => !secIds.has(k)))
+  }
+  for (const key of ['chartRows', 'chartReps', 'chartCurtains']) {
+    if (state?.[key]) next[key] = Object.fromEntries(Object.entries(state[key]).filter(([k]) => !secIds.has(k)))
+  }
+  if (state?.last?.kind === 'step' && stepIds.has(state.last.id)) next.last = null
+  if (state?.last?.kind === 'chart' && secIds.has(state.last.id)) next.last = null
+  return next
+}
+
+// « L'une après l'autre » : une partie de chaussette x2 sans exemplaire actif (ajoutée au patron, ou
+// passée à x2, pendant la chaussette 2) suit les autres parties, qui avancent ensemble (copyRun).
+// Rend la map `activeCopy` complétée ; inchangée si aucune partie n'a d'exemplaire actif au-delà
+// du 1, si elles ne sont pas d'accord, ou en « les deux en même temps ».
+export function alignSockActiveCopy(sections, state) {
+  const active = { ...(state?.activeCopy || {}) }
+  if (state?.copyMode === 'simultaneous') return active
+  const socks = sockPairSections(sections)
+  const copies = new Set(socks.filter((s) => active[s.id] != null).map((s) => Number(active[s.id])))
+  if (copies.size !== 1) return active
+  const [c] = copies
+  if (!(c > 1)) return active
+  for (const s of socks) if (active[s.id] == null) active[s.id] = c
+  return active
+}
+
 // Cible d'atterrissage de la reprise (intent 2026-09-30) : la dernière place travaillée selon
 // `state.last`, ou `null` — l'appelant retombe alors sur le comportement historique (premier
 // non fait), sans badge. `kind 'step'` : l'étape doit encore exister ET être suivie (jamais une
@@ -583,24 +718,28 @@ export function scrollTargetId(query, currentStepId) {
 }
 
 // Progression du lecteur à partir d'un `readerState` de projet ({ size, done, counters }).
-// Renvoie { sections:[{id,icon,title,done,total,complete}], done, total, pct } — pour l'aperçu
+// Renvoie { sections:[{id,icon,title,done,total,complete,copies}], done, total, pct } — pour l'aperçu
 // de l'onglet Sections d'un projet, sans monter le lecteur.
 export function readerProgress(reader, state = {}) {
   const size = typeof state?.size === 'number' ? state.size : null
-  const done = state?.done || {}
-  const counters = state?.counters || {}
-  const stepDone = (s) => stepIsDone(s, done, counters, size)
   const sections = (reader?.sections || []).map((sec) => {
     const countable = checkableStepsOf(sec)
-    const doneN = countable.filter(stepDone).length
+    const n = copiesOf(sec)
+    let doneN = 0
+    for (let c = 1; c <= n; c++) {
+      const v = copyView(state, c)
+      doneN += countable.filter((s) => stepIsDone(s, v.done, v.counters, size)).length
+    }
+    const totalN = countable.length * n
     return {
       id: sec.id,
       kind: sectionKind(sec),
       title: sec.title,
       done: doneN,
-      total: countable.length,
-      pct: countable.length ? Math.round((doneN / countable.length) * 100) : 0,
-      complete: countable.length > 0 && doneN === countable.length,
+      total: totalN,
+      pct: totalN ? Math.round((doneN / totalN) * 100) : 0,
+      complete: totalN > 0 && doneN === totalN,
+      copies: copiesSummary(sec, state?.copyMode),
     }
   })
   const total = sections.reduce((a, s) => a + s.total, 0)

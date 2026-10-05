@@ -7,6 +7,16 @@
 // même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_EN = [
   {
+    version: '1.4.2',
+    notes: [
+      'Repeated sections: a section can be worked several times (socks, sleeves, ears or legs of an amigurumi), and each copy keeps its own progress. By default, sleeves, ears, limbs and legs are worked in pairs.',
+      'Pair of socks: knit them one after the other, or both at the same time, row by row.',
+      'PDFs that hold several patterns can now be imported.',
+      'Pattern designer: shown on the pattern and on the shared badge.',
+      'New section types for socks (toe, foot, heel, leg, gusset, cuff) and a "Generic repeatable" type.',
+    ],
+  },
+  {
     version: '1.4.1',
     notes: [
       'Tracking notification: a button tap is kept even if Android has closed or frozen the app.',

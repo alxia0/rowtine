@@ -1518,6 +1518,40 @@ describe('BadgeComposer', () => {
     expect(wrapper.find('[data-test="badge-yarns"]').exists()).toBe(false)
   })
 
+  // La pastille Patron pilote `patternLine` des DEUX appels à renderBadge, et n'existe que pour un vrai patron.
+  describe('pastille Patron', () => {
+    async function monterComposer(pattern) {
+      stubCanvas()
+      const { wrapper, projectsStore } = mountComposer({ id: 45, name: 'X', photos: [] }, { pattern })
+      projectsStore.update = vi.fn().mockResolvedValue(undefined)
+      await flushPromises()
+      await wrapper.find('[data-test="badge-tab-infos"]').trigger('click')
+      return wrapper
+    }
+
+    it('absente sans patron ou avec le patron libre', async () => {
+      const sans = await monterComposer(null)
+      expect(sans.find('[data-test="badge-pattern"]').exists()).toBe(false)
+      const libre = await monterComposer({ name: 'Libre', builtin: true })
+      expect(libre.find('[data-test="badge-pattern"]').exists()).toBe(false)
+    })
+
+    it('décochée par défaut, un clic transmet la ligne Patron à la prévisu puis au partage', async () => {
+      const w = await monterComposer({ name: 'Bonnet', author: 'Sys' })
+      const pill = w.find('[data-test="badge-pattern"]')
+      expect(pill.text()).toBe(i18n.global.t('project.stats.badge.pattern'))
+      expect(pill.attributes('aria-pressed')).toBe('false')
+      expect(renderBadgeSpy.mock.calls.at(-1)[1].patternLine).toBe('')
+      await pill.trigger('click')
+      await flushPromises()
+      await waitForPreview()
+      const attendu = i18n.global.t('project.patternWithDesigner', { name: 'Bonnet', author: 'Sys' })
+      expect(renderBadgeSpy.mock.calls.at(-1)[1].patternLine).toBe(attendu)
+      await triggerShare(w)
+      expect(renderBadgeSpy.mock.calls.at(-1)[1].patternLine).toBe(attendu)
+    })
+  })
+
   describe('pastille Composition', () => {
     // Protège : pastille dédiée au bandeau des matières, proposée et cochée seulement si une matière est connue.
     async function openInfos(yarnUsage) {

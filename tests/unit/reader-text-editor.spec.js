@@ -136,6 +136,15 @@ describe('ReaderTextEditor', () => {
     expect(opts.labels.sections.some((g) => g.family === 'vetement')).toBe(true)
   })
 
+  it("passe les libellés d'exemplaires (opts.labels.copies) traduits", () => {
+    mountEditor()
+    const [, opts] = createCmEditor.mock.calls[0]
+    expect(opts.labels.copies.label).toBe(fr.reader.copies.label)
+    expect(opts.labels.copies.one).toBe(fr.reader.copies.one)
+    expect(opts.labels.copies.n).toBe(fr.reader.copies.n)
+    expect(Object.keys(opts.labels.copies).sort()).toEqual(['label', 'n', 'one'])
+  })
+
   // « Conseils » (tips) est la 8e balise du menu Aide-mémoire —
   // TOOLBAR_LABEL_KEYS doit la lister pour que useI18n() la lise et la passe
   // à createCmEditor ; sinon opts.labels.tips reste absent et createCmEditor

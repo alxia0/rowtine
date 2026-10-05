@@ -28,7 +28,8 @@ export const SOUS_TITRE_PREFIXE_RE = /^###\s+/
 // Sémantique STRICTEMENT identique (l'alternative vide en tête reproduit le « plus court
 // d'abord » du quantifieur paresseux) — vérifié par 300 000 tirages aléatoires comparant
 // index et groupes des deux motifs : zéro divergence.
-export const TITLE_KIND_RE = /^(|.*?\S)\s*\{([a-z0-9-]+)\}$/
+// Groupes : 1 = titre nu, 2 = kind, 3 = exemplaires (`x2`), 4 = `together`, ancien mot lu et ignoré (technique du projet depuis le 05/10).
+export const TITLE_KIND_RE = /^(|.*?\S)\s*\{([a-z0-9-]+)(?:\s+x(\d{1,2}))?(?:\s+(together))?\}$/
 
 // Même désambiguïsation que le parseur (src/utils/pattern-md/parse.js, dialecte
 // EN) : un titre `## Titre {tag}` n'est un bloc référence que si `tag` EST une

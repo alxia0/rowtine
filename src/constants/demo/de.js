@@ -18,6 +18,8 @@ const CHART_TORSADE = {
 /* ───────────────────────────── Zopfmütze (Patron des laufenden Projekts) ──────────────── */
 const BONNET = {
   demoId: 'bonnet',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Zopfmütze',
   type: 'knitting',
   category: 'accessories',
@@ -98,6 +100,8 @@ const BONNET = {
 /* ───────────────────────────── Wolkenschal (Einheitsgröße) ───────────────────────────── */
 const ECHARPE = {
   demoId: 'echarpe',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Wolkenschal',
   type: 'knitting',
   category: 'accessories',
@@ -150,6 +154,8 @@ const ECHARPE = {
 /* ───────────────────────────── Granny-Tasche (Häkeln) ────────────────────────────────── */
 const SAC = {
   demoId: 'sac',
+  author: 'Alexia O.',
+  authorUrl: 'https://rowtine.app',
   name: 'Granny-Tasche',
   type: 'crochet',
   category: 'accessories',

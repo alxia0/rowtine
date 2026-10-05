@@ -770,6 +770,66 @@ describe('pastille Technique : largeur réservée + case à cocher (revue finale
   })
 })
 
+describe('ligne Patron sous le titre (patternLine)', () => {
+  const tTechnique = (k, arg) => (k === 'technique.crochet' ? 'Crochet' : t(k, arg))
+  function rendre(templateKey, over) {
+    const { canvas, calls } = stubCanvas()
+    let geometry = null
+    renderBadge(canvas, {
+      templateKey, color: 'hsl(200 70% 45%)',
+      statKeys: ['totalTime'], stats, photoImg: null,
+      project: { name: 'Bonnet', technique: 'crochet' },
+      t: tTechnique, generatedAt: new Date(2026, 0, 20),
+      onGeometry: (g) => { geometry = g },
+      ...over,
+    })
+    const textCalls = calls.filter((c) => c[0] === 'fillText')
+    const patternCalls = textCalls.filter((c) => /^A+$/.test(c[1]))
+    return {
+      geometry,
+      fillTexts: textCalls.map((c) => c[1]),
+      textCalls,
+      patternChars: patternCalls.reduce((n, c) => n + c[1].length, 0),
+      maxTextRight: Math.max(0, ...patternCalls.map((c) => c[2] + c[1].length * FAKE_CHAR_WIDTH)),
+    }
+  }
+
+  describe.each(Object.keys(BADGE_TEMPLATES))('%s', (templateKey) => {
+    // Protège : la ligne Patron réserve un créneau sous le titre (stats décalées, cartouche plus haut).
+    it('patternLine : créneau réservé sous le titre et ligne dessinée', () => {
+      const sans = rendre(templateKey, { patternLine: '' })
+      const avec = rendre(templateKey, { patternLine: 'Bonnet, par Sys Fredens' })
+      if (templateKey === 'horizontal') expect(avec.geometry.canvas.h).toBe(sans.geometry.canvas.h)
+      else expect(avec.geometry.canvas.h).toBe(sans.geometry.canvas.h + 64)
+      expect(avec.fillTexts).toContain('Bonnet, par Sys Fredens')
+      expect(sans.fillTexts).not.toContain('Bonnet, par Sys Fredens')
+      const y = (r, text) => r.textCalls.find((c) => c[1] === text)[3]
+      expect(y(avec, 'Bonnet, par Sys Fredens')).toBeGreaterThan(y(avec, 'Bonnet'))
+      expect(y(avec, 'Bonnet, par Sys Fredens')).toBeLessThan(y(avec, 'TEMPS TOTAL'))
+      expect(y(avec, 'TEMPS TOTAL')).toBe(y(sans, 'TEMPS TOTAL') + 64)
+    })
+
+    // La pastille Technique reste sur la rangée du titre, jamais sur la ligne Patron.
+    it('patternLine : la pastille Technique garde son ancrage sur le titre', () => {
+      const sans = rendre(templateKey, { patternLine: '' })
+      const avec = rendre(templateKey, { patternLine: 'Bonnet, par Sys Fredens' })
+      const pastille = (r) => r.textCalls.find((c) => c[1] === 'CROCHET')
+      expect(pastille(avec).slice(2)).toEqual(pastille(sans).slice(2))
+    })
+
+    it('patternLine omis : rendu identique à avant (rétrocompatibilité)', () => {
+      expect(rendre(templateKey, {}).geometry).toEqual(rendre(templateKey, { patternLine: '' }).geometry)
+    })
+
+    // Un nom très long sans espace est coupé sur plusieurs lignes, en entier et sans déborder.
+    it('patternLine très long sans espace : coupé, pas de débordement', () => {
+      const r = rendre(templateKey, { patternLine: 'A'.repeat(120) })
+      expect(r.patternChars).toBe(120)
+      expect(r.maxTextRight).toBeLessThanOrEqual(r.geometry.canvas.w)
+    })
+  })
+})
+
 // Revue FINALE de branche (19/09) : `titleBlockHeight` s'arrête EXACTEMENT sur la ligne de base
 // de la dernière ligne du titre — elle ne réserve donc rien ni pour les descendantes du titre
 // (police grasse 56px) ni pour la pastille Technique, qui descend sous cette ligne de base de

@@ -3,7 +3,7 @@
 //  - Projet « Suivre le patron » (onglet Sections) = SUIVI INTERACTIF (taille, progression, diagramme, chrono).
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
-import { completeOnboarding } from './helpers'
+import { completeOnboarding, attendreFinFondu } from './helpers'
 
 async function openBonnetPattern(page) {
   await completeOnboarding(page, { firstName: 'Alex' })
@@ -154,6 +154,8 @@ test('rectifier le temps d’une session', async ({ page }) => {
 
 test('lecteur (suivi projet) — sans violation a11y bloquante', async ({ page }) => {
   await openProjectReader(page)
+  // Contraste mesuré après le fondu d'entrée de l'écran, jamais pendant (attendreFinFondu).
+  await attendreFinFondu(page)
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()
@@ -326,4 +328,93 @@ test('reprise : qui suit l’ordre retrouve son rang coché à l’écran et l�
   const cur = page.locator('.rstep--cur')
   await expect(cur).toBeVisible()
   await expect(cur).toBeInViewport()
+})
+
+// Paire de chaussettes en simultané : deux coches par rang, l'état persiste, l'écart s'affiche
+// (et rien ne déborde à 360 px).
+test('simultané : deux coches par rang, écart « 1 rang de retard », persistance après rechargement', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 })
+  await completeOnboarding(page, { firstName: 'Alex' })
+  const patternId = await page.evaluate(
+    (pat) =>
+      new Promise((res, rej) => {
+        const r = indexedDB.open('rowtine')
+        r.onerror = () => rej(r.error)
+        r.onsuccess = () => {
+          const a = r.result.transaction('patterns', 'readwrite').objectStore('patterns').add(pat)
+          a.onsuccess = () => res(a.result)
+          a.onerror = () => rej(a.error)
+        }
+      }),
+    {
+      name: 'Chaussettes Simultanées',
+      type: 'knitting',
+      category: '',
+      sizes: [],
+      gallery: [],
+      photos: [],
+      pdf: '',
+      reader: {
+        sizeLabels: [],
+        sections: [
+          {
+            id: 'pied',
+            kind: 'pied',
+            title: 'Pied',
+            copies: 2,
+            steps: [{ t: 'Rang un' }, { t: 'Rang deux' }, { t: 'Rang trois' }],
+          },
+        ],
+      },
+    },
+  )
+  await page.goto(`/pattern/${patternId}`)
+  await page.getByRole('button', { name: /Créer un projet/ }).click()
+  await page.locator('#name').fill('Test Chaussettes')
+  await page.locator('#techsel').selectOption('simultaneous')
+  await page.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page).toHaveURL(/\/project\/\d+/)
+  await page.getByRole('button', { name: /Suivre le patron/ }).click()
+  await expect(page).toHaveURL(/\/project\/\d+\/read/)
+
+  const rows = page.locator('.rstep')
+  await expect(rows.nth(0).locator('.rcheck')).toHaveCount(2)
+  // Le repère 1 / 2 est centré dans sa case (verticalement comme horizontalement).
+  for (const check of await rows.nth(0).locator('.rcheck').all()) {
+    const b = await check.boundingBox()
+    const n = await check.locator('.rcheck__n').boundingBox()
+    expect(Math.abs(n.y + n.height / 2 - (b.y + b.height / 2))).toBeLessThanOrEqual(2)
+    expect(Math.abs(n.x + n.width / 2 - (b.x + b.width / 2))).toBeLessThanOrEqual(2)
+  }
+  await rows.nth(0).getByRole('checkbox', { name: /1$/ }).click()
+  await rows.nth(0).getByRole('checkbox', { name: /2$/ }).click()
+  await rows.nth(1).getByRole('checkbox', { name: /1$/ }).click()
+  await expect(rows.nth(0)).toHaveClass(/rstep--done/)
+  await expect(rows.nth(1)).not.toHaveClass(/rstep--done/)
+  await expect(page.locator('.rsec__gap')).toHaveText('Chaussette 2 : 1 rang de retard')
+  // Contrôle visuel 360 px : aucun débordement horizontal, coches dans l'écran.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  const box = await rows.nth(0).locator('.rchecks').boundingBox()
+  expect(box.x + box.width).toBeLessThanOrEqual(360)
+
+  // Attente de l'écriture IndexedDB (état persisté) avant le rechargement.
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          new Promise((res) => {
+            const r = indexedDB.open('rowtine')
+            r.onsuccess = () => {
+              const all = r.result.transaction('projects').objectStore('projects').getAll()
+              all.onsuccess = () => res(Object.keys(all.result.at(-1)?.readerState?.copyState?.[2]?.done || {}).length)
+            }
+          }),
+      ),
+    )
+    .toBe(1)
+  await page.reload()
+  await expect(rows.nth(0)).toHaveClass(/rstep--done/)
+  await expect(rows.nth(1).getByRole('checkbox', { name: /1$/ })).toHaveAttribute('aria-checked', 'true')
+  await expect(rows.nth(1).getByRole('checkbox', { name: /2$/ })).toHaveAttribute('aria-checked', 'false')
+  await expect(page.locator('.rsec__gap')).toHaveText('Chaussette 2 : 1 rang de retard')
 })

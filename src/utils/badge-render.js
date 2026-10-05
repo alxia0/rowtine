@@ -105,6 +105,9 @@ const TEXT_PAD = 60
 // hauteur de ligne — nécessaires ICI aussi pour calculer la hauteur du bloc titre (multi-lignes).
 const TITLE_BASELINE = 56
 const LINE_HEIGHT = 64
+// Ligne Patron sous le titre (designer du patron, 03/10) : police et remontée dans son créneau.
+const PATTERN_LINE_FONT = '32px sans-serif'
+const PATTERN_LINE_RAISE = 20
 // Mesure sur Pixel 7 (Tâche 13, chantier « badge corrections typo/zoom », 19/09) : à 40,
 // l'écart bas-dernière-stat → haut-ligne-date mesurait 129px sur un badge Vertical réel
 // (calendrier + 5 stats), largement au-dessus de l'écart entre deux paires de stats voisines
@@ -1165,7 +1168,10 @@ function drawStackedBlocks(ctx, rows, { left, top, rowH, textColor, maxWidth }) 
 // (`computeBadgeGeometry`, texte mesuré), même sans contexte 2D. `scale` (défaut 1, prévisu) :
 // multiplie le canevas PHYSIQUE (export partagé, cf. `BADGE_EXPORT_SCALE`), plafonné à
 // `BADGE_MAX_DIM` ; mise en page et `onGeometry` restent en unités logiques.
-export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem, onGeometry, scale = 1 }) {
+// `patternLine` (designer du patron, 03/10) : ligne « Patron » sous le titre, chaîne DÉJÀ
+// résolue par l'appelant (même principe que `customText`, cf. `patternBadgeLine`) ; vide = pas
+// de ligne, rendu identique à avant.
+export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKeys, stats, photoImg, photoImg2, project, t, generatedAt, locale = 'fr', customText, patternLine = '', includeCalendar = false, includeTechnique = true, yarnUsage, vegan = false, unitSystem, onGeometry, scale = 1 }) {
   const ctx = canvas.getContext('2d')
 
   // Technique (Task 2, chantier « badge cartouche condensé » 18/09c ; universel aux 4 gabarits
@@ -1207,6 +1213,10 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // pas de cas pour elle). Chaîne vide si la clé est décochée ou si aucune matière n'est connue.
   const compositionText = (statKeys || []).includes('composition') ? compositionSummary(yarnUsage, t, locale) : ''
   let titleLines = [project?.name || '']
+  // Ligne Patron : créneaux de `LINE_HEIGHT` sous le titre, comptés avec lui dans la hauteur du
+  // bloc titre (géométrie et position des stats), pour que les 4 gabarits, le calendrier et le
+  // bandeau des matières se décalent ensemble. Wrappée plus bas avec un contexte 2D.
+  let patternLines = patternLine ? [patternLine] : []
   let freeTextLines = rawFreeTextLines
   // Lignes du bandeau : wrappées plus bas, à la largeur du titre ; sans contexte 2D, une ligne
   // non wrappée (même repli que `freeTextLines` ci-dessus, et que la prévisu du composeur).
@@ -1274,6 +1284,11 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
     // stade de la mesure, cf. `FREE_TEXT_FONT` plus bas pour le dessin réel).
     ctx.font = '40px sans-serif'
     for (const line of rawFreeTextLines) requiredTextWidth = Math.max(requiredTextWidth, ctx.measureText(line).width)
+    // Ligne Patron : même élargissement que le texte libre, à sa police de dessin.
+    if (patternLine) {
+      ctx.font = PATTERN_LINE_FONT
+      requiredTextWidth = Math.max(requiredTextWidth, ctx.measureText(patternLine).width)
+    }
     requiredTextWidth = Math.min(requiredTextWidth + TEXT_PAD * 2, REQUIRED_TEXT_WIDTH_CAP)
 
     // Le titre est dessiné en pleine largeur du cartouche, MÊME quand la carte calendaire
@@ -1285,6 +1300,8 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
     statsMaxWidth = textWidthForCalendar(colW, includeCalendar) - TEXT_PAD * 2
     ctx.font = 'bold 56px sans-serif'
     titleLines = wrapText(ctx, project?.name || '', titleMaxWidth)
+    ctx.font = PATTERN_LINE_FONT
+    patternLines = patternLine ? wrapText(ctx, patternLine, titleMaxWidth) : []
     // Texte libre (Task 5) : wrappé à `titleMaxWidth` — largeur PLEINE du cartouche, comme le
     // titre juste au-dessus — JAMAIS `statsMaxWidth` : c'est tout l'objet de cette tâche (cf.
     // son commentaire de tête). Un texte plus large que la colonne stats (réduite par le
@@ -1317,7 +1334,7 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // sous-lignes, cf. `geometryStatLineCount` juste au-dessus — Task 13 : les deux phrases de
   // `startedOn` ne comptent que pour UN groupe, cf. `countGroups`).
   // `compositionLines.length` (10e argument) : lignes du bandeau des matières, 0 sans bandeau.
-  const geometry = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0, compositionLines.length)
+  const geometry = computeBadgeGeometry(templateKey, photoRatio, geometryStatLineCount, titleLines.length + patternLines.length, includeCalendar, requiredTextWidth, freeTextLines.length, stackedRows ? countGroups(stackedRows) : countGroups(rawStatPairs), stats?.grid?.columns?.length || 0, compositionLines.length)
   const { canvas: canvasSize, photoSlot, photoSlots, statsArea, calendarArea, textBottom, freeTextTop, compositionBand, statsTopOffset } = geometry
   const { w, h } = canvasSize
   // Le canevas est dimensionné ICI, AVANT le retour anticipé qui suit — comme avant ce
@@ -1398,6 +1415,18 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
     ctx.fillText(line, textX, textTop + TITLE_BASELINE + i * LINE_HEIGHT)
   })
 
+  // Ligne Patron, dans les créneaux réservés sous le titre ; remontée de PATTERN_LINE_RAISE
+  // (corps 32 px dans un créneau de 64) pour se lire comme le sous-titre du nom.
+  if (patternLines.length) {
+    ctx.font = PATTERN_LINE_FONT
+    ctx.globalAlpha = 0.75
+    patternLines.forEach((line, i) => {
+      ctx.fillText(line, textX, textTop + TITLE_BASELINE + (titleLines.length + i) * LINE_HEIGHT - PATTERN_LINE_RAISE)
+    })
+    ctx.globalAlpha = 1
+    ctx.font = 'bold 56px sans-serif'
+  }
+
   // Mesure partagée de la dernière ligne du titre — icône vegan (ci-dessous) ET pastille
   // Technique (Task 2, juste après) s'y accolent toutes deux, `ctx.font` est encore posé sur
   // « bold 56px » (police du titre, réglée juste au-dessus) au moment de cette mesure.
@@ -1446,7 +1475,7 @@ export function renderBadge(canvas, { templateKey, color, photoRatio = 1, statKe
   // les stats (mode côte à côte), lu dans la géométrie, jamais redéduit du mode ici.
   drawStackedBlocks(ctx, stackedRows || [], {
     left: textX,
-    top: textTop + condensedTitleRowHeight(titleLines.length) + statsTopOffset,
+    top: textTop + condensedTitleRowHeight(titleLines.length + patternLines.length) + statsTopOffset,
     rowH: STACK_ROW_H,
     textColor,
     maxWidth: statsMaxWidth,

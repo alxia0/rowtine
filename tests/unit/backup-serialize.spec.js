@@ -9,6 +9,7 @@ import {
   serializeSettings,
 } from '@/backup/serialize'
 import { deserializePattern } from '@/backup/deserialize'
+import { mdToPattern } from '@/utils/pattern-md'
 
 // Deux data URLs distinctes (contenu base64 différent → noms de fichiers différents).
 const PHOTO_A = 'data:image/jpeg;base64,AAAA'
@@ -155,6 +156,32 @@ describe('serializeProject', () => {
     expect(files.find((f) => f.path === 'Projets/mon-pull [5]/patron.md')).toBeTruthy()
     const pj = JSON.parse(files.find((f) => f.path.endsWith('/patron.json')).data)
     expect(typeof pj.patronMd.hash).toBe('string')
+  })
+
+  // Le designer traverse la sauvegarde : patron.json (biblio et instance de projet) et patron.md le portent.
+  it('serializePattern conserve author dans patron.json', () => {
+    const { files } = serializePattern({ id: 1, name: 'Bonnet', author: 'Sys Fredens', photos: [] })
+    const json = JSON.parse(files.find((f) => f.path.endsWith('/patron.json')).data)
+    expect(json.author).toBe('Sys Fredens')
+  })
+
+  it('serializeProject conserve author sur le patron instance (patron.json)', () => {
+    const { files } = serializeProject({ id: 5, name: 'Mon pull', photos: [] }, {
+      instancePattern: { id: 9, name: 'Torsade', author: 'Sys Fredens', photos: [] },
+    })
+    const json = JSON.parse(files.find((f) => f.path.endsWith('/patron.json')).data)
+    expect(json.author).toBe('Sys Fredens')
+  })
+
+  it('serializeProject : le patron.md de l\'instance porte aussi author', () => {
+    const { files } = serializeProject({ id: 5, name: 'Mon pull', photos: [] }, {
+      instancePattern: {
+        id: 9, name: 'Torsade', author: 'Sys Fredens', photos: [],
+        reader: { sizeLabels: [], sections: [{ title: 'Corps', steps: [{ t: 'monter' }] }] },
+      },
+    })
+    const md = files.find((f) => f.path.endsWith('/patron.md')).data
+    expect(mdToPattern(md).pattern.author).toBe('Sys Fredens')
   })
 
   it('serializeProject SANS instancePattern : pas de patron.md', () => {

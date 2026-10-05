@@ -226,4 +226,25 @@ describe('patternToMd → mdToPattern : titres et scalaires piégeux', () => {
     expect(p.reader.sections[0].title).toBe('Co rps')
     expect(p.reader.sections[0].steps.map((s) => s.t)).toEqual(['Monter ## Fil', 'Suite.'])
   })
+
+  // Protège : le tag de kind porte les exemplaires, jamais le mode (technique du projet) ; 1 exemplaire n'écrit rien.
+  it('écrit les exemplaires dans le tag de kind, sans le mode', () => {
+    const { md } = patternToMd(withSections([{ id: 'p', kind: 'pointe', copies: 2, copyMode: 'simultaneous', title: 'Pointe', steps: [{ t: 'a' }] }]))
+    expect(md).toContain('## Pointe {toe x2}\n')
+  })
+  it('n\u2019écrit aucun suffixe pour 1 exemplaire, absent, ou un kind non répétable', () => {
+    for (const extra of [{ copies: 1 }, {}]) {
+      const { md } = patternToMd(withSections([{ id: 'p', kind: 'pointe', title: 'Pointe', steps: [{ t: 'a' }], ...extra }]))
+      expect(md).toContain('## Pointe {toe}\n')
+    }
+    const { md } = patternToMd(withSections([{ id: 'c', kind: 'corps', copies: 3, copyMode: 'simultaneous', title: 'Corps', steps: [{ t: 'a' }] }]))
+    expect(md).toContain('## Corps {body}\n')
+  })
+  it('aller-retour {toe x2} ; un ancien {toe x2 together} se réécrit sans le mot', () => {
+    for (const [tag, out] of [['toe x2', 'toe x2'], ['toe x2 together', 'toe x2'], ['sleeve x5', 'sleeve x5']]) {
+      const md = `---\nrowtine: 1\n---\n## T {${tag}}\n\n- 1 rang\n`
+      const { pattern } = mdToPattern(md)
+      expect(patternToMd(pattern).md).toContain(`## T {${out}}\n`)
+    }
+  })
 })

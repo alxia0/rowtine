@@ -17,6 +17,7 @@ const WORK_KINDS_FR = [
   'tete', 'corpsrond', 'membre', 'oreille', 'museau', 'queue',
   'motif', 'dentelle', 'echantillon', 'diagramme', 'boutonniere',
   'finitions', 'autre',
+  'cotes', 'pointe', 'pied', 'talon', 'jambe', 'gousset', 'repetable',
   // Un arbitrage (03/09) : rubriques de service/conseils — section consultable
   // du flux, tag `info` (distinct du bloc référence `intro` de REF_TO_EN).
   'infos',
@@ -36,6 +37,16 @@ describe('KIND_TO_EN / KIND_TO_FR', () => {
     expect(KIND_TO_EN.museau).toBe('muzzle')
     expect(KIND_TO_EN.queue).toBe('tail')
     expect(KIND_TO_EN.motif).toBe('motif')
+    expect(KIND_TO_EN.pointe).toBe('toe')
+    expect(KIND_TO_EN.pied).toBe('foot')
+    expect(KIND_TO_EN.talon).toBe('heel')
+    expect(KIND_TO_EN.jambe).toBe('leg')
+    expect(KIND_TO_EN.gousset).toBe('gusset')
+    expect(KIND_TO_FR.gusset).toBe('gousset')
+    expect(KIND_TO_EN.cotes).toBe('cuff')
+    expect(KIND_TO_FR.cuff).toBe('cotes')
+    expect(KIND_TO_EN.repetable).toBe('repeated')
+    expect(KIND_TO_FR.repeated).toBe('repetable')
     expect(KIND_TO_EN.dentelle).toBe('lace')
     // kind de travail échantillon = tag distinct `swatch` (le bloc référence, lui,
     // reste `gauge` via REF_TO_EN) — évite la collision/perte au round-trip.

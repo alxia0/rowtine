@@ -70,6 +70,8 @@ test('plein écran diagramme — sans violation a11y bloquante', async ({ page }
   await openDemoReaderWithChart(page)
   await page.locator('.chart__zoom').first().click()
   await expect(page.locator('.cfs')).toBeVisible()
+  // Le plein écran a son propre fondu (`cfs-fade`) : contraste mesuré une fois celui-ci fini.
+  await page.waitForFunction(() => !document.querySelector('.cfs-fade-enter-active'))
   expect(await audit(page)).toEqual([])
 })
 

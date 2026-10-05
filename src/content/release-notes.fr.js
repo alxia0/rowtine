@@ -14,6 +14,16 @@
 // privacy-policy.fr.js.
 export const RELEASE_NOTES_FR = [
   {
+    version: '1.4.2',
+    notes: [
+      "Sections répétables : une section peut se faire plusieurs fois (chaussettes, manches, oreilles ou pattes d'un amigurumi), et chaque exemplaire garde sa progression. Par défaut, les manches, oreilles, membres et jambes se font par 2.",
+      "Paire de chaussettes : confection soit l'une après l'autre, soit les deux en même temps rang par rang.",
+      'Import possible des PDF multi-patrons.',
+      'Designer du patron : affiché sur le patron et dans le badge partagé.',
+      'Nouveaux types de section pour les chaussettes (pointe, pied, talon, jambe, gousset, bord-côtes) et un type « Générique répétable ».',
+    ],
+  },
+  {
     version: '1.4.1',
     notes: [
       "Notification du suivi : l'appui sur un bouton est retenu même si Android a fermé ou figé l'app.",

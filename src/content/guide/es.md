@@ -133,6 +133,7 @@ nunca puede tener un precio propio.
   tejido, y entre paréntesis el precio del patrón, que solo pagas una vez aunque tejas el
   mismo patrón tres veces. Si una lana no tiene precio anotado, la app te lo dice en lugar
   de hacer como si fuera gratis.
+  El patrón vinculado aparece ahí con su diseñador o diseñadora («por …») cuando está indicado.
 - **Fotos**: tus fotos del proyecto, más las fotos originales del
   patrón debajo. Eliges cuál sirve de **foto de portada** (por defecto,
   la primera foto del patrón). Toca una foto para abrirla a pantalla
@@ -221,7 +222,7 @@ El cajón de ajustes tiene tres pestañas:
   los **materiales** de la labor («Algodón · Lana»), sin porcentajes. Marcada de
   entrada, añade a la insignia una banda a todo lo ancho, entre dos filetes, encima
   del mapa de calendario (debajo de las cifras si no conservas el mapa). La pastilla
-  **Mapa de calendario** añade la cuadrícula de los días trabajados. Ahí eliges
+  **Mapa de calendario** añade la cuadrícula de los días trabajados. La pastilla **Patrón** añade bajo el título de la insignia una línea «Nombre del patrón, por Diseñador» (solo el nombre si no hay diseñador indicado). Ahí eliges
   también el **Idioma** del texto de la insignia, independiente del de la app
   (práctico para enviársela a alguien que no habla el tuyo: los materiales se
   traducen con él), y una línea de **Texto libre (opcional)**, de 80 caracteres como
@@ -259,6 +260,19 @@ que cualquier patrón importado y verificado), te ofrece:
   barra de progreso global y por sección, y contadores de repetición
   integrados («− 3/12 +») que desaparecen solos si no corresponden a tu
   talla elegida.
+- **Secciones con varios ejemplares**: un par de calcetines, dos mangas o las orejas o las patas de un
+  amigurumi no hace falta escribirlos dos veces. En el editor del patrón, ajusta el número de ejemplares
+  de una sección; cada ejemplar conserva su propio progreso, y la sección muestra el total de
+  todos. Fuera de los calcetines, una sección duplicada se teje un ejemplar tras otro, con un botón para pasar al
+  siguiente. Para un par de calcetines, el método de trabajo se elige en el proyecto, con «Método de trabajo»
+  en la parte superior del lector, sobre las filas, o en la ficha del proyecto: «Uno tras otro» (todo
+  el calcetín 1, luego el calcetín 2 desde su primera parte: marcar la última fila del calcetín 1, con todas sus partes, lleva al calcetín 2, a su primera parte, con «Deshacer») o «Los dos a la vez» (cada fila tiene
+  entonces una marca por calcetín, y se muestra la diferencia entre los dos). Así, un mismo patrón
+  puede tejerse de otra forma en otro proyecto. Cambiar de método de trabajo una vez empezado pide una
+  confirmación y vuelve a poner los calcetines a cero, filas y diagramas incluidos; el resto del patrón no cambia. La notificación de la fila en curso
+  sigue al ejemplar activo (o al que va con retraso) y lo nombra. ¿Una sección que repetir que no es
+  una manga, ni una parte del calcetín, ni una oreja? Dale el tipo «Genérico repetible» y ajusta
+  después su número de ejemplares.
 - **El diagrama interactivo**: el diagrama del patrón (extraído tal cual
   del PDF original) con una **banda que sigue tu fila en curso**, las
   filas ya hechas en gris, y un contador «Fila X de 52». Accesible
@@ -527,6 +541,13 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   la vista, y se corrige en el editor.
   (La lectura también reconoce las rejillas redondas y cuadradas de los
   patrones granny, nunca perfectamente: el repaso sigue siendo obligado.)
+  **Un PDF que contiene varios patrones** (una recopilación, o un patrón
+  descrito en varias versiones completas) se importa un patrón cada vez. En la
+  pantalla de importación, toca «¿El PDF contiene varios patrones? Elegir las
+  páginas», elige tu archivo y marca en las miniaturas las páginas del patrón
+  que quieres, sin olvidar sus páginas comunes (material, abreviaturas). Cuando
+  la app reconoce por sí misma una recopilación, te propone directamente elegir
+  las páginas.
 - **Importar un archivo {app}**: en «+ Añadir un patrón», esta opción
   acepta un archivo **.rowtine**, es decir, un patrón ya preparado
   en el formato de {app} (su texto y sus imágenes). Entra tal cual en tu
@@ -544,6 +565,7 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   una foto, aparece el botón **Previsualizar el patrón**: puedes entonces
   seguir una imagen como diagrama, exactamente igual que en un patrón
   importado.
+- **Indicar el diseñador**: cuando la lectura no ha encontrado el diseñador de un patrón, el enlace **Diseñador/a: añadir**, en la ficha del patrón, abre directamente el formulario de edición del patrón en el campo **Diseñador/a**. Después aparece bajo el patrón en la pestaña **Detalles** de un proyecto y en la insignia.
 - **Encontrar un patrón**: las etiquetas de categoría en la parte
   superior de la biblioteca te muestran **cuántos patrones** hay en
   cada una, para saber de un vistazo dónde buscar.

@@ -135,6 +135,7 @@ einen eigenen Preis haben.
   reserviert oder schon verstrickt hast, und in Klammern den Preis der Anleitung, den
   du nur einmal bezahlst, auch wenn du sie dreimal strickst. Fehlt bei einem Garn der
   Preis, sagt dir die App das, statt so zu tun, als wäre es kostenlos.
+  Die verknüpfte Anleitung erscheint dort mit ihrer Designerin oder ihrem Designer („von …“), sofern angegeben.
 - **Fotos**: deine eigenen Projektfotos und dazu die Originalfotos der
   Anleitung. Du legst fest, welches als **Cover** dient (Standard: das
   erste Foto der Anleitung). Tippst du auf ein Foto, öffnest du es im
@@ -227,7 +228,7 @@ Der Einstellungsbereich hat drei Reiter:
   Von Anfang an ausgewählt, fügt sie dem Abzeichen ein Band über die ganze Breite
   hinzu, zwischen zwei feinen Linien, über der Kalenderkarte (unter den Zahlen,
   wenn du die Karte weglässt). Die Angabe **Kalenderkarte** fügt das Raster der
-  gearbeiteten Tage hinzu. Hier wählst du auch die **Sprache** des
+  gearbeiteten Tage hinzu. Die Angabe **Anleitung** fügt unter dem Titel des Abzeichens eine Zeile „Name der Anleitung, von Designer“ hinzu (nur den Namen, wenn kein Designer angegeben ist). Hier wählst du auch die **Sprache** des
   Abzeichentextes, unabhängig von der Sprache der App (praktisch, um es jemandem
   zu schicken, der deine nicht spricht: Die Materialien werden mit ihr
   übersetzt), und eine Zeile **Freitext (optional)**, höchstens 80 Zeichen.
@@ -267,6 +268,20 @@ vor, ebenso jede importierte und geprüfte Anleitung), bekommst du:
   je Abschnitt sowie eingebauten Wiederholungszählern
   („− 3/12 +“), die von selbst verschwinden, falls sie nicht zu deiner
   gewählten Größe gehören.
+- **Abschnitte mit mehreren Exemplaren**: Ein Sockenpaar, zwei Ärmel oder die Ohren oder Beine
+  eines Amigurumi müssen nicht doppelt geschrieben werden. Stelle im Editor der Anleitung die Anzahl
+  der Exemplare eines Abschnitts ein; jedes Exemplar behält seinen eigenen Fortschritt, und der
+  Abschnitt zeigt die Summe aller. Außerhalb von Socken wird ein verdoppelter Abschnitt nacheinander gearbeitet, mit
+  einer Schaltfläche für das nächste Exemplar. Bei einem Sockenpaar wird die Arbeitsweise im Projekt
+  gewählt, über „Arbeitsweise“ oben im Leser, über den Reihen, oder in der Projektkarte:
+  „Nacheinander“ (die ganze Socke 1, dann Socke 2 ab ihrem ersten Teil: Wer die letzte Reihe von Socke 1 abhakt, alle Teile eingeschlossen, kommt zu Socke 2, zu ihrem ersten Teil, mit „Rückgängig“) oder „Beide gleichzeitig“
+  (jede Reihe hat dann ein Häkchen pro Socke, und der Abstand zwischen beiden wird angezeigt).
+  Dieselbe Anleitung lässt sich also in einem anderen Projekt anders stricken. Wer die Arbeitsweise
+  wechselt, nachdem er begonnen hat, muss bestätigen, und die Socken beginnen wieder bei null, Reihen und Diagramme eingeschlossen;
+  der Rest der Anleitung bleibt unverändert. Die
+  Benachrichtigung der aktuellen Reihe folgt dem aktiven Exemplar (oder dem, das zurückliegt) und nennt es.
+  Ein Abschnitt zum Wiederholen, der weder Ärmel noch Sockenteil noch Ohr ist? Gib ihm den Typ
+  „Generisch, wiederholbar“ und stelle dann die Anzahl der Exemplare ein.
 - **Das interaktive Diagramm**: das Diagramm der Anleitung (unverändert aus
   dem Original-PDF übernommen) mit einer **Markierung, die deiner aktuellen
   Reihe folgt**, bereits abgearbeiteten, ausgegrauten Reihen und einem
@@ -556,6 +571,13 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   Blick auf und lässt sich im Editor korrigieren.
   (Das Lesen erkennt auch die runden und eckigen Raster von
   Granny-Anleitungen, nie perfekt: Das Gegenlesen bleibt Pflicht.)
+  **Ein PDF, das mehrere Anleitungen enthält** (eine Sammlung oder eine
+  Anleitung in mehreren vollständigen Fassungen), wird eine Anleitung nach der
+  anderen importiert. Tippe im Importbildschirm auf „Enthält das PDF mehrere
+  Anleitungen? Seiten wählen“, wähle deine Datei und hake dann auf den
+  Vorschaubildern die Seiten der gewünschten Anleitung an, ohne ihre
+  gemeinsamen Seiten (Material, Abkürzungen) zu vergessen. Erkennt die App eine
+  Sammlung selbst, schlägt sie dir direkt vor, die Seiten zu wählen.
 - **{app}-Datei importieren**: Unter „Anleitung hinzufügen“ nimmt diese
   Option eine **.rowtine**-Datei an, also eine Anleitung, die
   schon im {app}-Format vorbereitet ist (Text und Bilder). Sie kommt
@@ -574,6 +596,7 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   aus ihrem PDF.) Und sobald sie ein Foto hat, erscheint die Schaltfläche
   **Anleitung ansehen**: Dort kannst du ein Bild wie ein Diagramm
   verfolgen, genau wie bei einer importierten Anleitung.
+- **Designer angeben**: Hat das Einlesen die Designerin oder den Designer einer Anleitung nicht gefunden, öffnet der Link **Designer: hinzufügen** auf der Seite der Anleitung direkt das Bearbeitungsformular der Anleitung im Feld **Designer*in**. Danach erscheint der Name unter der Anleitung im Reiter **Details** eines Projekts und auf dem Abzeichen.
 - **Eine Anleitung wiederfinden**: Die Kategorie-Schaltflächen oben im
   Bildschirm „Anleitungen“ zeigen dir **die Anzahl der Anleitungen** je
   Kategorie, um auf einen Blick zu wissen, wo du suchen musst.

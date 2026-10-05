@@ -45,6 +45,9 @@ function setup({
   batteryIgnoring = true,
   readerData = READER,
   isChartVisible,
+  copyState = {},
+  activeCopy = {},
+  copyMode,
 } = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
@@ -57,11 +60,12 @@ function setup({
   settings.rowNotificationAsked = true
   const project = ref({ id: projectId, name: 'Pull test' })
   const reader = ref(readerData)
-  const state = reactive({ size: null, done: { ...done }, counters: { ...counters }, chartRows: {} })
-  // Même sémantique que ReaderView.toggleDone : un décochage SUPPRIME la clé.
-  const toggleDone = vi.fn((id) => {
-    state.done[id] = !state.done[id]
-    if (!state.done[id]) delete state.done[id]
+  const state = reactive({ size: null, done: { ...done }, counters: { ...counters }, chartRows: {}, copyState, activeCopy, copyMode })
+  // Même sémantique que ReaderView.toggleDone : un décochage SUPPRIME la clé ; `c` : exemplaire visé.
+  const toggleDone = vi.fn((id, c = 1) => {
+    const done = c > 1 ? (state.copyState[c] ??= { done: {}, counters: {} }).done : state.done
+    done[id] = !done[id]
+    if (!done[id]) delete done[id]
   })
   // Même sémantique que ReaderView.bumpCounter : borné à [0, total].
   const bumpCounter = vi.fn((step, delta) => {
@@ -776,5 +780,105 @@ describe('useRowNotification : acquittement et déduplication des appuis (spec 2
     await flushPromises()
     expect(toggleDone).toHaveBeenCalledWith('devant#0')
     expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('useRowNotification : exemplaires (sections répétables)', () => {
+  const SOCK = {
+    sections: [
+      { id: 'pied', kind: 'pied', title: 'Pied', copies: 2, steps: [{ t: 'Rang un' }, { t: 'Rang deux' }, { t: 'Rang trois' }] },
+    ],
+  }
+  const cs = (done) => ({ 2: { done, counters: {} } })
+
+  it("séquentiel, exemplaire 2 actif : la charge porte le rang de l'exemplaire 2 et l'id pied#1@2 ; l'appui coche l'exemplaire 2 seul", async () => {
+    const { toggleDone, state } = setup({
+      readerData: SOCK,
+      done: { 'pied#0': true, 'pied#1': true },
+      copyState: cs({ 'pied#0': true }),
+      activeCopy: { pied: 2 },
+    })
+    await flushPromises()
+    expect(lastShown().stepId).toBe('pied#1@2')
+    action({ projectId: 7, stepId: 'pied#1@2' })
+    expect(toggleDone).toHaveBeenCalledWith('pied#1', 2)
+    expect(state.copyState[2].done['pied#1']).toBe(true)
+    expect(state.done['pied#1']).toBe(true)
+    await flushPromises()
+    // La charge suit : rang suivant de l'exemplaire 2.
+    expect(lastShown().stepId).toBe('pied#2@2')
+  })
+
+  it("simultané (copyMode du projet) : la charge vise l'exemplaire en retard et « Ensuite » montre le rang de l'autre", async () => {
+    setup({
+      readerData: SOCK,
+      done: { 'pied#0': true, 'pied#1': true },
+      copyState: cs({ 'pied#0': true }),
+      copyMode: 'simultaneous',
+    })
+    await flushPromises()
+    const copy1 = i18n.global.t('reader.copies.title.chaussette', { n: 1, total: 2 })
+    expect(lastShown().stepId).toBe('pied#1@2')
+    expect(lastShown().bigText).toContain(i18n.global.t('rowNotif.nextCopy', { copy: copy1, text: 'Rang trois' }))
+  })
+
+  it("un appui visant un exemplaire où la coche est déjà posée ne la décoche pas (garde de applyRowTap)", async () => {
+    // Exemplaire 2 actif, étape courante pied#1 ; l'exemplaire 1 a déjà pied#1 : l'appui nu (exemplaire 1) passe sameStep.
+    const { toggleDone, state } = setup({
+      readerData: SOCK,
+      done: { 'pied#0': true, 'pied#1': true },
+      copyState: cs({ 'pied#0': true }),
+      activeCopy: { pied: 2 },
+    })
+    await flushPromises()
+    expect(lastShown().stepId).toBe('pied#1@2')
+    action({ projectId: 7, stepId: 'pied#1' })
+    expect(toggleDone).not.toHaveBeenCalled()
+    expect(state.done['pied#1']).toBe(true)
+  })
+
+  it('ids mal formés : ignorés sans erreur', async () => {
+    const { toggleDone } = setup({ readerData: SOCK })
+    await flushPromises()
+    for (const id of ['pied#0@', 'pied#0@abc', 'pied#0@0', 'pied#0@@', 'pied#0@1']) {
+      expect(() => action({ projectId: 7, stepId: id })).not.toThrow()
+    }
+    expect(toggleDone).not.toHaveBeenCalled()
+  })
+
+  it("séquentiel, exemplaire actif fini et l'autre non : l'appui coche l'autre exemplaire", async () => {
+    const all = { 'pied#0': true, 'pied#1': true, 'pied#2': true }
+    const { toggleDone, state } = setup({ readerData: SOCK, done: { 'pied#0': true }, copyState: cs(all), activeCopy: { pied: 2 } })
+    await flushPromises()
+    expect(lastShown().stepId).toBe('pied#1')
+    action({ projectId: 7, stepId: 'pied#1' })
+    expect(toggleDone).toHaveBeenCalledWith('pied#1', 1)
+    expect(state.done['pied#1']).toBe(true)
+  })
+
+  it("un appui @2 dont la section n'a plus 2 exemplaires est ignoré sans erreur", async () => {
+    const { toggleDone, wrapper } = setup({ readerData: { sections: [{ ...SOCK.sections[0], copies: 1 }] } })
+    await flushPromises()
+    expect(() => action({ projectId: 7, stepId: 'pied#0@2' })).not.toThrow()
+    expect(toggleDone).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it("appui retenu rejoué : un pied#0@2 coche l'exemplaire 2 même si l'exemplaire en retard a changé entre-temps", async () => {
+    native.readPendingRowAction.mockResolvedValueOnce({ projectId: 7, stepId: 'pied#0@2', delta: 1 })
+        // Les deux exemplaires à égalité (0 rang) : le retard est l'exemplaire 1, l'appui visait la 2.
+    const { canAskPermission, toggleDone, state } = setup({ readerData: SOCK, canAsk: false, copyMode: 'simultaneous' })
+    canAskPermission.value = true
+    await flushPromises()
+    expect(toggleDone).toHaveBeenCalledWith('pied#0', 2)
+    expect(state.copyState[2].done['pied#0']).toBe(true)
+    expect(native.clearPendingRowAction).toHaveBeenCalledTimes(1)
+  })
+
+  it('projet sans exemplaires : toggleDone appelé avec le seul id (inchangé)', async () => {
+    const { toggleDone } = setup()
+    await flushPromises()
+    action({ projectId: 7, stepId: 'devant#0' })
+    expect(toggleDone.mock.calls[0]).toEqual(['devant#0'])
   })
 })

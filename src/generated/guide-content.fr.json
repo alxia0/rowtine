@@ -588,7 +588,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : le prix des laines que tu lui as réservées ou déjà tricotées, et entre parenthèses le prix du patron, que tu ne paies qu'une fois, même si tu tricotes le même patron trois fois. Si une laine n'a pas de prix noté, l'app te le dit au lieu de faire comme si elle était gratuite.",
+                  "text": " : le prix des laines que tu lui as réservées ou déjà tricotées, et entre parenthèses le prix du patron, que tu ne paies qu'une fois, même si tu tricotes le même patron trois fois. Si une laine n'a pas de prix noté, l'app te le dit au lieu de faire comme si elle était gratuite. Le patron lié s'y affiche avec son designer (« par … ») quand il est renseigné.",
                   "bold": false,
                   "italic": false
                 }
@@ -1042,7 +1042,17 @@
                   "italic": false
                 },
                 {
-                  "text": " ajoute la grille des jours travaillés. Tu y choisis aussi la ",
+                  "text": " ajoute la grille des jours travaillés. La pastille ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Patron",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ajoute sous le titre du badge une ligne « Nom du patron, par Designer » (le nom seul si le designer n'est pas renseigné). Tu y choisis aussi la ",
                   "bold": false,
                   "italic": false
                 },
@@ -1205,6 +1215,21 @@
                 },
                 {
                   "text": " : chaque étape est cochable, d'un appui sur sa case ou n'importe où dans le tiers gauche de sa carte, avec une barre de progression globale et par section, et des compteurs de répétition intégrés (« − 3/12 + ») qui disparaissent tout seuls s'ils ne concernent pas ta taille.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Les sections à plusieurs exemplaires",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : une paire de chaussettes, deux manches ou les oreilles ou les pattes d'un amigurumi n'ont pas à être écrites deux fois. Dans l'éditeur du patron, règle le nombre d'exemplaires d'une section ; chaque exemplaire garde sa propre progression, et la section affiche le total de tous. Hors chaussettes, une section doublée se tricote l'une après l'autre, avec un bouton pour passer à l'exemplaire suivant. Pour une paire de chaussettes, le mode de réalisation se choisit dans le projet, avec « Mode de réalisation » en haut du lecteur, au-dessus des rangs, ou dans la fiche du projet : « L'une après l'autre » (toute la chaussette 1, puis la chaussette 2 depuis sa première partie : cocher le dernier rang de la chaussette 1, toutes ses parties comprises, mène à la chaussette 2, à sa première partie, avec « Annuler ») ou « Les deux en même temps » (chaque rang a alors une coche par chaussette, et l'écart entre les deux s'affiche). Un même patron peut donc se tricoter autrement dans un autre projet. Changer de mode de réalisation après avoir commencé demande une confirmation et fait repartir les chaussettes de zéro, rangs et diagrammes compris ; le reste du patron ne bouge pas. La notification du rang en cours suit l'exemplaire actif (ou celui qui a du retard) et le nomme. Une section à répéter qui n'est ni une manche, ni une partie de chaussette, ni une oreille ? Donne-lui le type « Générique répétable », puis règle son nombre d'exemplaires.",
                   "bold": false,
                   "italic": false
                 }
@@ -2380,7 +2405,17 @@
                   "italic": false
                 },
                 {
-                  "text": " t'emmène directement le parcourir, section par section. Les repères de l'aperçu t'aident à cette relecture : une ligne marquée « à lire » qui devrait se cocher, ou l'inverse, se voit d'un coup d'œil, et se corrige dans l'éditeur. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.)",
+                  "text": " t'emmène directement le parcourir, section par section. Les repères de l'aperçu t'aident à cette relecture : une ligne marquée « à lire » qui devrait se cocher, ou l'inverse, se voit d'un coup d'œil, et se corrige dans l'éditeur. (La lecture reconnaît aussi les grilles rondes et carrées des patrons granny, jamais parfaitement : la relecture reste de mise.) ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Un PDF qui contient plusieurs patrons",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (un recueil, ou un patron décrit en plusieurs versions complètes) s'importe un patron à la fois. Sur l'écran d'import, touche « Le PDF contient plusieurs patrons ? Choisir les pages », choisis ton fichier, puis coche sur les miniatures les pages du patron voulu, sans oublier ses pages communes (matériel, abréviations). Quand l'app reconnaît elle-même un recueil, elle te propose directement de choisir les pages.",
                   "bold": false,
                   "italic": false
                 }
@@ -2461,6 +2496,51 @@
                 },
                 {
                   "text": " apparaît : tu peux alors y suivre une image comme un diagramme, exactement comme pour un patron importé.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Indiquer le designer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : quand la lecture n'a pas trouvé le designer d'un patron, le lien ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Designer : ajouter",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", sur la fiche du patron, ouvre directement le formulaire de modification sur le champ ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Auteur·rice",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Il s'affiche ensuite sous le patron dans l'onglet ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Détails",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " d'un projet, et sur le badge.",
                   "bold": false,
                   "italic": false
                 }

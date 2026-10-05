@@ -1,11 +1,12 @@
 <script setup>
-import { reactive, ref, computed, defineAsyncComponent } from 'vue'
+import { reactive, ref, computed, defineAsyncComponent, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FieldHelp from '@/components/FieldHelp.vue'
 import { emptyPattern } from '@/stores/patterns'
 import { PATTERN_CATEGORIES } from '@/constants/catalog'
 import { TECHNIQUES as TECHS } from '@/constants/status'
 import { pickImage } from '@/utils/photo'
+import { cleanDesignerName } from '@/utils/pattern-designer'
 import { useCropperStore } from '@/stores/cropper'
 import { useSettingsStore } from '@/stores/settings'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -22,6 +23,13 @@ const PdfPagePickerDialog = defineAsyncComponent(() => import('@/components/PdfP
 const props = defineProps({
   initial: { type: Object, default: null }, // patron existant à éditer ; null = création
   submitLabel: { type: String, default: '' },
+  focusField: { type: String, default: '' }, // champ à focaliser à l'ouverture ('author')
+})
+const authorInput = ref(null)
+onMounted(async () => {
+  if (props.focusField !== 'author') return
+  await nextTick()
+  authorInput.value?.focus()
 })
 const emit = defineEmits(['submit', 'cancel'])
 const { t } = useI18n()
@@ -106,6 +114,7 @@ function submit() {
   }
   nameError.value = ''
   form.sizes = sizesText.value.split(',').map((s) => s.trim()).filter(Boolean)
+  form.author = cleanDesignerName(form.author)
   if (form.category !== 'other') form.categoryCustom = ''
   form.price = priceForm.price
   form.purchasedAt = priceForm.purchasedAt
@@ -204,7 +213,7 @@ function submit() {
     <input id="pat-source" v-model="form.source" class="input" :placeholder="t('pattern.sourcePlaceholder')" />
 
     <label class="field-label mt2" for="pat-author">{{ t('pattern.author') }}</label>
-    <input id="pat-author" v-model="form.author" class="input" :placeholder="t('pattern.authorPlaceholder')" />
+    <input id="pat-author" ref="authorInput" v-model="form.author" class="input" :placeholder="t('pattern.authorPlaceholder')" />
     <label class="field-label mt2" for="pat-authorurl">{{ t('pattern.authorUrl') }}</label>
     <input id="pat-authorurl" v-model="form.authorUrl" class="input" inputmode="url" placeholder="https://…" />
 

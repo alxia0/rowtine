@@ -10,6 +10,16 @@
 // espagnole, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_ES = [
   {
+    version: '1.4.2',
+    notes: [
+      'Secciones repetibles: una sección se puede hacer varias veces (calcetines, mangas, orejas o patas de un amigurumi), y cada ejemplar conserva su progreso. Por defecto, las mangas, orejas, extremidades y piernas se hacen por pares.',
+      'Par de calcetines: uno tras otro, o los dos a la vez fila por fila.',
+      'Ya se pueden importar PDF con varios patrones.',
+      'Diseñador del patrón: se muestra en el patrón y en la insignia compartida.',
+      'Nuevos tipos de sección para calcetines (puntera, pie, talón, caña, cuña, puño) y un tipo «Genérico repetible».',
+    ],
+  },
+  {
     version: '1.4.1',
     notes: [
       'Notificación del seguimiento: una pulsación en un botón se conserva aunque Android haya cerrado o congelado la app.',

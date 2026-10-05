@@ -23,10 +23,10 @@ vi.mock('@/native/keep-awake', () => ({
   setKeepScreenOn: async () => {},
 }))
 
-async function mountDetail(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 2' }]) {
+async function mountDetail(sections = [{ name: 'Corps', instructions: 'Rg 1\nRg 2' }], extra = {}, readerState = {}) {
   await db.patterns.clear(); await db.projects.clear()
-  const pid = await db.patterns.add({ name: 'Écharpe', sections })
-  const prj = await db.projects.add({ name: 'Mon écharpe', patternId: pid, status: 'wip', readerState: {} })
+  const pid = await db.patterns.add({ name: 'Écharpe', sections, ...extra })
+  const prj = await db.projects.add({ name: 'Mon écharpe', patternId: pid, status: 'wip', readerState })
   const router = createTestRouter([
     { path: '/project/:id', name: 'project', component: ProjectDetailView },
     { path: '/project/:id/read', name: 'project-read', component: { template: '<div/>' } },
@@ -59,6 +59,18 @@ describe('ProjectDetailView — onglet Sections unifié', () => {
     // Le cochage traverse une écriture Dexie puis le re-render de l'aperçu : on attend le
     // badge « Faite », sa conséquence observable à l'écran, avant de lire quoi que ce soit.
     await vi.waitFor(() => expect(w.text()).toContain(fr.reader.sectionDone), { timeout: 10000 }) // badge « Faite »
+  })
+
+  it('une section répétée affiche ses exemplaires, une section simple rien', async () => {
+    const reader = { sections: [
+      { id: 'p', kind: 'pied', copies: 2, title: 'Pied', steps: [{ t: 'Rg 1' }] },
+      { id: 'c', kind: 'corps', title: 'Corps', steps: [{ t: 'Rg 1' }] },
+    ] }
+    const { w } = await mountDetail(undefined, { reader }, { copyMode: 'simultaneous' })
+    await vi.waitFor(() => expect(w.findAll('.rovw').length).toBe(2), { timeout: 10000 })
+    const [pied, corps] = w.findAll('.rovw')
+    expect(pied.find('.rovw__copies').text()).toBe(i18n.global.t('reader.copies.nTogether', { n: 2 }))
+    expect(corps.find('.rovw__copies').exists()).toBe(false)
   })
 
   it('cocher la case ne navigue PAS vers le lecteur', async () => {

@@ -39,6 +39,7 @@ const I18N_DIR = path.resolve(__dirname, '../../src/i18n')
 //            c'est justement le genre de clé qu'un agent traducteur saute.
 const IDENTICAL_VALUE_ALLOWED = {
   '*': [
+    'rowNotif.sectionCopy', // « {copy} · {section} » : gabarit de séparateur, rien de linguistique
     'app.name', // "Rowtine" — nom de l'app, jamais traduit
     'pattern.categories.amigurumi', // "Amigurumi" — emprunt japonais, identique dans toutes les langues occidentales
     'yarn.filterCritLabel', // "Label" — terme voulu pour le menu du stock (décision produit, 07/09) : identique en fr/en/de, seul l'espagnol traduit (« Etiqueta »)
@@ -73,6 +74,7 @@ const IDENTICAL_VALUE_ALLOWED = {
     'stats.heatmap.projectLine', // "{name} — {duration}" — MÊME motif que stats.heatmap.cell juste au-dessus : {name} et {duration} portent déjà toute la traduction (11/08)
   ],
   en: [
+    'pagesSelect.pageLabel', // "Page {n}" : cognat fr/en (es: Página, de: Seite)
     // Mémo des techniques de points : mots anglais identiques au français (Crochet, Construction, Techniques).
     'stitchMemo.craft.crochet',
     'stitchMemo.group.construction',

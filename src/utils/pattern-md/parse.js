@@ -5,6 +5,7 @@ import { CHART_PATH_MAX_ROWS } from '../reader'
 import { sanitizeUrl } from '../safe-url'
 import { normalizeReaderForSave, broadcast } from '../reader-edit'
 import { isKind } from '../section-kinds'
+import { MAX_COPIES } from '../section-copies'
 import { parseFrontMatter } from './meta'
 import { mdTextToStep, stepTextToMd } from './line'
 import { parseStepCounter, legacyRepeatTotal } from './counters'
@@ -212,6 +213,7 @@ function parseGallery(lines) {
 function parseWorkSection(rawTitle, lines, n, warnings) {
   let title = rawTitle
   let kind = ''
+  let copies = 0
   const tm = TITLE_KIND_RE.exec(rawTitle)
   if (tm) {
     title = tm[1]
@@ -219,6 +221,10 @@ function parseWorkSection(rawTitle, lines, n, warnings) {
     // FR ou inconnu (kindToFr renvoie tel quel, cf. dialect.js).
     kind = kindToFr(tm[2])
     if (!isKind(kind)) warnings.push(W(WARNING_CODES.SECTION_UNKNOWN_KIND, { section: title, kind: tm[2] }))
+    // Exemplaires (2..MAX_COPIES) portés par le tag ; hors bornes : ignorés (1 exemplaire).
+    // `together` (ancien tag : la technique est un choix du projet depuis le 05/10) est accepté et ignoré.
+    const n = Number(tm[3])
+    if (tm[3] && n >= 2 && n <= MAX_COPIES) copies = n
   }
   const steps = []
   let chart = null
@@ -342,7 +348,7 @@ function parseWorkSection(rawTitle, lines, n, warnings) {
       warnings.push(W(WARNING_CODES.SECTION_LOOSE_TEXT, { section: title }))
     }
   }
-  return { section: { id: '', ...(kind ? { kind } : {}), title, steps, ...(chart ? { chart } : {}) }, chart }
+  return { section: { id: '', ...(kind ? { kind } : {}), ...(copies ? { copies } : {}), title, steps, ...(chart ? { chart } : {}) }, chart }
 }
 
 // Reconstruit le texte « papier » d'une étape pour concaténer une continuation

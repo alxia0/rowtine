@@ -222,6 +222,24 @@ describe('round-trip serializePattern → deserializePattern', () => {
     expect(restored).toEqual(pattern)
   })
 
+  // Aller-retour : author survit à serialize puis deserialize (changement de téléphone).
+  it('author survit à l\'aller-retour patron.json (biblio)', () => {
+    const pattern = { id: 11, name: 'Bonnet', author: 'Sys Fredens', photos: [] }
+    const result = serializePattern(pattern)
+    const patronJson = mainJson(result.files, result.dir, 'patron.json')
+    const filesByName = toFilesByName(result.files, result.dir, 'patron.json')
+    expect(deserializePattern(patronJson, filesByName).author).toBe('Sys Fredens')
+  })
+
+  it('author survit à l\'aller-retour du patron instance d\'un projet', () => {
+    const proj = { id: 7, name: 'Pull', photos: [] }
+    const instancePattern = { id: 44, name: 'Torsade', ownerProjectId: 7, author: 'Sys Fredens', photos: [] }
+    const result = serializeProject(proj, { instancePattern })
+    const projetJson = mainJson(result.files, result.dir, 'projet.json')
+    const filesByName = toFilesByName(result.files, result.dir, 'projet.json')
+    expect(deserializeProject(projetJson, filesByName).instancePattern.author).toBe('Sys Fredens')
+  })
+
   it('patron biblio sans pdf ni photos : round-trip identique, pas de clé pdf', () => {
     const pattern = { id: 10, name: 'Bonnet', photos: [] }
     const result = serializePattern(pattern)
