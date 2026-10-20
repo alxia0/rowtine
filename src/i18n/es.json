@@ -551,6 +551,22 @@
     "storedInPlaceholder": "ej. Estante 2, cesta azul",
     "notes": "Notas",
     "notesPlaceholder": "Tus notas personales sobre este hilo…",
+    "swatches": {
+      "title": "Muestras",
+      "add": "Añadir una muestra",
+      "remove": "Quitar",
+      "mode": "Forma de trabajo",
+      "modeFlat": "En plano",
+      "modeRound": "En redondo",
+      "size": "Aguja o ganchillo (mm)",
+      "stitches": "Puntos",
+      "rows": "Filas",
+      "per10": "por 10 cm",
+      "hint": "Anota la muestra que obtienes con este hilo.",
+      "empty": "Ninguna muestra anotada.",
+      "stitchesShort": "p.",
+      "rowsShort": "filas"
+    },
     "purchasesCount": "Compras registradas",
     "lastPurchaseDate": "Última compra",
     "composition": "Composición",
@@ -727,7 +743,7 @@
     "empty": "Todavía no hay patrones. Añade tu primer patrón.",
     "emptyExampleName": "Jersey raglán",
     "emptyExampleHint": "Así es como se ve un patrón. Añade tu primer patrón para empezar tu biblioteca.",
-    "noSections": "Ninguna sección.",
+    "writeInstructions": "Escribir las instrucciones",
     "sectionFallback": "Sección",
     "importWarningsTitle": "Para revisar después de importar",
     "importLowConfidence": "Calidad de importación baja: este patrón necesitará una corrección importante.",
@@ -822,6 +838,7 @@
   },
   "correction": {
     "title": "Corregir el patrón",
+    "writeTitle": "Escribir el patrón",
     "entry": "Corregir el patrón",
     "cancel": "Cancelar",
     "save": "Guardar",
@@ -1013,6 +1030,7 @@
       "replayTourHint": "Vuelve a abrir el gorro de ejemplo en el lector con las burbujas de explicación."
     },
     "contribute": "Contribuir",
+    "feedback": "Enviar comentarios",
     "suggest": "Sugerir una mejora",
     "support": "Apoyar a Rowtine",
     "export": {
@@ -1031,7 +1049,8 @@
         "dyeLot": "Lote",
         "purchaseDate": "Fecha de compra",
         "composition": "Composición",
-        "labels": "Características"
+        "labels": "Características",
+        "swatches": "Muestras"
       },
       "project": {
         "name": "Nombre",
@@ -1419,7 +1438,11 @@
     "suggested": "Sugeridos para este patrón",
     "noResult": "Ningún punto coincide",
     "done": "Listo",
-    "craft": { "crochet": "Ganchillo", "knitting": "Punto" },
+    "craft": { "crochet": "Ganchillo", "knitting": "Punto", "terms": "US / UK" },
+    "termsIntro": "Los nombres difieren entre los patrones US y UK. Comprueba cuál usa tu patrón.",
+    "termsUs": "US",
+    "termsUk": "UK",
+    "termsGeneral": "General",
     "group": {
       "base": "Puntos básicos",
       "shaping": "Aumentos y disminuciones",
@@ -1615,6 +1638,7 @@
     "licensesRepository": "Repositorio del proyecto",
     "changelogTitle": "Novedades de esta versión",
     "contact": "Contactar",
+    "feedback": "Enviar comentarios",
     "website": "Sitio web de {app}",
     "privacyUpdated": "Última actualización: {date}"
   },

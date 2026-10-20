@@ -10,6 +10,16 @@
 // espagnole, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_ES = [
   {
+    version: '1.4.3',
+    notes: [
+      'Muestras de lana: anota la tensión obtenida con una lana en su ficha del stock (plano o en redondo, tamaño de aguja o de ganchillo, puntos y vueltas en 10 cm). Las muestras acompañan a la lana en las copias de seguridad y en la exportación del stock.',
+      'Memo de puntos: nueva pestaña «US / UK» (solo en inglés) con los términos de ganchillo y de punto que cambian entre patrones estadounidenses y británicos, y las abreviaturas británicas (yfwd, yrn, yon, psso y más).',
+      'Los patrones de ejemplo en inglés indican ahora que están escritos en términos estadounidenses.',
+      'Escribir un patrón a mano: «Escribir las instrucciones» abre el editor enseguida, incluso sin foto.',
+      'Elegir una lana del stock: cada fila muestra ahora la marca, el modelo y el color.',
+    ],
+  },
+  {
     version: '1.4.2',
     notes: [
       'Secciones repetibles: una sección se puede hacer varias veces (calcetines, mangas, orejas o patas de un amigurumi), y cada ejemplar conserva su progreso. Por defecto, las mangas, orejas, extremidades y piernas se hacen por pares.',

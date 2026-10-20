@@ -561,10 +561,16 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   tallas, fuente, autor…) con un único apartado **Fotos** para sus imágenes.
   En la ficha del patrón, una estrella en cada foto de «Fotos del patrón» la
   marca como **portada**: es la que ilustra el patrón en la biblioteca. (Un
-  patrón importado conserva la portada sacada de su PDF.) Y en cuanto tiene
-  una foto, aparece el botón **Previsualizar el patrón**: puedes entonces
-  seguir una imagen como diagrama, exactamente igual que en un patrón
-  importado.
+  patrón importado conserva la portada sacada de su PDF.) Para escribir sus
+  instrucciones, toca **Escribir las instrucciones** en la ficha del patrón,
+  con o sin foto: el editor se abre en una página en blanco. Toca **Editar
+  texto**, escribe una línea por paso y da a cada línea su categoría (Paso,
+  Contador, Sección, Nota, Referencia), como se describe en «El editor de
+  corrección, en detalle», más abajo. Una vez guardado, el patrón se sigue
+  en un proyecto igual que uno importado: casillas, contadores y progreso
+  por sección. Y en cuanto tiene una foto, aparece el botón **Previsualizar
+  el patrón**: puedes entonces seguir una imagen como diagrama, exactamente
+  igual que en un patrón importado.
 - **Indicar el diseñador**: cuando la lectura no ha encontrado el diseñador de un patrón, el enlace **Diseñador/a: añadir**, en la ficha del patrón, abre directamente el formulario de edición del patrón en el campo **Diseñador/a**. Después aparece bajo el patrón en la pestaña **Detalles** de un proyecto y en la insignia.
 - **Encontrar un patrón**: las etiquetas de categoría en la parte
   superior de la biblioteca te muestran **cuántos patrones** hay en
@@ -582,7 +588,7 @@ que ajustar: es la misma pantalla, simplemente más cómoda.
   18,90 € el 7/8/2026», o simplemente «Gratis») y cuenta en la
   pantalla **Gastos**.
 - **Vista de patrón**: lectura sencilla para patrones sin formato
-  especial, o patrones que has escrito enteramente a mano.
+  especial.
 - **3 patrones de muestra** vienen con la app desde el primer inicio,
   para que descubras todas las funciones sin importar nada.
 
@@ -754,6 +760,14 @@ nada por error.
 - **Dónde la guardas, lo que opinas de ella**: dos campos libres,
   **Guardado en** («Estante 2, cesta azul») y **Notas**, se muestran luego
   en la ficha de la lana.
+- **La tensión que obtuviste con esta lana**: el bloque **Muestras** del
+  formulario guarda, para cada prueba, cómo la trabajaste (**En plano** o **En
+  redondo**), el tamaño de aguja o de ganchillo en milímetros, y el número de
+  **puntos** y de **filas** en 10 cm. **Añadir una muestra** abre una línea,
+  **Quitar** la elimina, y una línea que se deja vacía no se guarda. Las muestras
+  se muestran en la ficha de la lana, nunca son obligatorias y acompañan a la lana
+  en las copias de seguridad y en la exportación del stock. Cuando retomas una
+  lana que ya usaste, vuelves a encontrar tu tensión.
 - **Las lanas que no son de un solo color**: un campo **Tipo de color**
   (liso, degradado, autorrayado, jaspeado, teñido a mano) y un campo
   **Descripción del color** («azul, verde, amarillo jaspeado de negro»)
@@ -956,6 +970,11 @@ accesibles desde el inicio:
   pasa de la pestaña Ganchillo a la pestaña Punto, y toca una ficha para
   desplegar sus pasos. Para tener ciertos puntos a mano mientras tejes una
   pieza, elígelos desde la guía rápida del lector (punto 3).
+  En **inglés**, una tercera pestaña, **US / UK**, enumera los términos de
+  ganchillo y de punto que cambian entre patrones estadounidenses y británicos
+  (*single crochet* y *double crochet*, *bind off* y *cast off*), con sus
+  abreviaturas; el memo incluye además las abreviaturas británicas (*yfwd*,
+  *yrn*, *yon*, *psso*).
 
 ## 7. Estadísticas
 

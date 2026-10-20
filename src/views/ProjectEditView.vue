@@ -16,7 +16,7 @@ import { STATUS_ORDER, TECHNIQUES } from '@/constants/status'
 import { fillProjectFromPattern } from '@/utils/project-fill'
 import { shouldDeriveDone } from '@/utils/project-finished-at'
 import { reservationsOf, availableForProject, setProjectReservation, roundSkeins } from '@/utils/yarn-usage'
-import { matchesBrand, NO_BRAND } from '@/utils/yarn-filter'
+import { matchesBrand, NO_BRAND, yarnPickLabel } from '@/utils/yarn-filter'
 import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
 import { formatSkeins } from '@/utils/units'
 import AppIcon from '@/components/AppIcon.vue'
@@ -546,7 +546,7 @@ async function saveProject({ resetConfirmed = false } = {}) {
         <div v-else class="ypick">
           <div v-for="y in visibleYarns" :key="y.id" class="ypick__row" :class="{ 'ypick__row--on': selectedYarnIds.includes(y.id) }">
             <AppCheckbox class="ypick__pick" :model-value="selectedYarnIds.includes(y.id)" @update:model-value="toggleYarn(y.id)">
-              {{ y.brand || '—' }}<template v-if="y.colorName"> · {{ y.colorName }}</template>
+              {{ yarnPickLabel(y) }}
             </AppCheckbox>
             <span v-if="selectedYarnIds.includes(y.id)" class="ypick__qty">
               <input

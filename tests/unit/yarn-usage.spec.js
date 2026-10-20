@@ -236,6 +236,13 @@ describe('yarnUsageState — laine épuisée par le tricot', () => {
     expect(yarnUsageState({ quantity: 4, reservations: { 2: 2 }, consumed: { 1: 1 } }, { 2: { status: 'wip' } }))
       .toEqual({ state: 'reserved', used: 2, total: 4 })
   })
+  // Protège : terminer une allocation ne touche pas aux échantillons, et la laine épuisée garde sa fiche.
+  it('terminer l’allocation ne touche pas aux échantillons', () => {
+    const swatch = { id: 's1' }
+    const yarn = { quantity: 1, reservations: { 1: 1 }, consumed: {}, swatches: [swatch] }
+    expect(consumeProjectReservation(yarn, 1, 1)).not.toHaveProperty('swatches')
+    expect(yarnUsageState({ ...yarn, quantity: 0, consumed: { 1: 1 } }, {})).toEqual({ state: 'used', used: 0, total: 0 })
+  })
 })
 
 // Icône « projet vegan » (ProjectCard, 06/08/2026) : un projet est vegan si TOUTES

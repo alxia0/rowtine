@@ -74,3 +74,5 @@ export function matchesQuery(stitch, query) {
   const needle = fold(String(query || '').trim())
   return !needle || fold([stitch.name, ...(stitch.abbr || [])].join(' ')).includes(needle)
 }
+
+export { US_UK_TERMS, usUkTerms } from './us-uk-terms'

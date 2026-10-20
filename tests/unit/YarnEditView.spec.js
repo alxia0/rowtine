@@ -965,3 +965,64 @@ describe('YarnEditView, Notes et Lieu de rangement', () => {
     expect(w.find('#yarn-notes').element.value).toBe('Douce')
   })
 })
+
+// Échantillons saisis à la main sur la fiche de laine (mode, taille, mailles et rangs pour 10 cm).
+describe('YarnEditView, échantillons', () => {
+  const fill = async (w) => {
+    await w.find('[data-test="swatch-add"]').trigger('click')
+    await w.find('[data-test="swatch-mode"]').setValue('round')
+    await w.find('[data-test="swatch-size"]').setValue('4')
+    await w.find('[data-test="swatch-stitches"]').setValue('22')
+    await w.find('[data-test="swatch-rows"]').setValue('30')
+  }
+
+  it("ajouter un échantillon puis enregistrer l'inscrit dans la laine", async () => {
+    const { w, pinia } = await mountView()
+    const store = useYarnsStore(pinia)
+    store.add.mockResolvedValue(7)
+    await w.find('#yarn-color-name').setValue('Bleu')
+    await fill(w)
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+    expect(store.add.mock.calls[0][0].swatches).toEqual([{ mode: 'round', sizeMm: '4', stitches: '22', rows: '30' }])
+  })
+
+  it("une ligne vide n'est pas enregistrée", async () => {
+    const { w, pinia } = await mountView()
+    const store = useYarnsStore(pinia)
+    store.add.mockResolvedValue(7)
+    await w.find('#yarn-color-name').setValue('Bleu')
+    await w.find('[data-test="swatch-add"]').trigger('click')
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    await flushPromises()
+    expect(store.add.mock.calls[0][0].swatches).toEqual([])
+  })
+
+  it("l'édition reprend les échantillons existants", async () => {
+    const { w } = await mountView({
+      routeParams: { id: '8' },
+      existingYarns: [{ id: 8, brand: 'Drops', colorName: 'Bleu', composition: [], labels: [], swatches: [{ mode: 'round', sizeMm: '3.5', stitches: '24', rows: '32' }] }],
+    })
+    expect(w.findAll('[data-test="swatch-row"]')).toHaveLength(1)
+    expect(w.find('[data-test="swatch-mode"]').element.value).toBe('round')
+    expect(w.find('[data-test="swatch-size"]').element.value).toBe('3.5')
+    expect(w.find('[data-test="swatch-stitches"]').element.value).toBe('24')
+    expect(w.find('[data-test="swatch-rows"]').element.value).toBe('32')
+  })
+
+  it('la duplication copie les échantillons', async () => {
+    const { w } = await mountView({
+      routeQuery: { duplicateFrom: '8' },
+      existingYarns: [{ id: 8, brand: 'Drops', colorName: 'Bleu', composition: [], labels: [], swatches: [{ mode: 'flat', sizeMm: '4', stitches: '20', rows: '28' }] }],
+    })
+    expect(w.find('[data-test="swatch-stitches"]').element.value).toBe('20')
+  })
+
+  it('retirer supprime la ligne', async () => {
+    const { w } = await mountView()
+    await fill(w)
+    expect(w.findAll('[data-test="swatch-row"]')).toHaveLength(1)
+    await w.find('[data-test="swatch-remove"]').trigger('click')
+    expect(w.findAll('[data-test="swatch-row"]')).toHaveLength(0)
+  })
+})

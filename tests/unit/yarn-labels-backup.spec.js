@@ -21,4 +21,12 @@ describe('sauvegarde des caractéristiques', () => {
     const restored = deserializeYarns(JSON.parse(data))
     expect(restored[0].labels).toEqual(['vegan', 'rws'])
   })
+
+  // Les échantillons traversent aussi la reconstruction de deserializeYarns (restore.js).
+  it('conserve les échantillons après un aller-retour sauvegarde puis restauration', () => {
+    const swatches = [{ mode: 'flat', sizeMm: 4, stitches: 22, rows: 30 }]
+    const { files } = serializeYarns([{ id: 1, brand: 'Drops', swatches }])
+    const data = files.find((f) => f.path === 'laines.json').data
+    expect(deserializeYarns(JSON.parse(data))[0].swatches).toEqual(swatches)
+  })
 })

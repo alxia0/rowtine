@@ -1,0 +1,5 @@
+Yarn swatches: note the gauge you got with a yarn on its page in the stash.
+Stitch memo: a "US / UK" tab (English only) and the British abbreviations.
+English sample patterns now say they are written in US terms.
+Writing a pattern by hand: the editor opens right away, even without a photo.
+Choosing a yarn from your stash: each row shows the brand, the model and the colorway.

@@ -2485,7 +2485,27 @@
                   "italic": false
                 },
                 {
-                  "text": " : c'est elle qui illustre le patron dans la bibliothèque. (Un patron importé garde la couverture tirée de son PDF.) Et dès qu'il a une photo, le bouton ",
+                  "text": " : c'est elle qui illustre le patron dans la bibliothèque. (Un patron importé garde la couverture tirée de son PDF.) Pour écrire ses instructions, touche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Écrire les instructions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " sur la fiche du patron, avec ou sans photo : l'éditeur s'ouvre sur une page vide. Touche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Modifier le texte",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", écris une ligne par étape, puis donne à chaque ligne sa catégorie (Étape, Compteur, Section, Note, Aide-mémoire), comme décrit dans « L'éditeur de correction, en détail » ci-dessous. Une fois enregistré, le patron se suit dans un projet comme un patron importé : cases à cocher, compteurs et progression par section. Et dès qu'il a une photo, le bouton ",
                   "bold": false,
                   "italic": false
                 },
@@ -2640,7 +2660,7 @@
                   "italic": false
                 },
                 {
-                  "text": " : consultation en lecture simple pour les patrons sans mise en forme spéciale, ou les patrons saisis entièrement à la main.",
+                  "text": " : consultation en lecture simple pour les patrons sans mise en forme spéciale.",
                   "bold": false,
                   "italic": false
                 }
@@ -3591,6 +3611,91 @@
                 },
                 {
                   "text": ", s'affichent ensuite sur la fiche de la laine.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "La tension obtenue avec cette laine",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : le bloc ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Échantillons",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " du formulaire garde, pour chaque essai, la façon de travailler (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "À plat",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ou ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "En rond",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), la taille d'aiguille ou de crochet en millimètres, et le nombre de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "mailles",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " et de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "rangs",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " pour 10 cm. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ajouter un échantillon",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre une ligne, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Retirer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " la supprime, et une ligne laissée vide n'est pas enregistrée. Les échantillons s'affichent sur la fiche de la laine, ne sont jamais obligatoires, et suivent la laine dans les sauvegardes et dans l'export du stock. Quand tu reprends une laine déjà utilisée, tu retrouves ainsi ta tension.",
                   "bold": false,
                   "italic": false
                 }
@@ -4734,7 +4839,107 @@
                   "italic": false
                 },
                 {
-                  "text": " ouvre toutes les fiches du mémo, en simple consultation : les points de base et les points les plus courants, au crochet comme au tricot. Cherche un point par son nom ou son abréviation, passe de l'onglet Crochet à l'onglet Tricot, et touche une fiche pour déplier ses étapes. Pour garder certains points sous la main pendant un ouvrage, choisis-les depuis l'aide-mémoire du lecteur (point 3).",
+                  "text": " ouvre toutes les fiches du mémo, en simple consultation : les points de base et les points les plus courants, au crochet comme au tricot. Cherche un point par son nom ou son abréviation, passe de l'onglet Crochet à l'onglet Tricot, et touche une fiche pour déplier ses étapes. Pour garder certains points sous la main pendant un ouvrage, choisis-les depuis l'aide-mémoire du lecteur (point 3). En ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "anglais",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", un troisième onglet, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "US / UK",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", liste les termes de crochet et de tricot qui changent entre patrons américains et britanniques (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "single crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "double crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "bind off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cast off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": "), avec leurs abréviations ; le mémo y gagne aussi les abréviations britanniques (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yfwd",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yrn",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yon",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "psso",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }

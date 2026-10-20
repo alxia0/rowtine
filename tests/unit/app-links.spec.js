@@ -2,7 +2,14 @@
 // CHAÎNES LITTÉRALES, jamais à la table réimportée : itérer sur la table testée par elle-même
 // ne rougirait pas si une adresse était cassée dans app-links.js.
 import { describe, it, expect } from 'vitest'
-import { CONTACT_EMAIL, converterUrlFor, guideUrlFor, websiteUrlFor } from '@/constants/app-links'
+import {
+  CONTACT_EMAIL,
+  converterUrlFor,
+  feedbackUrlFor,
+  guideUrlFor,
+  websiteUrlFor,
+} from '@/constants/app-links'
+import { APP_VERSION } from '@/constants/app-info'
 
 // Le site suit la langue de l'APP (une adresse par langue), pas celle du navigateur.
 describe('app-links — adresses du site web (une par langue, VÉRIFIÉES 12/08/2026)', () => {
@@ -61,6 +68,38 @@ describe('app-links : adresses du convertisseur du site (une par langue, VÉRIFI
   })
   it("langue inconnue ('xx') : repli explicite sur l'anglais, jamais une adresse cassée", () => {
     expect(converterUrlFor('xx')).toBe('https://rowtine.app/en/convertisseur/')
+  })
+})
+
+// Adresses du formulaire de retours (chantier retours utilisatrices, 11/10/2026) : contrat
+// partagé avec la tâche « site » du même chantier (`source=app`, `version`, `android`
+// seulement si fourni). PAS ENCORE vérifiées en ligne, contrairement aux trois groupes
+// ci-dessus : la page fait l'objet d'un chantier parallèle sur le site.
+describe('app-links — adresses et paramètres du formulaire de retours', () => {
+  it('fr → source=app et la version courante, sans paramètre android', () => {
+    const url = new URL(feedbackUrlFor('fr'))
+    expect(url.origin + url.pathname).toBe('https://rowtine.app/fr/retours/')
+    expect(url.searchParams.get('source')).toBe('app')
+    expect(url.searchParams.get('version')).toBe(String(APP_VERSION))
+    expect(url.searchParams.has('android')).toBe(false)
+  })
+
+  it('en/de/es → chemin propre à chaque langue', () => {
+    expect(new URL(feedbackUrlFor('en')).pathname).toBe('/en/retours/')
+    expect(new URL(feedbackUrlFor('de')).pathname).toBe('/de/retours/')
+    expect(new URL(feedbackUrlFor('es')).pathname).toBe('/es/retours/')
+  })
+
+  // Même doctrine que les trois groupes d'adresses ci-dessus : une langue inconnue retombe
+  // sur l'anglais plutôt que de produire une adresse cassée.
+  it("langue inconnue ('xx') : repli explicite sur l'anglais", () => {
+    expect(new URL(feedbackUrlFor('xx')).pathname).toBe('/en/retours/')
+  })
+
+  it('context.version surcharge la version, context.android est transmis si fourni', () => {
+    const url = new URL(feedbackUrlFor('fr', { version: '9.9.9', android: '14' }))
+    expect(url.searchParams.get('version')).toBe('9.9.9')
+    expect(url.searchParams.get('android')).toBe('14')
   })
 })
 

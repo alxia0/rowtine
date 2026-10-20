@@ -92,3 +92,16 @@ describe('matchesQuery', () => {
     expect(matchesQuery(sc, undefined)).toBe(true)
   })
 })
+
+describe('termes britanniques', () => {
+  it('abréviations UK présentes sur les fiches anglaises', () => {
+    expect(resolveStitch('kn-yo', 'en').abbr).toEqual(expect.arrayContaining(['yo', 'yfwd (UK)', 'yrn (UK)', 'yon (UK)']))
+    expect(resolveStitch('cr-post', 'en').abbr).toEqual(expect.arrayContaining(['rtrf (UK)', 'rtrb (UK)']))
+    expect(resolveStitch('kn-skp', 'en').abbr).toContain('psso')
+  })
+  it('point de riz : double moss et moss américain précisés', () => {
+    const tip = resolveStitch('kn-seed', 'en').tip
+    expect(tip).toMatch(/double moss/i)
+    expect(tip).toMatch(/US moss stitch/i)
+  })
+})

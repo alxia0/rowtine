@@ -23,6 +23,7 @@ import { trapTabFocus, useDialogFocusReturn } from '@/composables/useFocusTrap'
 import { useDismissMenu } from '@/composables/useDismissMenu'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { pickAndCropImage } from '@/utils/photo'
+import { yarnPickLabel } from '@/utils/yarn-filter'
 import { cleanDesignerName } from '@/utils/pattern-designer'
 import { needleTexts, gaugeText as gaugeTextOf } from '@/utils/project-tiles'
 import { Capacitor } from '@capacitor/core'
@@ -809,7 +810,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
             <span class="itile__k">{{ t('project.yarns') }}</span>
             <ul v-if="projectYarns.length || consumedYarns.length" class="yarnlist">
               <li v-for="y in projectYarns" :key="'r' + y.id">
-                {{ y.brand || '—' }}<template v-if="y.colorName"> · {{ y.colorName }}</template>
+                {{ yarnPickLabel(y) }}
                 <!-- Réservé / stock (constat revue, 08/08) : `y.quantity` seul n'affichait que
                      le stock, jamais ce que la tuile « Coût du projet » facture (1 pelote par
                      défaut, ProjectEditView.vue:101) — « ×10 » à côté d'un coût pour 1 pelote se
@@ -817,7 +818,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
                 <span class="yarnlist__meta">×{{ formatSkeins(reservationsOf(y)[project.id], { locale }) }} / {{ formatSkeins(y.quantity, { locale }) }}<template v-if="y.weight"> · {{ t(`yarn.weights.${y.weight}`) }}</template></span>
               </li>
               <li v-for="y in consumedYarns" :key="'c' + y.id">
-                {{ y.brand || '—' }}<template v-if="y.colorName"> · {{ y.colorName }}</template>
+                {{ yarnPickLabel(y) }}
                 <span class="yarnlist__meta">{{ t('project.yarnKnitted', { n: formatSkeins(consumedOf(y)[project.id], { locale }) }) }}</span>
               </li>
             </ul>

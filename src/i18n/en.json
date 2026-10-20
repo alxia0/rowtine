@@ -551,6 +551,22 @@
     "storedInPlaceholder": "e.g. Shelf 2, blue basket",
     "notes": "Notes",
     "notesPlaceholder": "Your personal notes on this yarn…",
+    "swatches": {
+      "title": "Swatches",
+      "add": "Add a swatch",
+      "remove": "Remove",
+      "mode": "Worked",
+      "modeFlat": "Flat",
+      "modeRound": "In the round",
+      "size": "Needle or hook (mm)",
+      "stitches": "Stitches",
+      "rows": "Rows",
+      "per10": "per 10 cm",
+      "hint": "Record the gauge you get with this yarn.",
+      "empty": "No swatch recorded.",
+      "stitchesShort": "sts",
+      "rowsShort": "rows"
+    },
     "purchasesCount": "Recorded purchases",
     "lastPurchaseDate": "Last purchase",
     "composition": "Composition",
@@ -671,7 +687,7 @@
     "empty": "No patterns yet. Add your first one.",
     "emptyExampleName": "Raglan sweater",
     "emptyExampleHint": "This is what a pattern looks like. Add your first pattern to start your library.",
-    "noSections": "No sections.",
+    "writeInstructions": "Write the instructions",
     "sectionFallback": "Section",
     "importWarningsTitle": "To check after import",
     "importLowConfidence": "Low import quality — this pattern will need significant correction.",
@@ -758,6 +774,7 @@
   },
   "correction": {
     "title": "Fix the pattern",
+    "writeTitle": "Write the pattern",
     "entry": "Fix the pattern",
     "cancel": "Cancel",
     "save": "Save",
@@ -949,6 +966,7 @@
       "replayTourHint": "Reopens the sample hat in the reader with the explanation bubbles."
     },
     "contribute": "Contribute",
+    "feedback": "Give feedback",
     "suggest": "Suggest an improvement",
     "support": "Support Rowtine",
     "export": {
@@ -967,7 +985,8 @@
         "dyeLot": "Dye lot",
         "purchaseDate": "Purchase date",
         "composition": "Composition",
-        "labels": "Characteristics"
+        "labels": "Characteristics",
+        "swatches": "Swatches"
       },
       "project": {
         "name": "Name",
@@ -1335,7 +1354,11 @@
     "suggested": "Suggested for this pattern",
     "noResult": "No matching stitch",
     "done": "Done",
-    "craft": { "crochet": "Crochet", "knitting": "Knitting" },
+    "craft": { "crochet": "Crochet", "knitting": "Knitting", "terms": "US / UK" },
+    "termsIntro": "Names differ between US and UK patterns. Check which one your pattern uses.",
+    "termsUs": "US",
+    "termsUk": "UK",
+    "termsGeneral": "General",
     "group": {
       "base": "Basic stitches",
       "shaping": "Increases and decreases",
@@ -1531,6 +1554,7 @@
     "licensesRepository": "Project repository",
     "changelogTitle": "What's new in this version",
     "contact": "Contact us",
+    "feedback": "Give feedback",
     "website": "{app} website",
     "privacyUpdated": "Last updated: {date}"
   },

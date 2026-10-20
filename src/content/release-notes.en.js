@@ -7,6 +7,16 @@
 // même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_EN = [
   {
+    version: '1.4.3',
+    notes: [
+      'Yarn swatches: note the gauge you got with a yarn on its page in the stash (flat or in the round, needle or hook size, stitches and rows over 10 cm). Swatches follow the yarn in backups and in the stash export.',
+      'Stitch memo: a new "US / UK" tab (English only) lists the crochet and knitting terms that differ between US and UK patterns, and the British abbreviations (yfwd, yrn, yon, psso and more).',
+      'English sample patterns now say that they are written in US terms.',
+      'Writing a pattern by hand: "Write the instructions" opens the editor right away, even without a photo.',
+      'Choosing a yarn from your stash: each row now shows the brand, the model and the colorway.',
+    ],
+  },
+  {
     version: '1.4.2',
     notes: [
       'Repeated sections: a section can be worked several times (socks, sleeves, ears or legs of an amigurumi), and each copy keeps its own progress. By default, sleeves, ears, limbs and legs are worked in pairs.',

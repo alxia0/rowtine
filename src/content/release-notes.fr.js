@@ -14,6 +14,16 @@
 // privacy-policy.fr.js.
 export const RELEASE_NOTES_FR = [
   {
+    version: '1.4.3',
+    notes: [
+      "Échantillons de laine : note la tension obtenue avec une laine sur sa fiche du stock (à plat ou en rond, taille d'aiguille ou de crochet, mailles et rangs pour 10 cm). Les échantillons suivent la laine dans les sauvegardes et dans l'export du stock.",
+      "Mémo des points : nouvel onglet « US / UK » (en anglais uniquement) qui liste les termes de crochet et de tricot différents entre patrons américains et britanniques, et les abréviations britanniques (yfwd, yrn, yon, psso et d'autres).",
+      "Les patrons d'exemple en anglais indiquent maintenant qu'ils sont écrits en termes américains.",
+      "Écrire un patron à la main : « Écrire les instructions » ouvre l'éditeur tout de suite, même sans photo.",
+      "Choix d'une laine du stock : chaque ligne affiche la marque, le modèle et le coloris.",
+    ],
+  },
+  {
     version: '1.4.2',
     notes: [
       "Sections répétables : une section peut se faire plusieurs fois (chaussettes, manches, oreilles ou pattes d'un amigurumi), et chaque exemplaire garde sa progression. Par défaut, les manches, oreilles, membres et jambes se font par 2.",

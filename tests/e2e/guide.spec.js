@@ -68,10 +68,15 @@ test('Guide : chaque image du contenu français se charge réellement (aucune im
   for (let i = 0; i < total; i++) {
     const img = images.nth(i)
     await expect(img).toBeVisible()
+    // Les images sont en loading="lazy" : une image hors écran n'est pas encore chargée, donc
+    // naturalWidth vaut 0 sans que le fichier soit cassé. On l'amène à l'écran puis on attend
+    // son chargement ; un fichier réellement cassé garde 0 et fait échouer le sondage.
+    await img.scrollIntoViewIfNeeded()
     // naturalWidth reste à 0 si le fichier n'a pas pu être décodé (nom introuvable, WebP
     // corrompu…) même quand l'élément <img> lui-même est "visible" dans le DOM.
-    const naturalWidth = await img.evaluate((el) => el.naturalWidth)
-    expect(naturalWidth, `image cassée : ${await img.getAttribute('src')}`).toBeGreaterThan(0)
+    await expect
+      .poll(() => img.evaluate((el) => el.naturalWidth), { message: `image cassée : ${await img.getAttribute('src')}` })
+      .toBeGreaterThan(0)
   }
 })
 

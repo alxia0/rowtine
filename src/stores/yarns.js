@@ -40,6 +40,7 @@ export function emptyYarn() {
     // à cette refonte, jamais réécrites tant qu'elles ne sont pas modifiées.
     coverIndex: 0,
     notes: '', // texte libre, alimenté notamment par l'import Ravelry (Comments + annexes)
+    swatches: [], // échantillons saisis à la main : [{ mode, sizeMm, stitches, rows }], cf. utils/yarn-swatches.js
     storedIn: '', // lieu de rangement physique, alimenté notamment par « Stored in » (Ravelry)
   }
 }

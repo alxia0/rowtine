@@ -18,7 +18,7 @@ import i18n from '@/i18n'
 import AboutView from '@/views/AboutView.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import { APP_VERSION, APP_BUILD, APP_CREATOR } from '@/constants/app-info'
-import { CONTACT_EMAIL, websiteUrlFor } from '@/constants/app-links'
+import { CONTACT_EMAIL, websiteUrlFor, feedbackUrlFor } from '@/constants/app-links'
 import { RELEASE_NOTES_FR } from '@/content/release-notes.fr'
 import { RELEASE_NOTES_EN } from '@/content/release-notes.en'
 import { RELEASE_NOTES_DE } from '@/content/release-notes.de'
@@ -132,6 +132,23 @@ describe('AboutView — contact et site', () => {
     expect(row.exists()).toBe(true)
     expect(row.attributes('href')).toBe(`mailto:${CONTACT_EMAIL}`)
     expect(row.attributes('href')).not.toContain('github')
+  })
+
+  // Chantier retours utilisatrices, 11/10/2026 : près de « Nous contacter », même porte sans
+  // compte, cette fois vers le formulaire du site. Même mécanisme que « Site web » ci-dessous.
+  it('rend la rangée « Donner ton avis » vers le formulaire de la langue active', async () => {
+    const wrapper = await mountAbout('fr')
+    const row = wrapper.find('[data-test="about-link-feedback"]')
+    expect(row.exists()).toBe(true)
+    expect(row.attributes('href')).toBe(feedbackUrlFor('fr'))
+    expect(row.attributes('target')).toBe('_blank')
+    expect(row.attributes('rel')).toBe('noopener')
+  })
+
+  it("« Donner ton avis » suit la langue active — l'adresse change avec la locale (allemand)", async () => {
+    const wrapper = await mountAbout('de')
+    const row = wrapper.find('[data-test="about-link-feedback"]')
+    expect(row.attributes('href')).toBe(feedbackUrlFor('de'))
   })
 
   // 12/08/2026 — le SITE suit désormais la langue de l'APP, pas celle du navigateur (exigence

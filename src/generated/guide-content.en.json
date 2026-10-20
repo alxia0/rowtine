@@ -2480,7 +2480,27 @@
                   "italic": false
                 },
                 {
-                  "text": ": that's the one that illustrates the pattern in the library. (An imported pattern keeps the cover taken from its PDF.) And as soon as it has a photo, the ",
+                  "text": ": that's the one that illustrates the pattern in the library. (An imported pattern keeps the cover taken from its PDF.) To write its instructions, tap ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Write the instructions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " on the pattern's page, with or without a photo: the editor opens on a blank page. Tap ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Edit text",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", write one line per step, then give each line its category (Step, Counter, Section, Note, Reference), as described in \"The correction editor, in detail\" below. Once saved, the pattern is followed in a project just like an imported one: checkboxes, counters and progress by section. And as soon as it has a photo, the ",
                   "bold": false,
                   "italic": false
                 },
@@ -2635,7 +2655,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": simple reading for patterns without special formatting, or patterns you've typed in entirely by hand.",
+                  "text": ": simple reading for patterns without special formatting.",
                   "bold": false,
                   "italic": false
                 }
@@ -3586,6 +3606,91 @@
                 },
                 {
                   "text": ", then show up on the yarn's page.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "The gauge you got with this yarn",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Swatches",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " block of the form keeps, for each try, how you worked it (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Flat",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " or ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "In the round",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), the needle or hook size in millimetres, and the number of ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "stitches",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "rows",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " over 10 cm. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Add a swatch",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " opens a line, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Remove",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " deletes it, and a line left empty is not saved. Swatches show on the yarn's page, are never required, and follow the yarn in backups and in the stash export. When you pick up a yarn you have already used, you find your gauge again.",
                   "bold": false,
                   "italic": false
                 }
@@ -4729,7 +4834,107 @@
                   "italic": false
                 },
                 {
-                  "text": " tile opens every card in the memo, for reading only: the basic stitches and the most common ones, in crochet and in knitting. Search for a stitch by its name or abbreviation, switch between the Crochet and Knitting tabs, and tap a card to unfold its steps. To keep some stitches at hand while you work on a piece, choose them from the reader's cheat sheet (point 3).",
+                  "text": " tile opens every card in the memo, for reading only: the basic stitches and the most common ones, in crochet and in knitting. Search for a stitch by its name or abbreviation, switch between the Crochet and Knitting tabs, and tap a card to unfold its steps. To keep some stitches at hand while you work on a piece, choose them from the reader's cheat sheet (point 3). In ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "English",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", a third tab, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "US / UK",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", lists the crochet and knitting terms that change between US and UK patterns (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "single crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "double crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "bind off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cast off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": "), with their abbreviations; the memo also gains the British abbreviations (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yfwd",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yrn",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yon",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "psso",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }

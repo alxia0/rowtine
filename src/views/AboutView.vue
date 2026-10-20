@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import { APP_VERSION, APP_BUILD, APP_CREATOR } from '@/constants/app-info'
-import { CONTACT_EMAIL, websiteUrlFor } from '@/constants/app-links'
+import { CONTACT_EMAIL, websiteUrlFor, feedbackUrlFor } from '@/constants/app-links'
 import { resolveReleaseNotes } from '@/content/release-notes'
 import { withAppName } from '@/utils/app-name-token'
 
@@ -21,6 +21,10 @@ const releaseNotes = computed(() => resolveReleaseNotes(locale.value))
 // `websiteUrlFor` gère elle-même le repli sur l'anglais si la locale est inconnue, donc ne
 // rend jamais une adresse vide.
 const websiteUrl = computed(() => websiteUrlFor(locale.value))
+
+// Adresse du formulaire de retours pour la langue active (chantier retours utilisatrices,
+// 11/10/2026) — même mécanisme que `websiteUrl` ci-dessus.
+const feedbackUrl = computed(() => feedbackUrlFor(locale.value))
 
 // Le journal des nouveautés porte le marqueur `{app}`, pas le nom en clair : substitué
 // ici, à l'affichage, depuis la même source unique (`app.name`) — même
@@ -99,6 +103,19 @@ function note(text) {
            destinataire. -->
       <a v-if="CONTACT_EMAIL" class="link-row" data-test="about-link-contact" :href="`mailto:${CONTACT_EMAIL}`">
         {{ t('about.contact') }}
+      </a>
+      <!-- « Donner ton avis » (chantier retours utilisatrices, 11/10/2026) : juste après
+           « Nous contacter », même porte qui ne demande pas de compte, cette fois vers le
+           formulaire du site plutôt que le client mail. `target`/`rel` comme « Site web »
+           ci-dessous : Capacitor ouvre le navigateur système sur un hôte étranger à l'app. -->
+      <a
+        class="link-row"
+        data-test="about-link-feedback"
+        :href="feedbackUrl"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ t('about.feedback') }}
       </a>
       <a
         class="link-row"

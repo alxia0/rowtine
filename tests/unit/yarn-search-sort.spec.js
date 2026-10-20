@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   matchesQuery, matchesLabel, matchesBrand, NO_BRAND, sortYarns,
-  matchesWeight, matchesGrams, colorFamily, matchesColorFamily, COLOR_CUSTOM, matchesComposition,
+  yarnPickLabel, matchesWeight, matchesGrams, colorFamily, matchesColorFamily, COLOR_CUSTOM, matchesComposition,
 } from '@/utils/yarn-filter'
 import { YARN_WEIGHTS } from '@/constants/catalog'
 import { COLOR_PALETTE } from '@/constants/swatch'
@@ -302,5 +302,20 @@ describe('matchesComposition', () => {
   it('les doublons dans la composition ne gênent pas le filtre', () => {
     expect(matchesComposition({ composition: ['laine', 'laine', 'coton'] }, 'coton')).toBe(true)
     expect(matchesComposition({ composition: ['laine', 'laine'] }, 'coton')).toBe(false)
+  })
+})
+
+describe('libellé d’une laine dans les sélecteurs', () => {
+  it('affiche marque, modèle et coloris dans cet ordre', () => {
+    expect(yarnPickLabel(laine)).toBe('Drops · Baby Merino · Bleu glacier')
+  })
+
+  it('saute le modèle absent sans séparateur orphelin ni double espace', () => {
+    expect(yarnPickLabel({ brand: 'Drops', model: '  ', colorName: 'Bleu' })).toBe('Drops · Bleu')
+  })
+
+  it('garde le tiret quand la marque manque, comme avant', () => {
+    expect(yarnPickLabel({ colorName: 'Bleu' })).toBe('— · Bleu')
+    expect(yarnPickLabel({})).toBe('—')
   })
 })

@@ -2475,7 +2475,27 @@
                   "italic": false
                 },
                 {
-                  "text": ": es la que ilustra el patrón en la biblioteca. (Un patrón importado conserva la portada sacada de su PDF.) Y en cuanto tiene una foto, aparece el botón ",
+                  "text": ": es la que ilustra el patrón en la biblioteca. (Un patrón importado conserva la portada sacada de su PDF.) Para escribir sus instrucciones, toca ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Escribir las instrucciones",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " en la ficha del patrón, con o sin foto: el editor se abre en una página en blanco. Toca ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Editar texto",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", escribe una línea por paso y da a cada línea su categoría (Paso, Contador, Sección, Nota, Referencia), como se describe en «El editor de corrección, en detalle», más abajo. Una vez guardado, el patrón se sigue en un proyecto igual que uno importado: casillas, contadores y progreso por sección. Y en cuanto tiene una foto, aparece el botón ",
                   "bold": false,
                   "italic": false
                 },
@@ -2630,7 +2650,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": lectura sencilla para patrones sin formato especial, o patrones que has escrito enteramente a mano.",
+                  "text": ": lectura sencilla para patrones sin formato especial.",
                   "bold": false,
                   "italic": false
                 }
@@ -3581,6 +3601,91 @@
                 },
                 {
                   "text": ", se muestran luego en la ficha de la lana.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "La tensión que obtuviste con esta lana",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": el bloque ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Muestras",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " del formulario guarda, para cada prueba, cómo la trabajaste (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "En plano",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " o ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "En redondo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), el tamaño de aguja o de ganchillo en milímetros, y el número de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "puntos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " y de ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "filas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " en 10 cm. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Añadir una muestra",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " abre una línea, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Quitar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " la elimina, y una línea que se deja vacía no se guarda. Las muestras se muestran en la ficha de la lana, nunca son obligatorias y acompañan a la lana en las copias de seguridad y en la exportación del stock. Cuando retomas una lana que ya usaste, vuelves a encontrar tu tensión.",
                   "bold": false,
                   "italic": false
                 }
@@ -4724,7 +4829,107 @@
                   "italic": false
                 },
                 {
-                  "text": " abre todas las fichas del memo, solo para consultar: los puntos básicos y los más habituales, de ganchillo y de punto. Busca un punto por su nombre o su abreviatura, pasa de la pestaña Ganchillo a la pestaña Punto, y toca una ficha para desplegar sus pasos. Para tener ciertos puntos a mano mientras tejes una pieza, elígelos desde la guía rápida del lector (punto 3).",
+                  "text": " abre todas las fichas del memo, solo para consultar: los puntos básicos y los más habituales, de ganchillo y de punto. Busca un punto por su nombre o su abreviatura, pasa de la pestaña Ganchillo a la pestaña Punto, y toca una ficha para desplegar sus pasos. Para tener ciertos puntos a mano mientras tejes una pieza, elígelos desde la guía rápida del lector (punto 3). En ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "inglés",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", una tercera pestaña, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "US / UK",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", enumera los términos de ganchillo y de punto que cambian entre patrones estadounidenses y británicos (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "single crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "double crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "bind off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cast off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": "), con sus abreviaturas; el memo incluye además las abreviaturas británicas (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yfwd",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yrn",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yon",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "psso",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }

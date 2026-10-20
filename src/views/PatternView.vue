@@ -102,6 +102,11 @@ function createProject() {
 function preview() {
   router.push({ name: 'pattern-read', params: { id: pattern.value.id } })
 }
+function writeInstructions() {
+  // `write` : l'éditeur affiche « Écrire le patron » dès son ouverture, avant même
+  // d'avoir lu le patron (sinon « Corriger » s'affiche le temps du chargement).
+  router.push({ name: 'pattern-correct', params: { id: pattern.value.id }, query: { write: '1' } })
+}
 async function openExternal() {
   snackbar.show(t('patternExtras.opening')) // accuse le tap immédiatement (ouverture native lente)
   try {
@@ -196,10 +201,18 @@ async function setCover(idx) {
         >
           <AppIcon name="eye" :size="18" /> {{ t('pattern.preview') }}
         </button>
-        <!-- État vide (préexistant) : un patron sans reader/sections ni galerie
-             (ex. créé manuellement, PatternForm ne compose plus de reader) n'a rien à
-             prévisualiser — on le dit plutôt que de ne rien afficher. -->
-        <p v-else class="muted mt">{{ t('pattern.noSections') }}</p>
+        <!-- Patron sans section (créé manuellement : PatternForm ne compose pas de
+             reader) : l'éditeur s'ouvre directement pour en écrire les instructions,
+             photo ou non. Dès qu'il a des sections, on retombe sur Prévisualiser puis
+             « Corriger le patron ». -->
+        <button
+          v-if="!pattern.reader?.sections?.length"
+          class="btn btn--block mt"
+          data-test="write-instructions"
+          @click="writeInstructions"
+        >
+          <AppIcon name="edit" :size="18" /> {{ t('pattern.writeInstructions') }}
+        </button>
 
         <PatternGallery
           :images="pattern.gallery"

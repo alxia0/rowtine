@@ -124,6 +124,13 @@ export const CRAFT_MARKERS = [
   { id: 'en-crochet', kind: 'instr', w: 2, re: rx(String.raw`single\s+crochet|double\s+crochet|half\s+double|treble\s+crochet|sl[ \t]?st|magic\s+(?:ring|circle|loop)|ch\s+from\s+(?:the\s+)?hook`) },
   // relevé 2026-09-24 : 79/158 positifs en (195/3249 en tout), 0/73 négatifs
   { id: 'en-crochet-abbr', kind: 'instr', w: 2, re: rxc(String.raw`${N1}(?:sc|hdc|dc|tr|sl[ \t]?st|ch)|(?:sc|hdc|dc)\d?tog|[Cc]h\s+\d+`) },
+  // anglais britannique (ajout du 2026-10-20, après le mémo de points) : le lexique ci-dessus est américain.
+  // relevé 2026-10-20 : 3/3250 positifs, 0/78 négatifs
+  { id: 'en-uk-crochet-abbr', kind: 'instr', w: 2, re: rxc(String.raw`${N1}(?:htr|dtr)|(?:htr|tr)\d?tog|ss[ \t]+to[ \t]+(?:join|first|top)`) },
+  // relevé 2026-10-20 : 6/3250 positifs, 0/78 négatifs
+  { id: 'en-uk-crochet', kind: 'instr', w: 2, re: rx(String.raw`half\s+treble|double\s+treble|yarn\s+over\s+hook`) },
+  // relevé 2026-10-20 : 19/3250 positifs, 1/78 négatifs (un recueil de patrons de tricot, déjà accepté)
+  { id: 'en-uk-knit', kind: 'instr', w: 2, re: rx(String.raw`stocking\s+st(?:itch)?|double\s+moss|(?:yfwd|yrn|rtrf|rtrb)(?=\s*[,.;)\n])|yon(?=\s*,)`) },
   // relevé 2026-09-24 : 66/158 positifs en (122/3249 en tout), 0/73 négatifs
   { id: 'en-needles', kind: 'mat', w: 2, re: rx(String.raw`(?:circular|double[-\s]pointed|straight|knitting)\s+needles?|dpns?|needles?\s*(?:size\s*)?(?:us\s*)?(?:${NUM}\s*mm|\d+\s*\(\s*${NUM}\s*mm\s*\))`) },
   // relevé 2026-09-24 : 83/158 positifs en (132/3249 en tout), 0/73 négatifs

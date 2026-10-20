@@ -15,11 +15,15 @@ const CHART_TORSADE = {
   readDir: 'rtl',
 }
 
+const SOURCE_US_TERMS =
+  'Rowtine example pattern, written with US terms (for example sc, dc, bind off). UK equivalents are in Tools, Stitch techniques memo, US / UK tab.'
+
 /* ───────────────────────────── Cable Beanie (pattern for the in-progress project) ────── */
 const BONNET = {
   demoId: 'bonnet',
   author: 'Alexia O.',
   authorUrl: 'https://rowtine.app',
+  source: SOURCE_US_TERMS,
   name: 'Cable Beanie',
   type: 'knitting',
   category: 'accessories',
@@ -110,6 +114,7 @@ const ECHARPE = {
   demoId: 'echarpe',
   author: 'Alexia O.',
   authorUrl: 'https://rowtine.app',
+  source: SOURCE_US_TERMS,
   name: 'Cloud Scarf',
   type: 'knitting',
   category: 'accessories',
@@ -169,6 +174,7 @@ const SAC = {
   demoId: 'sac',
   author: 'Alexia O.',
   authorUrl: 'https://rowtine.app',
+  source: SOURCE_US_TERMS,
   name: 'Granny Bag',
   type: 'crochet',
   category: 'accessories',

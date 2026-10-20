@@ -173,6 +173,15 @@ function sectionFingerprint(section) {
   return typeof src === 'string' && src ? photoFileName(src, 0) : null
 }
 
+// Patron encore sans section (créé à la main, ouvert depuis « Écrire les instructions »
+// de la fiche) : on l'écrit, on ne le corrige pas. Figé sur `baseReader` (l'état à
+// l'ouverture), pas sur le texte en cours : le titre ne bascule pas pendant la frappe.
+// Avant chargement, l'indice `?write=1` posé par la fiche (sinon le titre habituel).
+const headerTitleKey = computed(() => {
+  const writing = baseReader.value ? !baseReader.value.sections?.length : route.query?.write === '1'
+  return writing ? 'correction.writeTitle' : 'correction.title'
+})
+
 onMounted(async () => {
   pattern.value = await patternsStore.get(route.params.id)
   if (!pattern.value) {
@@ -1248,7 +1257,7 @@ function onCancel() {
 
 <template>
 <div>
-  <AppHeader :title="t('correction.title')" back />
+  <AppHeader :title="t(headerTitleKey)" back />
   <main v-if="pattern" class="correct">
     <div class="correct__body">
       <section class="gallery-strip card">

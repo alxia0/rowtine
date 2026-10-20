@@ -2525,7 +2525,27 @@
                   "italic": false
                 },
                 {
-                  "text": ": Dieses Foto zeigt die Anleitung in der Bibliothek. (Eine importierte Anleitung behält das Cover aus ihrem PDF.) Und sobald sie ein Foto hat, erscheint die Schaltfläche ",
+                  "text": ": Dieses Foto zeigt die Anleitung in der Bibliothek. (Eine importierte Anleitung behält das Cover aus ihrem PDF.) Um ihre Arbeitsschritte zu schreiben, tippe auf der Seite der Anleitung auf ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Anleitung schreiben",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", mit oder ohne Foto: Der Editor öffnet sich mit einer leeren Seite. Tippe auf ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Text bearbeiten",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", schreib eine Zeile pro Schritt und gib jeder Zeile ihre Kategorie (Schritt, Zähler, Abschnitt, Notiz, Referenz), wie unter „Der Korrektur-Editor im Detail“ beschrieben. Nach dem Speichern verfolgst du die Anleitung in einem Projekt genau wie eine importierte: Kästchen zum Abhaken, Zähler und Fortschritt pro Abschnitt. Und sobald sie ein Foto hat, erscheint die Schaltfläche ",
                   "bold": false,
                   "italic": false
                 },
@@ -2680,7 +2700,7 @@
                   "italic": false
                 },
                 {
-                  "text": ": einfache Leseansicht für Anleitungen ohne besondere Formatierung oder Anleitungen, die du vollständig von Hand eingegeben hast.",
+                  "text": ": einfache Leseansicht für Anleitungen ohne besondere Formatierung.",
                   "bold": false,
                   "italic": false
                 }
@@ -3631,6 +3651,91 @@
                 },
                 {
                   "text": ", erscheinen danach auf der Karte des Garns.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Die Maschenprobe, die du mit dieser Wolle erzielt hast",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Der Block ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Maschenproben",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " im Formular hält für jeden Versuch fest, wie du gearbeitet hast (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "In Hin- und Rückreihen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " oder ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "In Runden",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "), die Nadel- oder Häkelnadelstärke in Millimetern sowie die Anzahl ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Maschen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Reihen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " auf 10 cm. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Maschenprobe hinzufügen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet eine Zeile, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Entfernen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " löscht sie, und eine leer gelassene Zeile wird nicht gespeichert. Die Maschenproben erscheinen auf der Karte des Garns, sind nie Pflicht und bleiben bei der Wolle, auch in Sicherungen und im Export des Vorrats. Nimmst du ein schon verwendetes Garn wieder zur Hand, findest du deine Maschenprobe wieder.",
                   "bold": false,
                   "italic": false
                 }
@@ -4774,7 +4879,107 @@
                   "italic": false
                 },
                 {
-                  "text": " öffnet alle Karten der Merkhilfe, nur zum Nachschlagen: die Grundmaschen und die gängigsten Maschen, beim Häkeln wie beim Stricken. Suche eine Masche über ihren Namen oder ihre Abkürzung, wechsle zwischen den Reitern Häkeln und Stricken, und tippe auf eine Karte, um ihre Schritte aufzuklappen. Um bestimmte Maschen während eines Werkstücks griffbereit zu haben, wählst du sie im Merkblatt des Lesemodus aus (Punkt 3).",
+                  "text": " öffnet alle Karten der Merkhilfe, nur zum Nachschlagen: die Grundmaschen und die gängigsten Maschen, beim Häkeln wie beim Stricken. Suche eine Masche über ihren Namen oder ihre Abkürzung, wechsle zwischen den Reitern Häkeln und Stricken, und tippe auf eine Karte, um ihre Schritte aufzuklappen. Um bestimmte Maschen während eines Werkstücks griffbereit zu haben, wählst du sie im Merkblatt des Lesemodus aus (Punkt 3). Auf ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Englisch",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " gibt es einen dritten Reiter, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "US / UK",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Er listet die Häkel- und Strickbegriffe auf, die sich zwischen US- und UK-Anleitungen unterscheiden (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "single crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "double crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "bind off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "cast off",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": "), mit ihren Abkürzungen; die Merkhilfe enthält außerdem die britischen Abkürzungen (",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yfwd",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yrn",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "yon",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ", ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "psso",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": ").",
                   "bold": false,
                   "italic": false
                 }

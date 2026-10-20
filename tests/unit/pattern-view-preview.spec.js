@@ -118,14 +118,43 @@ describe('PatternView — fiche épurée + Prévisualiser', () => {
     expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-read', params: { id } })
   })
 
-  it('patron créé manuellement sans galerie ni section : le message « aucune section » reste affiché', async () => {
+  // Protège : un patron sans section ni photo mène directement à l'éditeur pour écrire ses instructions.
+  it('patron créé manuellement sans galerie ni section : « Écrire les instructions » ouvre pattern-correct', async () => {
     const id = await db.patterns.add({ name: 'Test', type: 'knitting' })
     nav.route.params = { id: String(id) }
     nav.route.query = {}
     const w = mountView()
     await settle()
     expect(w.findAll('button').find((b) => b.text().includes('Prévisualiser'))).toBeFalsy()
-    expect(w.text()).toContain(i18n.global.t('pattern.noSections'))
+    const btn = w.find('[data-test="write-instructions"]')
+    expect(btn.exists()).toBe(true)
+    expect(btn.text()).toContain(tk('pattern.writeInstructions'))
+    await btn.trigger('click')
+    expect(nav.router.push).toHaveBeenCalledWith({ name: 'pattern-correct', params: { id }, query: { write: '1' } })
+  })
+
+  // Protège : avec une galerie mais sans section, les deux accès coexistent.
+  it('patron créé manuellement avec galerie, sans section : Prévisualiser ET « Écrire les instructions »', async () => {
+    const id = await db.patterns.add({
+      name: 'Test',
+      type: 'knitting',
+      reader: { sizeLabels: [], sections: [] },
+      gallery: [{ src: 'data:image/png;base64,GAL', page: 0, w: 10, h: 10 }],
+    })
+    nav.route.params = { id: String(id) }
+    nav.route.query = {}
+    const w = mountView()
+    await settle()
+    expect(w.findAll('button').find((b) => b.text().includes('Prévisualiser'))).toBeTruthy()
+    expect(w.find('[data-test="write-instructions"]').exists()).toBe(true)
+  })
+
+  // Protège : un patron qui a déjà des sections garde le seul parcours Prévisualiser puis Corriger.
+  it('patron avec sections : pas de « Écrire les instructions »', async () => {
+    await seedPattern()
+    const w = mountView()
+    await settle()
+    expect(w.find('[data-test="write-instructions"]').exists()).toBe(false)
   })
 })
 

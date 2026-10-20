@@ -3,6 +3,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
+import fr from '@/i18n/fr.json'
+import en from '@/i18n/en.json'
 import { createTestI18n } from './helpers/i18n-router'
 
 vi.mock('vue-router', () => ({ useRouter: () => ({ back: vi.fn(), push: vi.fn() }), useRoute: () => ({ query: {} }) }))
@@ -48,5 +51,39 @@ describe('StitchMemoView', () => {
     expect(w.text()).toContain(t('stitchMemo.noResult'))
     await w.get('input[type="search"]').setValue(resolveStitch('kn-knit', 'fr').abbr[0])
     expect(w.find('[data-stitch="kn-knit"]').exists()).toBe(true)
+  })
+
+  describe('onglet US / UK', () => {
+    const mountWith = (i) => mount(StitchMemoView, { global: { plugins: [i, createPinia()], stubs: { AppHeader: { props: ['title'], template: '<h1>{{ title }}</h1>' } } } })
+    const enI18n = () => createI18n({ legacy: false, locale: 'en', messages: { fr, en } })
+    const termsTab = (w) => w.findAll('[role="tab"]').find((b) => b.text() === 'US / UK')
+
+    it('l’onglet US / UK est absent en français', () => {
+      expect(termsTab(mountView())).toBeUndefined()
+    })
+
+    it('l’onglet US / UK est présent en anglais', () => {
+      const w = mountWith(enI18n())
+      expect(w.findAll('[role="tab"]').length).toBe(3)
+      expect(termsTab(w)).toBeDefined()
+    })
+
+    it('l’onglet montre les termes UK et masque la recherche', async () => {
+      const w = mountWith(enI18n())
+      await termsTab(w).trigger('click')
+      expect(w.text()).toContain('tr2tog')
+      expect(w.text()).toContain('yfwd')
+      expect(w.find('input[type="search"]').exists()).toBe(false)
+    })
+
+    it('repli sur Tricot si la langue quitte l’anglais', async () => {
+      const i = enI18n()
+      const w = mountWith(i)
+      await termsTab(w).trigger('click')
+      i.global.locale.value = 'fr'
+      await w.vm.$nextTick()
+      const sel = w.findAll('[role="tab"]').find((b) => b.attributes('aria-selected') === 'true')
+      expect(sel.text()).toBe(i.global.t('stitchMemo.craft.knitting'))
+    })
   })
 })

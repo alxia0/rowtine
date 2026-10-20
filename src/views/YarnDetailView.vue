@@ -26,6 +26,7 @@ import { orderedLabels } from '@/constants/yarn-labels'
 import { deduceOrigin } from '@/constants/fiber-origin'
 import { compositionText } from '@/constants/compositions'
 import { yarnUsageState } from '@/utils/yarn-usage'
+import { cleanSwatches, swatchSummary } from '@/utils/yarn-swatches'
 
 // Fiche détail plein écran d'une laine — remplace le tiroir YarnDetailDialog.vue (motif
 // « écran plein écran » de ProjectDetailView.vue). Additif : rien n'y navigue encore
@@ -97,6 +98,7 @@ const rows = computed(() => {
   push('yarn.notes', y.notes)
   return out
 })
+const swatchLines = computed(() => cleanSwatches(yarn.value?.swatches).map((sw) => swatchSummary(sw, t)))
 const labels = computed(() => orderedLabels(yarn.value?.labels))
 const origine = computed(() => deduceOrigin(yarn.value?.composition))
 const origineTexte = computed(() => {
@@ -205,6 +207,12 @@ async function remove() {
         </template>
       </dl>
 
+      <section v-if="swatchLines.length" class="ydet__block">
+        <h3 class="ydet__h3">{{ t('yarn.swatches.title') }}</h3>
+        <ul class="ydet__swatches">
+          <li v-for="(line, i) in swatchLines" :key="i" class="ydet__swatch">{{ line }}</li>
+        </ul>
+      </section>
       <section v-if="origineTexte || labels.length" class="ydet__block">
         <h3 class="ydet__h3">{{ t('yarn.labelsTitle') }}</h3>
         <p v-if="origineTexte" class="ydet__origin">{{ origineTexte }}</p>
@@ -264,6 +272,8 @@ async function remove() {
 .ydet__origin { color: var(--ink-55); font-size: 13px; margin: 0 0 var(--sp-2); }
 .ydet__labels { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
 .ydet__labels li { font-size: 12px; font-weight: 600; color: var(--ink); background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 3px 10px; }
+.ydet__swatches { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-2); }
+.ydet__swatch { color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }
 .ydet__usage { margin-bottom: var(--sp-4); }
 .tag { font-size: 11px; font-weight: 700; border-radius: var(--r-pill); padding: 2px 9px; border: 1px solid var(--line); color: var(--ink-55); }
 .tag--reserved { color: var(--mustard-deep); }

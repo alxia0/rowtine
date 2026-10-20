@@ -9,6 +9,7 @@ import { M_PER_YD, currencySymbol } from '@/utils/units'
 import { parseDecimal } from '@/utils/decimal'
 import { latestPurchaseDate, bainsOf } from '@/utils/purchases'
 import { normalizeLabels, orderedLabels } from '@/constants/yarn-labels'
+import { cleanSwatches, swatchSummary } from '@/utils/yarn-swatches'
 
 export function matchesQuery(yarn, query, t) {
   const q = String(query || '').trim().toLowerCase()
@@ -27,6 +28,14 @@ export function matchesQuery(yarn, query, t) {
   const foin = [yarn.brand, yarn.model, yarn.colorName, yarn.colorNotes, colorTypeLabel, labelLabels]
     .filter(Boolean).join(' ').toLowerCase()
   return foin.includes(q)
+}
+
+// Libellé d'une laine dans les listes de choix et la fiche projet : marque · modèle · coloris.
+// Un champ vide est sauté (pas de séparateur orphelin) ; sans marque, le tiret reste, comme
+// partout ailleurs dans l'app.
+export function yarnPickLabel(yarn) {
+  const clean = (s) => String(s ?? '').trim()
+  return [clean(yarn?.brand) || '—', clean(yarn?.model), clean(yarn?.colorName)].filter(Boolean).join(' · ')
 }
 
 // Filtre du menu déroulant. Une clé vide (« Toutes les laines ») retient tout.
@@ -230,7 +239,7 @@ export function yarnExportTable(yarns, { t, system, currency, locale, linesFor }
     t('settings.export.yarn.colorType'), t('settings.export.yarn.colorNotes'), t('settings.export.yarn.weight'),
     lengthHeader, t('settings.export.yarn.quantity'), priceHeader, t('settings.export.yarn.usedSkeins'),
     t('settings.export.yarn.dyeLot'), t('settings.export.yarn.purchaseDate'), t('settings.export.yarn.composition'),
-    t('settings.export.yarn.labels'),
+    t('settings.export.yarn.labels'), t('settings.export.yarn.swatches'),
   ]
   const rows = yarns.map((y) => {
     const lines = linesFor ? linesFor(y.id) : []
@@ -243,6 +252,7 @@ export function yarnExportTable(yarns, { t, system, currency, locale, linesFor }
       // Ordre canonique (YARN_LABELS), pas l'ordre de cochage — même helper que la fiche
       // détaillée et la carte du stock (revue finale du 06/08/2026).
       orderedLabels(y.labels).map((k) => t(`yarn.labels.${k}`)).join(', '),
+      cleanSwatches(y.swatches).map((sw) => swatchSummary(sw, t)).join('; '),
     ]
   })
   return { head, rows }

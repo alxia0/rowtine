@@ -1,3 +1,7 @@
+// Source unique de la version affichée (même import nommé qu'`AboutView.vue`, voir
+// `feedbackUrlFor` plus bas).
+import { APP_VERSION } from './app-info'
+
 // Emplacements PRÉVUS mais PAS ENCORE renseignés : ni l'adresse de contact ni le domaine du
 // site (guide + pitch) n'existaient au 02/08.
 // N'INVENTE AUCUNE VALEUR ICI — laisser vide tant que ce domaine n'a pas été choisi/acheté.
@@ -110,6 +114,42 @@ export const CONVERTER_URLS = {
 // Même résolution et même repli sur l'anglais que `guideUrlFor`.
 export function converterUrlFor(locale) {
   return CONVERTER_URLS[locale] ?? CONVERTER_URLS.en
+}
+
+// Page de retours du site (formulaire sans compte), une par langue de l'interface. Lue par
+// la rangée « Donner ton avis » du bloc Contribuer (SettingsView.vue) et de l'écran À propos
+// (AboutView.vue). ⚠️ PAS ENCORE EN LIGNE au 11/10/2026 : la page fait l'objet d'un chantier
+// sur le site en parallèle de celui-ci, et n'a donc pas été vérifiée en ligne comme
+// `WEBSITE_URLS`/`GUIDE_URLS`/`CONVERTER_URLS` l'ont été — même prudence que leur tout premier
+// commentaire, avant leur propre vérification.
+export const FEEDBACK_URLS = {
+  fr: 'https://rowtine.app/fr/retours/',
+  en: 'https://rowtine.app/en/retours/',
+  de: 'https://rowtine.app/de/retours/',
+  es: 'https://rowtine.app/es/retours/',
+}
+
+// Résout la langue ACTIVE vers l'adresse du formulaire de retours, avec les mêmes paramètres
+// que le site attend (contrat partagé avec la tâche « site » du même chantier) :
+//   - `source=app` : fixe, dit toujours que le retour vient de l'application ;
+//   - `version` : lue depuis la même source unique que l'écran À propos (`APP_VERSION`,
+//     `src/constants/app-info.js`), sauf si `context.version` la surcharge (utile aux tests) ;
+//   - `android` : OMIS tant qu'aucune dépendance déjà présente ne donne la version d'Android
+//     sans permission ni dépendance nouvelle (aucune au 11/10/2026 — `@capacitor/device`
+//     fournirait `Device.getInfo().osVersion`, mais n'est pas dans les dépendances du dépôt).
+//     Si `context.android` est fourni malgré tout, il est transmis tel quel.
+// Même repli sur l'anglais que `guideUrlFor`/`converterUrlFor` : une langue inconnue ne doit
+// jamais produire une adresse cassée.
+// Le site filtre lui-même ces trois valeurs côté serveur (`[0-9A-Za-z._ -]`, 32 caractères
+// max) ; `URLSearchParams` se contente ici de les encoder proprement pour l'URL.
+export function feedbackUrlFor(locale, context = {}) {
+  const base = FEEDBACK_URLS[locale] ?? FEEDBACK_URLS.en
+  const params = new URLSearchParams()
+  params.set('source', 'app')
+  const version = context.version ?? APP_VERSION
+  if (version) params.set('version', String(version))
+  if (context.android) params.set('android', String(context.android))
+  return `${base}?${params.toString()}`
 }
 
 // Page de dons « offrez-moi un café ». Adresse FOURNIE le 05/08/2026, le compte

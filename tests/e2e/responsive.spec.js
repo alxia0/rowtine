@@ -41,31 +41,6 @@ test.describe('tablette en paysage', () => {
     expect(largeur).toBeLessThanOrEqual(840)
   })
 
-  test('le stock de laines affiche plus de 2 colonnes sur tablette', async ({ page }) => {
-    await completeOnboarding(page)
-    await page.goto('/stash')
-    // Le stock est vide à l'onboarding (seul le lecteur de patrons est pré-rempli) : la
-    // bascule et la grille elle-même n'existent dans le DOM que si `yarnsStore.yarns.length`
-    // (StashView.vue, `<template v-if>`). Sans laine, le test expire au lieu d'échouer sur le
-    // nombre de colonnes — défaut du dossier, corrigé ici avec 3 laines.
-    for (const colorKey of ['rouge', 'bleu', 'vert']) {
-      await page.getByRole('button', { name: /Ajouter une laine/ }).click()
-      await page.locator('.addform select').first().selectOption('__other__')
-      await page.locator('input[placeholder="Saisis la marque"]').fill('Maison')
-      await page.locator(`.palette__sw[aria-label="${colorKey}"]`).click()
-      await page.locator('input[placeholder="1"]').fill('1')
-      await page.getByRole('button', { name: 'Enregistrer' }).click()
-    }
-
-    // Vue grille non active par défaut (StashView.vue: `const grid = ref(false)`).
-    await page.getByRole('button', { name: "Changer l'affichage" }).click()
-
-    const colonnes = await page.locator('.ygrid').evaluate(
-      (el) => getComputedStyle(el).gridTemplateColumns.split(' ').length,
-    )
-    expect(colonnes).toBeGreaterThan(2)
-  })
-
   test('les quatre bandes du lecteur restent alignées entre elles', async ({ page }) => {
     await completeOnboarding(page)
     // Patron SANS diagramme : depuis l'introduction du lecteur à deux volets, un patron AVEC

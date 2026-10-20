@@ -1,0 +1,5 @@
+Muestras de lana: anota la tensión obtenida con una lana en su ficha del stock.
+Memo de puntos: pestaña «US / UK» (solo en inglés) y abreviaturas británicas.
+Los patrones de ejemplo en inglés indican que están escritos en términos estadounidenses.
+Escribir un patrón a mano: el editor se abre enseguida, incluso sin foto.
+Elegir una lana del stock: cada fila muestra la marca, el modelo y el color.

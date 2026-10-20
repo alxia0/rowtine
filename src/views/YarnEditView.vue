@@ -23,6 +23,7 @@ import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
 import { toInput, fromInput, currencySymbol, formatSkeins } from '@/utils/units'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
+import { SWATCH_MODES, emptySwatch, cleanSwatches } from '@/utils/yarn-swatches'
 
 const route = useRoute()
 const router = useRouter()
@@ -193,6 +194,15 @@ function toggleLabel(k) {
   else form.labels.splice(i, 1)
 }
 
+// Échantillons : lignes libres de form.swatches ; une ligne restée vide n'est jamais enregistrée
+// (cleanSwatches au moment de save()).
+function addSwatch() {
+  form.swatches.push(emptySwatch())
+}
+function removeSwatch(i) {
+  form.swatches.splice(i, 1)
+}
+
 // Avertissement de cohérence : ne dépend QUE de la présence d'une fibre animale RECONNUE.
 const veganConflit = computed(() => {
   if (!form.labels.includes('vegan')) return ''
@@ -246,6 +256,7 @@ function applyExisting(y) {
   form.quantity = y.quantity === '' || y.quantity == null ? '' : formatSkeins(y.quantity, { locale: locale.value, grouping: false })
   form.composition = normalizeComposition(y.composition) // filtre les valeurs invalides
   form.labels = normalizeLabels(y.labels) // écarte toute clé hors des huit connues
+  form.swatches = cleanSwatches(y.swatches)
   loadUnitFields(y)
   delete form.id
   customBrand.value = !!(y.brand && !brandOptions.value.includes(y.brand))
@@ -264,6 +275,7 @@ function applyDuplicate(y) {
   })
   form.composition = normalizeComposition(y.composition)
   form.labels = normalizeLabels(y.labels) // même garde qu'en édition, cf. applyExisting
+  form.swatches = cleanSwatches(y.swatches) // la laine est la même : mêmes échantillons
   loadUnitFields(y)
   delete form.id
   customBrand.value = !!(y.brand && !brandOptions.value.includes(y.brand))
@@ -356,6 +368,7 @@ async function save() {
       price: form.price === '' || !Number.isFinite(parseDecimal(form.price)) ? '' : parseDecimal(form.price),
       quantity: normalizedQuantity(form.quantity),
       composition: normalizeComposition(form.composition),
+      swatches: cleanSwatches(form.swatches),
       colorNotes: form.colorType === 'uni' ? '' : form.colorNotes,
     }
     if (isEdit.value) {
@@ -592,6 +605,36 @@ async function resolvePendingPurchase(kind) {
       </template>
       <p v-if="veganConflit" class="veganwarn">{{ t('yarn.veganWarning', { fibre: veganConflit }) }}</p>
 
+      <p class="addform__section">{{ t('yarn.swatches.title') }}</p>
+      <p class="addform__grouplbl">{{ t('yarn.swatches.hint') }}</p>
+      <p v-if="!form.swatches.length" class="swatch__empty">{{ t('yarn.swatches.empty') }}</p>
+      <div v-for="(sw, i) in form.swatches" :key="i" class="swatch" data-test="swatch-row">
+        <div class="row row--fields">
+          <div class="col">
+            <label class="field-label" :for="`yarn-swatch-mode-${i}`">{{ t('yarn.swatches.mode') }}</label>
+            <select :id="`yarn-swatch-mode-${i}`" v-model="sw.mode" class="input" data-test="swatch-mode">
+              <option v-for="m in SWATCH_MODES" :key="m" :value="m">{{ t(m === 'round' ? 'yarn.swatches.modeRound' : 'yarn.swatches.modeFlat') }}</option>
+            </select>
+          </div>
+          <div class="col">
+            <label class="field-label" :for="`yarn-swatch-size-${i}`">{{ t('yarn.swatches.size') }}</label>
+            <input :id="`yarn-swatch-size-${i}`" v-model="sw.sizeMm" class="input" inputmode="decimal" data-test="swatch-size" />
+          </div>
+        </div>
+        <div class="row row--fields mt2">
+          <div class="col">
+            <label class="field-label" :for="`yarn-swatch-stitches-${i}`">{{ t('yarn.swatches.stitches') }} {{ t('yarn.swatches.per10') }}</label>
+            <input :id="`yarn-swatch-stitches-${i}`" v-model="sw.stitches" class="input" inputmode="numeric" data-test="swatch-stitches" />
+          </div>
+          <div class="col">
+            <label class="field-label" :for="`yarn-swatch-rows-${i}`">{{ t('yarn.swatches.rows') }} {{ t('yarn.swatches.per10') }}</label>
+            <input :id="`yarn-swatch-rows-${i}`" v-model="sw.rows" class="input" inputmode="numeric" data-test="swatch-rows" />
+          </div>
+        </div>
+        <button type="button" class="btn swatch__remove" data-test="swatch-remove" @click="removeSwatch(i)">{{ t('yarn.swatches.remove') }}</button>
+      </div>
+      <button type="button" class="btn mt2" data-test="swatch-add" @click="addSwatch">{{ t('yarn.swatches.add') }}</button>
+
       <label class="field-label mt2" for="yarn-notes">{{ t('yarn.notes') }}</label>
       <textarea id="yarn-notes" v-model="form.notes" class="input" rows="3" :placeholder="t('yarn.notesPlaceholder')"></textarea>
 
@@ -624,6 +667,10 @@ async function resolvePendingPurchase(kind) {
 .palette__cust { display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink-55); background: var(--bg); }
 .palette__cust:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
 .addform__title { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin: 0 0 var(--sp-2); }
+.swatch { margin-top: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line); border-radius: var(--r-md, 12px); }
+.swatch .col { min-width: 0; }
+.swatch__remove { margin-top: var(--sp-2); min-height: 44px; }
+.swatch__empty { margin: 0; font-size: 13.5px; color: var(--ink-55); }
 .mt2 { margin-top: var(--sp-2); }
 .wlabel { display: flex; align-items: center; gap: 6px; }
 .wlabel__help { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; margin: -12px 0; border: none; background: transparent; color: var(--ink-55); }

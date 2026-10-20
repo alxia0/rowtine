@@ -20,7 +20,7 @@ import { toCsv, downloadCsv } from '@/utils/csv'
 import { yarnExportTable } from '@/utils/yarn-filter'
 import { projectExportTable, patternExportTable } from '@/utils/export-tables'
 import SafFolderSection from '@/components/settings/SafFolderSection.vue'
-import { KOFI_URL, GITHUB_ISSUES_URL } from '@/constants/app-links'
+import { KOFI_URL, GITHUB_ISSUES_URL, feedbackUrlFor } from '@/constants/app-links'
 import { applyTheme, applyAccent, syncNativeChrome } from '@/theme/apply'
 import { generatePalette, hueGradientCss, presetHuesFor } from '@/theme/palette'
 import { useEffectiveTheme } from '@/theme/useEffectiveTheme'
@@ -38,9 +38,15 @@ import { isKeepScreenOnAvailable } from '@/native/keep-awake'
 import RowNotifOnboardingDialog from '@/components/RowNotifOnboardingDialog.vue'
 import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const settings = useSettingsStore()
 const { startTour } = useStartTour()
+
+// Adresse du formulaire de retours pour la langue ACTIVE de l'interface, même mécanisme et
+// même repli sur l'anglais que `GITHUB_ISSUES_URL`/`KOFI_URL` n'ont pas besoin (ils ne
+// dépendent pas de la langue) mais que `websiteUrlFor`/`guideUrlFor`/`converterUrlFor` ont déjà
+// ailleurs dans l'app.
+const feedbackUrl = computed(() => feedbackUrlFor(locale.value))
 const effectiveTheme = useEffectiveTheme()
 const hueGradient = computed(() => hueGradientCss(effectiveTheme.value))
 // Nuancier PAR THÈME (08/09) : la liste suit le thème effectif. Listes distinctes
@@ -564,6 +570,21 @@ function fmtDate(iso) {
     <!-- Contribuer -->
     <section class="block">
       <h2 class="block__title">{{ t('settings.contribute') }}</h2>
+      <!-- « Donner ton avis » (chantier retours utilisatrices, 11/10/2026) : EN TÊTE du bloc,
+           avant « Suggérer une amélioration », parce qu'elle ne demande ni compte ni dépôt
+           connu de l'utilisatrice — c'est la porte la plus large des trois. Ouvre le
+           formulaire du site, préremplie par `feedbackUrlFor` (langue active, `source=app`,
+           version). `target`/`rel` comme les deux rangées voisines : Capacitor voit un hôte
+           étranger à l'app et ouvre le navigateur système. -->
+      <a
+        class="link-row"
+        data-test="settings-link-feedback"
+        :href="feedbackUrl"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ t('settings.feedback') }}
+      </a>
       <!-- « Suggérer une amélioration » mène aux TICKETS du dépôt public depuis le 10/08/2026
            (décision produit). Elle ouvrait jusque-là le client mail, comme « Nous contacter »
            (À propos) — les deux menaient au même endroit, ce qui n'aidait personne.

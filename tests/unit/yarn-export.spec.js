@@ -4,6 +4,7 @@
 // langues. Bain et date d'achat viennent des lignes d'achat (`linesFor(yarnId)`), pas de la laine.
 import { describe, it, expect } from 'vitest'
 import { yarnExportTable } from '@/utils/yarn-filter'
+import { swatchSummary } from '@/utils/yarn-swatches'
 import { createTestI18n } from './helpers/i18n-router'
 
 // `t` factice : renvoie la clé elle-même entre crochets — suffit à vérifier QUELLE clé est
@@ -130,5 +131,19 @@ describe('yarnExportTable', () => {
   it('exporte les caractéristiques dans l’ordre canonique de YARN_LABELS, jamais l’ordre de cochage', () => {
     const { head, rows } = yarnExportTable([{ brand: 'Drops', labels: ['gots', 'vegan'] }], { t: realT })
     expect(rows[0][head.indexOf('Caractéristiques')]).toBe('Vegan, Fibres biologiques (GOTS)')
+  })
+
+  // La colonne des échantillons suit celle des caractéristiques ; cellule vide sans échantillon.
+  it('l’export ajoute la colonne des échantillons', () => {
+    const swatches = [
+      { mode: 'flat', sizeMm: 4, stitches: 22, rows: 30 },
+      { mode: 'round', sizeMm: 3.5, stitches: 24, rows: '' },
+    ]
+    const { head, rows } = yarnExportTable([{ brand: 'Drops', swatches }, { brand: 'Katia' }], { t })
+    expect(head[head.indexOf(t('settings.export.yarn.labels')) + 1]).toBe(t('settings.export.yarn.swatches'))
+    const col = head.indexOf(t('settings.export.yarn.swatches'))
+    expect(rows[0][col]).toBe(swatches.map((sw) => swatchSummary(sw, t)).join('; '))
+    expect(rows[0][col]).toContain('; ')
+    expect(rows[1][col]).toBe('')
   })
 })

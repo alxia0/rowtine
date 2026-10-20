@@ -1,4 +1,4 @@
-// Les 4 onglets de la fiche projet (Sections/Détails/Photos/Sessions) débordent sur un
+// Les 5 onglets de la fiche projet (Sections/Détails/Photos/Sessions/Stats) débordent sur un
 // écran étroit — le défilement horizontal EXISTE déjà (`.tabs { overflow-x: auto }`), mais
 // la barre de scroll est masquée volontairement (`scrollbar-width: none`) : rien ne dit
 // donc que « Sessions », coupé à droite, est atteignable. On vérifie ici l'indice de
@@ -35,7 +35,7 @@ test('un indice de dégradé signale que les onglets défilent, seulement quand 
   const tabs = page.locator('.tabs')
   // Attend un élément RÉEL (pas le SkeletonScreen) avant de mesurer quoi que ce soit.
   await expect(page.getByRole('tab').first()).toBeVisible()
-  await expect(page.getByRole('tab')).toHaveCount(4)
+  await expect(page.getByRole('tab')).toHaveCount(5)
 
   // Débordement réel du conteneur — sinon on teste l'inverse de ce qu'on croit.
   const overflowNarrow = await tabs.evaluate((el) => el.scrollWidth - el.clientWidth)

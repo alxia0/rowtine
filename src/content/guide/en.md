@@ -546,9 +546,15 @@ just more comfortable.
   author…) with a single **Photos** section for its images. On the pattern's
   page, a star on each photo in "Pattern photos" sets it as the **cover**:
   that's the one that illustrates the pattern in the library. (An imported
-  pattern keeps the cover taken from its PDF.) And as soon as it has a photo,
-  the **Preview the pattern** button appears: you can then follow an image
-  as a chart, exactly as for an imported pattern.
+  pattern keeps the cover taken from its PDF.) To write its instructions,
+  tap **Write the instructions** on the pattern's page, with or without a
+  photo: the editor opens on a blank page. Tap **Edit text**, write one line
+  per step, then give each line its category (Step, Counter, Section, Note,
+  Reference), as described in "The correction editor, in detail" below. Once
+  saved, the pattern is followed in a project just like an imported one:
+  checkboxes, counters and progress by section. And as soon as it has a
+  photo, the **Preview the pattern** button appears: you can then follow an
+  image as a chart, exactly as for an imported pattern.
 - **Set the designer**: when the reading did not find a pattern's designer, the
   **Designer: add** link on the pattern's page opens the pattern edit form directly on the **Designer** field. It then
   appears under the pattern in a project's **Details** tab, and on the badge.
@@ -567,7 +573,7 @@ just more comfortable.
   it is there, it shows on the pattern's own page ("Bought for £18.90 on
   8/7/2026", or simply "Free") and it counts in the **Expenses** screen.
 - **Pattern view**: simple reading for patterns without special
-  formatting, or patterns you've typed in entirely by hand.
+  formatting.
 - **3 sample patterns** ship with the app from the very first launch,
   so you can explore every feature without importing anything.
 
@@ -733,6 +739,13 @@ and asks for confirmation: nothing gets lost by mistake here either.
 - **Where it's stored, what you think of it**: two free fields, **Stored
   in** ("e.g. Shelf 2, blue basket") and **Notes**, then show up on the
   yarn's page.
+- **The gauge you got with this yarn**: the **Swatches** block of the form keeps,
+  for each try, how you worked it (**Flat** or **In the round**), the needle or
+  hook size in millimetres, and the number of **stitches** and **rows** over
+  10 cm. **Add a swatch** opens a line, **Remove** deletes it, and a line left
+  empty is not saved. Swatches show on the yarn's page, are never required, and
+  follow the yarn in backups and in the stash export. When you pick up a yarn
+  you have already used, you find your gauge again.
 - **Yarn that isn't a single colour**: a **Colour type** field (solid,
   gradient, self-striping, speckled, hand-dyed) and a **Colourway
   description** field ("blue, green, yellow speckled with black")
@@ -929,6 +942,10 @@ from Home:
   switch between the Crochet and Knitting tabs, and tap a card to unfold its
   steps. To keep some stitches at hand while you work on a piece, choose them
   from the reader's cheat sheet (point 3).
+  In **English**, a third tab, **US / UK**, lists the crochet and knitting terms
+  that change between US and UK patterns (*single crochet* and *double crochet*,
+  *bind off* and *cast off*), with their abbreviations; the memo also gains the
+  British abbreviations (*yfwd*, *yrn*, *yon*, *psso*).
 
 ## 7. Statistics
 

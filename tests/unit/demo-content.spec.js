@@ -118,3 +118,17 @@ describe('contenu de démonstration : designer des patrons', () => {
     }
   })
 })
+
+describe('contenu de démonstration : mention des termes US', () => {
+  // Protège : les exemples anglais annoncent leurs termes US, les autres langues n'ont pas de source.
+  it("les exemples anglais disent qu'ils sont en termes US", async () => {
+    const { patterns } = await loadDemoContent('en')
+    expect(patterns).toHaveLength(3)
+    for (const p of patterns) expect(p.source, p.demoId).toMatch(/US terms/)
+  })
+
+  it.each(['fr', 'de', 'es'])('%s : les patrons ne portent pas de source', async (locale) => {
+    const { patterns } = await loadDemoContent(locale)
+    for (const p of patterns) expect(p.source, p.demoId).toBeFalsy()
+  })
+})

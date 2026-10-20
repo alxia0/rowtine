@@ -197,7 +197,7 @@ export const STITCH_MEMO_EN = {
   },
   'cr-post': {
     name: 'Front and back post double crochet (US) / front and back post treble crochet (UK)',
-    abbr: ['FPdc (US)', 'BPdc (US)', 'FPtr (UK)', 'BPtr (UK)'],
+    abbr: ['FPdc (US)', 'BPdc (US)', 'FPtr (UK)', 'BPtr (UK)', 'rtrf (UK)', 'rtrb (UK)'],
     steps: [
       'Yarn over.',
       'For front post, insert the hook from front to back on one side of the post of the stitch below, then back to the front on the other side: the hook passes behind the post.',
@@ -335,7 +335,7 @@ export const STITCH_MEMO_EN = {
   },
   'kn-yo': {
     name: 'Yarn over',
-    abbr: ['yo'],
+    abbr: ['yo', 'yfwd (UK)', 'yrn (UK)', 'yon (UK)'],
     steps: [
       'If the yarn is at the back of the work, bring it to the front between the two needles.',
       'If the next stitch is a knit stitch, knit it: the yarn goes over the right needle and forms the yarn over.',
@@ -371,7 +371,7 @@ export const STITCH_MEMO_EN = {
   },
   'kn-skp': {
     name: 'Slip, knit, pass over',
-    abbr: ['skp', 'skpo'],
+    abbr: ['skp', 'skpo', 'psso'],
     steps: [
       'Slip 1 stitch knitwise onto the right needle, without working it.',
       'Knit the next stitch.',
@@ -482,7 +482,7 @@ export const STITCH_MEMO_EN = {
       'Check as you go: a stitch that shows a V gets purled, a stitch that shows a bump gets knitted.',
       'In the round, on an even number of stitches, apply the same rule on every round.',
     ],
-    tip: 'If columns appear, you are working the stitches the way they face you, which gives 1x1 rib. In US patterns, moss stitch is a different pattern whose knits and purls only shift every 2 rows.',
+    tip: 'If columns appear, you are working the stitches the way they face you, which gives 1x1 rib. The US moss stitch is a different pattern whose knits and purls only shift every 2 rows: that is the UK double moss stitch.',
   },
   'kn-cable': {
     name: 'Cable (4 stitches, with a cable needle)',

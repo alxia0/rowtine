@@ -491,10 +491,17 @@ régler : c'est le même écran, simplement plus à l'aise.
   source, auteur…) avec une seule rubrique **Photos** pour ses images. Sur la
   fiche du patron, une étoile sur chaque photo de « Photos du patron » la
   désigne comme **couverture** : c'est elle qui illustre le patron dans la
-  bibliothèque. (Un patron importé garde la couverture tirée de son PDF.) Et
-  dès qu'il a une photo, le bouton **Prévisualiser le patron** apparaît : tu
-  peux alors y suivre une image comme un diagramme, exactement comme pour un
-  patron importé.
+  bibliothèque. (Un patron importé garde la couverture tirée de son PDF.)
+  Pour écrire ses instructions, touche **Écrire les instructions** sur la
+  fiche du patron, avec ou sans photo : l'éditeur s'ouvre sur une page vide.
+  Touche **Modifier le texte**, écris une ligne par étape, puis donne à chaque
+  ligne sa catégorie (Étape, Compteur, Section, Note, Aide-mémoire), comme
+  décrit dans « L'éditeur de correction, en détail » ci-dessous. Une fois
+  enregistré, le patron se suit dans un projet comme un patron importé :
+  cases à cocher, compteurs et progression par section. Et dès qu'il a une
+  photo, le bouton **Prévisualiser le patron** apparaît : tu peux alors y
+  suivre une image comme un diagramme, exactement comme pour un patron
+  importé.
 - **Indiquer le designer** : quand la lecture n'a pas trouvé le designer d'un patron,
   le lien **Designer : ajouter**, sur la fiche du patron, ouvre directement le formulaire de modification sur le champ **Auteur·rice**. Il
   s'affiche ensuite sous le patron dans l'onglet **Détails** d'un projet, et sur le badge.
@@ -509,7 +516,7 @@ régler : c'est le même écran, simplement plus à l'aise.
   tu peux renseigner sans attendre d'avoir commencé un projet : dès qu'il est
   là, il s'affiche sur la fiche du patron (« Acheté 18,90 € le 07/08/2026 », ou simplement « Gratuit ») et il compte dans l'écran **Dépenses**.
 - **Vue patron** : consultation en lecture simple pour les patrons sans mise en
-  forme spéciale, ou les patrons saisis entièrement à la main.
+  forme spéciale.
 - **3 patrons d'exemple** sont livrés avec l'app dès le premier lancement, pour
   découvrir toutes les fonctions sans rien importer.
 
@@ -648,6 +655,14 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
 - **Où elle est rangée, ce que tu en penses** : deux champs libres, **Lieu de
   rangement** (« Étagère 2, panier bleu ») et **Notes**, s'affichent ensuite sur
   la fiche de la laine.
+- **La tension obtenue avec cette laine** : le bloc **Échantillons** du formulaire
+  garde, pour chaque essai, la façon de travailler (**À plat** ou **En rond**), la
+  taille d'aiguille ou de crochet en millimètres, et le nombre de **mailles** et de
+  **rangs** pour 10 cm. **Ajouter un échantillon** ouvre une ligne, **Retirer** la
+  supprime, et une ligne laissée vide n'est pas enregistrée. Les échantillons
+  s'affichent sur la fiche de la laine, ne sont jamais obligatoires, et suivent la
+  laine dans les sauvegardes et dans l'export du stock. Quand tu reprends une laine
+  déjà utilisée, tu retrouves ainsi ta tension.
 - **Les laines qui ne sont pas d'une seule couleur** : un champ **Type de
   coloris** (uni, dégradé, auto-rayant, moucheté, teint main) et un champ
   **Description du coloris** (« bleu, vert, jaune moucheté de noir ») complètent la pastille de couleur : une seule teinte ne suffit pas à décrire une laine multicolore. Le type de coloris se retrouve dans la recherche et dans
@@ -831,6 +846,11 @@ l'accueil :
   abréviation, passe de l'onglet Crochet à l'onglet Tricot, et touche une fiche
   pour déplier ses étapes. Pour garder certains points sous la main pendant un
   ouvrage, choisis-les depuis l'aide-mémoire du lecteur (point 3).
+  En **anglais**, un troisième onglet, **US / UK**, liste les termes de crochet
+  et de tricot qui changent entre patrons américains et britanniques (*single
+  crochet* et *double crochet*, *bind off* et *cast off*), avec leurs
+  abréviations ; le mémo y gagne aussi les abréviations britanniques (*yfwd*,
+  *yrn*, *yon*, *psso*).
 
 ## 7. Statistiques
 

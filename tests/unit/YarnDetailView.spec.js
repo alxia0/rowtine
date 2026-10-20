@@ -390,4 +390,32 @@ describe('YarnDetailView, Notes et Lieu de rangement', () => {
     expect(w.text()).not.toContain(fr.yarn.storedIn)
     expect(w.text()).not.toContain(fr.yarn.notes)
   })
+  // Échantillons : bloc en lecture seule, absent si la liste nettoyée est vide.
+  describe('échantillons', () => {
+    const SW = [{ mode: 'flat', sizeMm: '4', stitches: '22', rows: '30' }]
+    const title = fr.yarn.swatches.title
+
+    it('la fiche liste les échantillons', async () => {
+      const { w } = await mountView({ ...BASE_YARN, swatches: SW })
+      expect(w.text()).toContain(title)
+      const line = w.find('.ydet__swatch').text()
+      expect(line).toContain('22')
+      expect(line).toContain('30')
+    })
+
+    it('pas de bloc sans échantillon', async () => {
+      const { w } = await mountView({ ...BASE_YARN })
+      expect(w.text()).not.toContain(title)
+    })
+
+    it('une valeur invalide ne casse pas la fiche', async () => {
+      const { w } = await mountView({ ...BASE_YARN, swatches: 'abc' })
+      expect(w.text()).not.toContain(title)
+    })
+
+    it('une laine épuisée garde ses échantillons à l’affichage', async () => {
+      const { w } = await mountView({ ...BASE_YARN, quantity: 0, consumed: { 1: 1 }, swatches: SW })
+      expect(w.find('.ydet__swatch').text()).toContain('22')
+    })
+  })
 })

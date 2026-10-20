@@ -593,7 +593,14 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   für ihre Bilder. Auf der Anleitungskarte macht ein Stern auf jedem Foto
   unter „Fotos der Anleitung“ es zum **Cover**: Dieses Foto zeigt die
   Anleitung in der Bibliothek. (Eine importierte Anleitung behält das Cover
-  aus ihrem PDF.) Und sobald sie ein Foto hat, erscheint die Schaltfläche
+  aus ihrem PDF.) Um ihre Arbeitsschritte zu schreiben, tippe auf der Seite
+  der Anleitung auf **Anleitung schreiben**, mit oder ohne Foto: Der Editor
+  öffnet sich mit einer leeren Seite. Tippe auf **Text bearbeiten**, schreib
+  eine Zeile pro Schritt und gib jeder Zeile ihre Kategorie (Schritt, Zähler,
+  Abschnitt, Notiz, Referenz), wie unter „Der Korrektur-Editor im Detail“
+  beschrieben. Nach dem Speichern verfolgst du die Anleitung in einem Projekt
+  genau wie eine importierte: Kästchen zum Abhaken, Zähler und Fortschritt
+  pro Abschnitt. Und sobald sie ein Foto hat, erscheint die Schaltfläche
   **Anleitung ansehen**: Dort kannst du ein Bild wie ein Diagramm
   verfolgen, genau wie bei einer importierten Anleitung.
 - **Designer angeben**: Hat das Einlesen die Designerin oder den Designer einer Anleitung nicht gefunden, öffnet der Link **Designer: hinzufügen** auf der Seite der Anleitung direkt das Bearbeitungsformular der Anleitung im Feld **Designer*in**. Danach erscheint der Name unter der Anleitung im Reiter **Details** eines Projekts und auf dem Abzeichen.
@@ -614,8 +621,7 @@ zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.
   7.8.2026 für 18,90 € gekauft“ oder einfach „Kostenlos“) und er zählt
   im Bildschirm **Ausgaben**.
 - **Anleitungsansicht**: einfache Leseansicht für Anleitungen ohne
-  besondere Formatierung oder Anleitungen, die du vollständig von Hand
-  eingegeben hast.
+  besondere Formatierung.
 - **3 Beispielanleitungen** bekommst du schon beim ersten Start mit der
   App mitgeliefert, um alle Funktionen zu entdecken, ohne etwas zu
   importieren.
@@ -796,6 +802,15 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
 - **Wo es liegt, was du davon hältst**: zwei freie Felder,
   **Aufbewahrungsort** („Regal 2, blauer Korb“) und **Notizen**, erscheinen
   danach auf der Karte des Garns.
+- **Die Maschenprobe, die du mit dieser Wolle erzielt hast**: Der Block
+  **Maschenproben** im Formular hält für jeden Versuch fest, wie du gearbeitet
+  hast (**In Hin- und Rückreihen** oder **In Runden**), die Nadel- oder Häkelnadelstärke in
+  Millimetern sowie die Anzahl **Maschen** und **Reihen** auf 10 cm. **Maschenprobe
+  hinzufügen** öffnet eine Zeile, **Entfernen** löscht sie, und eine leer
+  gelassene Zeile wird nicht gespeichert. Die Maschenproben erscheinen auf der
+  Karte des Garns, sind nie Pflicht und bleiben bei der Wolle, auch in Sicherungen
+  und im Export des Vorrats. Nimmst du ein schon verwendetes Garn wieder zur Hand,
+  findest du deine Maschenprobe wieder.
 - **Garn, das nicht einfarbig ist**: Ein Feld **Farbtyp** (uni,
   Farbverlauf, selbststreifend, gesprenkelt, handgefärbt) und ein Feld
   **Beschreibung der Farbstellung** („blau, grün, gelb gesprenkelt mit
@@ -1014,6 +1029,11 @@ zu sein, erreichbar vom Start aus:
   auf eine Karte, um ihre Schritte aufzuklappen. Um bestimmte Maschen während
   eines Werkstücks griffbereit zu haben, wählst du sie im Merkblatt des
   Lesemodus aus (Punkt 3).
+  Auf **Englisch** gibt es einen dritten Reiter, **US / UK**: Er listet die
+  Häkel- und Strickbegriffe auf, die sich zwischen US- und UK-Anleitungen
+  unterscheiden (*single crochet* und *double crochet*, *bind off* und *cast off*),
+  mit ihren Abkürzungen; die Merkhilfe enthält außerdem die britischen
+  Abkürzungen (*yfwd*, *yrn*, *yon*, *psso*).
 
 ## 7. Statistik
 

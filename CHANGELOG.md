@@ -2,6 +2,21 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.4.3]
+
+- Yarn swatches: note the gauge you got with a yarn (flat or in the round,
+  needle or hook size, stitches and rows over 10 cm) on its page in the
+  stash. Swatches follow the yarn in backups and in the stash export.
+- Stitch memo: a new "US / UK" tab (English only) lists the crochet and
+  knitting terms that differ between US and UK patterns, such as single
+  crochet and double crochet, or bind off and cast off. The memo also gains
+  the British abbreviations (yfwd, yrn, yon, psso and more).
+- English sample patterns now say clearly that they are written in US terms.
+- Writing a pattern by hand: "Write the instructions" opens the editor right
+  away, even without a photo.
+- Choosing a yarn from your stash: each row now shows the brand, the model
+  and the colorway.
+
 ## [1.4.2]
 
 - Repeated sections: a section can be worked several times (socks, sleeves,

@@ -551,6 +551,22 @@
     "storedInPlaceholder": "z. B. Regal 2, blauer Korb",
     "notes": "Notizen",
     "notesPlaceholder": "Deine persönlichen Notizen zu diesem Garn…",
+    "swatches": {
+      "title": "Maschenproben",
+      "add": "Maschenprobe hinzufügen",
+      "remove": "Entfernen",
+      "mode": "Arbeitsweise",
+      "modeFlat": "In Hin- und Rückreihen",
+      "modeRound": "In Runden",
+      "size": "Nadel oder Häkelnadel (mm)",
+      "stitches": "Maschen",
+      "rows": "Reihen",
+      "per10": "auf 10 cm",
+      "hint": "Notiere die Maschenprobe, die du mit diesem Garn erreichst.",
+      "empty": "Keine Maschenprobe notiert.",
+      "stitchesShort": "M.",
+      "rowsShort": "R."
+    },
     "purchasesCount": "Erfasste Käufe",
     "lastPurchaseDate": "Letzter Kauf",
     "composition": "Material",
@@ -727,7 +743,7 @@
     "empty": "Noch keine Anleitungen. Füge deine erste hinzu.",
     "emptyExampleName": "Raglanpullover",
     "emptyExampleHint": "So sieht eine Anleitung aus. Füge deine erste Anleitung hinzu, um deine Bibliothek zu starten.",
-    "noSections": "Keine Abschnitte.",
+    "writeInstructions": "Anleitung schreiben",
     "sectionFallback": "Abschnitt",
     "importWarningsTitle": "Nach dem Import zu prüfen",
     "importLowConfidence": "Geringe Importqualität — diese Anleitung wird umfangreiche Korrekturen benötigen.",
@@ -822,6 +838,7 @@
   },
   "correction": {
     "title": "Anleitung korrigieren",
+    "writeTitle": "Anleitung schreiben",
     "entry": "Anleitung korrigieren",
     "cancel": "Abbrechen",
     "save": "Speichern",
@@ -1013,6 +1030,7 @@
       "replayTourHint": "Öffnet die Beispielmütze erneut im Leser mit den Erklärblasen."
     },
     "contribute": "Mitwirken",
+    "feedback": "Feedback geben",
     "suggest": "Verbesserung vorschlagen",
     "support": "Rowtine unterstützen",
     "export": {
@@ -1031,7 +1049,8 @@
         "dyeLot": "Farbpartie",
         "purchaseDate": "Kaufdatum",
         "composition": "Zusammensetzung",
-        "labels": "Eigenschaften"
+        "labels": "Eigenschaften",
+        "swatches": "Maschenproben"
       },
       "project": {
         "name": "Name",
@@ -1419,7 +1438,11 @@
     "suggested": "Vorschläge für diese Anleitung",
     "noResult": "Keine passende Masche",
     "done": "Fertig",
-    "craft": { "crochet": "Häkeln", "knitting": "Stricken" },
+    "craft": { "crochet": "Häkeln", "knitting": "Stricken", "terms": "US / UK" },
+    "termsIntro": "Die Bezeichnungen unterscheiden sich zwischen US- und UK-Anleitungen. Prüfe, welche deine Anleitung verwendet.",
+    "termsUs": "US",
+    "termsUk": "UK",
+    "termsGeneral": "Allgemein",
     "group": {
       "base": "Grundmaschen",
       "shaping": "Zu- und Abnahmen",
@@ -1615,6 +1638,7 @@
     "licensesRepository": "Projekt-Repository",
     "changelogTitle": "Neuigkeiten dieser Version",
     "contact": "Kontakt",
+    "feedback": "Feedback geben",
     "website": "{app}-Website",
     "privacyUpdated": "Letzte Aktualisierung: {date}"
   },

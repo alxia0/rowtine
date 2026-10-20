@@ -276,6 +276,7 @@ async function clickGalleryAdd(w) {
 
 beforeEach(async () => {
   nav.route.params = { id: '7' }
+  nav.route.query = {}
   nav.router.push.mockClear()
   nav.router.replace.mockClear()
   nav.router.back.mockClear()
@@ -333,6 +334,28 @@ describe('CorrectionView — charge/édite/enregistre (Step 1)', () => {
     expect(persisted.reader.sections.map((s) => s.id).sort()).toEqual(['corps', 'diagramme-1', 'encolure'])
   })
 
+  // Protège : un patron créé à la main, sans reader, s'écrit de zéro et s'enregistre en étapes suivables.
+  it('patron sans reader : le texte écrit de zéro est enregistré en section et étapes', async () => {
+    const { w } = await mountView({ pattern: { id: 7, name: 'Moufles', reader: undefined } })
+    expect(textarea(w).element.value).toBe('')
+    await textarea(w).setValue('## Devant\n- Monter 20 m.\n- Tricoter 10 rangs.\n')
+    await clickSaveAndSettle(w)
+    const persisted = await db.patterns.get(7)
+    expect(persisted.reader.sections).toHaveLength(1)
+    expect(persisted.reader.sections[0].title).toBe('Devant')
+    expect(persisted.reader.sections[0].steps.map((s) => s.t)).toEqual(['Monter 20 m.', 'Tricoter 10 rangs.'])
+  })
+
+  // Protège : l'en-tête dit « Écrire le patron » tant que le patron n'a aucune section, « Corriger » sinon.
+  it('titre : writeTitle sans section, title avec sections', async () => {
+    const vide = await mountView({ pattern: { id: 7, name: 'Moufles', reader: undefined } })
+    expect(vide.w.findComponent({ name: 'AppHeader' }).attributes('title')).toBe(tk('correction.writeTitle'))
+    vide.w.unmount()
+    await db.patterns.clear()
+    const plein = await mountView()
+    expect(plein.w.findComponent({ name: 'AppHeader' }).attributes('title')).toBe(tk('correction.title'))
+  })
+
   // Point C (lot correction-ux) : `onMounted` lit la base (patternsStore.get) avant de
   // poser `pattern` — sans squelette, le `v-if="pattern"` du <main> laisse la page vide
   // sous l'en-tête pendant l'attente. On contrôle la résolution de `get` (Promise
@@ -368,6 +391,19 @@ describe('CorrectionView — charge/édite/enregistre (Step 1)', () => {
     // APRÈS résolution : squelette retiré, éditeur affiché.
     expect(w.find('.skel').exists()).toBe(false)
     expect(textarea(w).exists()).toBe(true)
+  })
+
+  // Protège : ouvert depuis « Écrire les instructions », l'en-tête ne montre jamais « Corriger » pendant le chargement.
+  it('titre pendant le chargement : writeTitle si la route porte write=1', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    vi.spyOn(usePatternsStore(pinia), 'get').mockReturnValue(new Promise(() => {}))
+    nav.route.params = { id: '7' }
+    nav.route.query = { write: '1' }
+    const w = mount(CorrectionView, { global: { plugins: [pinia, i18n], stubs } })
+    await flushPromises()
+    expect(w.find('.skel').exists()).toBe(true)
+    expect(w.findComponent({ name: 'AppHeader' }).attributes('title')).toBe(tk('correction.writeTitle'))
   })
 
   it('patron introuvable → redirige vers la bibliothèque', async () => {

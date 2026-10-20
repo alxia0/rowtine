@@ -1,18 +1,29 @@
 <script setup>
 // Page Outils « Mémo : techniques de points » : consultation libre du catalogue, sans patron.
 // Rien n'est stocké ; seul l'état d'affichage (technique, recherche, fiches dépliées) vit ici.
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import { CRAFTS } from '@/content/stitch-memo/catalog'
-import { stitchesByGroup, matchesQuery } from '@/content/stitch-memo'
+import { stitchesByGroup, matchesQuery, usUkTerms } from '@/content/stitch-memo'
 
 const { t, locale } = useI18n()
 
 const tab = ref('knitting')
 const query = ref('')
 const open = ref(new Set())
+
+// L'onglet US / UK n'existe qu'en anglais (table de termes en anglais) ; hors anglais, on retombe sur Tricot.
+const tabs = computed(() => (locale.value === 'en' ? [...CRAFTS, 'terms'] : CRAFTS))
+watch(locale, (l) => {
+  if (l !== 'en' && tab.value === 'terms') tab.value = 'knitting'
+})
+const termSections = [
+  { craft: 'crochet', title: 'stitchMemo.craft.crochet' },
+  { craft: 'knitting', title: 'stitchMemo.craft.knitting' },
+  { craft: 'general', title: 'stitchMemo.termsGeneral' },
+].map((s) => ({ ...s, rows: usUkTerms(s.craft) }))
 
 const groups = computed(() =>
   stitchesByGroup(tab.value, locale.value)
@@ -31,10 +42,10 @@ function toggle(id) {
   <div>
     <AppHeader :title="t('stitchMemo.title')" back />
     <main class="screen">
-      <input v-model="query" type="search" class="input" :aria-label="t('stitchMemo.search')" :placeholder="t('stitchMemo.search')" />
+      <input v-if="tab !== 'terms'" v-model="query" type="search" class="input" :aria-label="t('stitchMemo.search')" :placeholder="t('stitchMemo.search')" />
       <div class="toggle mt" role="tablist">
         <button
-          v-for="c in CRAFTS"
+          v-for="c in tabs"
           :key="c"
           class="toggle__opt"
           :class="{ 'toggle__opt--on': tab === c }"
@@ -46,6 +57,25 @@ function toggle(id) {
           {{ t('stitchMemo.craft.' + c) }}
         </button>
       </div>
+
+      <template v-if="tab === 'terms'">
+        <p class="muted mt2">{{ t('stitchMemo.termsIntro') }}</p>
+        <section v-for="s in termSections" :key="s.craft" class="grp">
+          <h2 class="grp__title">{{ t(s.title) }}</h2>
+          <div v-for="r in s.rows" :key="r.id" class="card tm" :data-term="r.id">
+            <p class="tm__side">
+              <span class="tm__lbl">{{ t('stitchMemo.termsUs') }}</span>
+              <strong class="tm__name">{{ r.us.name }}</strong>
+              <span v-if="r.us.abbr.length" class="st__abbr">{{ r.us.abbr.join(', ') }}</span>
+            </p>
+            <p class="tm__side">
+              <span class="tm__lbl">{{ t('stitchMemo.termsUk') }}</span>
+              <strong class="tm__name">{{ r.uk.name }}</strong>
+              <span v-if="r.uk.abbr.length" class="st__abbr">{{ r.uk.abbr.join(', ') }}</span>
+            </p>
+          </div>
+        </section>
+      </template>
 
       <section v-for="g in groups" :key="g.group" class="grp">
         <h2 class="grp__title">{{ t('stitchMemo.group.' + g.group) }}</h2>
@@ -65,7 +95,7 @@ function toggle(id) {
           </div>
         </div>
       </section>
-      <p v-if="!groups.length" class="muted mt2">{{ t('stitchMemo.noResult') }}</p>
+      <p v-if="tab !== 'terms' && !groups.length" class="muted mt2">{{ t('stitchMemo.noResult') }}</p>
     </main>
   </div>
 </template>
@@ -88,5 +118,8 @@ function toggle(id) {
 .st__body { padding: 0 var(--sp-3) var(--sp-3); }
 .st__steps { margin: 0; padding-left: 1.3em; }
 .st__steps li { margin-bottom: var(--sp-1); }
+.tm { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); padding: 12px var(--sp-3); margin-bottom: var(--sp-2); }
+.tm__side { display: flex; flex-direction: column; min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.tm__lbl { color: var(--ink-55); font-size: 12px; font-weight: 600; }
 .st__tip { margin: var(--sp-2) 0 0; color: var(--ink-55); font-size: 13px; }
 </style>

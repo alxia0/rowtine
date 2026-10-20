@@ -39,6 +39,10 @@ const I18N_DIR = path.resolve(__dirname, '../../src/i18n')
 //            c'est justement le genre de clé qu'un agent traducteur saute.
 const IDENTICAL_VALUE_ALLOWED = {
   '*': [
+    // Onglet et étiquettes du mémo US / UK : sigles de variantes d'anglais, jamais traduits.
+    'stitchMemo.craft.terms',
+    'stitchMemo.termsUs',
+    'stitchMemo.termsUk',
     'rowNotif.sectionCopy', // « {copy} · {section} » : gabarit de séparateur, rien de linguistique
     'app.name', // "Rowtine" — nom de l'app, jamais traduit
     'pattern.categories.amigurumi', // "Amigurumi" — emprunt japonais, identique dans toutes les langues occidentales

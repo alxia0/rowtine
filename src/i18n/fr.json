@@ -551,6 +551,22 @@
     "storedInPlaceholder": "ex. Étagère 2, panier bleu",
     "notes": "Notes",
     "notesPlaceholder": "Tes notes personnelles sur cette laine…",
+    "swatches": {
+      "title": "Échantillons",
+      "add": "Ajouter un échantillon",
+      "remove": "Retirer",
+      "mode": "Façon de travailler",
+      "modeFlat": "À plat",
+      "modeRound": "En rond",
+      "size": "Aiguille ou crochet (mm)",
+      "stitches": "Mailles",
+      "rows": "Rangs",
+      "per10": "pour 10 cm",
+      "hint": "Note l'échantillon obtenu avec cette laine.",
+      "empty": "Aucun échantillon noté.",
+      "stitchesShort": "m.",
+      "rowsShort": "rgs"
+    },
     "purchasesCount": "Achats enregistrés",
     "lastPurchaseDate": "Dernier achat",
     "composition": "Composition",
@@ -691,7 +707,7 @@
     "empty": "Aucun patron. Ajoute ton premier patron.",
     "emptyExampleName": "Pull raglan",
     "emptyExampleHint": "Voici à quoi ressemble un patron. Ajoute ton premier patron pour démarrer ta bibliothèque.",
-    "noSections": "Aucune section.",
+    "writeInstructions": "Écrire les instructions",
     "sectionFallback": "Section",
     "importWarningsTitle": "À vérifier après l'import",
     "importLowConfidence": "Qualité d'import faible — ce patron demandera un travail de correction important.",
@@ -778,6 +794,7 @@
   },
   "correction": {
     "title": "Corriger le patron",
+    "writeTitle": "Écrire le patron",
     "entry": "Corriger le patron",
     "cancel": "Annuler",
     "save": "Enregistrer",
@@ -969,6 +986,7 @@
       "replayTourHint": "Rouvre le bonnet d'exemple dans le lecteur avec les bulles d'explication."
     },
     "contribute": "Contribuer",
+    "feedback": "Donner ton avis",
     "suggest": "Suggérer une amélioration",
     "support": "Soutenir Rowtine",
     "export": {
@@ -987,7 +1005,8 @@
         "dyeLot": "N° de bain",
         "purchaseDate": "Date d'achat",
         "composition": "Composition",
-        "labels": "Caractéristiques"
+        "labels": "Caractéristiques",
+        "swatches": "Échantillons"
       },
       "project": {
         "name": "Nom",
@@ -1355,7 +1374,11 @@
     "suggested": "Suggérés pour ce patron",
     "noResult": "Aucun point ne correspond",
     "done": "Terminé",
-    "craft": { "crochet": "Crochet", "knitting": "Tricot" },
+    "craft": { "crochet": "Crochet", "knitting": "Tricot", "terms": "US / UK" },
+    "termsIntro": "Les noms diffèrent entre les patrons US et UK. Vérifie lesquels ton patron utilise.",
+    "termsUs": "US",
+    "termsUk": "UK",
+    "termsGeneral": "Général",
     "group": {
       "base": "Mailles de base",
       "shaping": "Augmentations et diminutions",
@@ -1551,6 +1574,7 @@
     "licensesRepository": "Dépôt du projet",
     "changelogTitle": "Nouveautés de cette version",
     "contact": "Nous contacter",
+    "feedback": "Donner ton avis",
     "website": "Site de {app}",
     "privacyUpdated": "Dernière mise à jour : {date}"
   },

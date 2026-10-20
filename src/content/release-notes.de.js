@@ -11,6 +11,16 @@
 // allemande, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_DE = [
   {
+    version: '1.4.3',
+    notes: [
+      'Maschenproben für Wolle: Halte die mit einer Wolle erzielte Maschenprobe auf ihrer Karte im Vorrat fest (glatt oder in Runden, Nadel- oder Häkelnadelstärke, Maschen und Reihen auf 10 cm). Die Maschenproben bleiben bei der Wolle, auch in Sicherungen und im Export des Vorrats.',
+      'Maschen-Memo: Neuer Reiter „US / UK“ (nur auf Englisch) mit den Häkel- und Strickbegriffen, die sich zwischen US- und UK-Anleitungen unterscheiden, sowie den britischen Abkürzungen (yfwd, yrn, yon, psso und weitere).',
+      'Die englischen Beispielanleitungen weisen jetzt darauf hin, dass sie in US-Begriffen geschrieben sind.',
+      'Anleitung von Hand schreiben: „Anleitung schreiben“ öffnet sofort den Editor, auch ohne Foto.',
+      'Wolle aus dem Vorrat wählen: Jede Zeile zeigt jetzt Marke, Modell und Farbe.',
+    ],
+  },
+  {
     version: '1.4.2',
     notes: [
       'Wiederholbare Abschnitte: Ein Abschnitt kann mehrmals gearbeitet werden (Socken, Ärmel, Ohren oder Beine eines Amigurumi), und jedes Exemplar behält seinen eigenen Fortschritt. Ärmel, Ohren, Gliedmaßen und Beine werden standardmäßig paarweise gearbeitet.',

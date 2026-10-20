@@ -24,9 +24,10 @@ async function addYarn(page, { brand, colorKey, qty }) {
   await page.locator(`.palette__sw[aria-label="${colorKey}"]`).click()
   await page.locator('input[placeholder="1"]').fill(String(qty))
   await page.getByRole('button', { name: 'Enregistrer' }).click()
-  // Le panneau refermé signe la fin des DEUX écritures (fiche + ligne d'achat) depuis le
-  // correctif du 06/08 : on l'attend AVANT de chercher la carte.
-  await expect(page.locator('.addform')).toHaveCount(0)
+  // L'arrivée sur la fiche signe la fin des DEUX écritures (fiche + ligne d'achat) : on
+  // l'attend, puis on revient à la liste avant de chercher la carte.
+  await page.waitForURL(/\/stash\/\d+$/)
+  await page.goto('/stash')
   // Cibler la carte du stock, et non n'importe quel texte : tant que le formulaire est
   // ouvert, `getByText(/Drops/)` attrape aussi l'<option> « Drops » du catalogue de
   // marques (violation du mode strict), ce qui n'a rien à voir avec la laine créée.
@@ -127,8 +128,8 @@ test.describe('AppCheckbox — ProjectEditView (sélection des laines, pool de p
 
     // Pool de pelotes : le sélecteur de quantité apparaît pour les 2, borné au dispo.
     await expect(page.locator('.ypick__qtyin')).toHaveCount(2)
-    await expect(dropsRow.locator('.ypick__qtyin')).toHaveAttribute('max', '4')
-    await expect(phildarRow.locator('.ypick__qtyin')).toHaveAttribute('max', '2')
+    await expect(dropsRow.locator('.ypick__unit')).toContainText('/ 4')
+    await expect(phildarRow.locator('.ypick__unit')).toContainText('/ 2')
 
     // Décocher Drops ne touche pas Phildar (sélection multiple préservée). On repasse le
     // filtre sur Drops pour que sa ligne reste affichée après décochage — sinon, resté

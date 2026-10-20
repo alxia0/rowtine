@@ -47,7 +47,7 @@ vi.mock('@/native/keep-awake', () => ({ isKeepScreenOnAvailable: () => keepAwake
 const capApp = vi.hoisted(() => ({ listeners: {}, removeResume: null, addListener: null }))
 vi.mock('@capacitor/app', () => ({ App: { addListener: (...a) => capApp.addListener(...a) } }))
 
-import { KOFI_URL, GITHUB_ISSUES_URL } from '@/constants/app-links'
+import { KOFI_URL, GITHUB_ISSUES_URL, feedbackUrlFor } from '@/constants/app-links'
 import SettingsView from '@/views/SettingsView.vue'
 
 // Laisse finir une bascule en cours (le clic est ignoré tant qu'elle n'est pas terminée).
@@ -435,6 +435,27 @@ describe('SettingsView', () => {
   // depuis le début avec un href bouchon `https://github.com` : personne ne l'avait jamais
   // suivi, donc rien ne l'aurait signalé si elle était restée sur le bouchon.
   describe('bloc Contribuer', () => {
+    // Chantier retours utilisatrices, 11/10/2026 : porte la plus large des trois, placée en
+    // tête du bloc, avant « Suggérer ». `feedbackUrlFor` est lue avec la locale COURANTE de
+    // l'i18n de test (pas une valeur en dur) : ce test ne doit pas dépendre de la locale par
+    // défaut du runner, seulement du câblage réel entre la vue et la fonction.
+    it('la rangée « Donner ton avis » est EN TÊTE du bloc et pointe vers le formulaire de la langue active', async () => {
+      const w = mountView()
+      await flushPromises()
+      const row = w.get('[data-test="settings-link-feedback"]')
+      expect(row.attributes('href')).toBe(feedbackUrlFor(i18n.global.locale.value))
+      expect(row.attributes('target')).toBe('_blank')
+      expect(row.attributes('rel')).toBe('noopener')
+      const title = w
+        .findAll('.block__title')
+        .find((el) => el.text() === i18n.global.t('settings.contribute'))
+      const block = title.element.closest('.block')
+      const rowTestIds = [...block.querySelectorAll('[data-test^="settings-link-"]')].map((el) =>
+        el.getAttribute('data-test'),
+      )
+      expect(rowTestIds[0]).toBe('settings-link-feedback')
+    })
+
     it('la rangée « Soutenir » pointe vers la page de dons Ko-fi', async () => {
       const w = mountView()
       await flushPromises()
