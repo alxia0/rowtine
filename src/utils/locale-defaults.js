@@ -14,6 +14,7 @@ const BY_REGION = {
   GB: { unitSystem: 'metric', currency: 'GBP' },
   CH: { unitSystem: 'metric', currency: 'CHF' },
   CA: { unitSystem: 'metric', currency: 'CAD' },
+  JP: { unitSystem: 'metric', currency: 'JPY' },
 }
 
 export function defaultsForLocale(navigatorLanguage) {

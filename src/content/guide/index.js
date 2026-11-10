@@ -10,9 +10,10 @@ import fr from '@/generated/guide-content.fr.json'
 import en from '@/generated/guide-content.en.json'
 import de from '@/generated/guide-content.de.json'
 import es from '@/generated/guide-content.es.json'
+import ja from '@/generated/guide-content.ja.json'
 import { resolveLocalized } from '@/content/resolve-localized-content'
 
-const GUIDE_CONTENT = { fr, en, de, es }
+const GUIDE_CONTENT = { fr, en, de, es, ja }
 
 // Ordre de repli : la langue demandée, puis l'anglais (repli habituel du projet — cf.
 // src/i18n/index.js), puis le français EN DERNIER RECOURS. C'est la valeur D'ORIGINE de ce

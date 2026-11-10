@@ -5,6 +5,7 @@ import fr from './fr.json'
 import en from './en.json'
 import de from './de.json'
 import es from './es.json'
+import ja from './ja.json'
 import { detectDeviceLocale } from '@/utils/app-locale'
 
 // Repli en anglais, pas en français : une clé manquante dans une langue
@@ -21,7 +22,7 @@ const i18n = createI18n({
   // premier rendu clignoterait en français avant de basculer.
   locale: detectDeviceLocale(),
   fallbackLocale: 'en',
-  messages: { fr, en, de, es },
+  messages: { fr, en, de, es, ja },
 })
 
 // `<html lang>` suit la locale — ICI et nulle part ailleurs (revue du 29/07, passage
