@@ -18,6 +18,7 @@ export function emptyYarn() {
     grams: '', // grammes par pelote (total affiché = quantity × grams)
     quantity: 1,
     price: '', // prix d'une pelote (pour le total dépensé)
+    priceCurrency: '', // devise de ce prix ; vide = pas de prix, ou fiche d'avant (reprise au lancement)
     // `bain` / `purchasedAt` : champs devenus INERTES depuis les travaux sur le budget laine (01/08).
     // Le formulaire de laine ne les propose plus — une fiche peut désormais porter
     // PLUSIEURS achats, chacun avec son propre bain et sa propre date, tracés dans le

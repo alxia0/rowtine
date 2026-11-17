@@ -279,7 +279,7 @@ export function findScrollContainer(el) {
   return document.scrollingElement || document.documentElement
 }
 
-function isDocumentContainer(container) {
+export function isDocumentContainer(container) {
   return container === document.scrollingElement || container === document.documentElement || container === document.body
 }
 

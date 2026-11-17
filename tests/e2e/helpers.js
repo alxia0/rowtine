@@ -475,6 +475,8 @@ export async function openDemoReaderWithChart(page) {
 export async function attendreFinFondu(page) {
   await page.waitForFunction(() => !document.querySelector('.route-fade-leave-active'))
   await page.waitForFunction(() => !document.querySelector('.route-fade-enter-active'))
+  // Même chose pour une feuille ou un dialogue en `<Transition name="fade">` qui vient de s'ouvrir.
+  await page.waitForFunction(() => !document.querySelector('.fade-enter-active'))
 }
 
 // Attend qu'un élément ait CESSÉ de bouger verticalement, avant de mesurer sa position.

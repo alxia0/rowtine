@@ -13,6 +13,7 @@ import { db } from '@/db/db'
 import i18n from '@/i18n'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { SESSION_NO_SECTION } from '@/constants/session'
+import { ymdLocal } from '@/utils/time-periods'
 
 const nav = vi.hoisted(() => ({
   route: { params: {}, query: {} },
@@ -23,6 +24,7 @@ vi.mock('vue-router', () => ({ useRoute: () => nav.route, useRouter: () => nav.r
 import ProjectEditView from '@/views/ProjectEditView.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import ToolParkingDialog from '@/components/ToolParkingDialog.vue'
 
 async function seedProject(extra = {}) {
   const pid = await db.projects.add({
@@ -102,11 +104,11 @@ describe('ProjectEditView — 3ᵉ point d\'entrée Terminé/Abandonné (R2 + R3
     await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
     expect(w.findComponent(YarnConsumptionDialog).props('mode')).toBe('done')
     expect(w.findComponent(YarnConsumptionDialog).props('yarns')).toEqual([
-      { id: yid, name: 'Drops · Bleu', reserved: 2 },
+      { id: yid, name: 'Drops · Bleu', reserved: 2, available: 5, othersReserved: false },
     ])
-    // Le statut est déjà écrit (écriture du projet faite avant la question), mais la
-    // navigation attend la réponse — jamais de "terminé" silencieux sans consommation.
-    expect((await db.projects.get(pid)).status).toBe('done')
+    // Le statut final n'est PAS encore écrit : il ne l'est qu'à la validation (Annuler doit
+    // laisser le projet tel qu'il était). La navigation attend aussi la réponse.
+    expect((await db.projects.get(pid)).status).toBe('wip')
     expect(nav.router.replace).not.toHaveBeenCalled()
     expect((await db.yarns.get(yid)).reservations).toEqual({ [pid]: 2 }) // pas encore consommée
   })
@@ -166,14 +168,16 @@ describe('ProjectEditView — 3ᵉ point d\'entrée Terminé/Abandonné (R2 + R3
 
     await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
     const created = (await db.projects.toArray()).find((p) => p.name === 'Nouveau pull')
-    expect(created.status).toBe('done')
+    // Créé en « En attente » (défaut d'emptyProject) : Terminé n'est écrit qu'à la validation.
+    expect(created.status).toBe('waiting')
     expect(w.findComponent(YarnConsumptionDialog).props('yarns')).toEqual([
-      { id: yid, name: 'Drops · Bleu', reserved: 1 },
+      { id: yid, name: 'Drops · Bleu', reserved: 1, available: 5, othersReserved: false },
     ])
 
     await w.findComponent(YarnConsumptionDialog).vm.$emit('confirm', [{ id: yid, used: 1 }])
     await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: created.id } }), { timeout: 10000 })
     expect((await db.yarns.get(yid)).quantity).toBe(4)
+    expect((await db.projects.get(created.id)).status).toBe('done')
   })
 
   it('saisir une date de fin sur un projet QUI RÉSERVE DES PELOTES ouvre le dialogue de consommation', async () => {
@@ -204,7 +208,7 @@ describe('ProjectEditView — 3ᵉ point d\'entrée Terminé/Abandonné (R2 + R3
 
     await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
     expect(w.findComponent(YarnConsumptionDialog).props('yarns')).toEqual([
-      { id: yid, name: 'Drops · Bleu', reserved: 2 },
+      { id: yid, name: 'Drops · Bleu', reserved: 2, available: 5, othersReserved: false },
     ])
 
     await w.findComponent(YarnConsumptionDialog).vm.$emit('confirm', [{ id: yid, used: 2 }])
@@ -212,6 +216,154 @@ describe('ProjectEditView — 3ᵉ point d\'entrée Terminé/Abandonné (R2 + R3
     const fresh = await db.projects.get(pid)
     expect(fresh.status).toBe('done')
     expect(fresh.finishedAt).toBe('2026-07-15')
+  })
+})
+
+// Annuler la question des pelotes (décision de Julien, 15/11) : toute fermeture sans
+// « Valider » laisse le statut tel qu'il était et ne touche à aucune laine. Sur cet écran, le
+// statut Terminé/Abandonné n'est donc écrit qu'APRÈS la validation ; les autres champs, eux,
+// sont enregistrés tout de suite, et Annuler mène quand même à la fiche du projet.
+describe('ProjectEditView, Annuler la question des pelotes', () => {
+  const dialog = (w) => w.findComponent(YarnConsumptionDialog)
+
+  async function saveAsDone(w) {
+    await chip(w, 'done').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await flushPromises()
+    await vi.waitFor(() => expect(dialog(w).props('open')).toBe(true), { timeout: 10000 })
+  }
+
+  it('(a) projet en cours passé à Terminé puis Annuler : statut inchangé, laine intacte, autres champs enregistrés, retour à la fiche', async () => {
+    const pid = await seedProject({ finishedAt: '' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await w.find('#name').setValue('Pull torsadé rouge')
+    await saveAsDone(w)
+    await dialog(w).vm.$emit('cancel')
+
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const p = await db.projects.get(pid)
+    expect(p.status).toBe('wip')
+    expect(p.finishedAt).toBe('')
+    expect(p.name).toBe('Pull torsadé rouge')
+    const y = await db.yarns.get(yid)
+    expect(y.quantity).toBe(5)
+    expect(y.reservations).toEqual({ [pid]: 2 })
+    expect(y.consumed ?? {}).toEqual({}) // aucune trace de consommation
+    expect(dialog(w).props('open')).toBe(false)
+  })
+
+  it('(b) même chose puis Valider : statut Terminé, date de fin du jour, laine consommée', async () => {
+    const pid = await seedProject({ finishedAt: '' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await w.find('#name').setValue('Pull torsadé rouge')
+    await saveAsDone(w)
+    await dialog(w).vm.$emit('confirm', [{ id: yid, used: 2 }])
+
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const p = await db.projects.get(pid)
+    expect(p.status).toBe('done')
+    expect(p.finishedAt).toBe(ymdLocal(new Date()))
+    expect(p.name).toBe('Pull torsadé rouge')
+    const y = await db.yarns.get(yid)
+    expect(y.quantity).toBe(3)
+    expect(y.reservations).toEqual({})
+    expect(y.consumed).toEqual({ [pid]: 2 })
+  })
+
+  it('(c) sans laine réservée : aucune question, Terminé écrit directement avec la date du jour', async () => {
+    const pid = await seedProject({ finishedAt: '' })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await chip(w, 'done').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    expect(dialog(w).props('open')).toBe(false)
+    const p = await db.projects.get(pid)
+    expect(p.status).toBe('done')
+    expect(p.finishedAt).toBe(ymdLocal(new Date()))
+  })
+
+  it('(d) création directe en Terminé avec une laine puis Annuler : un seul projet, créé « En attente », retour à sa fiche', async () => {
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5 })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await w.find('#name').setValue('Nouveau pull')
+    await w.find('.ypick__brandfilter select').setValue('Drops')
+    await flushPromises()
+    await w.find('.ypick__row input[type=checkbox]').trigger('change')
+    await saveAsDone(w)
+    await dialog(w).vm.$emit('cancel')
+
+    expect(await db.projects.count()).toBe(1)
+    const [created] = await db.projects.toArray()
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: created.id } }), { timeout: 10000 })
+    expect(created.name).toBe('Nouveau pull')
+    expect(created.status).toBe('waiting')
+    expect(created.finishedAt).toBe('')
+    const y = await db.yarns.get(yid)
+    expect(y.quantity).toBe(5)
+    expect(y.reservations).toEqual({ [created.id]: 1 })
+    expect(y.consumed ?? {}).toEqual({}) // aucune trace de consommation
+  })
+
+  it('(f) création directe en Terminé SANS laine réservée : aucune question, un seul projet, Terminé écrit tout de suite avec la date du jour', async () => {
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await w.find('#name').setValue('Bonnet express')
+    await chip(w, 'done').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+
+    await vi.waitFor(async () => expect(await db.projects.count()).toBe(1), { timeout: 10000 })
+    const [created] = await db.projects.toArray()
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: created.id } }), { timeout: 10000 })
+    expect(dialog(w).props('open')).toBe(false)
+    const p = await db.projects.get(created.id)
+    expect(p.name).toBe('Bonnet express')
+    expect(p.status).toBe('done')
+    expect(p.finishedAt).toBe(ymdLocal(new Date()))
+  })
+
+  it('date de fin saisie puis Annuler : ni statut ni date écrits (la date seule est le geste de clôture)', async () => {
+    const pid = await seedProject({ finishedAt: '' })
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await w.find('#end').setValue('2026-07-15')
+    await w.find('.btn--primary').trigger('click')
+    await flushPromises()
+    await vi.waitFor(() => expect(dialog(w).props('open')).toBe(true), { timeout: 10000 })
+    await dialog(w).vm.$emit('cancel')
+
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const p = await db.projects.get(pid)
+    expect(p.status).toBe('wip')
+    expect(p.finishedAt).toBe('')
+  })
+
+  it('« Corriger le stock » : annule (statut inchangé), passe par la fiche puis ouvre la laine', async () => {
+    const pid = await seedProject()
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountEdit()
+    await waitHydrated(w)
+
+    await saveAsDone(w)
+    await dialog(w).vm.$emit('fix-stock', yid)
+
+    await vi.waitFor(() => expect(nav.router.push).toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yid } }), { timeout: 10000 })
+    expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } })
+    expect((await db.projects.get(pid)).status).toBe('wip')
+    expect((await db.yarns.get(yid)).reservations).toEqual({ [pid]: 2 })
   })
 })
 
@@ -392,6 +544,36 @@ describe('ProjectEditView — chrono actif sur ce projet à l’enregistrement',
     expect(rows[0].durationSec).toBe(5)
   })
 
+  it('(e) avec une laine réservée : Annuler laisse le chrono tourner, seul Valider le ferme', async () => {
+    const pid = await seedProject()
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+    const { w, active } = await mountEditSharedPinia(pid)
+    const dialog = () => w.findComponent(YarnConsumptionDialog)
+
+    await chip(w, 'done').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(dialog().props('open')).toBe(true), { timeout: 10000 })
+    // Question posée : rien n'est encore décidé, le chrono tourne toujours.
+    expect(active.isActive).toBe(true)
+    await dialog().vm.$emit('cancel')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    expect(active.isActive).toBe(true)
+    expect(await db.sessions.where('projectId').equals(pid).count()).toBe(0)
+    expect((await db.projects.get(pid)).status).toBe('wip')
+
+    // Nouvel enregistrement en Terminé, cette fois validé : le chrono est fermé et journalisé.
+    nav.router.replace.mockClear()
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(dialog().props('open')).toBe(true), { timeout: 10000 })
+    await dialog().vm.$emit('confirm', [{ id: yid, used: 2 }])
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    expect(active.isActive).toBe(false)
+    const rows = await db.sessions.where('projectId').equals(pid).toArray()
+    expect(rows.length).toBe(1)
+    expect(rows[0].durationSec).toBe(5)
+    expect((await db.projects.get(pid)).status).toBe('done')
+  })
+
   it('laisser le statut à « En cours » n’y touche pas : le chrono de ce projet continue', async () => {
     const pid = await seedProject()
     const { w, active } = await mountEditSharedPinia(pid)
@@ -543,5 +725,508 @@ describe('ProjectEditView — technique des chaussettes', () => {
     await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
     expect((await db.projects.get(pid)).readerState).toEqual({ done: {}, counters: {} })
     w.unmount()
+  })
+
+  // « Corriger le stock » du bloc « Pelotes tricotées » passe par le même enregistrement : si
+  // la question « Recommencer les chaussettes ? » l'interrompt, la confirmation relance `save`,
+  // qui doit encore ouvrir la laine ensuite (sinon le bouton ne mène qu'à la fiche).
+  it('« Corriger le stock » interrompu par la question des chaussettes : après Recommencer, la laine s’ouvre quand même', async () => {
+    const sockId = await db.patterns.add({ name: 'Chaussettes', type: 'knitting', reader: SOCK })
+    const pid = await seedProject({ status: 'done', finishedAt: '2026-07-01', patternId: sockId, readerState: { done: { 'p#0': true }, copyMode: 'simultaneous' } })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4, reservations: {}, consumed: { [pid]: 3 } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('select#techsel').setValue('sequential')
+    const champ = w.find('[data-test="consumed-block"] input')
+    champ.element.value = '12'
+    await champ.trigger('input')
+    await flushPromises()
+    await w.find('[data-test="consumed-fix-stock"]').trigger('click')
+    await vi.waitFor(() => expect(dlg(w).props('open')).toBe(true))
+    expect(nav.router.push).not.toHaveBeenCalled()
+    dlg(w).vm.$emit('confirm')
+    await vi.waitFor(() => expect(nav.router.push).toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yid } }), { timeout: 10000 })
+    expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } })
+    w.unmount()
+  })
+})
+
+// Bloc « Pelotes tricotées » : corrige APRÈS COUP combien de pelotes un projet terminé a
+// consommées. Les assertions lisent la base (quantity, consumed), pas des appels de fonction.
+describe('ProjectEditView, bloc « Pelotes tricotées » (correction après coup)', () => {
+  const mountBlock = () => mount(ProjectEditView, { global: { plugins: [createPinia(), i18n] } })
+  const block = (w) => w.find('[data-test="consumed-block"]')
+  const fixBtn = (w) => block(w).find('[data-test="consumed-fix-stock"]')
+  const field = (w) => block(w).find('input')
+  async function typeQty(w, text, i = 0) {
+    const input = block(w).findAll('input')[i]
+    input.element.value = text
+    await input.trigger('input')
+  }
+  async function saveNow(w) {
+    nav.router.replace.mockClear()
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+  }
+  // Projet terminé qui a consommé 3 pelotes d'une laine dont il reste 4 pelotes.
+  async function seedDone() {
+    const pid = await seedProject({ status: 'done', finishedAt: '2026-07-01' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4, reservations: {}, consumed: { [pid]: 3 } })
+    return { pid, yid }
+  }
+
+  // Le bouton enregistre, et l'enregistrement peut ouvrir la question des pelotes (statut passé à
+  // Abandonné avec une laine B réservée). « Corriger le stock » sur B, DANS le dialogue, annule :
+  // l'annulation ne doit plus pousser la laine A en plus, sinon l'historique empile
+  // projet, A, B et le Retour depuis B atterrit sur A.
+  it('« Corriger le stock » de la laine A puis de la laine B dans le dialogue : une seule poussée, vers B', async () => {
+    const { pid, yid } = await seedDone()
+    const yidB = await db.yarns.add({ brand: 'Rico', colorName: 'Rouge', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    await chip(w, 'abandoned').trigger('click')
+    await typeQty(w, '12')
+    await flushPromises()
+    await fixBtn(w).trigger('click')
+    const d = w.findComponent(YarnConsumptionDialog)
+    await vi.waitFor(() => expect(d.props('open')).toBe(true), { timeout: 10000 })
+    await d.vm.$emit('fix-stock', yidB)
+
+    await vi.waitFor(() => expect(nav.router.push).toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yidB } }), { timeout: 10000 })
+    expect(nav.router.push).toHaveBeenCalledTimes(1)
+    expect(nav.router.push).not.toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yid } })
+    w.unmount()
+  })
+
+  it('Annuler simple dans le dialogue ouvert par « Corriger le stock » : la laine A reste ouverte', async () => {
+    const { pid, yid } = await seedDone()
+    await db.yarns.add({ brand: 'Rico', colorName: 'Rouge', quantity: 5, reservations: { [pid]: 2 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    await chip(w, 'abandoned').trigger('click')
+    await typeQty(w, '12')
+    await flushPromises()
+    await fixBtn(w).trigger('click')
+    const d = w.findComponent(YarnConsumptionDialog)
+    await vi.waitFor(() => expect(d.props('open')).toBe(true), { timeout: 10000 })
+    await d.vm.$emit('cancel')
+
+    await vi.waitFor(() => expect(nav.router.push).toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yid } }), { timeout: 10000 })
+    expect(nav.router.push).toHaveBeenCalledTimes(1)
+    w.unmount()
+  })
+
+  it('absent sur un projet sans trace de consommation', async () => {
+    const pid = await seedProject()
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4, reservations: { [pid]: 2 }, consumed: {} })
+    const w = mountBlock()
+    await waitHydrated(w)
+    expect(block(w).exists()).toBe(false)
+  })
+
+  it('absent sur un nouveau projet', async () => {
+    nav.route.params = {}
+    await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4, reservations: {}, consumed: { 99: 3 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    expect(block(w).exists()).toBe(false)
+  })
+
+  it('une ligne par laine tracée, avec son nom et sa valeur', async () => {
+    const { pid } = await seedDone()
+    await db.yarns.add({ brand: 'Rico', colorName: 'Rouge', quantity: 1, reservations: {}, consumed: { [pid]: 1.5 } })
+    await db.yarns.add({ brand: 'Autre', colorName: 'Vert', quantity: 1, reservations: {}, consumed: { 999: 2 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    const rows = block(w).findAll('.ypick__row')
+    expect(rows).toHaveLength(2)
+    // l'ordre des lignes suit le store : on retrouve chaque laine par son nom
+    const rowOf = (label) => rows.find((r) => r.text().includes(label))
+    expect(rowOf('Drops · Bleu').find('input').element.value).toBe('3')
+    expect(rowOf('Rico · Rouge').find('input').element.value).toBe('1,5')
+  })
+
+  it('3 vers 5 avec 4 en stock : consumed 5, quantity 2', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '5')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 5 })
+    expect(y.quantity).toBe(2)
+  })
+
+  it('5 vers 2 rend 3 pelotes au stock', async () => {
+    const pid = await seedProject({ status: 'done', finishedAt: '2026-07-01' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 4, reservations: {}, consumed: { [pid]: 5 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '2')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 2 })
+    expect(y.quantity).toBe(7)
+  })
+
+  it('un 0 réellement saisi retire la trace et rend tout au stock', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '0')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed ?? {}).toEqual({})
+    expect(y.quantity).toBe(7)
+    // La trace de CE projet est bien retirée (pas seulement vide par accident), et corriger sa
+    // consommation ne touche pas à son statut.
+    expect(y.consumed ?? {}).not.toHaveProperty(String(pid))
+    expect((await db.projects.get(pid)).status).toBe('done')
+  })
+
+  it('valeur au-dessus du maximum : champ ramené au maximum, message et bouton vers la laine', async () => {
+    const { pid, yid } = await seedDone() // maximum = 3 + 4 = 7
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '12')
+    await flushPromises()
+    expect(field(w).element.value).toBe('7')
+    expect(block(w).text()).toContain(i18n.global.t('project.consumedOverStockPlain', { n: '7' }))
+    expect(block(w).text()).not.toContain(i18n.global.t('project.consumedOverStock', { n: '7' }))
+    expect(fixBtn(w).text()).toBe(i18n.global.t('project.consumedFixStock'))
+    // jamais de troncature silencieuse : l'enregistrement écrit le maximum, pas 12
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 7 })
+    expect(y.quantity).toBe(0)
+  })
+
+  // Reste n°2 du lot du 17/11 : seule la réservation propre du projet limite le maximum
+  // (stock 5, réservé 2, consommé 3 : 6 et non 8). Ni « autres projets » (faux), ni le texte nu.
+  const pickQty = (w) => w.findAll('.ypick__qtyin').find((el) => !block(w).element.contains(el.element))
+  async function typePick(w, text) {
+    const input = pickQty(w)
+    input.element.value = text
+    await input.trigger('input')
+  }
+  async function seedOwnReserved() {
+    const pid = await seedProject({ status: 'done', finishedAt: '2026-07-01' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 }, consumed: { [pid]: 3 } })
+    return { pid, yid }
+  }
+
+  it('maximum qui remonte (laine décochée) : le message périmé disparaît', async () => {
+    await seedOwnReserved()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '9') // borné à 6, message affiché
+    await flushPromises()
+    expect(fixBtn(w).exists()).toBe(true)
+    await w.find('.ypick__pick input').setValue(false) // décocher : plus de réservation, maximum 8
+    await flushPromises()
+    expect(fixBtn(w).exists()).toBe(false)
+  })
+
+  it('seule la réservation propre limite : texte dédié, ni « autres projets » ni texte nu', async () => {
+    await seedOwnReserved()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '9')
+    await flushPromises()
+    expect(field(w).element.value).toBe('6')
+    const own = i18n.global.t('project.consumedOverStockOwn', { n: '6' })
+    expect(block(w).text()).toContain(own)
+    expect(block(w).text()).not.toContain('autres projets')
+    expect(block(w).text()).not.toContain(i18n.global.t('project.consumedOverStock', { n: '6' }))
+  })
+
+  // Reste n°1 : le maximum du bloc tient compte de la réservation EN ATTENTE dans le même
+  // formulaire, sinon on accepte 6 à l'écran et l'enregistrement écrit 5 sans rien dire.
+  it('réservation relevée dans le formulaire : le maximum du bloc suit (5, pas 6)', async () => {
+    const { pid, yid } = await seedOwnReserved()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typePick(w, '3')
+    await typeQty(w, '6')
+    await flushPromises()
+    expect(field(w).element.value).toBe('5')
+    expect(block(w).text()).toContain(i18n.global.t('project.consumedOverStockOwn', { n: '5' }))
+    // Un projet terminé qui garde une réservation repose la question des pelotes : Annuler
+    // laisse les champs déjà enregistrés (liens puis corrections) tels quels.
+    nav.router.replace.mockClear()
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
+    await w.findComponent(YarnConsumptionDialog).vm.$emit('cancel')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    const y = await db.yarns.get(yid)
+    expect(y.reservations).toEqual({ [pid]: 3 })
+    expect(y.consumed).toEqual({ [pid]: 5 })
+    expect(y.quantity).toBe(3)
+  })
+
+  it('valeur déjà tapée, puis réservation relevée : la valeur est ramenée et dite', async () => {
+    await seedOwnReserved()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '6') // permis : maximum 6
+    await flushPromises()
+    expect(fixBtn(w).exists()).toBe(false)
+    await typePick(w, '3')
+    await flushPromises()
+    expect(field(w).element.value).toBe('5')
+    expect(block(w).text()).toContain(i18n.global.t('project.consumedOverStockOwn', { n: '5' }))
+  })
+
+  it('le message disparaît quand la valeur redevient permise', async () => {
+    await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '12')
+    await typeQty(w, '6')
+    await flushPromises()
+    expect(fixBtn(w).exists()).toBe(false)
+  })
+
+  // Régression (revue finale) : stock 5, A réserve 2, B réserve 3, A clôt à 2. Il reste 3
+  // pelotes, toutes réservées par B : la correction de A ne peut pas monter au-dessus de 2.
+  it('A/B : les pelotes réservées par un autre projet ne sont pas à prendre (maximum 2, pas 5)', async () => {
+    const pid = await seedProject({ status: 'done', finishedAt: '2026-07-01' })
+    const autre = await db.projects.add({ name: 'B', technique: 'knitting', status: 'wip' })
+    const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 3, reservations: { [autre]: 3 }, consumed: { [pid]: 2 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '5')
+    await flushPromises()
+    expect(field(w).element.value).toBe('2')
+    expect(block(w).text()).toContain(i18n.global.t('project.consumedOverStock', { n: '2' }))
+    expect(block(w).text()).toContain('autres projets')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.quantity).toBe(3)
+    expect(y.consumed).toEqual({ [pid]: 2 })
+    expect(y.reservations).toEqual({ [autre]: 3 })
+  })
+
+  // « Corriger le stock » était un lien : le suivre quittait l'écran sans enregistrer, et tout ce
+  // qui avait été tapé ailleurs dans le formulaire était perdu en silence. Le bouton enregistre
+  // d'abord (même parcours qu'Enregistrer), atterrit sur la fiche du projet, puis ouvre la laine
+  // par-dessus (le Retour depuis la laine ramène à la fiche, comme depuis le dialogue).
+  it('« Corriger le stock » enregistre d’abord les autres modifications, passe par la fiche puis ouvre la laine', async () => {
+    const { pid, yid } = await seedDone()
+    const autreYid = await db.yarns.add({ brand: 'Rico', colorName: 'Rouge', quantity: 2, reservations: {}, consumed: { [pid]: 1 } })
+    const w = mountBlock()
+    await waitHydrated(w)
+    await w.find('#name').setValue('Pull torsadé corrigé')
+    const rows = block(w).findAll('.ypick__row')
+    const rowOf = (label) => rows.find((r) => r.text().includes(label))
+    // Une correction permise sur une autre laine : elle est enregistrée avec le reste.
+    const rico = rowOf('Rico · Rouge').find('input')
+    rico.element.value = '2'
+    await rico.trigger('input')
+    // Dépassement sur la laine à corriger : le bouton apparaît.
+    const drops = rowOf('Drops · Bleu').find('input')
+    drops.element.value = '12'
+    await drops.trigger('input')
+    await flushPromises()
+    await fixBtn(w).trigger('click')
+
+    await vi.waitFor(() => expect(nav.router.push).toHaveBeenCalledWith({ name: 'stash-edit', params: { id: yid } }), { timeout: 10000 })
+    expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } })
+    expect(nav.router.replace.mock.invocationCallOrder[0]).toBeLessThan(nav.router.push.mock.invocationCallOrder[0])
+    const p = await db.projects.get(pid)
+    expect(p.name).toBe('Pull torsadé corrigé')
+    expect(p.status).toBe('done')
+    const rouge = await db.yarns.get(autreYid)
+    expect(rouge.consumed).toEqual({ [pid]: 2 })
+    expect(rouge.quantity).toBe(1)
+    // La laine dont le stock est à corriger n'est PAS touchée : sa saisie bornée n'est pas une
+    // vraie consommation (même règle que « Corriger le stock » dans le dialogue, qui ne
+    // consomme rien). Écrire le maximum viderait le stock juste avant qu'on aille le corriger.
+    const bleu = await db.yarns.get(yid)
+    expect(bleu.consumed).toEqual({ [pid]: 3 })
+    expect(bleu.quantity).toBe(4)
+  })
+
+  it('« Corriger le stock » avec un nom vidé : rien n’est enregistré, on reste sur le formulaire', async () => {
+    const { pid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await w.find('#name').setValue('')
+    await typeQty(w, '12')
+    await flushPromises()
+    await fixBtn(w).trigger('click')
+    await flushPromises()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(nav.router.replace).not.toHaveBeenCalled()
+    expect(nav.router.push).not.toHaveBeenCalled()
+    expect((await db.projects.get(pid)).name).toBe('Pull torsadé')
+  })
+
+  it('champ vidé puis Enregistrer : rien ne change (jamais 0)', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '5')
+    await typeQty(w, '')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 3 })
+    expect(y.quantity).toBe(4)
+  })
+
+  it('champ illisible (virgule seule) : rien ne change non plus', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, ',')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 3 })
+    expect(y.quantity).toBe(4)
+  })
+
+  it('modifier deux fois (3 vers 5 puis 5 vers 3) redonne l\'état d\'origine', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '5')
+    await saveNow(w)
+    expect((await db.yarns.get(yid)).quantity).toBe(2)
+    await typeQty(w, '3')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 3 })
+    expect(y.quantity).toBe(4)
+  })
+
+  it('laine supprimée entre le chargement et Enregistrer : ignorée sans erreur', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await typeQty(w, '5')
+    await db.yarns.delete(yid)
+    // le store est la source de lecture : on le met au courant comme le ferait un autre écran
+    const { useYarnsStore } = await import('@/stores/yarns')
+    await useYarnsStore().load()
+    await saveNow(w)
+    expect(await db.yarns.get(yid)).toBeUndefined()
+    expect((await db.projects.get(pid)).name).toBe('Pull torsadé')
+  })
+
+  it('le stock est relu à l\'enregistrement : un stock changé depuis le chargement n\'est pas écrasé', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    // un autre écran fait passer le stock de 4 à 10 pendant que celui-ci est ouvert
+    const { useYarnsStore } = await import('@/stores/yarns')
+    await useYarnsStore().update(yid, { quantity: 10 })
+    await typeQty(w, '5')
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 5 })
+    expect(y.quantity).toBe(8) // 10 + 3 - 5, pas 4 + 3 - 5
+  })
+
+  it('valeur inchangée : la laine n\'est pas réécrite', async () => {
+    const { pid, yid } = await seedDone()
+    const w = mountBlock()
+    await waitHydrated(w)
+    await saveNow(w)
+    const y = await db.yarns.get(yid)
+    expect(y.consumed).toEqual({ [pid]: 3 })
+    expect(y.quantity).toBe(4)
+  })
+})
+
+describe('ProjectEditView : pause, outils liés', () => {
+  it('avec un outil lié : le statut est déjà écrit dialogue ouvert, « Libérer » range les liens puis navigue', async () => {
+    const tid = await db.tools.add({ type: 'needle', name: 'Aiguille' })
+    const pid = await seedProject({ toolIds: [tid], kitPicks: [] })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await chip(w, 'pause').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    // Non-blocage : le statut est parti avec l'enregistrement, sans attendre la réponse.
+    expect((await db.projects.get(pid)).status).toBe('pause')
+    expect(nav.router.replace).not.toHaveBeenCalled()
+    await w.findComponent(ToolParkingDialog).vm.$emit('confirm', [])
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.status).toBe('pause')
+    expect(saved.toolIds).toEqual([])
+    expect(saved.parkedTools).toEqual({ toolIds: [tid], kitPicks: [] })
+  })
+
+  it('sans outil lié : aucune question, le statut change et on navigue', async () => {
+    const pid = await seedProject({ toolIds: [], kitPicks: [] })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await chip(w, 'pause').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('open')).toBe(false)
+    expect((await db.projects.get(pid)).status).toBe('pause')
+  })
+
+  async function seedParked() {
+    const tid = await db.tools.add({ type: 'needle', name: 'Aiguille' })
+    const pid = await seedProject({ status: 'pause', toolIds: [], kitPicks: [], parkedTools: { toolIds: [tid], kitPicks: [] } })
+    return { tid, pid }
+  }
+
+  it('reprise (pause -> en cours) : statut déjà écrit, « Reprendre » relie l\'outil dans une seconde écriture', async () => {
+    const { tid, pid } = await seedParked()
+    const w = mountEdit()
+    await waitHydrated(w)
+    await chip(w, 'wip').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('mode')).toBe('resume')
+    expect((await db.projects.get(pid)).status).toBe('wip')
+    expect((await db.projects.get(pid)).toolIds).toEqual([])
+    expect(nav.router.replace).not.toHaveBeenCalled()
+    await w.findComponent(ToolParkingDialog).vm.$emit('confirm', [`tool:${tid}`])
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.toolIds).toEqual([tid])
+    expect(saved.parkedTools ?? null).toBeNull()
+  })
+
+  it('reprise : « Pas maintenant » écrit parkedTools null et navigue', async () => {
+    const { pid } = await seedParked()
+    const w = mountEdit()
+    await waitHydrated(w)
+    await chip(w, 'wip').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    await w.findComponent(ToolParkingDialog).vm.$emit('cancel')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.status).toBe('wip')
+    expect(saved.toolIds).toEqual([])
+    expect(saved.parkedTools ?? null).toBeNull()
+  })
+
+  it('création : jamais de question de pause ni de reprise', async () => {
+    nav.route.params = {}
+    nav.route.query = {}
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('#name').setValue('Nouveau')
+    await chip(w, 'wip').trigger('click')
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalled(), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('open')).toBe(false)
+  })
+
+  it('statut inchangé (en pause, enregistrer) : aucune question de reprise', async () => {
+    const tid = await db.tools.add({ type: 'needle', name: 'Aiguille' })
+    const pid = await seedProject({ status: 'pause', toolIds: [], kitPicks: [], parkedTools: { toolIds: [tid], kitPicks: [] } })
+    const w = mountEdit()
+    await waitHydrated(w)
+    await w.find('.btn--primary').trigger('click')
+    await vi.waitFor(() => expect(nav.router.replace).toHaveBeenCalledWith({ name: 'project', params: { id: pid } }), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('open')).toBe(false)
   })
 })

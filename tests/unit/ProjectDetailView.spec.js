@@ -27,9 +27,12 @@ vi.mock('@/utils/open-pdf', () => ({ openPdfExternally }))
 import ProjectDetailView from '@/views/ProjectDetailView.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
+import ToolParkingDialog from '@/components/ToolParkingDialog.vue'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { useCropperStore } from '@/stores/cropper'
 import { useSettingsStore } from '@/stores/settings'
+import { useTrashStore } from '@/stores/trash'
+import { useProjectsStore } from '@/stores/projects'
 
 const tk = makeTk(i18n)
 
@@ -687,7 +690,7 @@ describe('ProjectDetailView', () => {
       await w.findComponent(StatusBadge).vm.$emit('change', 'done')
       await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
       expect(w.findComponent(YarnConsumptionDialog).props('yarns')).toEqual([
-        { id: yid, name: 'Drops · Bleu', reserved: 2 },
+        { id: yid, name: 'Drops · Bleu', reserved: 2, available: 5, othersReserved: false },
       ])
       expect((await db.projects.get(pid)).status).toBe('wip')
     })
@@ -706,6 +709,21 @@ describe('ProjectDetailView', () => {
       expect((await db.yarns.get(yid)).quantity).toBe(3) // 5 - 2 tricotées
       expect((await db.yarns.get(yid)).reservations).toEqual({})
       expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(false)
+    })
+
+    it('Annuler : ferme sans consommer et sans changer le statut', async () => {
+      const pid = await seedProject()
+      const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [pid]: 2 } })
+      const w = mountDetail()
+      await flushPromises()
+
+      await w.findComponent(StatusBadge).vm.$emit('change', 'done')
+      await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
+
+      await w.findComponent(YarnConsumptionDialog).vm.$emit('cancel')
+      await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(false), { timeout: 10000 })
+      expect((await db.projects.get(pid)).status).toBe('wip')
+      expect((await db.yarns.get(yid)).quantity).toBe(5)
     })
 
     it('valider avec une quantité rectifiée déduit seulement ce qui est saisi, le reste retourne au stock', async () => {
@@ -1088,6 +1106,14 @@ describe('fiche projet — prix du patron', () => {
     expect(ligne.text()).not.toMatch(/\d/)
   })
 
+  it('2 bis. prix illisible ⇒ « Prix inconnu », jamais « Gratuit »', async () => {
+    const w = await monterAvecPrix({ price: 'environ 5', priceCurrency: 'EUR' })
+    const ligne = w.find('[data-test="project-pattern-price"]')
+    expect(ligne.exists()).toBe(true)
+    expect(ligne.text()).toContain(fr.purchases.priceUnknown)
+    expect(ligne.text()).not.toContain(fr.pattern.priceFree)
+  })
+
   it('3. prix VIDE ⇒ AUCUNE ligne (pas une ligne vide)', async () => {
     const w = await monterAvecPrix({ price: '' })
     expect(w.find('[data-test="project-pattern-price"]').exists()).toBe(false)
@@ -1207,6 +1233,22 @@ describe('fiche projet — coût du projet (laines)', () => {
     // CHF et non EUR : EUR est DEFAULT_CURRENCY, l'assertion passerait sur un repli codé
     // en dur. C'est CE `toContain` qui prouve que `settings.currency` est lu.
     expect(txt).toContain('CHF')
+  })
+
+  it('2b. deux laines en devises différentes ⇒ les DEUX montants, chacun dans sa devise', async () => {
+    const w = await monter({
+      currency: 'CHF',
+      yarns: [
+        { price: '4,50', priceCurrency: 'EUR', reserved: 3 }, // 13,50 EUR
+        { price: '2', priceCurrency: 'USD', knitted: 2 },     //  4 USD
+      ],
+    })
+    const txt = tuile(w).text()
+    expect(txt).toMatch(/(?<!\d)13,50/)
+    expect(txt).toContain('€')
+    expect(txt).toMatch(/(?<!\d)4\D/)
+    expect(txt).toContain('$')
+    expect(txt).not.toContain('CHF')
   })
 
   it('3. des pelotes mais AUCUN prix connu ⇒ « — », jamais « 0 € »', async () => {
@@ -1355,5 +1397,406 @@ describe('fiche projet — rectifier une séance', () => {
     await w.find('.addform input[type="date"]').setValue('')
     await save(w)
     expect((await db.sessions.get(sid)).date).toBe('2026-08-10T10:00:00.000Z')
+  })
+})
+
+// Protège la mention « taille absente du stock » : une ligne par taille manquante, et jamais tant que le stock d'outils est vide.
+describe('fiche projet : taille absente du stock d’outils', () => {
+  const sizes = [{ mm: '4', us: '' }, { mm: '5', us: '' }]
+  it('signale la taille 5 seule quand le stock a une circulaire 4', async () => {
+    await db.tools.add({ type: 'circular', category: 'needle', sizeMm: 4, status: 'available' })
+    await seedProject({ needles: sizes })
+    const w = mountDetail()
+    await flushPromises()
+    await w.vm.changeTab('infos')
+    await flushPromises()
+    const notes = w.findAll('.itile__missing').map((n) => n.text())
+    expect(notes).toEqual([tk('project.missingSize', { mm: '5' })])
+  })
+  it('aucune mention quand le stock d’outils est vide', async () => {
+    await seedProject({ needles: sizes })
+    const w = mountDetail()
+    await flushPromises()
+    await w.vm.changeTab('infos')
+    await flushPromises()
+    expect(w.find('.itile__k').exists()).toBe(true)
+    expect(w.find('.itile__missing').exists()).toBe(false)
+  })
+})
+
+// Protège la tuile « Mes outils » : absente sans stock d'outils, lignes liées qui ouvrent la fiche
+// outil, feuille de sélection (tailles du projet d'abord) qui enregistre les liens, fermée au retour.
+describe('fiche projet : outils liés', () => {
+  // Écriture Dexie (fake-indexeddb, tâches macro) : quelques tours de file suffisent, sans minuterie.
+  async function settle() {
+    for (let i = 0; i < 10; i++) await flushPromises()
+  }
+  const circ4 = { type: 'circular', category: 'needle', sizeMm: 4, brand: 'ChiaoGoo', status: 'available' }
+  const circ6 = { type: 'circular', category: 'needle', sizeMm: 6, brand: 'Addi', status: 'available' }
+  async function openInfos(extra = {}) {
+    await seedProject({ needles: [{ mm: '4', us: '' }], ...extra })
+    const w = mountDetail()
+    await flushPromises()
+    await w.vm.changeTab('infos')
+    await flushPromises()
+    return w
+  }
+
+  // Protège l'affichage de la fiche : la lecture de la liste des projets n'est pas attendue.
+  it('la fiche s’affiche même si le chargement de la liste des projets ne se résout pas', async () => {
+    await seedProject()
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    vi.spyOn(useProjectsStore(), 'load').mockReturnValue(new Promise(() => {}))
+    const w = mount(ProjectDetailView, {
+      global: { plugins: [pinia, i18n], stubs: { StatusBadge: true, CounterCard: true, CounterForm: true } },
+    })
+    await settle()
+    expect(w.vm.loading).toBe(false)
+    expect(w.text()).toContain('Pull torsadé')
+  })
+
+  it('aucune tuile « Mes outils » quand le stock d’outils est vide', async () => {
+    const w = await openInfos()
+    expect(w.find('[data-test="project-tools"]').exists()).toBe(false)
+  })
+
+  it('un outil lié montre sa ligne, qui ouvre la fiche de l’outil', async () => {
+    const toolId = await db.tools.add(circ4)
+    await db.tools.add(circ6)
+    const w = await openInfos({ toolIds: [toolId] })
+    const tile = w.get('[data-test="project-tools"]')
+    expect(tile.text()).toContain(tk('tools.title'))
+    const rows = tile.findAll('.trow')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].text()).toContain('ChiaoGoo')
+    await rows[0].trigger('click')
+    expect(nav.router.push).toHaveBeenCalledWith({ name: 'tool', params: { id: toolId } })
+  })
+
+  it('la tuile et la feuille nomment le projet en cours qui utilise l’outil', async () => {
+    const toolId = await db.tools.add(circ4)
+    const w = await openInfos({ toolIds: [toolId] })
+    await settle()
+    const inUse = tk('tools.inUseBy', { name: 'Pull torsadé' })
+    expect(w.get('[data-test="project-tools"] .trow__status').text()).toBe(inUse)
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    expect(w.get('[data-test="tool-picker"] .trow__status').text()).toBe(inUse)
+  })
+
+  it('sans lien, la tuile le dit et propose de choisir des outils', async () => {
+    await db.tools.add(circ4)
+    const w = await openInfos()
+    const tile = w.get('[data-test="project-tools"]')
+    expect(tile.text()).toContain(tk('project.toolsNone'))
+    expect(tile.get('[data-test="project-tools-choose"]').text()).toContain(tk('project.chooseTools'))
+  })
+
+  it('la feuille met en tête les outils aux tailles du projet et enregistre les cases cochées', async () => {
+    await db.tools.add(circ6)
+    const id4 = await db.tools.add(circ4)
+    const w = await openInfos()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const sheet = w.get('[data-test="tool-picker"]')
+    expect(sheet.attributes('role')).toBe('dialog')
+    const groups = sheet.findAll('[data-test="tool-picker-group"]')
+    expect(groups.map((g) => g.get('h3').text())).toEqual([tk('tools.picker.matching'), tk('tools.picker.others')])
+    expect(groups[0].text()).toContain('ChiaoGoo')
+    expect(groups[1].text()).toContain('Addi')
+    await groups[0].get('input[type="checkbox"]').setValue(true)
+    await sheet.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    expect(w.find('[data-test="tool-picker"]').exists()).toBe(false)
+    const pid = Number(nav.route.params.id)
+    expect((await db.projects.get(pid)).toolIds).toEqual([id4])
+    expect(w.get('[data-test="project-tools"]').findAll('.trow')).toHaveLength(1)
+  })
+
+  it('à l’ouverture, le focus entre dans la feuille', async () => {
+    await db.tools.add(circ4)
+    await seedProject({ needles: [{ mm: '4', us: '' }] })
+    const w = mount(ProjectDetailView, {
+      attachTo: document.body,
+      global: { plugins: [createPinia(), i18n], stubs: { StatusBadge: true, CounterCard: true, CounterForm: true } },
+    })
+    await flushPromises()
+    await w.vm.changeTab('infos')
+    await flushPromises()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    expect(document.activeElement.closest('[data-test="tool-picker"]')).not.toBeNull()
+    w.unmount()
+  })
+
+  it('une écriture des liens qui échoue le dit et garde la feuille ouverte', async () => {
+    await db.tools.add(circ4)
+    const w = await openInfos()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    await w.get('[data-test="tool-picker"] input[type="checkbox"]').setValue(true)
+    const spy = vi.spyOn(db.projects, 'update').mockRejectedValueOnce(new Error('disque plein'))
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    spy.mockRestore()
+    expect(useSnackbarStore().message).toBe(tk('project.toolsSaveError'))
+    expect(w.find('[data-test="tool-picker"]').exists()).toBe(true)
+  })
+
+  it('le geste retour ferme la feuille sans quitter la fiche ni enregistrer', async () => {
+    await db.tools.add(circ4)
+    const w = await openInfos()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    await w.get('[data-test="tool-picker"] input[type="checkbox"]').setValue(true)
+    expect(w.vm.handleBackPressed()).toBe(true)
+    await flushPromises()
+    expect(w.find('[data-test="tool-picker"]').exists()).toBe(false)
+    expect(w.find('#panel-infos').exists()).toBe(true)
+    expect((await db.projects.get(Number(nav.route.params.id))).toolIds ?? []).toEqual([])
+  })
+
+  // Protège le lien d'un outil en corbeille : absent de la feuille, il survit à « Enregistrer ».
+  it('un id lié absent du stock (outil en corbeille) reste lié après « Enregistrer »', async () => {
+    const trashed = await db.tools.add(circ6)
+    const id4 = await db.tools.add(circ4)
+    await useTrashStore().moveToTrash('tool', trashed)
+    const w = await openInfos({ toolIds: [trashed] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const sheet = w.get('[data-test="tool-picker"]')
+    expect(sheet.text()).not.toContain('Addi')
+    await sheet.get('input[type="checkbox"]').setValue(true)
+    await sheet.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    expect((await db.projects.get(Number(nav.route.params.id))).toolIds).toEqual([id4, trashed])
+  })
+  // Protège les prises de kit : un kit se déplie en tailles (jamais de case pour le kit entier),
+  // une taille cochée propose un câble, l'enregistrement écrit kitPicks et la tuile les montre.
+  const zing = { type: 'interchangeable', category: 'kit', kitSizes: [3.5, 4, 5], kitCables: [60, 80], brand: 'KnitPro', line: 'Zing', status: 'available' }
+  const kitBlock = (w) => w.get('[data-test="tool-picker-kit"]')
+  const sizeBox = (block, mm) => block.get(`[data-test="tool-picker-kit-size"][data-value="${mm}"]`)
+
+  it('un kit se déplie en tailles, celles du projet d’abord, sans case pour le kit entier', async () => {
+    await db.tools.add(zing)
+    const w = await openInfos()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const block = kitBlock(w)
+    expect(block.findAll('[data-test="tool-picker-kit-size"]').map((b) => b.attributes('data-value'))).toEqual(['4', '3.5', '5'])
+    expect(block.findAll('input[type="checkbox"]')).toHaveLength(3)
+    expect(block.find('[data-test="tool-picker-whole-kit"]').exists()).toBe(false)
+  })
+
+  it('cocher 4 mm puis choisir 80 cm écrit la prise, et la tuile la montre', async () => {
+    const kitId = await db.tools.add(zing)
+    const w = await openInfos()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const block = kitBlock(w)
+    expect(block.find('select').exists()).toBe(false)
+    await sizeBox(block, 4).get('input[type="checkbox"]').setValue(true)
+    const select = sizeBox(block, 4).get('select')
+    expect(select.findAll('option').map((o) => o.text())).toEqual([tk('tools.picker.noCable'), '60 cm', '80 cm'])
+    await select.setValue('80|')
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    const saved = await db.projects.get(Number(nav.route.params.id))
+    expect(saved.kitPicks).toEqual([{ toolId: kitId, sizeMm: 4, cableCm: 80, cableJoin: null }])
+    expect(saved.toolIds).toEqual([])
+    const rows = w.get('[data-test="project-tools"]').findAll('.trow__title')
+    expect(rows.map((r) => r.text())).toEqual([`KnitPro Zing · ${tk('tools.kitPick', { size: '4 mm', cable: '80 cm' })}`])
+  })
+
+  it('une taille ou un câble pris par un autre projet en cours reste cochable, avec « pris : »', async () => {
+    const kitId = await db.tools.add({ ...zing, kitCables: [80] })
+    await db.projects.add({ name: 'Bonnet', status: 'wip', kitPicks: [{ toolId: kitId, sizeMm: 4, cableCm: 80 }] })
+    await db.projects.add({ name: 'Fini', status: 'done', kitPicks: [{ toolId: kitId, sizeMm: 5, cableCm: null }] })
+    const w = await openInfos()
+    await settle()
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const block = kitBlock(w)
+    const taken = tk('tools.picker.takenBy', { name: 'Bonnet' })
+    expect(sizeBox(block, 4).text()).toContain(taken)
+    expect(sizeBox(block, 5).text()).not.toContain(tk('tools.picker.takenBy', { name: 'Fini' }))
+    await sizeBox(block, 4).get('input[type="checkbox"]').setValue(true)
+    expect(sizeBox(block, 4).findAll('option').map((o) => o.text())).toEqual([tk('tools.picker.noCable'), `80 cm (${taken})`])
+    await sizeBox(block, 4).get('select').setValue('80|')
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    expect((await db.projects.get(Number(nav.route.params.id))).kitPicks).toEqual([{ toolId: kitId, sizeMm: 4, cableCm: 80, cableJoin: null }])
+  })
+
+  it('un lien ancien au kit entier reste affiché, coché, et se décoche', async () => {
+    const kitId = await db.tools.add(zing)
+    const w = await openInfos({ toolIds: [kitId] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const whole = kitBlock(w).get('[data-test="tool-picker-whole-kit"] input[type="checkbox"]')
+    expect(whole.element.checked).toBe(true)
+    await whole.setValue(false)
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    expect((await db.projects.get(Number(nav.route.params.id))).toolIds).toEqual([])
+  })
+
+  it('cocher une taille d’un kit lié en entier remplace le lien ancien', async () => {
+    const kitId = await db.tools.add(zing)
+    const w = await openInfos({ toolIds: [kitId] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const block = kitBlock(w)
+    await sizeBox(block, 4).get('input[type="checkbox"]').setValue(true)
+    expect(block.get('[data-test="tool-picker-whole-kit"] input[type="checkbox"]').element.checked).toBe(false)
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    const saved = await db.projects.get(Number(nav.route.params.id))
+    expect(saved.toolIds).toEqual([])
+    expect(saved.kitPicks).toEqual([{ toolId: kitId, sizeMm: 4, cableCm: null, cableJoin: null }])
+  })
+
+  it('les prises d’un kit en corbeille survivent à « Enregistrer »', async () => {
+    const id4 = await db.tools.add(circ4)
+    const trashed = await db.tools.add(zing)
+    await useTrashStore().moveToTrash('tool', trashed)
+    const pick = { toolId: trashed, sizeMm: 4, cableCm: 60 }
+    const w = await openInfos({ kitPicks: [pick] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    expect(w.find('[data-test="tool-picker-kit"]').exists()).toBe(false)
+    await w.get('[data-test="tool-picker"] input[type="checkbox"]').setValue(true)
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    const saved = await db.projects.get(Number(nav.route.params.id))
+    expect(saved.toolIds).toEqual([id4])
+    expect(saved.kitPicks).toEqual([{ ...pick, cableJoin: null }])
+  })
+
+  it('une prise dont le câble n’est plus dans le kit s’ouvre cochée, sans câble', async () => {
+    const kitId = await db.tools.add(zing)
+    const w = await openInfos({ kitPicks: [{ toolId: kitId, sizeMm: 5, cableCm: 100 }] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const box = sizeBox(kitBlock(w), 5)
+    expect(box.get('input[type="checkbox"]').element.checked).toBe(true)
+    expect(box.get('select').element.value).toBe('')
+  })
+
+  it('les prises déjà enregistrées sont cochées à l’ouverture, câble compris', async () => {
+    const kitId = await db.tools.add(zing)
+    const w = await openInfos({ kitPicks: [{ toolId: kitId, sizeMm: 5, cableCm: 60 }] })
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+    const box = sizeBox(kitBlock(w), 5)
+    expect(box.get('input[type="checkbox"]').element.checked).toBe(true)
+    expect(box.get('select').element.value).toBe('60|')
+  })
+
+  // Diamètre de la fixation (spec 2026-11-17) : un couple longueur + diamètre est une option du menu.
+  const twin = { ...zing, kitCables: [{ cm: 80, join: 's' }, { cm: 80, join: 'l' }] }
+  const openSheet = async (w) => {
+    await w.get('[data-test="project-tools-choose"]').trigger('click')
+    await flushPromises()
+  }
+
+  it('un 80 cm S et un 80 cm L sont deux options du menu', async () => {
+    await db.tools.add(twin)
+    const w = await openInfos()
+    await openSheet(w)
+    await sizeBox(kitBlock(w), 4).get('input[type="checkbox"]').setValue(true)
+    expect(sizeBox(kitBlock(w), 4).findAll('option').map((o) => o.text())).toEqual([tk('tools.picker.noCable'), '80 cm S', '80 cm L'])
+  })
+
+  it('choisir 80 cm L écrit cableJoin, la tuile dit « 80 cm L », et la feuille rouverte reprend L', async () => {
+    const kitId = await db.tools.add(twin)
+    const w = await openInfos()
+    await openSheet(w)
+    await sizeBox(kitBlock(w), 4).get('input[type="checkbox"]').setValue(true)
+    await sizeBox(kitBlock(w), 4).get('select').setValue('80|l')
+    await w.get('[data-test="tool-picker-save"]').trigger('click')
+    await settle()
+    expect((await db.projects.get(Number(nav.route.params.id))).kitPicks).toEqual([{ toolId: kitId, sizeMm: 4, cableCm: 80, cableJoin: 'l' }])
+    expect(w.get('[data-test="project-tools"]').findAll('.trow__title').map((r) => r.text())).toEqual([`KnitPro Zing · ${tk('tools.kitPick', { size: '4 mm', cable: '80 cm L' })}`])
+    await openSheet(w)
+    expect(sizeBox(kitBlock(w), 4).get('select').element.value).toBe('80|l')
+  })
+
+  it('un 80 cm S pris ailleurs ne marque pas le 80 cm L', async () => {
+    const kitId = await db.tools.add(twin)
+    await db.projects.add({ name: 'Bonnet', status: 'wip', kitPicks: [{ toolId: kitId, sizeMm: 5, cableCm: 80, cableJoin: 's' }] })
+    const w = await openInfos()
+    await settle()
+    await openSheet(w)
+    await sizeBox(kitBlock(w), 4).get('input[type="checkbox"]').setValue(true)
+    const taken = tk('tools.picker.takenBy', { name: 'Bonnet' })
+    expect(sizeBox(kitBlock(w), 4).findAll('option').map((o) => o.text())).toEqual([tk('tools.picker.noCable'), `80 cm S (${taken})`, '80 cm L'])
+  })
+
+  it('une prise ancienne sans diamètre sur un kit à un seul 80 cm S s’ouvre sur « 80 cm S »', async () => {
+    const kitId = await db.tools.add({ ...zing, kitCables: [{ cm: 80, join: 's' }] })
+    const w = await openInfos({ kitPicks: [{ toolId: kitId, sizeMm: 4, cableCm: 80 }] })
+    await openSheet(w)
+    const select = sizeBox(kitBlock(w), 4).get('select')
+    expect(select.element.value).toBe('80|s')
+    expect(select.findAll('option').map((o) => o.text())).toContain('80 cm S')
+  })
+})
+
+describe('ProjectDetailView : pause et reprise, outils liés', () => {
+  const tool = { type: 'needle', name: 'Aiguille 4 mm' }
+
+  it('pause : « Libérer » met en pause, vide les liens et les range dans parkedTools', async () => {
+    const tid = await db.tools.add(tool)
+    const pid = await seedProject({ toolIds: [tid], kitPicks: [] })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findComponent(StatusBadge).vm.$emit('change', 'pause')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    expect((await db.projects.get(pid)).status).toBe('wip')
+    await w.findComponent(ToolParkingDialog).vm.$emit('confirm', [])
+    await vi.waitFor(async () => expect((await db.projects.get(pid)).status).toBe('pause'), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.toolIds).toEqual([])
+    expect(saved.parkedTools).toEqual({ toolIds: [tid], kitPicks: [] })
+  })
+
+  it('pause : « Les garder » met en pause en gardant les liens', async () => {
+    const tid = await db.tools.add(tool)
+    const pid = await seedProject({ toolIds: [tid], kitPicks: [] })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findComponent(StatusBadge).vm.$emit('change', 'pause')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    await w.findComponent(ToolParkingDialog).vm.$emit('cancel')
+    await vi.waitFor(async () => expect((await db.projects.get(pid)).status).toBe('pause'), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.toolIds).toEqual([tid])
+    expect(saved.parkedTools).toBeUndefined()
+  })
+
+  it('pause sans outil lié : aucune question, le statut change tout de suite', async () => {
+    const pid = await seedProject({ toolIds: [], kitPicks: [] })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findComponent(StatusBadge).vm.$emit('change', 'pause')
+    await vi.waitFor(async () => expect((await db.projects.get(pid)).status).toBe('pause'), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('open')).toBe(false)
+  })
+
+  it('reprise : « Reprendre » relie l\'outil resté libre et oublie le mis de côté', async () => {
+    const tid = await db.tools.add(tool)
+    const pid = await seedProject({ status: 'pause', toolIds: [], kitPicks: [], parkedTools: { toolIds: [tid], kitPicks: [] } })
+    const w = mountDetail()
+    await flushPromises()
+    await w.findComponent(StatusBadge).vm.$emit('change', 'wip')
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true), { timeout: 10000 })
+    expect(w.findComponent(ToolParkingDialog).props('mode')).toBe('resume')
+    await w.findComponent(ToolParkingDialog).vm.$emit('confirm', [`tool:${tid}`])
+    await vi.waitFor(async () => expect((await db.projects.get(pid)).status).toBe('wip'), { timeout: 10000 })
+    const saved = await db.projects.get(pid)
+    expect(saved.toolIds).toEqual([tid])
+    expect(saved.parkedTools ?? null).toBeNull()
   })
 })

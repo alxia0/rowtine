@@ -14,6 +14,17 @@
 // privacy-policy.fr.js.
 export const RELEASE_NOTES_FR = [
   {
+    version: '1.5.0',
+    notes: [
+      'Nouvel écran « Mes outils » : tes aiguilles, crochets et kits interchangeables, avec taille, longueur, matière, photos et prix. Un kit peut avoir des câbles de plusieurs longueurs et diamètres de fixation.',
+      'Lie des outils à un projet : sa fiche signale une taille absente de ton stock. Pour un kit, tu prends une taille et un câble précis, et le reste du kit reste libre pour un autre projet.',
+      'Mettre un projet en pause propose de libérer ses outils pour un autre projet ; le reprendre propose de reprendre ceux qui sont encore libres.',
+      "Les outils achetés comptent dans les Dépenses, et le stock d'outils s'exporte en tableur.",
+      "Projet terminé : un bouton Annuler dans la fenêtre des pelotes, un plafond au disponible, et une correction des pelotes après coup depuis l'écran Modifier.",
+      "Après une mise à jour, une fenêtre te présente les nouveautés une seule fois, et l'écran À propos garde le journal de toutes les versions.",
+    ],
+  },
+  {
     version: '1.4.3',
     notes: [
       "Échantillons de laine : note la tension obtenue avec une laine sur sa fiche du stock (à plat ou en rond, taille d'aiguille ou de crochet, mailles et rangs pour 10 cm). Les échantillons suivent la laine dans les sauvegardes et dans l'export du stock.",

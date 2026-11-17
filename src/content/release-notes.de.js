@@ -11,6 +11,17 @@
 // allemande, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_DE = [
   {
+    version: '1.5.0',
+    notes: [
+      'Neu „Meine Nadeln“: deine Nadeln, Häkelnadeln und Wechselsets mit Größe, Länge, Material, Fotos und Preis. Ein Set kann Seile in mehreren Längen und Anschlussdurchmessern haben.',
+      'Werkzeuge einem Projekt zuordnen: Die Karte warnt, wenn eine Größe im Vorrat fehlt. Bei einem Set nimmst du eine bestimmte Größe und ein Seil, der Rest des Sets bleibt für ein anderes Projekt frei.',
+      'Wenn du ein Projekt pausierst, schlägt die App vor, seine Werkzeuge für ein anderes Projekt freizugeben; wenn du es wieder aufnimmst, schlägt sie vor, die noch freien zurückzunehmen.',
+      'Gekaufte Werkzeuge zählen in den Ausgaben, und der Werkzeugvorrat lässt sich als Tabelle exportieren.',
+      'Fertiges Projekt: ein Abbrechen-Knopf im Knäuel-Fenster, eine Obergrenze beim Verfügbaren und eine nachträgliche Korrektur der Knäuel im Bildschirm Bearbeiten.',
+      'Nach einem Update zeigt ein Fenster die Neuigkeiten einmalig, und der Bildschirm Info bewahrt das Journal aller Versionen.',
+    ],
+  },
+  {
     version: '1.4.3',
     notes: [
       'Maschenproben für Wolle: Halte die mit einer Wolle erzielte Maschenprobe auf ihrer Karte im Vorrat fest (glatt oder in Runden, Nadel- oder Häkelnadelstärke, Maschen und Reihen auf 10 cm). Die Maschenproben bleiben bei der Wolle, auch in Sicherungen und im Export des Vorrats.',

@@ -103,6 +103,17 @@ beforeEach(async () => {
 })
 
 describe('YarnDetailView', () => {
+  it('le prix garde la devise de la fiche, même si les réglages ont changé', async () => {
+    const { w } = await mountView({ ...BASE_YARN, price: 12.5, priceCurrency: 'EUR' }, { currency: 'USD' })
+    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '€'))).toBe('12,50')
+    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '$'))).toBeNull()
+  })
+
+  it('un prix sans devise (ancienne fiche) prend celle des réglages', async () => {
+    const { w } = await mountView({ ...BASE_YARN, price: 12.5 }, { currency: 'USD' })
+    expect(fieldValue(w, fr.yarn.priceWithSymbol.replace('{symbol}', '$'))).toBe('12,50')
+  })
+
   it('affiche le prix au format de la langue, centimes compris (3,20 et non 3,2)', async () => {
     const { w } = await mountView({ ...BASE_YARN })
     // Devise par défaut EUR (settings.js) : le libellé attendu porte donc « € ».

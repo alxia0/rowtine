@@ -20,6 +20,7 @@ import { ymdLocal } from '@/utils/time-periods'
 // Le champ de prix n'accepte que des chiffres et un séparateur : un prix tapé « 18,90 € »
 // donnait NaN, donc 0, donc « Gratuit ».
 import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
+import { hasPrice } from '@/utils/price-currency'
 import { toInput, fromInput, currencySymbol, formatSkeins } from '@/utils/units'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
@@ -248,6 +249,7 @@ function applyExisting(y) {
   // tel quel montrerait « 9.5 » au lieu de « 9,5 » dans un champ qui n'accepte que la virgule
   // française, cassant la parité avec le métrage/poids (`toInput`).
   form.price = y.price === '' || y.price == null ? '' : String(y.price).replace('.', ',')
+  form.priceCurrency = y.priceCurrency || ''
   // Même parade pour la quantité, mais au format de la langue active (comma OU point) :
   // `y.quantity` est un nombre JS (roundSkeins) — le réafficher tel quel montrerait
   // « 2.5 » même en français. `formatSkeins('')` rend « 0 » : une quantité vide/absente
@@ -269,7 +271,7 @@ function applyExisting(y) {
 // vit exclusivement sur l'écran fiche, jamais recopiée à la duplication).
 function applyDuplicate(y) {
   Object.assign(form, emptyYarn(), y, {
-    color: '', colorName: '', price: '', purchasedAt: '', bain: '',
+    color: '', colorName: '', price: '', priceCurrency: '', purchasedAt: '', bain: '',
     colorType: 'uni', colorNotes: '',
     quantity: 1, reservations: {}, consumed: {},
   })
@@ -371,6 +373,8 @@ async function save() {
       swatches: cleanSwatches(form.swatches),
       colorNotes: form.colorType === 'uni' ? '' : form.colorNotes,
     }
+    // Un prix garde la devise dans laquelle il a été noté ; sans prix, aucune devise.
+    payload.priceCurrency = hasPrice(payload.price) ? form.priceCurrency || settings.currency : ''
     if (isEdit.value) {
       const previousQty = current ? Number(current.quantity) || 0 : 0
       // roundSkeins referme la traîne binaire d'une soustraction décimale (2,3 - 2,1 =
@@ -404,7 +408,7 @@ async function save() {
         kind: 'buy',
         quantity: payload.quantity,
         unitPrice: payload.price,
-        currency: settings.currency,
+        currency: payload.priceCurrency || settings.currency,
         // Date et bain SAISIS dans le formulaire de création — pas systématiquement la
         // date du jour : `firstPurchaseDate` en est pré-rempli par défaut, mais reste
         // modifiable. `|| todayISO()` ne protège qu'un champ vidé à la main.
@@ -437,7 +441,7 @@ async function resolvePendingPurchase(kind) {
         kind,
         quantity: pending.delta,
         unitPrice: kind === 'gift' ? '' : pending.payload.price,
-        currency: settings.currency,
+        currency: pending.payload.priceCurrency || settings.currency,
         date: todayISO(),
         reconstructed: false,
       })
@@ -526,7 +530,7 @@ async function resolvePendingPurchase(kind) {
         <div class="col"><label class="field-label" for="yarn-length">{{ settings.unitSystem === 'imperial' ? t('yarn.lengthYd') : t('yarn.lengthM') }}</label><input id="yarn-length" v-model="form.lengthM" class="input" inputmode="decimal" placeholder="100" /></div>
         <div class="col"><label class="field-label" for="yarn-grams">{{ settings.unitSystem === 'imperial' ? t('yarn.ounces') : t('yarn.grams') }}</label><input id="yarn-grams" v-model="form.grams" class="input" inputmode="decimal" placeholder="50" /></div>
         <div class="col"><label class="field-label" for="yarn-quantity">{{ t('yarn.quantity') }}</label><input id="yarn-quantity" v-model="form.quantity" class="input" inputmode="decimal" placeholder="1" /></div>
-        <div class="col"><label class="field-label" for="yarn-price">{{ t('yarn.priceWithSymbol', { symbol: currencySymbol(settings.currency, locale) }) }}</label><input id="yarn-price" :value="form.price" class="input" inputmode="decimal" placeholder="—" @input="onPrixLaine" /></div>
+        <div class="col"><label class="field-label" for="yarn-price">{{ t('yarn.priceWithSymbol', { symbol: currencySymbol(form.priceCurrency || settings.currency, locale) }) }}</label><input id="yarn-price" :value="form.price" class="input" inputmode="decimal" placeholder="—" @input="onPrixLaine" /></div>
       </div>
       <label class="field-label mt2" for="yarn-stored-in">{{ t('yarn.storedIn') }}</label>
       <input id="yarn-stored-in" v-model="form.storedIn" class="input" :placeholder="t('yarn.storedInPlaceholder')" />

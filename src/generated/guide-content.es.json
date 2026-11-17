@@ -104,7 +104,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "El cronómetro registra tus sesiones, la pestaña Fotos guarda las imágenes del patrón y tus propias fotos, las estadísticas resumen tu actividad en el proyecto, y una insignia se comparte en un gesto. Ver los capítulos 2 y 7.",
+              "text": "El cronómetro registra tus sesiones, la pestaña Fotos guarda las imágenes del patrón y tus propias fotos, las estadísticas resumen tu actividad en el proyecto, y una insignia se comparte en un gesto. Ver los capítulos 2 y 8.",
               "bold": false,
               "italic": false
             }
@@ -406,7 +406,7 @@
                   "italic": false
                 },
                 {
-                  "text": " te lleva en todo momento al stock de lana, a la biblioteca de patrones, a las estadísticas, ",
+                  "text": " te lleva en todo momento al stock de lana, a tus herramientas, a la biblioteca de patrones, a las estadísticas, ",
                   "bold": false,
                   "italic": false
                 },
@@ -1582,7 +1582,7 @@
               "italic": false
             },
             {
-              "text": " de las herramientas (punto 6).",
+              "text": " de las herramientas (punto 7).",
               "bold": false,
               "italic": false
             }
@@ -2291,7 +2291,7 @@
               "italic": false
             },
             {
-              "text": " (punto 7) también aprovecha el espacio: su cuadrícula del calendario y sus casillas numéricas se despliegan en vez de apretarse, y en las ventanas más largas, Semestre o Año, ves muchas más semanas antes de tener que arrastrar la cuadrícula de lado. No hay nada más que ajustar: es la misma pantalla, simplemente más cómoda.",
+              "text": " (punto 8) también aprovecha el espacio: su cuadrícula del calendario y sus casillas numéricas se despliegan en vez de apretarse, y en las ventanas más largas, Semestre o Año, ves muchas más semanas antes de tener que arrastrar la cuadrícula de lado. No hay nada más que ajustar: es la misma pantalla, simplemente más cómoda.",
               "bold": false,
               "italic": false
             }
@@ -4162,6 +4162,71 @@
             {
               "spans": [
                 {
+                  "text": "Terminar un proyecto y corregir después",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en la ventana de fin de proyecto puedes indicar más ovillos de los previstos al principio, dentro de lo que está ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "disponible",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " para la lana (su stock, menos los ovillos reservados para otros proyectos). Por encima, la app te lo dice, conserva el máximo y te propone ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Corregir el stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", que abre la ficha de la lana. El botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Cancelar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (igual que la cruz, un toque fuera o Atrás) cierra la ventana sin consumir nada: el proyecto conserva su estado y puedes volver a terminarlo más tarde. Una vez terminado o abandonado el proyecto, el bloque ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ovillos tejidos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de su pantalla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Modificar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " te deja corregir esas cantidades; el stock de la lana sigue el cambio, al alza o a la baja, sin contar nunca dos veces.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "La ficha de una lana",
                   "bold": true,
                   "italic": false
@@ -4472,7 +4537,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la ",
+              "text": "Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, la ",
               "bold": false,
               "italic": false
             },
@@ -4482,12 +4547,22 @@
               "italic": false
             },
             {
-              "text": " como los ",
+              "text": ", los ",
               "bold": false,
               "italic": false
             },
             {
               "text": "patrones",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " y las ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "herramientas",
               "bold": true,
               "italic": false
             },
@@ -4535,7 +4610,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", que sigue lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón, este total sigue siendo exactamente el que conoces; en cuanto aparece un patrón en él, se desglosa en dos sublíneas: lo que fue a lana, lo que fue a patrones.",
+                  "text": ", que sigue lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón ni de herramienta, este total sigue siendo exactamente el que conoces; en cuanto aparece un patrón o una herramienta en él, se desglosa en una sublínea por categoría presente: lo que fue a lana, a patrones, a herramientas.",
                   "bold": false,
                   "italic": false
                 }
@@ -4585,7 +4660,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", lana y patrones mezclados en el orden del calendario: ves de un vistazo lo que te costó un mes.",
+                  "text": ", lana, patrones y herramientas mezclados en el orden del calendario: ves de un vistazo lo que te costó un mes.",
                   "bold": false,
                   "italic": false
                 }
@@ -4595,7 +4670,7 @@
             {
               "spans": [
                 {
-                  "text": "En cuanto aparece un patrón en la lista, cada línea lleva además su etiqueta, ",
+                  "text": "En cuanto aparece un patrón o una herramienta en la lista, cada línea lleva además su etiqueta, ",
                   "bold": false,
                   "italic": false
                 },
@@ -4605,7 +4680,7 @@
                   "italic": false
                 },
                 {
-                  "text": " o ",
+                  "text": ", ",
                   "bold": false,
                   "italic": false
                 },
@@ -4615,7 +4690,17 @@
                   "italic": false
                 },
                 {
-                  "text": ". Un patrón que has declarado gratuito aparece con la mención ",
+                  "text": " o ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Herramienta",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Un patrón o una herramienta que has declarado gratuito aparece con la mención ",
                   "bold": false,
                   "italic": false
                 },
@@ -4675,7 +4760,7 @@
                   "italic": false
                 },
                 {
-                  "text": " justo después si fue un error. Una línea de patrón, en cambio, se modifica desde la ficha del patrón: un toque te lleva allí.",
+                  "text": " justo después si fue un error. Una línea de patrón o de herramienta, en cambio, se modifica desde la ficha del patrón o de la herramienta: un toque te lleva allí.",
                   "bold": false,
                   "italic": false
                 }
@@ -4698,7 +4783,7 @@
               "italic": false
             },
             {
-              "text": ": una compra de lana sobrevive a la eliminación > de su ficha y sigue visible aquí. El precio de un patrón, en cambio, > pertenece al patrón: si eliminas el patrón, su gasto desaparece con > él.",
+              "text": ": una compra de lana sobrevive a la eliminación > de su ficha y sigue visible aquí. El precio de un patrón, en cambio, > pertenece al patrón: si eliminas el patrón, su gasto desaparece con > él. Tus herramientas con precio también aparecen aquí, en «Herramientas»: > para corregir o borrar el precio, abre la ficha de la herramienta.",
               "bold": false,
               "italic": false
             }
@@ -4710,7 +4795,520 @@
       "id": "section-6",
       "title": [
         {
-          "text": "6. Herramientas independientes",
+          "text": "6. Tus herramientas: agujas y ganchillos",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "La pantalla ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Mis herramientas",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", en el menú justo después del stock de lana, reúne tus agujas y tus ganchillos. Antes de comprar un par o de empezar un patrón, ves de un vistazo si ya tienes el número que necesitas.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Añadir una herramienta",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": el botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Añadir una herramienta",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " abre el formulario. Primero eliges el tipo, entre tres familias: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Agujas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Agujas rectas, Agujas circulares, Agujas de doble punta, Agujas flexibles, Puntas intercambiables, Cable, Otra aguja), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Juegos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Juego intercambiable, Juego de ganchillos) y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ganchillos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Ganchillo, Ganchillo tunecino). Después solo aparecen los campos que tienen sentido para ese tipo: el largo para una aguja circular, el número de agujas para unas de doble punta, el mango para un ganchillo, la forma (fijo o con cable) para un ganchillo tunecino.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Aparte del tipo, solo el número es obligatorio",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", y solo en los tipos que lo tienen: es opcional en Otra aguja, y un Cable no tiene. Lo eliges en la lista, donde cada número en milímetros lleva su equivalente estadounidense cuando existe. En un ganchillo, la lista va de los números finos (0,6 mm) hasta 25 mm, y es el material el que elige el equivalente: en ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "acero inoxidable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", el número de los ganchillos de acero (2,25 mm · US 2); si no, la letra (2,25 mm · B-1). Si el tuyo no está, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Otro número…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " te deja escribirlo en mm. Todo lo demás es opcional: material, marca, gama, cantidad, fecha de compra, precio, tienda, dónde lo guardas, estado (Disponible, Prestado, Perdido, Dañado, Por reemplazar), notas y fotos.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Un juego intercambiable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " es una sola ficha. En ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Números incluidos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " marcas los números de las puntas que trae; en ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Cables incluidos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", el largo de sus cables. Si dos cables del mismo largo tienen una conexión distinta (S, L o Mini), elige primero el ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Diámetro de la conexión",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " y luego marca los largos: un 80 cm S y un 80 cm L siguen siendo dos cables distintos, y la ficha del juego los cuenta por separado. Su ficha muestra después el ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Contenido del juego",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Un juego de ganchillos",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " funciona igual: marcas los números de sus ganchillos, en la escala de ganchillos (4 mm · G-6). Marca ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ganchillos tunecinos intercambiables",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " para añadir sus cables; sin esa casilla, el juego no tiene cables. Para el número que falta en un proyecto, un juego de ganchillos cuenta solo para el ganchillo, y uno de agujas solo para el punto. Bajo un número, aparece como «ganchillos del juego».",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Por tipo o por número",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": dos botones en la parte superior de la pantalla cambian la presentación. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Por tipo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ordena tus herramientas por familia (Agujas, Juegos, Ganchillos) y luego por tipo. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Por número",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " las agrupa número a número, mezclando todas las familias; los cables sueltos y las herramientas sin número van al final. Un juego aparece bajo cada uno de sus números, con una línea como «puntas del juego KnitPro»: así sabes enseguida que tu punta de 4 mm está en el juego. La app recuerda tu elección en este dispositivo.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Las pastillas de número",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": bajo esos dos botones hay una pastilla por cada número que tienes. Toca una para ver solo las herramientas de ese número; tócala otra vez para quitar el filtro. El campo de búsqueda, justo debajo, busca en la marca, la gama, las notas y el lugar donde las guardas. Si nada coincide, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Borrar la búsqueda y el número",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " lo devuelve todo.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "La ficha de una herramienta",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": un toque en una herramienta la abre. Reúne todo lo que anotaste y tus fotos; un toque en la estrella elige la foto de portada. En la lista, cada herramienta ocupa dos líneas: la primera empieza por la marca y la gama, y luego el número; la segunda da el tipo, el largo, el material, la cantidad si hay varias, y termina siempre con el estado (disponible, prestado, perdido…), para que una aguja prestada o perdida no te pille por sorpresa.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Editar, duplicar o eliminar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " una herramienta desde el menú ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Acciones",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (icono vertical de tres puntos) en la parte superior de su ficha. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Duplicar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " abre el formulario ya relleno, con todo salvo las fotos: útil para la misma aguja en otro número. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Eliminar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " la manda a la papelera. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Deshacer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", justo después, la devuelve a su sitio, y la papelera de los ajustes la guarda hasta que la vacíes.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tus herramientas van en la copia de seguridad",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": se copian en la carpeta {app} con todo lo demás, y sus fotos en una subcarpeta llamada ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Una restauración te las devuelve tal cual.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Exportación a hoja de cálculo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": el botón ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mis herramientas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", en la sección de exportación de los Ajustes, exporta tu stock de herramientas a una hoja de cálculo (CSV), igual que tu lana. Cada ficha ocupa una fila, con su equivalencia de tamaño, su precio y su moneda.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Número que falta en tu stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en la ficha de un proyecto, bajo la casilla Agujas (o Ganchillo), una línea discreta señala cada número pedido que no está en tus herramientas. Solo aparece si ya tienes al menos una herramienta.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Vincular tus herramientas a un proyecto",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en la ficha de un proyecto, pestaña ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Detalles",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", la casilla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mis herramientas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " muestra las herramientas que vinculaste, y ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Elegir herramientas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " abre la lista para marcar, primero las de los números del proyecto. Una herramienta vinculada a un proyecto En curso muestra «en uso:» seguido del nombre del proyecto en ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mis herramientas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " y en la lista para marcar, y su ficha nombra los proyectos que la usan. Como el aviso de número, la casilla solo aparece si tienes al menos una herramienta. Cuando pones un proyecto en pausa, la app te propone liberar sus herramientas para otro proyecto; al retomarlo, te propone recuperar las que siguen libres.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tomar un número de un juego",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": en la lista para marcar, un juego no tiene casilla propia; se despliega en sus números, primero los del proyecto. Marca el número que tomas; si el juego tiene cables, elige también un cable, o ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "sin cable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Solo ese número queda ocupado, no todo el juego: en ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mis herramientas",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", la línea del juego dice «en uso: 4 mm (Gorro)» o «disponible». Un número o un cable que ya usa otro proyecto En curso se puede marcar igualmente, con la mención «en uso:» seguida del nombre del proyecto, para pasar una punta de un proyecto a otro. La ficha del juego nombra el proyecto de cada número tomado y cuenta los cables en uso («80 cm ×2, 1 en uso (Gorro)»); la casilla del proyecto muestra «KnitPro Zing · 4 mm + 80 cm». Un juego vinculado entero antes de esta versión conserva su casilla ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Juego completo (enlace anterior)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": desmárcala, o marca un número para sustituirlo.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Mientras no tengas ninguna herramienta, la pantalla muestra una línea de ejemplo, una aguja circular de bambú de 4 mm: nunca se guarda.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. Herramientas independientes",
           "bold": false,
           "italic": false
         }
@@ -4941,10 +5539,10 @@
       ]
     },
     {
-      "id": "section-7",
+      "id": "section-8",
       "title": [
         {
-          "text": "7. Estadísticas",
+          "text": "8. Estadísticas",
           "bold": false,
           "italic": false
         }
@@ -5114,7 +5712,7 @@
               "italic": false
             },
             {
-              "text": " muestra una casilla por día, del primer día de tu semana (arriba) al último (abajo), a lo largo de toda la ventana elegida; ese primer día es lunes por defecto, o domingo si lo elegiste en Ajustes (§8). Su color sigue el tono de acento elegido en los ajustes (§8), y su intensidad depende de cuánto tiempo tejiste o ganchillaste ese día, en cinco niveles: nada, menos de 30 minutos, de 30 minutos a 1 hora, de 1 a 2 horas, 2 horas o más. Los umbrales son ",
+              "text": " muestra una casilla por día, del primer día de tu semana (arriba) al último (abajo), a lo largo de toda la ventana elegida; ese primer día es lunes por defecto, o domingo si lo elegiste en Ajustes (§9). Su color sigue el tono de acento elegido en los ajustes (§9), y su intensidad depende de cuánto tiempo tejiste o ganchillaste ese día, en cinco niveles: nada, menos de 30 minutos, de 30 minutos a 1 hora, de 1 a 2 horas, 2 horas o más. Los umbrales son ",
               "bold": false,
               "italic": false
             },
@@ -5205,10 +5803,10 @@
       ]
     },
     {
-      "id": "section-8",
+      "id": "section-9",
       "title": [
         {
-          "text": "8. Ajustes",
+          "text": "9. Ajustes",
           "bold": false,
           "italic": false
         }
@@ -5278,7 +5876,7 @@
                   "italic": false
                 },
                 {
-                  "text": " y cambia solo con el modo claro u oscuro; en cuanto eliges, tu elección manda y se mantiene igual en los dos modos. Ese tono colorea los botones, las selecciones, las barras de progreso y la cuadrícula de las estadísticas (§7).",
+                  "text": " y cambia solo con el modo claro u oscuro; en cuanto eliges, tu elección manda y se mantiene igual en los dos modos. Ese tono colorea los botones, las selecciones, las barras de progreso y la cuadrícula de las estadísticas (§8).",
                   "bold": false,
                   "italic": false
                 }
@@ -5364,17 +5962,27 @@
                         "italic": false
                       },
                       {
-                        "text": " entre cinco (€, $, £, CHF, CA$). Ojo, es solo una etiqueta: los precios que ya has introducido ",
+                        "text": " entre cinco (€, $, £, CHF, CA$). Se aplica a los precios que introduzcas ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "no se convierten",
+                        "text": "a partir de ahora",
                         "bold": true,
                         "italic": false
                       },
                       {
-                        "text": ", se muestran con el otro símbolo, y la app te lo recuerda antes de confirmar.",
+                        "text": ": cada precio conserva la moneda en la que lo anotaste y ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "no se convierte nada",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "; la app te lo recuerda antes de confirmar.",
                         "bold": false,
                         "italic": false
                       }
@@ -5423,7 +6031,7 @@
                   {
                     "spans": [
                       {
-                        "text": "Exportación de tu stock, tus proyectos o tus patrones a hoja de cálculo (CSV), para consultarlos o guardarlos en otro sitio. Las columnas siguen tus ajustes actuales: longitudes y pesos en el sistema de unidades elegido, precios con el símbolo de la moneda elegida.",
+                        "text": "Exportación de tu stock, tus proyectos o tus patrones a hoja de cálculo (CSV), para consultarlos o guardarlos en otro sitio. Las columnas siguen tus ajustes actuales: longitudes y pesos en el sistema de unidades elegido, precios seguidos de su moneda en una columna aparte (cada precio conserva la suya).",
                         "bold": false,
                         "italic": false
                       }
@@ -5443,7 +6051,7 @@
                         "italic": false
                       },
                       {
-                        "text": " universal: todo proyecto, lana o patrón eliminado acaba ahí y puedes restaurarlo en cualquier momento (hasta que la vacíes a propósito).",
+                        "text": " universal: todo proyecto, lana, herramienta o patrón eliminado acaba ahí y puedes restaurarlo en cualquier momento (hasta que la vacíes a propósito).",
                         "bold": false,
                         "italic": false
                       }
@@ -5863,10 +6471,10 @@
       ]
     },
     {
-      "id": "section-9",
+      "id": "section-10",
       "title": [
         {
-          "text": "9. Bajo el capó: lo que {app} te garantiza",
+          "text": "10. Bajo el capó: lo que {app} te garantiza",
           "bold": false,
           "italic": false
         }
@@ -5960,6 +6568,21 @@
                 },
                 {
                   "text": ": desde la pantalla Acerca de, dice dónde viven tus datos, qué puede salir de tu teléfono y en qué casos, qué pasa si desinstalas la app, y quién responde de ello: el responsable y la dirección de contacto aparecen nombrados. Está escrita en tu idioma.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Las novedades, una sola vez",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": tras una actualización, una ventana resume las novedades de la última versión, una sola vez por versión. «Entendido» la cierra, «Ver todo» abre la pantalla Acerca de, donde encuentras el registro de todas las versiones. Una instalación nueva no la muestra. La app recuerda la última versión que has visto en este dispositivo, pero no en la copia de seguridad.",
                   "bold": false,
                   "italic": false
                 }

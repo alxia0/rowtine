@@ -9,6 +9,9 @@ import {
   yarnUsageState,
   consumedOf,
   consumeProjectReservation,
+  maxConsumptionFor,
+  reservedByOthers,
+  adjustProjectConsumption,
   isProjectVegan,
   roundSkeins,
 } from '@/utils/yarn-usage'
@@ -190,8 +193,13 @@ describe('consumeProjectReservation', () => {
   it('rien tricoté (0) → tout retourne au stock, aucune trace', () => {
     expect(consumeProjectReservation(base(), 1, 0)).toEqual({ quantity: 5, reservations: {}, consumed: {} })
   })
-  it('borne au réservé : on ne consomme jamais plus que ce que le projet tenait', () => {
-    expect(consumeProjectReservation(base(), 1, 99)).toEqual({ quantity: 2, reservations: {}, consumed: { 1: 3 } })
+  it('used au-dessus du réservé : accepté jusqu au stock (réservé 3, stock 10, used 5)', () => {
+    const y = { quantity: 10, reservations: { 1: 3 }, consumed: {} }
+    expect(consumeProjectReservation(y, 1, 5)).toEqual({ quantity: 5, reservations: {}, consumed: { 1: 5 } })
+  })
+  it('borne au stock : on ne consomme jamais plus que ce qui existe (réservé 3, stock 4, used 9)', () => {
+    const y = { quantity: 4, reservations: { 1: 3 }, consumed: {} }
+    expect(consumeProjectReservation(y, 1, 9)).toEqual({ quantity: 0, reservations: {}, consumed: { 1: 4 } })
   })
   it('used négatif → traité comme 0', () => {
     expect(consumeProjectReservation(base(), 1, -5)).toEqual({ quantity: 5, reservations: {}, consumed: {} })
@@ -219,6 +227,125 @@ describe('consumeProjectReservation', () => {
   it('consomme 2,1 sur 2,3 : 0,2 pile, sans traîne binaire (2.3 - 2.1)', () => {
     const y = { quantity: 2.3, reservations: { 1: 2.3 }, consumed: {} }
     expect(consumeProjectReservation(y, 1, 2.1).quantity).toBe(0.2)
+  })
+  // Régression (revue finale) : le plafond était le stock TOTAL, donc A pouvait prendre les
+  // pelotes réservées par B. Le stock tombait sous ce que B réservait encore, et la clôture de
+  // B était ensuite tronquée à 0 sans aucune trace. Le plafond est ce qui est DISPONIBLE pour
+  // ce projet : sa propre réservation plus le stock libre.
+  it('stock 5, A réserve 2, B réserve 3 : A ne peut pas prendre les pelotes de B (plafond 2)', () => {
+    const y = { quantity: 5, reservations: { 1: 2, 2: 3 }, consumed: {} }
+    const apresA = consumeProjectReservation(y, 1, 5)
+    expect(apresA).toEqual({ quantity: 3, reservations: { 2: 3 }, consumed: { 1: 2 } })
+    // B garde de quoi clore : ses 3 pelotes existent encore, et sa trace est écrite.
+    expect(consumeProjectReservation({ ...y, ...apresA }, 2, 3)).toEqual({ quantity: 0, reservations: {}, consumed: { 1: 2, 2: 3 } })
+  })
+  it('stock libre en plus de la réservation : plafond = réservation + libre (réservé 2, autre 3, stock 7 → 4)', () => {
+    const y = { quantity: 7, reservations: { 1: 2, 2: 3 }, consumed: {} }
+    expect(consumeProjectReservation(y, 1, 9)).toEqual({ quantity: 3, reservations: { 2: 3 }, consumed: { 1: 4 } })
+  })
+})
+
+describe('maxConsumptionFor', () => {
+  it('déjà tricoté + stock restant', () => {
+    expect(maxConsumptionFor({ quantity: 4, consumed: { 1: 5 } }, 1)).toBe(9)
+  })
+  it('aucune trace pour ce projet : le stock seul', () => {
+    expect(maxConsumptionFor({ quantity: 4, consumed: { 2: 5 } }, 1)).toBe(4)
+  })
+  it('pas de traîne binaire', () => {
+    expect(maxConsumptionFor({ quantity: 0.2, consumed: { 1: 0.1 } }, 1)).toBe(0.3)
+  })
+  // Même régression que consumeProjectReservation : après coup, A ne prend pas non plus les
+  // pelotes que B réserve encore.
+  it('A a tricoté 2, il reste 3 pelotes toutes réservées par B : plafond 2, pas 5', () => {
+    expect(maxConsumptionFor({ quantity: 3, reservations: { 2: 3 }, consumed: { 1: 2 } }, 1)).toBe(2)
+  })
+  it('stock libre en plus des réservations des autres : déjà tricoté + libre', () => {
+    expect(maxConsumptionFor({ quantity: 4, reservations: { 2: 1 }, consumed: { 1: 2 } }, 1)).toBe(5)
+  })
+  // La réservation propre du projet est du stock déjà « à lui » : le compter en plus dans le
+  // plafond le faisait doubler (5 en stock, 2 réservées, 3 tricotées : 6 et non 3 + 5 = 8).
+  it('réservation propre déduite du plafond : quantity 5, réservé 2, tricoté 3 donne 6', () => {
+    expect(maxConsumptionFor({ quantity: 5, reservations: { 1: 2 }, consumed: { 1: 3 } }, 1)).toBe(6)
+  })
+  it('sans réservation propre : inchangé, 8', () => {
+    expect(maxConsumptionFor({ quantity: 5, consumed: { 1: 3 } }, 1)).toBe(8)
+  })
+  it('réservation d\'un autre projet : plafond déjà en place, 6', () => {
+    expect(maxConsumptionFor({ quantity: 5, reservations: { 2: 2 }, consumed: { 1: 3 } }, 1)).toBe(6)
+  })
+  it('réservation propre supérieure au disponible : plancher 0, pas de plafond négatif', () => {
+    expect(maxConsumptionFor({ quantity: 2, reservations: { 1: 2, 2: 1 }, consumed: { 1: 3 } }, 1)).toBe(3)
+  })
+})
+
+describe('reservedByOthers', () => {
+  it('somme des réservations des autres projets', () => {
+    expect(reservedByOthers({ reservations: { 1: 2, 2: 1.5 } }, 1)).toBe(1.5)
+  })
+  it('projet absent : toutes les réservations comptent', () => {
+    expect(reservedByOthers({ reservations: { 1: 2, 2: 1.5 } }, 9)).toBe(3.5)
+  })
+  it('aucune réservation : 0', () => {
+    expect(reservedByOthers({ quantity: 4 }, 1)).toBe(0)
+  })
+  it('pas de traîne binaire', () => {
+    expect(reservedByOthers({ reservations: { 2: 0.1, 3: 0.2 } }, 1)).toBe(0.3)
+  })
+})
+
+describe('adjustProjectConsumption', () => {
+  const y = (over = {}) => ({ quantity: 7, reservations: {}, consumed: { 1: 3 }, ...over })
+  it('hausse 3 → 5 (stock 7) : quantity 5, consumed 5', () => {
+    expect(adjustProjectConsumption(y(), 1, 5)).toEqual({ quantity: 5, consumed: { 1: 5 } })
+  })
+  it('baisse 5 → 2 : 3 pelotes rendues au stock', () => {
+    expect(adjustProjectConsumption(y({ quantity: 1, consumed: { 1: 5 } }), 1, 2)).toEqual({ quantity: 4, consumed: { 1: 2 } })
+  })
+  it('hausse au-delà (5 → 20, stock 4) : bornée à 9', () => {
+    expect(adjustProjectConsumption(y({ quantity: 4, consumed: { 1: 5 } }), 1, 20)).toEqual({ quantity: 0, consumed: { 1: 9 } })
+  })
+  it('nouveau 0 : la clé est retirée de consumed', () => {
+    const r = adjustProjectConsumption(y(), 1, 0)
+    expect(r).toEqual({ quantity: 10, consumed: {} })
+    expect(r.consumed).not.toHaveProperty('1')
+  })
+  it('négatif : traité comme 0', () => {
+    expect(adjustProjectConsumption(y(), 1, -4)).toEqual({ quantity: 10, consumed: {} })
+  })
+  it('ne touche jamais aux autres projets', () => {
+    const r = adjustProjectConsumption(y({ consumed: { 1: 3, 2: 1.5 } }), 1, 5)
+    expect(r.consumed).toEqual({ 1: 5, 2: 1.5 })
+  })
+  it('ancien 0,1 + écart 0,2 : pas de 0.30000000000000004', () => {
+    const r = adjustProjectConsumption({ quantity: 1, consumed: { 1: 0.1 } }, 1, 0.3)
+    expect(r.consumed[1]).toBe(0.3)
+    expect(r.quantity).toBe(0.8)
+  })
+  it('appliquer deux fois la même valeur = une fois', () => {
+    const start = y()
+    const once = adjustProjectConsumption(start, 1, 5)
+    const twice = adjustProjectConsumption({ ...start, ...once }, 1, 5)
+    expect(twice).toEqual(once)
+  })
+  it('laine à stock 0 avec trace, baisse : stock rendu, plus « Utilisée »', () => {
+    const start = { quantity: 0, reservations: {}, consumed: { 1: 5 } }
+    const r = adjustProjectConsumption(start, 1, 2)
+    expect(r.quantity).toBe(3)
+    expect(yarnUsageState({ ...start, ...r }, {}).state).not.toBe('used')
+  })
+  it('newUsed NaN : patch identique à l’état actuel', () => {
+    expect(adjustProjectConsumption(y(), 1, NaN)).toEqual({ quantity: 7, consumed: { 1: 3 } })
+    expect(adjustProjectConsumption(y(), 1, 'abc')).toEqual({ quantity: 7, consumed: { 1: 3 } })
+  })
+  it('ne mute pas la laine d’origine', () => {
+    const start = y()
+    adjustProjectConsumption(start, 1, 5)
+    expect(start).toEqual(y())
+  })
+  it('stock 3 entièrement réservé par B : A (2 tricotées) ne monte pas au-delà de 2, le stock de B reste entier', () => {
+    const start = { quantity: 3, reservations: { 2: 3 }, consumed: { 1: 2 } }
+    expect(adjustProjectConsumption(start, 1, 5)).toEqual({ quantity: 3, consumed: { 1: 2 } })
   })
 })
 

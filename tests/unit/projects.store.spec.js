@@ -6,6 +6,9 @@ import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import { useProjectsStore, emptyProject } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
+import { useToolsStore } from '@/stores/tools'
+import { useTrashStore } from '@/stores/trash'
+import { linkedTools } from '@/utils/tool-links'
 import { ymdLocal } from '@/utils/time-periods'
 
 beforeEach(async () => {
@@ -203,6 +206,12 @@ describe('store projets — suppression en cascade + restauration', () => {
     const again = await store.seedExamplesIfEmpty('knitting')
     expect(again).toBeNull()
   })
+
+  it('le semis d’exemples ne pose aucun lien d’outil', async () => {
+    const store = useProjectsStore()
+    await store.seedExamplesIfEmpty('knitting')
+    expect(store.projects.every((p) => !p.toolIds?.length)).toBe(true)
+  })
 })
 
 describe('date de fin — règle 1 (statut → date)', () => {
@@ -213,6 +222,13 @@ describe('date de fin — règle 1 (statut → date)', () => {
     const id = await store.create({ name: 'Châle', status: 'wip' })
     await store.update(id, { status: 'done' }) // exactement le patch de ProjectDetailView.changeStatus
     expect((await store.get(id)).finishedAt).toBe(aujourdhui())
+  })
+
+  it('passer à Abandonné ne pose PAS de date de fin', async () => {
+    const store = useProjectsStore()
+    const id = await store.create({ name: 'Pull', status: 'wip' })
+    await store.update(id, { status: 'abandoned' })
+    expect((await store.get(id)).finishedAt || '').toBe('')
   })
 
   it('SITE 2 (tuile de l’Accueil) : idem depuis le badge de statut', async () => {
@@ -256,5 +272,171 @@ describe('date de fin — règle 1 (statut → date)', () => {
     const store = useProjectsStore()
     const id = await store.create({ name: 'Snood daté', status: 'done', finishedAt: '2026-07-15' })
     expect((await store.get(id)).finishedAt).toBe('2026-07-15')
+  })
+})
+
+describe('store projets : liens d’outils (toolIds)', () => {
+  it('un projet neuf porte toolIds vide', () => {
+    expect(emptyProject().toolIds).toEqual([])
+  })
+
+  it('un projet neuf porte kitPicks vide', () => {
+    expect(emptyProject().kitPicks).toEqual([])
+  })
+
+  it('setToolLinks élague toolIds et kitPicks, garde un kit en corbeille', async () => {
+    const store = useProjectsStore()
+    const tools = useToolsStore()
+    const kit = await db.tools.add({ type: 'interchangeable', kitSizes: [4, 5], kitCables: [80] })
+    const trashedKit = await tools.add({ type: 'interchangeable', kitSizes: [3], kitCables: [] })
+    await useTrashStore().moveToTrash('tool', trashedKit)
+    const pid = await store.create({ name: 'Bonnet' })
+    await store.setToolLinks(pid, {
+      toolIds: [kit, 9999],
+      kitPicks: [
+        { toolId: kit, sizeMm: 4, cableCm: 80 },
+        { toolId: kit, sizeMm: 6, cableCm: null },
+        { toolId: trashedKit, sizeMm: 3, cableCm: null },
+        { toolId: 9999, sizeMm: 4, cableCm: null },
+      ],
+    })
+    const p = await store.get(pid)
+    expect(p.toolIds).toEqual([kit])
+    expect(p.kitPicks).toEqual([
+      { toolId: kit, sizeMm: 4, cableCm: 80, cableJoin: null },
+      { toolId: trashedKit, sizeMm: 3, cableCm: null, cableJoin: null },
+    ])
+  })
+
+  // Protège l'écriture des prises avec diamètre : 80 L gardé, 80 S inconnu du kit retiré, prise ancienne rattachée.
+  it('setToolLinks écrit cableJoin et rattache une prise ancienne à l’unique diamètre', async () => {
+    const store = useProjectsStore()
+    const both = await db.tools.add({ type: 'interchangeable', kitSizes: [4], kitCables: [{ cm: 80, join: 's' }, { cm: 80, join: 'l' }] })
+    const onlyS = await db.tools.add({ type: 'interchangeable', kitSizes: [4], kitCables: [{ cm: 60, join: 's' }] })
+    const pid = await store.create({ name: 'Bonnet' })
+    await store.setToolLinks(pid, { kitPicks: [
+      { toolId: both, sizeMm: 4, cableCm: 80, cableJoin: 'l' },
+      { toolId: onlyS, sizeMm: 4, cableCm: 60 },
+    ] })
+    expect((await store.get(pid)).kitPicks).toEqual([
+      { toolId: both, sizeMm: 4, cableCm: 80, cableJoin: 'l' },
+      { toolId: onlyS, sizeMm: 4, cableCm: 60, cableJoin: 's' },
+    ])
+  })
+
+  it('setToolIds retire les ids d’outils inexistants à l’écriture', async () => {
+    const store = useProjectsStore()
+    const toolId = await db.tools.add({ type: 'circular', sizeMm: 4 })
+    const pid = await store.create({ name: 'Bonnet' })
+    await store.setToolIds(pid, [toolId, 9999])
+    expect((await store.get(pid)).toolIds).toEqual([toolId])
+  })
+
+  it('setToolIds sur un projet en cours ne date rien et n’inscrit aucun jour actif', async () => {
+    const store = useProjectsStore()
+    const toolId = await db.tools.add({ type: 'circular', sizeMm: 4 })
+    const pid = await store.create({ name: 'Bonnet', status: 'wip' })
+    await store.setToolIds(pid, [toolId])
+    const p = await store.get(pid)
+    expect(p.toolIds).toEqual([toolId])
+    expect(p.lastWorkedAt).toBeFalsy()
+    expect(p.finishedAt).toBeFalsy()
+    expect(p.startedAt).toBeFalsy()
+    expect(await db.activeDays.count()).toBe(0)
+  })
+
+  it('setToolLinks sur un projet en cours ne date rien et n’inscrit aucun jour actif', async () => {
+    const store = useProjectsStore()
+    const kit = await db.tools.add({ type: 'interchangeable', kitSizes: [4], kitCables: [80] })
+    const pid = await store.create({ name: 'Bonnet', status: 'wip' })
+    await store.setToolLinks(pid, { toolIds: [], kitPicks: [{ toolId: kit, sizeMm: 4, cableCm: 80 }] })
+    const p = await store.get(pid)
+    expect(p.kitPicks).toEqual([{ toolId: kit, sizeMm: 4, cableCm: 80, cableJoin: null }])
+    expect(p.lastWorkedAt).toBeFalsy()
+    expect(p.finishedAt).toBeFalsy()
+    expect(p.startedAt).toBeFalsy()
+    expect(await db.activeDays.count()).toBe(0)
+  })
+
+  it('setToolLinks avec kitPicks seul laisse toolIds intact', async () => {
+    const store = useProjectsStore()
+    const circ = await db.tools.add({ type: 'circular', sizeMm: 4 })
+    const kit = await db.tools.add({ type: 'interchangeable', kitSizes: [5], kitCables: [] })
+    const pid = await store.create({ name: 'Bonnet' })
+    await store.setToolLinks(pid, { toolIds: [circ] })
+    await store.setToolLinks(pid, { kitPicks: [{ toolId: kit, sizeMm: 5, cableCm: null }] })
+    const p = await store.get(pid)
+    expect(p.toolIds).toEqual([circ])
+    expect(p.kitPicks).toEqual([{ toolId: kit, sizeMm: 5, cableCm: null, cableJoin: null }])
+  })
+
+  it('un outil supprimé puis restauré garde son id et le lien revient', async () => {
+    const projects = useProjectsStore()
+    const tools = useToolsStore()
+    const toolId = await tools.add({ type: 'circular', sizeMm: 4 })
+    const pid = await projects.create({ name: 'Bonnet' })
+    await projects.setToolIds(pid, [toolId])
+    const removed = await tools.remove(toolId)
+    const project = await projects.get(pid)
+    expect(linkedTools(project, await db.tools.toArray())).toEqual([])
+    await tools.restore(removed)
+    expect(linkedTools(await projects.get(pid), await db.tools.toArray()).map((t) => t.id)).toEqual([toolId])
+  })
+
+  // Protège le lien d'un outil en corbeille : réécrire les liens ne l'efface pas, la restauration le ramène.
+  it('setToolIds garde l’id d’un outil en corbeille, et le lien revient à sa restauration', async () => {
+    const projects = useProjectsStore()
+    const trash = useTrashStore()
+    const toolId = await db.tools.add({ type: 'circular', sizeMm: 4 })
+    const otherId = await db.tools.add({ type: 'circular', sizeMm: 6 })
+    const pid = await projects.create({ name: 'Bonnet' })
+    await projects.setToolIds(pid, [toolId])
+    const trashId = await trash.moveToTrash('tool', toolId)
+    await projects.setToolIds(pid, [otherId, toolId])
+    expect((await projects.get(pid)).toolIds).toEqual([otherId, toolId])
+    await trash.restore(trashId)
+    const ids = linkedTools(await projects.get(pid), await db.tools.toArray()).map((t) => t.id)
+    expect(ids.sort()).toEqual([toolId, otherId].sort())
+  })
+
+  // Protège le nettoyage : un outil supprimé définitivement (corbeille vidée) perd son lien à l'écriture.
+  it('setToolIds retire l’id d’un outil supprimé définitivement', async () => {
+    const projects = useProjectsStore()
+    const trash = useTrashStore()
+    const toolId = await db.tools.add({ type: 'circular', sizeMm: 4 })
+    const pid = await projects.create({ name: 'Bonnet' })
+    await projects.setToolIds(pid, [toolId])
+    await trash.moveToTrash('tool', toolId)
+    await trash.empty()
+    await projects.setToolIds(pid, [toolId])
+    expect((await projects.get(pid)).toolIds).toEqual([])
+  })
+})
+
+describe('store projets : parkedTools vidé à la fin du projet', () => {
+  const parked = () => ({ toolIds: [1], kitPicks: [] })
+
+  // Protège la fin de vie : un projet terminé ou abandonné ne garde pas d'outils « mis de côté ».
+  it.each(['done', 'abandoned'])('passer à %s vide parkedTools', async (status) => {
+    const store = useProjectsStore()
+    const id = await store.create({ name: 'Bonnet', status: 'pause', parkedTools: parked() })
+    await store.update(id, { status })
+    expect((await store.get(id)).parkedTools).toBeNull()
+  })
+
+  // Contrat : repasser à wip seul ne vide rien, c'est le composable de reprise qui s'en charge.
+  it('passer à wip seul laisse parkedTools intact', async () => {
+    const store = useProjectsStore()
+    const id = await store.create({ name: 'Bonnet', status: 'pause', parkedTools: parked() })
+    await store.update(id, { status: 'wip' })
+    expect((await store.get(id)).parkedTools).toEqual(parked())
+  })
+
+  // Contrat : un projet sans parkedTools ne reçoit pas le champ.
+  it('un projet terminé sans parkedTools n’en gagne pas', async () => {
+    const store = useProjectsStore()
+    const id = await store.create({ name: 'Bonnet', status: 'wip' })
+    await store.update(id, { status: 'done' })
+    expect('parkedTools' in (await store.get(id))).toBe(false)
   })
 })

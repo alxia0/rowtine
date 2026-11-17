@@ -8,6 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db, setSetting } from '@/db/db'
+import { APP_VERSION } from '@/constants/app-info'
 import { useSettingsStore } from '@/stores/settings'
 import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { NOTICE } from '@/constants/notice-queue'
@@ -59,6 +60,8 @@ beforeEach(async () => {
   setActivePinia(pinia)
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
+  // Version déjà vue : sans marqueur, la pop-up « Nouveautés » s'ouvrirait en travers de ce que ce fichier teste.
+  await db.settings.put({ key: 'lastSeenVersion', value: APP_VERSION })
 })
 afterEach(() => {
   while (wrappers.length) wrappers.pop().unmount()

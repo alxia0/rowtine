@@ -108,4 +108,27 @@ describe('StashView — récap', () => {
     expect(money.lbl).not.toContain('€')
     expect(money.num).toBe('20') // le nombre ne change pas : aucune conversion
   })
+
+  it('deux devises dans le stock : une tuile de montant par devise, jamais une somme mêlée', async () => {
+    await db.settings.put({ key: 'currency', value: 'EUR' })
+    const w = await mountStash([
+      { brand: 'A', colorName: 'Rouge', quantity: 3, lengthM: 100, grams: 50, price: '2', priceCurrency: 'EUR' },
+      { brand: 'B', colorName: 'Bleu', quantity: 1, lengthM: 100, grams: 50, price: '5', priceCurrency: 'USD' },
+      { brand: 'C', colorName: 'Vert', quantity: 2, lengthM: 100, grams: 50, price: '1' }, // sans devise : réglages (EUR)
+    ])
+    const [, , , ...money] = tiles(w)
+    expect(money).toHaveLength(2)
+    const eur = money.find((m) => m.lbl.includes('€'))
+    const usd = money.find((m) => m.lbl.includes('$'))
+    expect(eur.num).toBe('8')
+    expect(usd.num).toBe('5')
+  })
+
+  it('une seule devise : une seule tuile de montant', async () => {
+    const w = await mountStash([
+      { brand: 'A', colorName: 'Rouge', quantity: 3, lengthM: 100, grams: 50, price: '2', priceCurrency: 'EUR' },
+      { brand: 'C', colorName: 'Vert', quantity: 2, lengthM: 100, grams: 50, price: '1' },
+    ])
+    expect(tiles(w)).toHaveLength(4)
+  })
 })

@@ -7,6 +7,7 @@
     "menu": "Menú",
     "home": "Inicio",
     "stash": "Stock de lana",
+    "tools": "Mis herramientas",
     "library": "Biblioteca de patrones",
     "stats": "Estadísticas",
     "expenses": "Gastos",
@@ -317,6 +318,10 @@
     "timerFieldHint": "Permite seguir el tiempo dedicado a este proyecto.",
     "changeStatus": "Cambiar el estado",
     "needles": "Agujas",
+    "missingSize": "{mm} mm: no está en tus herramientas",
+    "chooseTools": "Elegir herramientas",
+    "toolsNone": "Ninguna herramienta vinculada",
+    "toolsSaveError": "No se pudieron guardar las herramientas. Inténtalo de nuevo.",
     "needleMm": "Agujas (mm)",
     "needleUs": "Agujas (US)",
     "hooks": "Ganchillo",
@@ -358,6 +363,12 @@
     "yarnsEmpty": "Tu stock está vacío: añade lanas para vincularlas aquí.",
     "yarnsBrandPlaceholder": "Elegir una marca",
     "yarnsPickBrand": "Elige una marca para ver las lanas disponibles.",
+    "consumedTitle": "Ovillos tejidos",
+    "consumedHint": "Si corriges el número de ovillos tejidos, el stock de la lana lo sigue: los ovillos de más se descuentan y los de menos se devuelven.",
+    "consumedOverStock": "No hay suficientes ovillos disponibles de esta lana: el máximo es {n}. Los reservados para otros proyectos no cuentan.",
+    "consumedOverStockPlain": "No hay suficientes ovillos disponibles de esta lana: el máximo es {n}.",
+    "consumedOverStockOwn": "No hay suficientes ovillos disponibles de esta lana: el máximo es {n}. Los ovillos que este proyecto aún tiene reservados no se cuentan además.",
+    "consumedFixStock": "Corregir el stock de esta lana",
     "nameRequired": "Dale un nombre a tu proyecto.",
     "created": "Proyecto creado.",
     "saved": "Proyecto guardado.",
@@ -368,9 +379,12 @@
     "correctPattern": "Corregir el patrón",
     "consumeTitle": "¡Proyecto terminado!",
     "consumeIntro": "¿Cuántos ovillos has utilizado realmente?",
-    "consumeHint": "El resto vuelve a tu stock. Si cierras esta ventana, todo lo reservado se contará como tejido.",
+    "consumeHint": "El resto vuelve a tu stock.",
     "consumeReserved": "{n} reservado(s)",
     "consumeConfirm": "Confirmar",
+    "consumeOverStock": "Solo quedan {n} ovillo(s) disponible(s) de esta lana. Los reservados para otros proyectos no cuentan.",
+    "consumeOverStockPlain": "Solo quedan {n} ovillo(s) disponible(s) de esta lana.",
+    "consumeFixStock": "Corregir el stock",
     "abandonTitle": "Proyecto abandonado",
     "abandonIntro": "¿Se ha perdido algún ovillo (sin destejer)?",
     "abandonHint": "Por defecto, todo vuelve a tu stock. Indica solo lo que no vayas a recuperar.",
@@ -445,6 +459,16 @@
     "editPattern": "Editar el patrón",
     "setCover": "Definir como portada",
     "coverBadge": "Portada"
+  },
+  "toolParking": {
+    "pauseTitle": "¿Liberar estas herramientas para otro proyecto?",
+    "pauseIntro": "Este proyecto se pone en pausa. Una vez liberadas, estas herramientas vuelven a estar disponibles para tus otros proyectos, y podrás recuperarlas al retomarlo.",
+    "release": "Liberar",
+    "keep": "Conservarlas",
+    "resumeTitle": "¿Recuperar estas herramientas?",
+    "resumeIntro": "Este proyecto se retoma. Marca las herramientas que quieres volver a vincular: las que ya usa otro proyecto no se pueden.",
+    "resume": "Recuperar",
+    "notNow": "Ahora no"
   },
   "section": {
     "state": {
@@ -725,6 +749,7 @@
     "priceBought": "Comprado por {price}",
     "priceBoughtOn": "Comprado por {price} el {date}",
     "priceFreeOn": "Gratis, obtenido el {date}",
+    "priceUnknownOn": "Precio desconocido, comprado el {date}",
     "purchasedAt": "Fecha de compra",
     "priceSharedHint": "Este precio pertenece al patrón: lo comparten todos los proyectos que lo usan.",
     "priceFreePatternHint": "El «Patrón libre» no tiene precio: es común a todos tus proyectos sin patrón.",
@@ -1005,7 +1030,7 @@
     "unitsImperial": "Imperial (yd, oz)",
     "currencyLabel": "Moneda",
     "currencyChangeTitle": "Cambiar de moneda",
-    "currencyChangeMessage": "Los precios ya introducidos no se convertirán. Simplemente se mostrarán en {currency}.",
+    "currencyChangeMessage": "Los precios ya introducidos conservan su moneda. Los próximos serán en {currency}.",
     "currencyChangeConfirm": "Cambiar la moneda",
     "data": "Mis datos",
     "dataHint": "Todo se guarda en tu teléfono y se respalda automáticamente en tu carpeta de datos (ver más abajo).",
@@ -1022,7 +1047,8 @@
     "types": {
       "project": "Proyecto",
       "yarn": "Lana",
-      "pattern": "Patrón"
+      "pattern": "Patrón",
+      "tool": "Herramienta"
     },
     "help": {
       "title": "Ayuda",
@@ -1045,6 +1071,7 @@
         "lengthM": "Metraje (m)",
         "quantity": "Cantidad",
         "price": "Precio",
+        "currency": "Moneda",
         "usedSkeins": "Ovillos usados",
         "dyeLot": "Lote",
         "purchaseDate": "Fecha de compra",
@@ -1074,6 +1101,29 @@
         "sizes": "Tallas",
         "source": "Fuente",
         "sections": "Secciones"
+      },
+      "tool": {
+        "category": "Categoría",
+        "type": "Tipo",
+        "sizeMm": "Tamaño (mm)",
+        "equivalent": "Equivalencia (US o letra)",
+        "length": "Longitud",
+        "dpnCount": "Número de agujas",
+        "tunisianKind": "Ganchillo tunecino",
+        "material": "Material",
+        "handle": "Mango",
+        "brand": "Marca",
+        "line": "Línea",
+        "quantity": "Cantidad",
+        "status": "Estado",
+        "price": "Precio",
+        "currency": "Moneda",
+        "purchasedAt": "Fecha de compra",
+        "shop": "Tienda",
+        "storedIn": "Almacenaje",
+        "kitSizes": "Tamaños del kit (mm)",
+        "kitCables": "Cables del kit",
+        "notes": "Notas"
       }
     }
   },
@@ -1124,6 +1174,7 @@
     "sideFolder": "La carpeta",
     "sideDevice": "Este dispositivo",
     "sideCounts": "{projets} proyectos, {patrons} patrones, {laines} lanas",
+    "sideCountsTools": "{projets} proyectos, {patrons} patrones, {laines} lanas, {outils} herramientas",
     "purpose": "Todo lo que tejes vive en esta app, en tu dispositivo.",
     "hintStartFresh": "Los datos de esta carpeta se perderán."
   },
@@ -1134,6 +1185,12 @@
     "failed": "No se ha podido preparar esta carpeta. Elige otra.",
     "changeTitle": "Cambiar de carpeta",
     "changeBody": "Elige la carpeta donde Rowtine guardará tus datos. Si no se llama ya «Rowtine» y aún no contiene tus datos, vivirán en una subcarpeta «Rowtine», creada si hace falta."
+  },
+  "releaseNotice": {
+    "title": "Novedades de la versión {version}",
+    "intro": "Esto es lo que cambia con esta actualización.",
+    "ok": "Entendido",
+    "seeAll": "Ver todo"
   },
   "restore": {
     "done": "Datos restaurados.",
@@ -1613,10 +1670,12 @@
     "tagYarn": "Lana",
     "tagPattern": "Patrón",
     "freeTag": "Gratis",
+    "tagTool": "Herramienta",
     "categoryFilterLabel": "Tipo",
     "categoryAll": "Todo",
     "categoryYarn": "Lana",
     "categoryPattern": "Patrones",
+    "categoryTool": "Herramientas",
     "yearFilterLabel": "Año",
     "yearFilterAll": "Todos los años",
     "periodAll": "Desde el principio",
@@ -1674,5 +1733,169 @@
     "label": "Visita guiada del lector",
     "unavailable": "No se pudo preparar el proyecto de ejemplo.",
     "recreated": "El proyecto de ejemplo se recreó para la visita."
+  },
+  "tools": {
+    "title": "Mis herramientas",
+    "add": "Añadir una herramienta",
+    "byType": "Por tipo",
+    "viewMode": "Vista",
+    "bySize": "Por número",
+    "search": "Buscar (marca, gama, notas)",
+    "empty": "Aún no hay herramientas. Añade tus agujas y ganchillos para ver de un vistazo lo que tienes.",
+    "noMatch": "Ninguna herramienta coincide.",
+    "clearSearch": "Borrar la búsqueda y el número",
+    "fromKit": "puntas del juego {name}",
+    "fromHookKit": "ganchillos del juego {name}",
+    "categories": {
+      "needle": "Agujas",
+      "kit": "Juegos",
+      "hook": "Ganchillos"
+    },
+    "groups": {
+      "cables": "Cables",
+      "nosize": "Sin número"
+    },
+    "sizeFilter": "Mostrar solo {size}",
+    "types": {
+      "straight": "Agujas rectas",
+      "circular": "Agujas circulares",
+      "dpn": "Agujas de doble punta",
+      "tips": "Puntas intercambiables",
+      "cable": "Cable",
+      "flexible": "Agujas flexibles",
+      "other": "Otra aguja",
+      "interchangeable": "Juego intercambiable",
+      "hookKit": "Juego de ganchillos",
+      "standard": "Ganchillo",
+      "tunisian": "Ganchillo tunecino"
+    },
+    "typesShort": {
+      "straight": "rectas",
+      "circular": "circular",
+      "dpn": "doble punta",
+      "tips": "puntas",
+      "cable": "cable",
+      "flexible": "flex.",
+      "other": "otra",
+      "interchangeable": "juego",
+      "hookKit": "juego ganchillos",
+      "standard": "ganchillo",
+      "tunisian": "tunecino"
+    },
+    "materials": {
+      "wood": "madera",
+      "bamboo": "bambú",
+      "aluminium": "aluminio",
+      "steel": "acero inoxidable",
+      "brass": "latón",
+      "nickel": "niquelado",
+      "carbon": "carbono",
+      "plastic": "plástico",
+      "glass": "vidrio",
+      "other": "otro"
+    },
+    "statuses": {
+      "available": "Disponible",
+      "lent": "Prestado",
+      "lost": "Perdido",
+      "damaged": "Dañado",
+      "replace": "Por reemplazar"
+    },
+    "lengthKinds": {
+      "sock": "de calcetín",
+      "standard": "estándar",
+      "short": "cortas",
+      "mini": "mini"
+    },
+    "sizeMm": "{mm} mm",
+    "sizeRange": "{min} a {max} mm",
+    "lengthCm": "{cm} cm",
+    "lengthCmCount": "{cm} cm ×{count}",
+    "sizeLine": "{mm} mm · US {us}",
+    "sizeLineHook": "{mm} mm · {us}",
+    "sizeLineUk": "{mm} mm · US {us} · UK {uk}",
+    "notFound": "Herramienta no encontrada.",
+    "inUse": "en uso",
+    "inUseBy": "en uso: {name}",
+    "kitTakenSize": "{size} ({name})",
+    "kitPick": "{size} + {cable}",
+    "kitCableTaken": "{cable}, {n} en uso ({names})",
+    "countTimes": "×{n}",
+    "statusesInline": {
+      "available": "disponible",
+      "lent": "prestado",
+      "lost": "perdido",
+      "damaged": "dañado",
+      "replace": "por reemplazar"
+    },
+    "projects": "Proyectos",
+    "picker": {
+      "matching": "En los números del proyecto",
+      "others": "Otras herramientas",
+      "takenBy": "en uso: {name}",
+      "cable": "Cable",
+      "noCable": "sin cable",
+      "cableFor": "Cable para {size}",
+      "wholeKit": "Juego completo (enlace anterior)"
+    },
+    "deleted": "Herramienta eliminada.",
+    "kitContent": "Contenido del juego",
+    "photoLabel": "Fotos de la herramienta",
+    "handles": {
+      "classic": "clásico",
+      "ergonomic": "ergonómico",
+      "rubber": "grip de goma",
+      "beaded": "con cuentas"
+    },
+    "tunisianKinds": {
+      "fixed": "fijo",
+      "cabled": "con cable",
+      "interchangeable": "intercambiable"
+    },
+    "fields": {
+      "type": "Tipo",
+      "size": "Número",
+      "length": "Longitud",
+      "tipLength": "Longitud de las puntas",
+      "dpnCount": "Número de agujas",
+      "tunisianKind": "Forma",
+      "handle": "Mango",
+      "material": "Material",
+      "brand": "Marca",
+      "line": "Gama",
+      "quantity": "Cantidad",
+      "purchasedAt": "Fecha de compra",
+      "price": "Precio ({symbol})",
+      "shop": "Tienda",
+      "storedIn": "Guardado en",
+      "status": "Estado",
+      "notes": "Notas",
+      "kitSizes": "Números incluidos",
+      "kitCables": "Cables incluidos",
+      "cableJoin": "Diámetro de la conexión",
+      "tunisianKit": "Ganchillos tunecinos intercambiables"
+    },
+    "sizeFree": "Número en mm",
+    "sizeRequired": "Elige un número antes de guardar.",
+    "form": {
+      "editTitle": "Editar herramienta",
+      "updated": "Herramienta modificada.",
+      "typeRequired": "Elige primero el tipo de herramienta.",
+      "sizePick": "Elige un número",
+      "sizeOther": "Otro número…",
+      "sizeOption": "{mm} mm (US {us})",
+      "cableLess": "Quitar un cable de {cm} cm",
+      "cableMore": "Añadir un cable de {cm} cm",
+      "sizeOptionHook": "{mm} mm ({us})",
+      "unset": "Sin indicar",
+      "lengthCm": "Longitud (cm)",
+      "sections": {
+        "type": "Tipo de herramienta",
+        "size": "Número y medidas",
+        "material": "Material y marca",
+        "purchase": "Compra y almacenamiento",
+        "photos": "Fotos y notas"
+      }
+    }
   }
 }

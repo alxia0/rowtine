@@ -17,7 +17,7 @@
 // une clé manquante retomberait sur l'anglais et le test resterait vert, alors que c'est
 // précisément le défaut visé. On résout donc contre les fichiers JSON BRUTS, sans aucun repli.
 import { describe, it, expect } from 'vitest'
-import { projectExportTable, patternExportTable } from '@/utils/export-tables'
+import { projectExportTable, patternExportTable, toolExportTable } from '@/utils/export-tables'
 import fr from '@/i18n/fr.json'
 import en from '@/i18n/en.json'
 import de from '@/i18n/de.json'
@@ -153,5 +153,91 @@ describe.each(LANGUES)('en-têtes d’export résolus en %s', (locale, messages)
     const patrons = patternExportTable([patronComplet], { t: tLangue }).rows
     expect(patrons[0][1], `type en ${locale}`).not.toMatch(/^technique\./)
     expect(patrons[0][2], `catégorie en ${locale}`).not.toMatch(/^pattern\.categories\./)
+  })
+})
+
+// --- C. Outils ----------------------------------------------------------------------------
+
+const outilCirculaire = { type: 'circular', category: 'needle', sizeMm: 4, lengthCm: 80, price: '12.5', priceCurrency: 'CHF', quantity: 1, status: 'available' }
+const outilKit = { type: 'interchangeable', category: 'kit', kitSizes: [3.5, 5], kitCables: [60, 80], quantity: 1, status: 'available' }
+const outilCable = { type: 'cable', category: 'needle', lengthCm: 80, quantity: 2, status: 'lent' }
+const outilCrochet = { type: 'standard', category: 'hook', sizeMm: 4, material: 'aluminium', quantity: 1, status: 'available' }
+const tFr = (key, params = {}) => (resoudre(fr, key) ?? key).replace(/\{(\w+)\}/g, (m, k) => params[k] ?? m)
+
+describe('toolExportTable', () => {
+  it('une cellule par en-tête, pour chaque forme de fiche', () => {
+    const { head, rows } = toolExportTable([outilCirculaire, outilKit, outilCable], { t: tFr, locale: 'fr' })
+    expect(head).toHaveLength(21)
+    for (const row of rows) expect(row).toHaveLength(head.length)
+  })
+
+  it('aucune cellule ne sort un chemin de clé', () => {
+    const { head, rows } = toolExportTable([outilCirculaire, outilKit, outilCable, outilCrochet], { t: tFr, locale: 'fr' })
+    for (const cell of [...head, ...rows.flat()]) expect(String(cell)).not.toMatch(/tools\.|settings\.export/)
+  })
+
+  it('kit : tailles et câbles en une cellule', () => {
+    const { head, rows } = toolExportTable([outilKit], { t: tFr, locale: 'fr' })
+    expect(rows[0][head.length - 3]).toBe('3,5 / 5')
+    expect(rows[0][head.length - 2]).toBe('60 cm ; 80 cm')
+  })
+
+  it('kit de crochets : la colonne tunisien dit « interchangeable » quand il l’est, vide sinon', () => {
+    const kit = { type: 'hookKit', category: 'kit', kitSizes: [4, 5], kitCables: [], tunisian: false, quantity: 1, status: 'available' }
+    const { head, rows } = toolExportTable([kit, { ...kit, tunisian: true, kitCables: [80] }], { t: tFr, locale: 'fr' })
+    const col = head.indexOf(tFr('settings.export.tool.tunisianKind'))
+    expect(rows[0][col]).toBe('')
+    expect(rows[1][col]).toBe(tFr('tools.tunisianKinds.interchangeable'))
+    expect(rows[1][head.length - 3]).toBe('4 / 5')
+    expect(rows[1][head.length - 2]).toBe('80 cm')
+  })
+
+  it('kit : plusieurs câbles de même longueur écrits « 20 cm ×2 ; 35 cm »', () => {
+    const { head, rows } = toolExportTable([{ ...outilKit, kitCables: [35, 20, 20] }], { t: tFr, locale: 'fr' })
+    expect(rows[0][head.length - 2]).toBe('20 cm ×2 ; 35 cm')
+  })
+
+  it('kit : le diamètre de la fixation est écrit, un câble par couple longueur et diamètre', () => {
+    const kitCables = [{ cm: 80, join: 'l' }, { cm: 20, join: 's' }, { cm: 20, join: 's' }, { cm: 80, join: 's' }, { cm: 100, join: null }]
+    const { head, rows } = toolExportTable([{ ...outilKit, kitCables }], { t: tFr, locale: 'fr' })
+    expect(rows[0][head.length - 2]).toBe('20 cm S ×2 ; 80 cm S ; 80 cm L ; 100 cm')
+  })
+
+  it('prix sans symbole, devise en code ; sans prix, les deux vides', () => {
+    const { rows } = toolExportTable([outilCirculaire, outilCable], { t: tFr, locale: 'fr' })
+    expect(rows[0][13]).toBe('12,5')
+    expect(rows[0][14]).toBe('CHF')
+    expect(rows[1][13]).toBe('')
+    expect(rows[1][14]).toBe('')
+  })
+
+  it('équivalent calculé : numéro US en aiguille, lettre en crochet', () => {
+    const { rows } = toolExportTable([outilCirculaire, outilCrochet], { t: tFr, locale: 'fr' })
+    expect(rows[0][3]).toBe('6')
+    expect(rows[1][3]).toBe('G-6')
+  })
+  // Protège les valeurs à clé : longueur nommée, nombre d'aiguilles, crochet tunisien, manche, état prêté.
+  it('valeurs à clé traduites : chaussette, tunisien câblé à manche ergonomique, outil prêté', () => {
+    const dpn = { type: 'dpn', category: 'needle', sizeMm: 2.5, lengthKind: 'sock', dpnCount: 5, quantity: 1, status: 'available' }
+    const tunisien = { type: 'tunisian', category: 'hook', sizeMm: 5, lengthCm: 100, tunisianKind: 'cabled', handle: 'ergonomic', quantity: 1, status: 'available' }
+    const { head, rows } = toolExportTable([dpn, tunisien, outilCable], { t: tFr, locale: 'fr' })
+    const col = (name) => head.indexOf(tFr(`settings.export.tool.${name}`))
+    expect(rows[0][col('length')]).toBe(tFr('tools.lengthKinds.sock'))
+    expect(rows[0][col('dpnCount')]).toBe('5')
+    expect(rows[1][col('length')]).toBe('100')
+    expect(rows[1][col('tunisianKind')]).toBe(tFr('tools.tunisianKinds.cabled'))
+    expect(rows[1][col('handle')]).toBe(tFr('tools.handles.ergonomic'))
+    expect(rows[2][col('status')]).toBe(tFr('tools.statuses.lent'))
+  })
+
+  // Protège l'état par défaut : une fiche sans `status` se lit disponible, comme partout ailleurs.
+  it('outil sans état : sorti comme disponible', () => {
+    const { head, rows } = toolExportTable([{ type: 'straight', category: 'needle', sizeMm: 4 }], { t: tFr, locale: 'fr' })
+    expect(rows[0][head.indexOf(tFr('settings.export.tool.status'))]).toBe(tFr('tools.statuses.available'))
+  })
+
+  // Protège l'en-tête de longueur : la colonne peut contenir une longueur nommée, il ne promet pas des cm.
+  it.each(LANGUES)('en-tête de longueur sans unité en %s', (locale, messages) => {
+    expect(resoudre(messages, 'settings.export.tool.length')).not.toMatch(/cm/)
   })
 })

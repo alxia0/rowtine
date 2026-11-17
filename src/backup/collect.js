@@ -54,7 +54,7 @@ function trashIds(rows) {
 }
 
 export async function collectBackupData() {
-  const [projectRows, patternRows, yarns, independentCounters, settingRows, trashRows, purchases, activeDays] =
+  const [projectRows, patternRows, yarns, independentCounters, settingRows, trashRows, purchases, activeDays, tools] =
     await Promise.all([
       db.projects.toArray(),
       db.patterns.toArray(),
@@ -64,6 +64,7 @@ export async function collectBackupData() {
       db.trash.toArray(),
       db.purchases.toArray(),
       db.activeDays.toArray(), // journal des jours actifs (lot 2) : table globale, registre plat
+      db.tools.toArray(), // stock d'outils : table globale, photos externalisées dans Outils/
     ])
 
   // `set` seulement si absente : reproduit exactement la sémantique « premier
@@ -105,5 +106,5 @@ export async function collectBackupData() {
   // conservé sur disque par la réconciliation de `backupAll`, via `keepIds`) — cf.
   // `corbeille.json` (orchestrator.js) et `readBackup` (restore.js).
 
-  return { projects, libraryPatterns, yarns, purchases, activeDays, independentCounters, settings, keepIds, trashIds: trash }
+  return { projects, libraryPatterns, yarns, tools, purchases, activeDays, independentCounters, settings, keepIds, trashIds: trash }
 }

@@ -16,3 +16,15 @@ describe('icons — nouvelles entrées barre éditeur', () => {
     expect(ICONS.repeat.body).toContain('<path')
   })
 })
+
+describe('icons — types d’outils', () => {
+  it('chaque type d’outil a une icône du registre', async () => {
+    const { TOOL_TYPES } = await import('@/constants/tools')
+    for (const def of Object.values(TOOL_TYPES)) expect(hasIcon(def.icon)).toBe(true)
+  })
+  it('le câble a sa propre icône, distincte de la circulaire', async () => {
+    const { TOOL_TYPES } = await import('@/constants/tools')
+    expect(TOOL_TYPES.cable.icon).toBe('tool-cable')
+    expect(ICONS['tool-cable'].body).not.toBe(ICONS['tool-circular'].body)
+  })
+})

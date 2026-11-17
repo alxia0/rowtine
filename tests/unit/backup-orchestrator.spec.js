@@ -635,3 +635,67 @@ describe('backupAll — la fiche d’identité (racine) est hors d’atteinte de
     expect(removeCalls).not.toContain(MANIFEST_PATH)
   })
 })
+
+describe('backupAll — outils (outils.json et Outils/)', () => {
+  let storage
+
+  beforeEach(() => {
+    storage = new MemoryBackupStorage()
+  })
+
+  it('écrit outils.json et les photos sous Outils/ AVANT outils.json', async () => {
+    const acheves = []
+    const vraiWrite = storage.writeFile.bind(storage)
+    storage.writeFile = async (path, data, opts) => {
+      await new Promise((r) => setTimeout(r, path.includes('outil-photo-') ? 20 : 0))
+      const res = await vraiWrite(path, data, opts)
+      acheves.push(path)
+      return res
+    }
+    await backupAll(storage, baseSnapshot({ tools: [{ id: 1, type: 'standard', photos: [PHOTO_A, PHOTO_B] }] }))
+
+    const outils = JSON.parse(await storage.readFile('outils.json'))
+    expect(outils[0].photos).toHaveLength(2)
+    for (const name of outils[0].photos) {
+      expect(name).toMatch(/^outil-photo-/)
+      expect(await storage.exists(`Outils/${name}`)).toBe(true)
+      expect(acheves.indexOf(`Outils/${name}`)).toBeLessThan(acheves.indexOf('outils.json'))
+    }
+  })
+
+  it('un instantané sans outils écrit quand même outils.json (tableau vide)', async () => {
+    await backupAll(storage, baseSnapshot())
+    expect(JSON.parse(await storage.readFile('outils.json'))).toEqual([])
+  })
+
+  it("la réconciliation efface une photo d'outil orpheline, garde celles référencées, ne touche ni Laines/ ni une photo de laine", async () => {
+    const snapshot = baseSnapshot({
+      tools: [{ id: 1, photos: [PHOTO_A] }],
+      yarns: [{ id: 5, brand: 'Katia', photos: [PHOTO_B] }],
+    })
+    await backupAll(storage, snapshot)
+    const tool = JSON.parse(await storage.readFile('outils.json'))[0]
+    const yarn = JSON.parse(await storage.readFile('laines.json'))[0]
+    await storage.writeFile('Outils/outil-photo-orphelin.jpg', 'ZZZZ', { encoding: 'base64' })
+    // Chaque ménage est borné à SON dossier ET à SON préfixe : un fichier d'un autre
+    // préfixe, posé dans l'autre dossier, n'est jamais balayé.
+    await storage.writeFile('Outils/laine-photo-etranger.jpg', 'ZZZZ', { encoding: 'base64' })
+    await storage.writeFile('Laines/outil-photo-etranger.jpg', 'ZZZZ', { encoding: 'base64' })
+
+    await backupAll(storage, snapshot)
+
+    expect(await storage.exists('Outils/outil-photo-orphelin.jpg')).toBe(false)
+    expect(await storage.exists('Outils/laine-photo-etranger.jpg')).toBe(true)
+    expect(await storage.exists('Laines/outil-photo-etranger.jpg')).toBe(true)
+    expect(await storage.exists(`Outils/${tool.photos[0]}`)).toBe(true)
+    expect(await storage.exists(`Laines/${yarn.photos[0]}`)).toBe(true)
+  })
+
+  it("outil supprimé : sa photo devient orpheline et part, celle d'un autre outil reste", async () => {
+    await backupAll(storage, baseSnapshot({ tools: [{ id: 1, photos: [PHOTO_A] }, { id: 2, photos: [PHOTO_B] }] }))
+    const [t1, t2] = JSON.parse(await storage.readFile('outils.json'))
+    await backupAll(storage, baseSnapshot({ tools: [{ id: 2, photos: [PHOTO_B] }] }))
+    expect(await storage.exists(`Outils/${t1.photos[0]}`)).toBe(false)
+    expect(await storage.exists(`Outils/${t2.photos[0]}`)).toBe(true)
+  })
+})

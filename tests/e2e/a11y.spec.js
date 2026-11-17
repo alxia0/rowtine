@@ -34,6 +34,9 @@ const ROUTES = [
   { path: '/stash', ready: /Ajouter une laine|Stock vide/ },
   // « Sauvegarder » a disparu de l'écran (écriture continue, plus de
   // bouton explicite) : on attend le bloc « Mes données », stable et propre à la vue.
+  // Mes outils (lot stock d'outils, 14/11) : liste vide et formulaire d'ajout (grille des types).
+  { path: '/tools', ready: /Ajouter un outil/ },
+  { path: '/tools/new', ready: /Type d’outil/ },
   { path: '/settings', ready: /Mes données/ },
   { path: '/calculator', ready: /Mailles actuelles|Calculateur/ },
   { path: '/counters', ready: /Compteur/ },
@@ -55,12 +58,127 @@ for (const route of ROUTES) {
   })
 }
 
+// Liste remplie (pastilles de taille, bascule Par type / Par taille) et fiche d'un outil :
+// états que l'écran vide ne montre pas.
+test('mes outils : liste remplie, vue par taille et fiche — sans violation a11y bloquante', async ({ page }) => {
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.goto('/tools/new')
+  await page.locator('[data-test="type-circular"]').click()
+  await page.locator('#tool-size').selectOption('4')
+  await page.locator('#tool-length').selectOption('80')
+  await page.locator('#tool-brand').fill('ChiaoGoo')
+  expect(await audit(page)).toEqual([])
+  await page.locator('[data-test="tool-save"]').click()
+  await page.waitForURL(/\/tools\/\d+$/)
+  await expect(page.getByRole('heading', { level: 1, name: /4 mm/ })).toBeVisible()
+  expect(await audit(page)).toEqual([])
+  await page.goto('/tools')
+  await expect(page.locator('.tlist .trow')).toHaveCount(1)
+  expect(await audit(page)).toEqual([])
+  await page.getByRole('button', { name: 'Par taille' }).click()
+  await page.getByRole('button', { name: 'Filtrer sur 4 mm' }).click()
+  expect(await audit(page)).toEqual([])
+})
+
+// Fiche d'un kit d'aiguilles interchangeables : listes de tailles et de câbles (<ul> d'étiquettes)
+// et section « Contenu du kit », absentes de la fiche d'une aiguille simple.
+test('mes outils : formulaire et fiche d’un kit — sans violation a11y bloquante', async ({ page }) => {
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.goto('/tools/new')
+  await page.locator('[data-test="type-interchangeable"]').click()
+  for (const mm of ['3.5', '4', '5']) await page.locator(`[data-test="kit-size"][data-value="${mm}"] label`).click()
+  for (const cm of ['60', '80']) await page.locator(`[data-test="kit-cable"][data-value="${cm}"] label`).click()
+  await page.locator('#tool-brand').fill('KnitPro')
+  await page.locator('#tool-line').fill('Zing')
+  expect(await audit(page)).toEqual([])
+  await page.locator('[data-test="tool-save"]').click()
+  await page.waitForURL(/\/tools\/\d+$/)
+  await expect(page.locator('[data-test="kit-size"]')).toHaveCount(3)
+  expect(await audit(page)).toEqual([])
+})
+
 test('fiche projet — sans violation a11y bloquante', async ({ page }) => {
   await completeOnboarding(page, { firstName: 'Alex' })
   await page.getByRole('button', { name: /Créer un projet/ }).click()
   await page.locator('#name').fill('Projet a11y')
   await page.getByRole('button', { name: 'Enregistrer' }).click()
   await expect(page).toHaveURL(/\/project\/\d+/)
+  expect(await audit(page)).toEqual([])
+})
+
+// Fiche projet avec un outil en stock : tuile « Mes outils » (onglet Détails), puis feuille de
+// sélection ouverte (cases étiquetées par la ligne de l'outil).
+test('fiche projet : tuile Mes outils et feuille de sélection — sans violation a11y bloquante', async ({ page }) => {
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.goto('/tools/new')
+  await page.locator('[data-test="type-circular"]').click()
+  await page.locator('#tool-size').selectOption('4')
+  await page.locator('[data-test="tool-save"]').click()
+  await page.waitForURL(/\/tools\/\d+$/)
+  await page.goto('/')
+  await page.getByRole('button', { name: /Créer un projet/ }).click()
+  await page.locator('#name').fill('Projet outils')
+  await page.locator('#needle-mm-0').fill('4')
+  await page.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page).toHaveURL(/\/project\/\d+/)
+  await page.getByRole('tab', { name: 'Détails' }).click()
+  await expect(page.locator('[data-test="project-tools"]')).toBeVisible()
+  expect(await audit(page)).toEqual([])
+  await page.getByRole('button', { name: 'Choisir des outils' }).click()
+  await expect(page.getByRole('dialog', { name: 'Choisir des outils' })).toBeVisible()
+  expect(await audit(page)).toEqual([])
+})
+
+// Feuille dépliée sur un kit (spec interne) : cases de
+// taille, une taille cochée et sa liste de câbles visible.
+test('feuille de sélection dépliée sur un kit, câble proposé, sans violation a11y bloquante', async ({ page }) => {
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.goto('/tools/new')
+  await page.locator('[data-test="type-interchangeable"]').click()
+  for (const mm of ['4', '5']) await page.locator(`[data-test="kit-size"][data-value="${mm}"] label`).click()
+  await page.locator('[data-test="kit-cable"][data-value="80"] label').click()
+  await page.locator('#tool-brand').fill('KnitPro')
+  await page.locator('[data-test="tool-save"]').click()
+  await page.waitForURL(/\/tools\/\d+$/)
+  await page.goto('/')
+  await page.getByRole('button', { name: /Créer un projet/ }).click()
+  await page.locator('#name').fill('Projet kit')
+  await page.locator('#needle-mm-0').fill('4')
+  await page.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page).toHaveURL(/\/project\/\d+/)
+  await page.getByRole('tab', { name: 'Détails' }).click()
+  await page.getByRole('button', { name: 'Choisir des outils' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Choisir des outils' })
+  await sheet.locator('[data-test="tool-picker-kit-size"][data-value="4"] label').click()
+  await expect(sheet.getByRole('combobox', { name: 'Câble' })).toBeVisible()
+  expect(await audit(page)).toEqual([])
+})
+
+// Feuille dépliée sur un kit à deux câbles de même longueur (80 cm S et 80 cm L, spec 2026-11-17).
+test('feuille de sélection dépliée sur un kit à deux câbles de même longueur, sans violation a11y bloquante', async ({ page }) => {
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.goto('/tools/new')
+  await page.locator('[data-test="type-interchangeable"]').click()
+  await page.locator('[data-test="kit-size"][data-value="4"] label').click()
+  await page.getByRole('radio', { name: 'S', exact: true }).click()
+  await page.locator('[data-test="kit-cable"][data-value="80"] label').click()
+  await page.getByRole('radio', { name: 'L', exact: true }).click()
+  await page.locator('[data-test="kit-cable"][data-value="80"] label').click()
+  await page.locator('#tool-brand').fill('KnitPro')
+  await page.locator('[data-test="tool-save"]').click()
+  await page.waitForURL(/\/tools\/\d+$/)
+  await page.goto('/')
+  await page.getByRole('button', { name: /Créer un projet/ }).click()
+  await page.locator('#name').fill('Projet deux câbles')
+  await page.locator('#needle-mm-0').fill('4')
+  await page.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page).toHaveURL(/\/project\/\d+/)
+  await page.getByRole('tab', { name: 'Détails' }).click()
+  await page.getByRole('button', { name: 'Choisir des outils' }).click()
+  const sheet = page.getByRole('dialog', { name: 'Choisir des outils' })
+  await sheet.locator('[data-test="tool-picker-kit-size"][data-value="4"] label').click()
+  const select = sheet.getByRole('combobox', { name: 'Câble' })
+  await expect(select.locator('option')).toHaveText(['aucun câble', '80 cm S', '80 cm L'])
   expect(await audit(page)).toEqual([])
 })
 

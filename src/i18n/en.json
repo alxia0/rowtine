@@ -7,6 +7,7 @@
     "menu": "Menu",
     "home": "Home",
     "stash": "Yarn stash",
+    "tools": "My tools",
     "library": "Pattern library",
     "stats": "Statistics",
     "expenses": "Expenses",
@@ -317,6 +318,10 @@
     "timerFieldHint": "Track the time spent on this project.",
     "changeStatus": "Change status",
     "needles": "Needles",
+    "missingSize": "{mm} mm: not in your tools",
+    "chooseTools": "Choose tools",
+    "toolsNone": "No tools linked",
+    "toolsSaveError": "Your tools could not be saved. Try again.",
     "needleMm": "Needles (mm)",
     "needleUs": "Needles (US)",
     "hooks": "Hook",
@@ -358,6 +363,12 @@
     "yarnsEmpty": "Your stash is empty — add yarns to link them here.",
     "yarnsBrandPlaceholder": "Choose a brand",
     "yarnsPickBrand": "Choose a brand to see the available yarns.",
+    "consumedTitle": "Skeins knitted",
+    "consumedHint": "If you correct the number of skeins knitted, the yarn's stock follows: extra skeins are taken out, skeins no longer used are put back.",
+    "consumedOverStock": "There aren't enough skeins available for this yarn: the maximum is {n}. Skeins reserved by other projects don't count.",
+    "consumedOverStockPlain": "There aren't enough skeins available for this yarn: the maximum is {n}.",
+    "consumedOverStockOwn": "There aren't enough skeins available for this yarn: the maximum is {n}. Skeins this project still has in reserve aren't counted on top.",
+    "consumedFixStock": "Fix this yarn's stock",
     "nameRequired": "Give your project a name.",
     "created": "Project created.",
     "saved": "Project saved.",
@@ -368,9 +379,12 @@
     "correctPattern": "Correct the pattern",
     "consumeTitle": "Project finished!",
     "consumeIntro": "How many skeins did you actually use?",
-    "consumeHint": "The rest goes back to your stash. If you close this window, everything reserved counts as knitted.",
+    "consumeHint": "The rest goes back to your stash.",
     "consumeReserved": "{n} reserved",
     "consumeConfirm": "Confirm",
+    "consumeOverStock": "Only {n} skein(s) available for this yarn. Skeins reserved by other projects don't count.",
+    "consumeOverStockPlain": "Only {n} skein(s) available for this yarn.",
+    "consumeFixStock": "Fix the stock",
     "abandonTitle": "Project abandoned",
     "abandonIntro": "Are any skeins lost (not frogged)?",
     "abandonHint": "By default everything goes back to your stash. Only enter what you won't get back.",
@@ -445,6 +459,16 @@
     "editPattern": "Edit pattern",
     "setCover": "Set as cover",
     "coverBadge": "Cover"
+  },
+  "toolParking": {
+    "pauseTitle": "Free these tools for another project?",
+    "pauseIntro": "This project is going on hold. Once freed, these tools become available again for your other projects, and you can pick them back up when you resume.",
+    "release": "Free them",
+    "keep": "Keep them",
+    "resumeTitle": "Take these tools back?",
+    "resumeIntro": "This project is starting again. Tick the tools you want to link again: the ones already taken by another project cannot be.",
+    "resume": "Take back",
+    "notNow": "Not now"
   },
   "section": {
     "state": {
@@ -669,6 +693,7 @@
     "priceBought": "Bought for {price}",
     "priceBoughtOn": "Bought for {price} on {date}",
     "priceFreeOn": "Free, obtained on {date}",
+    "priceUnknownOn": "Price unknown, bought on {date}",
     "purchasedAt": "Purchase date",
     "priceSharedHint": "This price belongs to the pattern: every project using it shares the same price.",
     "priceFreePatternHint": "The “Free pattern” has no price: it is shared by all your projects without a pattern.",
@@ -941,7 +966,7 @@
     "unitsImperial": "Imperial (yd, oz)",
     "currencyLabel": "Currency",
     "currencyChangeTitle": "Change currency",
-    "currencyChangeMessage": "Prices already entered will not be converted. They will simply be shown in {currency}.",
+    "currencyChangeMessage": "Prices already entered keep their currency. New ones will be in {currency}.",
     "currencyChangeConfirm": "Change currency",
     "data": "My data",
     "dataHint": "Everything is stored on your phone, and backed up automatically to your data folder (see below).",
@@ -958,7 +983,8 @@
     "types": {
       "project": "Project",
       "yarn": "Yarn",
-      "pattern": "Pattern"
+      "pattern": "Pattern",
+      "tool": "Tool"
     },
     "help": {
       "title": "Help",
@@ -981,6 +1007,7 @@
         "lengthM": "Length (m)",
         "quantity": "Quantity",
         "price": "Price",
+        "currency": "Currency",
         "usedSkeins": "Used (skeins)",
         "dyeLot": "Dye lot",
         "purchaseDate": "Purchase date",
@@ -1010,6 +1037,29 @@
         "sizes": "Sizes",
         "source": "Source",
         "sections": "Sections"
+      },
+      "tool": {
+        "category": "Category",
+        "type": "Type",
+        "sizeMm": "Size (mm)",
+        "equivalent": "Equivalent (US or letter)",
+        "length": "Length",
+        "dpnCount": "Number of needles",
+        "tunisianKind": "Tunisian hook",
+        "material": "Material",
+        "handle": "Handle",
+        "brand": "Brand",
+        "line": "Line",
+        "quantity": "Quantity",
+        "status": "Status",
+        "price": "Price",
+        "currency": "Currency",
+        "purchasedAt": "Purchase date",
+        "shop": "Shop",
+        "storedIn": "Storage",
+        "kitSizes": "Kit sizes (mm)",
+        "kitCables": "Kit cables",
+        "notes": "Notes"
       }
     }
   },
@@ -1055,6 +1105,7 @@
     "sideFolder": "The folder",
     "sideDevice": "This device",
     "sideCounts": "{projets} projects, {patrons} patterns, {laines} yarns",
+    "sideCountsTools": "{projets} projects, {patrons} patterns, {laines} yarns, {outils} tools",
     "purpose": "Everything you knit lives in this app, on your device.",
     "hintStartFresh": "This folder's data will be lost."
   },
@@ -1065,6 +1116,12 @@
     "failed": "This folder could not be prepared. Please choose another one.",
     "changeTitle": "Change folder",
     "changeBody": "Choose the folder where Rowtine will store your data. If it isn't already named “Rowtine” and doesn't already contain your data, your data will live in a “Rowtine” subfolder, created if needed."
+  },
+  "releaseNotice": {
+    "title": "What's new in version {version}",
+    "intro": "Here is what changes with this update.",
+    "ok": "Got it",
+    "seeAll": "See everything"
   },
   "restore": {
     "done": "Data restored.",
@@ -1529,10 +1586,12 @@
     "tagYarn": "Yarn",
     "tagPattern": "Pattern",
     "freeTag": "Free",
+    "tagTool": "Tool",
     "categoryFilterLabel": "Type",
     "categoryAll": "All",
     "categoryYarn": "Yarn",
     "categoryPattern": "Patterns",
+    "categoryTool": "Tools",
     "yearFilterLabel": "Year",
     "yearFilterAll": "All years",
     "periodAll": "Since the start",
@@ -1590,5 +1649,169 @@
     "label": "Guided tour of the reader",
     "unavailable": "The sample project couldn't be prepared.",
     "recreated": "The sample project was recreated for the tour."
+  },
+  "tools": {
+    "title": "My tools",
+    "add": "Add a tool",
+    "byType": "By type",
+    "viewMode": "View",
+    "bySize": "By size",
+    "search": "Search (brand, line, notes)",
+    "empty": "No tools yet. Add your needles and hooks to see at a glance what you have.",
+    "noMatch": "No tool matches.",
+    "clearSearch": "Clear search and size",
+    "fromKit": "tips from the {name} set",
+    "fromHookKit": "hooks from the {name} set",
+    "categories": {
+      "needle": "Needles",
+      "kit": "Sets",
+      "hook": "Hooks"
+    },
+    "groups": {
+      "cables": "Cables",
+      "nosize": "No size"
+    },
+    "sizeFilter": "Show only {size}",
+    "types": {
+      "straight": "Straight needles",
+      "circular": "Circular needles",
+      "dpn": "Double-pointed needles",
+      "tips": "Interchangeable tips",
+      "cable": "Cable",
+      "flexible": "Flexible needles",
+      "other": "Other needle",
+      "interchangeable": "Interchangeable set",
+      "hookKit": "Crochet hook set",
+      "standard": "Crochet hook",
+      "tunisian": "Tunisian hook"
+    },
+    "typesShort": {
+      "straight": "straight",
+      "circular": "circular",
+      "dpn": "DPN",
+      "tips": "tips",
+      "cable": "cable",
+      "flexible": "flexible",
+      "other": "other",
+      "interchangeable": "set",
+      "hookKit": "hook set",
+      "standard": "hook",
+      "tunisian": "Tunisian"
+    },
+    "materials": {
+      "wood": "wood",
+      "bamboo": "bamboo",
+      "aluminium": "aluminium",
+      "steel": "stainless steel",
+      "brass": "brass",
+      "nickel": "nickel-plated",
+      "carbon": "carbon",
+      "plastic": "plastic",
+      "glass": "glass",
+      "other": "other"
+    },
+    "statuses": {
+      "available": "Available",
+      "lent": "Lent",
+      "lost": "Lost",
+      "damaged": "Damaged",
+      "replace": "To replace"
+    },
+    "lengthKinds": {
+      "sock": "sock",
+      "standard": "regular",
+      "short": "short",
+      "mini": "mini"
+    },
+    "sizeMm": "{mm} mm",
+    "sizeRange": "{min} to {max} mm",
+    "lengthCm": "{cm} cm",
+    "lengthCmCount": "{cm} cm ×{count}",
+    "sizeLine": "{mm} mm · US {us}",
+    "sizeLineHook": "{mm} mm · {us}",
+    "sizeLineUk": "{mm} mm · US {us} · UK {uk}",
+    "notFound": "Tool not found.",
+    "inUse": "in use",
+    "inUseBy": "in use: {name}",
+    "kitTakenSize": "{size} ({name})",
+    "kitPick": "{size} + {cable}",
+    "kitCableTaken": "{cable}, {n} taken ({names})",
+    "countTimes": "×{n}",
+    "statusesInline": {
+      "available": "available",
+      "lent": "lent",
+      "lost": "lost",
+      "damaged": "damaged",
+      "replace": "to replace"
+    },
+    "projects": "Projects",
+    "picker": {
+      "matching": "In the project’s sizes",
+      "others": "Other tools",
+      "takenBy": "taken: {name}",
+      "cable": "Cable",
+      "noCable": "no cable",
+      "cableFor": "Cable for {size}",
+      "wholeKit": "Whole set (earlier link)"
+    },
+    "deleted": "Tool deleted.",
+    "kitContent": "Set contents",
+    "photoLabel": "Tool photos",
+    "handles": {
+      "classic": "classic",
+      "ergonomic": "ergonomic",
+      "rubber": "rubber grip",
+      "beaded": "beaded"
+    },
+    "tunisianKinds": {
+      "fixed": "fixed",
+      "cabled": "cabled",
+      "interchangeable": "interchangeable heads"
+    },
+    "fields": {
+      "type": "Type",
+      "size": "Size",
+      "length": "Length",
+      "tipLength": "Tip length",
+      "dpnCount": "Number of needles",
+      "tunisianKind": "Style",
+      "handle": "Handle",
+      "material": "Material",
+      "brand": "Brand",
+      "line": "Line",
+      "quantity": "Quantity",
+      "purchasedAt": "Purchase date",
+      "price": "Price ({symbol})",
+      "shop": "Shop",
+      "storedIn": "Stored in",
+      "status": "Condition",
+      "notes": "Notes",
+      "kitSizes": "Sizes included",
+      "kitCables": "Cables included",
+      "cableJoin": "Connector diameter",
+      "tunisianKit": "Interchangeable Tunisian hooks"
+    },
+    "sizeFree": "Size in mm",
+    "sizeRequired": "Pick a size before saving.",
+    "form": {
+      "editTitle": "Edit tool",
+      "updated": "Tool updated.",
+      "typeRequired": "Pick the type of tool first.",
+      "sizePick": "Pick a size",
+      "sizeOther": "Other size…",
+      "sizeOption": "{mm} mm (US {us})",
+      "cableLess": "Remove one {cm} cm cable",
+      "cableMore": "Add one {cm} cm cable",
+      "sizeOptionHook": "{mm} mm ({us})",
+      "unset": "Not specified",
+      "lengthCm": "Length (cm)",
+      "sections": {
+        "type": "Tool type",
+        "size": "Size and dimensions",
+        "material": "Material and brand",
+        "purchase": "Purchase and storage",
+        "photos": "Photos and notes"
+      }
+    }
   }
 }

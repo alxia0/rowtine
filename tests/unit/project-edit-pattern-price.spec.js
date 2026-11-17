@@ -15,6 +15,7 @@ import { useProjectsStore } from '@/stores/projects'
 import { useSettingsStore } from '@/stores/settings'
 import ProjectEditView from '@/views/ProjectEditView.vue'
 import { createTestI18n } from './helpers/i18n-router'
+import { currencySymbol } from '@/utils/units'
 
 const i18n = createTestI18n()
 
@@ -91,10 +92,9 @@ describe('formulaire projet — le prix va dans le PATRON', () => {
   })
 
   it('2. sans y toucher, enregistrer un projet ne RÉÉCRIT PAS la fiche du patron', async () => {
-    // Sans ce garde, ouvrir puis enregistrer un projet ré-estamperait `priceCurrency` avec la
-    // devise du MOMENT — qui peut avoir changé dans les réglages depuis l'achat.
+    // Fiche ancienne sans devise : une écriture parasite lui poserait celle des réglages.
     const patId = await db.patterns.add({
-      name: 'Sabai', type: 'knitting', price: '8,50', priceCurrency: 'GBP', purchasedAt: '2024-11-04',
+      name: 'Sabai', type: 'knitting', price: '8,50', priceCurrency: '', purchasedAt: '2024-11-04',
     })
     await usePatternsStore().load()
     route.query = { pattern: String(patId) }
@@ -104,7 +104,7 @@ describe('formulaire projet — le prix va dans le PATRON', () => {
     await enregistrer(w)
 
     const pat = await db.patterns.get(patId)
-    expect(pat.priceCurrency).toBe('GBP') // PAS 'CHF'
+    expect(pat.priceCurrency).toBe('') // PAS 'CHF'
     expect(pat.purchasedAt).toBe('2024-11-04')
   })
 
@@ -120,6 +120,25 @@ describe('formulaire projet — le prix va dans le PATRON', () => {
     await flushPromises()
     expect(w.find('[data-test="pattern-price"]').element.value).toBe('19')
     expect(w.find('[data-test="pattern-purchased-at"]').element.value).toBe('2025-06-01')
+  })
+
+  // La devise du patron chargé ne fuit pas sur le suivant, ni au libellé ni à l'écriture.
+  it('3b. changer de patron recharge aussi sa devise', async () => {
+    const a = await db.patterns.add({ name: 'Sabai', type: 'knitting', price: '8,50', priceCurrency: 'GBP', purchasedAt: '2026-03-12' })
+    const b = await db.patterns.add({ name: 'Twist', type: 'knitting', price: '19', priceCurrency: 'USD', purchasedAt: '2025-06-01' })
+    await usePatternsStore().load()
+    route.query = { pattern: String(a) }
+    const w = await monter()
+    const label = () => w.find('label[for="pat-price"]').text()
+    expect(label()).toContain(`(${currencySymbol('GBP', 'fr')})`)
+
+    await w.find('#project-pattern').setValue(String(b))
+    await flushPromises()
+    expect(label()).toContain(`(${currencySymbol('USD', 'fr')})`)
+    await w.find('#name').setValue('Bonnet')
+    await w.find('[data-test="pattern-price"]').setValue('20')
+    await enregistrer(w)
+    expect((await db.patterns.get(b)).priceCurrency).toBe('USD')
   })
 
   it('4. « Patron libre » : aucun champ de prix, une explication à la place', async () => {
@@ -225,5 +244,24 @@ describe('formulaire projet — le prix va dans le PATRON', () => {
     const pat = await db.patterns.get(patId)
     expect(pat.price).toBe('')
     expect(pat.priceCurrency).toBe('')
+  })
+
+  // Retoucher le montant garde la devise d'achat, même si les réglages ont changé depuis.
+  it('10. changer le montant garde la devise déjà posée sur le patron', async () => {
+    const patId = await db.patterns.add({
+      name: 'Sabai', type: 'knitting', price: '18', priceCurrency: 'GBP', purchasedAt: '2023-05-02',
+    })
+    await usePatternsStore().load()
+    route.query = { pattern: String(patId) }
+    const w = await monter()
+    expect(w.find('label[for="pat-price"]').text()).toContain(`(${currencySymbol('GBP', 'fr')})`)
+
+    await w.find('#name').setValue('Bonnet')
+    await w.find('[data-test="pattern-price"]').setValue('20')
+    await enregistrer(w)
+
+    const pat = await db.patterns.get(patId)
+    expect(pat.price).toBe('20')
+    expect(pat.priceCurrency).toBe('GBP')
   })
 })

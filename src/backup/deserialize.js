@@ -214,6 +214,20 @@ export function deserializeYarns(json, filesByName = {}, missing = []) {
   })
 }
 
+// Outils : même mécanique que les laines, sans la branche `photo` (un outil n'a que la
+// galerie `photos`). `missing` reçoit les noms référencés mais absents de `filesByName`.
+export function deserializeTools(json, filesByName = {}, missing = []) {
+  return asArray(json).map((tool) => {
+    // Ligne nulle (édition à la main) : rendue telle quelle, la validation d'entité
+    // (restore.js) l'écartera avec un rapport.
+    if (!tool || typeof tool !== 'object') return tool
+    if ('photos' in tool) {
+      return { ...tool, photos: photosFromNames(tool.photos, filesByName, missing) }
+    }
+    return tool
+  })
+}
+
 // Compteurs indépendants : le JSON parsé (compteurs.json) EST déjà le tableau
 // d'entités. Fournie pour symétrie/API uniforme.
 export function deserializeIndependentCounters(json) {

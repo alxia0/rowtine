@@ -115,6 +115,24 @@ describe('RavelryImportView', () => {
     expect(settingsStore.currency).toBe('CHF')
   })
 
+  it('la laine importée avec un prix porte la devise de sa ligne d’achat, sans prix aucune', async () => {
+    const file = makeRavelryFile(HEADERS, [
+      ['In stash', 'Drops', 'Baby Merino', 'Bleu nuit', 'DK (11 wpi)', 50, 105, 3, 3, 15, '2026-05-01', '', ''],
+      ['In stash', 'Katia', 'Concept Cotton', 'Vert', 'DK (11 wpi)', 50, 120, 1, 1, '', '2025-11-02', '', ''],
+    ])
+    const { w, yarnsStore, purchasesStore } = mountView([], 'CHF')
+    yarnsStore.add.mockResolvedValueOnce(1).mockResolvedValueOnce(2)
+    await pick(w, file)
+    await w.find('[data-test="ravelry-analyze"]').trigger('click')
+    await flushPromises()
+    await w.find('[data-test="ravelry-confirm"]').trigger('click')
+    await flushPromises()
+    const [priced, unpriced] = yarnsStore.add.mock.calls.map((c) => c[0])
+    expect(priced.priceCurrency).toBe('CHF')
+    expect(priced.priceCurrency).toBe(purchasesStore.add.mock.calls[0][0].currency)
+    expect(unpriced.priceCurrency).toBe('')
+  })
+
   it('une écriture qui échoue en cours de boucle affiche une erreur et ne masque pas la progression réelle (finding 3)', async () => {
     const file = makeRavelryFile(HEADERS, [
       ['In stash', 'Drops', 'Baby Merino', 'Bleu nuit', 'DK (11 wpi)', 50, 105, 3, 3, 15, '2026-05-01', '', ''],

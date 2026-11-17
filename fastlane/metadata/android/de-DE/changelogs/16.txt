@@ -1,0 +1,6 @@
+Neu „Meine Nadeln“: Nadeln, Häkelnadeln und Wechselsets (Größen, Seile) mit Fotos und Preis.
+Werkzeuge einem Projekt zuordnen, auch eine Größe und ein Seil eines Sets; fehlende Größen werden gemeldet.
+Projekt pausieren: Werkzeuge für ein anderes freigeben, später zurücknehmen.
+Gekaufte Werkzeuge zählen in den Ausgaben; Vorrat als Tabelle exportieren.
+Fertiges Projekt: Abbrechen-Knopf, Knäuel nachträglich korrigierbar.
+Nach einem Update zeigt ein Fenster die Neuigkeiten.

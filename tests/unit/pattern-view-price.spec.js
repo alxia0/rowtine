@@ -88,6 +88,16 @@ describe('fiche patron — prix et date d’achat', () => {
     expect(ligne(w).text()).toBe(tk('pattern.priceFree'))
   })
 
+  it('4 bis. prix illisible + date ⇒ « Prix inconnu, acheté le <date> », jamais « Gratuit »', async () => {
+    const w = await monter({ price: 'environ 5', priceCurrency: 'EUR', purchasedAt: '2026-08-07' })
+    expect(ligne(w).text()).toBe(tk('pattern.priceUnknownOn', { date: '07/08/2026' }))
+  })
+
+  it('4 ter. prix illisible sans date ⇒ « Prix inconnu », comme l’écran Dépenses', async () => {
+    const w = await monter({ price: '18,90 €' })
+    expect(ligne(w).text()).toBe(tk('purchases.priceUnknown'))
+  })
+
   it('5. aucun prix noté ⇒ AUCUNE ligne (pas une ligne vide)', async () => {
     // Ancré sur le marqueur de test, pas sur un fragment de texte : une assertion d'absence
     // portant sur du texte pourrait être vraie pour une raison étrangère au comportement.

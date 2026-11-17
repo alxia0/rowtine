@@ -19,6 +19,7 @@ import BackToTop from '@/components/BackToTop.vue'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useYarnsStore } from '@/stores/yarns'
 import { usePatternsStore } from '@/stores/patterns'
+import { useToolsStore } from '@/stores/tools'
 import { useSnackbarStore } from '@/stores/snackbar'
 import { formatMoney, formatSkeins } from '@/utils/units'
 import {
@@ -26,12 +27,16 @@ import {
   categoryOf, filterByCategory, totalsByCategory,
 } from '@/utils/purchases'
 import { patternExpenseLines } from '@/utils/pattern-price'
+import { toolExpenseLines } from '@/utils/tool-expense'
+import { toolSizeText } from '@/utils/tool-list'
+import { formatDecimalText, parseDecimal } from '@/utils/decimal'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const purchasesStore = usePurchasesStore()
 const yarnsStore = useYarnsStore()
 const patternsStore = usePatternsStore()
+const toolsStore = useToolsStore()
 const snackbar = useSnackbarStore()
 
 onMounted(() => {
@@ -44,6 +49,8 @@ onMounted(() => {
   // (depuis le 07/08). Même filet que ci-dessus : une exception avant la reprise dans App.vue
   // laisserait sinon ce magasin vide pour toute la session, sans autre endroit où le recharger.
   if (!patternsStore.loaded) patternsStore.load()
+  // Les outils avec un prix sont une source de dépenses de la même façon (lignes fabriquées).
+  if (!toolsStore.loaded) toolsStore.load()
 })
 
 // Les deux sources de dépense. Les lignes de PATRON sont FABRIQUÉES à la lecture (jamais
@@ -53,6 +60,7 @@ onMounted(() => {
 const lines = computed(() => [
   ...(purchasesStore.purchases || []),
   ...patternExpenseLines(patternsStore.patterns || []),
+  ...toolExpenseLines(toolsStore.tools || []),
 ])
 const yarnsById = computed(() => Object.fromEntries(yarnsStore.yarns.map((y) => [y.id, y])))
 // Libellé d'une ligne : `yarnLabel` n'est écrit qu'à la création de la ligne et par la
@@ -63,10 +71,21 @@ const yarnsById = computed(() => Object.fromEntries(yarnsStore.yarns.map((y) => 
 // source). Même format que `purchaseLabel` (StashView.vue) et `labelOf`
 // (purchases-reprise.js) — dupliqué ici à dessein, comme ces deux-là le sont déjà entre
 // eux : les trois modules n'ont aucune autre raison de se connaître.
+// Libellé d'un outil : type traduit, taille, marque, résolus depuis la fiche vivante (jamais figés).
+// La ligne n'existe que si la fiche est présente, le repli sur '' n'est qu'un garde-fou.
+const toolsById = computed(() => Object.fromEntries((toolsStore.tools || []).map((tl) => [tl.id, tl])))
+function toolLabel(line) {
+  const tool = toolsById.value[line.toolId]
+  if (!tool) return ''
+  const size = toolSizeText(tool, t, (n) => formatDecimalText(String(n), locale.value))
+  const brand = String(tool.brand || '').trim()
+  return [t(`tools.types.${tool.type}`), size, brand].filter(Boolean).join(' · ')
+}
 function lineLabel(line) {
   // Une dépense de patron porte son propre libellé : `yarnId`/`yarnLabel` disent « laine » et
   // n'ont aucun sens ici.
   if (categoryOf(line) === 'pattern') return line.label
+  if (categoryOf(line) === 'tool') return toolLabel(line)
   if (line.yarnId == null) return line.yarnLabel
   const yarn = yarnsById.value[line.yarnId]
   if (!yarn) return line.yarnLabel
@@ -99,7 +118,7 @@ const validYearValues = computed(
 watch([availableYears, hasUndated], () => {
   if (!validYearValues.value.has(selectedYear.value)) selectedYear.value = 'all'
 })
-// Filtre de catégorie (depuis le 07/08) : 'all' (défaut), 'yarn', 'pattern'. Visible dès qu'il y a
+// Filtre de catégorie (depuis le 07/08) : 'all' (défaut), 'yarn', 'pattern', 'tool'. Visible dès qu'il y a
 // du contenu, MÊME si une seule catégorie est peuplée — même arbitrage que le menu Année
 // (voir le commentaire du template) : voir la commande vaut mieux que se demander où elle est,
 // et ici elle annonce en plus une fonctionnalité qu'on ne devinerait pas.
@@ -161,23 +180,35 @@ async function removeLine(line) {
   }
 }
 
-// Ventilation par catégorie. N'apparaît QUE s'il existe au moins une ligne de patron dans
-// l'ensemble filtré : l'écran de quelqu'un qui n'a jamais saisi de prix de patron reste
-// STRICTEMENT identique à ce qu'il était. Pas de changement cosmétique imposé à qui ne se
+// Ventilation par catégorie. N'apparaît QUE s'il existe au moins une ligne de patron ou d'outil
+// dans l'ensemble filtré : l'écran de quelqu'un qui n'a jamais saisi de prix de patron ni
+// d'outil reste STRICTEMENT identique à ce qu'il était. Pas de changement cosmétique imposé à qui ne se
 // sert pas de la fonctionnalité.
 const categoryTotals = computed(() => totalsByCategory(filteredLines.value))
-const hasPatternLines = computed(() => filteredLines.value.some((l) => categoryOf(l) === 'pattern'))
+const hasMadeLines = computed(() => filteredLines.value.some(isMade))
+// Une sous-ligne par catégorie PRÉSENTE : qui n'a que des patrons ne voit pas « Outils 0 € ».
+const hasPatternLines = computed(() => filteredLines.value.some(isPattern))
+const hasToolLines = computed(() => filteredLines.value.some(isTool))
 function categoryTotalText(cat, currency) {
   return formatMoney(categoryTotals.value[cat][currency] || 0, { locale: locale.value, currency, profile: 'detail' }).text
 }
 
 const isPattern = (line) => categoryOf(line) === 'pattern'
+const isTool = (line) => categoryOf(line) === 'tool'
+// Ligne FABRIQUÉE (patron ou outil) : ni `yarnId`, ni pelotes, ni suppression possible. Toute
+// garde du gabarit qui disait « pas un patron » pour dire « une laine » passe par ici.
+function isMade(line) {
+  return isPattern(line) || isTool(line)
+}
+// Quantité d'un outil : nombre simple, rien quand elle vaut 1.
+const toolQtyText = (line) => (Number(line.quantity) > 1 ? `×${formatDecimalText(String(line.quantity), locale.value)}` : '')
 
-// Un appui sur une dépense de patron ouvre sa fiche : c'est là qu'on modifie ou efface le prix.
-// La route est nommée `pattern` (cf. src/router/index.js) — vérifier ce nom avant d'écrire,
-// une route inexistante échoue silencieusement en navigation.
-function openPattern(line) {
-  router.push({ name: 'pattern', params: { id: line.patternId } })
+// Un appui sur une dépense de patron ou d'outil ouvre sa fiche : c'est là qu'on modifie ou
+// efface le prix. Les routes sont nommées `pattern` et `tool` (cf. src/router/index.js) — une
+// route inexistante échoue silencieusement en navigation.
+function openMade(line) {
+  if (isTool(line)) router.push({ name: 'tool', params: { id: line.toolId } })
+  else router.push({ name: 'pattern', params: { id: line.patternId } })
 }
 </script>
 
@@ -212,6 +243,7 @@ function openPattern(line) {
             <option value="all">{{ t('expenses.categoryAll') }}</option>
             <option value="yarn">{{ t('expenses.categoryYarn') }}</option>
             <option value="pattern">{{ t('expenses.categoryPattern') }}</option>
+            <option value="tool">{{ t('expenses.categoryTool') }}</option>
           </select>
         </label>
       </div>
@@ -220,15 +252,19 @@ function openPattern(line) {
         <div v-for="cur in totalCurrencies" :key="cur" class="exp__stat">
           <span class="exp__stat-num">{{ moneyStat(cur).text }}</span>
           <span class="exp__stat-lbl">{{ t(moneyStat(cur).unitKey, { symbol: moneyStat(cur).symbol }) }}</span>
-          <!-- Ventilation seulement s'il y a des patrons : sinon l'écran reste celui d'avant. -->
-          <span v-if="hasPatternLines" class="exp__breakdown" data-test="expenses-breakdown">
+          <!-- Ventilation seulement s'il y a des patrons ou des outils : sinon l'écran reste celui d'avant. -->
+          <span v-if="hasMadeLines" class="exp__breakdown" data-test="expenses-breakdown">
             <span class="exp__breakdown-row">
               <span>{{ t('expenses.categoryYarn') }}</span>
               <span>{{ categoryTotalText('yarn', cur) }}</span>
             </span>
-            <span class="exp__breakdown-row">
+            <span v-if="hasPatternLines" class="exp__breakdown-row">
               <span>{{ t('expenses.categoryPattern') }}</span>
               <span>{{ categoryTotalText('pattern', cur) }}</span>
+            </span>
+            <span v-if="hasToolLines" class="exp__breakdown-row">
+              <span>{{ t('expenses.categoryTool') }}</span>
+              <span>{{ categoryTotalText('tool', cur) }}</span>
             </span>
           </span>
         </div>
@@ -260,23 +296,27 @@ function openPattern(line) {
           <ul class="exp__list">
             <li v-for="line in m.lines" :key="line.id" class="exp__line" :data-test="`expenses-line-${line.id}`">
               <div class="exp__line-main">
-                <!-- Pas de quantité sur un patron : « ×1 » n'y veut rien dire. -->
-                <span v-if="!isPattern(line)" class="exp__line-qty">×{{ formatSkeins(line.quantity, { locale }) }}</span>
+                <!-- Pas de quantité sur un patron : « ×1 » n'y veut rien dire. Un outil : nombre simple
+                     (jamais en pelotes), et rien quand il n'y en a qu'un. -->
+                <template v-if="isTool(line)">
+                  <span v-if="toolQtyText(line)" class="exp__line-qty">{{ toolQtyText(line) }}</span>
+                </template>
+                <span v-else-if="!isPattern(line)" class="exp__line-qty">×{{ formatSkeins(line.quantity, { locale }) }}</span>
                 <span class="exp__line-label">{{ lineLabel(line) }}</span>
                 <!-- La garde de CATÉGORIE fait tout le travail : la ligne de patron n'a pas de
                      `yarnId`, mais `undefined == null` est VRAI en JavaScript — sans elle,
                      chaque patron porterait la mention « Laine supprimée ». -->
-                <span v-if="!isPattern(line) && line.yarnId == null" class="tag exp__orphan-tag">{{ t('expenses.orphanTag') }}</span>
+                <span v-if="!isMade(line) && line.yarnId == null" class="tag exp__orphan-tag">{{ t('expenses.orphanTag') }}</span>
               </div>
               <div class="exp__line-tags">
-                <!-- Même garde que la ventilation (`hasPatternLines`) : tant qu'il n'existe
-                     aucune ligne de patron, la catégorie est une évidence (100 % laine) et
+                <!-- Même garde que la ventilation (`hasMadeLines`) : tant qu'il n'existe
+                     aucune ligne de patron ni d'outil, la catégorie est une évidence (100 % laine) et
                      l'étiquette n'apprend rien — juste du bruit visuel sur chaque ligne d'une
                      utilisatrice qui ne se sert pas de la fonctionnalité. Elle n'apparaît qu'à
                      partir du moment où deux catégories coexistent réellement dans l'écran. -->
-                <span v-if="hasPatternLines" class="tag">{{ isPattern(line) ? t('expenses.tagPattern') : t('expenses.tagYarn') }}</span>
+                <span v-if="hasMadeLines" class="tag">{{ isPattern(line) ? t('expenses.tagPattern') : isTool(line) ? t('expenses.tagTool') : t('expenses.tagYarn') }}</span>
                 <span v-if="line.kind === 'gift'" class="tag">{{ t('purchases.kindGift') }}</span>
-                <span v-else-if="isPattern(line) && !lineAmount(line)" class="tag">{{ t('expenses.freeTag') }}</span>
+                <span v-else-if="isMade(line) && parseDecimal(line.unitPrice) === 0" class="tag">{{ t('expenses.freeTag') }}</span>
                 <span v-else-if="isPriceUnknown(line)" class="tag">{{ t('purchases.priceUnknown') }}</span>
                 <span v-else class="exp__line-amount">{{ lineAmountText(line) }}</span>
               </div>
@@ -284,7 +324,7 @@ function openPattern(line) {
                    supprimer, seulement un champ à vider sur la fiche du patron. Une croix qui
                    viderait ce champ sans le dire serait un geste destructeur déguisé. -->
               <button
-                v-if="!isPattern(line)"
+                v-if="!isMade(line)"
                 type="button"
                 class="exp__line-delete"
                 :data-test="`expenses-delete-${line.id}`"
@@ -299,8 +339,8 @@ function openPattern(line) {
                 type="button"
                 class="exp__line-open"
                 :data-test="`expenses-open-${line.id}`"
-                :aria-label="t('expenses.tagPattern')"
-                @click="openPattern(line)"
+                :aria-label="isTool(line) ? t('expenses.tagTool') : t('expenses.tagPattern')"
+                @click="openMade(line)"
               >
                 <AppIcon name="chevronRight" :size="16" />
               </button>

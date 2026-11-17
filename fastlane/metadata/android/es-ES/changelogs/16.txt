@@ -1,0 +1,6 @@
+Nueva pantalla «Mis herramientas»: agujas, ganchos y kits intercambiables (tallas, cables), con fotos y precio.
+Vincula herramientas a un proyecto, o una talla y un cable de un kit; se avisa si falta una talla.
+Pausa de un proyecto: libera sus herramientas para otro y retómalas después.
+Herramientas compradas en Gastos; exporta el stock a una hoja de cálculo.
+Proyecto terminado: botón Cancelar y ovillos corregibles después.
+Tras una actualización, una ventana presenta las novedades.

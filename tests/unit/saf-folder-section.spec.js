@@ -34,6 +34,7 @@ const dbApi = vi.hoisted(() => ({
     projects: { count: vi.fn() },
     patterns: { filter: vi.fn() },
     yarns: { count: vi.fn() },
+    tools: { count: vi.fn() },
   },
 }))
 vi.mock('@/db/db', () => dbApi)
@@ -812,6 +813,7 @@ describe('SafFolderSection', () => {
       dbApi.db.projects.count.mockResolvedValue(3)
       dbApi.db.patterns.filter.mockReturnValue({ count: vi.fn().mockResolvedValue(5) })
       dbApi.db.yarns.count.mockResolvedValue(7)
+      dbApi.db.tools.count.mockResolvedValue(2)
     })
 
     it('fiche de CET appareil : origine, décomptes des deux côtés, et le conseil', async () => {
@@ -844,6 +846,38 @@ describe('SafFolderSection', () => {
       expect(device).toContain('3 projets')
       expect(device).toContain('5 patrons')
       expect(device).toContain('7 laines')
+    })
+
+    it('manifeste avec `outils` : la ligne du dossier le dit, et celle de l\'appareil aussi', async () => {
+      manifestApi.readManifest.mockResolvedValue({
+        state: 'ok',
+        manifest: {
+          appareil: 'moi',
+          ecritLe: '2026-08-06T05:15:18.402Z',
+          contenu: { projets: 2, patrons: 3, laines: 4, outils: 5 },
+        },
+      })
+      const w = mountIt()
+      await flushPromises()
+      expect(w.find('[data-test="side-folder"]').element.textContent).toContain('5 outils')
+      expect(w.find('[data-test="side-device"]').element.textContent).toContain('2 outils')
+    })
+
+    it('ancien manifeste SANS `outils` : la ligne du dossier reste inchangée', async () => {
+      manifestApi.readManifest.mockResolvedValue({
+        state: 'ok',
+        manifest: {
+          appareil: 'moi',
+          ecritLe: '2026-08-06T05:15:18.402Z',
+          contenu: { projets: 2, patrons: 3, laines: 4 },
+        },
+      })
+      const w = mountIt()
+      await flushPromises()
+      const folder = w.find('[data-test="side-folder"]').element.textContent
+      expect(folder).toContain('4 laines')
+      expect(folder).not.toContain('outils')
+      expect(folder).not.toContain('undefined')
     })
 
     it('fiche ABSENTE : aucun conseil, et AUCUN décompte côté dossier', async () => {

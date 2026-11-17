@@ -9,6 +9,9 @@ import { useSettingsStore } from '@/stores/settings'
 import { useTrashStore } from '@/stores/trash'
 import { useProjectsStore } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
+import { useToolsStore } from '@/stores/tools'
+import { hasPrice } from '@/utils/price-currency'
+import { isPricedPattern } from '@/utils/pattern-price'
 import { usePurchasesStore } from '@/stores/purchases'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -18,7 +21,7 @@ import { CURRENCIES } from '@/constants/currencies'
 import { currencySymbol } from '@/utils/units'
 import { toCsv, downloadCsv } from '@/utils/csv'
 import { yarnExportTable } from '@/utils/yarn-filter'
-import { projectExportTable, patternExportTable } from '@/utils/export-tables'
+import { projectExportTable, patternExportTable, toolExportTable } from '@/utils/export-tables'
 import SafFolderSection from '@/components/settings/SafFolderSection.vue'
 import { KOFI_URL, GITHUB_ISSUES_URL, feedbackUrlFor } from '@/constants/app-links'
 import { applyTheme, applyAccent, syncNativeChrome } from '@/theme/apply'
@@ -70,6 +73,7 @@ function setAccentHue(hue) {
 const trash = useTrashStore()
 const projectsStore = useProjectsStore()
 const yarnsStore = useYarnsStore()
+const toolsStore = useToolsStore()
 const purchasesStore = usePurchasesStore()
 const patternsStore = usePatternsStore()
 const snackbar = useSnackbarStore()
@@ -216,12 +220,16 @@ const currencyOptions = computed(() =>
   CURRENCIES.map((c) => ({ code: c, label: `${c} (${currencySymbol(c, settings.locale)})` })),
 )
 function hasAnyPrice() {
-  return yarnsStore.yarns.some((y) => String(y.price ?? '').trim() !== '')
+  return yarnsStore.yarns.some((y) => hasPrice(y.price))
+    || toolsStore.tools.some((x) => hasPrice(x.price))
+    || patternsStore.patterns.some(isPricedPattern)
 }
 async function onCurrencyChange(e) {
   const next = e.target.value
   if (next === settings.currency) return
   if (!yarnsStore.loaded) await yarnsStore.load()
+  if (!toolsStore.loaded) await toolsStore.load()
+  if (!patternsStore.loaded) await patternsStore.load()
   if (hasAnyPrice()) {
     pendingCurrency.value = next
     return
@@ -290,6 +298,13 @@ async function exportPatterns() {
   if (!patternsStore.loaded) await patternsStore.load()
   const { head, rows } = patternExportTable(patternsStore.libraryPatterns, { t })
   downloadCsv(`rowtine-patrons-${today()}.csv`, toCsv(head, rows))
+  snackbar.show(t('settings.exportDone'))
+}
+
+async function exportTools() {
+  if (!toolsStore.loaded) await toolsStore.load()
+  const { head, rows } = toolExportTable(toolsStore.tools, { t, locale: settings.locale })
+  downloadCsv(`rowtine-outils-${today()}.csv`, toCsv(head, rows))
   snackbar.show(t('settings.exportDone'))
 }
 
@@ -532,6 +547,7 @@ function fmtDate(iso) {
         <button class="btn" @click="exportYarns">{{ t('nav.stash') }}</button>
         <button class="btn" @click="exportProjects">{{ t('settings.exportProjects') }}</button>
         <button class="btn" @click="exportPatterns">{{ t('nav.library') }}</button>
+        <button class="btn" data-test="export-tools" @click="exportTools">{{ t('nav.tools') }}</button>
       </div>
 
       <button class="trash-toggle mt2" @click="showTrash = !showTrash">

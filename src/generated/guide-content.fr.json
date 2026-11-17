@@ -104,7 +104,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Le chrono enregistre tes sessions, l'onglet Photos garde les images du patron et tes propres photos, les statistiques résument ton activité sur le projet, et un badge se partage en un geste. Voir les chapitres 2 et 7.",
+              "text": "Le chrono enregistre tes sessions, l'onglet Photos garde les images du patron et tes propres photos, les statistiques résument ton activité sur le projet, et un badge se partage en un geste. Voir les chapitres 2 et 8.",
               "bold": false,
               "italic": false
             }
@@ -406,7 +406,7 @@
                   "italic": false
                 },
                 {
-                  "text": " mène à tout moment au stock de laines, à la bibliothèque de patrons, aux statistiques, ",
+                  "text": " mène à tout moment au stock de laines, à tes outils, à la bibliothèque de patrons, aux statistiques, ",
                   "bold": false,
                   "italic": false
                 },
@@ -1582,7 +1582,7 @@
               "italic": false
             },
             {
-              "text": " des outils (point 6).",
+              "text": " des outils (point 7).",
               "bold": false,
               "italic": false
             }
@@ -2301,7 +2301,7 @@
               "italic": false
             },
             {
-              "text": " (point 7) profite lui aussi de la place : sa grille calendaire et ses tuiles chiffrées s'étalent au lieu de se serrer, et sur les fenêtres les plus longues, Semestre ou Année, tu vois bien plus de semaines avant d'avoir à faire glisser la grille du doigt. Rien de plus à régler : c'est le même écran, simplement plus à l'aise.",
+              "text": " (point 8) profite lui aussi de la place : sa grille calendaire et ses tuiles chiffrées s'étalent au lieu de se serrer, et sur les fenêtres les plus longues, Semestre ou Année, tu vois bien plus de semaines avant d'avoir à faire glisser la grille du doigt. Rien de plus à régler : c'est le même écran, simplement plus à l'aise.",
               "bold": false,
               "italic": false
             }
@@ -4172,6 +4172,71 @@
             {
               "spans": [
                 {
+                  "text": "Terminer un projet, et corriger après coup",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : dans la fenêtre de fin de projet, tu peux indiquer plus de pelotes que prévu au départ, dans la limite de ce qui est ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "disponible",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " pour la laine (son stock, moins les pelotes réservées à d'autres projets). Au-dessus, l'app te le dit, garde le maximum et te propose ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Corriger le stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", qui ouvre la fiche de la laine. Le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Annuler",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (comme la croix, un appui à côté ou le retour) ferme la fenêtre sans rien consommer : le projet garde son statut, tu peux revenir le terminer plus tard. Une fois le projet terminé ou abandonné, le bloc ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Pelotes tricotées",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " de son écran ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Modifier",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " te laisse corriger ces quantités ; le stock de la laine suit, en plus ou en moins, sans jamais compter deux fois.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "La fiche d'une laine",
                   "bold": true,
                   "italic": false
@@ -4492,12 +4557,22 @@
               "italic": false
             },
             {
-              "text": " comme les ",
+              "text": ", les ",
               "bold": false,
               "italic": false
             },
             {
               "text": "patrons",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " et les ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "outils",
               "bold": true,
               "italic": false
             },
@@ -4545,7 +4620,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", qui suit ce qu'il te reste et baisse quand tu utilises une pelote. Tant que tu n'as noté aucun prix de patron, ce total reste exactement celui que tu connais ; dès qu'un patron y figure, il se ventile en deux sous-lignes : ce qui est parti en laine, ce qui est parti en patrons.",
+                  "text": ", qui suit ce qu'il te reste et baisse quand tu utilises une pelote. Tant que tu n'as noté aucun prix de patron ni d'outil, ce total reste exactement celui que tu connais ; dès qu'un patron ou un outil y figure, il se ventile en une sous-ligne par catégorie présente : ce qui est parti en laine, en patrons, en outils.",
                   "bold": false,
                   "italic": false
                 }
@@ -4595,7 +4670,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", laine et patrons mêlés dans l'ordre du calendrier : tu vois d'un coup d'œil ce qu'un mois t'a coûté.",
+                  "text": ", laine, patrons et outils mêlés dans l'ordre du calendrier : tu vois d'un coup d'œil ce qu'un mois t'a coûté.",
                   "bold": false,
                   "italic": false
                 }
@@ -4605,7 +4680,7 @@
             {
               "spans": [
                 {
-                  "text": "Dès qu'un patron figure dans la liste, chaque ligne porte en plus son étiquette, ",
+                  "text": "Dès qu'un patron ou un outil figure dans la liste, chaque ligne porte en plus son étiquette, ",
                   "bold": false,
                   "italic": false
                 },
@@ -4615,7 +4690,7 @@
                   "italic": false
                 },
                 {
-                  "text": " ou ",
+                  "text": ", ",
                   "bold": false,
                   "italic": false
                 },
@@ -4625,7 +4700,17 @@
                   "italic": false
                 },
                 {
-                  "text": ". Un patron que tu as déclaré gratuit apparaît avec la mention ",
+                  "text": " ou ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Outil",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Un patron ou un outil que tu as déclaré gratuit apparaît avec la mention ",
                   "bold": false,
                   "italic": false
                 },
@@ -4685,7 +4770,7 @@
                   "italic": false
                 },
                 {
-                  "text": " juste après si c'était une erreur. Une ligne de patron, elle, se modifie depuis la fiche du patron : un appui dessus t'y emmène.",
+                  "text": " juste après si c'était une erreur. Une ligne de patron ou d'outil, elle, se modifie depuis la fiche du patron ou de l'outil : un appui dessus t'y emmène.",
                   "bold": false,
                   "italic": false
                 }
@@ -4708,7 +4793,7 @@
               "italic": false
             },
             {
-              "text": " : un achat de laine survit à la suppression de sa fiche et reste visible ici. Le prix d'un patron, lui, appartient au patron : si tu > supprimes le patron, sa dépense s'en va avec lui.",
+              "text": " : un achat de laine survit à la suppression de sa fiche et reste visible ici. Le prix d'un patron, lui, appartient au patron : si tu > supprimes le patron, sa dépense s'en va avec lui. Tes outils avec un prix y figurent aussi, rangés sous « Outils » : pour corriger ou effacer le prix, ouvre la fiche de l'outil.",
               "bold": false,
               "italic": false
             }
@@ -4720,7 +4805,520 @@
       "id": "section-6",
       "title": [
         {
-          "text": "6. Outils indépendants",
+          "text": "6. Tes outils : aiguilles et crochets",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "L'écran ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Mes outils",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", dans le menu juste après le stock de laine, range tes aiguilles et tes crochets. Avant d'acheter une paire ou de commencer un patron, tu vois d'un coup d'œil si tu as déjà la bonne taille.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Ajouter un outil",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ajouter un outil",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre le formulaire. Tu choisis d'abord le type, dans trois familles : ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Aiguilles",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Aiguilles droites, Circulaires, Double pointes, Aiguilles flexibles, Pointes interchangeables, Câble, Autre aiguille), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Kits",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Kit interchangeable, Kit de crochets) et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Crochets",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Crochet, Crochet tunisien). Ensuite, seuls les champs utiles à ce type s'affichent : la longueur pour une circulaire, le nombre d'aiguilles pour des double pointes, le manche pour un crochet, la forme (fixe ou à câble) pour un crochet tunisien.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "En dehors du type, seule la taille est obligatoire",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", et seulement pour les types qui en ont une : elle est facultative pour une Autre aiguille, et un Câble n'en a pas. Tu la choisis dans la liste, où chaque taille en millimètres porte son équivalent américain quand il existe. Pour un crochet, la liste va des tailles fines (0,6 mm) jusqu'à 25 mm, et c'est la matière qui choisit l'équivalent : en ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "acier inoxydable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", le numéro des crochets acier (2,25 mm · US 2) ; sinon, la lettre (2,25 mm · B-1). Si la tienne n'y est pas, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Autre taille…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " te laisse la taper en mm. Tout le reste est facultatif : matière, marque, gamme, quantité, date d'achat, prix, boutique, rangement, état (Disponible, Prêté, Perdu, Abîmé, À remplacer), notes et photos.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Le kit interchangeable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " tient sur une seule fiche. Dans ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Tailles présentes",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", tu coches les tailles des pointes qu'il contient ; dans ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Câbles présents",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", les longueurs de ses câbles. Si deux câbles de même longueur n'ont pas la même fixation (S, L ou Mini), choisis d'abord le ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Diamètre de la fixation",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", puis coche les longueurs : 80 cm S et 80 cm L restent deux câbles distincts, et la fiche du kit les compte à part. Sa fiche affiche ensuite le ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Contenu du kit",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Le kit de crochets",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " marche pareil : tu coches les tailles de ses crochets, dans l'échelle des crochets (4 mm · G-6). Coche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Crochets tunisiens interchangeables",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " pour y ajouter les câbles ; sans cette case, le kit n'a pas de câbles. Pour la taille manquante d'un projet, un kit de crochets compte pour le crochet seulement, un kit d'aiguilles pour le tricot seulement. Sous une taille, il s'affiche comme « crochets du kit ».",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Par type ou par taille",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : deux boutons en haut de l'écran changent la présentation. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Par type",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " range tes outils par famille (Aiguilles, Kits, Crochets), puis par type. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Par taille",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " les regroupe taille par taille, toutes familles mêlées ; les câbles seuls et les outils sans taille viennent en dernier. Un kit apparaît sous chacune de ses tailles, avec une ligne comme « pointes du kit KnitPro » : tu sais tout de suite que ta pointe de 4 mm est dans le kit. L'app retient ton choix sur cet appareil.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Les pastilles de taille",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : sous ces deux boutons, une pastille par taille que tu possèdes. Touche une pastille pour n'afficher que les outils de cette taille ; touche-la à nouveau pour retirer le filtre. Le champ de recherche, juste en dessous, cherche dans la marque, la gamme, les notes et le rangement. Si rien ne correspond, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Effacer la recherche et la taille",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " remet tout.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "La fiche d'un outil",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : un appui sur un outil l'ouvre. Elle rassemble tout ce que tu as noté et tes photos ; un appui sur l'étoile choisit la photo de couverture. Dans la liste, chaque outil s'affiche sur deux lignes : la première commence par la marque et la gamme, puis la taille ; la seconde donne le type, la longueur, la matière, le nombre s'il y en a plusieurs, et finit toujours par l'état (disponible, prêté, perdu…), pour qu'une aiguille prêtée ou perdue ne te trompe pas.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Modifier, dupliquer ou supprimer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " un outil depuis le menu ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Actions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (icône verticale à trois points) en haut de sa fiche. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Dupliquer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre le formulaire déjà rempli, avec tout sauf les photos : pratique pour la même aiguille dans une autre taille. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Supprimer",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " envoie l'outil à la corbeille. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Annuler",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", juste après, le remet en place, et la corbeille des réglages le garde jusqu'à ce que tu la vides.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tes outils suivent ta sauvegarde",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : ils sont copiés dans le dossier {app} avec tout le reste, et leurs photos dans un sous-dossier ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Une restauration te les rend tels quels.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Export en tableur",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : le bouton ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mes outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", dans la section export des Réglages, sort ton stock d'outils en tableur (CSV), comme celui de ta laine. Chaque fiche y tient sur une ligne, avec son équivalent de taille, son prix et sa devise.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Taille absente de ton stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : sur la fiche d'un projet, sous la tuile Aiguilles (ou Crochet), une ligne discrète signale chaque taille demandée qui n'est pas dans tes outils. Elle n'apparaît que si tu as déjà au moins un outil.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Lier tes outils à un projet",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : sur la fiche d'un projet, onglet ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Détails",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", la tuile ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mes outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " liste les outils que tu y as liés, et ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Choisir des outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ouvre la liste à cocher, avec d'abord ceux aux tailles du projet. Un outil lié à un projet En cours porte « en cours : » suivi du nom du projet dans ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mes outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " et dans la liste à cocher, et sa fiche nomme les projets qui l'utilisent. Comme la mention de taille, la tuile n'apparaît que si tu as au moins un outil. Quand tu mets un projet en pause, l'appli te propose de libérer ses outils pour un autre projet ; à la reprise, elle te propose de reprendre ceux qui sont encore libres.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Prendre une taille dans un kit",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : dans la liste à cocher, un kit n'a pas de case à lui, il se déplie en ses tailles, celles du projet d'abord. Coche la taille que tu prends ; si le kit a des câbles, choisis aussi le câble, ou ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "aucun câble",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Seule cette taille est occupée, pas tout le kit : dans ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Mes outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", la ligne du kit dit « en cours : 4 mm (Bonnet) » ou « disponible ». Une taille ou un câble déjà pris par un autre projet En cours reste cochable, avec la mention « pris : » suivie du nom du projet, pour déplacer une pointe d'un projet à l'autre. La fiche du kit nomme le projet de chaque taille prise et compte les câbles pris (« 80 cm ×2, 1 pris (Bonnet) ») ; la tuile du projet affiche « KnitPro Zing · 4 mm + 80 cm ». Un kit lié en entier avant cette version garde sa case ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Kit entier (lien d’avant)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : décoche-la, ou coche une taille pour la remplacer.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Tant que tu n'as aucun outil, l'écran montre une ligne d'exemple, une circulaire de 4 mm en bambou : elle n'est jamais enregistrée.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. Outils indépendants",
           "bold": false,
           "italic": false
         }
@@ -4951,10 +5549,10 @@
       ]
     },
     {
-      "id": "section-7",
+      "id": "section-8",
       "title": [
         {
-          "text": "7. Statistiques",
+          "text": "8. Statistiques",
           "bold": false,
           "italic": false
         }
@@ -5124,7 +5722,7 @@
               "italic": false
             },
             {
-              "text": " affiche une case par jour, du premier jour de ta semaine (en haut) au dernier (en bas), sur toute la fenêtre choisie ; ce premier jour est lundi par défaut, ou dimanche si tu l'as choisi dans les Réglages (§8). Sa couleur suit la teinte d'accent choisie dans les réglages (§8), et son intensité dépend du temps tricoté ce jour-là, à cinq niveaux : rien, moins de 30 minutes, de 30 minutes à 1 heure, de 1 à 2 heures, 2 heures et plus. Les seuils sont ",
+              "text": " affiche une case par jour, du premier jour de ta semaine (en haut) au dernier (en bas), sur toute la fenêtre choisie ; ce premier jour est lundi par défaut, ou dimanche si tu l'as choisi dans les Réglages (§9). Sa couleur suit la teinte d'accent choisie dans les réglages (§9), et son intensité dépend du temps tricoté ce jour-là, à cinq niveaux : rien, moins de 30 minutes, de 30 minutes à 1 heure, de 1 à 2 heures, 2 heures et plus. Les seuils sont ",
               "bold": false,
               "italic": false
             },
@@ -5215,10 +5813,10 @@
       ]
     },
     {
-      "id": "section-8",
+      "id": "section-9",
       "title": [
         {
-          "text": "8. Réglages",
+          "text": "9. Réglages",
           "bold": false,
           "italic": false
         }
@@ -5288,7 +5886,7 @@
                   "italic": false
                 },
                 {
-                  "text": " et change d'elle-même avec le mode clair ou sombre ; dès que tu choisis, ton choix prime et reste le même dans les deux modes. Cette teinte colore les boutons, les sélections, les barres de progression et la grille des statistiques (§7).",
+                  "text": " et change d'elle-même avec le mode clair ou sombre ; dès que tu choisis, ton choix prime et reste le même dans les deux modes. Cette teinte colore les boutons, les sélections, les barres de progression et la grille des statistiques (§8).",
                   "bold": false,
                   "italic": false
                 }
@@ -5374,17 +5972,27 @@
                         "italic": false
                       },
                       {
-                        "text": " parmi cinq (€, $, £, CHF, $ CA). Attention, c'est une simple étiquette : les prix déjà saisis ",
+                        "text": " parmi cinq (€, $, £, CHF, $ CA). Elle s'applique aux prix que tu saisis ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "ne sont pas convertis",
+                        "text": "ensuite",
                         "bold": true,
                         "italic": false
                       },
                       {
-                        "text": " et s'affichent avec l'autre symbole ; l'app te le rappelle avant de valider.",
+                        "text": " : chaque prix garde la devise dans laquelle tu l'as noté, ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "rien n'est converti",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " ; l'app te le rappelle avant de valider.",
                         "bold": false,
                         "italic": false
                       }
@@ -5433,7 +6041,7 @@
                   {
                     "spans": [
                       {
-                        "text": "Export de ton stock, de tes projets ou de tes patrons en tableur (CSV), pour les consulter ou les sauvegarder ailleurs. Les colonnes suivent tes réglages : longueurs et poids dans ton système d'unités, prix avec le symbole de ta devise.",
+                        "text": "Export de ton stock, de tes projets ou de tes patrons en tableur (CSV), pour les consulter ou les sauvegarder ailleurs. Les colonnes suivent tes réglages : longueurs et poids dans ton système d'unités, prix suivis de leur devise dans une colonne à part (chaque prix garde la sienne).",
                         "bold": false,
                         "italic": false
                       }
@@ -5448,7 +6056,7 @@
                         "italic": false
                       },
                       {
-                        "text": " universelle : tout projet, laine ou patron supprimé s'y retrouve et peut être restauré à tout moment (jusqu'à vidage volontaire).",
+                        "text": " universelle : tout projet, laine, outil ou patron supprimé s'y retrouve et peut être restauré à tout moment (jusqu'à vidage volontaire).",
                         "bold": false,
                         "italic": false
                       }
@@ -5868,10 +6476,10 @@
       ]
     },
     {
-      "id": "section-9",
+      "id": "section-10",
       "title": [
         {
-          "text": "9. Sous le capot : ce que {app} te garantit",
+          "text": "10. Sous le capot : ce que {app} te garantit",
           "bold": false,
           "italic": false
         }
@@ -5965,6 +6573,21 @@
                 },
                 {
                   "text": " : depuis l'écran À propos, elle dit où vivent tes données, ce qui peut sortir de ton téléphone et dans quels cas, ce qu'il advient si tu désinstalles l'app, et qui en répond : le responsable et l'adresse de contact y sont nommés. Elle est écrite dans ta langue.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Les nouveautés, une seule fois",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " : après une mise à jour, une fenêtre te résume les nouveautés de la dernière version, une seule fois par version. « Compris » la referme, « Tout voir » ouvre l'écran À propos, où tu retrouves le journal de toutes les versions. Une installation neuve ne l'affiche pas. L'app se souvient de la dernière version que tu as vue sur cet appareil, mais pas dans la sauvegarde.",
                   "bold": false,
                   "italic": false
                 }

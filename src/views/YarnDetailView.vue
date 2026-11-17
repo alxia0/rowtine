@@ -17,7 +17,8 @@ import { useSmartBack } from '@/composables/useSmartBack'
 import { useCropperStore } from '@/stores/cropper'
 import { useLightboxStore } from '@/stores/lightbox'
 import { pickAndCropImage } from '@/utils/photo'
-import { photosOf, coverPhotoOf } from '@/utils/yarn-photos'
+import { priceCurrencyOf } from '@/utils/price-currency'
+import { photosOf, coverPhotoOf, coverIndexAfterRemoval } from '@/utils/yarn-photos'
 import { formatLength, formatWeight, formatAmount, formatSkeins, currencySymbol } from '@/utils/units'
 import { formatLocalDate } from '@/utils/date-format'
 import { parseDecimal } from '@/utils/decimal'
@@ -68,7 +69,7 @@ const purchaseLines = computed(() => purchasesStore.forYarn(yarn.value?.id) || [
 const rows = computed(() => {
   const y = yarn.value || {}
   const out = []
-  const push = (labelKey, value) => { if (value !== '' && value != null && !(Array.isArray(value) && !value.length)) out.push({ labelKey, value }) }
+  const push = (labelKey, value, symbol = settings.currency) => { if (value !== '' && value != null && !(Array.isArray(value) && !value.length)) out.push({ labelKey, value, symbol }) }
   push('yarn.brand', y.brand)
   push('yarn.model', y.model)
   push('yarn.colorName', y.colorName)
@@ -87,7 +88,7 @@ const rows = computed(() => {
   push('yarn.quantity', y.quantity !== '' && y.quantity != null ? formatSkeins(y.quantity, { locale: locale.value }) : '')
   // Une saisie illisible comme nombre reste affichée telle quelle (jamais perdre d'info).
   const priceOk = y.price !== '' && y.price != null && Number.isFinite(parseDecimal(y.price))
-  push('yarn.priceWithSymbol', priceOk ? formatAmount(y.price, { locale: locale.value }) : y.price)
+  push('yarn.priceWithSymbol', priceOk ? formatAmount(y.price, { locale: locale.value }) : y.price, priceCurrencyOf(y, settings.currency))
   const lines = purchaseLines.value
   if (lines.length) {
     push('yarn.purchasesCount', lines.length)
@@ -128,11 +129,6 @@ async function addPhoto() {
   // cf. src/utils/yarn-photos.js) continuerait de le lire en plus de la galerie fraîchement
   // écrite. Toute écriture de galerie doit désormais purger ce champ hérité.
   await yarnsStore.update(yarn.value.id, { photos: [...photos.value, dataUrl], photo: '' })
-}
-function coverIndexAfterRemoval(idx, ci) {
-  if (idx === ci) return 0
-  if (idx < ci) return ci - 1
-  return ci
 }
 async function removePhoto(idx) {
   if (!yarn.value) return
@@ -202,7 +198,7 @@ async function remove() {
     <main class="screen">
       <dl class="ydet__list">
         <template v-for="r in rows" :key="r.labelKey">
-          <dt class="ydet__dt">{{ t(r.labelKey, { symbol: currencySymbol(settings.currency, locale) }) }}</dt>
+          <dt class="ydet__dt">{{ t(r.labelKey, { symbol: currencySymbol(r.symbol, locale) }) }}</dt>
           <dd class="ydet__dd">{{ r.value }}</dd>
         </template>
       </dl>

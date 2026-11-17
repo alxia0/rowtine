@@ -5,6 +5,7 @@ import {
   serializeProject,
   serializePattern,
   serializeYarns,
+  serializeTools,
   serializeIndependentCounters,
   serializeSettings,
 } from '@/backup/serialize'
@@ -503,5 +504,26 @@ describe('PDF non-base64 : symétrie avec isInlineDataUrl (photos/galerie)', () 
     const filesByName = {}
     const restored = deserializePattern(JSON.parse(patronJsonFile.data), filesByName)
     expect(restored.pdf).toBe(pattern.pdf)
+  })
+})
+
+describe('serializeTools', () => {
+  it('externalise les photos dans Outils/ et publie outils.json en dernier', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo='
+    const { files, photoNames } = serializeTools([{ id: 1, type: 'circular', photos: [png] }])
+    expect(files.at(-1).path).toBe('outils.json')
+    expect(files[0].path).toMatch(/^Outils\/outil-photo-/)
+    expect(JSON.parse(files.at(-1).data)[0].photos).toEqual([photoNames[0]])
+  })
+
+  it("une photo partagée par deux outils n'est écrite qu'une fois, un outil sans galerie n'en gagne pas", () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo='
+    const { files } = serializeTools([
+      { id: 1, photos: [png] },
+      { id: 2, photos: [png] },
+      { id: 3, type: 'standard' },
+    ])
+    expect(files.filter((f) => f.path.startsWith('Outils/'))).toHaveLength(1)
+    expect('photos' in JSON.parse(files.at(-1).data)[2]).toBe(false)
   })
 })

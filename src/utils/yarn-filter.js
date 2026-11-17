@@ -5,7 +5,8 @@ import { YARN_WEIGHTS } from '@/constants/catalog'
 import { reservedTotal } from '@/utils/yarn-usage'
 import { compositionToText, normalizeComposition } from '@/constants/compositions'
 import { COLOR_PALETTE, isCustomColor } from '@/constants/swatch'
-import { M_PER_YD, currencySymbol } from '@/utils/units'
+import { M_PER_YD } from '@/utils/units'
+import { hasPrice, priceCurrencyOf } from '@/utils/price-currency'
 import { parseDecimal } from '@/utils/decimal'
 import { latestPurchaseDate, bainsOf } from '@/utils/purchases'
 import { normalizeLabels, orderedLabels } from '@/constants/yarn-labels'
@@ -217,8 +218,8 @@ function exportSkeins(n, locale) {
 // construit ses propres en-têtes — sans ce passage explicite depuis l'appelant
 // (SettingsView::exportYarns), il resterait silencieusement en métrique/euro quels que
 // soient les réglages réels. La longueur est CONVERTIE (unité réelle, réversible) ; le prix
-// n'est JAMAIS converti (la devise n'est qu'une étiquette, cf. src/utils/units.js) — seul
-// son en-tête change pour porter le symbole choisi.
+// n'est JAMAIS converti (la devise n'est qu'une étiquette, cf. src/utils/units.js) — elle sort
+// dans sa propre colonne « Devise » (code ISO), `currency` servant de repli aux laines sans devise.
 //
 // `linesFor(yarnId)` (les travaux sur le budget) : bain et date d'achat viennent désormais du
 // registre d'achats, pas des champs `yarn.bain`/`yarn.purchasedAt` (retirés du formulaire
@@ -232,12 +233,10 @@ export function yarnExportTable(yarns, { t, system, currency, locale, linesFor }
   // parenthèses — « Métrage » en mètres, mais « Longueur » en yards (asymétrie du texte
   // existant, conservée telle quelle).
   const lengthHeader = system === 'imperial' ? t('settings.export.yarn.lengthYd') : t('settings.export.yarn.lengthM')
-  const priceSymbol = currency ? currencySymbol(currency, locale) : ''
-  const priceHeader = priceSymbol ? `${t('settings.export.yarn.price')} (${priceSymbol})` : t('settings.export.yarn.price')
   const head = [
     t('settings.export.yarn.brand'), t('settings.export.yarn.model'), t('settings.export.yarn.color'),
     t('settings.export.yarn.colorType'), t('settings.export.yarn.colorNotes'), t('settings.export.yarn.weight'),
-    lengthHeader, t('settings.export.yarn.quantity'), priceHeader, t('settings.export.yarn.usedSkeins'),
+    lengthHeader, t('settings.export.yarn.quantity'), t('settings.export.yarn.price'), t('settings.export.yarn.currency'), t('settings.export.yarn.usedSkeins'),
     t('settings.export.yarn.dyeLot'), t('settings.export.yarn.purchaseDate'), t('settings.export.yarn.composition'),
     t('settings.export.yarn.labels'), t('settings.export.yarn.swatches'),
   ]
@@ -247,6 +246,9 @@ export function yarnExportTable(yarns, { t, system, currency, locale, linesFor }
       y.brand, y.model || '', y.colorName, t(`yarn.colorTypes.${y.colorType || 'uni'}`), y.colorNotes || '',
       y.weight ? t(`yarn.weights.${y.weight}`) : '',
       exportLength(y.lengthM, system, locale), exportSkeins(y.quantity, locale), y.price,
+      // Devise : le code ISO d'un prix déclaré (0 compris), vide sans prix. Le prix lui-même
+      // n'est jamais converti.
+      hasPrice(y.price) ? priceCurrencyOf(y, currency) : '',
       reservedTotal(y) ? exportSkeins(reservedTotal(y), locale) : '', bainsOf(lines), latestPurchaseDate(lines),
       compositionToText(y.composition),
       // Ordre canonique (YARN_LABELS), pas l'ordre de cochage — même helper que la fiche

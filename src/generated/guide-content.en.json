@@ -104,7 +104,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "The timer logs your sessions, the Photos tab keeps the pattern's images and your own photos, statistics sum up your activity on the project, and a badge is shared in one tap. See chapters 2 and 7.",
+              "text": "The timer logs your sessions, the Photos tab keeps the pattern's images and your own photos, statistics sum up your activity on the project, and a badge is shared in one tap. See chapters 2 and 8.",
               "bold": false,
               "italic": false
             }
@@ -401,7 +401,7 @@
                   "italic": false
                 },
                 {
-                  "text": " takes you at any time to your yarn stash, your pattern library, the statistics, ",
+                  "text": " takes you at any time to your yarn stash, your tools, your pattern library, the statistics, ",
                   "bold": false,
                   "italic": false
                 },
@@ -1577,7 +1577,7 @@
               "italic": false
             },
             {
-              "text": " tile among the tools (point 6).",
+              "text": " tile among the tools (point 7).",
               "bold": false,
               "italic": false
             }
@@ -2296,7 +2296,7 @@
               "italic": false
             },
             {
-              "text": " screen (point 7) makes use of the space too: its calendar grid and its number tiles spread out instead of squeezing together, and on the longest windows, Half-year or Year, you see far more weeks before you have to drag the grid sideways. There is nothing extra to set: it's the same screen, just more comfortable.",
+              "text": " screen (point 8) makes use of the space too: its calendar grid and its number tiles spread out instead of squeezing together, and on the longest windows, Half-year or Year, you see far more weeks before you have to drag the grid sideways. There is nothing extra to set: it's the same screen, just more comfortable.",
               "bold": false,
               "italic": false
             }
@@ -4167,6 +4167,71 @@
             {
               "spans": [
                 {
+                  "text": "Finishing a project, and correcting afterwards",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": in the window that opens when you finish a project, you can enter more skeins than planned at the start, within what is ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "available",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " for the yarn (its stock, minus the skeins reserved for other projects). Above that, the app tells you, keeps the maximum and offers ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Fix the stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", which opens the yarn's page. The ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Cancel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button (like the cross, a tap outside or Back) closes the window without using anything: the project keeps its status, and you can come back and finish it later. Once the project is finished or abandoned, the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Skeins knitted",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " block on its ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Edit",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " screen lets you correct these quantities; the yarn's stock follows, up or down, without ever counting twice.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "A yarn's page",
                   "bold": true,
                   "italic": false
@@ -4487,12 +4552,22 @@
               "italic": false
             },
             {
-              "text": " and ",
+              "text": ", ",
               "bold": false,
               "italic": false
             },
             {
               "text": "patterns",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " and ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "tools",
               "bold": true,
               "italic": false
             },
@@ -4540,7 +4615,7 @@
                   "italic": false
                 },
                 {
-                  "text": " screen, which tracks what you have left and drops when you use a skein. As long as you haven't noted any pattern price, this total stays exactly as you know it; as soon as a pattern shows up in it, it breaks down into two sub-lines: what went to yarn, what went to patterns.",
+                  "text": " screen, which tracks what you have left and drops when you use a skein. As long as you haven't noted any pattern or tool price, this total stays exactly as you know it; as soon as a pattern or a tool shows up in it, it breaks down into one sub-line per category present: what went to yarn, to patterns, to tools.",
                   "bold": false,
                   "italic": false
                 }
@@ -4590,7 +4665,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", yarn and patterns mixed in calendar order: you see at a glance what a given month cost you.",
+                  "text": ", yarn, patterns and tools mixed in calendar order: you see at a glance what a given month cost you.",
                   "bold": false,
                   "italic": false
                 }
@@ -4600,7 +4675,7 @@
             {
               "spans": [
                 {
-                  "text": "As soon as a pattern shows up in the list, each line also carries its label, ",
+                  "text": "As soon as a pattern or a tool shows up in the list, each line also carries its label, ",
                   "bold": false,
                   "italic": false
                 },
@@ -4610,7 +4685,7 @@
                   "italic": false
                 },
                 {
-                  "text": " or ",
+                  "text": ", ",
                   "bold": false,
                   "italic": false
                 },
@@ -4620,7 +4695,17 @@
                   "italic": false
                 },
                 {
-                  "text": ". A pattern you've declared free shows up with the ",
+                  "text": " or ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Tool",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". A pattern or a tool you've declared free shows up with the ",
                   "bold": false,
                   "italic": false
                 },
@@ -4680,7 +4765,7 @@
                   "italic": false
                 },
                 {
-                  "text": " right after in case of a mistake. A pattern line, on the other hand, is edited from the pattern's page: tapping it takes you there.",
+                  "text": " right after in case of a mistake. A pattern or tool line, on the other hand, is edited from the pattern's or tool's page: tapping it takes you there.",
                   "bold": false,
                   "italic": false
                 }
@@ -4703,7 +4788,7 @@
               "italic": false
             },
             {
-              "text": ": a yarn purchase survives the deletion of its page and > stays visible here. A pattern's price, though, belongs to the > pattern: if you delete the pattern, its expense goes with it.",
+              "text": ": a yarn purchase survives the deletion of its page and > stays visible here. A pattern's price, though, belongs to the > pattern: if you delete the pattern, its expense goes with it. Your tools > with a price show up here too, under \"Tools\": to fix or clear the price, open the tool's page.",
               "bold": false,
               "italic": false
             }
@@ -4715,7 +4800,520 @@
       "id": "section-6",
       "title": [
         {
-          "text": "6. Standalone tools",
+          "text": "6. Your tools: needles and hooks",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "The ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "My tools",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " screen, in the menu right after the yarn stash, keeps track of your needles and hooks. Before you buy a pair or cast on a new project, you can see at a glance whether you already own the right size.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Adding a tool",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Add a tool",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button opens the form. You pick the type first, from three families: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Needles",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Straight needles, Circular needles, Double-pointed needles, Flexible needles, Interchangeable tips, Cable, Other needle), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sets",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Interchangeable set, Crochet hook set) and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Hooks",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Crochet hook, Tunisian hook). After that, only the fields that matter for that type appear: the length for a circular needle, the number of needles for double-pointed needles, the handle for a hook, the style (fixed or cabled) for a Tunisian hook.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Apart from the type, only the size is required",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", and only for types that have one: it is optional for Other needle, and a Cable has none. You pick it from the list, where each size in millimetres shows its US equivalent when there is one. For a hook, the list runs from the fine sizes (0.6 mm) up to 25 mm, and the material picks the equivalent: in ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "stainless steel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the steel hook number (2.25 mm · US 2); otherwise, the letter (2.25 mm · B-1). If yours isn't listed, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Other size…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " lets you type it in mm. Everything else is optional: material, brand, line, quantity, purchase date, price, shop, where it's stored, condition (Available, Lent, Lost, Damaged, To replace), notes and photos.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "An interchangeable set",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " is a single entry. Under ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sizes included",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", tick the sizes of the tips it holds; under ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Cables included",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the lengths of its cables. If two cables of the same length have different connectors (S, L or Mini), pick the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Connector diameter",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " first, then tick the lengths: an 80 cm S and an 80 cm L stay two separate cables, and the set's page counts them apart. Its page then shows the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Set contents",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A crochet hook set",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " works the same way: you tick the sizes of its hooks, on the hook size scale (4 mm · G-6). Tick ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Interchangeable Tunisian hooks",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " to add its cables; without that box, the set has no cables. For a project's missing size, a hook set counts for crochet only, and a needle set for knitting only. Under a size, it shows as \"hooks from the set\".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "By type or by size",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": two buttons at the top of the screen switch the layout. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "By type",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " sorts your tools by family (Needles, Sets, Hooks), then by type. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "By size",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " groups them size by size, all families together; loose cables and tools without a size come last. A set shows up under each of its sizes, with a line such as \"tips from the KnitPro set\", so you know straight away that your 4 mm tip is in the set. The app remembers your choice on this device.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Size chips",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": below those two buttons, there is one chip for each size you own. Tap a chip to show only the tools in that size; tap it again to clear the filter. The search field just below looks through brand, line, notes and storage place. If nothing matches, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Clear search and size",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " brings everything back.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A tool's page",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": tap a tool to open it. It gathers everything you noted, plus your photos; tap the star to choose the cover photo. In the list, each tool takes two rows: the first starts with the brand and product line, then the size; the second gives the type, length, material, the count when there are several, and always ends with the condition (available, lent, lost…), so a lent or lost needle won't catch you out.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Edit, duplicate or delete",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " a tool from the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Actions",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " menu (vertical three-dot icon) at the top of its page. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Duplicate",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " opens the form already filled in with everything except the photos: handy for the same needle in another size. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Delete",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " moves the tool to the trash. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Undo",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", right after, puts it back, and the trash in Settings keeps it until you empty it.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Your tools are backed up",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": they are copied to the {app} folder along with everything else, and their photos go into a subfolder named ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". A restore gives them back exactly as they were.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Spreadsheet export",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "My tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " button, in the export section of Settings, exports your tool stock to a spreadsheet (CSV), just like your yarn stash. Each tool takes one row, with its size equivalent, its price and its currency.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "A size missing from your stock",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": on a project page, under the Needles (or Hook) tile, a discreet line flags each requested size that is not in your tools. It only appears once you have at least one tool.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Link your tools to a project",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": on a project page, ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Details",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " tab, the ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "My tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " tile lists the tools you linked to it, and ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Choose tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " opens the checklist, starting with those in the project's sizes. A tool linked to an In progress project shows “in use:” followed by the project's name in ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "My tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " and in the checklist, and its page names the projects that use it. Like the size note, the tile only appears once you have at least one tool. When you pause a project, the app offers to free its tools for another project; when you resume it, it offers to take back the ones that are still free.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Take one size from a set",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": in the checklist, a set has no box of its own; it unfolds into its sizes, the project's sizes first. Tick the size you take; if the set has cables, also pick a cable, or ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "no cable",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Only that size is in use, not the whole set: in ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "My tools",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", the set's row says \"in use: 4 mm (Hat)\" or \"available\". A size or cable already taken by another In progress project can still be ticked, marked \"taken:\" followed by the project's name, so you can move a tip from one project to another. The set's page names the project of each taken size and counts the taken cables (\"80 cm ×2, 1 taken (Hat)\"); the project tile shows \"KnitPro Zing · 4 mm + 80 cm\". A set linked as a whole before this version keeps its ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Whole set (earlier link)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " box: untick it, or tick a size to replace it.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Until you add your first tool, the screen shows a sample line, a 4 mm bamboo circular needle: it is never saved.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. Standalone tools",
           "bold": false,
           "italic": false
         }
@@ -4946,10 +5544,10 @@
       ]
     },
     {
-      "id": "section-7",
+      "id": "section-8",
       "title": [
         {
-          "text": "7. Statistics",
+          "text": "8. Statistics",
           "bold": false,
           "italic": false
         }
@@ -5119,7 +5717,7 @@
               "italic": false
             },
             {
-              "text": " shows one square per day, from the first day of your week (top) to the last (bottom), across the whole window you picked; that first day is Monday by default, or Sunday if you picked it in Settings (§8). Its colour follows the accent shade chosen in Settings (§8), and its intensity depends on how long you knitted or crocheted that day, on five levels: nothing, less than 30 minutes, 30 minutes to 1 hour, 1 to 2 hours, 2 hours or more. The thresholds are ",
+              "text": " shows one square per day, from the first day of your week (top) to the last (bottom), across the whole window you picked; that first day is Monday by default, or Sunday if you picked it in Settings (§9). Its colour follows the accent shade chosen in Settings (§9), and its intensity depends on how long you knitted or crocheted that day, on five levels: nothing, less than 30 minutes, 30 minutes to 1 hour, 1 to 2 hours, 2 hours or more. The thresholds are ",
               "bold": false,
               "italic": false
             },
@@ -5210,10 +5808,10 @@
       ]
     },
     {
-      "id": "section-8",
+      "id": "section-9",
       "title": [
         {
-          "text": "8. Settings",
+          "text": "9. Settings",
           "bold": false,
           "italic": false
         }
@@ -5283,7 +5881,7 @@
                   "italic": false
                 },
                 {
-                  "text": " and changes on its own with light or dark mode; as soon as you choose, your choice wins out and stays the same in both modes. That shade colours the buttons, the selections, the progress bars and the statistics grid (§7).",
+                  "text": " and changes on its own with light or dark mode; as soon as you choose, your choice wins out and stays the same in both modes. That shade colours the buttons, the selections, the progress bars and the statistics grid (§8).",
                   "bold": false,
                   "italic": false
                 }
@@ -5369,17 +5967,27 @@
                         "italic": false
                       },
                       {
-                        "text": " among five (€, $, £, CHF, CA$). Note that it's a plain label: prices you've already entered ",
+                        "text": " among five (€, $, £, CHF, CA$). It applies to the prices you enter ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "aren't converted",
+                        "text": "from then on",
                         "bold": true,
                         "italic": false
                       },
                       {
-                        "text": " and appear with the other symbol; the app warns you about this before confirming.",
+                        "text": ": each price keeps the currency you noted it in and ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "nothing is converted",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "; the app reminds you of this before confirming.",
                         "bold": false,
                         "italic": false
                       }
@@ -5428,7 +6036,7 @@
                   {
                     "spans": [
                       {
-                        "text": "Export your stash, projects or patterns to a spreadsheet (CSV), to view or back them up elsewhere. Columns follow your current settings: lengths and weights in your chosen unit system, prices with your chosen currency symbol.",
+                        "text": "Export your stash, projects or patterns to a spreadsheet (CSV), to view or back them up elsewhere. Columns follow your current settings: lengths and weights in your chosen unit system, prices followed by their currency in a column of its own (each price keeps its own).",
                         "bold": false,
                         "italic": false
                       }
@@ -5448,7 +6056,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": any project, yarn or pattern you delete ends up there and can be restored at any time (until you empty it on purpose).",
+                        "text": ": any project, yarn, tool or pattern you delete ends up there and can be restored at any time (until you empty it on purpose).",
                         "bold": false,
                         "italic": false
                       }
@@ -5868,10 +6476,10 @@
       ]
     },
     {
-      "id": "section-9",
+      "id": "section-10",
       "title": [
         {
-          "text": "9. Under the hood: what {app} guarantees you",
+          "text": "10. Under the hood: what {app} guarantees you",
           "bold": false,
           "italic": false
         }
@@ -5965,6 +6573,21 @@
                 },
                 {
                   "text": ": from the About screen, it tells you where your data lives, what may leave your phone and in which cases, what happens if you uninstall the app, and who answers for it: the person responsible and the contact address are named there. It is written in your language.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "What's new, shown once",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": after an update, a window sums up what is new in the latest version, once per version. \"Got it\" closes it, \"See everything\" opens the About screen, where you find the log of all versions. A fresh install does not show it. The app remembers the last version you saw on this device, but not in the backup.",
                   "bold": false,
                   "italic": false
                 }

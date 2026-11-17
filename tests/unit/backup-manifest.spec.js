@@ -5,7 +5,7 @@ vi.mock('@/backup/device-identity', () => ({
   deviceId: async () => 'moi-42',
   deviceName: async () => 'LYA-L29',
 }))
-const counts = { projects: 6, yarns: 31 }
+const counts = { projects: 6, yarns: 31, tools: 4 }
 // Fixtures discriminantes : le mock applique VRAIMENT le prédicat reçu, il ne renvoie pas
 // un nombre en dur. Sans ça, un prédicat inversé ou absent (ex. `filter(() => true)`)
 // laisserait le test vert — c'est le défaut réel corrigé ici après revue.
@@ -21,6 +21,7 @@ vi.mock('@/db/db', () => ({
     projects: { count: async () => counts.projects },
     patterns: { filter: (fn) => ({ count: async () => patternFixtures.filter(fn).length }) },
     yarns: { count: async () => counts.yarns },
+    tools: { count: async () => counts.tools },
   },
 }))
 
@@ -41,7 +42,7 @@ describe('backup-manifest', () => {
     expect(m.version).toBe(1)
     expect(m.appareil).toBe('moi-42')
     expect(m.modeleAppareil).toBe('LYA-L29')
-    expect(m.contenu).toEqual({ projets: 6, patrons: LIBRARY_PATTERNS_COUNT, laines: 31 })
+    expect(m.contenu).toEqual({ projets: 6, patrons: LIBRARY_PATTERNS_COUNT, laines: 31, outils: 4 })
     expect(Date.parse(m.ecritLe)).not.toBeNaN()
   })
 

@@ -8,6 +8,7 @@ import { finishedAtPatch } from '@/utils/project-finished-at'
 import { startedAtPatch } from '@/utils/project-started-at'
 import { ymdLocal } from '@/utils/time-periods'
 import { recordActiveDay } from '@/db/active-days'
+import { pruneToolIds, pruneKitPicks } from '@/utils/tool-links'
 import { createLoadGuard } from '@/stores/load-guard'
 
 // Rétro-compat aiguilles : un projet ancien porte les scalaires needleMm/needleUs ;
@@ -47,6 +48,8 @@ export function emptyProject() {
     // (renommage, taille, statut, photos, synchro). Distinct d'`updatedAt`, qui bouge à CHAQUE
     // écriture : c'est lui qui classe la tuile « Reprendre » de l'accueil. Cf. markWorked().
     lastWorkedAt: '',
+    kitPicks: [], // tailles/câbles pris dans un kit [{ toolId, sizeMm, cableCm, cableJoin }], non indexé ; absent d'un projet d'avant = []
+    toolIds: [], // outils liés (ids de db.tools), non indexé ; un projet d'avant sans le champ se lit comme []
     showTimer: true, // chrono affiché par défaut ; bascule via le chevron de la pastille/le kebab/le formulaire (spec 08/09)
   }
 }
@@ -183,15 +186,19 @@ export const useProjectsStore = defineStore('projects', () => {
     // un statut passé à 'done' par effet de bord contournerait requestStatusChange, donc le
     // dialogue des pelotes ne s'ouvrirait pas et le stock resterait faux en silence. Elle vit
     // dans ProjectEditView.save(), seul écran qui porte un champ de date de fin.
-    // Le `get` n'a lieu QUE sur un passage à 'done' : markWorked() écrit à chaque geste de
-    // progression, il ne doit pas payer une lecture de plus.
+    // Le `get` n'a lieu QUE sur un passage à 'done' ou 'abandoned' (rangement des outils
+    // mis de côté) ou sur une écriture de `lastWorkedAt` : un simple changement de statut
+    // ou un autre champ ne paie pas de lecture de plus.
     // Un seul `get` couvre les deux règles ci-dessous : les sites qui écrivent `status` et
     // `lastWorkedAt` dans le MÊME patch (rare) ne paient pas deux lectures, et surtout, un
     // appelant qui ne garde pas le tableau réactif `projects` chargé (le lecteur, qui ne lit
     // les projets que par `get()` direct — piège trouvé en test, `projects.value` y restait
     // vide) ne voit plus jamais la garde échouer en silence.
-    if (patch.status === 'done' || patch.lastWorkedAt) {
+    const finit = patch.status === 'done' || patch.status === 'abandoned'
+    if (finit || patch.lastWorkedAt) {
       const before = await db.projects.get(Number(id))
+      // Fin de vie : les outils « mis de côté » par la pause n'ont plus lieu d'être.
+      if (finit && before?.parkedTools) patch.parkedTools = null
       if (patch.status === 'done') Object.assign(patch, finishedAtPatch(before, patch, ymdLocal(new Date())) || {})
       // Première date de DÉBUT : posée au premier geste de progression si le projet n'en a
       // encore aucune — décision produit du 12/09 (une utilisatrice qui ne renseigne jamais
@@ -407,6 +414,27 @@ export const useProjectsStore = defineStore('projects', () => {
     return n
   }
 
+  // Écrit les outils liés d'un projet. Les ids d'outils supprimés définitivement (orphelins) et
+  // les doublons sont retirés ici, à l'écriture. Un outil en corbeille n'est plus dans `db.tools`
+  // mais garde son id : il compte comme présent, et sa restauration (un `put` de la fiche
+  // d'origine, trash.js) ramène le lien.
+  async function setToolIds(projectId, toolIds) {
+    const [stock, trashed] = await Promise.all([db.tools.toArray(), db.trash.where('type').equals('tool').toArray()])
+    const known = [...stock, ...trashed.map((row) => row.payload).filter((tool) => tool?.id != null)]
+    await update(projectId, { toolIds: pruneToolIds(toolIds, known) })
+  }
+
+  // Écrit les liens d'outils d'un projet : `toolIds` (outils seuls) et `kitPicks` (tailles et câbles
+  // pris dans un kit). Même élagage que `setToolIds` (stock + corbeille) ; une clé omise est laissée telle quelle.
+  async function setToolLinks(projectId, { toolIds, kitPicks } = {}) {
+    const [stock, trashed] = await Promise.all([db.tools.toArray(), db.trash.where('type').equals('tool').toArray()])
+    const known = [...stock, ...trashed.map((row) => row.payload).filter((tool) => tool?.id != null)]
+    const patch = {}
+    if (toolIds !== undefined) patch.toolIds = pruneToolIds(toolIds, known)
+    if (kitPicks !== undefined) patch.kitPicks = pruneKitPicks(kitPicks, known)
+    await update(projectId, patch)
+  }
+
   return {
     projects,
     loaded,
@@ -414,6 +442,8 @@ export const useProjectsStore = defineStore('projects', () => {
     get,
     create,
     update,
+    setToolIds,
+    setToolLinks,
     markWorked,
     ensureStarted,
     remove,

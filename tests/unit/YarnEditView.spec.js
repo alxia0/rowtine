@@ -1026,3 +1026,70 @@ describe('YarnEditView, échantillons', () => {
     expect(w.findAll('[data-test="swatch-row"]')).toHaveLength(0)
   })
 })
+
+// ── Devise du prix : la fiche garde celle dans laquelle le prix a été noté ────────────────
+describe('YarnEditView : devise du prix (base réelle)', () => {
+  async function mountDevise({ routeParams = {}, yarns = [], currency = 'EUR' } = {}) {
+    await db.open()
+    await db.yarns.clear()
+    await db.settings.clear()
+    await db.purchases.clear()
+    await db.settings.put({ key: 'currency', value: currency })
+    for (const y of yarns) await db.yarns.add(y)
+    const router = createTestRouter([
+      { path: '/stash/:id', name: 'stash-item', component: { template: '<div />' } },
+      { path: '/stash/new', name: 'stash-new', component: YarnEditView },
+      { path: '/stash/:id/edit', name: 'stash-edit', component: YarnEditView },
+    ])
+    router.push({ name: routeParams.id ? 'stash-edit' : 'stash-new', params: routeParams })
+    await router.isReady()
+    const pinia = createPinia()
+    await useSettingsStore(pinia).load()
+    const w = mount(YarnEditView, { global: { plugins: [router, i18n, pinia], stubs: defaultStubs } })
+    await flushPromises()
+    return { w, router }
+  }
+  const saveDevise = async (w) => {
+    await w.find('.addform__actions .btn--primary').trigger('click')
+    for (let i = 0; i < 10; i++) await flushPromises()
+  }
+  const OLD = { id: 7, brand: 'Katia', colorName: 'Rouge', quantity: 2, price: 4, priceCurrency: 'EUR', composition: [], reservations: {}, consumed: {} }
+
+  it('modification : le libellé garde la devise de la fiche et l’enregistrement ne la change pas', async () => {
+    const { w } = await mountDevise({ routeParams: { id: '7' }, yarns: [OLD], currency: 'USD' })
+    const label = w.find('label[for="yarn-price"]').text()
+    expect(label).toContain('€')
+    expect(label).not.toContain('$')
+    await saveDevise(w)
+    expect((await db.yarns.get(7)).priceCurrency).toBe('EUR')
+  })
+
+  it('création : le prix prend la devise des réglages, et la ligne d’achat la même', async () => {
+    const { w } = await mountDevise({ currency: 'USD' })
+    await w.find('#yarn-color-name').setValue('Bleu')
+    await w.find('#yarn-quantity').setValue('2')
+    await w.find('#yarn-price').setValue('5')
+    await saveDevise(w)
+    const [row] = await db.yarns.toArray()
+    expect(row).toMatchObject({ price: 5, priceCurrency: 'USD' })
+    const [line] = await db.purchases.toArray()
+    expect(line.currency).toBe('USD')
+  })
+
+  it('prix vidé : la fiche ne garde aucune devise', async () => {
+    const { w } = await mountDevise({ routeParams: { id: '7' }, yarns: [OLD] })
+    await w.find('#yarn-price').setValue('')
+    await saveDevise(w)
+    expect((await db.yarns.get(7)).priceCurrency).toBe('')
+  })
+
+  it('hausse de quantité achetée : la ligne d’achat prend la devise de la laine, pas celle des réglages', async () => {
+    const { w } = await mountDevise({ routeParams: { id: '7' }, yarns: [OLD], currency: 'USD' })
+    await w.find('#yarn-quantity').setValue('5')
+    await saveDevise(w)
+    await w.find('[data-test="qty-increase-buy"]').trigger('click')
+    for (let i = 0; i < 10; i++) await flushPromises()
+    const [line] = await db.purchases.toArray()
+    expect(line.currency).toBe('EUR')
+  })
+})

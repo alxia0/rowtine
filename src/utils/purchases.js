@@ -2,7 +2,8 @@
 // Calculs du budget laine — PURS : aucune dépendance à Dexie, Pinia ou Vue, pour
 // rester testables sans base et réutilisables par la fiche, l'écran Dépenses et
 // l'accueil sans les faire diverger (leçon du récap de stock dupliqué, 17/07).
-import { parseDecimal } from '@/utils/decimal'
+import { parseDecimal, isReadableDecimal } from '@/utils/decimal'
+import { hasPrice, priceCurrencyOf } from '@/utils/price-currency'
 import { consumedOf, reservationsOf, roundSkeins } from '@/utils/yarn-usage'
 
 // Une ligne d'historique. `kind` : 'buy' (acheté) | 'gift' (offert).
@@ -28,8 +29,13 @@ export function emptyPurchase() {
   }
 }
 
+// Prix inconnu : rien de noté, ou un texte illisible (« 18,90 € », saisi avant le filtre de
+// saisie du 21/08/2026 et jamais repris). Illisible, il vaut 0 dans le budget comme un champ
+// vide, mais ne doit pas se lire « Gratuit » ni afficher un montant inventé.
 export function isPriceUnknown(line) {
-  return line?.kind !== 'gift' && !String(line?.unitPrice ?? '').trim()
+  if (line?.kind === 'gift') return false
+  const raw = String(line?.unitPrice ?? '').trim()
+  return !raw || !isReadableDecimal(raw)
 }
 
 export function lineAmount(line) {
@@ -218,12 +224,13 @@ export function bainsOf(lines) {
 }
 
 // ─── Catégories de dépense (lot « prix du patron », 07/08) ──────────────────
-// Deux catégories : la laine (lignes de `db.purchases`) et les patrons (lignes fabriquées à
-// la lecture par src/utils/pattern-price.js). L'ABSENCE de `category` VAUT 'yarn' : les
+// Trois catégories : la laine (lignes de `db.purchases`), les patrons et les outils (lignes
+// fabriquées à la lecture par src/utils/pattern-price.js et src/utils/tool-expense.js). L'ABSENCE de `category` VAUT 'yarn' : les
 // lignes écrites avant ce lot n'ont pas le champ, et on ne réécrit RIEN en base pour un
 // défaut de lecture qui coûte une ligne.
 export function categoryOf(line) {
-  return line?.category === 'pattern' ? 'pattern' : 'yarn'
+  if (line?.category === 'pattern') return 'pattern'
+  return line?.category === 'tool' ? 'tool' : 'yarn'
 }
 
 // 'all' (ou toute valeur absente) ne filtre rien — même convention que `filterByYear`.
@@ -232,13 +239,13 @@ export function filterByCategory(lines, category) {
   return (lines || []).filter((l) => categoryOf(l) === category)
 }
 
-// { catégorie: { devise: montant } }. Les DEUX clés existent toujours, même vides : l'appelant
+// { catégorie: { devise: montant } }. Les TROIS clés existent toujours, même vides : l'appelant
 // n'a pas à se garder contre un `undefined` avant de lire. Comme `totalsByCurrency`, dont
 // cette fonction se sert, un montant nul ne crée aucune entrée de devise — un patron gratuit
 // ne fait donc pas apparaître de devise fantôme dans la ventilation.
 export function totalsByCategory(lines) {
-  const out = { yarn: {}, pattern: {} }
-  for (const cat of ['yarn', 'pattern']) {
+  const out = { yarn: {}, pattern: {}, tool: {} }
+  for (const cat of ['yarn', 'pattern', 'tool']) {
     out[cat] = totalsByCurrency(filterByCategory(lines, cat))
   }
   return out
@@ -256,8 +263,8 @@ export function totalsByCategory(lines) {
 // (« 2 laine(s) sans prix noté »). Une chaîne vide = « je n'ai rien noté » ; un `'0'` = un
 // prix DÉCLARÉ (« j'ai vérifié, c'était offert »), qui compte donc dans `pricedCount` —
 // même arbitrage que `isPricedPattern` (pattern-price.js). Les confondre perdrait l'info.
-export function projectYarnCost(yarns, projectId) {
-  const out = { amount: 0, skeins: 0, unknownCount: 0, pricedCount: 0 }
+export function projectYarnCost(yarns, projectId, fallback) {
+  const out = { amounts: {}, skeins: 0, unknownCount: 0, pricedCount: 0 }
   const pid = Number(projectId)
   // `Number(null)` et `Number('')` valent 0, qui EST « finite » : sans le `pid <= 0`, un id
   // absent irait chercher les allocations du projet fantôme n° 0 (les ids Dexie partent à 1)
@@ -267,13 +274,13 @@ export function projectYarnCost(yarns, projectId) {
     const n = (reservationsOf(y)[pid] || 0) + (consumedOf(y)[pid] || 0)
     if (n <= 0) continue
     out.skeins += n
-    const raw = String(y?.price ?? '').trim()
-    if (!raw) {
+    if (!hasPrice(y?.price)) {
       out.unknownCount++
       continue
     }
     out.pricedCount++
-    out.amount += (parseDecimal(raw) || 0) * n
+    const cur = priceCurrencyOf(y, fallback)
+    out.amounts[cur] = (out.amounts[cur] || 0) + (parseDecimal(y.price) || 0) * n
   }
   // roundSkeins referme la traîne binaire d'une somme de décimales (0,1 + 0,2 =
   // 0.30000000000000004) : `skeins` sert de sélecteur de pluriel à l'affichage.

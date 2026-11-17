@@ -4,6 +4,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
 import { useTrashStore } from '@/stores/trash'
+import { useToolsStore } from '@/stores/tools'
+import i18n from '@/i18n'
 
 beforeEach(async () => {
   setActivePinia(createPinia())
@@ -12,6 +14,65 @@ beforeEach(async () => {
 })
 
 describe('store trash', () => {
+  it('moveToTrash("tool") retire l’outil et le restaure à l’identique', async () => {
+    const id = await db.tools.add({ type: 'circular', category: 'needle', sizeMm: 4, brand: 'ChiaoGoo' })
+    const trash = useTrashStore()
+    const trashId = await trash.moveToTrash('tool', id)
+    expect(await db.tools.get(id)).toBeUndefined()
+    expect(trash.items[0]).toMatchObject({ type: 'tool', name: 'ChiaoGoo 4 mm' })
+    await trash.restore(trashId)
+    expect((await db.tools.get(id)).sizeMm).toBe(4)
+  })
+
+  it('nom de corbeille d’un outil : marque + gamme + taille, taille seule sans marque, vide sans rien', async () => {
+    const trash = useTrashStore()
+    const avant = i18n.global.locale.value
+    try {
+      i18n.global.locale.value = 'fr'
+      const a = await db.tools.add({ type: 'circular', category: 'needle', sizeMm: 3.5, brand: 'ChiaoGoo', line: 'Red Lace' })
+      const b = await db.tools.add({ type: 'circular', category: 'needle', sizeMm: 4, brand: 'ChiaoGoo' })
+      const c = await db.tools.add({ type: 'interchangeable', category: 'kit', brand: 'Addi' })
+      const d = await db.tools.add({ type: 'cable', category: 'needle' })
+      for (const id of [a, b, c, d]) await trash.moveToTrash('tool', id)
+      const nameOf = (id) => trash.items.find((i) => i.payload.id === id).name
+      expect(nameOf(a)).toBe('ChiaoGoo Red Lace 3,5 mm')
+      expect(nameOf(b)).toBe('ChiaoGoo 4 mm')
+      expect(nameOf(c)).toBe('Addi')
+      expect(nameOf(d)).toBe('')
+    } finally {
+      i18n.global.locale.value = avant
+    }
+  })
+
+  it('un outil sans marque prend sa taille comme nom de corbeille, au séparateur de la langue', async () => {
+    const id = await db.tools.add({ type: 'standard', category: 'hook', sizeMm: 3.5, brand: '' })
+    const trash = useTrashStore()
+    const avant = i18n.global.locale.value
+    try {
+      i18n.global.locale.value = 'fr'
+      await trash.moveToTrash('tool', id)
+      expect(trash.items[0].name).toBe('3,5 mm')
+      const id2 = await db.tools.add({ type: 'standard', category: 'hook', sizeMm: 3.5, brand: '' })
+      i18n.global.locale.value = 'en'
+      await trash.moveToTrash('tool', id2)
+      expect(trash.items.find((i) => i.payload.id === id2).name).toBe('3.5 mm')
+    } finally {
+      i18n.global.locale.value = avant
+    }
+  })
+
+  it('restaurer un outil rafraîchit le stock d’outils déjà chargé', async () => {
+    const id = await db.tools.add({ type: 'circular', category: 'needle', sizeMm: 4, brand: 'ChiaoGoo' })
+    const tools = useToolsStore()
+    await tools.load()
+    const trash = useTrashStore()
+    const trashId = await trash.moveToTrash('tool', id)
+    await tools.load()
+    expect(tools.tools.some((t) => t.id === id)).toBe(false)
+    await trash.restore(trashId)
+    expect(tools.tools.some((t) => t.id === id)).toBe(true)
+  })
+
   it('dérive un libellé depuis le nom/marque de l’objet', async () => {
     const store = useTrashStore()
     await store.add('yarn', { brand: 'Drops', colorName: 'Écru' })

@@ -148,4 +148,11 @@ describe('collectBackupData', () => {
     expect(snapshot.trashIds.projects).toEqual([2])
     expect(snapshot.trashIds.patterns.sort((a, b) => a - b)).toEqual([9, 200])
   })
+
+  it('collecte la table tools', async () => {
+    await db.tools.add({ type: 'standard', category: 'hook', sizeMm: 4 })
+    const data = await collectBackupData()
+    expect(data.tools).toHaveLength(1)
+    expect(data.tools[0]).toMatchObject({ category: 'hook', sizeMm: 4 })
+  })
 })

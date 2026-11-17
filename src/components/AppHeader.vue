@@ -18,7 +18,8 @@ const { open, triggerRef, menuRef } = useDismissMenu()
 const goBack = useSmartBack()
 
 // Navigation = menu burger en haut à droite (décision design 28/06, pas de barre basse).
-// Neuf entrées (Sessions, 31/08, rangée avec les écrans de consultation), par intention : ce
+// Dix entrées (Sessions, 31/08, rangée avec les écrans de consultation ; Mes outils, 14/11,
+// juste après le stock de laine), par intention : ce
 // sur quoi on travaille, ce qu'on consulte, puis l'aide et les réglages. Statistiques et Dépenses avaient jusque-là
 // pour seul chemin une tuile de l'accueil — et celle des Dépenses ne s'affiche même que
 // s'il existe au moins un achat, ce qui laissait l'écran inatteignable sur une app neuve.
@@ -28,6 +29,7 @@ const goBack = useSmartBack()
 const items = [
   { name: 'home', label: 'nav.home' },
   { name: 'stash', label: 'nav.stash' },
+  { name: 'tools', label: 'nav.tools' },
   { name: 'library', label: 'nav.library' },
   { name: 'stats', label: 'nav.stats' },
   { name: 'sessions', label: 'nav.sessions' },

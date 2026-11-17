@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Le menu burger d'AppHeader.vue est la SEULE navigation de l'app (décision design du
-// 28/06 : pas de barre basse). Il porte 9 entrées (Sessions depuis le 31/08), le lot du
-// 12/08 y ayant fait entrer Statistiques, Dépenses et le Guide utilisateur — ce dernier
+// 28/06 : pas de barre basse). Il porte 10 entrées (Sessions depuis le 31/08, Mes outils
+// depuis le 14/11), le lot du 12/08 y ayant fait entrer Statistiques, Dépenses et le Guide utilisateur — ce dernier
 // ayant quitté l'écran À propos. Ce test couvre le CONTENU et l'ORDRE ; que le panneau tienne dans
 // la fenêtre est couvert côté e2e (tests/e2e/menu-items.spec.js), un montage jsdom ne
 // mesurant aucune géométrie réelle.
@@ -11,7 +11,7 @@ import i18n from '@/i18n'
 import AppHeader from '@/components/AppHeader.vue'
 import { createTestRouter } from './helpers/i18n-router'
 
-const ROUTES = ['home', 'stash', 'library', 'stats', 'sessions', 'expenses', 'guide', 'settings', 'about']
+const ROUTES = ['home', 'stash', 'tools', 'library', 'stats', 'sessions', 'expenses', 'guide', 'settings', 'about']
 
 function makeRouter() {
   return createTestRouter(ROUTES.map((name) => ({
@@ -43,8 +43,8 @@ async function ouvrirEtLire(wrapper) {
   return wrapper.findAll('.menu__item')
 }
 
-describe('AppHeader — menu à 9 entrées', () => {
-  it('affiche les 9 entrées DANS L’ORDRE : faire, consulter, aide', async () => {
+describe('AppHeader — menu à 10 entrées', () => {
+  it('affiche les 10 entrées DANS L’ORDRE : faire, consulter, aide', async () => {
     const { wrapper } = await mountHeader()
     const items = await ouvrirEtLire(wrapper)
 
@@ -52,6 +52,7 @@ describe('AppHeader — menu à 9 entrées', () => {
     expect(items.map((i) => i.text())).toEqual([
       fr.home,
       fr.stash,
+      fr.tools,
       fr.library,
       fr.stats,
       fr.sessions,
@@ -62,7 +63,7 @@ describe('AppHeader — menu à 9 entrées', () => {
     ])
   })
 
-  it('mène aux 9 routes attendues, dans le même ordre', async () => {
+  it('mène aux 10 routes attendues, dans le même ordre', async () => {
     const { wrapper, router } = await mountHeader()
 
     for (let i = 0; i < ROUTES.length; i++) {
@@ -85,7 +86,7 @@ describe('AppHeader — menu à 9 entrées', () => {
   })
 
   it('porte un séparateur décoratif, invisible pour les lecteurs d’écran et non cliquable', async () => {
-    // Un séparateur qui se rendrait comme une 9e entrée serait annoncé « bouton » par un
+    // Un séparateur qui se rendrait comme une 11e entrée serait annoncé « bouton » par un
     // lecteur d’écran et focalisable au clavier : il doit être un élément à part.
     const { wrapper } = await mountHeader()
     await ouvrirEtLire(wrapper)
@@ -99,7 +100,7 @@ describe('AppHeader — menu à 9 entrées', () => {
     // Parité : une clé oubliée dans une seule langue ferait afficher « nav.stats » brut.
     for (const lang of ['fr', 'en', 'de', 'es']) {
       const nav = i18n.global.messages.value[lang].nav
-      for (const key of ['stats', 'sessions', 'expenses', 'guide']) {
+      for (const key of ['stats', 'sessions', 'expenses', 'guide', 'tools']) {
         expect(typeof nav[key], `${lang}.nav.${key}`).toBe('string')
         expect(nav[key].trim(), `${lang}.nav.${key}`).not.toBe('')
       }

@@ -1,6 +1,6 @@
 // L'ORDRE DES MESSAGES QUI OCCUPENT L'ÉCRAN.
 //
-// Huit messages peuvent s'ouvrir par-dessus l'application sans qu'on les ait demandés.
+// Neuf messages peuvent s'ouvrir par-dessus l'application sans qu'on les ait demandés.
 // Avant ce lot, rien ne disait lequel gagne quand deux se présentent ensemble : trois
 // d'entre eux partageaient même le rang d'empilement CSS 1200, et c'est l'ordre du DOM
 // qui tranchait, par accident. Deux incidents de cette famille sont au dossier (10/08 :
@@ -20,8 +20,11 @@
 //   5 welcome        — elle accueille, elle n'urge pas
 //   6 readerTour     — la visite guidée du lecteur (lot du 23/09/2026) : demandée
 //                      explicitement (`?tour=1`), juste après la bienvenue qui la propose
-//   7 importCaveat   — il ne se justifie qu'une fois arrivée dans la Bibliothèque
-//   8 swipeHint      — elle enseigne un geste, elle peut attendre que tous les autres aient
+//   7 newVersionNotes — les nouveautés de la version, affichées une fois après une mise
+//                      à jour : elles cèdent à l'accueil et à la visite guidée, et passent
+//                      avant les deux messages d'apprentissage ci-dessous
+//   8 importCaveat   — il ne se justifie qu'une fois arrivée dans la Bibliothèque
+//   9 swipeHint      — elle enseigne un geste, elle peut attendre que tous les autres aient
 //                      parlé. ⚠️ Elle vit sur les écrans de LISTE (Bibliothèque, Stock) et
 //                      sur la fiche PROJET. « Elle peut attendre la fiche suivante », écrit
 //                      ici au départ, décrivait un placement supprimé le jour même : il n'y a
@@ -38,6 +41,7 @@ export const NOTICE = {
   SYNC_REPORT: 'syncReport',
   WELCOME: 'welcome',
   READER_TOUR: 'readerTour',
+  NEW_VERSION_NOTES: 'newVersionNotes',
   IMPORT_CAVEAT: 'importCaveat',
   SWIPE_HINT: 'swipeHint',
 }
@@ -49,6 +53,7 @@ export const NOTICE_RANKS = {
   [NOTICE.SYNC_REPORT]: 4,
   [NOTICE.WELCOME]: 5,
   [NOTICE.READER_TOUR]: 6,
-  [NOTICE.IMPORT_CAVEAT]: 7,
-  [NOTICE.SWIPE_HINT]: 8,
+  [NOTICE.NEW_VERSION_NOTES]: 7,
+  [NOTICE.IMPORT_CAVEAT]: 8,
+  [NOTICE.SWIPE_HINT]: 9,
 }

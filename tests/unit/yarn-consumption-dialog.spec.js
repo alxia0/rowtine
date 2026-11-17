@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 // YarnConsumptionDialog — question posée à la clôture d'un projet (K2) : « combien de
-// pelotes as-tu réellement utilisées ? ». Piège UX (décision produit) : PAS de bouton
-// Annuler — fermer la question (croix, scrim, Échap) consomme TOUT le réservé (défaut =
-// tout tricoté). Les champs sont pré-remplis à la quantité réservée ; mettre 0 = « rien
-// tricoté », le reliquat retourne au stock.
+// pelotes as-tu réellement utilisées ? ». Règle (décision produit, qui remplace l'ancienne
+// « pas d'Annuler, fermer applique le défaut ») : un bouton Annuler existe, et croix, voile
+// et Échap valent Annuler (émettent `cancel`, jamais `confirm`) : rien n'est consommé, le
+// statut ne change pas. Seul « Valider » émet `confirm`. Les champs sont pré-remplis à la
+// quantité réservée (ou au disponible s'il est plus petit) ; saisir plus que le réservé est
+// accepté tant que le DISPONIBLE pour ce projet suffit (sa réservation plus le stock libre,
+// jamais les pelotes réservées par d'autres projets), au-delà la saisie est refusée avec un
+// avertissement.
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import fr from '@/i18n/fr.json'
@@ -16,8 +20,8 @@ const tk = makeTk(i18n)
 const stubs = { AppIcon: true }
 
 const yarns = [
-  { id: 1, name: 'Drops · Bleu', reserved: 3 },
-  { id: 2, name: 'Katia · Écru', reserved: 1 },
+  { id: 1, name: 'Drops · Bleu', reserved: 3, available: 10 },
+  { id: 2, name: 'Katia · Écru', reserved: 1, available: 4 },
 ]
 
 function mountDialog(props) {
@@ -46,7 +50,7 @@ describe('YarnConsumptionDialog', () => {
   })
 
   it('réservé décimal : libellé et valeur par défaut du champ au format de la langue (2,5, pas 2.5)', () => {
-    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 2.5 }] })
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 2.5, available: 10 }] })
     expect(w.find('.ycn__reserved').text()).toContain(tk('project.consumeReserved', { n: '2,5' }))
     expect(w.find('.ycn__input').element.value).toBe('2,5')
   })
@@ -82,26 +86,150 @@ describe('YarnConsumptionDialog', () => {
     expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 0 })
   })
 
-  it('un nombre supérieur au réservé est borné au réservé', async () => {
+  it('un nombre supérieur au réservé mais dans le disponible est accepté (5 sur {reserved: 3, available: 10})', async () => {
     const w = mountDialog({ open: true, yarns })
-    await w.findAll('.ycn__input')[0].setValue(99)
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue(5)
+    expect(champ.element.value).toBe('5')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 5 })
+  })
+
+  // Protège : le champ montre toujours la valeur qui sera enregistrée (borne = disponible).
+  it('une saisie au-dessus du disponible est ramenée au disponible, avec avertissement et bouton « Corriger le stock »', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue(12)
+    expect(champ.element.value).toBe('10')
+    const msg = w.find('.ycn__over')
+    expect(msg.exists()).toBe(true)
+    expect(msg.text()).toContain(tk('project.consumeOverStockPlain', { n: 10 }))
+    expect(msg.text()).not.toContain(tk('project.consumeOverStock', { n: 10 }))
+    expect(w.find('.ycn__fix').text()).toBe(tk('project.consumeFixStock'))
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 10 })
+  })
+
+  it('le message de dépassement disparaît à la ressaisie dans les bornes', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue(12)
+    expect(w.find('.ycn__over').exists()).toBe(true)
+    await champ.setValue(4)
+    expect(w.find('.ycn__over').exists()).toBe(false)
+  })
+
+  it('« Corriger le stock » émet fix-stock avec l’id de la laine concernée', async () => {
+    const w = mountDialog({ open: true, yarns })
+    await w.findAll('.ycn__input')[1].setValue(9) // disponible 4
+    await w.find('.ycn__fix').trigger('click')
+    expect(w.emitted('fix-stock')).toEqual([[2]])
+  })
+
+  // Régression (revue finale) : stock 5, A réserve 2, B réserve 3. Le composable passe à A un
+  // disponible de 2 ; le champ ne peut pas monter au-dessus, l'avertissement donne cette borne.
+  it('une laine que d\'autres projets réservent garde la phrase sur les autres projets, les autres non', async () => {
+    const w = mountDialog({ open: true, yarns: [
+      { id: 1, name: 'A', reserved: 3, available: 2, othersReserved: true },
+      { id: 2, name: 'B', reserved: 3, available: 2, othersReserved: false },
+    ] })
+    const msgs = w.findAll('.ycn__over')
+    expect(msgs[0].text()).toContain(tk('project.consumeOverStock', { n: 2 }))
+    expect(msgs[0].text()).toContain('autres projets')
+    expect(msgs[1].text()).toContain(tk('project.consumeOverStockPlain', { n: 2 }))
+    expect(msgs[1].text()).not.toContain(tk('project.consumeOverStock', { n: 2 }))
+    expect(msgs[1].text()).not.toContain('autres projets')
+  })
+
+  it('A/B : disponible 2 pour A (stock 5, B en réserve 3) : 5 tapé est ramené à 2, avec avertissement', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 2, available: 2 }] })
+    const champ = w.find('.ycn__input')
+    await champ.setValue(5)
+    expect(champ.element.value).toBe('2')
+    expect(w.find('.ycn__over').text()).toContain(tk('project.consumeOverStockPlain', { n: 2 }))
+    expect(w.find('.ycn__over').text()).not.toContain(tk('project.consumeOverStock', { n: 2 }))
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0]).toEqual([{ id: 1, used: 2 }])
+  })
+
+  // Défaut en mode Terminé = min(réservé, disponible) : un champ pré-rempli au-dessus de la
+  // borne afficherait une valeur que l'écriture tronquerait en silence.
+  it('réservé au-dessus du disponible : le champ s’ouvre au disponible, avertissement et « Corriger le stock » déjà visibles', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 3, available: 2 }] })
+    expect(w.find('.ycn__input').element.value).toBe('2')
+    expect(w.find('.ycn__over').text()).toContain(tk('project.consumeOverStockPlain', { n: 2 }))
+    expect(w.find('.ycn__over').text()).not.toContain(tk('project.consumeOverStock', { n: 2 }))
+    expect(w.find('.ycn__fix').exists()).toBe(true)
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0]).toEqual([{ id: 1, used: 2 }])
+  })
+
+  it('disponible 0 : le champ s’ouvre à 0 avec l’avertissement, Valider envoie 0', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 2, available: 0 }] })
+    expect(w.find('.ycn__input').element.value).toBe('0')
+    expect(w.find('.ycn__over').text()).toContain(tk('project.consumeOverStockPlain', { n: 0 }))
+    expect(w.find('.ycn__over').text()).not.toContain(tk('project.consumeOverStock', { n: 0 }))
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0]).toEqual([{ id: 1, used: 0 }])
+  })
+
+  it('l’avertissement posé à l’ouverture est réévalué à la réouverture (disponible redevenu suffisant)', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 3, available: 2 }] })
+    expect(w.find('.ycn__over').exists()).toBe(true)
+    await w.setProps({ open: false })
+    await w.setProps({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 3, available: 8 }] })
+    expect(w.find('.ycn__input').element.value).toBe('3')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+  })
+
+  it('une saisie exactement égale au disponible n’affiche pas l’avertissement, au-dessus si', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 1, available: 4 }] })
+    const champ = w.find('.ycn__input')
+    await champ.setValue('4')
+    expect(champ.element.value).toBe('4')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+    await champ.setValue('4,5')
+    expect(champ.element.value).toBe('4')
+    expect(w.find('.ycn__over').exists()).toBe(true)
+  })
+
+  it('ouvert au-dessus de la borne puis la borne tapée : l’avertissement disparaît', async () => {
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 3, available: 2 }] })
+    await w.find('.ycn__input').setValue('2')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+  })
+
+  it('mode abandonné, réservé au-dessus du disponible : défaut 0, aucun avertissement à l’ouverture', () => {
+    const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3, available: 2 }] })
+    expect(w.find('.ycn__input').element.value).toBe('0')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+  })
+
+  // Un champ vidé efface l'avertissement (il ne dit plus rien de juste), mais n'est toujours
+  // pas lu comme 0 : la dernière valeur bornée est gardée.
+  it('champ vidé après un dépassement : l’avertissement disparaît, la valeur n’est pas lue comme 0', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const champ = w.findAll('.ycn__input')[0]
+    await champ.setValue(12)
+    expect(w.find('.ycn__over').exists()).toBe(true)
+    await champ.setValue('')
+    expect(w.find('.ycn__over').exists()).toBe(false)
+    await w.find('.ycn__confirm').trigger('click')
+    expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 10 })
+  })
+
+  // Piège : champ vidé = jamais lu comme 0 (sinon un Valider rendrait toute la réserve au stock).
+  it('un champ vidé n’est jamais lu comme 0 : la valeur courante est conservée', async () => {
+    const w = mountDialog({ open: true, yarns })
+    await w.findAll('.ycn__input')[0].setValue('')
     await w.find('.ycn__confirm').trigger('click')
     expect(w.emitted('confirm')[0][0][0]).toEqual({ id: 1, used: 3 })
   })
 
-  // Protège : le champ montre toujours la valeur qui sera enregistrée (borne comprise).
-  it('une saisie bornée est réécrite dans le champ, même si la valeur retenue ne change pas', async () => {
-    const w = mountDialog({ open: true, yarns })
-    const champ = w.findAll('.ycn__input')[0]
-    await champ.setValue(99) // retenu : 3, déjà la valeur courante
-    expect(champ.element.value).toBe('3')
-    await champ.setValue('9,9') // décimal au-dessus du réservé : borné à 3 aussi
-    expect(champ.element.value).toBe('3')
-  })
-
   // Un caractère refusé est retiré de l'affichage à la frappe, pas seulement de la valeur retenue.
   it('un caractère refusé est filtré de l’affichage à la frappe (« 2a » → « 2 », « -5 » → « 5 »)', async () => {
-    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 30 }] })
+    const w = mountDialog({ open: true, yarns: [{ id: 1, name: 'Drops · Bleu', reserved: 30, available: 30 }] })
     const champ = w.find('.ycn__input')
     await champ.setValue('2a')
     expect(champ.element.value).toBe('2')
@@ -159,42 +287,34 @@ describe('YarnConsumptionDialog', () => {
     expect(w.findAll('.ycn__input')[0].element.value).toBe('1,5')
   })
 
-  it('fermer par le scrim émet confirm avec les valeurs par défaut (tout tricoté), jamais un cancel', async () => {
+  it('le bouton Annuler (common.cancel) existe et émet cancel, jamais confirm', async () => {
+    const w = mountDialog({ open: true, yarns })
+    const btn = w.find('.ycn__cancel')
+    expect(btn.text()).toBe(tk('common.cancel'))
+    await btn.trigger('click')
+    expect(w.emitted('cancel')).toHaveLength(1)
+    expect(w.emitted('confirm')).toBeFalsy()
+  })
+
+  it('le voile émet cancel et PAS confirm', async () => {
     const w = mountDialog({ open: true, yarns })
     await w.find('.ycn__scrim').trigger('click')
-    expect(w.emitted('confirm')).toBeTruthy()
-    expect(w.emitted('confirm')[0]).toEqual([
-      [
-        { id: 1, used: 3 },
-        { id: 2, used: 1 },
-      ],
-    ])
-    expect(w.emitted('cancel')).toBeFalsy()
+    expect(w.emitted('cancel')).toHaveLength(1)
+    expect(w.emitted('confirm')).toBeFalsy()
   })
 
-  it('fermer par la croix émet confirm avec les valeurs par défaut, jamais un cancel', async () => {
+  it('la croix émet cancel et PAS confirm', async () => {
     const w = mountDialog({ open: true, yarns })
     await w.find('.ycn__close').trigger('click')
-    expect(w.emitted('confirm')[0]).toEqual([
-      [
-        { id: 1, used: 3 },
-        { id: 2, used: 1 },
-      ],
-    ])
-    expect(w.emitted('cancel')).toBeFalsy()
+    expect(w.emitted('cancel')).toHaveLength(1)
+    expect(w.emitted('confirm')).toBeFalsy()
   })
 
-  it('Échap émet confirm avec les valeurs par défaut, jamais un cancel (monté déjà ouvert)', () => {
+  it('Échap émet cancel et PAS confirm (monté déjà ouvert)', () => {
     const w = mountDialog({ open: true, yarns })
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
-    expect(w.emitted('confirm')).toBeTruthy()
-    expect(w.emitted('confirm')[0]).toEqual([
-      [
-        { id: 1, used: 3 },
-        { id: 2, used: 1 },
-      ],
-    ])
-    expect(w.emitted('cancel')).toBeFalsy()
+    expect(w.emitted('cancel')).toHaveLength(1)
+    expect(w.emitted('confirm')).toBeFalsy()
     w.unmount()
   })
 
@@ -205,17 +325,20 @@ describe('YarnConsumptionDialog', () => {
 
   describe('mode « abandonné » (R3) : même dialogue, défaut inversé à 0', () => {
     it('mode abandonné : le champ est pré-rempli à 0 (par défaut on détricote, tout revient)', () => {
-      const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3 }] })
+      const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3, available: 10 }] })
       expect(w.find('.ycn__input').element.value).toBe('0')
       expect(w.text()).toContain(fr.project.abandonTitle)
     })
-    it('mode abandonné : fermer applique le défaut 0 (rien de perdu)', async () => {
-      const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3 }] })
+    it('mode abandonné : fermer annule (aucun confirm), Valider sans rien toucher envoie 0', async () => {
+      const w = mountDialog({ open: true, mode: 'abandoned', yarns: [{ id: 1, name: 'Bleu', reserved: 3, available: 10 }] })
       await w.find('.ycn__scrim').trigger('click')
+      expect(w.emitted('cancel')).toHaveLength(1)
+      expect(w.emitted('confirm')).toBeFalsy()
+      await w.find('.ycn__confirm').trigger('click')
       expect(w.emitted('confirm')[0][0]).toEqual([{ id: 1, used: 0 }])
     })
     it('mode terminé : inchangé, pré-rempli au réservé', () => {
-      const w = mountDialog({ open: true, mode: 'done', yarns: [{ id: 1, name: 'Bleu', reserved: 3 }] })
+      const w = mountDialog({ open: true, mode: 'done', yarns: [{ id: 1, name: 'Bleu', reserved: 3, available: 10 }] })
       expect(w.find('.ycn__input').element.value).toBe('3')
       expect(w.text()).toContain(fr.project.consumeTitle)
     })

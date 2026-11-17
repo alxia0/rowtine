@@ -3,16 +3,18 @@
 // `readBackup` parcourt l'arbo (via une `BackupStorage`) et reconstruit un
 // dbSnapshot prêt pour Dexie (ids d'origine préservés) ; `writeSnapshotToDb`
 // remplace l'état courant de la base par ce snapshot, dans une transaction.
-import { db } from '@/db/db'
+import { db, getSetting } from '@/db/db'
 import { parseEntryId, displayEntryName, MIME_TO_EXT, MAX_BACKUP_FILE_BYTES } from './naming'
-import { YARN_PHOTOS_DIR } from './serialize'
+import { YARN_PHOTOS_DIR, TOOL_PHOTOS_DIR } from './serialize'
 import { normalizeYarnReservations } from '@/utils/yarn-usage'
 import { runReprise } from '@/db/purchases-reprise'
+import { fillMissingPriceCurrency } from '@/db/price-currency-reprise'
 import { DEFAULT_CURRENCY } from '@/constants/currencies'
 import {
   deserializeProject,
   deserializePattern,
   deserializeYarns as deserializeYarnsRaw,
+  deserializeTools,
   deserializeIndependentCounters,
   deserializePurchases,
   deserializeActiveDays,
@@ -459,6 +461,27 @@ export async function readBackup(storage, { onProgress } = {}) {
     'laines.json',
   )
   reportMissingAssets(yarnMissing, YARN_PHOTOS_DIR, errors)
+
+  // Outils : photos sous `Outils/` uniquement (jamais de repli « racine » : les outils n'ont
+  // jamais eu de photo à la racine). `Outils/` absent (sauvegarde d'avant le stock d'outils)
+  // ne fait pas échouer le reste, et `outils.json` absent rend `[]` sans erreur.
+  const toolPhotoFiles = Object.create(null)
+  try {
+    Object.assign(
+      toolPhotoFiles,
+      await readFolderFiles(storage, TOOL_PHOTOS_DIR, null, await storage.readdir(TOOL_PHOTOS_DIR), errors),
+    )
+  } catch (err) {
+    errors.push({ where: TOOL_PHOTOS_DIR, error: err?.message || String(err) })
+  }
+  const toolMissing = []
+  const tools = keepEntities(
+    deserializeTools(await readRootJson(storage, 'outils.json', [], errors), toolPhotoFiles, toolMissing),
+    'tools',
+    errors,
+    'outils.json',
+  )
+  reportMissingAssets(toolMissing, TOOL_PHOTOS_DIR, errors)
   const independentCounters = keepEntities(
     deserializeIndependentCounters(await readRootJson(storage, 'compteurs.json', [], errors)),
     'counters',
@@ -500,6 +523,7 @@ export async function readBackup(storage, { onProgress } = {}) {
     sessions,
     diagrams,
     yarns,
+    tools,
     purchases,
     activeDays,
     hasPurchasesFile,
@@ -515,7 +539,7 @@ export async function readBackup(storage, { onProgress } = {}) {
 // l'appareil dans l'état de la sauvegarde. Un `bulkPut` sans `clear()` préalable laisserait en
 // place des jours qui n'appartiennent pas à l'état restauré — la série mentirait dans l'autre
 // sens. La clé primaire étant le jour, le `bulkPut` lui-même ne peut créer aucun doublon.
-const REPLACED_TABLES = ['projects', 'patterns', 'sections', 'diagrams', 'counters', 'sessions', 'yarns', 'purchases', 'activeDays']
+const REPLACED_TABLES = ['projects', 'patterns', 'sections', 'diagrams', 'counters', 'sessions', 'yarns', 'tools', 'purchases', 'activeDays']
 
 // Remplace l'état courant de la base par `dbSnapshot`, dans une transaction :
 // chaque table est vidée puis repeuplée (`bulkPut`, ids d'origine préservés).
@@ -535,6 +559,7 @@ export async function writeSnapshotToDb(dbSnapshot) {
       db.counters,
       db.sessions,
       db.yarns,
+      db.tools,
       db.purchases,
       db.activeDays,
       db.settings,
@@ -571,7 +596,7 @@ export async function writeSnapshotToDb(dbSnapshot) {
   // Fichier présent (même vide) → l'utilisatrice a le droit d'avoir zéro achat,
   // on ne reconstruit rien. Aucune laine restaurée → rien à reconstruire non plus.
   if (dbSnapshot.hasPurchasesFile === false && dbSnapshot.yarns?.length) {
-    const currency = dbSnapshot.settings?.find((s) => s.key === 'currency')?.value ?? DEFAULT_CURRENCY
+    const currency = (await getSetting('currency')) ?? DEFAULT_CURRENCY
     try {
       await runReprise(currency)
     } catch {
@@ -587,5 +612,15 @@ export async function writeSnapshotToDb(dbSnapshot) {
       // cours de route, le drapeau reste absent, et l'`ensureReprise` du prochain
       // lancement (App.vue, onMounted) reconstruira alors ce qui n'a pas pu l'être ici.
     }
+  }
+
+  // Devise des prix de laine, d'outil et de patron : une sauvegarde d'avant ce lot n'en porte pas. Hors
+  // transaction (déjà committée), avec la devise des réglages RESTAURÉS, comme `runReprise`
+  // ci-dessus. Idempotente, sans drapeau : si elle échoue, le prochain lancement (App.vue) la rejoue.
+  try {
+    const currency = (await getSetting('currency')) ?? DEFAULT_CURRENCY
+    await fillMissingPriceCurrency(currency)
+  } catch {
+    // Le reste est restauré ; rattrapage au prochain lancement.
   }
 }

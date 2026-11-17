@@ -46,6 +46,10 @@ export const EXCLUDED_SETTINGS_KEYS = [
   // Permission de notification déjà demandée (29/09/2026) : état propre à cet appareil, la
   // permission Android ne voyage pas avec une sauvegarde. `rowNotification` (préférence) part.
   'rowNotificationAsked',
+  // Dernière version dont la pop-up « Nouveautés » a été vue ou écartée : propre à cet
+  // appareil, comme `backupDecision`. Restauré depuis l'ancien téléphone, il écraserait le
+  // marqueur du nouvel appareil et rejouerait ou masquerait le message à tort.
+  'lastSeenVersion',
 ]
 
 // Une data URL que `parseDataUrl` REFUSE (il n'accepte que la forme base64) ne peut pas
@@ -305,61 +309,70 @@ export function serializePattern(pattern) {
 // était externalisée — `photos` partait en base64 dans laines.json, la cause du même
 // plantage mémoire que celui corrigé le 15/08 pour `photo`. MÊME préfixe, MÊME dossier que
 // `photo` : `readRootFilesByPrefix('laine-photo-')` + `readdir(Laines)` (restore.js) et
-// le ménage `reconcileYarnPhotos` (orchestrator.js) les trouvent sans changement — un
+// le ménage `reconcileGalleryPhotos` (orchestrator.js) les trouvent sans changement — un
 // autre préfixe laisserait ces photos jamais restaurées, ou effacées par le ménage au
 // tour suivant. Nom de repli (entrée non data URL) unique par laine ET par position,
 // `${yarnIndex}-${i}` : l'index de galerie seul ferait collisionner la photo 0 de deux
 // laines différentes. `photo` garde `yarnIndex` seul, format déjà publié, inchangé.
 export const YARN_PHOTOS_DIR = 'Laines'
 
-export function serializeYarns(yarns) {
-  const seen = new Set() // noms déjà construits — dédup PARTAGÉE entre photo et photos,
-  // toutes laines confondues (cf. note ci-dessus)
+// Galerie d'entités (laines, outils) : photos externalisées dans `dir` sous `prefix`,
+// dédup PARTAGÉE sur tout l'appel, JSON publié EN DERNIER (cf. note de serializeYarns).
+function serializeGalleryEntities(entities, { dir, prefix, jsonName, singlePhotoField }) {
+  const seen = new Set() // noms déjà construits, dédup PARTAGÉE entre photo et photos
   const files = []
   const photoNames = [] // noms référencés, dans l'ordre : sert au ménage des orphelines
 
-  // Résout UNE data URL (photo unique ou item de galerie) en nom de fichier, en
-  // écrivant le fichier au besoin (dédup par `seen`, partagé sur tout l'appel).
-  // Data URL non analysable (cf. isInlineDataUrl) : conservée telle quelle, aucun
-  // fichier — même garde que buildPhotoFiles pour patrons/projets.
+  // Résout UNE data URL en nom de fichier, en écrivant le fichier au besoin. Data URL non
+  // analysable (cf. isInlineDataUrl) : conservée telle quelle, aucun fichier.
   function resolvePhoto(dataUrl, fallbackIndex) {
     if (isInlineDataUrl(dataUrl)) return dataUrl
-    const name = assetFileName(dataUrl, fallbackIndex, 'laine-photo-')
+    const name = assetFileName(dataUrl, fallbackIndex, prefix)
     if (!seen.has(name)) {
       const parsed = parseDataUrl(dataUrl)
-      const file = {
-        path: `${YARN_PHOTOS_DIR}/${name}`,
-        data: parsed ? parsed.base64 : '',
-        encoding: 'base64',
-      }
       seen.add(name)
-      files.push(file)
+      files.push({ path: `${dir}/${name}`, data: parsed ? parsed.base64 : '', encoding: 'base64' })
       photoNames.push(name)
     }
     return name
   }
 
-  const yarnsJson = (yarns || []).map((yarn, yarnIndex) => {
-    let next = yarn
-    // Pas de photo : champ inchangé.
-    if (yarn.photo) {
-      next = { ...next, photo: resolvePhoto(yarn.photo, yarnIndex) }
+  const json = (entities || []).map((entity, index) => {
+    let next = entity
+    if (singlePhotoField && entity.photo) {
+      next = { ...next, photo: resolvePhoto(entity.photo, index) }
     }
-    // `photos` n'est touché QUE si la clé existe : une laine qui n'a jamais porté de
-    // galerie ne doit pas en gagner une (round-trip strict, cf. deserializeYarns).
-    if ('photos' in yarn) {
-      const gallery = Array.isArray(yarn.photos) ? yarn.photos : []
-      next = { ...next, photos: gallery.map((p, i) => resolvePhoto(p, `${yarnIndex}-${i}`)) }
+    // `photos` n'est touché QUE si la clé existe (round-trip strict).
+    if ('photos' in entity) {
+      const gallery = Array.isArray(entity.photos) ? entity.photos : []
+      next = { ...next, photos: gallery.map((p, i) => resolvePhoto(p, `${index}-${i}`)) }
     }
     return next
   })
   return {
-    files: [
-      ...files,
-      { path: 'laines.json', data: JSON.stringify(yarnsJson, null, 2), encoding: 'utf8' },
-    ],
+    files: [...files, { path: jsonName, data: JSON.stringify(json, null, 2), encoding: 'utf8' }],
     photoNames,
   }
+}
+
+export function serializeYarns(yarns) {
+  return serializeGalleryEntities(yarns, {
+    dir: YARN_PHOTOS_DIR,
+    prefix: 'laine-photo-',
+    jsonName: 'laines.json',
+    singlePhotoField: true,
+  })
+}
+
+// Outils : même mécanique que les laines (galerie `photos` seule, pas de `photo` unique).
+export const TOOL_PHOTOS_DIR = 'Outils'
+export function serializeTools(tools) {
+  return serializeGalleryEntities(tools, {
+    dir: TOOL_PHOTOS_DIR,
+    prefix: 'outil-photo-',
+    jsonName: 'outils.json',
+    singlePhotoField: false,
+  })
 }
 
 // Achats : registre plat, aucun fichier annexe. C'est le SEUL endroit où l'historique

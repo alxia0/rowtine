@@ -19,3 +19,11 @@ export function coverPhotoOf(yarn) {
   if (!photos.length) return ''
   return photos[boundedIndex(yarn?.coverIndex, photos.length)]
 }
+
+// Index de couverture après retrait de la photo `idx` : la couverture retirée se replie sur
+// la 1re, une photo retirée avant la couverture la décale d'un cran, sinon rien ne bouge.
+export function coverIndexAfterRemoval(idx, ci) {
+  if (idx === ci) return 0
+  if (idx < ci) return ci - 1
+  return ci
+}

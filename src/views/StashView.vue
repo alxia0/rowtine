@@ -22,6 +22,7 @@ import {
 } from '@/utils/yarn-filter'
 import { EXAMPLE_YARN } from '@/constants/empty-samples'
 import { parseDecimal } from '@/utils/decimal'
+import { stockTotalsByCurrency } from '@/utils/price-currency'
 import { formatLength, formatWeight, formatMoney, formatSkeins } from '@/utils/units'
 import { useSettingsStore } from '@/stores/settings'
 import { usePurchasesStore } from '@/stores/purchases'
@@ -88,9 +89,9 @@ const totalMeters = computed(() =>
 const totalGrams = computed(() =>
   yarnsStore.yarns.reduce((a, y) => a + (Number(y.quantity) || 0) * (parseDecimal(y.grams) || 0), 0),
 )
-const totalSpent = computed(() =>
-  yarnsStore.yarns.reduce((a, y) => a + (Number(y.quantity) || 0) * (parseDecimal(y.price) || 0), 0),
-)
+// Montants dépensés regroupés par devise (jamais une somme mêlée) ; une devise à zéro n'a pas de tuile.
+const spentByCurrency = computed(() => stockTotalsByCurrency(yarnsStore.yarns, settings.currency))
+const spentCurrencies = computed(() => Object.keys(spentByCurrency.value).filter((c) => spentByCurrency.value[c] > 0))
 
 // Totaux mis en forme pour l'en-tête : la valeur et son unité sont calculées ensemble
 // (au-delà de 1 000 la tuile passe en km / kg selon le système choisi), cf. src/utils/units.js.
@@ -102,9 +103,9 @@ const unitOpts = computed(() => ({
 }))
 const lengthStat = computed(() => formatLength(totalMeters.value, unitOpts.value))
 const weightStat = computed(() => formatWeight(totalGrams.value, unitOpts.value))
-const moneyStat = computed(() =>
-  formatMoney(totalSpent.value, { locale: locale.value, currency: settings.currency, profile: 'total' }),
-)
+function moneyStat(currency) {
+  return formatMoney(spentByCurrency.value[currency], { locale: locale.value, currency, profile: 'total' })
+}
 
 // Carte d'exemple de l'écran « stock vide » (EXAMPLE_YARN) : mêmes profils que YarnCard
 // (métrage du lot = 'lot', poids du lot = 'total') ; sinon une utilisatrice en impérial
@@ -260,11 +261,11 @@ const sortOptions = computed(() => [
   <AppHeader :title="t('nav.stash')" />
   <main class="screen">
     <template v-if="yarnsStore.yarns.length">
-      <div class="recap">
+      <div class="recap" :class="{ 'recap--wrap': spentCurrencies.length > 1 }">
         <div class="recap__stat"><span class="recap__num">{{ formatSkeins(totalSkeins, { locale }) }}</span><span class="recap__lbl">{{ t('yarn.skeins') }}</span></div>
         <div class="recap__stat"><span class="recap__num">{{ lengthStat.text }}</span><span class="recap__lbl">{{ t(lengthStat.unitKey) }}</span></div>
         <div class="recap__stat"><span class="recap__num">{{ weightStat.text }}</span><span class="recap__lbl">{{ t(weightStat.unitKey) }}</span></div>
-        <div v-if="totalSpent > 0" class="recap__stat"><span class="recap__num">{{ moneyStat.text }}</span><span class="recap__lbl">{{ t(moneyStat.unitKey, { symbol: moneyStat.symbol }) }}</span></div>
+        <div v-for="cur in spentCurrencies" :key="cur" class="recap__stat"><span class="recap__num">{{ moneyStat(cur).text }}</span><span class="recap__lbl">{{ t(moneyStat(cur).unitKey, { symbol: moneyStat(cur).symbol }) }}</span></div>
       </div>
 
       <input v-model="search" class="input" :aria-label="t('yarn.search')" :placeholder="t('yarn.search')" />
@@ -356,6 +357,7 @@ const sortOptions = computed(() => [
    récupérée pour les nombres à 7 caractères (ex. "124,747" km) sans toucher à la hauteur
    des tuiles ni à la police — mesuré à 360px, cf. tests/e2e/stash-recap-overflow.spec.js. */
 .recap { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--sp-1); margin-bottom: var(--sp-3); }
+.recap--wrap { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); } /* 5 tuiles ou plus (2 devises ou +) : 3 par rangée, à 4+ côte à côte les chiffres débordaient à 360px */
 .recap__stat { background: var(--tile); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-2); text-align: center; box-shadow: var(--clay-sm); }
 /* Mesuré à 360px : 25px de débordement à 22px fixes, « 49,203 » passait sous la tuile
    voisine (cf. captures 25/07). `clamp()` réduit juste ce qu'il faut sur écran étroit ;

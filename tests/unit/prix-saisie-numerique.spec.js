@@ -14,9 +14,9 @@
 // #pat-price (prix du patron). Les autres `inputmode="decimal"` de l'app sont des aiguilles,
 // des échantillons et la jauge : ils ne sont pas concernés par ce défaut, ils ne bougent pas.
 //
-// `patternPriceState` n'est PAS touché : son test 5 (« environ 5 » ⇒ gratuit) décrit ce que
-// l'app fait d'une donnée HÉRITÉE, pas ce qu'elle accepte à la frappe. Les deux contrats vivent
-// côte à côte.
+// `patternPriceState` décrit ce que l'app fait d'une donnée HÉRITÉE, pas ce qu'elle accepte à la
+// frappe : depuis le 15/11, une telle donnée s'affiche « Prix inconnu » (son test 5), comme dans
+// l'écran Dépenses. Les deux contrats vivent côte à côte.
 import { describe, it, expect } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'

@@ -7,6 +7,17 @@
 // même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_EN = [
   {
+    version: '1.5.0',
+    notes: [
+      'New “My tools” screen: your needles, hooks and interchangeable sets, with size, length, material, photos and price. A set can have cables of several lengths and fixing diameters.',
+      'Link tools to a project: its page warns when a size is missing from your stash. For a set, you take one exact size and one cable, and the rest of the set stays free for another project.',
+      'Pausing a project offers to free its tools for another project; resuming it offers to take back the ones that are still free.',
+      'Tools you bought count in Expenses, and the tool stash exports to a spreadsheet.',
+      'Finished project: a Cancel button in the skeins window, a cap at what is available, and a way to correct the skeins afterwards from the Edit screen.',
+      "After an update, a window shows what's new once, and the About screen keeps the log of every version.",
+    ],
+  },
+  {
     version: '1.4.3',
     notes: [
       'Yarn swatches: note the gauge you got with a yarn on its page in the stash (flat or in the round, needle or hook size, stitches and rows over 10 cm). Swatches follow the yarn in backups and in the stash export.',

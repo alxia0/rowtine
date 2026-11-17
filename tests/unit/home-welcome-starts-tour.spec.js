@@ -13,6 +13,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db, getSetting, setSetting } from '@/db/db'
+import { APP_VERSION } from '@/constants/app-info'
 import i18n from '@/i18n'
 import fr from '@/i18n/fr.json'
 
@@ -51,6 +52,8 @@ beforeEach(async () => {
   setActivePinia(pinia)
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
+  // Version déjà vue : sans marqueur, la pop-up « Nouveautés » s'ouvrirait en travers de ce que ce fichier teste.
+  await db.settings.put({ key: 'lastSeenVersion', value: APP_VERSION })
   tourSample.ensureTourProject.mockReset()
   nav.router.push.mockReset()
 })

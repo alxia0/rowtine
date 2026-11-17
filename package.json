@@ -1,13 +1,13 @@
 {
   "name": "rowtine",
-  "version": "1.4.3",
-  "buildNumber": 15,
+  "version": "1.5.0",
+  "buildNumber": 16,
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/gen-third-party-licenses.mjs --check",
-    "build": "vite build",
+    "prebuild": "node scripts/gen-third-party-licenses.mjs --check && vitest run tests/unit/release-notes-current-version.spec.js",
+    "build": "yarn prebuild && vite build",
     "preview": "vite preview",
     "lint": "run-s \"lint:*\"",
     "lint:oxlint": "oxlint . --fix",

@@ -21,12 +21,13 @@ import { isLibraryPattern } from '@/utils/pattern-price'
 export const MANIFEST_PATH = 'sauvegarde.json'
 
 async function localCounts() {
-  const [projets, patrons, laines] = await Promise.all([
+  const [projets, patrons, laines, outils] = await Promise.all([
     db.projects.count(),
     db.patterns.filter(isLibraryPattern).count(),
     db.yarns.count(),
+    db.tools.count(),
   ])
-  return { projets, patrons, laines }
+  return { projets, patrons, laines, outils }
 }
 
 export async function buildManifest() {

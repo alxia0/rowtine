@@ -11,6 +11,7 @@
 // discriminant.
 import { test, expect } from '@playwright/test'
 import { completeOnboarding } from './helpers'
+import { seedYarns } from './helpers-seed-yarns'
 
 // Ajoute une laine avec un métrage, un poids et un prix — variante du helper local de
 // stash.spec.js, qui ne remplit que la quantité.
@@ -120,4 +121,31 @@ test('la grille ne déborde plus de l’écran, même avec l’ancienne police f
 
   const recapOverflow = await recap.evaluate((el) => el.scrollWidth - el.clientWidth)
   expect(recapOverflow).toBeLessThanOrEqual(0)
+})
+
+test('deux devises (5 tuiles) à 7 chiffres ne débordent pas à 360 px', async ({ page }) => {
+  // Deux devises ajoutent une tuile d'argent par devise : 5 tuiles côte à côte à 360 px.
+  await completeOnboarding(page, { firstName: 'Alex' })
+  await page.setViewportSize({ width: 360, height: 800 })
+  const base = { colorKey: 'rouge', quantity: 251, lengthM: 497, grams: 98, photos: [] }
+  await seedYarns(page, [
+    { ...base, brand: 'Maison', price: '14,90', priceCurrency: 'EUR' },
+    { ...base, brand: 'Maison US', price: '14,90', priceCurrency: 'USD' },
+  ])
+  await page.goto('/stash')
+  const recap = page.locator('.recap')
+  await expect(recap).toBeVisible()
+  await expect(page.locator('.recap__stat')).toHaveCount(5)
+  await expect(recap).toContainText('km')
+
+  const pageOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )
+  expect(pageOverflow).toBeLessThanOrEqual(0)
+  const recapOverflow = await recap.evaluate((el) => el.scrollWidth - el.clientWidth)
+  expect(recapOverflow).toBeLessThanOrEqual(0)
+  for (const num of await page.locator('.recap__num').all()) {
+    const overflow = await num.evaluate((el) => el.scrollWidth - el.clientWidth)
+    expect(overflow).toBeLessThanOrEqual(3)
+  }
 })

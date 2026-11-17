@@ -7,7 +7,7 @@
 // patron acheté 18 € et tricoté trois fois n'a coûté 18 €, pas 54 €. Le champ reste
 // saisissable depuis le formulaire du projet, mais il écrit dans la fiche du patron.
 
-import { parseDecimal } from '@/utils/decimal'
+import { parseDecimal, isReadableDecimal } from '@/utils/decimal'
 
 // Un patron de BIBLIOTHÈQUE : ni le gabarit « Patron libre » (builtin, UNIQUE et PARTAGÉ par
 // tous les projets sans patron), ni une copie de travail (ownerProjectId, duplicata d'un
@@ -75,6 +75,9 @@ export function patternExpenseLines(patterns) {
 // Trois états, comme la saisie : un montant, un « gratuit » DÉCLARÉ (`'0'` — « j'ai vérifié,
 // c'était gratuit »), ou rien de noté (champ vide — « je n'ai rien noté »). Les deux derniers
 // ne se confondent jamais : les mélanger perdrait l'information (cf. isPricedPattern).
+// Un quatrième, `unknown`, pour une saisie qui ne se lit pas comme un nombre (« environ 5 »,
+// donnée d'avant le blocage de la saisie) : l'écran Dépenses la dit « Prix inconnu », les
+// fiches aussi. Avant le 15/11 elle devenait 0, donc « Gratuit », ce qu'elle n'est pas.
 //
 // La devise rendue est celle DU PATRON, jamais celle du réglage global : un patron acheté en
 // francs suisses reste en francs suisses dans une app réglée en euros (l'app ne convertit
@@ -82,6 +85,7 @@ export function patternExpenseLines(patterns) {
 export function patternPriceState(pattern) {
   const raw = String(pattern?.price ?? '').trim()
   if (!raw) return { kind: 'none' }
+  if (!isReadableDecimal(raw)) return { kind: 'unknown' }
   const amount = parseDecimal(raw) || 0
   if (!amount) return { kind: 'free' }
   return { kind: 'amount', amount, currency: pattern?.priceCurrency || '' }

@@ -1,0 +1,6 @@
+Nouvel écran « Mes outils » : aiguilles, crochets et kits interchangeables (tailles, câbles), avec photos et prix.
+Lie des outils à un projet, ou une taille et un câble d'un kit ; une taille absente est signalée.
+Pause d'un projet : libère ses outils pour un autre, reprends-les ensuite.
+Outils achetés comptés dans les Dépenses ; export du stock en tableur.
+Projet terminé : bouton Annuler, pelotes corrigeables après coup.
+Après une mise à jour : fenêtre des nouveautés.

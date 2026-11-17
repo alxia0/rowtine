@@ -94,11 +94,11 @@ describe('file des messages', () => {
     expect(q.active).toBe(NOTICE.WELCOME)
   })
 
-  it('les huit messages ont un rang, tous distincts', () => {
+  it('les neuf messages ont un rang, tous distincts', () => {
     const ids = Object.values(NOTICE)
-    expect(ids).toHaveLength(8)
+    expect(ids).toHaveLength(9)
     const rangs = ids.map((id) => NOTICE_RANKS[id])
     expect(rangs.every((r) => Number.isInteger(r))).toBe(true)
-    expect(new Set(rangs).size).toBe(8)
+    expect(new Set(rangs).size).toBe(9)
   })
 })

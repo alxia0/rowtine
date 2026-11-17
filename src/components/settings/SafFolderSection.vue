@@ -61,7 +61,7 @@ const dbRestorable = ref(false)
 // sans que l'autre ne dessine la porte de sortie.
 const pauseReason = ref(null)
 const backupPaused = computed(() => pauseReason.value !== null)
-const counts = ref({ p: 0, m: 0, l: 0 })
+const counts = ref({ p: 0, m: 0, l: 0, o: 0 })
 
 // Fiche d'identité de la sauvegarde (lot du 06/08/2026). Le 06/08 au matin, l'app a
 // annoncé « une sauvegarde t'attend » et suspendu ses écritures : rien à l'écran ne
@@ -177,12 +177,13 @@ async function loadState() {
       dbRestorable.value = false
       restorable.value = null
     }
-    const [p, m, l] = await Promise.all([
+    const [p, m, l, o] = await Promise.all([
       db.projects.count(),
       db.patterns.filter(isLibraryPattern).count(),
       db.yarns.count(),
+      db.tools.count(),
     ])
-    counts.value = { p, m, l }
+    counts.value = { p, m, l, o }
     // Encore deux lectures indépendantes de `storage` (même remarque qu'au-dessus) :
     // - Site unique de vérité (lot du 06/08) : la ligne « en pause » ET le `v-if` du
     //   bouton de sortie qui en découle doivent suivre EXACTEMENT le critère qui
@@ -320,10 +321,10 @@ async function startFresh() {
            corbeille, donc annoncerait un écart imaginaire — sur l'écran dont le seul rôle
            est de rassurer. -->
       <p v-if="backupFound && folderCounts" class="muted small" data-test="side-folder">
-        {{ t('saf.sideFolder') }} — {{ t('saf.sideCounts', folderCounts) }}
+        {{ t('saf.sideFolder') }} — {{ t(Number.isFinite(folderCounts.outils) ? 'saf.sideCountsTools' : 'saf.sideCounts', folderCounts) }}
       </p>
       <p class="muted small" data-test="side-device">
-        {{ t('saf.sideDevice') }} — {{ t('saf.sideCounts', { projets: counts.p, patrons: counts.m, laines: counts.l }) }}
+        {{ t('saf.sideDevice') }} — {{ t('saf.sideCountsTools', { projets: counts.p, patrons: counts.m, laines: counts.l, outils: counts.o }) }}
       </p>
       <!-- ⚠️ LES TROIS LIGNES QUI PARLENT DU DOSSIER (`origin`, `side-folder`, `advice`)
            PORTENT LA MÊME GARDE : `backupFound` (dans ce bloc, déjà filtré par

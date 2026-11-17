@@ -36,7 +36,7 @@ chapitre 3.
 
 Le chrono enregistre tes sessions, l'onglet Photos garde les images du
 patron et tes propres photos, les statistiques résument ton activité sur le
-projet, et un badge se partage en un geste. Voir les chapitres 2 et 7.
+projet, et un badge se partage en un geste. Voir les chapitres 2 et 8.
 
 Pour essayer tout de suite : le bouton « Revoir la visite
 guidée », juste en dessous et dans les Réglages, ouvre le bonnet
@@ -71,7 +71,7 @@ En ouvrant l'app, tu retrouves :
   Reprendre et du récapitulatif. Ils reviennent dès que tu as créé ton premier
   projet ou importé ton premier patron.
 - Enfin, **le menu en haut à droite** mène à tout moment au stock de laines, à
-  la bibliothèque de patrons, aux statistiques, **aux sessions**, aux dépenses,
+  tes outils, à la bibliothèque de patrons, aux statistiques, **aux sessions**, aux dépenses,
   à ce guide, aux réglages et à l'écran À propos. Il est présent sur tous les
   écrans : où que tu sois dans l'app, tu peux repartir ailleurs sans revenir à
   l'accueil.
@@ -310,7 +310,7 @@ le bouton **Modifier les points**, en tête de l'onglet, rouvre le même
 sélecteur : décocher un point retire sa fiche.
 
 Hors de tout patron, le mémo complet se consulte aussi depuis l'accueil, par la
-tuile **Points** des outils (point 6).
+tuile **Points** des outils (point 7).
 
 ### Le diagramme en plein écran, et comment bien le « caler »
 
@@ -446,7 +446,7 @@ tablette tenue à la verticale), le lecteur s'affiche en une seule colonne. Un p
 
 *Les statistiques sur une tablette tenue à l'horizontale, en fenêtre Semestre : la grille calendaire montre d'un coup les six derniers mois, quand un téléphone t'oblige à faire glisser du doigt, et les tuiles chiffrées se rangent deux par deux en dessous.*
 
-L'écran **Statistiques** (point 7) profite lui aussi de la place : sa grille
+L'écran **Statistiques** (point 8) profite lui aussi de la place : sa grille
 calendaire et ses tuiles chiffrées s'étalent au lieu de se serrer, et sur les fenêtres les plus longues, Semestre ou Année, tu vois bien plus de semaines avant d'avoir à faire glisser la grille du doigt. Rien de plus à
 régler : c'est le même écran, simplement plus à l'aise.
 
@@ -719,6 +719,7 @@ l'app t'arrête et te demande confirmation : rien ne se perd par erreur, ici no
   pour un projet **Abandonné**, où tu indiques les pelotes perdues. L'app garde
   deux chiffres après la virgule (un quart de pelote, c'est 0,25) et affiche
   partout ces nombres avec le séparateur de ta langue.
+- **Terminer un projet, et corriger après coup** : dans la fenêtre de fin de projet, tu peux indiquer plus de pelotes que prévu au départ, dans la limite de ce qui est **disponible** pour la laine (son stock, moins les pelotes réservées à d'autres projets). Au-dessus, l'app te le dit, garde le maximum et te propose **Corriger le stock**, qui ouvre la fiche de la laine. Le bouton **Annuler** (comme la croix, un appui à côté ou le retour) ferme la fenêtre sans rien consommer : le projet garde son statut, tu peux revenir le terminer plus tard. Une fois le projet terminé ou abandonné, le bloc **Pelotes tricotées** de son écran **Modifier** te laisse corriger ces quantités ; le stock de la laine suit, en plus ou en moins, sans jamais compter deux fois.
 - **La fiche d'une laine** : un appui sur sa carte l'ouvre en plein écran.
   Elle rassemble tout ce que tu as noté (marque, coloris, rangement, métrage,
   quantité, prix, achats, composition, notes), ses caractéristiques, son état
@@ -777,24 +778,25 @@ jamais à Ravelry.
 
 *Les menus Année et Type en haut, le total avec sa ventilation laine / patrons, puis le détail par mois.*
 
-Accessible depuis le menu de l'app, cet écran récapitule tout ce que tu as payé pour ton tricot, la **laine** comme les **patrons** :
+Accessible depuis le menu de l'app, cet écran récapitule tout ce que tu as payé pour ton tricot, la **laine**, les **patrons** et les **outils** :
 - Le **total dépensé**, par devise si tu en as utilisé plusieurs (l'app ne les
   mélange pas, faute de connaître un taux de change). Ce total ne redescend
   jamais tout seul : consommer une pelote ou terminer un projet ne le fait pas
   baisser. Il est différent de la **valeur de ton stock**, en haut de l'écran
   **Stock de laine**, qui suit ce qu'il te reste et baisse quand tu utilises
   une pelote. Tant que tu
-  n'as noté aucun prix de patron, ce total reste exactement celui que tu
-  connais ; dès qu'un patron y figure, il se ventile en deux sous-lignes : ce
-  qui est parti en laine, ce qui est parti en patrons.
+  n'as noté aucun prix de patron ni d'outil, ce total reste exactement celui
+  que tu connais ; dès qu'un patron ou un outil y figure, il se ventile en une
+  sous-ligne par catégorie présente : ce qui est parti en laine, en patrons,
+  en outils.
 - Deux menus en haut : **Année** n'affiche que l'année choisie (ou « Toutes
   les années »), **Type** n'affiche qu'une catégorie (ou tout). Les totaux se
   recalculent en conséquence. Les achats dont tu n'as pas noté la date se
   retrouvent sous « Date inconnue », qui s'ajoute au menu Année quand il y en a.
-- Une **répartition par année puis par mois**, laine et patrons mêlés dans
+- Une **répartition par année puis par mois**, laine, patrons et outils mêlés dans
   l'ordre du calendrier : tu vois d'un coup d'œil ce qu'un mois t'a coûté.
-- Dès qu'un patron figure dans la liste, chaque ligne porte en plus son
-  étiquette, **Laine** ou **Patron**. Un patron que tu as déclaré gratuit
+- Dès qu'un patron ou un outil figure dans la liste, chaque ligne porte en plus son
+  étiquette, **Laine**, **Patron** ou **Outil**. Un patron ou un outil que tu as déclaré gratuit
   apparaît avec la mention **Gratuit** : c'est la trace que tu as vérifié,
   pas un oubli.
 - La **liste complète** de tous tes achats et cadeaux, y compris ceux dont la
@@ -802,13 +804,33 @@ Accessible depuis le menu de l'app, cet écran récapitule tout ce que tu as pay
   supprimée »).
 - La possibilité de **supprimer** une ligne de laine directement depuis cet
   écran, en te laissant l'**annuler** juste après si c'était une erreur. Une
-  ligne de patron, elle, se modifie depuis la fiche du patron : un appui
-  dessus t'y emmène.
+  ligne de patron ou d'outil, elle, se modifie depuis la fiche du patron ou
+  de l'outil : un appui dessus t'y emmène.
 
 > **À savoir** : un achat de laine survit à la suppression de sa fiche et reste visible ici. Le prix d'un patron, lui, appartient au patron : si tu
-> supprimes le patron, sa dépense s'en va avec lui.
+> supprimes le patron, sa dépense s'en va avec lui. Tes outils avec un prix y figurent aussi, rangés sous « Outils » : pour corriger ou effacer le prix, ouvre la fiche de l'outil.
 
-## 6. Outils indépendants
+## 6. Tes outils : aiguilles et crochets
+
+L'écran **Mes outils**, dans le menu juste après le stock de laine, range tes aiguilles et tes crochets. Avant d'acheter une paire ou de commencer un patron, tu vois d'un coup d'œil si tu as déjà la bonne taille.
+
+- **Ajouter un outil** : le bouton **Ajouter un outil** ouvre le formulaire. Tu choisis d'abord le type, dans trois familles : **Aiguilles** (Aiguilles droites, Circulaires, Double pointes, Aiguilles flexibles, Pointes interchangeables, Câble, Autre aiguille), **Kits** (Kit interchangeable, Kit de crochets) et **Crochets** (Crochet, Crochet tunisien). Ensuite, seuls les champs utiles à ce type s'affichent : la longueur pour une circulaire, le nombre d'aiguilles pour des double pointes, le manche pour un crochet, la forme (fixe ou à câble) pour un crochet tunisien.
+- **En dehors du type, seule la taille est obligatoire**, et seulement pour les types qui en ont une : elle est facultative pour une Autre aiguille, et un Câble n'en a pas. Tu la choisis dans la liste, où chaque taille en millimètres porte son équivalent américain quand il existe. Pour un crochet, la liste va des tailles fines (0,6 mm) jusqu'à 25 mm, et c'est la matière qui choisit l'équivalent : en **acier inoxydable**, le numéro des crochets acier (2,25 mm · US 2) ; sinon, la lettre (2,25 mm · B-1). Si la tienne n'y est pas, **Autre taille…** te laisse la taper en mm. Tout le reste est facultatif : matière, marque, gamme, quantité, date d'achat, prix, boutique, rangement, état (Disponible, Prêté, Perdu, Abîmé, À remplacer), notes et photos.
+- **Le kit interchangeable** tient sur une seule fiche. Dans **Tailles présentes**, tu coches les tailles des pointes qu'il contient ; dans **Câbles présents**, les longueurs de ses câbles. Si deux câbles de même longueur n'ont pas la même fixation (S, L ou Mini), choisis d'abord le **Diamètre de la fixation**, puis coche les longueurs : 80 cm S et 80 cm L restent deux câbles distincts, et la fiche du kit les compte à part. Sa fiche affiche ensuite le **Contenu du kit**.
+- **Le kit de crochets** marche pareil : tu coches les tailles de ses crochets, dans l'échelle des crochets (4 mm · G-6). Coche **Crochets tunisiens interchangeables** pour y ajouter les câbles ; sans cette case, le kit n'a pas de câbles. Pour la taille manquante d'un projet, un kit de crochets compte pour le crochet seulement, un kit d'aiguilles pour le tricot seulement. Sous une taille, il s'affiche comme « crochets du kit ».
+- **Par type ou par taille** : deux boutons en haut de l'écran changent la présentation. **Par type** range tes outils par famille (Aiguilles, Kits, Crochets), puis par type. **Par taille** les regroupe taille par taille, toutes familles mêlées ; les câbles seuls et les outils sans taille viennent en dernier. Un kit apparaît sous chacune de ses tailles, avec une ligne comme « pointes du kit KnitPro » : tu sais tout de suite que ta pointe de 4 mm est dans le kit. L'app retient ton choix sur cet appareil.
+- **Les pastilles de taille** : sous ces deux boutons, une pastille par taille que tu possèdes. Touche une pastille pour n'afficher que les outils de cette taille ; touche-la à nouveau pour retirer le filtre. Le champ de recherche, juste en dessous, cherche dans la marque, la gamme, les notes et le rangement. Si rien ne correspond, **Effacer la recherche et la taille** remet tout.
+- **La fiche d'un outil** : un appui sur un outil l'ouvre. Elle rassemble tout ce que tu as noté et tes photos ; un appui sur l'étoile choisit la photo de couverture. Dans la liste, chaque outil s'affiche sur deux lignes : la première commence par la marque et la gamme, puis la taille ; la seconde donne le type, la longueur, la matière, le nombre s'il y en a plusieurs, et finit toujours par l'état (disponible, prêté, perdu…), pour qu'une aiguille prêtée ou perdue ne te trompe pas.
+- **Modifier, dupliquer ou supprimer** un outil depuis le menu **Actions** (icône verticale à trois points) en haut de sa fiche. **Dupliquer** ouvre le formulaire déjà rempli, avec tout sauf les photos : pratique pour la même aiguille dans une autre taille. **Supprimer** envoie l'outil à la corbeille. **Annuler**, juste après, le remet en place, et la corbeille des réglages le garde jusqu'à ce que tu la vides.
+- **Tes outils suivent ta sauvegarde** : ils sont copiés dans le dossier {app} avec tout le reste, et leurs photos dans un sous-dossier **Outils**. Une restauration te les rend tels quels.
+- **Export en tableur** : le bouton **Mes outils**, dans la section export des Réglages, sort ton stock d'outils en tableur (CSV), comme celui de ta laine. Chaque fiche y tient sur une ligne, avec son équivalent de taille, son prix et sa devise.
+- **Taille absente de ton stock** : sur la fiche d'un projet, sous la tuile Aiguilles (ou Crochet), une ligne discrète signale chaque taille demandée qui n'est pas dans tes outils. Elle n'apparaît que si tu as déjà au moins un outil.
+- **Lier tes outils à un projet** : sur la fiche d'un projet, onglet **Détails**, la tuile **Mes outils** liste les outils que tu y as liés, et **Choisir des outils** ouvre la liste à cocher, avec d'abord ceux aux tailles du projet. Un outil lié à un projet En cours porte « en cours : » suivi du nom du projet dans **Mes outils** et dans la liste à cocher, et sa fiche nomme les projets qui l'utilisent. Comme la mention de taille, la tuile n'apparaît que si tu as au moins un outil. Quand tu mets un projet en pause, l'appli te propose de libérer ses outils pour un autre projet ; à la reprise, elle te propose de reprendre ceux qui sont encore libres.
+- **Prendre une taille dans un kit** : dans la liste à cocher, un kit n'a pas de case à lui, il se déplie en ses tailles, celles du projet d'abord. Coche la taille que tu prends ; si le kit a des câbles, choisis aussi le câble, ou **aucun câble**. Seule cette taille est occupée, pas tout le kit : dans **Mes outils**, la ligne du kit dit « en cours : 4 mm (Bonnet) » ou « disponible ». Une taille ou un câble déjà pris par un autre projet En cours reste cochable, avec la mention « pris : » suivie du nom du projet, pour déplacer une pointe d'un projet à l'autre. La fiche du kit nomme le projet de chaque taille prise et compte les câbles pris (« 80 cm ×2, 1 pris (Bonnet) ») ; la tuile du projet affiche « KnitPro Zing · 4 mm + 80 cm ». Un kit lié en entier avant cette version garde sa case **Kit entier (lien d’avant)** : décoche-la, ou coche une taille pour la remplacer.
+
+Tant que tu n'as aucun outil, l'écran montre une ligne d'exemple, une circulaire de 4 mm en bambou : elle n'est jamais enregistrée.
+
+## 7. Outils indépendants
 
 ![Le champ « Nom du compteur » encore vide, les deux cases décochées avec leur exemple (une manche, ou « répéter les rangs 1 à 8, 5 fois »), puis « + Compteur » et « Aucun compteur. Ajoute-en un. »](images/fr/06a-compteurs.webp)
 
@@ -852,7 +874,7 @@ l'accueil :
   abréviations ; le mémo y gagne aussi les abréviations britanniques (*yfwd*,
   *yrn*, *yon*, *psso*).
 
-## 7. Statistiques
+## 8. Statistiques
 
 ![L'onglet Trimestre retenu entre Mois, Semestre et Année, du 29/06/2026 au 24/09/2026, la carte Sur la période à 72:40:06, puis l'onglet Calendrier plutôt que Rythme, une grille de juin à sept. graduée de moins à plus, et les cartes Temps total 72:40:06 et Jours actifs 69 sur 88](images/fr/07-statistiques.webp)
 
@@ -879,8 +901,8 @@ Le reste de l'écran se partage en **deux onglets**, qui se changent au
 
 *L'onglet « Rythme » : les barres du temps passé par période, les sept barres par jour de la semaine, et la phrase qui nomme ton jour le plus assidu.*
 
-La **grille** affiche une case par jour, du premier jour de ta semaine (en haut) au dernier (en bas), sur toute la fenêtre choisie ; ce premier jour est lundi par défaut, ou dimanche si tu l'as choisi dans les Réglages (§8). Sa couleur suit la
-teinte d'accent choisie dans les réglages (§8), et son intensité dépend du temps tricoté ce jour-là, à cinq niveaux : rien, moins de 30 minutes, de 30 minutes à 1 heure, de 1 à 2 heures, 2 heures et plus. Les seuils sont
+La **grille** affiche une case par jour, du premier jour de ta semaine (en haut) au dernier (en bas), sur toute la fenêtre choisie ; ce premier jour est lundi par défaut, ou dimanche si tu l'as choisi dans les Réglages (§9). Sa couleur suit la
+teinte d'accent choisie dans les réglages (§9), et son intensité dépend du temps tricoté ce jour-là, à cinq niveaux : rien, moins de 30 minutes, de 30 minutes à 1 heure, de 1 à 2 heures, 2 heures et plus. Les seuils sont
 **fixes** : une case foncée veut toujours dire la même chose, d'un mois à
 l'autre, même un trimestre plus calme que d'habitude. Un trait plus marqué
 entoure les colonnes d'un même mois, pour les repérer d'un coup d'œil.
@@ -894,7 +916,7 @@ affiche, sous la grille, sa date, sa durée et, quand plusieurs projets ont avan
 
 Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins une action** : une session chronométrée ou ajoutée à la main, un rang coché, un compteur de projet avancé. Et ouvrir l'application sans rien y faire ne compte pas : il faut une action **enregistrée**.
 
-## 8. Réglages
+## 9. Réglages
 
 ![Camille est saisie dans « Ton prénom (facultatif) », Tricot est retenu comme technique par défaut et un bouton Enregistrer ferme la carte Profil, puis Apparence sur Système, le bloc Couleur d'ambiance avec ses dix pastilles et son curseur de teinte, Premier jour de la semaine sur Lundi, et le titre Langue au bord inférieur du cadre](images/fr/08-reglages.webp)
 
@@ -907,7 +929,7 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
   laquelle sur le curseur continu. Tant que tu n'as rien choisi, la couleur **suit ton thème** et change d'elle-même avec le mode clair ou sombre ;
   dès que tu choisis, ton choix prime et reste le même dans les deux modes.
   Cette teinte colore les boutons, les sélections, les barres de progression et
-  la grille des statistiques (§7).
+  la grille des statistiques (§8).
 - **Premier jour de la semaine** : lundi (par défaut) ou dimanche. Ce choix
   gouverne la grille calendaire et les sept barres par jour de semaine de
   l'écran Statistiques, ainsi que la remise à zéro du total « cette semaine »
@@ -919,17 +941,18 @@ Ce que la **série** compte, ce sont les jours où tu as enregistré **au moins 
   - **Métrique** (mètres, grammes) ou **impérial** (yards, onces, livres) ; tout suit : la saisie de tes pelotes, les totaux du stock, l'échantillon
     (10 × 10 cm ou 4 × 4 pouces). Changer de système ne modifie pas tes
     chiffres enregistrés, il les réaffiche dans l'autre unité.
-  - **Devise** parmi cinq (€, $, £, CHF, $ CA). Attention, c'est une simple
-    étiquette : les prix déjà saisis **ne sont pas convertis** et s'affichent avec l'autre symbole ; l'app te le rappelle avant de valider.
+  - **Devise** parmi cinq (€, $, £, CHF, $ CA). Elle s'applique aux prix
+    que tu saisis **ensuite** : chaque prix garde la devise dans laquelle tu l'as noté,
+    **rien n'est converti** ; l'app te le rappelle avant de valider.
   - Ces deux réglages te sont proposés **dès le premier écran** à l'ouverture
     de l'app, pré-remplis d'après la langue de ton appareil ; tu peux les
     changer à tout moment ici.
 - **Données** :
   - Export de ton stock, de tes projets ou de tes patrons en tableur (CSV),
     pour les consulter ou les sauvegarder ailleurs. Les colonnes suivent tes
-    réglages : longueurs et poids dans ton système d'unités, prix avec le
-    symbole de ta devise.
-  - **Corbeille** universelle : tout projet, laine ou patron supprimé s'y
+    réglages : longueurs et poids dans ton système d'unités, prix suivis de
+    leur devise dans une colonne à part (chaque prix garde la sienne).
+  - **Corbeille** universelle : tout projet, laine, outil ou patron supprimé s'y
     retrouve et peut être restauré à tout moment (jusqu'à vidage volontaire).
 - **Dossier {app}** : tout ce que tu tricotes ou crochètes n'existe que dans cette app, sur ton appareil, nulle part ailleurs. Le dossier de sauvegarde en garde une copie, écrite **en continu** (tu n'as jamais rien à déclencher ni à y penser), pour la retrouver si tu perds ton appareil, s'il casse
   ou si tu réinstalles l'app. Tu le désignes une seule fois, au tout premier
@@ -1022,7 +1045,7 @@ la visite guidée, que tu peux relancer quand tu veux).
   seule fois en tout**, pas une fois par écran ; le bouton « C'est compris »
   la referme.
 
-## 9. Sous le capot : ce que {app} te garantit
+## 10. Sous le capot : ce que {app} te garantit
 
 - **Hors ligne par défaut** : aucune de tes données ne quitte ton appareil.
 - **Pas de compte, pas de paywall** : toutes les fonctions ci-dessus sont
@@ -1041,4 +1064,9 @@ la visite guidée, que tu peux relancer quand tu veux).
   dit où vivent tes données, ce qui peut sortir de ton téléphone et dans quels
   cas, ce qu'il advient si tu désinstalles l'app, et qui en répond : le responsable et l'adresse de contact y sont nommés. Elle est écrite dans ta
   langue.
+- **Les nouveautés, une seule fois** : après une mise à jour, une fenêtre te résume les
+  nouveautés de la dernière version, une seule fois par version. « Compris » la
+  referme, « Tout voir » ouvre l'écran À propos, où tu retrouves le
+  journal de toutes les versions. Une installation neuve ne l'affiche pas. L'app se souvient de la
+  dernière version que tu as vue sur cet appareil, mais pas dans la sauvegarde.
 - **En quatre langues** : français, anglais, allemand et espagnol.

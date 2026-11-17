@@ -61,6 +61,12 @@ const purchasesLoad = vi.fn()
 vi.mock('@/stores/purchases', () => ({
   usePurchasesStore: () => ({ load: purchasesLoad }),
 }))
+// Stock d'outils : `reloadStores` doit le recharger, sinon une vue déjà chargée garde l'état
+// d'avant la restauration et une modification le réécrirait par-dessus.
+const toolsLoad = vi.fn()
+vi.mock('@/stores/tools', () => ({
+  useToolsStore: () => ({ load: toolsLoad }),
+}))
 // `locale` simule la valeur RECHARGÉE par `settingsStore.load()` depuis la base
 // restaurée (lot 3 bloquants avant diffusion, 01/08) — statique ici (le mock
 // ne rejoue pas la réactivité de `load()`), suffisant pour prouver que `reloadStores`
@@ -188,6 +194,7 @@ describe('runRestore', () => {
     expect(projectsLoad).toHaveBeenCalledTimes(1)
     expect(yarnsLoad).toHaveBeenCalledTimes(1)
     expect(purchasesLoad).toHaveBeenCalledTimes(1)
+    expect(toolsLoad).toHaveBeenCalledTimes(1)
     expect(settingsLoad).toHaveBeenCalledTimes(1)
     expect(trashLoad).toHaveBeenCalledTimes(1)
     expect(activeSessionLoad).toHaveBeenCalledTimes(1)
@@ -281,6 +288,27 @@ describe('runRestore', () => {
     expect(clearBackupDecision).toHaveBeenCalledTimes(1)
     expect(isFolderCleanSinceRestore()).toBe(false)
     await expect(getSetting('restoredDue')).resolves.toBe(false)
+  })
+
+  // `outils.json` illisible : le VRAI readBackup consigne l'écart (sans lever), donc la
+  // restauration est partielle, tools vide, et le dossier n'est pas pris en charge.
+  it("outils.json corrompu : restauration partielle (owned:false), tools: [], écart sur outils.json", async () => {
+    const { readBackup: vraiReadBackup } = await vi.importActual('@/backup/restore')
+    const { MemoryBackupStorage } = await import('@/backup/memory-storage')
+    const mem = new MemoryBackupStorage()
+    await mem.writeFile('outils.json', '{ pas du json', { encoding: 'utf8' })
+    getBackupStorage.mockReturnValue(mem)
+    getBackupPermissionOk.mockResolvedValue(true)
+    hasBackup.mockResolvedValue(true)
+    readBackup.mockImplementation((st, opts) => vraiReadBackup(st, opts))
+    writeSnapshotToDb.mockResolvedValue()
+
+    const res = await runRestore({ notifyRestored: true })
+
+    expect(res).toMatchObject({ ok: true, owned: false })
+    expect(res.errors).toContainEqual(expect.objectContaining({ where: 'outils.json' }))
+    expect(writeSnapshotToDb).toHaveBeenCalledWith(expect.objectContaining({ tools: [] }))
+    expect(recordBackupDecision).not.toHaveBeenCalled()
   })
 
   // Contrainte de PLACEMENT, pas cosmétique — même exigence que `readBackup` et
@@ -906,6 +934,18 @@ describe('isDbEmpty', () => {
     await db.purchases.add({ yarnId: null, yarnLabel: 'Laine supprimée', quantity: 2, kind: 'buy' })
     expect(await isDbEmpty()).toBe(false)
   })
+
+  // `tools` est dans REPLACED_TABLES : une base avec un seul outil ne doit pas être jugée vide.
+  it('faux dès qu’un outil existe (seul contenu de la base)', async () => {
+    await db.tools.add({ type: 'standard', category: 'hook', sizeMm: 4, photos: [] })
+    expect(await isDbEmpty()).toBe(false)
+  })
+
+  // `activeDays` est remplacée à la restauration et survit à la suppression définitive d'un projet.
+  it('isDbEmpty est faux quand la base ne contient que des jours actifs', async () => {
+    await db.activeDays.put({ day: '2026-11-01' })
+    expect(await isDbEmpty()).toBe(false)
+  })
 })
 
 // Correctif (04/08/2026) : le semis d'exemples (3 patrons + 2 projets, écran
@@ -960,6 +1000,21 @@ describe('isDbRestorable : une base qui ne contient que les exemples semés est 
     expect(await isDbRestorable()).toBe(false)
   })
 
+  it('isDbRestorable reste vrai avec le semis seul (non-recul)', async () => {
+    const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
+    const j1 = await db.projects.add({ name: 'Écharpe douillette' })
+    await recordSeededSamples({ patterns: [p1], projects: [j1] })
+    expect(await isDbRestorable()).toBe(true)
+  })
+
+  it('isDbRestorable est faux avec le semis et un jour actif', async () => {
+    const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
+    const j1 = await db.projects.add({ name: 'Écharpe douillette' })
+    await recordSeededSamples({ patterns: [p1], projects: [j1] })
+    await db.activeDays.put({ day: '2026-11-01' })
+    expect(await isDbRestorable()).toBe(false)
+  })
+
   it('semis + UN patron réel → pas restaurable', async () => {
     const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
     await recordSeededSamples({ patterns: [p1], projects: [] })
@@ -985,6 +1040,13 @@ describe('isDbRestorable : une base qui ne contient que les exemples semés est 
     const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
     await recordSeededSamples({ patterns: [p1], projects: [] })
     await db.purchases.add({ total: 12 })
+    expect(await isDbRestorable()).toBe(false)
+  })
+
+  it('semis + UN outil → pas restaurable', async () => {
+    const p1 = await db.patterns.add({ name: 'Bonnet Torsade' })
+    await recordSeededSamples({ patterns: [p1], projects: [] })
+    await db.tools.add({ type: 'standard', category: 'hook', sizeMm: 4, photos: [] })
     expect(await isDbRestorable()).toBe(false)
   })
 

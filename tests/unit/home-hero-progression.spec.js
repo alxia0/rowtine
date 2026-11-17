@@ -16,6 +16,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { db } from '@/db/db'
+import { APP_VERSION } from '@/constants/app-info'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSectionsStore } from '@/stores/sections'
 import i18n from '@/i18n'
@@ -76,6 +77,8 @@ beforeEach(async () => {
   nav.router.push.mockClear()
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
+  // Version déjà vue : sans marqueur, la pop-up « Nouveautés » s'ouvrirait en travers de ce que ce fichier teste.
+  await db.settings.put({ key: 'lastSeenVersion', value: APP_VERSION })
   await db.settings.put({ key: 'onboarded', value: true })
   projectId = await db.projects.add(wipProject('Châle Bellis'))
 })

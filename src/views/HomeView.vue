@@ -20,6 +20,10 @@ import { startOfWeek } from '@/utils/time-periods'
 import { relativeDayLabel } from '@/utils/date-format'
 import { NOTICE } from '@/constants/notice-queue'
 import { useNoticeSlot } from '@/composables/useNoticeSlot'
+import { decideReleaseNotice } from '@/utils/release-notice'
+import { resolveReleaseNotes } from '@/content/release-notes'
+import { withAppName } from '@/utils/app-name-token'
+import { APP_VERSION } from '@/constants/app-info'
 import { useStartTour } from '@/composables/useStartTour'
 import { getSeededSampleIds, getTourProjectIds, isSampleOnlyHome } from '@/utils/seeded-samples'
 
@@ -110,6 +114,34 @@ const welcomeTexts = computed(() =>
 // aucun des deux ne suffit seul. La file ne remplace pas cette logique, elle décide
 // seulement du moment de l'affichage face à la porte du dossier.
 const welcomeHasSlot = useNoticeSlot(NOTICE.WELCOME, showWelcome)
+
+// Pop-up « Nouveautés » après une mise à jour. La décision (montrer, avancer le marqueur en
+// silence, ne rien faire) est pure : cf. src/utils/release-notice.js. Elle passe par la file
+// des messages (rang 7) : si la bienvenue ou un autre message plus prioritaire occupe
+// l'écran, elle attend son tour, jamais deux à la fois.
+const showReleaseNotice = ref(false)
+const releaseNoticeHasSlot = useNoticeSlot(NOTICE.NEW_VERSION_NOTES, showReleaseNotice)
+// Le journal porte le marqueur `{app}` : substitué ici, depuis la même source du nom que
+// AboutView.vue (`app.name`).
+// Calculés depuis la langue COURANTE de l'interface (pas figés au montage) : titre,
+// introduction et points suivent ensemble un changement de langue pendant que la fenêtre est
+// ouverte. Seule la DÉCISION (montrer ou non) se prend une fois, au montage.
+const releaseItems = computed(() => {
+  const entry = resolveReleaseNotes(locale.value).notes.find((e) => e.version === APP_VERSION)
+  return (entry?.notes || []).map((n) => withAppName(n, t('app.name')))
+})
+// ⚠️ L'écriture du marqueur est ATTENDUE (piège `swipeHintSeen`, cf. `dismissWelcome`) : la
+// fermeture reste synchrone, juste au-dessus, mais si l'app repart de zéro avant que Dexie
+// ait committé, la pop-up reviendrait au démarrage suivant.
+async function dismissReleaseNotice() {
+  showReleaseNotice.value = false
+  await settings.setLastSeenVersion(APP_VERSION)
+}
+// « Tout voir » : même acquittement, puis l'écran À propos où vit le journal complet.
+async function onReleaseNoticeSeeAll() {
+  await dismissReleaseNotice()
+  router.push({ name: 'about' })
+}
 async function dismissWelcome() {
   showWelcome.value = false
   // Les DEUX drapeaux, pas seulement celui qui a armé l'affichage : la fenêtre est
@@ -179,6 +211,24 @@ onMounted(async () => {
     // Les DEUX drapeaux armant la même pop-up (semis ou restauration, cf.
     // `welcomeTexts`), la condition propre du 10/08 s'élargit d'autant.
     showWelcome.value = settings.welcomeDue || settings.restoredDue
+    // Nouveautés de la version installée (cf. `decideReleaseNotice`). Après la lecture des
+    // réglages, avant les lectures lentes : la file décide seule du moment de l'affichage.
+    const decision = decideReleaseNotice({
+      onboarded: settings.onboarded,
+      lastSeenVersion: settings.lastSeenVersion,
+      currentVersion: APP_VERSION,
+      entries: resolveReleaseNotes(settings.locale).notes,
+    })
+    if (decision.advance) {
+      // Un échec d'écriture ne doit JAMAIS empêcher l'accueil de charger : la décision sera
+      // simplement refaite au prochain montage.
+      try {
+        await settings.setLastSeenVersion(APP_VERSION)
+      } catch {
+        /* avalé exprès, cf. ci-dessus */
+      }
+    }
+    if (decision.show) showReleaseNotice.value = true
     if (!projectsStore.loaded) await projectsStore.load()
     if (!yarnsStore.loaded) yarnsStore.load()
     // Filet pour le montage direct du composant (tests, ou tout futur point d'entrée
@@ -504,6 +554,18 @@ function importPdf() {
       :cancel-label="welcomeTexts.cancel"
       @confirm="onWelcomeConfirm"
       @cancel="onWelcomeCancel"
+    />
+    <ConfirmDialog
+      :open="releaseNoticeHasSlot"
+      centered
+      dismiss-action="confirm"
+      :title="t('releaseNotice.title', { version: APP_VERSION })"
+      :message="t('releaseNotice.intro')"
+      :items="releaseItems"
+      :confirm-label="t('releaseNotice.ok')"
+      :cancel-label="t('releaseNotice.seeAll')"
+      @confirm="dismissReleaseNotice"
+      @cancel="onReleaseNoticeSeeAll"
     />
   </main>
 </div>

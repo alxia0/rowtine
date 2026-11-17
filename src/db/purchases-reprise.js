@@ -19,6 +19,7 @@
 //      seconde garde rend une reprise re-jouée inoffensive au lieu de doubler l'historique.
 import { db, getSetting, setSetting } from '@/db/db'
 import { acquiredFromStock, emptyPurchase } from '@/utils/purchases'
+import { priceCurrencyOf } from '@/utils/price-currency'
 
 export const REPRISE_FLAG = 'purchasesRepriseDone'
 
@@ -38,7 +39,8 @@ export function buildReconstructedPurchase(yarn, currency) {
     // StashView.vue:save()) — la virgule française, pas le point, alimente ce champ partout
     // ailleurs (cf. YarnPurchases.vue `openEdit`, même parade).
     unitPrice: String(yarn.price ?? '').replace('.', ','),
-    currency,
+    // Devise propre à la fiche si elle en a une, sinon celle des réglages.
+    currency: priceCurrencyOf(yarn, currency),
     date: String(yarn.purchasedAt ?? ''),
     bain: String(yarn.bain ?? ''),
     reconstructed: true,

@@ -7,6 +7,7 @@
     "menu": "Menü",
     "home": "Start",
     "stash": "Garnvorrat",
+    "tools": "Meine Nadeln",
     "library": "Anleitungen",
     "stats": "Statistik",
     "expenses": "Ausgaben",
@@ -317,6 +318,10 @@
     "timerFieldHint": "Verfolgt die für dieses Projekt aufgewendete Zeit.",
     "changeStatus": "Status ändern",
     "needles": "Nadeln",
+    "missingSize": "{mm} mm: nicht unter deinen Nadeln",
+    "chooseTools": "Nadeln auswählen",
+    "toolsNone": "Keine Nadeln verknüpft",
+    "toolsSaveError": "Die Nadeln konnten nicht gespeichert werden. Versuch es noch einmal.",
     "needleMm": "Nadeln (mm)",
     "needleUs": "Nadeln (US)",
     "hooks": "Häkelnadel",
@@ -358,6 +363,12 @@
     "yarnsEmpty": "Dein Vorrat ist leer — füge Garne hinzu, um sie hier zu verknüpfen.",
     "yarnsBrandPlaceholder": "Marke wählen",
     "yarnsPickBrand": "Wähle eine Marke, um die verfügbaren Garne zu sehen.",
+    "consumedTitle": "Gestrickte Knäuel",
+    "consumedHint": "Wenn du die Zahl der gestrickten Knäuel korrigierst, folgt der Vorrat des Garns: zusätzliche Knäuel werden abgezogen, nicht mehr benötigte kommen zurück.",
+    "consumedOverStock": "Von diesem Garn sind nicht genug Knäuel verfügbar: das Maximum ist {n}. Knäuel, die für andere Projekte reserviert sind, zählen nicht.",
+    "consumedOverStockPlain": "Von diesem Garn sind nicht genug Knäuel verfügbar: das Maximum ist {n}.",
+    "consumedOverStockOwn": "Von diesem Garn sind nicht genug Knäuel verfügbar: das Maximum ist {n}. Knäuel, die dieses Projekt noch reserviert hat, werden nicht zusätzlich gezählt.",
+    "consumedFixStock": "Vorrat dieses Garns korrigieren",
     "nameRequired": "Gib deinem Projekt einen Namen.",
     "created": "Projekt erstellt.",
     "saved": "Projekt gespeichert.",
@@ -368,9 +379,12 @@
     "correctPattern": "Anleitung korrigieren",
     "consumeTitle": "Projekt fertig!",
     "consumeIntro": "Wie viele Knäuel hast du tatsächlich verwendet?",
-    "consumeHint": "Der Rest geht zurück in deinen Vorrat. Wenn du dieses Fenster schließt, gilt alles Reservierte als verstrickt.",
+    "consumeHint": "Der Rest geht zurück in deinen Vorrat.",
     "consumeReserved": "{n} reserviert",
     "consumeConfirm": "Bestätigen",
+    "consumeOverStock": "Von diesem Garn sind nur noch {n} Knäuel verfügbar. Knäuel, die für andere Projekte reserviert sind, zählen nicht.",
+    "consumeOverStockPlain": "Von diesem Garn sind nur noch {n} Knäuel verfügbar.",
+    "consumeFixStock": "Vorrat korrigieren",
     "abandonTitle": "Projekt abgebrochen",
     "abandonIntro": "Sind Knäuel verloren gegangen (nicht aufgetrennt)?",
     "abandonHint": "Standardmäßig geht alles zurück in deinen Vorrat. Gib nur an, was du nicht zurückbekommst.",
@@ -445,6 +459,16 @@
     "editPattern": "Anleitung bearbeiten",
     "setCover": "Cover festlegen",
     "coverBadge": "Cover"
+  },
+  "toolParking": {
+    "pauseTitle": "Diese Werkzeuge für ein anderes Projekt freigeben?",
+    "pauseIntro": "Dieses Projekt wird pausiert. Freigegeben stehen die Werkzeuge deinen anderen Projekten wieder zur Verfügung, und du kannst sie beim Weitermachen zurückholen.",
+    "release": "Freigeben",
+    "keep": "Behalten",
+    "resumeTitle": "Diese Werkzeuge zurückholen?",
+    "resumeIntro": "Dieses Projekt geht weiter. Hake die Werkzeuge an, die du wieder verknüpfen möchtest: Die, die schon ein anderes Projekt nutzt, kannst du nicht wählen.",
+    "resume": "Zurückholen",
+    "notNow": "Jetzt nicht"
   },
   "section": {
     "state": {
@@ -725,6 +749,7 @@
     "priceBought": "Für {price} gekauft",
     "priceBoughtOn": "Am {date} für {price} gekauft",
     "priceFreeOn": "Kostenlos, am {date} erhalten",
+    "priceUnknownOn": "Preis unbekannt, am {date} gekauft",
     "purchasedAt": "Kaufdatum",
     "priceSharedHint": "Dieser Preis gehört zur Anleitung: Alle Projekte, die sie nutzen, teilen sich denselben Preis.",
     "priceFreePatternHint": "Die „Freie Anleitung“ hat keinen Preis: Sie ist allen deinen Projekten ohne Anleitung gemeinsam.",
@@ -1005,7 +1030,7 @@
     "unitsImperial": "Imperial (yd, oz)",
     "currencyLabel": "Währung",
     "currencyChangeTitle": "Währung ändern",
-    "currencyChangeMessage": "Bereits eingegebene Preise werden nicht umgerechnet. Sie werden lediglich in {currency} angezeigt.",
+    "currencyChangeMessage": "Bereits eingegebene Preise behalten ihre Währung. Neue Preise sind in {currency}.",
     "currencyChangeConfirm": "Währung ändern",
     "data": "Meine Daten",
     "dataHint": "Alles wird auf deinem Smartphone gespeichert und automatisch in deinem Datenordner gesichert (siehe unten).",
@@ -1022,7 +1047,8 @@
     "types": {
       "project": "Projekt",
       "yarn": "Garn",
-      "pattern": "Anleitung"
+      "pattern": "Anleitung",
+      "tool": "Werkzeug"
     },
     "help": {
       "title": "Hilfe",
@@ -1045,6 +1071,7 @@
         "lengthM": "Lauflänge (m)",
         "quantity": "Menge",
         "price": "Preis",
+        "currency": "Währung",
         "usedSkeins": "Verwendete Knäuel",
         "dyeLot": "Farbpartie",
         "purchaseDate": "Kaufdatum",
@@ -1074,6 +1101,29 @@
         "sizes": "Größen",
         "source": "Quelle",
         "sections": "Abschnitte"
+      },
+      "tool": {
+        "category": "Kategorie",
+        "type": "Typ",
+        "sizeMm": "Größe (mm)",
+        "equivalent": "Entsprechung (US oder Buchstabe)",
+        "length": "Länge",
+        "dpnCount": "Anzahl Nadeln",
+        "tunisianKind": "Tunesische Häkelnadel",
+        "material": "Material",
+        "handle": "Griff",
+        "brand": "Marke",
+        "line": "Serie",
+        "quantity": "Menge",
+        "status": "Zustand",
+        "price": "Preis",
+        "currency": "Währung",
+        "purchasedAt": "Kaufdatum",
+        "shop": "Geschäft",
+        "storedIn": "Aufbewahrung",
+        "kitSizes": "Kit-Größen (mm)",
+        "kitCables": "Kit-Kabel",
+        "notes": "Notizen"
       }
     }
   },
@@ -1124,6 +1174,7 @@
     "sideFolder": "Der Ordner",
     "sideDevice": "Dieses Gerät",
     "sideCounts": "{projets} Projekte, {patrons} Anleitungen, {laines} Garne",
+    "sideCountsTools": "{projets} Projekte, {patrons} Anleitungen, {laines} Garne, {outils} Werkzeuge",
     "purpose": "Alles, was du strickst, lebt in dieser App, auf deinem Gerät.",
     "hintStartFresh": "Die Daten dieses Ordners gehen verloren."
   },
@@ -1134,6 +1185,12 @@
     "failed": "Dieser Ordner konnte nicht vorbereitet werden. Bitte wähle einen anderen.",
     "changeTitle": "Ordner ändern",
     "changeBody": "Wähle den Ordner, in dem Rowtine deine Daten speichert. Wenn er nicht schon „Rowtine“ heißt und deine Daten noch nicht enthält, liegen sie in einem „Rowtine“-Unterordner, der nur bei Bedarf angelegt wird."
+  },
+  "releaseNotice": {
+    "title": "Neu in Version {version}",
+    "intro": "Das ändert sich mit diesem Update.",
+    "ok": "Verstanden",
+    "seeAll": "Alles ansehen"
   },
   "restore": {
     "done": "Daten wiederhergestellt.",
@@ -1613,10 +1670,12 @@
     "tagYarn": "Garn",
     "tagPattern": "Anleitung",
     "freeTag": "Kostenlos",
+    "tagTool": "Nadel",
     "categoryFilterLabel": "Art",
     "categoryAll": "Alles",
     "categoryYarn": "Garn",
     "categoryPattern": "Anleitungen",
+    "categoryTool": "Nadeln",
     "yearFilterLabel": "Jahr",
     "yearFilterAll": "Alle Jahre",
     "periodAll": "Seit Beginn",
@@ -1674,5 +1733,169 @@
     "label": "Geführte Tour durch den Leser",
     "unavailable": "Das Beispielprojekt konnte nicht vorbereitet werden.",
     "recreated": "Das Beispielprojekt wurde für die Tour neu erstellt."
+  },
+  "tools": {
+    "title": "Meine Nadeln",
+    "add": "Nadel hinzufügen",
+    "byType": "Nach Art",
+    "viewMode": "Ansicht",
+    "bySize": "Nach Stärke",
+    "search": "Suchen (Marke, Serie, Notizen)",
+    "empty": "Noch keine Nadeln. Füge deine Strick- und Häkelnadeln hinzu, dann siehst du auf einen Blick, was du hast.",
+    "noMatch": "Keine Nadel passt.",
+    "clearSearch": "Suche und Stärke zurücksetzen",
+    "fromKit": "Spitzen aus dem Set {name}",
+    "fromHookKit": "Häkelnadeln aus dem Set {name}",
+    "categories": {
+      "needle": "Stricknadeln",
+      "kit": "Sets",
+      "hook": "Häkelnadeln"
+    },
+    "groups": {
+      "cables": "Seile",
+      "nosize": "Ohne Stärke"
+    },
+    "sizeFilter": "Nur {size} zeigen",
+    "types": {
+      "straight": "Jackenstricknadeln",
+      "circular": "Rundstricknadeln",
+      "dpn": "Nadelspiel",
+      "tips": "Wechselnadelspitzen",
+      "cable": "Seil",
+      "flexible": "Flexible Nadeln",
+      "other": "Andere Nadel",
+      "interchangeable": "Wechselnadelset",
+      "hookKit": "Häkelnadelset",
+      "standard": "Häkelnadel",
+      "tunisian": "Tunesische Häkelnadel"
+    },
+    "typesShort": {
+      "straight": "Jackennadeln",
+      "circular": "Rundnadel",
+      "dpn": "Nadelspiel",
+      "tips": "Spitzen",
+      "cable": "Seil",
+      "flexible": "Flexinadeln",
+      "other": "andere",
+      "interchangeable": "Set",
+      "hookKit": "Häkelset",
+      "standard": "Häkelnadel",
+      "tunisian": "tunesisch"
+    },
+    "materials": {
+      "wood": "Holz",
+      "bamboo": "Bambus",
+      "aluminium": "Aluminium",
+      "steel": "Edelstahl",
+      "brass": "Messing",
+      "nickel": "vernickelt",
+      "carbon": "Carbon",
+      "plastic": "Kunststoff",
+      "glass": "Glas",
+      "other": "anderes"
+    },
+    "statuses": {
+      "available": "Verfügbar",
+      "lent": "Verliehen",
+      "lost": "Verloren",
+      "damaged": "Beschädigt",
+      "replace": "Zu ersetzen"
+    },
+    "lengthKinds": {
+      "sock": "für Socken",
+      "standard": "Standard",
+      "short": "kurz",
+      "mini": "mini"
+    },
+    "sizeMm": "{mm} mm",
+    "sizeRange": "{min} bis {max} mm",
+    "lengthCm": "{cm} cm",
+    "lengthCmCount": "{cm} cm ×{count}",
+    "sizeLine": "{mm} mm · US {us}",
+    "sizeLineHook": "{mm} mm · {us}",
+    "sizeLineUk": "{mm} mm · US {us} · UK {uk}",
+    "notFound": "Werkzeug nicht gefunden.",
+    "inUse": "in Gebrauch",
+    "inUseBy": "in Gebrauch: {name}",
+    "kitTakenSize": "{size} ({name})",
+    "kitPick": "{size} + {cable}",
+    "kitCableTaken": "{cable}, {n} belegt ({names})",
+    "countTimes": "×{n}",
+    "statusesInline": {
+      "available": "verfügbar",
+      "lent": "verliehen",
+      "lost": "verloren",
+      "damaged": "beschädigt",
+      "replace": "zu ersetzen"
+    },
+    "projects": "Projekte",
+    "picker": {
+      "matching": "In den Größen des Projekts",
+      "others": "Weitere Nadeln",
+      "takenBy": "belegt: {name}",
+      "cable": "Kabel",
+      "noCable": "kein Kabel",
+      "cableFor": "Kabel für {size}",
+      "wholeKit": "Ganzes Set (frühere Verknüpfung)"
+    },
+    "deleted": "Werkzeug gelöscht.",
+    "kitContent": "Inhalt des Sets",
+    "photoLabel": "Fotos des Werkzeugs",
+    "handles": {
+      "classic": "klassisch",
+      "ergonomic": "ergonomisch",
+      "rubber": "Gummigriff",
+      "beaded": "mit Perlen"
+    },
+    "tunisianKinds": {
+      "fixed": "fest",
+      "cabled": "mit Kabel",
+      "interchangeable": "austauschbar"
+    },
+    "fields": {
+      "type": "Typ",
+      "size": "Größe",
+      "length": "Länge",
+      "tipLength": "Länge der Spitzen",
+      "dpnCount": "Anzahl Nadeln",
+      "tunisianKind": "Form",
+      "handle": "Griff",
+      "material": "Material",
+      "brand": "Marke",
+      "line": "Serie",
+      "quantity": "Menge",
+      "purchasedAt": "Kaufdatum",
+      "price": "Preis ({symbol})",
+      "shop": "Geschäft",
+      "storedIn": "Aufbewahrungsort",
+      "status": "Zustand",
+      "notes": "Notizen",
+      "kitSizes": "Enthaltene Größen",
+      "kitCables": "Enthaltene Kabel",
+      "cableJoin": "Durchmesser des Anschlusses",
+      "tunisianKit": "Austauschbare tunesische Häkelnadeln"
+    },
+    "sizeFree": "Größe in mm",
+    "sizeRequired": "Wähle eine Größe, bevor du speicherst.",
+    "form": {
+      "editTitle": "Werkzeug bearbeiten",
+      "updated": "Werkzeug geändert.",
+      "typeRequired": "Wähle zuerst die Art des Werkzeugs.",
+      "sizePick": "Wähle eine Größe",
+      "sizeOther": "Andere Größe…",
+      "sizeOption": "{mm} mm (US {us})",
+      "cableLess": "Ein Kabel mit {cm} cm entfernen",
+      "cableMore": "Ein Kabel mit {cm} cm hinzufügen",
+      "sizeOptionHook": "{mm} mm ({us})",
+      "unset": "Keine Angabe",
+      "lengthCm": "Länge (cm)",
+      "sections": {
+        "type": "Art des Werkzeugs",
+        "size": "Größe und Maße",
+        "material": "Material und Marke",
+        "purchase": "Kauf und Aufbewahrung",
+        "photos": "Fotos und Notizen"
+      }
+    }
   }
 }

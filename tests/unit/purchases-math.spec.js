@@ -53,6 +53,11 @@ describe('montant d’une ligne', () => {
   it('achat avec prix renseigné : jamais signalé comme prix inconnu', () => {
     expect(isPriceUnknown(buy({ quantity: 2, unitPrice: '5,50' }))).toBe(false)
   })
+  // Protège un prix illisible saisi avant le filtre de saisie : inconnu, jamais lu comme 0 (gratuit).
+  it('prix illisible : signalé comme prix inconnu ; « 0 » reste un prix connu', () => {
+    expect(isPriceUnknown(buy({ quantity: 1, unitPrice: '18,90 €' }))).toBe(true)
+    expect(isPriceUnknown(buy({ quantity: 1, unitPrice: '0' }))).toBe(false)
+  })
 })
 
 describe('totaux', () => {
@@ -127,6 +132,10 @@ describe('categoryOf — l’absence VAUT « laine »', () => {
     expect(categoryOf({ category: 'yarn' })).toBe('yarn')
   })
 
+  it('C2b. la catégorie « tool » est reconnue', () => {
+    expect(categoryOf({ category: 'tool' })).toBe('tool')
+  })
+
   it('C3. null / undefined ⇒ « yarn », jamais une exception', () => {
     expect(categoryOf(null)).toBe('yarn')
     expect(categoryOf(undefined)).toBe('yarn')
@@ -166,18 +175,25 @@ describe('totalsByCategory', () => {
       { category: 'yarn', quantity: 2, unitPrice: '6', currency: 'GBP', kind: 'buy' }, // 12 laine £
       { category: 'pattern', quantity: 1, unitPrice: '18', currency: 'EUR', kind: 'buy' }, // 18 patron
     ])
-    expect(totals).toEqual({ yarn: { EUR: 21, GBP: 12 }, pattern: { EUR: 18 } })
+    expect(totals).toEqual({ yarn: { EUR: 21, GBP: 12 }, pattern: { EUR: 18 }, tool: {} })
   })
 
-  it('C9. les deux clés existent TOUJOURS, même vides — l’appelant n’a pas à se garder', () => {
-    expect(totalsByCategory([])).toEqual({ yarn: {}, pattern: {} })
+  it('C9. les trois clés existent TOUJOURS, même vides — l’appelant n’a pas à se garder', () => {
+    expect(totalsByCategory([])).toEqual({ yarn: {}, pattern: {}, tool: {} })
   })
 
   it('C10. un patron GRATUIT (montant 0) ne crée aucune devise fantôme', () => {
     const totals = totalsByCategory([
       { category: 'pattern', quantity: 1, unitPrice: '0', currency: 'EUR', kind: 'buy' },
     ])
-    expect(totals).toEqual({ yarn: {}, pattern: {} })
+    expect(totals).toEqual({ yarn: {}, pattern: {}, tool: {} })
+  })
+
+  it('C10b. une ligne d’outil de 10 EUR ⇒ tool: { EUR: 10 }', () => {
+    const totals = totalsByCategory([
+      { category: 'tool', quantity: 1, unitPrice: 10, currency: 'EUR', kind: 'buy' },
+    ])
+    expect(totals).toEqual({ yarn: {}, pattern: {}, tool: { EUR: 10 } })
   })
 })
 

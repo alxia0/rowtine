@@ -7,8 +7,10 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import fr from '@/i18n/fr.json'
 import { db } from '@/db/db'
+import { STATUS_ORDER } from '@/constants/status'
 import ProjectCard from '@/components/ProjectCard.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
+import ToolParkingDialog from '@/components/ToolParkingDialog.vue'
 import { useProjectsStore } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
 import { createTestI18n, makeTk } from './helpers/i18n-router'
@@ -89,9 +91,25 @@ describe('ProjectCard — statut rapide', () => {
 
       await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
       expect(w.findComponent(YarnConsumptionDialog).props('yarns')).toEqual([
-        { id: yid, name: 'Drops · Bleu', reserved: 2 },
+        { id: yid, name: 'Drops · Bleu', reserved: 2, available: 5, othersReserved: false },
       ])
       expect((await db.projects.get(id)).status).toBe('wip')
+    })
+
+    it('Annuler : ferme sans consommer et sans changer le statut', async () => {
+      const { w, id } = await mountCard()
+      const yid = await db.yarns.add({ brand: 'Drops', colorName: 'Bleu', quantity: 5, reservations: { [id]: 2 } })
+
+      await w.find('button.badge--editable').trigger('click')
+      const items = w.findAll('.menu__item')
+      await items[3].trigger('click') // 'done'
+      await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(true), { timeout: 10000 })
+
+      await w.findComponent(YarnConsumptionDialog).vm.$emit('cancel')
+      await vi.waitFor(() => expect(w.findComponent(YarnConsumptionDialog).props('open')).toBe(false), { timeout: 10000 })
+      expect((await db.projects.get(id)).status).toBe('wip')
+      expect((await db.yarns.get(yid)).quantity).toBe(5)
+      expect((await db.yarns.get(yid)).reservations).toEqual({ [id]: 2 })
     })
 
     it('Valider (défaut = tout tricoté) déduit tout le réservé et passe à Terminé', async () => {
@@ -274,5 +292,36 @@ describe('ProjectCard — statut rapide', () => {
       expect(w.find('.pcard__stitch').exists()).toBe(true)
       expect(w.find('.pcard__pct').text()).toBe('0 %')
     })
+  })
+})
+
+describe('ProjectCard : pause, outils liés', () => {
+  async function pauseFromCard(fields) {
+    const w = await mountCardWith(fields)
+    await w.find('button.badge--editable').trigger('click')
+    const items = w.findAll('.menu__item')
+    await items[STATUS_ORDER.indexOf('pause')].trigger('click')
+    await flushPromises()
+    return w
+  }
+
+  it('avec un outil lié : le dialogue s\'ouvre, le statut n\'est écrit qu\'au choix, « Libérer » range les liens', async () => {
+    const tid = await db.tools.add({ type: 'needle', name: 'Aiguille' })
+    const w = await pauseFromCard({ toolIds: [tid], kitPicks: [] })
+    const [row] = await db.projects.toArray()
+    await vi.waitFor(() => expect(w.findComponent(ToolParkingDialog).props('open')).toBe(true))
+    expect((await db.projects.get(row.id)).status).toBe('wip')
+    await w.findComponent(ToolParkingDialog).vm.$emit('confirm', [])
+    await vi.waitFor(async () => expect((await db.projects.get(row.id)).status).toBe('pause'))
+    const saved = await db.projects.get(row.id)
+    expect(saved.toolIds).toEqual([])
+    expect(saved.parkedTools).toEqual({ toolIds: [tid], kitPicks: [] })
+  })
+
+  it('sans outil lié : aucune question, le statut change tout de suite', async () => {
+    const w = await pauseFromCard({ toolIds: [], kitPicks: [] })
+    const [row] = await db.projects.toArray()
+    await vi.waitFor(async () => expect((await db.projects.get(row.id)).status).toBe('pause'))
+    expect(w.findComponent(ToolParkingDialog).props('open')).toBe(false)
   })
 })

@@ -28,7 +28,7 @@ test('Guide : /guide?section=… défile jusqu’à la section, pas seulement la
   // ── PRÉCONDITIONS ────────────────────────────────────────────────────────────────────
   // Sans elles, « la section n'est pas visible » serait vrai sur une page blanche, et
   // « elle est visible » serait vrai sur une page trop courte pour avoir à défiler.
-  await expect(page.locator('.section')).toHaveCount(10)
+  await expect(page.locator('.section')).toHaveCount(11)
   const cible = page.locator(`.section[data-section-id="${CIBLE}"]`)
   await expect(cible).toHaveCount(1)
   await expect(page.locator('.section[open]')).toHaveCount(1)

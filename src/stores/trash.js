@@ -5,13 +5,26 @@ import { ref } from 'vue'
 import { db, plain } from '@/db/db'
 import { usePurchasesStore } from '@/stores/purchases'
 import { refreshYarnsIfLoaded } from '@/stores/yarns'
+import { refreshToolsIfLoaded } from '@/stores/tools'
 import { reinjectYarnLinks } from '@/stores/projects'
 import { createLoadGuard } from '@/stores/load-guard'
+import { formatDecimalText } from '@/utils/decimal'
+import i18n from '@/i18n'
 
-const TABLE = { project: 'projects', yarn: 'yarns', pattern: 'patterns' }
+const TABLE = { project: 'projects', yarn: 'yarns', pattern: 'patterns', tool: 'tools' }
 
 // Ligne de corbeille, construite à l'identique par `add` et `moveToTrash`.
 function trashRow(type, payload) {
+  // Un outil n'a ni nom ni coloris : sa marque (et sa gamme) suivie de sa taille l'identifient,
+  // pour que deux « ChiaoGoo » restent discernables. Sans marque, la taille seule ; sans rien,
+  // le nom reste vide et la corbeille affiche le libellé du type. Le nom est figé à l'écriture :
+  // la taille prend le séparateur décimal de la langue active à ce moment.
+  if (type === 'tool') {
+    const sizeMm = payload?.sizeMm
+    const size = sizeMm != null && sizeMm !== '' ? `${formatDecimalText(String(sizeMm), i18n.global.locale.value)} mm` : ''
+    const name = [payload?.brand, payload?.line, size].map((x) => String(x ?? '').trim()).filter(Boolean).join(' ')
+    return { type, payload: plain(payload), name, deletedAt: new Date().toISOString() }
+  }
   // Un projet est stocké sous forme de « bundle » { project, sections, … } (cascade).
   const source = payload?.project || payload
   const name = source?.name || source?.brand || source?.colorName || ''
@@ -43,7 +56,7 @@ export const useTrashStore = defineStore('trash', () => {
   // Renvoie l'id de l'entrée de corbeille, ou `null` si l'élément n'existait pas.
   // Les projets n'y passent pas : leur suppression en cascade vit dans projects.js.
   async function moveToTrash(type, id) {
-    const table = type === 'yarn' || type === 'pattern' ? db[TABLE[type]] : null
+    const table = ['yarn', 'pattern', 'tool'].includes(type) ? db[TABLE[type]] : null
     if (!table) throw new Error(`moveToTrash: type non pris en charge (${type})`)
     const trashId = await db.transaction('rw', [table, db.trash], async () => {
       const item = await table.get(Number(id))
@@ -63,7 +76,7 @@ export const useTrashStore = defineStore('trash', () => {
     // (`reinjectYarnLinks` en fait partie), sans quoi la zone se perd.
     const shortfalls = await db.transaction(
       'rw',
-      [db.trash, db.projects, db.sections, db.diagrams, db.counters, db.sessions, db.patterns, db.yarns],
+      [db.trash, db.projects, db.sections, db.diagrams, db.counters, db.sessions, db.patterns, db.yarns, db.tools],
       async () => {
         let manques = []
         const row = await db.trash.get(Number(trashId))
@@ -107,6 +120,7 @@ export const useTrashStore = defineStore('trash', () => {
     // suppression de PROJET, personne ne rechargeait les laines et le stock affichait encore les
     // pelotes comme libres alors qu'elles venaient d'être re-réservées.
     await refreshYarnsIfLoaded()
+    await refreshToolsIfLoaded()
     return { shortfalls }
   }
   // Suppression DÉFINITIVE d'une laine : ses achats survivent (arbitrage produit, 31/07 —

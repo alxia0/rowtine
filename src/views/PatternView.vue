@@ -60,6 +60,7 @@ const priceLine = computed(() => {
   if (st.kind === 'none') return ''
   const date = formatLocalDate(p?.purchasedAt, locale.value)
   if (st.kind === 'free') return date ? t('pattern.priceFreeOn', { date }) : t('pattern.priceFree')
+  if (st.kind === 'unknown') return date ? t('pattern.priceUnknownOn', { date }) : t('purchases.priceUnknown')
   const price = formatMoney(st.amount, { locale: locale.value, currency: st.currency, profile: 'detail' }).text
   return date ? t('pattern.priceBoughtOn', { price, date }) : t('pattern.priceBought', { price })
 })

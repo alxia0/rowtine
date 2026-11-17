@@ -12,10 +12,12 @@ import { useSnackbarStore } from '@/stores/snackbar'
 import { useActiveSessionStore } from '@/stores/activeSession'
 import { closeChronoSession } from '@/utils/close-chrono-session'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
+import { useToolParking } from '@/composables/useToolParking'
+import ToolParkingDialog from '@/components/ToolParkingDialog.vue'
 import { STATUS_ORDER, TECHNIQUES } from '@/constants/status'
 import { fillProjectFromPattern } from '@/utils/project-fill'
 import { shouldDeriveDone } from '@/utils/project-finished-at'
-import { reservationsOf, availableForProject, setProjectReservation, roundSkeins } from '@/utils/yarn-usage'
+import { consumedOf, maxConsumptionFor, adjustProjectConsumption, reservationsOf, availableForProject, reservedByOthers, setProjectReservation, roundSkeins } from '@/utils/yarn-usage'
 import { matchesBrand, NO_BRAND, yarnPickLabel } from '@/utils/yarn-filter'
 import { filtrerSaisieDecimale, parseDecimal } from '@/utils/decimal'
 import { formatSkeins } from '@/utils/units'
@@ -25,6 +27,7 @@ import AppToggle from '@/components/AppToggle.vue'
 import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
 import { priceOwnerId } from '@/utils/pattern-price'
+import { hasPrice } from '@/utils/price-currency'
 import { patternToReader, withStepIds, hasSockProgress, resetSockProgress } from '@/utils/reader'
 import { sockPairSections } from '@/utils/section-copies'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -40,6 +43,7 @@ const settings = useSettingsStore()
 const snackbar = useSnackbarStore()
 const activeSession = useActiveSessionStore()
 const projectConsumption = useProjectConsumption()
+const toolParking = useToolParking()
 
 const isEdit = computed(() => !!route.params.id)
 const pid = computed(() => (isEdit.value ? Number(route.params.id) : null))
@@ -61,6 +65,16 @@ const yarnQty = reactive({}) // yarnId -> nb de pelotes utilisées par ce projet
 // (« 2,5 » → « 2.5 »), cassant la virgule sous le doigt. Ce buffer reste calé sur ce que
 // l'utilisatrice vient de taper ; seule une saisie BORNÉE (au-dessus du disponible) l'écrase.
 const yarnQtyText = reactive({})
+
+// Bloc « Pelotes tricotées » (projet déjà terminé/abandonné) : corrige APRÈS COUP combien de
+// pelotes ont été consommées. Mêmes tampons que les quantités ci-dessus, pour la même raison
+// (la virgule doit survivre sous le doigt). `consumedIds` est figé au chargement : une ligne
+// ne doit pas apparaître ou disparaître au fil de la frappe ni des écritures.
+const consumedIds = ref([]) // laines portant une trace consumed[pid] de CE projet
+const consumedQty = reactive({}) // yarnId -> valeur à écrire, ou null = champ vide/illisible, ligne ignorée
+const consumedInitial = reactive({}) // yarnId -> valeur déjà enregistrée (base de comparaison)
+const consumedText = reactive({}) // yarnId -> texte affiché
+const consumedOver = reactive({}) // yarnId -> maximum permis, tant que la saisie a dû être bornée
 const patternSel = ref('') // id du patron lié (chaîne du <select>) ; '' = aucun
 const originalPatternId = ref(null) // pour détecter un changement de patron
 const hydrating = ref(true) // true tant que le montage initial n'est pas fini (ignore le watch de préremplissage)
@@ -69,9 +83,11 @@ const hydrating = ref(true) // true tant que le montage initial n'est pas fini (
 // et tricoté trois fois n'a coûté 18 €, pas 54 €. Ce formulaire n'est donc qu'un point de
 // SAISIE — l'écriture va dans la fiche du patron sélectionné (cf. `save()`).
 const priceForm = reactive({ price: '', purchasedAt: '' })
+// Devise déjà posée sur le prix du patron porteur : gardée à l'écriture, montrée au libellé.
+const priceCurrency = ref('')
 // N'écrire QUE si l'utilisatrice a touché aux champs. Sans ce garde, ouvrir puis enregistrer
 // un projet sans rien changer réécrirait la fiche du patron — donc ré-estamperait
-// `priceCurrency` avec la devise du MOMENT, qui peut avoir changé depuis l'achat.
+// `priceCurrency` d'une fiche ancienne qui n'en portait pas encore.
 const priceDirty = ref(false)
 
 const selectedPattern = computed(() =>
@@ -99,6 +115,7 @@ function loadPatternPrice() {
   const holder = owner != null ? patternsStore.patterns.find((p) => p.id === owner) : null
   priceForm.price = holder?.price || ''
   priceForm.purchasedAt = holder?.purchasedAt || ''
+  priceCurrency.value = holder?.priceCurrency || ''
   priceDirty.value = false
 }
 
@@ -162,6 +179,31 @@ function toggleYarn(id) {
   } else {
     selectedYarnIds.value.splice(i, 1)
   }
+  reclampConsumed()
+}
+// Le maximum du bloc « Pelotes tricotées » dépend de la réservation en attente : si elle
+// change APRÈS que la valeur a été tapée, celle-ci est ramenée au nouveau maximum et dite,
+// comme à la frappe. Sinon on accepterait à l'écran ce que l'enregistrement borne en silence.
+function reclampConsumed() {
+  for (const id of consumedIds.value) {
+    const value = consumedQty[id]
+    if (!Number.isFinite(value)) continue
+    const y = yarnsStore.yarns.find((v) => v.id === id)
+    if (!y) continue
+    const max = consumedMax(y)
+    if (value <= max) {
+      // Le maximum a pu REMONTER (réservation baissée ou laine décochée) : un message resté
+      // affiché avec l'ancien chiffre serait faux. Il ne reste que si la valeur colle au maximum.
+      if (consumedOver[id] != null) {
+        if (value < max) delete consumedOver[id]
+        else consumedOver[id] = max
+      }
+      continue
+    }
+    consumedQty[id] = max
+    consumedOver[id] = max
+    consumedText[id] = formatSkeins(max, { locale: locale.value, grouping: false })
+  }
 }
 // Même motif que YarnConsumptionDialog.onInput : le champ n'est réécrit que si la saisie a
 // été bornée (au-dessus du disponible) — jamais pour une simple différence de forme, sinon
@@ -183,6 +225,7 @@ function setYarnQty(id, e) {
   if (!Number.isFinite(n) || n <= 0) return
   const next = roundSkeins(Math.min(n, max))
   yarnQty[id] = next
+  reclampConsumed()
   if (roundSkeins(n) !== next) {
     // formatSkeins (SANS groupement, un champ modifiable ne doit jamais recevoir un
     // séparateur de milliers), pas un String(next) nu : même motif que
@@ -190,6 +233,57 @@ function setYarnQty(id, e) {
     const texte = formatSkeins(next, { locale: locale.value, grouping: false })
     yarnQtyText[id] = texte
     e.target.value = texte
+  }
+}
+
+// Même motif que setYarnQty. Deux différences voulues : un champ vide ou illisible n'est JAMAIS
+// lu comme 0 (`adjustProjectConsumption` lit '' et null comme 0, une cellule effacée ferait
+// rendre toutes les pelotes au stock) : la ligne est alors ignorée à l'enregistrement ; et un
+// 0 réellement tapé est permis, il retire la trace. Le maximum est relu sur la laine FRAÎCHE
+// du store (une autre correction a pu changer le stock), et un dépassement est borné, dit et
+// relié à la laine : jamais de troncature silencieuse.
+function setConsumed(id, e) {
+  const filtre = filtrerSaisieDecimale(e.target.value)
+  if (filtre !== e.target.value) e.target.value = filtre
+  consumedText[id] = filtre
+  const n = filtre === '' ? NaN : parseDecimal(filtre)
+  if (!Number.isFinite(n) || n < 0) {
+    consumedQty[id] = null
+    delete consumedOver[id]
+    return
+  }
+  const y = yarnsStore.yarns.find((v) => v.id === id)
+  const max = y ? consumedMax(y) : n
+  const next = roundSkeins(Math.min(n, max))
+  consumedQty[id] = next
+  if (roundSkeins(n) !== next) {
+    consumedOver[id] = max
+    const texte = formatSkeins(next, { locale: locale.value, grouping: false })
+    consumedText[id] = texte
+    e.target.value = texte
+  } else {
+    delete consumedOver[id]
+  }
+}
+const consumedRows = computed(() =>
+  consumedIds.value.map((id) => yarnsStore.yarns.find((y) => y.id === id)).filter(Boolean),
+)
+
+// Applique les corrections APRÈS applyYarnLinks. La laine est relue FRAÎCHE du store à chaque
+// ligne (jamais un instantané du chargement : deux corrections successives doivent donner le
+// même stock qu'une seule) ; une laine supprimée entre-temps est ignorée. `skipId` : la laine
+// dont on part corriger le stock (« Corriger le stock » du bloc). Sa saisie a été bornée au
+// maximum, ce n'est pas une vraie consommation : l'écrire viderait son stock juste avant qu'on
+// aille le corriger. Même règle que « Corriger le stock » dans le dialogue, qui ne consomme rien.
+async function applyConsumedCorrections(skipId = null) {
+  for (const id of consumedIds.value) {
+    if (id === skipId) continue
+    const value = consumedQty[id]
+    if (!Number.isFinite(value) || value === consumedInitial[id]) continue
+    const fresh = yarnsStore.yarns.find((y) => y.id === id)
+    if (!fresh) continue
+    await yarnsStore.update(id, adjustProjectConsumption(fresh, pid.value, value))
+    consumedInitial[id] = value
   }
 }
 
@@ -228,6 +322,14 @@ onMounted(async () => {
       for (const y of yarnsStore.yarns) {
         const q = reservationsOf(y)[p.id]
         if (q != null) yarnQty[y.id] = q
+      }
+      for (const y of yarnsStore.yarns) {
+        const used = consumedOf(y)[p.id]
+        if (used == null) continue
+        consumedIds.value.push(y.id)
+        consumedQty[y.id] = used
+        consumedInitial[y.id] = used
+        consumedText[y.id] = formatSkeins(used, { locale: locale.value, grouping: false })
       }
       patternSel.value = p.patternId != null ? String(p.patternId) : ''
       techMode.value = p.readerState?.copyMode === 'simultaneous' ? 'simultaneous' : 'sequential'
@@ -299,17 +401,40 @@ function setStars(n) {
   form.stars = form.stars === n ? n - 1 : n
 }
 
+// La réservation que ce formulaire écrira pour CETTE laine (null = aucune). Une seule règle,
+// lue par l'enregistrement ET par le plafond du bloc « Pelotes tricotées » : les deux ne
+// peuvent donc pas diverger.
+function wantedReservation(y, projectId) {
+  if (!selectedYarnIds.value.includes(y.id)) return null
+  const max = availableForProject(y, projectId)
+  // Plus de plancher à 1 ni de `|| 1` : une quantité illisible ou ≤ 0 retombe sur TOUT le
+  // disponible (repli, pas une pelote inventée), jamais sur un minimum arbitraire.
+  const n = roundSkeins(parseDecimal(yarnQty[y.id]))
+  return Math.min(max, Number.isFinite(n) && n > 0 ? n : max)
+}
+
+// La laine telle qu'elle sera APRÈS les liaisons de ce formulaire (réservation propre en
+// attente). Une laine non proposable (rien de disponible) n'est pas touchée à l'enregistrement.
+function yarnAfterLinks(y) {
+  if (availableForProject(y, pid.value) <= 0) return y
+  return { ...y, reservations: setProjectReservation(y, pid.value, wantedReservation(y, pid.value)) }
+}
+// Maximum du bloc « Pelotes tricotées » : calculé sur la laine telle qu'elle sera écrite.
+const consumedMax = (y) => maxConsumptionFor(yarnAfterLinks(y), pid.value)
+// Quel texte dit le plafond : les autres projets d'abord, puis la seule réservation propre.
+function consumedOverKey(y) {
+  if (reservedByOthers(y, pid.value) > 0) return 'project.consumedOverStock'
+  return reservationsOfAfter(y) > 0 ? 'project.consumedOverStockOwn' : 'project.consumedOverStockPlain'
+}
+const reservationsOfAfter = (y) => reservationsOf(yarnAfterLinks(y))[Number(pid.value)] || 0
+
 // Applique les liaisons de laines : écrit/retire l'allocation de CE projet dans le pool
 // de chaque laine (les allocations des autres projets ne sont jamais touchées).
 async function applyYarnLinks(projectId) {
   for (const y of selectableYarns.value) {
     const linked = selectedYarnIds.value.includes(y.id)
     const before = reservationsOf(y)[projectId] ?? null
-    const max = availableForProject(y, projectId)
-    // Plus de plancher à 1 ni de `|| 1` : une quantité illisible ou ≤ 0 retombe sur TOUT le
-    // disponible (repli, pas une pelote inventée), jamais sur un minimum arbitraire.
-    const n = roundSkeins(parseDecimal(yarnQty[y.id]))
-    const want = linked ? Math.min(max, Number.isFinite(n) && n > 0 ? n : max) : null
+    const want = wantedReservation(y, projectId)
     if (before === want) continue
     await yarnsStore.update(y.id, { reservations: setProjectReservation(y, projectId, want) })
   }
@@ -324,16 +449,24 @@ function removeNeedle(i) {
 }
 
 // 3ᵉ point d'entrée vers Terminé/Abandonné (R2) : les pastilles de statut
-// (`.chips` ci-dessous) ne font que poser `form.status` — le statut n'est réel qu'à
+// (`.chips` ci-dessous) ne font que poser `form.status`, le statut n'est réel qu'à
 // l'ENREGISTREMENT. La question « combien de pelotes as-tu utilisées/perdues ? » (R3)
 // est donc posée ICI, dans `save()`, APRÈS `applyYarnLinks` (les réservations doivent
-// exister avant de demander combien en a été utilisé) — jamais au clic sur une pastille,
+// exister avant de demander combien en a été utilisé), jamais au clic sur une pastille,
 // sinon on consommerait pour un statut que l'utilisateur peut encore changer avant de
 // valider. Couvre aussi la création directe d'un projet en Terminé/Abandonné avec des
 // laines liées : les réservations viennent tout juste d'être créées par `applyYarnLinks`.
-async function finishSave(projectId) {
+// `router.replace` attendu : « Corriger le stock » (fixStock) enchaîne l'annulation, donc
+// cette navigation, puis l'ouverture de la laine ; sans l'attente, la seconde navigation
+// démarrerait pendant la première et pourrait l'interrompre, et le Retour depuis la laine
+// ramènerait alors sur ce formulaire au lieu de la fiche du projet.
+// `fixStockYarnId` (« Corriger le stock » du bloc « Pelotes tricotées ») : une fois sur la
+// fiche, la laine est ouverte PAR-DESSUS, comme `fixStock` du dialogue, pour que le Retour
+// depuis la laine ramène à la fiche du projet et non à ce formulaire.
+async function finishSave(projectId, fixStockYarnId = null) {
   snackbar.show(isEdit.value ? t('project.saved') : t('project.created'))
-  router.replace({ name: 'project', params: { id: projectId } })
+  await router.replace({ name: 'project', params: { id: projectId } })
+  if (fixStockYarnId != null) await router.push({ name: 'stash-edit', params: { id: fixStockYarnId } })
 }
 
 // Garde anti double-tap — même défaut et même forme que StashView.save() (constaté en
@@ -354,7 +487,23 @@ async function save(options) {
   }
 }
 
-async function saveProject({ resetConfirmed = false } = {}) {
+// « Corriger le stock » du bloc « Pelotes tricotées » : c'était un lien, qui quittait l'écran
+// sans rien enregistrer (tout ce qui avait été tapé ailleurs était perdu en silence). Il passe
+// désormais par l'enregistrement normal, puis ouvre la laine (cf. `finishSave`). Un nom vide
+// arrête tout comme Enregistrer : on reste ici, rien n'est ouvert.
+function saveThenFixStock(yarnId) {
+  return save({ fixStockYarnId: yarnId })
+}
+
+// Laine à ouvrir après l'enregistrement, gardée pendant la question « Recommencer les
+// chaussettes ? » : la confirmation relance `save`, qui doit encore savoir où aller ensuite.
+let pendingResetFixYarn = null
+function confirmResetSave() {
+  pendingResetSave.value = false
+  save({ resetConfirmed: true, fixStockYarnId: pendingResetFixYarn })
+}
+
+async function saveProject({ resetConfirmed = false, fixStockYarnId = null } = {}) {
   if (!form.name.trim()) {
     nameError.value = t('project.nameRequired')
     nameInput.value?.focus()
@@ -418,6 +567,7 @@ async function saveProject({ resetConfirmed = false } = {}) {
     const base = payload.readerState || avant.readerState || {}
     if ((base.copyMode === 'simultaneous' ? 'simultaneous' : undefined) !== wantedMode) {
       if (!patternChanged && hasSockProgress(sockSections.value, base) && !resetConfirmed) {
+        pendingResetFixYarn = fixStockYarnId
         pendingResetSave.value = true
         return
       }
@@ -429,16 +579,22 @@ async function saveProject({ resetConfirmed = false } = {}) {
   } else if (!isEdit.value && wantedMode) {
     payload.readerState = { copyMode: wantedMode }
   }
-  // Un chrono qui tourne sur CE projet peut survivre à cet écran : `project-edit` reste
-  // dans la « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que
-  // l'id ne change pas — et `finishSave` ci-dessus renvoie justement vers `project` avec
-  // le MÊME id, donc le garde ne fermera RIEN à la navigation de sortie. Si le statut posé
-  // ici est Terminé/Abandonné, la pastille sera masquée dès l'atterrissage sur la fiche
-  // (chronoVisible, ProjectDetailView) sans que la session ait été close — même défaut que
-  // changeStatus là-bas, même correctif : fermer AVANT l'écriture du statut.
-  if (isEdit.value && ['done', 'abandoned'].includes(payload.status) && activeSession.isActive
-    && activeSession.projectId === pid.value) {
-    await closeChronoSession()
+  // Statut final (Terminé/Abandonné) DIFFÉRÉ : il n'est écrit qu'une fois la question des
+  // pelotes validée (décision de Julien, 15/11 : Annuler laisse le statut tel qu'il était).
+  // Le premier enregistrement porte donc tous les autres champs, mais pas ce statut : un
+  // projet existant garde l'ancien, une création part en « En attente » (défaut
+  // d'emptyProject). La date de fin voyage AVEC le statut : écrite seule dans ce premier
+  // enregistrement, elle serait déjà en base quand `projectsStore.update` recevra le statut,
+  // et la règle 1 (finishedAtPatch) n'y verrait plus une date tapée mais une date inchangée,
+  // qu'elle remplacerait par celle du jour. Hors Terminé/Abandonné, rien ne change.
+  const finalStatus = payload.status
+  const deferred = ['done', 'abandoned'].includes(finalStatus)
+  const statusPatch = { status: finalStatus }
+  if (deferred) {
+    if (isEdit.value) delete payload.status
+    else payload.status = emptyProject().status
+    statusPatch.finishedAt = payload.finishedAt
+    delete payload.finishedAt
   }
   let projectId
   if (isEdit.value) {
@@ -448,24 +604,63 @@ async function saveProject({ resetConfirmed = false } = {}) {
     projectId = await projectsStore.create(payload)
   }
   await applyYarnLinks(projectId)
+  await applyConsumedCorrections(fixStockYarnId)
   // Le prix va dans la fiche du PATRON, jamais dans le projet. Écrit seulement si
-  // l'utilisatrice y a touché (cf. `priceDirty`), et la devise n'est estampillée que s'il y a
-  // un montant — sinon un prix effacé garderait la devise d'un achat qui n'existe plus.
+  // l'utilisatrice y a touché (cf. `priceDirty`). Même règle que la laine et l'outil : une
+  // devise déjà posée est gardée, sinon celle des réglages ; pas de montant, pas de devise
+  // (un prix effacé ne garde la devise d'aucun achat).
   if (priceDirty.value && priceOwner.value != null) {
     await patternsStore.update(priceOwner.value, {
       price: priceForm.price,
-      priceCurrency: String(priceForm.price || '').trim() ? settings.currency : '',
+      priceCurrency: hasPrice(priceForm.price) ? priceCurrency.value || settings.currency : '',
       purchasedAt: priceForm.purchasedAt,
     })
   }
+  // Un chrono qui tourne sur CE projet peut survivre à cet écran : `project-edit` reste
+  // dans la « bulle » du garde de routeur (src/router/index.js, inChronoBubble) tant que
+  // l'id ne change pas, et `finishSave` renvoie justement vers `project` avec le MÊME id,
+  // donc le garde ne fermera RIEN à la navigation de sortie. Si le statut posé ici est
+  // Terminé/Abandonné, la pastille sera masquée dès l'atterrissage sur la fiche
+  // (chronoVisible, ProjectDetailView) sans que la session ait été close : même défaut que
+  // changeStatus là-bas, même correctif, fermer AVANT l'écriture du statut. Ici, dans
+  // `applyStatus` : un Annuler laisse le projet en cours, son chrono doit continuer.
+  async function applyStatus(extra = {}) {
+    // Pause/reprise : les liens rangés ou repris s'écrivent ici (le statut est déjà parti avec
+    // `payload`). Rien à écrire si `extra` est vide.
+    if (Object.keys(extra).length) await projectsStore.update(projectId, extra)
+    if (deferred) {
+      if (isEdit.value && activeSession.isActive && activeSession.projectId === pid.value) {
+        await closeChronoSession()
+      }
+      // `projectsStore.update` pose la date de fin (règle 1) en entrant dans Terminé.
+      await projectsStore.update(projectId, statusPatch)
+    }
+    await finishSave(projectId, fixStockYarnId)
+  }
+  // Annuler (et croix, voile, Échap, Retour Android, « Corriger le stock ») : les autres
+  // champs sont déjà enregistrés, seul le statut final (et sa date de fin) reste non écrit.
+  // On quitte quand même le formulaire vers la fiche : pour une création, y rester inviterait
+  // à enregistrer de nouveau, ce qui créerait un second projet.
+  // « Corriger le stock » d'une AUTRE laine dans le dialogue (`fixingStock`) ouvre déjà sa
+  // propre fiche : on ne pousse pas aussi la laine du bloc, sinon l'historique empile deux fiches.
+  const onCancel = (opts) => finishSave(projectId, opts?.fixingStock ? null : fixStockYarnId)
   // Ordre voulu : la question (si nécessaire) est posée APRÈS que les réservations
   // existent bel et bien. `requestStatusChange` ne bloque jamais en attendant la réponse
-  // de l'utilisateur (cf. useProjectConsumption.js) — c'est pourquoi la suite (message +
-  // navigation) est déléguée à `finishSave`, exécuté immédiatement s'il n'y a pas de
-  // question à poser (statut ni 'done' ni 'abandoned', ou aucune laine réservée), ou en
-  // différé une fois la consommation appliquée (Valider, ou l'un de ses défauts croix/
-  // scrim/Échap/Retour Android).
-  await projectConsumption.requestStatusChange({ id: projectId }, payload.status, () => finishSave(projectId))
+  // de l'utilisateur (cf. useProjectConsumption.js), c'est pourquoi la suite (statut,
+  // message, navigation) est déléguée à `applyStatus`, exécuté immédiatement s'il n'y a pas
+  // de question à poser (statut ni 'done' ni 'abandoned', ou aucune laine réservée), ou en
+  // différé sur « Valider » seulement ; toute autre fermeture passe par `onCancel`.
+  // Pause/reprise : seulement pour une modification dont le statut a changé (jamais à la
+  // création). Le statut « d'avant » est celui lu en base ci-dessus (`avant`), pas celui du
+  // formulaire. La consommation de pelotes reste appelée à l'intérieur : les deux questions ne
+  // se posent jamais ensemble (pause et reprise ne passent pas par terminé/abandonné).
+  const consume = (extra) =>
+    projectConsumption.requestStatusChange({ id: projectId }, finalStatus, () => applyStatus(extra), onCancel)
+  if (isEdit.value && avant && avant.status !== finalStatus) {
+    await toolParking.requestStatusChange({ id: projectId, status: avant.status }, finalStatus, consume)
+  } else {
+    await consume({})
+  }
 }
 </script>
 
@@ -503,6 +698,7 @@ async function saveProject({ resetConfirmed = false } = {}) {
         v-if="showPriceFields"
         :model-value="priceForm"
         :hidden-reason="priceHiddenReason"
+        :currency="priceCurrency"
         shared-hint
         @update:model-value="onPriceInput"
       />
@@ -562,6 +758,34 @@ async function saveProject({ resetConfirmed = false } = {}) {
           </div>
         </div>
       </template>
+    </section>
+
+    <section v-if="isEdit && consumedRows.length" class="card" data-test="consumed-block">
+      <h2 class="card__title">{{ t('project.consumedTitle') }}</h2>
+      <p class="muted-hint">{{ t('project.consumedHint') }}</p>
+      <div class="ypick">
+        <div v-for="y in consumedRows" :key="y.id" class="ypick__row ypick__row--on">
+          <span class="ypick__pick">{{ yarnPickLabel(y) }}</span>
+          <span class="ypick__qty">
+            <input
+              class="ypick__qtyin"
+              inputmode="decimal"
+              :aria-label="`${t('project.consumedTitle')} : ${yarnPickLabel(y)}`"
+              :value="consumedText[y.id]"
+              @input="setConsumed(y.id, $event)"
+            />
+            <span class="ypick__unit">{{ t('project.yarnSkeins') }}</span>
+          </span>
+          <p v-if="consumedOver[y.id] != null" class="muted-hint" role="status">
+            {{ t(consumedOverKey(y), { n: formatSkeins(consumedOver[y.id], { locale }) }) }}
+            <!-- Un bouton, pas un lien : il enregistre d'abord (cf. `saveThenFixStock`). Ni
+                 `btn--primary` (les tests et l'œil cherchent LE bouton Enregistrer). -->
+            <button type="button" class="consumed-fix" data-test="consumed-fix-stock" :disabled="saving" @click="saveThenFixStock(y.id)">
+              {{ t('project.consumedFixStock') }}
+            </button>
+          </p>
+        </div>
+      </div>
     </section>
 
     <!-- `technique` reste dans CE bloc, avec les aiguilles/crochet : isCrochet pilote les
@@ -664,7 +888,7 @@ async function saveProject({ resetConfirmed = false } = {}) {
     :confirm-label="t('reader.copies.resetConfirm')"
     :cancel-label="t('common.cancel')"
     danger
-    @confirm="pendingResetSave = false; save({ resetConfirmed: true })"
+    @confirm="confirmResetSave"
     @cancel="pendingResetSave = false"
   />
   <!-- « Combien de pelotes as-tu réellement utilisées/perdues ? » (3ᵉ point d'entrée,
@@ -675,6 +899,16 @@ async function saveProject({ resetConfirmed = false } = {}) {
     :yarns="projectConsumption.yarns"
     :mode="projectConsumption.mode"
     @confirm="projectConsumption.confirm"
+    @cancel="projectConsumption.cancel"
+    @fix-stock="projectConsumption.fixStock"
+  />
+  <!-- Pause : « libérer les outils ? » ; reprise : « les reprendre ? ». -->
+  <ToolParkingDialog
+    :open="toolParking.open"
+    :mode="toolParking.mode"
+    :entries="toolParking.entries"
+    @confirm="toolParking.confirm"
+    @cancel="toolParking.cancel"
   />
 </div>
 </template>
@@ -875,6 +1109,19 @@ async function saveProject({ resetConfirmed = false } = {}) {
 .ypick__unit {
   color: var(--ink-55);
   font-size: 12.5px;
+}
+/* « Corriger le stock » du bloc « Pelotes tricotées » : même allure que `.ycn__fix` du dialogue
+   (YarnConsumptionDialog.vue), cible tactile de 44 px. */
+.consumed-fix {
+  display: block;
+  margin-top: var(--sp-1);
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: var(--r-md);
+  font-weight: 700;
 }
 .ypick__meta {
   color: var(--ink-55);

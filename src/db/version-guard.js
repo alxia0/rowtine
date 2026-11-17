@@ -3,22 +3,25 @@
 // sécurité, autre défaut) : fonctions pures, dépendances injectables pour la
 // testabilité, un point d'entrée unique appelé depuis router/index.js.
 //
+// État actuel (14/11/2026) : db.js déclare la v1 fusionnée (13/08/2026, onze tables) PUIS une
+// db.version(2) (la table `tools`, douze tables au total) ; le code attend donc 20 côté
+// IndexedDB (Dexie multiplie le numéro par 10). La prochaine version sera db.version(3).
 // Pourquoi ce cas existe (établi en phase 1 du chantier de ménage, 13/08/2026) :
-// db.js A PERDU ses versions 2 et 3 (déjà fait) : il ne déclare
-// plus qu'une db.version(1), portant les onze tables. Un appareil déjà passé par le code
-// précédent porte donc une base IndexedDB à 30 là où ce code déclare 10. Mesuré en test
-// et CONFIRMÉ SUR LE PIXEL 7 le 13/08 : Dexie lève VersionError, l'absorbe et rouvre SANS
-// version — l'app démarre normalement.
+// db.js avait alors PERDU ses anciennes versions 2 et 3 (fusionnées dans la v1). Un appareil
+// déjà passé par le code précédent portait donc une base IndexedDB à 30 là où le code
+// déclarait 10. Mesuré en test et CONFIRMÉ SUR LE PIXEL 7 le 13/08 : Dexie lève
+// VersionError, l'absorbe et rouvre SANS version — l'app démarre normalement. Le mécanisme
+// reste celui de toute base plus récente que le code, quels que soient les numéros.
 // ⚠️ Ce que cet écart COÛTE dépend de ce que le code déclare, et cela a changé le 13/08 :
 // face à un code déclarant MOINS de tables que la base, deux tables devenaient invisibles
 // et la sauvegarde automatique s'arrêtait ENTIÈREMENT, sans un mot — c'est ce silence qui
-// a motivé ce garde-fou. Avec la déclaration fusionnée, les onze tables sont déclarées :
+// a motivé ce garde-fou. Avec la déclaration fusionnée, toutes les tables sont déclarées :
 // rien n'est invisible, la sauvegarde reste complète (mesuré, tests/unit/db-migration-
 // guard.spec.js). Il ne reste qu'un écart de NUMÉRO — mais il ne se règle pas tout seul et
 // l'app n'est pas dans l'état qu'elle prévoit.
 // ⚠️ Ce garde-fou compare UN NUMÉRO, jamais la liste des tables (les comparer exigerait
-// d'ouvrir la base, ce qu'il évite délibérément) : après la 1.0, une db.version(2) pourra
-// ajouter une douzième table, puis un build plus ancien tournera sur cette base — src/
+// d'ouvrir la base, ce qu'il évite délibérément) : après la 1.0, une db.version(3) pourra
+// ajouter une table de plus, puis un build plus ancien tournera sur cette base — src/
 // backup/collect.js nomme ses tables une par une et omettrait celle-là en silence. Les
 // textes affichés (clés `versionGuard.*`) ont été reformulés en conséquence lors de la
 // vague de correction finale du 13/08 : ils n'affirment que ce que ce garde-fou vérifie
@@ -31,12 +34,12 @@ import { reactive } from 'vue'
 const DB_NAME = 'rowtine'
 
 // Dexie multiplie par 10 le numéro de version déclaré côté IndexedDB (dexie.js:4512) :
-// version(1) → 10, version(3) → 30. `db.verno` est mis à jour de façon SYNCHRONE à
+// version(1) → 10, version(2) → 20, version(3) → 30. `db.verno` est mis à jour de façon SYNCHRONE à
 // chaque appel `db.version(n)` (dexie.js:6004, `this.verno = Math.max(this.verno, n)`),
 // donc dès l'import de src/db/db.js — AVANT toute ouverture de la base. C'est ce qui
 // permet de dériver la version attendue du schéma RÉELLEMENT déclaré, jamais d'un
-// nombre écrit en dur ici : quand db.js sera réduit à une seule db.version(1),
-// `db.verno` vaudra 1 tout seul et ce garde-fou continuera de refléter le schéma actuel,
+// nombre écrit en dur ici : à chaque nouvelle db.version(n) ajoutée dans db.js,
+// `db.verno` vaut n tout seul (2 depuis `tools`) et ce garde-fou continuera de refléter le schéma actuel,
 // sans qu'il faille toucher ce fichier.
 export function expectedIndexedDbVersion(dexieDb = db) {
   return Math.round(dexieDb.verno * 10)

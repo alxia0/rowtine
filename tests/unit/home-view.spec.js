@@ -17,6 +17,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import { db, getSetting, setSetting } from '@/db/db'
 import i18n from '@/i18n'
 import fr from '@/i18n/fr.json'
+import { APP_VERSION } from '@/constants/app-info'
 import { recordSeededSamples } from '@/utils/seeded-samples'
 import { useSessionsStore } from '@/stores/sessions'
 import { useSettingsStore } from '@/stores/settings'
@@ -68,6 +69,9 @@ beforeEach(async () => {
   await db.open()
   await Promise.all(db.tables.map((t) => t.clear()))
   await db.settings.put({ key: 'onboarded', value: true })
+  // Version déjà vue : ce fichier ne teste que la bienvenue, pas la pop-up « Nouveautés »
+  // (qui, sur une base onboardée sans marqueur, prendrait la place APRÈS l'acquittement).
+  await db.settings.put({ key: 'lastSeenVersion', value: APP_VERSION })
 })
 
 describe("HomeView — la bienvenue survit à un vrai relancement de l'app", () => {

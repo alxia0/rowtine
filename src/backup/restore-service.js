@@ -25,6 +25,7 @@ import { useYarnsStore } from '@/stores/yarns'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useSettingsStore } from '@/stores/settings'
 import { useTrashStore } from '@/stores/trash'
+import { useToolsStore } from '@/stores/tools'
 import { useActiveSessionStore } from '@/stores/activeSession'
 
 // Recharge tous les stores Pinia qui exposent un `load()` global (les stores
@@ -43,6 +44,7 @@ async function reloadStores() {
     useProjectsStore().load(),
     useYarnsStore().load(),
     usePurchasesStore().load(),
+    useToolsStore().load(),
     settingsStore.load(),
     useTrashStore().load(),
     useActiveSessionStore().load(),
@@ -426,6 +428,13 @@ export async function isDbEmpty() {
   // d'achats orphelin serait jugée « vide » et une restauration l'effacerait
   // silencieusement.
   if ((await db.purchases.count()) > 0) return false
+  // Outils (stock d'outils) : `tools` a rejoint `REPLACED_TABLES` (restore.js) et n'a aucun
+  // lien transitif avec les autres tables : une base ne contenant QUE des outils serait
+  // jugée « vide » et une restauration les effacerait en silence (même défaut que
+  // compteurs indépendants et achats ci-dessus).
+  if ((await db.tools.count()) > 0) return false
+  // Jours actifs : table remplacée à la restauration, qui survit à la suppression définitive d'un projet.
+  if ((await db.activeDays.count()) > 0) return false
   return true
 }
 
@@ -496,6 +505,10 @@ export async function isDbRestorable() {
 
   if ((await db.yarns.count()) > 0) return false
   if ((await db.purchases.count()) > 0) return false
+  // Outils : jamais semés, donc toujours créés par l'utilisatrice (cf. isDbEmpty).
+  if ((await db.tools.count()) > 0) return false
+  // Jours actifs : table remplacée à la restauration, qui survit à la suppression définitive d'un projet.
+  if ((await db.activeDays.count()) > 0) return false
 
   const seededProjects = new Set(seeded.projects)
   const projects = await db.projects.toArray()

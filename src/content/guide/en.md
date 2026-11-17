@@ -35,7 +35,7 @@ underlined term in the text shows its definition. See chapter 3.
 
 The timer logs your sessions, the Photos tab keeps the pattern's
 images and your own photos, statistics sum up your activity on the
-project, and a badge is shared in one tap. See chapters 2 and 7.
+project, and a badge is shared in one tap. See chapters 2 and 8.
 
 To try it right away: the "Replay the guided tour" button, just below
 and in Settings, opens the sample hat in the reader with explanation
@@ -77,7 +77,7 @@ Opening the app, you'll find:
   the Resume tile and the summary. They come back as soon as you create your
   first project or import your first pattern.
 - Finally, **the menu at the top right** takes you at any time to your yarn
-  stash, your pattern library, the statistics, **your sessions**, the expenses,
+  stash, your tools, your pattern library, the statistics, **your sessions**, the expenses,
   this guide, the settings and the About screen. It is on every screen:
   wherever you are in the app, you can head somewhere else without going back
   to the home screen.
@@ -332,7 +332,7 @@ it later, the **Edit stitches** button, at the top of the tab, reopens the same
 picker: unticking a stitch removes its card.
 
 Outside any pattern, the full memo can also be browsed from Home, through the
-**Stitches** tile among the tools (point 6).
+**Stitches** tile among the tools (point 7).
 
 ### The full-screen chart, and how to align it well
 
@@ -491,7 +491,7 @@ dots, same gesture.
 
 *Statistics on a tablet held sideways, in the Half-year window: the calendar grid shows the last six months at a glance, where a phone makes you swipe sideways to see them, and the number tiles line up two by two below it.*
 
-The **Statistics** screen (point 7) makes use of the space too: its calendar
+The **Statistics** screen (point 8) makes use of the space too: its calendar
 grid and its number tiles spread out instead of squeezing together, and on the
 longest windows, Half-year or Year, you see far more weeks before you have to
 drag the grid sideways. There is nothing extra to set: it's the same screen,
@@ -810,6 +810,7 @@ and asks for confirmation: nothing gets lost by mistake here either.
   **Abandoned** project, where you enter the skeins that were lost. The app
   keeps two decimal places (a quarter skein is 0.25) and shows these numbers
   everywhere with your language's decimal separator.
+- **Finishing a project, and correcting afterwards**: in the window that opens when you finish a project, you can enter more skeins than planned at the start, within what is **available** for the yarn (its stock, minus the skeins reserved for other projects). Above that, the app tells you, keeps the maximum and offers **Fix the stock**, which opens the yarn's page. The **Cancel** button (like the cross, a tap outside or Back) closes the window without using anything: the project keeps its status, and you can come back and finish it later. Once the project is finished or abandoned, the **Skeins knitted** block on its **Edit** screen lets you correct these quantities; the yarn's stock follows, up or down, without ever counting twice.
 - **A yarn's page**: tapping its card opens it full screen. It gathers
   everything you noted (brand, colourway, storage, length, quantity,
   price, purchases, composition, notes), its characteristics, its status
@@ -868,41 +869,62 @@ connects to Ravelry.
 *The Year and Type menus at the top, the total with its yarn / pattern breakdown, then the detail by month.*
 
 Reached from the app menu, this screen
-summarises everything you've paid for your knitting, **yarn** and
-**patterns** alike:
+summarises everything you've paid for your knitting, **yarn**,
+**patterns** and **tools** alike:
 - The **total spent**, by currency if you've used more than one (the
   app never mixes them, since it has no exchange rate to rely on). This
   total never goes down by itself: using up a skein or finishing a
   project doesn't lower it. It is different from your **stash value**, at
   the top of the **Yarn stash** screen, which tracks what you have left
   and drops when you use a skein. As
-  long as you haven't noted any pattern price, this total stays
-  exactly as you know it; as soon as a pattern shows up in it, it
-  breaks down into two sub-lines: what went to yarn, what went to
-  patterns.
+  long as you haven't noted any pattern or tool price, this total stays
+  exactly as you know it; as soon as a pattern or a tool shows up in it, it
+  breaks down into one sub-line per category present: what went to yarn,
+  to patterns, to tools.
 - Two menus at the top: **Year** shows only the year you choose (or
   "All years"), **Type** shows only one category (or all). Totals
   recalculate accordingly. Purchases you haven't dated end up under
   "Unknown date", which is added to the Year menu whenever there are
   any.
-- A **breakdown by year then by month**, yarn and patterns mixed in
+- A **breakdown by year then by month**, yarn, patterns and tools mixed in
   calendar order: you see at a glance what a given month cost you.
-- As soon as a pattern shows up in the list, each line also carries
-  its label, **Yarn** or **Pattern**. A pattern you've declared free
+- As soon as a pattern or a tool shows up in the list, each line also carries
+  its label, **Yarn**, **Pattern** or **Tool**. A pattern or a tool you've declared free
   shows up with the **Free** tag: that's proof you checked, not an
   oversight.
 - The **full list** of every purchase and gift, including those whose
   yarn page you've since deleted (marked "Deleted yarn").
 - The option to **delete** a yarn line directly from this screen, with
   a chance to **undo** right after in case of a mistake. A pattern
-  line, on the other hand, is edited from the pattern's page: tapping
-  it takes you there.
+  or tool line, on the other hand, is edited from the pattern's or tool's
+  page: tapping it takes you there.
 
 > **Good to know**: a yarn purchase survives the deletion of its page and
 > stays visible here. A pattern's price, though, belongs to the
-> pattern: if you delete the pattern, its expense goes with it.
+> pattern: if you delete the pattern, its expense goes with it. Your tools
+> with a price show up here too, under "Tools": to fix or clear the price, open the tool's page.
 
-## 6. Standalone tools
+## 6. Your tools: needles and hooks
+
+The **My tools** screen, in the menu right after the yarn stash, keeps track of your needles and hooks. Before you buy a pair or cast on a new project, you can see at a glance whether you already own the right size.
+
+- **Adding a tool**: the **Add a tool** button opens the form. You pick the type first, from three families: **Needles** (Straight needles, Circular needles, Double-pointed needles, Flexible needles, Interchangeable tips, Cable, Other needle), **Sets** (Interchangeable set, Crochet hook set) and **Hooks** (Crochet hook, Tunisian hook). After that, only the fields that matter for that type appear: the length for a circular needle, the number of needles for double-pointed needles, the handle for a hook, the style (fixed or cabled) for a Tunisian hook.
+- **Apart from the type, only the size is required**, and only for types that have one: it is optional for Other needle, and a Cable has none. You pick it from the list, where each size in millimetres shows its US equivalent when there is one. For a hook, the list runs from the fine sizes (0.6 mm) up to 25 mm, and the material picks the equivalent: in **stainless steel**, the steel hook number (2.25 mm · US 2); otherwise, the letter (2.25 mm · B-1). If yours isn't listed, **Other size…** lets you type it in mm. Everything else is optional: material, brand, line, quantity, purchase date, price, shop, where it's stored, condition (Available, Lent, Lost, Damaged, To replace), notes and photos.
+- **An interchangeable set** is a single entry. Under **Sizes included**, tick the sizes of the tips it holds; under **Cables included**, the lengths of its cables. If two cables of the same length have different connectors (S, L or Mini), pick the **Connector diameter** first, then tick the lengths: an 80 cm S and an 80 cm L stay two separate cables, and the set's page counts them apart. Its page then shows the **Set contents**.
+- **A crochet hook set** works the same way: you tick the sizes of its hooks, on the hook size scale (4 mm · G-6). Tick **Interchangeable Tunisian hooks** to add its cables; without that box, the set has no cables. For a project's missing size, a hook set counts for crochet only, and a needle set for knitting only. Under a size, it shows as "hooks from the set".
+- **By type or by size**: two buttons at the top of the screen switch the layout. **By type** sorts your tools by family (Needles, Sets, Hooks), then by type. **By size** groups them size by size, all families together; loose cables and tools without a size come last. A set shows up under each of its sizes, with a line such as "tips from the KnitPro set", so you know straight away that your 4 mm tip is in the set. The app remembers your choice on this device.
+- **Size chips**: below those two buttons, there is one chip for each size you own. Tap a chip to show only the tools in that size; tap it again to clear the filter. The search field just below looks through brand, line, notes and storage place. If nothing matches, **Clear search and size** brings everything back.
+- **A tool's page**: tap a tool to open it. It gathers everything you noted, plus your photos; tap the star to choose the cover photo. In the list, each tool takes two rows: the first starts with the brand and product line, then the size; the second gives the type, length, material, the count when there are several, and always ends with the condition (available, lent, lost…), so a lent or lost needle won't catch you out.
+- **Edit, duplicate or delete** a tool from the **Actions** menu (vertical three-dot icon) at the top of its page. **Duplicate** opens the form already filled in with everything except the photos: handy for the same needle in another size. **Delete** moves the tool to the trash. **Undo**, right after, puts it back, and the trash in Settings keeps it until you empty it.
+- **Your tools are backed up**: they are copied to the {app} folder along with everything else, and their photos go into a subfolder named **Outils**. A restore gives them back exactly as they were.
+- **Spreadsheet export**: the **My tools** button, in the export section of Settings, exports your tool stock to a spreadsheet (CSV), just like your yarn stash. Each tool takes one row, with its size equivalent, its price and its currency.
+- **A size missing from your stock**: on a project page, under the Needles (or Hook) tile, a discreet line flags each requested size that is not in your tools. It only appears once you have at least one tool.
+- **Link your tools to a project**: on a project page, **Details** tab, the **My tools** tile lists the tools you linked to it, and **Choose tools** opens the checklist, starting with those in the project's sizes. A tool linked to an In progress project shows “in use:” followed by the project's name in **My tools** and in the checklist, and its page names the projects that use it. Like the size note, the tile only appears once you have at least one tool. When you pause a project, the app offers to free its tools for another project; when you resume it, it offers to take back the ones that are still free.
+- **Take one size from a set**: in the checklist, a set has no box of its own; it unfolds into its sizes, the project's sizes first. Tick the size you take; if the set has cables, also pick a cable, or **no cable**. Only that size is in use, not the whole set: in **My tools**, the set's row says "in use: 4 mm (Hat)" or "available". A size or cable already taken by another In progress project can still be ticked, marked "taken:" followed by the project's name, so you can move a tip from one project to another. The set's page names the project of each taken size and counts the taken cables ("80 cm ×2, 1 taken (Hat)"); the project tile shows "KnitPro Zing · 4 mm + 80 cm". A set linked as a whole before this version keeps its **Whole set (earlier link)** box: untick it, or tick a size to replace it.
+
+Until you add your first tool, the screen shows a sample line, a 4 mm bamboo circular needle: it is never saved.
+
+## 7. Standalone tools
 
 ![The Counter name field still empty, both boxes unticked beside their examples (a sleeve, or repeat rows 1 to 8, 5 times), then the + Counter button and the line No counters yet. Add one.](images/en/06a-compteurs.webp)
 
@@ -947,7 +969,7 @@ from Home:
   *bind off* and *cast off*), with their abbreviations; the memo also gains the
   British abbreviations (*yfwd*, *yrn*, *yon*, *psso*).
 
-## 7. Statistics
+## 8. Statistics
 
 ![The Quarter tab selected among Month, Half-year and Year, 6/29/2026 to 9/24/2026, the Over the period card reading 72:40:06, then Calendar rather than Rhythm, a grid from Jun to Sep graded from less to more, and the Total time 72:40:06 and Active days 69 of 88 cards](images/en/07-statistiques.webp)
 
@@ -984,8 +1006,8 @@ Year, so the two gestures don't get confused):
 
 The **grid** shows one square per day, from the first day of your week
 (top) to the last (bottom), across the whole window you picked; that first
-day is Monday by default, or Sunday if you picked it in Settings (§8). Its
-colour follows the accent shade chosen in Settings (§8), and its intensity
+day is Monday by default, or Sunday if you picked it in Settings (§9). Its
+colour follows the accent shade chosen in Settings (§9), and its intensity
 depends on how long you knitted or crocheted that day, on five levels:
 nothing, less than 30 minutes, 30 minutes to 1 hour, 1 to 2 hours, 2 hours
 or more. The thresholds
@@ -1007,7 +1029,7 @@ action**: a session, timed or added by hand, a row checked off, a project
 counter moved forward. And opening the app without doing anything in it
 doesn't count: it takes a **logged** action.
 
-## 8. Settings
+## 9. Settings
 
 ![Camille typed into "Your first name (optional)", Knitting picked out as the default craft and a Save button closing off the Profile card, then Appearance on System, the Ambience color block with its ten dots and its hue slider, First day of the week on Monday, and the Language heading alone at the bottom edge](images/en/08-reglages.webp)
 
@@ -1022,7 +1044,7 @@ doesn't count: it takes a **logged** action.
   **follows your theme** and changes on its own with light or dark mode; as
   soon as you choose, your choice wins out and stays the same in both modes.
   That shade colours the buttons, the selections, the progress bars and the
-  statistics grid (§7).
+  statistics grid (§8).
 - **First day of the week**: Monday (default) or Sunday. This choice
   governs the calendar grid and the seven weekday bars on the Statistics
   screen, as well as the weekly reset of the "this week" total on Home.
@@ -1034,10 +1056,10 @@ doesn't count: it takes a **logged** action.
     everything follows: entering your skeins, stash totals, gauge
     (10 × 10 cm or 4 × 4 inches). Switching systems doesn't change any
     of your saved numbers, it just redisplays them in the other unit.
-  - **Currency** among five (€, $, £, CHF, CA$). Note that it's a
-    plain label: prices you've already entered **aren't converted** and
-    appear with the other symbol; the app warns you about this before
-    confirming.
+  - **Currency** among five (€, $, £, CHF, CA$). It applies to the
+    prices you enter **from then on**: each price keeps the currency you
+    noted it in and **nothing is converted**; the app reminds you of this
+    before confirming.
   - Both settings are offered to you **right from the first screen**
     when you open the app, pre-filled from your device's language; you
     can change them here at any time.
@@ -1045,8 +1067,9 @@ doesn't count: it takes a **logged** action.
   - Export your stash, projects or patterns to a spreadsheet (CSV), to
     view or back them up elsewhere. Columns follow your current
     settings: lengths and weights in your chosen unit system, prices
-    with your chosen currency symbol.
-  - A universal **Trash**: any project, yarn or pattern you delete
+    followed by their currency in a column of its own (each price keeps
+    its own).
+  - A universal **Trash**: any project, yarn, tool or pattern you delete
     ends up there and can be restored at any time (until you empty it
     on purpose).
 - **{app} folder**: everything you knit or crochet only exists inside this
@@ -1136,7 +1159,7 @@ whenever you like).
   categories that is too wide for the screen. It appears **only once in
   total**, not once per screen; the "Got it" button closes it.
 
-## 9. Under the hood: what {app} guarantees you
+## 10. Under the hood: what {app} guarantees you
 
 - **Offline by default**: none of your data ever leaves your device.
 - **No account, no paywall**: every feature above is free, with no
@@ -1157,4 +1180,10 @@ whenever you like).
   happens if you uninstall the app, and who answers for it: the person
   responsible and the contact address are named there. It is written in your
   language.
+- **What's new, shown once**: after an update, a window sums up what is new in the
+  latest version, once per version. "Got it" closes it, "See everything" opens the
+  About screen, where you find the log of
+  all versions. A fresh install does not show it.
+  The app remembers the last version you saw on this device, but not in the
+  backup.
 - **In four languages**: French, English, German and Spanish.

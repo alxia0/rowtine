@@ -25,7 +25,7 @@ test('Guide : la capture de l’année s’ouvre pivotée et occupe presque tout
 }) => {
   await completeOnboarding(page, { firstName: 'Alex' })
   await page.goto('/guide')
-  await expect(page.locator('.section')).toHaveCount(10)
+  await expect(page.locator('.section')).toHaveCount(11)
 
   // La section Statistiques, trouvée par la figure qu'elle porte plutôt que par son numéro :
   // un remaniement du contenu du guide ne doit pas casser ce test en silence. Un <details>
@@ -93,7 +93,7 @@ test('Guide : la capture de l’année s’ouvre pivotée et occupe presque tout
 test('Guide : une capture ordinaire du même guide n’est PAS pivotée', async ({ page }) => {
   await completeOnboarding(page, { firstName: 'Alex' })
   await page.goto('/guide')
-  await expect(page.locator('.section')).toHaveCount(10)
+  await expect(page.locator('.section')).toHaveCount(11)
 
   // La première figure du guide : une capture d'écran de téléphone (480 × 888, plus haute que
   // large) — le cas le plus courant, et celui qui ne doit strictement rien changer.

@@ -4,6 +4,7 @@
 //
 // Le composant ne connaît NI la base NI les magasins : il présente et remonte. C'est
 // l'appelant qui décide QUAND et OÙ écrire — et qui estampille la devise à ce moment-là.
+// Il passe aussi la devise DÉJÀ posée sur ce prix (`currency`), pour le libellé seulement.
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
@@ -23,12 +24,14 @@ const props = defineProps({
   // Mention « ce prix appartient au patron » : utile depuis un PROJET (on modifie une donnée
   // partagée par d'autres projets), inutile sur la fiche du patron où c'est une évidence.
   sharedHint: { type: Boolean, default: false },
+  // Devise du prix tel qu'enregistré ; vide (pas encore de prix) = celle des réglages.
+  currency: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue'])
 const { t, locale } = useI18n()
 const settings = useSettingsStore()
 
-const symbol = computed(() => currencySymbol(settings.currency, locale.value))
+const symbol = computed(() => currencySymbol(props.currency || settings.currency, locale.value))
 
 function patch(over) {
   emit('update:modelValue', { ...props.modelValue, ...over })

@@ -2,21 +2,21 @@
 // tests/unit/db-migration-guard.spec.js
 // Filet de sécurité de l'unique déclaration de schéma (cf. src/db/db.js). La question
 // qu'il posait jusqu'au 13/08/2026 — « une base v1 monte-t-elle vers le schéma courant ? »
-// — n'a plus d'objet : le fichier ne déclare plus qu'une seule `db.version(1)` portant les
-// onze tables, il n'y a plus de montée de version à rejouer.
+// — n'a plus d'objet : le fichier déclare la `db.version(1)` fusionnée (onze tables) puis, depuis
+// le 14/11/2026, une `db.version(2)` ajoutant `tools` (douze tables au total).
 //
 // LA QUESTION QUI LA REMPLACE, et qui est la seule qui compte au moment du ménage pré-1.0 :
 // UNE BASE ÉCRITE PAR L'APK ACTUELLEMENT INSTALLÉ S'OUVRE-T-ELLE AVEC CE CODE ?
 // L'APK installé sur les deux appareils de la maison a construit sa base par paliers
 // v1 → v2 → v3, donc à la version 30 côté IndexedDB (Dexie multiplie par 10). Le code
-// réduit, lui, ne déclare plus que la version 10. C'est exactement le scénario du
+// déclarait 10 (v1 fusionnée) et déclare 20 depuis `tools` (v2). C'est exactement le scénario du
 // garde-fou de démarrage (src/db/version-guard.js), et ce test l'exerce de bout en bout
 // contre le VRAI singleton `db` du dépôt — jamais contre une copie du schéma.
 //
 // ⚠️ Ce que ce fichier vérifie N'EST PAS que « tout va bien » : la phase 1 a mesuré, et le
 // Pixel 7 a confirmé, qu'un code déclarant MOINS DE TABLES que la base voit ces tables
-// disparaître EN SILENCE et bloque toute sauvegarde automatique sans un mot. La fusion
-// déclare les onze tables, donc aucune ne manque — mais c'est un fait à MESURER, pas à
+// disparaître EN SILENCE et bloque toute sauvegarde automatique sans un mot. Le code
+// déclare les douze tables, donc aucune ne manque — mais c'est un fait à MESURER, pas à
 // déduire : les assertions ci-dessous le vérifient une par une, y compris la collecte de
 // sauvegarde réelle (`collectBackupData`), qui est ce qui s'arrêtait entièrement.
 //
@@ -50,8 +50,8 @@ afterEach(() => {
   versionGuardState.triggered = false
 })
 
-describe("base écrite par l'APK installé (paliers v1→v2→v3, version 30) ouverte par le code fusionné (version 10)", () => {
-  it('ouvre sans erreur, garde les onze tables visibles et leurs données, sauvegarde comprise', async () => {
+describe("base écrite par l'APK installé (paliers v1→v2→v3, version 30) ouverte par le code courant (version 20)", () => {
+  it('ouvre sans erreur, garde les douze tables visibles et leurs données, sauvegarde comprise', async () => {
     // 1. La base de l'appareil : construite par paliers, comme l'a fait l'APK installé.
     db.close()
     await Dexie.delete('rowtine')
@@ -100,15 +100,17 @@ describe("base écrite par l'APK installé (paliers v1→v2→v3, version 30) ou
       erreur = e
     }
     expect(erreur).toBeNull()
-    expect(db.verno).toBe(1) // le code déclare bien UNE seule version
+    // Le code déclare la v1 fusionnée puis la v2 (table `tools`, 14/11/2026) : 20 côté
+    // IndexedDB. Une base à 30 reste donc PLUS RÉCENTE que le code, le garde-fou s'y déclenche.
+    expect(db.verno).toBe(2)
 
     // 3. Le fait que la phase 1 a rendu dangereux : une table déclarée en moins devient
-    // INVISIBLE en silence. Les onze doivent être là, comme PROPRIÉTÉS (c'est par la
+    // INVISIBLE en silence. Les douze doivent être là, comme PROPRIÉTÉS (c'est par la
     // propriété que tout le code applicatif y accède, `db.purchases.toArray()` etc. —
     // `db.table('x')`, lui, lève proprement, ce qui n'est PAS le chemin réel).
     const attendues = [
       'projects', 'yarns', 'patterns', 'sections', 'diagrams', 'counters',
-      'sessions', 'settings', 'trash', 'purchases', 'activeDays',
+      'sessions', 'settings', 'trash', 'purchases', 'activeDays', 'tools',
     ]
     for (const nom of attendues) {
       expect(db[nom], `table ${nom} invisible au code : elle disparaîtrait en silence`).toBeDefined()
@@ -159,15 +161,18 @@ describe("base écrite par l'APK installé (paliers v1→v2→v3, version 30) ou
     expect(snapshot.yarns).toHaveLength(1)
     expect(snapshot.projects).toHaveLength(1)
 
-    // 7. La base reste à 30 côté IndexedDB : Dexie ne renumérote pas vers le bas. C'est
+    // 7. La base reste AU-DESSUS du code côté IndexedDB : Dexie ne renumérote pas vers le bas. C'est
     // précisément ce qui fait que le garde-fou de démarrage se déclenche — vérifié ici sur
     // le chemin de production exact (aucune injection), contre cette base réelle.
-    expect(db.backendDB().version).toBe(30)
+    // ⚠️ 31 et non plus 30 depuis `tools` (14/11/2026) : la base à 30 ne porte pas cette
+    // table, Dexie la rouvre au numéro natif SUIVANT pour la créer (même mécanisme que dans
+    // purchases.store.spec.js). Le code attend 20 : l'écart demeure, le garde-fou parle.
+    expect(db.backendDB().version).toBe(31)
     versionGuardState.triggered = false
     await checkVersionGuardOnStartup()
     expect(
       versionGuardState.triggered,
-      'base 30 contre un code en 10 : le garde-fou doit prévenir, jamais laisser la situation muette',
+      'base 31 contre un code en 20 : le garde-fou doit prévenir, jamais laisser la situation muette',
     ).toBe(true)
 
     db.close()

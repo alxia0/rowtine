@@ -10,6 +10,17 @@
 // espagnole, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_ES = [
   {
+    version: '1.5.0',
+    notes: [
+      'Nueva pantalla «Mis herramientas»: tus agujas, ganchos y kits intercambiables, con talla, longitud, material, fotos y precio. Un kit puede tener cables de varias longitudes y diámetros de fijación.',
+      'Vincula herramientas a un proyecto: su ficha avisa si falta una talla en tu stock. En un kit tomas una talla y un cable concretos, y el resto del kit queda libre para otro proyecto.',
+      'Al poner un proyecto en pausa, la app propone liberar sus herramientas para otro proyecto; al retomarlo, propone recuperar las que siguen libres.',
+      'Las herramientas compradas cuentan en Gastos, y el stock de herramientas se exporta a una hoja de cálculo.',
+      'Proyecto terminado: botón Cancelar en la ventana de los ovillos, tope en lo disponible y corrección de los ovillos después desde la pantalla Modificar.',
+      'Tras una actualización, una ventana te presenta las novedades una sola vez, y la pantalla Acerca de guarda el registro de todas las versiones.',
+    ],
+  },
+  {
     version: '1.4.3',
     notes: [
       'Muestras de lana: anota la tensión obtenida con una lana en su ficha del stock (plano o en redondo, tamaño de aguja o de ganchillo, puntos y vueltas en 10 cm). Las muestras acompañan a la lana en las copias de seguridad y en la exportación del stock.',

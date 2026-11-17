@@ -1,0 +1,6 @@
+New “My tools” screen: needles, hooks and interchangeable sets (sizes, cables), with photos and price.
+Link tools to a project, or one size and cable of a set; a size missing from your stash is flagged.
+Pausing a project frees its tools for another one; take them back on resume.
+Tools you bought count in Expenses; export the stash to a spreadsheet.
+Finished project: a Cancel button, skeins fixable afterwards.
+After an update, a window shows what's new.

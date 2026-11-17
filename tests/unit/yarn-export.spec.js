@@ -45,9 +45,9 @@ describe('yarnExportTable', () => {
     const { head, rows } = yarnExportTable([laineComplete], { t, linesFor })
     expect(head[0]).toBe(t('settings.export.yarn.brand'))
     expect(head[1]).toBe(t('settings.export.yarn.model'))
-    expect(head[11]).toBe(t('settings.export.yarn.purchaseDate'))
+    expect(head[12]).toBe(t('settings.export.yarn.purchaseDate'))
     expect(rows[0][1]).toBe('Baby Merino')
-    expect(rows[0][11]).toBe('2026-01-15')
+    expect(rows[0][12]).toBe('2026-01-15')
   })
 
   // Plusieurs lignes d'achat pour la MÊME laine ne perdent ni un bain, ni la date la plus
@@ -60,9 +60,9 @@ describe('yarnExportTable', () => {
       { bain: 'A12', date: '2026-01-15' }, // même bain que la ligne précédente : ne doit pas se dupliquer
     ] : [])
     const { head, rows } = yarnExportTable([laineComplete], { t, linesFor: linesMulti })
-    expect(head[10]).toBe(t('settings.export.yarn.dyeLot'))
-    expect(rows[0][10]).toBe('B03 · A12')
-    expect(rows[0][11]).toBe('2026-05-04')
+    expect(head[11]).toBe(t('settings.export.yarn.dyeLot'))
+    expect(rows[0][11]).toBe('B03 · A12')
+    expect(rows[0][12]).toBe('2026-05-04')
   })
 
   it('« Type de coloris »/« Colour type » et « Notes couleur »/« Colour notes » sont juste après « Coloris »/« Colour »', () => {
@@ -94,8 +94,8 @@ describe('yarnExportTable', () => {
   it('sans `linesFor` fourni (appelant qui ne connaît pas encore le registre), bain et date sortent vides sans planter', () => {
     expect(() => yarnExportTable([laineComplete], { t })).not.toThrow()
     const { rows } = yarnExportTable([laineComplete], { t })
-    expect(rows[0][10]).toBe('')
     expect(rows[0][11]).toBe('')
+    expect(rows[0][12]).toBe('')
   })
 
   // `yarnExportTable` liste ses colonnes une par une : sans ajout explicite, les

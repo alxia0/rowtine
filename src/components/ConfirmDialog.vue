@@ -54,6 +54,9 @@ const props = defineProps({
   danger: { type: Boolean, default: false },
   centered: { type: Boolean, default: false },
   dismissOnScrim: { type: Boolean, default: true },
+  // Liste de points (chaînes) rendue entre le message et les boutons, p. ex. les nouveautés
+  // d'une mise à jour. Absente ou vide : aucun nœud, le dialogue reste celui d'avant.
+  items: { type: Array, default: () => [] },
   dismissAction: { type: String, default: 'cancel', validator: (v) => v === 'cancel' || v === 'confirm' },
 })
 const emit = defineEmits(['confirm', 'cancel'])
@@ -130,6 +133,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
       >
         <h2 :id="titleId" class="cfd__title">{{ title }}</h2>
         <p class="cfd__msg">{{ message }}</p>
+        <ul v-if="items.length" class="cfd__items" data-test="confirm-items">
+          <li v-for="(item, i) in items" :key="i">{{ item }}</li>
+        </ul>
         <div class="cfd__actions">
           <button v-if="hasCancel" ref="cancelBtn" class="btn" data-test="confirm-cancel" @click="open && emit('cancel')">{{ cancelLabel }}</button>
           <button
@@ -164,6 +170,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
 }
 .cfd__title { font-family: var(--font-display); font-size: 20px; margin: 0; color: var(--ink); }
 .cfd__msg { margin: var(--sp-3) 0 var(--sp-5); color: var(--ink-70); font-size: 14px; line-height: 1.5; }
+.cfd__items { margin: calc(-1 * var(--sp-2)) 0 var(--sp-5); padding-left: var(--sp-5); color: var(--ink-70); font-size: 14px; line-height: 1.5; max-height: 40vh; overflow-y: auto; }
+.cfd__items li + li { margin-top: var(--sp-1); }
 .cfd__actions { display: flex; gap: var(--sp-3); }
 .cfd__actions .btn { flex: 1; min-height: 44px; }
 /* fond --danger : solide, ne suit PAS la teinte → texte clair statique --on-solid

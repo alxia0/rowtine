@@ -7,6 +7,7 @@ import { PATTERN_CATEGORIES } from '@/constants/catalog'
 import { TECHNIQUES as TECHS } from '@/constants/status'
 import { pickImage } from '@/utils/photo'
 import { cleanDesignerName } from '@/utils/pattern-designer'
+import { hasPrice } from '@/utils/price-currency'
 import { useCropperStore } from '@/stores/cropper'
 import { useSettingsStore } from '@/stores/settings'
 import { useSnackbarStore } from '@/stores/snackbar'
@@ -52,10 +53,6 @@ const sizesText = ref((form.sizes || []).join(', '))
 // estampillée à l'enregistrement (ci-dessous), jamais rejouée à l'affichage, pour qu'un
 // changement de devise dans les réglages ne réécrive pas rétroactivement un achat ancien.
 const priceForm = reactive({ price: form.price || '', purchasedAt: form.purchasedAt || '' })
-// Prix TEL QU'AU MONTAGE (jamais réactif) : seul repère pour savoir, à l'enregistrement, si
-// LE PRIX a bougé — par opposition à n'importe quel autre champ de cette même fiche (nom,
-// photo, auteur, catégorie...). Cf. commentaire de `submit()`.
-const seedPriceStr = String(seed.price || '').trim()
 // Le « Patron libre » est un gabarit UNIQUE partagé par tous les projets sans patron : jamais
 // de prix dessus. Ce formulaire n'édite jamais de copie de travail, d'où le seul cas 'builtin'.
 const priceHiddenReason = computed(() => (form.builtin ? 'builtin' : null))
@@ -118,23 +115,13 @@ function submit() {
   if (form.category !== 'other') form.categoryCustom = ''
   form.price = priceForm.price
   form.purchasedAt = priceForm.purchasedAt
-  // Devise ré-estampillée à l'ÉCRITURE seulement si LE PRIX A CHANGÉ depuis le montage — pas
-  // à chaque `submit()`. Ce formulaire sert aussi à modifier n'importe quel autre champ d'une
-  // fiche patron déjà achetée (nom, photo, auteur, catégorie...) : sans cette garde, ouvrir la
-  // fiche d'un patron payé 8,50 CHF pour y ajouter une photo, après avoir depuis basculé les
-  // réglages sur EUR, réécrivait silencieusement `priceCurrency` en EUR — la ligne quittait le
-  // total CHF de l'écran Dépenses pour le total EUR sans qu'aucun euro n'ait changé de main, à
-  // l'inverse exact de ce que promet le message de confirmation du changement de devise
-  // (« les prix déjà saisis ne seront pas convertis »). Même convention que les lignes d'achat
-  // de laine (YarnPurchases.vue : `openEdit` préserve `line.currency`, seul `openAddMissing`
-  // estampille) : ESTAMPILLER à la création, PRÉSERVER à l'édition. Prix vidé : toujours remis
-  // à '' (un prix effacé ne doit garder la devise d'aucun achat) — ce cas prime sur la garde.
-  const priceStr = String(priceForm.price || '').trim()
-  if (!priceStr) {
-    form.priceCurrency = ''
-  } else if (priceStr !== seedPriceStr) {
-    form.priceCurrency = settings.currency
-  }
+  // Même règle que la laine et l'outil : un prix garde la devise déjà posée, même si les
+  // réglages ont changé depuis l'achat (la devise est une étiquette, l'app ne convertit rien).
+  // Seul un prix sans devise (nouveau, ou ancien d'avant l'estampille) prend celle des
+  // réglages. Prix vidé : devise remise à '', un prix effacé ne garde la devise d'aucun achat.
+  // Une fiche rouverte pour changer autre chose garde donc sa devise, et le filtre des champs
+  // inchangés ci-dessous la retire de la charge utile.
+  form.priceCurrency = hasPrice(priceForm.price) ? form.priceCurrency || settings.currency : ''
   const payload = JSON.parse(JSON.stringify(form))
   // Édition : seuls les champs CHANGÉS depuis l'ouverture partent (`patternsStore.update`
   // fusionne, le reste garde sa valeur EN BASE). Renvoyer la copie figée à l'ouverture
@@ -225,6 +212,7 @@ function submit() {
     <PatternPriceFields
       :model-value="priceForm"
       :hidden-reason="priceHiddenReason"
+      :currency="form.priceCurrency"
       @update:model-value="Object.assign(priceForm, $event)"
     />
 

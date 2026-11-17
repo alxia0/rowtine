@@ -76,6 +76,20 @@ const IDENTICAL_VALUE_ALLOWED = {
     'project.stats.progressValue', // "{pct} %" — pur gabarit (chiffre + symbole %), rien de linguistique ; en.json seul s'en écarte (pas d'espace avant %, convention anglophone)
     'stats.heatmap.cell', // "{date} — {duration}, {count}" — pur gabarit (tiret cadratin + virgule), rien de linguistique : {duration} et {count} portent déjà la traduction (fmtDuration + stats.heatmap.sessions)
     'stats.heatmap.projectLine', // "{name} — {duration}" — MÊME motif que stats.heatmap.cell juste au-dessus : {name} et {duration} portent déjà toute la traduction (11/08)
+    // Stock d'outils (14/11) : gabarits de taille et de longueur, chiffre + symbole SI, et
+    // « US » est le nom du barème, jamais traduit.
+    'tools.sizeMm', // "{mm} mm"
+    'tools.lengthCm', // "{cm} cm"
+    'tools.lengthCmCount', // "{cm} cm ×{count}" : que des nombres et une unité, identique dans toutes les langues
+    'tools.countTimes', // "×{n}" : quantité sur la ligne d'un outil, signe et nombre seuls
+    'tools.kitTakenSize', // "{size} ({name})" : taille prise d'un kit et son projet, sans mot
+    'tools.kitPick', // "{size} + {cable}" : taille et câble pris d'un kit, sans mot
+    'tools.lengthKinds.mini', // "mini" : mot international, écrit pareil dans les 4 langues
+    'tools.sizeLine', // "{mm} mm · US {us}"
+    'tools.sizeLineUk', // "{mm} mm · US {us} · UK {uk}" : que des nombres, identique dans toutes les langues
+    'tools.sizeLineHook', // "{mm} mm · {us}" : {us} porte la lettre du crochet (G-6)
+    'tools.form.sizeOption', // "{mm} mm (US {us})" : option de taille du formulaire, même gabarit
+    'tools.form.sizeOptionHook', // "{mm} mm ({us})" : idem pour un crochet
   ],
   en: [
     'pagesSelect.pageLabel', // "Page {n}" : cognat fr/en (es: Página, de: Seite)
@@ -183,6 +197,8 @@ const IDENTICAL_VALUE_ALLOWED = {
     'settings.export.pattern.type', // "Type"
     'settings.export.pattern.source', // "Source"
     'settings.export.pattern.sections', // "Sections"
+    'settings.export.tool.type', // "Type"
+    'settings.export.tool.notes', // "Notes"
 
     // Étapes du wizard badge : "Photo" est un cognat fr/en seulement — "Foto" en allemand,
     // "Foto" en espagnol aussi, donc PAS reconduit dans le compartiment '*'. "Format", en
@@ -204,6 +220,9 @@ const IDENTICAL_VALUE_ALLOWED = {
     // ("Technik" en allemand, "Técnica" en espagnol), donc PAS reconduit
     // dans le compartiment '*'.
     'project.stats.technique', // "Technique"
+    'tools.fields.type', // "Type" : mot identique en français et en anglais ("Typ" en allemand, "Tipo" en espagnol)
+    'tools.fields.notes', // "Notes" : idem ("Notizen" en allemand, "Notas" en espagnol)
+    'tools.materials.aluminium', // "aluminium" : orthographe britannique de en.json ("colour"), "Aluminium" en allemand, "aluminio" en espagnol
   ],
 
   // Allemand — mesuré le 29/07 en lançant la règle 4 contre de.json. Chaque
@@ -271,6 +290,8 @@ const IDENTICAL_VALUE_ALLOWED = {
     'project.finishedAt', // "Fin" — mot espagnol correct, identique au français (pas à l'anglais "Finished")
     'settings.export.project.end', // idem : "Fin" est le mot espagnol correct pour un en-tête de colonne "fin", pas un oubli
     'yarn.usage.free', // "Libre" — identique par coïncidence orthographique fr/es (pas à l'anglais "Free")
+    'tools.statuses.available', // "Disponible" : mot espagnol correct, identique au français (pas à l'anglais "Available")
+    'tools.statusesInline.available', // « disponible » en minuscules, même mot espagnol que tools.statuses.available
     'reader.edit.repeatTotal', // "Total" — mot international à une syllabe, aucune alternative plus courte ou naturelle en espagnol
     'patternExtras.fromPage', // "p. {n}" — abréviation de pagination identique en français, anglais et espagnol ("página")
 

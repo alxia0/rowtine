@@ -70,9 +70,7 @@ export function yarnAvailable(yarn) {
 // (0.9000000000000001), qui fuirait sinon dans les allocations écrites par
 // setProjectReservation.
 export function availableForProject(yarn, pid) {
-  const res = reservationsOf(yarn)
-  const others = roundSkeins(Object.entries(res).reduce((a, [k, n]) => (Number(k) === Number(pid) ? a : a + n), 0))
-  return roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - others))
+  return roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - reservedByOthers(yarn, pid)))
 }
 
 // Écrit/retire l'allocation d'UN projet dans le pool d'une laine, sans jamais toucher
@@ -109,8 +107,12 @@ export function consumedOf(yarn) {
   return cleanReservations(yarn?.consumed)
 }
 
-// Termine l'allocation d'UN projet : borne `used` à [0, réservé pour ce projet],
-// retire sa réservation (le reliquat retourne donc au stock automatiquement — cf.
+// Termine l'allocation d'UN projet : borne `used` à [0, disponible pour ce projet] (on peut
+// avoir tricoté plus que ce qui était réservé, jamais plus que ce qui est à lui : sa propre
+// réservation plus le stock libre, cf. `availableForProject`). Le stock TOTAL comme plafond
+// laissait un projet prendre les pelotes réservées par un AUTRE : le stock tombait sous ce que
+// l'autre réservait encore (invariant `quantity >= reservedTotal` cassé, cf. YarnEditView), et la
+// clôture de l'autre était ensuite tronquée en silence. Retire sa réservation (le reliquat retourne donc au stock automatiquement, cf.
 // `setProjectReservation(yarn, pid, null)`), cumule `used` dans la trace de
 // consommation de ce projet, et déduit `quantity` (plancher 0). PUR : ne mute jamais
 // la laine, ne touche jamais les allocations/traces des autres projets. Composé à
@@ -119,12 +121,54 @@ export function consumeProjectReservation(yarn, pid, used) {
   const key = Number(pid)
   const reserved = reservationsOf(yarn)[key] || 0
   const n = roundSkeins(Number(used))
-  const clamped = Number.isFinite(n) ? Math.max(0, Math.min(n, reserved)) : 0
+  // Un projet SANS réservation sur cette laine n'a rien à consommer : le plafond ne vaut
+  // que pour un projet réservataire (sinon n'importe quel pid ponctionnerait le stock).
+  // Calculé sur la laine REÇUE, avant le retrait de la réservation : sa propre part compte.
+  const ceiling = reserved > 0 ? availableForProject(yarn, key) : 0
+  const clamped = Number.isFinite(n) ? Math.max(0, Math.min(n, ceiling)) : 0
   const reservations = setProjectReservation(yarn, key, null)
   const before = consumedOf(yarn)
   const consumed = cleanReservations({ ...before, [key]: (before[key] || 0) + clamped })
   const quantity = roundSkeins(Math.max(0, (Number(yarn?.quantity) || 0) - clamped))
   return { reservations, consumed, quantity }
+}
+
+// Somme des réservations des AUTRES projets sur cette laine (celle de `pid` exclue),
+// arrondie par roundSkeins (traîne binaire). Un pid absent les compte donc toutes.
+export function reservedByOthers(yarn, pid) {
+  const res = reservationsOf(yarn)
+  return roundSkeins(Object.entries(res).reduce((a, [k, n]) => (Number(k) === Number(pid) ? a : a + n), 0))
+}
+
+// Le plus qu'un projet puisse avoir tricoté de cette laine : ce qu'il a déjà consommé
+// (déjà retiré du stock) plus ce qui lui reste DISPONIBLE. Le disponible est le stock moins
+// les réservations des AUTRES projets (les pelotes qu'un autre projet garde ne sont jamais à
+// prendre, même règle que consumeProjectReservation), MOINS la réservation propre du projet :
+// ces pelotes-là sont encore dans `quantity` mais ne sont pas du stock libre, et les compter
+// en plus de ce qui est déjà tricoté doublait le plafond. Plancher 0 ; roundSkeins referme
+// la traîne binaire.
+export function maxConsumptionFor(yarn, pid) {
+  const own = reservationsOf(yarn)[Number(pid)] || 0
+  const free = Math.max(0, availableForProject(yarn, pid) - own)
+  return roundSkeins((consumedOf(yarn)[Number(pid)] || 0) + free)
+}
+
+// Corrige APRÈS COUP la consommation d'UN projet (déjà terminé) : patch pur
+// { consumed, quantity }. La valeur est bornée à [0, maxConsumptionFor], et le stock suit
+// l'écart avec l'ancienne valeur (hausse = pelotes retirées, baisse = rendues). Idempotent :
+// réappliquer la même valeur ne change plus rien (l'écart est calculé contre l'ancien).
+// Une valeur illisible laisse l'état tel quel. Une consommation à 0 retire la clé (cleanReservations).
+export function adjustProjectConsumption(yarn, pid, newUsed) {
+  const key = Number(pid)
+  const before = consumedOf(yarn)
+  const old = before[key] || 0
+  const stock = Number(yarn?.quantity) || 0
+  const n = roundSkeins(Number(newUsed))
+  const target = Number.isFinite(n) ? Math.max(0, Math.min(n, maxConsumptionFor(yarn, key))) : old
+  return {
+    consumed: cleanReservations({ ...before, [key]: target }),
+    quantity: roundSkeins(Math.max(0, stock + old - target)),
+  }
 }
 
 // État du badge stock. `projectsById` : { [id]: { status } }.

@@ -1,8 +1,8 @@
-// Le burger d'AppHeader.vue porte 9 entrées (Sessions, 31/08 ; Statistiques,
-// Dépenses et Guide y sont entrés). Preuve visuelle dans les cas serrés déjà identifiés —
+// Le burger d'AppHeader.vue porte 10 entrées (Mes outils, 14/11 ; Sessions, 31/08 ;
+// Statistiques, Dépenses et Guide y sont entrés). Preuve visuelle dans les cas serrés déjà identifiés —
 // écran étroit, EN PAYSAGE, et la tablette cible en paysage où c'est la
 // hauteur qui est le facteur limitant — et dans les 4 langues (l'allemand rallonge les
-// libellés). À 9 entrées, le panneau ne tient PLUS en 640×360 sans hauteur bornée : c'est
+// libellés). Dès 9 entrées, le panneau ne tient PLUS en 640×360 sans hauteur bornée : c'est
 // exactement ce que ce fichier mesure.
 //
 // Revue du 02/08 : la 1re version de ce fichier ne couvrait que 360×640 (étroit, PORTRAIT) et
@@ -52,7 +52,7 @@ async function openMenu(page) {
 
   await page.locator('.hdr__burger').click()
   const items = page.locator('.menu__item')
-  await expect(items).toHaveCount(9)
+  await expect(items).toHaveCount(10)
   return items
 }
 
@@ -87,10 +87,10 @@ async function checkMenuReachable(page, locale, { scrolls }) {
     expect(scrollHeight, 'le panneau tient sans défiler').toBeLessThanOrEqual(clientHeight)
   }
 
-  // Le panneau défile en interne quand il est borné : `toBeVisible()` sur la 9e entrée
+  // Le panneau défile en interne quand il est borné : `toBeVisible()` sur la dernière entrée
   // serait faux sans amener celle-ci dans le cadre. On fait défiler puis on vérifie —
-  // c'est la preuve que les 9 sont ATTEIGNABLES, pas seulement présentes dans le DOM.
-  for (let i = 0; i < 9; i++) {
+  // c'est la preuve que les 10 sont ATTEIGNABLES, pas seulement présentes dans le DOM.
+  for (let i = 0; i < 10; i++) {
     await items.nth(i).scrollIntoViewIfNeeded()
     await expect(items.nth(i)).toBeVisible()
   }
@@ -111,9 +111,9 @@ for (const locale of LOCALES) {
       test.use({ viewport: scenario.viewport })
 
       // Titre honnête (revue finale du 12/08) : depuis l'ajout de `scrollIntoViewIfNeeded()`,
-      // ce test ne prouve PAS que les 9 entrées sont visibles à la fois — en 640×360 il y en a
-      // environ 6 sur 9 dans le cadre. Ce qu'il prouve, c'est qu'elles sont toutes ATTEIGNABLES.
-      test('les 9 entrées du menu restent toutes atteignables, le panneau défilant si besoin', async ({ page }) => {
+      // ce test ne prouve PAS que les 10 entrées sont visibles à la fois : en 640×360 il y en a
+      // environ 6 dans le cadre. Ce qu'il prouve, c'est qu'elles sont toutes ATTEIGNABLES.
+      test('les 10 entrées du menu restent toutes atteignables, le panneau défilant si besoin', async ({ page }) => {
         await checkMenuReachable(page, locale, { scrolls: scenario.scrolls })
       })
     })

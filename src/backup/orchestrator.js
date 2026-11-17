@@ -5,7 +5,7 @@
 // réconciliation des suppressions calée sur la corbeille (`snapshot.keepIds`), et
 // écriture de `corbeille.json` (`snapshot.trashIds`) — index que S3 consulte pour ne
 // PAS restaurer comme actif un dossier dont le contenu a été supprimé (cf. restore.js).
-import { serializeProject, serializePattern, serializeYarns, serializePurchases, serializeActiveDays, serializeIndependentCounters, serializeSettings, serializeTrashIndex, YARN_PHOTOS_DIR } from './serialize'
+import { serializeProject, serializePattern, serializeYarns, serializeTools, serializePurchases, serializeActiveDays, serializeIndependentCounters, serializeSettings, serializeTrashIndex, YARN_PHOTOS_DIR, TOOL_PHOTOS_DIR } from './serialize'
 import { parseEntryId, hash8 } from './naming'
 
 // Motif des fichiers lourds "gérés" d'un dossier d'entrée (photos, images de galerie
@@ -215,14 +215,17 @@ async function reconcile(storage, rootDir, keepIds, stats) {
 // sur le Huawei le 21/08 est le résidu d'une écriture interrompue, un déchet que personne ne
 // lira jamais. Ce ménage tourne APRÈS l'écriture séquentielle des fichiers racine, donc
 // jamais pendant qu'une photo s'écrit.
-async function reconcileYarnPhotos(storage, keepNames, stats) {
+// Généralisé aux outils (`Outils/`, `outil-photo-`) : chaque appel est borné à SON dossier
+// ET à SON préfixe, donc jamais une photo de laine ne part avec le ménage des outils, ni
+// l'inverse. Un dossier absent se lit `[]` (parité native, cf. saf-storage.js).
+async function reconcileGalleryPhotos(storage, dir, prefix, keepNames, stats) {
   const keep = new Set(keepNames || [])
-  const entries = await storage.readdir(YARN_PHOTOS_DIR)
+  const entries = await storage.readdir(dir)
   for (const entry of entries) {
     if (entry.isDir) continue
-    if (!entry.name.startsWith('laine-photo-')) continue
+    if (!entry.name.startsWith(prefix)) continue
     if (keep.has(entry.name)) continue
-    await storage.remove(`${YARN_PHOTOS_DIR}/${entry.name}`)
+    await storage.remove(`${dir}/${entry.name}`)
     stats.removed++
   }
 }
@@ -288,8 +291,11 @@ export async function backupAll(storage, snapshot, { onProgress } = {}) {
   // laine-photo-* par photo externalisée) — les autres sérialiseurs racine en renvoient
   // toujours un seul chacun.
   const { files: yarnFiles, photoNames: yarnPhotoNames } = serializeYarns(snapshot.yarns || [])
+  // Même règle pour les outils : photos `Outils/outil-photo-*` d'abord, `outils.json` en dernier.
+  const { files: toolFiles, photoNames: toolPhotoNames } = serializeTools(snapshot.tools || [])
   const rootFiles = [
     ...yarnFiles,
+    ...toolFiles,
     serializePurchases(snapshot.purchases || []),
     serializeActiveDays(snapshot.activeDays || []),
     serializeIndependentCounters(snapshot.independentCounters || []),
@@ -309,7 +315,8 @@ export async function backupAll(storage, snapshot, { onProgress } = {}) {
   const keepIds = snapshot.keepIds || {}
   await reconcile(storage, 'Projets', keepIds.projects || [], stats)
   await reconcile(storage, 'Patrons', keepIds.patterns || [], stats)
-  await reconcileYarnPhotos(storage, yarnPhotoNames, stats)
+  await reconcileGalleryPhotos(storage, YARN_PHOTOS_DIR, 'laine-photo-', yarnPhotoNames, stats)
+  await reconcileGalleryPhotos(storage, TOOL_PHOTOS_DIR, 'outil-photo-', toolPhotoNames, stats)
 
   return stats
 }

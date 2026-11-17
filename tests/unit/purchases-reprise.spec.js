@@ -26,6 +26,10 @@ describe('ligne reconstruite', () => {
       date: '2026-03-04', bain: 'A12', currency: 'EUR', reconstructed: true,
     })
   })
+  it('la devise de la fiche l\'emporte sur celle des réglages', () => {
+    const l = buildReconstructedPurchase({ id: 5, quantity: 1, price: 2, priceCurrency: 'GBP' }, 'EUR')
+    expect(l.currency).toBe('GBP')
+  })
   it('libellé figé lisible : marque · modèle · coloris', () => {
     const l = buildReconstructedPurchase({ id: 1, brand: 'Katia', model: 'Merino', colorName: 'Rouge' }, 'EUR')
     expect(l.yarnLabel).toBe('Katia · Merino · Rouge')

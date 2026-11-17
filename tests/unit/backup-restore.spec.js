@@ -123,6 +123,13 @@ async function seedRichDb() {
     },
   ])
 
+  // Outil avec galerie : le round-trip global prouve que `tools` traverse collecte, sérialisation,
+  // disque, lecture et remplacement de table.
+  await db.tools.bulkAdd([
+    { id: 70, type: 'circular', category: 'needle', sizeMm: 4, photos: [PHOTO_A, PHOTO_B], coverIndex: 1 },
+    { id: 71, type: 'standard', category: 'hook', sizeMm: 3.5, photos: [] },
+  ])
+
   await setSetting('theme', 'clay')
   await setSetting('onboarded', true)
   await setSetting('lastBackupAt', '2026-07-02T10:00:00.000Z')
@@ -145,6 +152,7 @@ function normalizeSnapshot(snapshot) {
     })),
     libraryPatterns: sortById(snapshot.libraryPatterns),
     yarns: sortById(snapshot.yarns),
+    tools: sortById(snapshot.tools),
     purchases: sortById(snapshot.purchases),
     independentCounters: sortById(snapshot.independentCounters),
     keepIds: {
@@ -225,6 +233,7 @@ describe('readBackup — reconstruit le dbSnapshot depuis une arbo produite par 
       sessions: [],
       diagrams: [],
       yarns: [],
+      tools: [],
       purchases: [],
       // Journal des jours actifs : `jours-actifs.json` absent → repli `[]`
       // (readBackup, §7ter), au même titre qu'achats.json.
@@ -415,6 +424,8 @@ describe('ROUND-TRIP DE BOUT EN BOUT — collect → backupAll → readBackup �
     expect(snapshotB.yarns.find((y) => y.id === 50).consumed).toEqual({ 2: 3 })
     expect(snapshotB.yarns.find((y) => y.id === 50).photo).toBe(YARN_PHOTO)
     expect(snapshotB.yarns.find((y) => y.id === 50).composition).toEqual(['laine', 'soie'])
+    expect(snapshotB.tools.find((t) => t.id === 70)).toMatchObject({ photos: [PHOTO_A, PHOTO_B], coverIndex: 1, sizeMm: 4 })
+    expect(snapshotB.tools).toHaveLength(2)
     const sabai = snapshotB.libraryPatterns.find((p) => p.id === 100)
     expect(sabai).toMatchObject({ needleMm: '4.5', needleUs: '7', gaugeStitches: '22', gaugeRows: '28' })
   })
@@ -641,5 +652,156 @@ describe('les résidus d’écriture ne sont ni lus ni restaurés', () => {
     expect(snapshot.projects[0].photos).toEqual([PHOTO_A])
     expect(lus.filter((p) => /film\.(mp4|mov)$|photo-geante/.test(p))).toEqual([])
     expect(snapshot.errors).toEqual([expect.objectContaining({ where: dir, code: 'file-too-large', file: 'photo-geante.jpg' })])
+  })
+})
+
+describe('outils : restauration', () => {
+  const baseData = {
+    projects: [],
+    libraryPatterns: [],
+    yarns: [],
+    independentCounters: [],
+    settings: {},
+    keepIds: { projects: [], patterns: [] },
+  }
+
+  it('une sauvegarde avec outils.json et Outils/ restaure les outils avec leurs photos', async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, { ...baseData, tools: [{ id: 3, type: 'standard', photos: [PHOTO_A, PHOTO_B], coverIndex: 1 }] })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.tools).toEqual([{ id: 3, type: 'standard', photos: [PHOTO_A, PHOTO_B], coverIndex: 1 }])
+    expect(snapshot.errors).toBeUndefined()
+  })
+
+  it('un projet avec toolIds garde ses liens, et l’outil son id, après sauvegarde et lecture', async () => {
+    const mem = new MemoryBackupStorage()
+    const projects = [{ id: 5, name: 'Bonnet', status: 'wip', toolIds: [3], photos: [], sections: [], counters: [], sessions: [], diagrams: [], instancePattern: null }]
+    await backupAll(mem, {
+      ...baseData,
+      projects,
+      keepIds: { projects: [5], patterns: [] },
+      tools: [{ id: 3, type: 'circular', sizeMm: 4 }],
+    })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.projects[0].toolIds).toEqual([3])
+    expect(snapshot.tools.map((t) => t.id)).toEqual([3])
+  })
+
+  it('un projet avec kitPicks les garde après sauvegarde et lecture', async () => {
+    const mem = new MemoryBackupStorage()
+    const kitPicks = [{ toolId: 3, sizeMm: 4, cableCm: 80 }, { toolId: 3, sizeMm: 5, cableCm: null }]
+    const projects = [{ id: 5, name: 'Bonnet', status: 'wip', toolIds: [], kitPicks, photos: [], sections: [], counters: [], sessions: [], diagrams: [], instancePattern: null }]
+    await backupAll(mem, { ...baseData, projects, keepIds: { projects: [5], patterns: [] }, tools: [{ id: 3, type: 'interchangeable', kitSizes: [4, 5], kitCables: [80] }] })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.projects[0].kitPicks).toEqual(kitPicks)
+  })
+
+  it('un projet avec parkedTools le garde après sauvegarde et lecture', async () => {
+    const mem = new MemoryBackupStorage()
+    const parkedTools = { toolIds: [3], kitPicks: [{ toolId: 3, sizeMm: 4, cableCm: 80 }] }
+    const projects = [{ id: 5, name: 'Bonnet', status: 'pause', toolIds: [], parkedTools, photos: [], sections: [], counters: [], sessions: [], diagrams: [], instancePattern: null }]
+    await backupAll(mem, { ...baseData, projects, keepIds: { projects: [5], patterns: [] }, tools: [{ id: 3, type: 'interchangeable', kitSizes: [4, 5], kitCables: [80] }] })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.projects[0].parkedTools).toEqual(parkedTools)
+  })
+
+  // Protège l'aller-retour des câbles à diamètre (objets) et d'un kit ancien (nombres) : rien n'est converti ni perdu.
+  it('un kit à câbles objets et un kit ancien à câbles nombres font l’aller-retour, prises avec cableJoin comprises', async () => {
+    const mem = new MemoryBackupStorage()
+    const kitPicks = [{ toolId: 3, sizeMm: 4, cableCm: 80, cableJoin: 'l' }, { toolId: 4, sizeMm: 4, cableCm: 80 }]
+    const projects = [{ id: 5, name: 'Bonnet', status: 'wip', toolIds: [], kitPicks, photos: [], sections: [], counters: [], sessions: [], diagrams: [], instancePattern: null }]
+    const tools = [
+      { id: 3, type: 'interchangeable', kitSizes: [4], kitCables: [{ cm: 80, join: 's' }, { cm: 80, join: 'l' }] },
+      { id: 4, type: 'interchangeable', kitSizes: [4], kitCables: [80, 80, 100] },
+    ]
+    await backupAll(mem, { ...baseData, projects, keepIds: { projects: [5], patterns: [] }, tools })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.projects[0].kitPicks).toEqual(kitPicks)
+    expect(snapshot.tools.find((x) => x.id === 3).kitCables).toEqual(tools[0].kitCables)
+    expect(snapshot.tools.find((x) => x.id === 4).kitCables).toEqual([80, 80, 100])
+  })
+
+  it('une sauvegarde ANTÉRIEURE (sans outils.json) se restaure sans erreur avec tools: []', async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, { ...baseData, tools: [] })
+    await mem.remove('outils.json')
+    expect(await mem.exists('Outils')).toBe(false)
+    const snapshot = await readBackup(mem)
+    expect(snapshot.tools).toEqual([])
+    expect(snapshot.errors).toBeUndefined()
+  })
+
+  it("photo d'outil manquante : consignée dans errors (Outils), outil restauré sans elle", async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, { ...baseData, tools: [{ id: 1, photos: [PHOTO_A, PHOTO_B] }] })
+    const missingName = JSON.parse(await mem.readFile('outils.json'))[0].photos[0]
+    await mem.remove(`Outils/${missingName}`)
+    const snapshot = await readBackup(mem)
+    expect(snapshot.tools[0].photos).toHaveLength(1)
+    expect(snapshot.errors).toContainEqual({ where: 'Outils', code: 'missing-asset', file: missingName })
+  })
+
+  it('une ligne invalide de outils.json est écartée avec un rapport, les autres outils survivent', async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, { ...baseData, tools: [{ id: 1, photos: [] }] })
+    await mem.writeFile('outils.json', JSON.stringify([null, { id: 1, photos: [] }]), { encoding: 'utf8' })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.tools).toEqual([{ id: 1, photos: [] }])
+    expect(snapshot.errors).toContainEqual(expect.objectContaining({ where: 'outils.json', table: 'tools' }))
+  })
+
+  it('outils.json corrompu (JSON invalide) : erreur consignée, aucun outil, le reste se lit', async () => {
+    const mem = new MemoryBackupStorage()
+    await backupAll(mem, { ...baseData, tools: [{ id: 1, photos: [] }] })
+    await mem.writeFile('outils.json', '{ pas du json', { encoding: 'utf8' })
+    const snapshot = await readBackup(mem)
+    expect(snapshot.tools).toEqual([])
+    expect(snapshot.errors).toContainEqual(expect.objectContaining({ where: 'outils.json' }))
+  })
+
+  it('writeSnapshotToDb REMPLACE la table : un outil absent du snapshot disparaît', async () => {
+    await db.tools.bulkAdd([{ id: 1, type: 'standard', photos: [] }, { id: 2, type: 'standard', photos: [] }])
+    await writeSnapshotToDb({
+      projects: [], patterns: [], sections: [], counters: [], sessions: [], diagrams: [],
+      yarns: [], purchases: [], activeDays: [], settings: [],
+      tools: [{ id: 2, type: 'circular', photos: [] }, { id: 9, type: 'standard', photos: [] }],
+    })
+    const ids = (await db.tools.toArray()).map((t) => t.id).sort((a, b) => a - b)
+    expect(ids).toEqual([2, 9])
+    expect((await db.tools.get(2)).type).toBe('circular')
+  })
+
+  it('restaurer depuis une ancienne sauvegarde (tools: []) vide les outils de l\'appareil, sans lever', async () => {
+    await db.tools.add({ id: 1, type: 'standard', photos: [] })
+    await writeSnapshotToDb({
+      projects: [], patterns: [], sections: [], counters: [], sessions: [], diagrams: [],
+      yarns: [], purchases: [], activeDays: [], settings: [], tools: [],
+    })
+    expect(await db.tools.count()).toBe(0)
+  })
+})
+
+describe('writeSnapshotToDb : devise des prix', () => {
+  it('prix sans devise : reçoivent la devise des réglages RESTAURÉS', async () => {
+    await writeSnapshotToDb({
+      projects: [], patterns: [], sections: [], counters: [], sessions: [], diagrams: [],
+      yarns: [{ id: 1, brand: 'A', price: 3, photos: [] }],
+      tools: [{ id: 1, type: 'standard', price: '9', photos: [] }],
+      purchases: [], activeDays: [], hasPurchasesFile: true,
+      settings: [{ key: 'currency', value: 'USD' }],
+    })
+    expect((await db.yarns.get(1)).priceCurrency).toBe('USD')
+    expect((await db.tools.get(1)).priceCurrency).toBe('USD')
+  })
+
+  it('snapshot sans clé currency : la devise propre de l\'appareil (réglage fusionné) est posée, pas EUR', async () => {
+    await db.settings.put({ key: 'currency', value: 'CHF' })
+    await writeSnapshotToDb({
+      projects: [], patterns: [], sections: [], counters: [], sessions: [], diagrams: [],
+      yarns: [{ id: 1, brand: 'A', price: 3, photos: [] }],
+      tools: [], purchases: [], activeDays: [], hasPurchasesFile: true,
+      settings: [],
+    })
+    expect((await db.yarns.get(1)).priceCurrency).toBe('CHF')
   })
 })

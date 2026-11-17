@@ -22,7 +22,7 @@ test('À propos ne porte plus le lien vers le guide : il a déménagé dans le m
   await expect(page.getByRole('link', { name: 'Guide utilisateur' })).toHaveCount(0)
 })
 
-test('Guide : le sommaire liste les 10 sections et n’affiche aucun bandeau de repli en français', async ({
+test('Guide : le sommaire liste les 11 sections et n’affiche aucun bandeau de repli en français', async ({
   page,
 }) => {
   await completeOnboarding(page, { firstName: 'Alex' })
@@ -30,10 +30,10 @@ test('Guide : le sommaire liste les 10 sections et n’affiche aucun bandeau de 
   // On cible le BLOC du sommaire, pas son texte : la prose du guide cite désormais le mot
   // « sommaire » (§3, sommaire du lecteur) et getByText('Sommaire') résolvait 4 éléments.
   await expect(page.locator('.toc__title')).toBeVisible()
-  // 10 sections mesurées dans src/content/guide/fr.md le 02/08 (l'intro « L'esprit de
-  // Rowtine » + 9 sections numérotées) — si ce nombre change, ce test doit être relu, pas
+  // 11 sections mesurées dans src/content/guide/fr.md le 14/11 (l'intro « L'esprit de
+  // Rowtine » + 10 sections numérotées, dont « 6. Tes outils » ajoutée le 14/11). Si ce nombre change, ce test doit être relu, pas
   // juste ajusté en silence.
-  await expect(page.locator('.toc__item')).toHaveCount(10)
+  await expect(page.locator('.toc__item')).toHaveCount(11)
   await expect(page.locator('.notice')).toHaveCount(0)
 })
 
@@ -53,7 +53,7 @@ test('Guide : chaque image du contenu français se charge réellement (aucune im
   // `.count()` n'attend PAS que Vue ait fini de monter la vue : sans cette assertion qui, elle,
   // réessaie jusqu'à un compte stable, une lecture immédiate après `goto()` peut tomber à 0
   // par pure course de rendu (observé en revue du 02/08).
-  await expect(page.locator('.section')).toHaveCount(10)
+  await expect(page.locator('.section')).toHaveCount(11)
 
   // `<details>` fermé ne retire PAS son contenu du DOM (les <img> y sont déjà, `.count()` les
   // trouve), mais les masque VISUELLEMENT — `toBeVisible()` échoue tant que la section reste
@@ -90,7 +90,7 @@ test('Guide : toucher une figure l’ouvre en plein écran ; le geste retour la 
 }) => {
   await completeOnboarding(page, { firstName: 'Alex' })
   await page.goto('/guide')
-  await expect(page.locator('.section')).toHaveCount(10)
+  await expect(page.locator('.section')).toHaveCount(11)
   // Le bandeau de décision de sauvegarde AVALE le retour (App.vue, `interceptBackupPrompt`,
   // qui passe avant la visionneuse) : s'il était affiché ici, l'assertion de fermeture
   // échouerait pour une raison étrangère à cette fonctionnalité.
@@ -147,7 +147,7 @@ test('Guide : toucher une figure l’ouvre en plein écran ; le geste retour la 
 
   await expect(visionneuse).toHaveCount(0) // la visionneuse s'est fermée…
   await expect(page).toHaveURL(/\/guide$/) // … et on est TOUJOURS dans le guide
-  await expect(page.locator('.toc__item')).toHaveCount(10)
+  await expect(page.locator('.toc__item')).toHaveCount(11)
 })
 
 test('Guide : retour vers l’écran d’origine (accueil, via le menu)', async ({ page }) => {

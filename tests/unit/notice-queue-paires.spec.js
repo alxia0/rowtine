@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Les paires de messages qui peuvent RÉELLEMENT s'afficher ensemble, et que la file ordonne.
-// Seules les paires plausibles sont testées (huit messages font vingt-huit paires). Les autres
+// Seules les paires plausibles sont testées (neuf messages font trente-six paires). Les autres
 // paires réelles vivent au plus près de leur écran : porte du dossier × astuce de balayage dans
 // first-detail-tip-bandeau-import.spec.js, avertissement d'import × astuce dans
 // library-import-caveat.spec.js.
@@ -52,6 +52,43 @@ describe('paire 2 — porte du dossier x bienvenue de l accueil', () => {
 
     q.withdraw(NOTICE.FOLDER_GATE)
     expect(q.active).toBe(NOTICE.WELCOME)
+  })
+})
+
+describe('paire 3 — nouveautés de la version x bienvenue, visite guidée, avertissement d import, astuce', () => {
+  // Les nouveautés (rang 7) cèdent aux messages d'accueil et gagnent contre les deux
+  // messages d'apprentissage qui peuvent attendre.
+  it.each([
+    [NOTICE.WELCOME],
+    [NOTICE.READER_TOUR],
+  ])('%s parle, les nouveautés attendent — puis les nouveautés parlent', (fort) => {
+    const q = useNoticeQueueStore()
+    q.request(NOTICE.NEW_VERSION_NOTES)
+    q.request(fort)
+
+    // PRÉCONDITION : les deux demandent la parole en même temps.
+    expect(q.requesters).toHaveLength(2)
+    expect(q.requesters).toContain(NOTICE.NEW_VERSION_NOTES)
+
+    expect(q.active).toBe(fort)
+    q.withdraw(fort)
+    expect(q.active).toBe(NOTICE.NEW_VERSION_NOTES)
+  })
+
+  it.each([
+    [NOTICE.IMPORT_CAVEAT],
+    [NOTICE.SWIPE_HINT],
+  ])('les nouveautés parlent, %s attend — puis il parle', (faible) => {
+    const q = useNoticeQueueStore()
+    q.request(faible)
+    q.request(NOTICE.NEW_VERSION_NOTES)
+
+    expect(q.requesters).toHaveLength(2)
+    expect(q.requesters).toContain(faible)
+
+    expect(q.active).toBe(NOTICE.NEW_VERSION_NOTES)
+    q.withdraw(NOTICE.NEW_VERSION_NOTES)
+    expect(q.active).toBe(faible)
   })
 })
 

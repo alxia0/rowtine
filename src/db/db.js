@@ -10,16 +10,23 @@ import { clearFolderClean } from '@/backup/restore-guard'
 export const db = new Dexie('rowtine')
 
 // ─────────────────────────────────────────────────────────────────────────
-// SCHÉMA — UNE SEULE VERSION, DÉLIBÉRÉMENT (ménage pré-1.0, 13/08/2026).
+// SCHÉMA — v1 FUSIONNÉE (ménage pré-1.0, 13/08/2026), puis v2 À LA SUITE.
+// 14/11/2026 : `db.version(2)` ajoutée pour la table `tools` (stock d'outils), voir plus
+// bas. LA PROCHAINE VERSION SERA `db.version(3)` ; la v1 et la v2 ne s'éditent plus.
+//
+// Historique du 13/08/2026 (l'état qui a donné la v1) :
 // Avant 1.0, l'app n'a aucune utilisatrice hors de la maison : rien n'oblige à
 // traîner l'empilement historique v1 (schéma d'origine) + v2 (achats) + v3
 // (jours actifs) qui avait construit les bases des appareils de test. Tout est
 // déclaré ici, d'un bloc, comme sur une installation neuve.
 //
 // Ce qui remplace l'ancienne procédure de migration, pour le cas d'un appareil
-// dont la base est PLUS RÉCENTE que ce que ce fichier déclare (typiquement les
-// deux appareils de la maison : base à 30 côté IndexedDB, ce code à 10 — Dexie
-// multiplie le numéro par 10) : le garde-fou de démarrage, src/db/version-guard.js,
+// dont la base est PLUS RÉCENTE que ce que ce fichier déclare (cas d'un appareil qui aurait
+// fait tourner un code plus récent que celui qu'on lui réinstalle). État actuel : la v1
+// publiée vaut 10 côté IndexedDB (Dexie multiplie le numéro par 10), la v2 (20) a été
+// ajoutée le 14/11/2026 pour `tools`, et les bases mesurées sur la tablette et le Huawei
+// sont à 10 : elles montent à 20 au premier lancement de ce code. Le garde-fou de
+// démarrage, src/db/version-guard.js,
 // appelé par src/router/index.js. Il compare la base présente à la version
 // DÉRIVÉE de la déclaration ci-dessous et affiche un message au lieu de laisser
 // la situation se régler en silence — mesuré en phase 1 : Dexie absorbe la
@@ -27,13 +34,15 @@ export const db = new Dexie('rowtine')
 //
 // ⚠️ APRÈS la 1.0 (donc dès qu'une base existe ailleurs qu'ici), ce bloc redevient
 // intouchable : on ne modifie JAMAIS en place une version publiée — un changement
-// de schéma s'ajoute À LA SUITE, `db.version(2).stores({...})`, et s'accompagne
+// de schéma s'ajoute À LA SUITE (la prochaine est `db.version(3).stores({...})`), et s'accompagne
 // d'un `.upgrade(tx => ...)` dès qu'il transforme de la donnée déjà écrite (renommer
 // un champ, changer son type, éclater une table).
 //
 // ⚠️ Ce que devient une édition EN PLACE d'une version déjà publiée — lu dans la source
-// de Dexie (dexie.js:4566-4572 puis 3768-3790) et mesuré le 13/08/2026
-// (tests/unit/purchases.store.spec.js) ; ce n'est PAS « rien ne se passe » :
+// de Dexie (dexie.js:4566-4572 puis 3768-3790) et mesuré le 13/08/2026 puis
+// re-mesuré le 14/11/2026 sur le scénario voisin d'une base PLUS RÉCENTE que le code
+// (tests/unit/db-migration-guard.spec.js : base à 30 sans `tools`, rouverte à 31 par le
+// rattrapage de Dexie) ; ce n'est PAS « rien ne se passe » :
 // - édition ADDITIVE (table ou index AJOUTÉS) : Dexie RATTRAPE tout seul en rouvrant la
 //   base au numéro natif +1. Seule trace : un `console.warn`. Le schéma finit correct,
 //   mais la base d'un appareil passe à un numéro que le code ne déclare pas — le
@@ -50,9 +59,10 @@ export const db = new Dexie('rowtine')
 //
 // Filets de sécurité : `tests/unit/db-schema-unique.spec.js` compare, sur base
 // NEUVE, les index RÉELS produits par la déclaration ci-dessous à ceux que
-// produisait la montée par paliers v1→v2→v3 (c'est lui qui verrait un `++id`
+// produisait la montée par paliers v1→v2→v3, puis la table `tools` (c'est lui qui verrait un `++id`
 // perdu) ; `tests/unit/db-migration-guard.spec.js` ouvre avec ce fichier une base
-// écrite par l'APK actuellement installé sur les appareils.
+// écrite par l'APK actuellement installé sur les appareils ;
+// `tests/unit/purchases.store.spec.js` vérifie la montée réelle d'une base à 10 vers 20.
 // ─────────────────────────────────────────────────────────────────────────
 
 // On n'indexe que ce qu'on requête réellement (le 1er champ = clé primaire).
@@ -77,6 +87,16 @@ db.version(1).stores({
   // primaire EST le jour : un `put` est idempotent, cinquante gestes dans la journée
   // n'écrivent qu'une ligne. Volume : quelques centaines de lignes sur plusieurs années.
   activeDays: 'day', // { day: 'AAAA-MM-JJ' } — jour LOCAL, jamais toISOString()
+})
+
+// Stock d'outils (14/11/2026) — première version APRÈS la 1.0 : ajoutée à la suite, la v1
+// n'est plus jamais éditée (cf. bloc ci-dessus). Dexie garde les tables non citées.
+// Numéro 2 (soit 20 côté IndexedDB) : bases mesurées le 14/11/2026 par le débogage de la
+// WebView, à 10 sur la Nexus 7 et le Huawei ; le Pixel porte la 1.4.3 publiée, où une base
+// à 30 déclencherait déjà le garde-fou de démarrage. Aucun appareil au-dessus de 10, donc
+// pas besoin de sauter à un numéro plus haut.
+db.version(2).stores({
+  tools: '++id, category, type, sizeMm',
 })
 
 // Hook de mutation global : chaque store Pinia appelle

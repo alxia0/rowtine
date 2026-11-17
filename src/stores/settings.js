@@ -8,6 +8,7 @@ import { detectDeviceLocale } from '@/utils/app-locale'
 import { DEFAULT_HUES, defaultHueFor } from '@/theme/palette'
 import { applyAccent } from '@/theme/apply'
 import { resolveEffective } from '@/theme/resolve'
+import { APP_VERSION } from '@/constants/app-info'
 
 export const useSettingsStore = defineStore('settings', () => {
   const firstName = ref('')
@@ -63,6 +64,9 @@ export const useSettingsStore = defineStore('settings', () => {
   // acquittement de la pop-up (LibraryView), jamais à sa demande — si l'utilisatrice quitte
   // la Bibliothèque avant de l'avoir vue, l'avertissement revient à la visite suivante.
   const importCaveatDue = ref(false)
+  // Dernière version dont la pop-up « Nouveautés » a été vue ou écartée ; absente (null) =
+  // installation d'avant la fonction. Non sauvegardé : propre à cet appareil.
+  const lastSeenVersion = ref(null)
   // Localisation (lot 2, 25/07). Le stockage des laines reste TOUJOURS en mètres et en
   // grammes : ces réglages ne changent que l'affichage et la saisie. Valeurs par défaut
   // métrique/euro pour qu'un compte existant ne change pas de comportement.
@@ -107,6 +111,7 @@ export const useSettingsStore = defineStore('settings', () => {
       storedWelcomeDue,
       storedRestoredDue,
       storedImportCaveat,
+      storedLastSeenVersion,
       storedUnitSystem,
       storedCurrency,
       storedWeekStart,
@@ -126,6 +131,7 @@ export const useSettingsStore = defineStore('settings', () => {
       getSetting('welcomeDue'),
       getSetting('restoredDue'),
       getSetting('importCaveatDue'),
+      getSetting('lastSeenVersion'),
       getSetting('unitSystem'),
       getSetting('currency'),
       getSetting('weekStart'),
@@ -155,6 +161,7 @@ export const useSettingsStore = defineStore('settings', () => {
     welcomeDue.value = storedWelcomeDue ?? false
     restoredDue.value = storedRestoredDue ?? false
     importCaveatDue.value = storedImportCaveat ?? false
+    lastSeenVersion.value = storedLastSeenVersion ?? null
     unitSystem.value = storedUnitSystem ?? 'metric'
     currency.value = storedCurrency ?? DEFAULT_CURRENCY
     weekStart.value = storedWeekStart ?? 1
@@ -171,6 +178,15 @@ export const useSettingsStore = defineStore('settings', () => {
     onboarded.value = true
     await setSetting('firstName', firstName.value)
     await setSetting('defaultTechnique', technique)
+    // Installation neuve : la version installée est déjà « vue », sinon l'accueil, monté juste
+    // après cet écran avec `onboarded` vrai et aucun marqueur, prendrait cette installation
+    // pour une mise à jour et lui montrerait les nouveautés (cf. `decideReleaseNotice`, qui ne
+    // voit jamais ce cas : le garde de route renvoie sur l'onboarding AVANT que l'accueil ne
+    // se monte avec `onboarded` faux).
+    // ⚠️ Écrit AVANT `onboarded` : si l'app est tuée entre les deux écritures, un marqueur
+    // orphelin avec `onboarded` faux est sans effet, alors que l'inverse montrerait les
+    // nouveautés à une installation neuve.
+    await setLastSeenVersion(APP_VERSION)
     await setSetting('onboarded', true)
     // `welcomeDue` ne se pose plus ici (lot « ordre des pop-ups », 10/08/2026) : la porte du
     // dossier passe désormais entre la fin de cet écran et l'accueil, et c'est ELLE qui décide
@@ -230,6 +246,12 @@ export const useSettingsStore = defineStore('settings', () => {
   async function clearImportCaveatDue() {
     importCaveatDue.value = false
     await setSetting('importCaveatDue', false)
+  }
+
+  // Mémoire ET base, `await` sur l'écriture, comme `markSwipeHintSeen()`.
+  async function setLastSeenVersion(version) {
+    lastSeenVersion.value = version
+    await setSetting('lastSeenVersion', version)
   }
 
   async function saveTheme(value) {
@@ -359,6 +381,7 @@ export const useSettingsStore = defineStore('settings', () => {
     welcomeDue,
     restoredDue,
     importCaveatDue,
+    lastSeenVersion,
     loaded,
     unitSystem,
     currency,
@@ -369,6 +392,7 @@ export const useSettingsStore = defineStore('settings', () => {
     load,
     completeOnboarding,
     markSwipeHintSeen,
+    setLastSeenVersion,
     clearWelcomeDue,
     setWelcomeDue,
     setRestoredDue,

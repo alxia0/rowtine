@@ -33,6 +33,9 @@ import { useNoticeQueueStore } from '@/stores/notice-queue'
 import { folderGateHandlesBack } from '@/utils/folder-gate-back'
 import { versionGuardHandlesBack } from '@/utils/version-guard-back'
 import { ensureReprise } from '@/db/purchases-reprise'
+import { runPriceCurrencyReprise } from '@/db/price-currency-reprise'
+import { useYarnsStore } from '@/stores/yarns'
+import { useToolsStore } from '@/stores/tools'
 import { getSetting, setSetting } from '@/db/db'
 import {
   estimateStorage,
@@ -45,6 +48,7 @@ import { useColorPickerStore } from '@/stores/color-picker'
 import { useLightboxStore } from '@/stores/lightbox'
 import { usePatternsStore } from '@/stores/patterns'
 import { useProjectConsumptionStore } from '@/stores/project-consumption'
+import { useToolParkingStore } from '@/stores/tool-parking'
 import { useProjectsStore } from '@/stores/projects'
 import { usePurchasesStore } from '@/stores/purchases'
 import { useSettingsStore } from '@/stores/settings'
@@ -57,10 +61,13 @@ const lightbox = useLightboxStore()
 const chartZoom = useChartZoomStore()
 const colorPicker = useColorPickerStore()
 const projectConsumption = useProjectConsumptionStore()
+const toolParking = useToolParkingStore()
 const smartBack = useSmartBack()
 const patternsStore = usePatternsStore()
 const projectsStore = useProjectsStore()
 const purchasesStore = usePurchasesStore()
+const yarnsStore = useYarnsStore()
+const toolsStore = useToolsStore()
 const settingsStore = useSettingsStore()
 const snackbar = useSnackbarStore()
 const syncReportStore = useSyncReportStore()
@@ -316,6 +323,14 @@ onMounted(async () => {
     // Rejouée au prochain lancement (drapeau non posé) — cf. commentaire ci-dessus.
   }
 
+  // Devise des prix de laine, d'outil et de patron : les fiches d'avant n'en portent pas, on leur
+  // pose celle des réglages (et on recharge les stores si quelque chose a changé en base).
+  await runPriceCurrencyReprise(settingsStore.currency, {
+    yarns: yarnsStore,
+    tools: toolsStore,
+    patterns: patternsStore,
+  })
+
   // Préchauffe au repos : une fois l'accueil peint, on pré-charge le code des écrans
   // chauds + les stores partagés, hors du chemin du tap (cure du « lent la 1re fois »).
   scheduleWarmup()
@@ -401,8 +416,8 @@ function dismissVersionGuard() {
 // doivent être fermés en priorité : sinon Back navigue hors de l'écran et jette le
 // formulaire/l'action en cours — régression vs l'ancien <input type=color> natif, dont le
 // Back système fermait proprement le dialogue (revue, deuxième passe). Fermer le dialogue de
-// consommation (clôture) via Back, au contraire, consomme TOUT le réservé (décision produit,
-// cf. composable useProjectConsumption) — Back n'échappe pas à la question. (Note : le
+// consommation (clôture) via Back vaut Annuler : rien n'est consommé et le statut ne change
+// pas (décision produit, cf. composable useProjectConsumption). (Note : le
 // dialogue « pelotes tricotées ? », posé À la suppression, a été retiré de ce maillon avec
 // le reste de la fonctionnalité — la suppression ne pose plus cette question.)
 // Le bandeau de décision passe AVANT tout (correctif de revue) : tant qu'aucune
@@ -432,6 +447,7 @@ function closeTopOverlay() {
   else if (lightbox.open) lightbox.close()
   else if (colorPicker.open) colorPicker.close()
   else if (projectConsumption.open) projectConsumption.close()
+  else if (toolParking.open) toolParking.close()
   else return false
   return true
 }
@@ -457,8 +473,9 @@ function onBack() {
   // `currentViewRef` ci-dessus. Placée en DERNIER recours, après tous les pop-up — elle
   // ne doit intercepter QUE le cas où aucun overlay bloquant n'est ouvert ; sinon un
   // dialogue « combien de pelotes ? » ouvert depuis un onglet non par défaut ne se
-  // fermerait plus jamais au retour, régression sur une décision produit déjà actée
-  // (cf. commentaire de tête de `onBack()`, « Back n'échappe pas à la question »).
+  // fermerait plus jamais au retour. Règle actuelle (décision de Julien, 15/11) : le Retour
+  // Android ANNULE cette fenêtre comme le bouton Annuler (`closeTopOverlay` ci-dessus) : rien
+  // n'est consommé et le statut du projet ne change pas (cf. useProjectConsumption.js).
   if (!currentViewRef.value?.handleBackPressed?.()) smartBack()
 }
 

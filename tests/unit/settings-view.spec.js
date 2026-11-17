@@ -47,6 +47,9 @@ vi.mock('@/native/keep-awake', () => ({ isKeepScreenOnAvailable: () => keepAwake
 const capApp = vi.hoisted(() => ({ listeners: {}, removeResume: null, addListener: null }))
 vi.mock('@capacitor/app', () => ({ App: { addListener: (...a) => capApp.addListener(...a) } }))
 
+const csv = vi.hoisted(() => ({ downloadCsv: vi.fn() }))
+vi.mock('@/utils/csv', async (orig) => ({ ...(await orig()), downloadCsv: csv.downloadCsv }))
+
 import { KOFI_URL, GITHUB_ISSUES_URL, feedbackUrlFor } from '@/constants/app-links'
 import SettingsView from '@/views/SettingsView.vue'
 
@@ -106,6 +109,16 @@ describe('SettingsView', () => {
     await flushPromises()
     expect(w.text()).toMatch(/export tableur/i)
     expect(w.text()).toMatch(/corbeille/i)
+  })
+
+  it('export des outils : télécharge rowtine-outils-<jour>.csv', async () => {
+    csv.downloadCsv.mockClear()
+    const w = mountView()
+    await flushPromises()
+    await w.get('[data-test="export-tools"]').trigger('click')
+    await flushPromises()
+    expect(csv.downloadCsv).toHaveBeenCalledTimes(1)
+    expect(csv.downloadCsv.mock.calls[0][0]).toMatch(/^rowtine-outils-\d{4}-\d{2}-\d{2}\.csv$/)
   })
 
   it('vider la corbeille demande confirmation : Annuler garde tout, Vider efface', async () => {

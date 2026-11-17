@@ -2,6 +2,23 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.5.0]
+
+- New "My tools" screen: your needles, hooks and interchangeable sets, with
+  size, length, material, photos and price. A set can have cables of several
+  lengths and fixing diameters.
+- Link tools to a project: its page warns when a size is missing from your
+  stash. For a set, you take one exact size and one cable, and the rest of
+  the set stays free for another project.
+- Pausing a project offers to free its tools for another project; resuming it
+  offers to take back the ones that are still free.
+- Tools you bought count in Expenses, and the tool stash exports to a
+  spreadsheet.
+- Finished project: a Cancel button in the skeins window, a cap at what is
+  available, and a way to correct the skeins afterwards from the Edit screen.
+- After an update, a window shows what's new once, and the About screen keeps
+  the log of every version.
+
 ## [1.4.3]
 
 - Yarn swatches: note the gauge you got with a yarn (flat or in the round,

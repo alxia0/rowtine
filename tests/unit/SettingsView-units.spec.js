@@ -9,9 +9,13 @@ import { createTestI18n, createTestRouter } from './helpers/i18n-router'
 
 const i18n = createTestI18n()
 
-async function mountSettings(yarns = []) {
+async function mountSettings(yarns = [], tools = [], patterns = []) {
   await db.settings.clear()
   await db.yarns.clear()
+  await db.tools.clear()
+  await db.patterns.clear()
+  for (const p of patterns) await db.patterns.add(p)
+  for (const t of tools) await db.tools.add(t)
   for (const y of yarns) await db.yarns.add(y)
   const router = createTestRouter([{ path: '/', name: 'settings', component: SettingsView }])
   router.push('/')
@@ -80,7 +84,42 @@ describe('SettingsView — unités et devise', () => {
     await vi.waitFor(() => expect(w.find('[role="dialog"]').exists()).toBe(true), { timeout: 10000 })
     const dialog = w.find('[role="dialog"]')
     // Le message doit dire clairement que rien n'est converti.
-    expect(dialog.text()).toContain('ne seront pas convertis')
+    expect(dialog.text()).toContain('gardent leur devise')
+  })
+
+  it('prévient aussi quand seul un outil a un prix, avec le message qui dit que chaque prix garde sa devise', async () => {
+    const w = await mountSettings([YARN_NO_PRICE], [{ type: 'circular', sizeMm: 4, price: 12 }])
+    await w.find('[data-test="currency-select"]').setValue('USD')
+    await vi.waitFor(() => expect(w.find('[role="dialog"]').exists()).toBe(true), { timeout: 10000 })
+    const text = w.find('[role="dialog"]').text()
+    expect(text).toContain('gardent leur devise')
+    expect(text).toContain('USD')
+  })
+
+  it('un outil sans prix ne déclenche aucun avertissement', async () => {
+    const w = await mountSettings([YARN_NO_PRICE], [{ type: 'circular', sizeMm: 4, price: '' }])
+    const settings = useSettingsStore(w.pinia)
+    await w.find('[data-test="currency-select"]').setValue('USD')
+    await vi.waitFor(() => expect(settings.currency).toBe('USD'), { timeout: 10000 })
+    expect(w.find('[role="dialog"]').exists()).toBe(false)
+  })
+
+  // Le prix d'un patron est un prix déjà saisi : il déclenche l'avertissement lui aussi.
+  it('prévient aussi quand seul un patron a un prix', async () => {
+    const w = await mountSettings([YARN_NO_PRICE], [], [{ name: 'Sabai', type: 'knitting', price: '8,50', priceCurrency: 'EUR' }])
+    await w.find('[data-test="currency-select"]').setValue('USD')
+    await vi.waitFor(() => expect(w.find('[role="dialog"]').exists()).toBe(true), { timeout: 10000 })
+  })
+
+  it('un patron sans prix, ou le patron libre, ne déclenche aucun avertissement', async () => {
+    const w = await mountSettings([YARN_NO_PRICE], [], [
+      { name: 'Sabai', type: 'knitting', price: '' },
+      { name: 'Patron libre', type: 'knitting', builtin: true, price: '5' },
+    ])
+    const settings = useSettingsStore(w.pinia)
+    await w.find('[data-test="currency-select"]').setValue('USD')
+    await vi.waitFor(() => expect(settings.currency).toBe('USD'), { timeout: 10000 })
+    expect(w.find('[role="dialog"]').exists()).toBe(false)
   })
 
   it('annuler remet le sélecteur sur l’ancienne devise', async () => {

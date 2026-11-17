@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // tests/unit/purchases.store.spec.js
 // Unitaire — registre d'achats : CRUD, tri, orphelinage. La table `purchases` doit exister
-// (déclarée dans l'unique `db.version(1)` de src/db/db.js depuis la fusion du 13/08/2026,
+// (déclarée dans la `db.version(1)` fusionnée de src/db/db.js depuis le 13/08/2026,
 // ex-version 2) : ce fichier échoue au premier `db.purchases` si elle manque.
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
@@ -120,15 +120,14 @@ describe('store purchases', () => {
   })
 
   // Le test précédent rouvre une base que le singleton `db` a créée lui-même, avec les
-  // onze tables : il ne prouve donc que « la base survit à un close/reopen ». Celui-ci
+  // douze tables : il ne prouve donc que « la base survit à un close/reopen ». Celui-ci
   // construit une base ne portant QUE les neuf tables d'origine (ce que l'app écrivait
   // avant les travaux sur le budget laine), la ferme, puis la rouvre avec le schéma courant du dépôt.
-  // ⚠️ Depuis la fusion du 13/08/2026, src/db/db.js ne déclare plus qu'une seule
-  // `db.version(1)` : les deux bases portent donc le MÊME numéro déclaré et il n'y a plus
-  // de montée de version à rejouer côté code. Ce que ce test prouve désormais — mesuré,
-  // pas supposé, mécanisme relevé plus bas — c'est que les tables manquantes apparaissent
-  // quand même (`purchases` est écrite plus bas et relue), au prix d'une réouverture au
-  // numéro natif suivant.
+  // ⚠️ src/db/db.js déclare la v1 fusionnée (13/08/2026) puis la v2 (`tools`, 14/11/2026) :
+  // la base à 10 construite ici MONTE donc réellement à 20 à l'ouverture (assertions plus
+  // bas). Ce que ce test prouve — mesuré, pas supposé — c'est que les tables manquantes
+  // (`purchases`, `activeDays`, `tools`) apparaissent et que rien de ce qui existait n'est
+  // perdu.
   // Doit être le DERNIER test du fichier : il détruit et recrée la base « rowtine ».
   it("une base ne portant que les neuf tables d'origine gagne purchases sans rien perdre", async () => {
     db.close()
@@ -156,17 +155,14 @@ describe('store purchases', () => {
     ancienne.close()
 
     await db.open() // lancement après mise à jour, avec la déclaration unique du dépôt
-    expect(db.verno).toBe(1) // une seule version déclarée depuis la fusion (ménage pré-1.0)
-    // ⚠️ LE MÉCANISME, MESURÉ (13/08/2026) et non déduit : IndexedDB ne sait créer un
-    // objectStore que pendant un `onupgradeneeded`, qui ne se déclenche que si le numéro
-    // de version MONTE. La base est à 10, le code déclare 10 — et pourtant les deux tables
-    // manquantes apparaissent. Ce qui l'explique : Dexie rouvre de lui-même la base au
-    // numéro natif SUIVANT. Relevé ici sur l'IDBDatabase brute : 11, pas 10.
-    // Conséquence à connaître : un appareil dans cet état finirait à 11 face à un code qui
-    // en déclare 10, donc le garde-fou de démarrage (src/db/version-guard.js) s'y
-    // déclencherait au lancement suivant. Aucun appareil de la maison n'est dans ce cas
-    // (ils sont à 30). ⚠️ Mesuré sous fake-indexeddb seulement, jamais sur une WebView.
-    expect(db.backendDB().version).toBe(11)
+    expect(db.verno).toBe(2) // v1 fusionnée (ménage pré-1.0) puis v2 (tools, 14/11/2026)
+    // ⚠️ Depuis `tools` (14/11/2026), le code déclare la v2 (20 côté IndexedDB) : la base
+    // à 10 MONTE donc réellement, `onupgradeneeded` se déclenche et crée les tables
+    // manquantes (`purchases`, `activeDays`, `tools`) sans passer par le rattrapage de
+    // Dexie. Avant, avec une seule version déclarée, le numéro ne montait pas et Dexie
+    // rouvrait lui-même au numéro natif suivant (11, mesuré le 13/08/2026). Mesuré sous
+    // fake-indexeddb seulement, jamais sur une WebView.
+    expect(db.backendDB().version).toBe(20)
     expect(await db.projects.count()).toBe(1)
     expect((await db.yarns.get(1)).price).toBe('5,50')
     expect(await db.sections.count()).toBe(1)

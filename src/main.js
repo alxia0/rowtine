@@ -9,6 +9,7 @@ import i18n from './i18n'
 import { installStorageGuard, storageAwareErrorHandler } from '@/db/storage-guard'
 import { installSafeArea } from '@/native/safe-area'
 import { installKeyboardAvoidance } from '@/utils/keyboard-avoidance'
+import { installFocusUnderHeader } from '@/utils/focus-under-header'
 
 const app = createApp(App)
 app.use(createPinia())
@@ -32,5 +33,9 @@ installSafeArea()
 // écouteur global, posé une fois ici (cf. src/utils/keyboard-avoidance.js pour le
 // mécanisme complet et son raisonnement).
 installKeyboardAvoidance()
+
+// Un élément pris au clavier ne doit pas finir caché sous l'en-tête collant (WCAG 2.4.11).
+// Les champs texte restent à l'évitement du clavier ci-dessus (cf. src/utils/focus-under-header.js).
+installFocusUnderHeader()
 
 app.mount('#app')

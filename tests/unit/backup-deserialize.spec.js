@@ -8,6 +8,7 @@ import {
   serializeProject,
   serializePattern,
   serializeYarns,
+  serializeTools,
   serializeIndependentCounters,
   serializeSettings,
 } from '@/backup/serialize'
@@ -17,6 +18,7 @@ import {
   deserializeProject,
   deserializePattern,
   deserializeYarns,
+  deserializeTools,
   deserializeIndependentCounters,
   deserializeSettings,
 } from '@/backup/deserialize'
@@ -566,5 +568,36 @@ describe('round-trip serializeSettings → deserializeSettings', () => {
   it('objet vide → tableau vide', () => {
     expect(deserializeSettings({})).toEqual([])
     expect(deserializeSettings(undefined)).toEqual([])
+  })
+})
+
+describe('deserializeTools', () => {
+  it('résout les noms de photos et signale les manquantes', () => {
+    const missing = []
+    const out = deserializeTools(
+      [{ id: 1, photos: ['outil-photo-a.png', 'outil-photo-b.png'] }],
+      { 'outil-photo-a.png': 'AAA' },
+      missing,
+    )
+    expect(out[0].photos).toEqual(['data:image/png;base64,AAA'])
+    expect(missing).toEqual(['outil-photo-b.png'])
+  })
+
+  it('round-trip : serializeTools puis deserializeTools rend les outils à l\'identique', () => {
+    const tools = [
+      { id: 1, type: 'circular', category: 'needle', sizeMm: 4, photos: [PHOTO_A, PHOTO_B], coverIndex: 1 },
+      { id: 2, type: 'standard', category: 'hook', sizeMm: 3.5, photos: [] },
+    ]
+    const { files } = serializeTools(tools)
+    const byName = {}
+    for (const f of files) {
+      if (f.path.startsWith('Outils/')) byName[f.path.slice('Outils/'.length)] = f.data
+    }
+    const json = JSON.parse(files.at(-1).data)
+    expect(deserializeTools(json, byName)).toEqual(tools)
+  })
+
+  it("une ligne nulle ne fait pas lever (elle sera écartée par la validation d'entité)", () => {
+    expect(deserializeTools([null])).toEqual([null])
   })
 })

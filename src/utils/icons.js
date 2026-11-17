@@ -330,6 +330,51 @@ export const ICONS = {
   ratioSquare: { body: '<rect x="4" y="4" width="16" height="16" rx="1.5"/>' },
   ratioHorizontal: { body: '<rect x="2" y="6" width="20" height="12" rx="1.5"/>' },
   ratioVertical: { body: '<rect x="6" y="2" width="12" height="20" rx="1.5"/>' },
+
+  // ─── Outils (stock d'aiguilles et de crochets) ─────────────────────────
+  'tool-straight': {
+    // deux aiguilles droites croisées, têtes rondes en haut
+    body:
+      '<path d="M7 4.5 15.5 20"/><circle cx="6.4" cy="3.6" r="1.4"/>' +
+      '<path d="M17 4.5 8.5 20"/><circle cx="17.6" cy="3.6" r="1.4"/>',
+  },
+  'tool-circular': {
+    // deux pointes reliées par un câble en boucle
+    body: '<path d="M7.5 9.5 5.5 3"/><path d="M16.5 9.5 18.5 3"/><path d="M7.5 9.5a7 7 0 1 0 9 0"/>',
+  },
+  'tool-cable': {
+    // câble seul : une boucle au centre, les deux bouts repartent autour d'elle, l'un à gauche,
+    // l'autre à droite, et remontent à mi-hauteur. Chaque embout est un court trait dans le
+    // prolongement du câble, juste plus épais (aucune pointe d'aiguille, à la différence de tool-circular)
+    body:
+      '<path d="M4.6 12.4C4 16.6 7.6 19.6 12 15.6C13.6 13.8 16 11.6 16 9a4 4 0 0 0-8 0c0 2.6 2.4 4.8 4 6.6c4.4 4 8 1 7.4-3.2"/>' +
+      '<path d="M4.6 12.4 5 9.4M19.4 12.4 19 9.4" stroke-width="3"/>',
+  },
+  'tool-dpn': {
+    // trois aiguilles double pointe parallèles, inclinées
+    body: '<path d="M5 19 13 3"/><path d="M8.5 20.5 16.5 4.5"/><path d="M12 22 20 6"/>',
+  },
+  'tool-kit': {
+    // étui de kit : rectangle arrondi, rangée de pointes
+    body:
+      '<rect x="3" y="6" width="18" height="13" rx="2.5"/>' +
+      '<path d="M7 9v7M10 9v7M13 9v7M16 9v7"/>',
+  },
+  'tool-hook': {
+    // crochet : tige droite, tête recourbée en haut ; incliné de 35 degrés, coordonnées aplaties
+    // (ex-<g transform="rotate(35 12 12)">, rotation seule : le trait garde son épaisseur)
+    body: '<path d="M6.264 20.192L14.294 8.723"/><path d="M14.294 8.723A2.6 2.6 0 1 1 17.915 8.085"/>',
+  },
+  'tool-tunisian': {
+    // crochet tunisien : tige longue, tête recourbée, butée en bas
+    body: '<path d="M12 18.5V6.5"/><path d="M12 6.5a2.3 2.3 0 1 1 2.3-2.3"/><circle cx="12" cy="20.3" r="1.8"/>',
+  },
+  tools: {
+    // écran Mes outils : une aiguille et un crochet croisés
+    body:
+      '<path d="M5 19 17.5 4"/><circle cx="18.4" cy="3.3" r="1.2"/>' +
+      '<path d="M19 19 8.5 6.5"/><path d="M8.5 6.5a2.2 2.2 0 1 0-1.6 3.4"/>',
+  },
 }
 
 // Nom d'icône présent au registre ? (fallback géré par AppIcon → 'pelote').

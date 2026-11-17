@@ -1,10 +1,10 @@
 // LE BRANCHEMENT D'UN COMPOSANT SUR LA FILE DES MESSAGES.
 //
-// Huit RANGS, portés par SEPT composants — `App.vue` en tient deux (le garde-fou de version
-// et la décision de sauvegarde). Tous doivent faire la même chose : dire qu'ils veulent
-// l'écran quand leur propre condition est remplie, se retirer quand elle ne l'est plus, et
-// ne s'afficher que si la file les nomme. Écrit huit fois à la main, ce motif se serait
-// désaccordé au premier lot suivant. Écrit ici une fois, il se teste une fois.
+// Neuf RANGS, portés par SEPT composants — `App.vue` en tient deux (le garde-fou de version
+// et la décision de sauvegarde), `HomeView.vue` aussi (la bienvenue et les nouveautés).
+// Tous doivent faire la même chose : dire qu'ils veulent l'écran quand leur propre condition
+// est remplie, se retirer quand elle ne l'est plus, et ne s'afficher que si la file les nomme.
+// Écrit neuf fois à la main, ce motif se serait désaccordé au premier lot suivant. Écrit ici une fois, il se teste une fois.
 //
 // `wants` est la condition PROPRE du composant, inchangée par ce lot : le composant garde
 // son drapeau, son magasin et sa logique. Il ne délègue que la décision « ai-je le droit de

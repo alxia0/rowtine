@@ -11,6 +11,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import fr from '@/i18n/fr.json'
 import PatternPriceFields from '@/components/PatternPriceFields.vue'
 import { createTestI18n } from './helpers/i18n-router'
+import { currencySymbol } from '@/utils/units'
 
 const i18n = createTestI18n()
 const monter = (props = {}) =>
@@ -92,6 +93,14 @@ describe('PatternPriceFields', () => {
   it('9. la mention « ce prix appartient au patron » n’apparaît QUE si on la demande', () => {
     expect(monter().text()).not.toContain(fr.pattern.priceSharedHint)
     expect(monter({ sharedHint: true }).text()).toContain(fr.pattern.priceSharedHint)
+  })
+
+  // Le libellé montre la devise du prix saisi ; sans devise, celle des réglages.
+  it('9b. le symbole du libellé suit la devise du prix, à défaut celle des réglages', () => {
+    useSettingsStore().currency = 'GBP'
+    const label = (w) => w.find('label[for="pat-price"]').text()
+    expect(label(monter({ currency: 'CHF' }))).toContain(`(${currencySymbol('CHF', 'fr')})`)
+    expect(label(monter())).toContain(`(${currencySymbol('GBP', 'fr')})`)
   })
 })
 
@@ -176,17 +185,32 @@ describe('PatternForm — le prix ressort dans la charge utile', () => {
     expect(payload.priceCurrency).toBe('')
   })
 
-  it('15. changer le MONTANT d’un patron déjà acheté ré-estampille la devise courante', async () => {
+  // Une devise déjà posée reste celle de l'achat, même si les réglages ont changé depuis.
+  it('15. changer le MONTANT d’un patron déjà acheté garde sa devise d’achat', async () => {
     setActivePinia(createPinia())
     useSettingsStore().currency = 'GBP'
     const w = mount(PatternForm, {
       props: { initial: { name: 'Sabai', price: '8,50', priceCurrency: 'CHF', purchasedAt: '2024-11-04' } },
       global: { plugins: [i18n] },
     })
+    expect(w.find('label[for="pat-price"]').text()).toContain(`(${currencySymbol('CHF', 'fr')})`)
     await w.find('[data-test="pattern-price"]').setValue('12,00')
     await w.find('.btn--primary').trigger('click')
     const payload = w.emitted('submit').at(-1)[0]
     expect(payload.price).toBe('12,00')
-    expect(payload.priceCurrency).toBe('GBP')
+    expect('priceCurrency' in payload).toBe(false)
+  })
+
+  // Un prix ancien sans devise prend celle des réglages au premier enregistrement.
+  it('16. un prix sans devise reçoit celle des réglages à l’enregistrement', async () => {
+    setActivePinia(createPinia())
+    useSettingsStore().currency = 'GBP'
+    const w = mount(PatternForm, {
+      props: { initial: { name: 'Sabai', price: '8,50', priceCurrency: '', purchasedAt: '2024-11-04' } },
+      global: { plugins: [i18n] },
+    })
+    await w.find('[data-test="pattern-price"]').setValue('9')
+    await w.find('.btn--primary').trigger('click')
+    expect(w.emitted('submit').at(-1)[0].priceCurrency).toBe('GBP')
   })
 })

@@ -38,7 +38,7 @@ unterstrichenen Begriffe im Text berührst. Siehe Kapitel 3.
 Der Timer zeichnet deine Sitzungen auf, der Reiter Fotos sammelt die
 Bilder der Anleitung und deine eigenen Fotos, die Statistik fasst
 deine Aktivität im Projekt zusammen, und ein Abzeichen wird mit einer
-Geste geteilt. Siehe Kapitel 2 und 7.
+Geste geteilt. Siehe Kapitel 2 und 8.
 
 Um es gleich auszuprobieren: Die Schaltfläche „Geführte Tour erneut
 ansehen“, direkt darunter und in den Einstellungen, öffnet die
@@ -85,7 +85,7 @@ Beim Öffnen der App findest du:
   Kachel Fortsetzen und die Übersicht. Beides kehrt zurück, sobald du dein erstes
   Projekt erstellt oder deine erste Anleitung importiert hast.
 - Und schließlich bringt dich **das Menü oben rechts** jederzeit zum
-  Garnvorrat, zu den Anleitungen, zur Statistik, **zu den Sitzungen**, zu den
+  Garnvorrat, zu deinen Nadeln, zu den Anleitungen, zur Statistik, **zu den Sitzungen**, zu den
   Ausgaben, zu dieser Anleitung, zu den Einstellungen und zum Bildschirm
   „Info“. Es ist auf jedem Bildschirm da: Wo du dich in der App auch
   befindest, du kommst überallhin, ohne erst zur Startseite zurückzugehen.
@@ -359,7 +359,7 @@ deine Sicherung. Um sie später zu ändern, öffnet die Schaltfläche **Maschen
 Masche weg, verschwindet ihre Karte.
 
 Auch ohne Anleitung lässt sich die ganze Merkhilfe vom Start aus nachschlagen,
-über die Kachel **Maschen** bei den Werkzeugen (Punkt 6).
+über die Kachel **Maschen** bei den Werkzeugen (Punkt 7).
 
 ### Das Diagramm im Vollbild, und wie du es richtig „ausrichtest“
 
@@ -535,7 +535,7 @@ der Spalte der Anleitung: dieselben Punkte, dieselbe Geste.
 
 *Die Statistik auf einem quer gehaltenen Tablet, im Fenster Halbjahr: das Kalendergitter zeigt die letzten sechs Monate auf einen Blick, während du auf dem Handy dafür zur Seite wischen musst, und die Zahlenkacheln reihen sich darunter zu zweit auf.*
 
-Auch der Bildschirm **Statistik** (Punkt 7) nutzt den Platz: Sein
+Auch der Bildschirm **Statistik** (Punkt 8) nutzt den Platz: Sein
 Kalendergitter und seine Zahlenkacheln breiten sich aus, statt sich zu
 drängen, und in den längsten Fenstern, Halbjahr oder Jahr, siehst du viel mehr
 Wochen, bevor du das Gitter seitwärts schieben musst. Es gibt nichts
@@ -882,6 +882,7 @@ Bestätigung: Auch hier geht dir nichts aus Versehen verloren.
   **Abgebrochen** setzt: Dort gibst du die verlorenen Knäuel an. Die App
   behält zwei Nachkommastellen (ein Viertelknäuel ist 0,25) und zeigt diese
   Zahlen überall mit dem Dezimaltrennzeichen deiner Sprache an.
+- **Ein Projekt abschließen und danach korrigieren**: Im Fenster beim Abschluss eines Projekts kannst du mehr Knäuel angeben als anfangs geplant, im Rahmen dessen, was für das Garn **verfügbar** ist (sein Vorrat, abzüglich der für andere Projekte reservierten Knäuel). Darüber sagt dir die App Bescheid, behält das Maximum und bietet **Vorrat korrigieren** an, was die Karte des Garns öffnet. Die Schaltfläche **Abbrechen** (wie das Kreuz, ein Tipp daneben oder Zurück) schließt das Fenster, ohne etwas zu verbrauchen: Das Projekt behält seinen Status, und du kannst es später abschließen. Sobald das Projekt fertig oder abgebrochen ist, kannst du die Mengen im Block **Gestrickte Knäuel** auf seinem Bildschirm **Bearbeiten** korrigieren; der Vorrat des Garns folgt, nach oben wie nach unten, ohne je doppelt zu zählen.
 - **Die Karte eines Garns**: Ein Tipp auf seine Kachel öffnet sie im
   Vollbild. Sie versammelt alles, was du notiert hast (Marke, Farbe,
   Aufbewahrungsort, Lauflänge, Menge, Preis, Käufe, Material, Notizen),
@@ -950,27 +951,28 @@ gibst, und verbindet sich nie mit Ravelry.
 *Die Menüs Jahr und Art oben, die Gesamtsumme mit ihrer Aufteilung Garn / Anleitungen, dann die Aufschlüsselung nach Monat.*
 
 Erreichbar über das Menü der App, fasst dir dieser Bildschirm alles zusammen, was du
-für dein Stricken oder Häkeln bezahlt hast, **Garn** und
-**Anleitungen**:
+für dein Stricken oder Häkeln bezahlt hast, **Garn**,
+**Anleitungen** und **Nadeln**:
 - Die **Gesamtausgabe**, nach Währung, falls du mehrere verwendet hast
   (die App vermischt sie nie, da sie keinen Wechselkurs kennt). Diese
   Summe sinkt nie von selbst: Wenn du ein Knäuel verbrauchst oder ein
   Projekt abschließt, sinkt sie nicht. Sie unterscheidet sich von deinem
   **Vorratswert**, oben im Bildschirm **Garnvorrat**, der zeigt, was dir
-  noch bleibt, und sinkt, wenn du ein Knäuel verbrauchst. Solange du keinen Anleitungspreis eingetragen hast, bleibt diese Summe
-  genau wie gewohnt; sobald eine Anleitung darin auftaucht, wird sie in
-  zwei Unterzeilen aufgeteilt: was in Garn und was in Anleitungen ging.
+  noch bleibt, und sinkt, wenn du ein Knäuel verbrauchst. Solange du keinen Anleitungs- oder Nadelpreis eingetragen hast, bleibt diese Summe
+  genau wie gewohnt; sobald eine Anleitung oder eine Nadel darin auftaucht, wird sie
+  in eine Unterzeile pro vorhandener Kategorie aufgeteilt: was in Garn,
+  in Anleitungen und in Nadeln ging.
 - Zwei Menüs oben: **Jahr** zeigt dir nur das gewählte Jahr an (oder
   „Alle Jahre“), **Art** zeigt dir nur eine Kategorie an (oder alles).
   Die Summen werden entsprechend neu berechnet. Käufe, deren Datum du
   nicht erfasst hast, landen unter „Unbekanntes Datum“, das dem Menü
   Jahr hinzugefügt wird, sobald es welche gibt.
-- Eine **Aufschlüsselung nach Jahr, dann nach Monat**, Garn und
-  Anleitungen in der Reihenfolge des Kalenders gemischt: Du siehst auf
+- Eine **Aufschlüsselung nach Jahr, dann nach Monat**, Garn,
+  Anleitungen und Nadeln in der Reihenfolge des Kalenders gemischt: Du siehst auf
   einen Blick, was dich ein Monat gekostet hat.
-- Sobald eine Anleitung in der Liste auftaucht, trägt jede Zeile
-  zusätzlich ihre Kennzeichnung, **Garn** oder **Anleitung**. Eine
-  Anleitung, die du als kostenlos angegeben hast, erscheint mit dem
+- Sobald eine Anleitung oder eine Nadel in der Liste auftaucht, trägt jede Zeile
+  zusätzlich ihre Kennzeichnung, **Garn**, **Anleitung** oder **Nadel**. Eine
+  Anleitung oder Nadel, die du als kostenlos angegeben hast, erscheint mit dem
   Vermerk **Kostenlos**: Das ist die Spur, dass du geprüft hast, kein
   Versehen.
 - Die **vollständige Liste** all deiner Käufe und Geschenke,
@@ -978,14 +980,36 @@ für dein Stricken oder Häkeln bezahlt hast, **Garn** und
   (gekennzeichnet mit „Garn gelöscht“).
 - Die Möglichkeit, eine Garn-Zeile direkt von diesem Bildschirm aus zu
   **löschen**, mit der Möglichkeit, es bei einem Versehen gleich danach
-  **rückgängig** zu machen. Eine Anleitungs-Zeile änderst du dagegen
-  über die Anleitungskarte: Ein Antippen bringt dich dorthin.
+  **rückgängig** zu machen. Eine Anleitungs- oder Nadel-Zeile änderst du dagegen
+  über die Karte der Anleitung oder der Nadel: Ein Antippen bringt dich dorthin.
 
 > **Gut zu wissen**: Ein Garnkauf übersteht das Löschen seiner Karte und
 > bleibt hier sichtbar. Der Preis einer Anleitung dagegen gehört zur
 > Anleitung: Löschst du die Anleitung, verschwindet ihre Ausgabe mit ihr.
+> Deine Nadeln mit Preis erscheinen hier ebenfalls, unter „Nadeln“: Um den
+> Preis zu korrigieren oder zu löschen, öffne die Karte der Nadel.
 
-## 6. Eigenständige Werkzeuge
+## 6. Deine Nadeln
+
+Der Bildschirm **Meine Nadeln**, im Menü direkt nach dem Garnvorrat, hält deine Stricknadeln und Häkelnadeln beisammen. Bevor du ein Paar kaufst oder ein neues Projekt anschlägst, siehst du auf einen Blick, ob du die passende Stärke schon hast.
+
+- **Eine Nadel hinzufügen**: Die Schaltfläche **Nadel hinzufügen** öffnet das Formular. Zuerst wählst du die Art, aus drei Gruppen: **Stricknadeln** (Jackenstricknadeln, Rundstricknadeln, Nadelspiel, Flexible Nadeln, Wechselnadelspitzen, Seil, Andere Nadel), **Sets** (Wechselnadelset, Häkelnadelset) und **Häkelnadeln** (Häkelnadel, Tunesische Häkelnadel). Danach erscheinen nur die Felder, die zu dieser Art passen: die Länge bei einer Rundstricknadel, die Anzahl Nadeln bei einem Nadelspiel, der Griff bei einer Häkelnadel, die Form (fest oder mit Kabel) bei einer tunesischen Häkelnadel.
+- **Außer der Art ist nur die Größe Pflicht**, und nur bei den Arten, die eine haben: Bei einer Anderen Nadel ist sie freiwillig, ein Seil hat keine. Du wählst sie aus der Liste, in der jede Stärke in Millimetern ihre US-Entsprechung zeigt, wenn es eine gibt. Bei einer Häkelnadel reicht die Liste von den feinen Stärken (0,6 mm) bis 25 mm, und das Material bestimmt die Entsprechung: aus **Edelstahl** die Nummer der Stahlhäkelnadeln (2,25 mm · US 2), sonst der Buchstabe (2,25 mm · B-1). Ist deine nicht dabei, kannst du sie über **Andere Größe…** in mm eintippen. Alles andere ist freiwillig: Material, Marke, Serie, Anzahl, Kaufdatum, Preis, Geschäft, Aufbewahrungsort, Zustand (Verfügbar, Verliehen, Verloren, Beschädigt, Zu ersetzen), Notizen und Fotos.
+- **Ein Wechselnadelset** ist ein einziger Eintrag. Unter **Enthaltene Größen** hakst du die Stärken der Spitzen an, die darin stecken, unter **Enthaltene Kabel** die Längen der Seile. Haben zwei Kabel gleicher Länge unterschiedliche Anschlüsse (S, L oder Mini), wählst du zuerst den **Durchmesser des Anschlusses** und hakst dann die Längen an: Ein 80 cm S und ein 80 cm L bleiben zwei getrennte Kabel, und die Karte des Sets zählt sie einzeln. Seine Karte zeigt danach den **Inhalt des Sets**.
+- **Ein Häkelnadelset** funktioniert genauso: Du hakst die Größen seiner Häkelnadeln an, auf der Häkelnadel-Skala (4 mm · G-6). Hake **Austauschbare tunesische Häkelnadeln** an, um Kabel hinzuzufügen; ohne dieses Kästchen hat das Set keine Kabel. Bei der fehlenden Größe eines Projekts zählt ein Häkelnadelset nur für Häkeln und ein Nadelset nur für Stricken. Unter einer Größe erscheint es als „Häkelnadeln aus dem Set“.
+- **Nach Art oder nach Stärke**: Zwei Schaltflächen oben auf dem Bildschirm wechseln die Ansicht. **Nach Art** ordnet deine Nadeln nach Gruppe (Stricknadeln, Sets, Häkelnadeln) und dann nach Art. **Nach Stärke** fasst sie Stärke für Stärke zusammen, alle Gruppen gemischt; einzelne Seile und Nadeln ohne Stärke stehen am Ende. Ein Set erscheint unter jeder seiner Stärken, mit einer Zeile wie „Spitzen aus dem Set KnitPro“: So weißt du sofort, dass deine 4-mm-Spitze im Set steckt. Die App merkt sich deine Wahl auf diesem Gerät.
+- **Die Stärken als Chips**: Unter den beiden Schaltflächen gibt es einen Chip für jede Stärke, die du besitzt. Tippst du einen an, siehst du nur noch die Nadeln dieser Stärke; tippst du ihn noch einmal an, ist der Filter wieder weg. Das Suchfeld darunter sucht in Marke, Serie, Notizen und Aufbewahrungsort. Passt nichts, holt **Suche und Stärke zurücksetzen** alles zurück.
+- **Die Karte einer Nadel**: Tippst du auf eine Nadel, öffnet sie sich. Dort steht alles, was du notiert hast, dazu deine Fotos; mit dem Stern wählst du das Titelfoto. In der Liste zeigt jedes Werkzeug zwei Zeilen: Die erste beginnt mit Marke und Serie, dann folgt die Stärke; die zweite nennt Art, Länge, Material, die Anzahl, wenn es mehrere sind, und endet immer mit dem Zustand (verfügbar, verliehen, verloren …), damit dich eine verliehene oder verlorene Nadel nicht überrascht.
+- **Eine Nadel bearbeiten, duplizieren oder löschen**: über das Menü **Aktionen** (senkrechtes Dreipunkt-Symbol) oben auf ihrer Karte. **Duplizieren** öffnet das Formular schon ausgefüllt, mit allem außer den Fotos: praktisch für dieselbe Nadel in einer anderen Stärke. **Löschen** verschiebt sie in den Papierkorb. **Rückgängig**, gleich danach, holt sie zurück, und der Papierkorb in den Einstellungen bewahrt sie auf, bis du ihn leerst.
+- **Deine Nadeln sind in der Sicherung dabei**: Sie werden mit allem anderen in den {app}-Ordner kopiert, ihre Fotos in einen Unterordner namens **Outils**. Eine Wiederherstellung bringt sie unverändert zurück.
+- **Tabellenexport**: Die Schaltfläche **Meine Nadeln** im Export-Bereich der Einstellungen exportiert deine Nadeln und Häkelnadeln als Tabelle (CSV), genau wie deinen Garnvorrat. Jedes Stück steht in einer Zeile, mit seiner Größenentsprechung, seinem Preis und seiner Währung.
+- **Größe fehlt im Bestand**: Auf der Projektseite weist unter der Kachel Nadeln (oder Häkelnadel) eine dezente Zeile auf jede verlangte Größe hin, die nicht in deinen Nadeln ist. Sie erscheint erst, wenn du mindestens eine Nadel eingetragen hast.
+- **Nadeln mit einem Projekt verknüpfen**: Auf der Projektseite, Reiter **Details**, listet die Kachel **Meine Nadeln** die Nadeln, die du verknüpft hast, und **Nadeln auswählen** öffnet die Liste zum Ankreuzen, zuerst die in den Größen des Projekts. Eine Nadel, die mit einem Projekt In Arbeit verknüpft ist, trägt in **Meine Nadeln** und in der Liste zum Ankreuzen den Hinweis „in Gebrauch:“ mit dem Namen des Projekts, und ihre Seite nennt die Projekte, die sie verwenden. Wie der Größenhinweis erscheint die Kachel erst, wenn du mindestens eine Nadel eingetragen hast. Wenn du ein Projekt pausierst, schlägt die App vor, seine Nadeln für ein anderes Projekt freizugeben; wenn du es wieder aufnimmst, schlägt sie vor, die noch freien zurückzunehmen.
+- **Eine Größe aus einem Set nehmen**: In der Auswahlliste hat ein Set kein eigenes Kästchen, es klappt sich in seine Größen auf, die des Projekts zuerst. Hake die Größe an, die du nimmst; hat das Set Kabel, wählst du auch ein Kabel oder **kein Kabel**. Nur diese Größe ist belegt, nicht das ganze Set: In **Meine Nadeln** zeigt die Zeile des Sets „in Gebrauch: 4 mm (Mütze)“ oder „verfügbar“. Eine Größe oder ein Kabel, das schon ein anderes laufendes Projekt nutzt, kannst du trotzdem anhaken, mit dem Hinweis „belegt:“ und dem Projektnamen; so wechselt eine Spitze von einem Projekt zum anderen. Die Seite des Sets nennt bei jeder belegten Größe das Projekt und zählt die belegten Kabel („80 cm ×2, 1 belegt (Mütze)“); die Projektkachel zeigt „KnitPro Zing · 4 mm + 80 cm“. Ein Set, das vor dieser Version als Ganzes verknüpft wurde, behält sein Kästchen **Ganzes Set (frühere Verknüpfung)**: Entferne den Haken oder hake eine Größe an, um es zu ersetzen.
+
+Solange du noch keine Nadel eingetragen hast, zeigt der Bildschirm eine Beispielzeile, eine Rundstricknadel aus Bambus in 4 mm: Sie wird nie gespeichert.
+
+## 7. Eigenständige Werkzeuge
 
 ![Der Bildschirm Zähler mit leerem Namensfeld: unter jedem der beiden Kästchen steht ein Beispiel, ein Ärmel und Reihen 1 bis 8 fünfmal wiederholen; ganz unten die Zeile Noch kein Zähler, füge einen hinzu.](images/de/06a-compteurs.webp)
 
@@ -1035,7 +1059,7 @@ zu sein, erreichbar vom Start aus:
   mit ihren Abkürzungen; die Merkhilfe enthält außerdem die britischen
   Abkürzungen (*yfwd*, *yrn*, *yon*, *psso*).
 
-## 7. Statistik
+## 8. Statistik
 
 ![Der Bildschirm Statistik, der Reiter Quartal ist aktiv neben Monat, Halbjahr und Jahr: vom 29.6.2026 bis 24.9.2026, im Zeitraum 72:40:06, darunter Kalender statt Rhythmus, ein Raster von Jun bis Sep, abgestuft von weniger bis mehr, und die Karten Gesamtzeit 72:40:06 und Aktive Tage 69 von 88.](images/de/07-statistiques.webp)
 
@@ -1077,8 +1101,8 @@ werden):
 Das **Gitter** zeigt ein Kästchen pro Tag, vom ersten Tag deiner Woche
 (oben) bis zum letzten (unten), über das ganze gewählte Fenster; dieser
 erste Tag ist standardmäßig Montag, oder Sonntag, wenn du das in den
-Einstellungen (§8) so gewählt hast. Seine Farbe folgt dem in den
-Einstellungen (§8) gewählten Akzentton, und ihre Intensität hängt davon
+Einstellungen (§9) so gewählt hast. Seine Farbe folgt dem in den
+Einstellungen (§9) gewählten Akzentton, und ihre Intensität hängt davon
 ab, wie lange du an diesem Tag gestrickt oder gehäkelt hast, in fünf
 Stufen: nichts, weniger als 30 Minuten, 30 Minuten bis 1 Stunde, 1 bis
 2 Stunden, 2 Stunden und mehr. Die Schwellenwerte sind
@@ -1102,7 +1126,7 @@ eine abgehakte Reihe, ein weiterbewegter Projektzähler. Und die App zu
 öffnen, ohne etwas darin zu tun, zählt nicht: Es braucht eine **erfasste**
 Aktion.
 
-## 8. Einstellungen
+## 9. Einstellungen
 
 ![Die Einstellungen in Karten: im Profil steht Camille, als Standardtechnik ist Stricken gewählt, darunter eine Schaltfläche Speichern; dann das Erscheinungsbild auf System, der Block Stimmungsfarbe mit seinen zehn Punkten und seinem Farbton-Regler, der Erste Wochentag auf Montag und ganz unten am Rand nur noch die Überschrift Sprache.](images/de/08-reglages.webp)
 
@@ -1117,7 +1141,7 @@ Aktion.
   **deinem Erscheinungsbild** und wechselt von selbst zwischen hell und
   dunkel; sobald du wählst, hat deine Wahl Vorrang und bleibt in beiden Modi
   dieselbe. Dieser Ton färbt die Schaltflächen, die Auswahlen, die
-  Fortschrittsbalken und das Statistikgitter (§7).
+  Fortschrittsbalken und das Statistikgitter (§8).
 - **Erster Wochentag**: Montag (Standard) oder Sonntag. Diese Wahl
   bestimmt das Kalendergitter und die sieben Balken pro Wochentag auf dem
   Statistik-Bildschirm, ebenso wie die wöchentliche Nullstellung der
@@ -1131,10 +1155,10 @@ Aktion.
     Maschenprobe (10 × 10 cm oder 4 × 4 Zoll). Wechselst du das System,
     ändert das keine gespeicherten Zahlen, es zeigt sie dir nur in der
     anderen Einheit erneut an.
-  - **Währung** aus fünf Möglichkeiten (€, $, £, CHF, CA$). Beachte: Es
-    handelt sich nur um eine Beschriftung. Bereits eingegebene Preise
-    werden **nicht umgerechnet**, sondern nur mit dem anderen Symbol
-    angezeigt, und die App weist dich vor der Bestätigung darauf hin.
+  - **Währung** aus fünf Möglichkeiten (€, $, £, CHF, CA$). Sie gilt für
+    Preise, die du **ab dann** eingibst: Jeder Preis behält die Währung,
+    in der du ihn notiert hast, und **nichts wird umgerechnet**; die App
+    erinnert dich vor der Bestätigung daran.
   - Beide Einstellungen werden dir **schon auf dem ersten Bildschirm**
     beim Öffnen der App angeboten, vorausgefüllt nach der Sprache
     deines Geräts; du kannst sie hier jederzeit ändern.
@@ -1142,8 +1166,9 @@ Aktion.
   - Export deines Vorrats, deiner Projekte oder Anleitungen als Tabelle
     (CSV), um sie andernorts anzusehen oder zu sichern. Die Spalten
     folgen deinen aktuellen Einstellungen: Längen und Gewichte im
-    gewählten Einheitensystem, Preise mit dem gewählten Währungssymbol.
-  - Ein universeller **Papierkorb**: Jedes gelöschte Projekt, Garn oder
+    gewählten Einheitensystem, Preise gefolgt von ihrer Währung in einer eigenen
+    Spalte (jeder Preis behält seine eigene).
+  - Ein universeller **Papierkorb**: Jedes gelöschte Projekt, Garn, Werkzeug oder
     jede gelöschte Anleitung landet dort und lässt sich jederzeit
     wiederherstellen (bis du ihn absichtlich leerst).
 - **{app}-Ordner**: Alles, was du strickst oder häkelst, existiert nur in
@@ -1253,7 +1278,7 @@ Tour, die du jederzeit erneut ansehen kannst).
   **nur ein einziges Mal insgesamt**, nicht einmal pro Bildschirm; die
   Schaltfläche „Verstanden“ schließt ihn.
 
-## 9. Unter der Haube: was {app} dir garantiert
+## 10. Unter der Haube: was {app} dir garantiert
 
 - **Standardmäßig offline**: Keine deiner Daten verlässt jemals dein
   Gerät.
@@ -1277,4 +1302,10 @@ Tour, die du jederzeit erneut ansehen kannst).
   welchen Fällen, was beim Deinstallieren der App geschieht, und wer dafür
   die Verantwortung trägt: Die verantwortliche Person und die
   Kontaktadresse werden dort genannt. Sie ist in deiner Sprache geschrieben.
+- **Neuigkeiten, nur einmal**: Nach einem Update fasst ein Fenster zusammen, was in der
+  neuesten Version neu ist, einmal pro Version. „Verstanden“ schließt es,
+  „Alles ansehen“ öffnet den Bildschirm „Info“, wo du das Protokoll
+  aller Versionen findest. Eine frische Installation zeigt es nicht. Die App merkt sich auf
+  diesem Gerät die letzte Version, die du gesehen hast, aber nicht in der
+  Sicherung.
 - **In vier Sprachen**: Französisch, Englisch, Deutsch und Spanisch.

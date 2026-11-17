@@ -11,16 +11,16 @@ const PID = 7
 
 describe('projectYarnCost', () => {
   it('1. compte une laine RÉSERVÉE au projet', () => {
-    const r = projectYarnCost([{ price: '4,50', reservations: { [PID]: 3 }, consumed: {} }], PID)
-    expect(r.amount).toBeCloseTo(13.5, 5)
+    const r = projectYarnCost([{ price: '4,50', reservations: { [PID]: 3 }, consumed: {} }], PID, 'EUR')
+    expect(r.amounts.EUR).toBeCloseTo(13.5, 5)
     expect(r.skeins).toBe(3)
     expect(r.pricedCount).toBe(1)
     expect(r.unknownCount).toBe(0)
   })
 
   it('2. compte une laine DÉJÀ TRICOTÉE (un projet terminé garde son coût)', () => {
-    const r = projectYarnCost([{ price: '4', reservations: {}, consumed: { [PID]: 2 } }], PID)
-    expect(r.amount).toBeCloseTo(8, 5)
+    const r = projectYarnCost([{ price: '4', reservations: {}, consumed: { [PID]: 2 } }], PID, 'EUR')
+    expect(r.amounts.EUR).toBeCloseTo(8, 5)
     expect(r.skeins).toBe(2)
   })
 
@@ -34,23 +34,24 @@ describe('projectYarnCost', () => {
         { price: '100', reservations: { 99: 2 }, consumed: { 99: 3 } },
       ],
       PID,
+      'EUR',
     )
-    expect(r.amount).toBeCloseTo(10, 5)
+    expect(r.amounts.EUR).toBeCloseTo(10, 5)
     expect(r.skeins).toBe(5)
   })
 
   it('4. IGNORE une laine réservée par un AUTRE projet', () => {
     // Mutation qui doit faire rougir ce test : retirer le filtrage par projet (sommer tout
     // le stock). Sans lui, une implémentation qui compte tout passerait les tests 1 à 3.
-    const r = projectYarnCost([{ price: '100', reservations: { 99: 5 }, consumed: { 42: 2 } }], PID)
-    expect(r.amount).toBe(0)
+    const r = projectYarnCost([{ price: '100', reservations: { 99: 5 }, consumed: { 42: 2 } }], PID, 'EUR')
+    expect(r.amounts).toEqual({})
     expect(r.skeins).toBe(0)
     expect(r.pricedCount).toBe(0)
   })
 
   it('5. prix VIDE : la laine est comptée en pelotes, mais son prix est INCONNU', () => {
-    const r = projectYarnCost([{ price: '', reservations: { [PID]: 3 }, consumed: {} }], PID)
-    expect(r.amount).toBe(0)
+    const r = projectYarnCost([{ price: '', reservations: { [PID]: 3 }, consumed: {} }], PID, 'EUR')
+    expect(r.amounts).toEqual({})
     expect(r.skeins).toBe(3)
     expect(r.unknownCount).toBe(1)
     expect(r.pricedCount).toBe(0)
@@ -60,8 +61,8 @@ describe('projectYarnCost', () => {
     // Mutation qui doit faire rougir ce test : traiter '0' comme une chaîne vide (par
     // exemple via un `if (!parseDecimal(raw))`). C'est l'arbitrage du lot du 07/08 :
     // « j'ai vérifié, c'était offert » n'est pas « je n'ai rien noté ».
-    const r = projectYarnCost([{ price: '0', reservations: { [PID]: 3 }, consumed: {} }], PID)
-    expect(r.amount).toBe(0)
+    const r = projectYarnCost([{ price: '0', reservations: { [PID]: 3 }, consumed: {} }], PID, 'EUR')
+    expect(r.amounts).toEqual({ EUR: 0 })
     expect(r.pricedCount).toBe(1)
     expect(r.unknownCount).toBe(0)
   })
@@ -73,9 +74,10 @@ describe('projectYarnCost', () => {
         { price: '4', reservations: { [PID]: 2 }, consumed: {} },
       ],
       PID,
+      'EUR',
     )
     // 3,70 + 8 = 11,70 — un `Number('3,70')` rendrait NaN et ferait tomber ce test.
-    expect(r.amount).toBeCloseTo(11.7, 5)
+    expect(r.amounts.EUR).toBeCloseTo(11.7, 5)
     expect(r.skeins).toBe(3)
     expect(r.pricedCount).toBe(2)
   })
@@ -96,9 +98,23 @@ describe('projectYarnCost', () => {
   it('8. projectId absent ou invalide : tout à zéro, aucune exception', () => {
     const yarns = [{ price: '5', reservations: { 0: 3 }, consumed: {} }]
     for (const bad of [null, undefined, '', 0, NaN]) {
-      const r = projectYarnCost(yarns, bad)
-      expect(r).toEqual({ amount: 0, skeins: 0, unknownCount: 0, pricedCount: 0 })
+      const r = projectYarnCost(yarns, bad, 'EUR')
+      expect(r).toEqual({ amounts: {}, skeins: 0, unknownCount: 0, pricedCount: 0 })
     }
     expect(projectYarnCost(null, PID).skeins).toBe(0)
+  })
+
+  it('10. deux devises : un montant par devise, repli sur la devise des réglages pour une laine sans devise', () => {
+    const r = projectYarnCost(
+      [
+        { price: '4', priceCurrency: 'EUR', reservations: { [PID]: 2 }, consumed: {} },
+        { price: '10', priceCurrency: 'USD', reservations: { [PID]: 1 }, consumed: {} },
+        { price: '3', reservations: { [PID]: 1 }, consumed: {} },
+      ],
+      PID,
+      'CHF',
+    )
+    expect(r.amounts).toEqual({ EUR: 8, USD: 10, CHF: 3 })
+    expect(r.pricedCount).toBe(3)
   })
 })

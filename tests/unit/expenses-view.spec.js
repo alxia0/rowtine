@@ -702,6 +702,16 @@ describe('ExpensesView — laine et patrons', () => {
     expect(lignes[0].text()).toContain(fr.expenses.freeTag)
   })
 
+  // Protège un prix de patron illisible (saisi avant le filtre de saisie) : ni « Gratuit », ni montant inventé.
+  it('P8b. un patron au prix illisible affiche « Prix inconnu », ni « Gratuit » ni un montant', async () => {
+    await db.patterns.add({ name: 'Vieux Châle', type: 'knitting', price: '18,90 €', priceCurrency: 'EUR', purchasedAt: '2026-03-22' })
+    const w = await monterAvecLesDeux()
+    const ligne = w.findAll('.exp__line').find((l) => l.text().includes('Vieux Châle'))
+    expect(ligne.text()).toContain(fr.purchases.priceUnknown)
+    expect(ligne.text()).not.toContain(fr.expenses.freeTag)
+    expect(ligne.find('.exp__line-amount').exists()).toBe(false)
+  })
+
   it('P9. une ligne de patron n’a PAS de croix de suppression', async () => {
     const w = await monterAvecLesDeux()
     expect(w.find(`[data-test="expenses-delete-pat:${sabaiId}"]`).exists()).toBe(false)
@@ -746,5 +756,114 @@ describe('ExpensesView — laine et patrons', () => {
     await flushPromises()
     const options = w.find('[data-test="expenses-year-select"]').findAll('option').map((o) => o.element.value)
     expect(options).toContain('2023') // année 100% laine : doit rester choisissable même sous le filtre Patrons
+  })
+})
+
+// ─── Outils : lignes fabriquées depuis les fiches ────────────────────────────
+// Une ligne d'outil n'est ni une laine (pas d'étiquette orpheline, pas de suppression, pas de
+// pelotes) ; elle ouvre la fiche outil, a son filtre et déclenche la ventilation.
+describe('ExpensesView — outils', () => {
+  let toolId
+  async function monterAvecUnOutil(over = {}) {
+    toolId = await db.tools.add({
+      type: 'circular', sizeMm: 4, brand: 'ChiaoGoo', price: 12, priceCurrency: 'EUR', quantity: 2,
+      purchasedAt: '2026-05-06', status: 'available', ...over,
+    })
+    return mountView()
+  }
+
+  it('une ligne d’outil n’est ni une laine supprimée, ni supprimable, ni en pelotes', async () => {
+    const w = await monterAvecUnOutil()
+    await flushPromises()
+    const ligne = w.find(`[data-test="expenses-line-tool:${toolId}"]`)
+    expect(ligne.exists()).toBe(true)
+    expect(ligne.text()).toContain('ChiaoGoo')
+    expect(ligne.text()).not.toContain(fr.expenses.orphanTag)
+    expect(ligne.find(`[data-test="expenses-delete-tool:${toolId}"]`).exists()).toBe(false)
+    expect(ligne.find('.exp__line-qty').text()).toBe('×2')
+    expect(ligne.text()).toContain(fr.expenses.tagTool)
+  })
+
+  it('quantité 1 : aucune quantité affichée', async () => {
+    const w = await monterAvecUnOutil({ quantity: 1 })
+    await flushPromises()
+    expect(w.find(`[data-test="expenses-line-tool:${toolId}"] .exp__line-qty`).exists()).toBe(false)
+  })
+
+  it('prix 0 : la ligne porte l’étiquette « gratuit » des patrons', async () => {
+    const w = await monterAvecUnOutil({ price: '0' })
+    await flushPromises()
+    expect(w.find(`[data-test="expenses-line-tool:${toolId}"]`).text()).toContain(fr.expenses.freeTag)
+  })
+
+  it('appui : ouvre la fiche outil', async () => {
+    const w = await monterAvecUnOutil()
+    await flushPromises()
+    await w.find(`[data-test="expenses-open-tool:${toolId}"]`).trigger('click')
+    expect(router.push).toHaveBeenCalledWith({ name: 'tool', params: { id: toolId } })
+  })
+
+  it('filtre Outils : l’option existe et ne garde que la ligne d’outil', async () => {
+    await usePurchasesStore().add({
+      yarnId: null, yarnLabel: 'Drops · Air', kind: 'buy', quantity: 3, unitPrice: '7', currency: 'EUR', date: '2026-03-04',
+    })
+    const w = await monterAvecUnOutil()
+    await flushPromises()
+    const sel = w.find('[data-test="expenses-category-select"]')
+    expect(sel.findAll('option').map((o) => o.element.value)).toContain('tool')
+    await sel.setValue('tool')
+    expect(w.text()).toContain('ChiaoGoo')
+    expect(w.text()).not.toContain('Drops · Air')
+  })
+
+  it('ventilation : un outil seul l’affiche, avec la ligne Outils ; sans outil ni patron, rien', async () => {
+    const w = await monterAvecUnOutil()
+    await flushPromises()
+    const brk = w.find('[data-test="expenses-breakdown"]')
+    expect(brk.exists()).toBe(true)
+    expect(brk.text()).toContain(fr.expenses.categoryTool)
+    expect(brk.text()).toContain('24')
+    w.unmount()
+    await Promise.all(db.tables.map((t) => t.clear()))
+    pinia = createPinia()
+    setActivePinia(pinia)
+    await usePurchasesStore().add({
+      yarnId: null, yarnLabel: 'Drops · Air', kind: 'buy', quantity: 3, unitPrice: '7', currency: 'EUR', date: '2026-03-04',
+    })
+    const w2 = mountView()
+    await flushPromises()
+    expect(w2.find('[data-test="expenses-breakdown"]').exists()).toBe(false)
+  })
+  it('ventilation : patron sans outil ⇒ pas de ligne Outils ; outil sans patron ⇒ pas de ligne Patrons', async () => {
+    await db.patterns.add({ name: 'Sabai', type: 'knitting', price: '18', priceCurrency: 'EUR', purchasedAt: '2026-03-12' })
+    await usePatternsStore().load()
+    const w = mountView()
+    await flushPromises()
+    const brk = w.find('[data-test="expenses-breakdown"]')
+    expect(brk.text()).toContain(fr.expenses.categoryPattern)
+    expect(brk.text()).not.toContain(fr.expenses.categoryTool)
+    w.unmount()
+    await Promise.all(db.tables.map((t) => t.clear()))
+    pinia = createPinia()
+    setActivePinia(pinia)
+    const w2 = await monterAvecUnOutil()
+    await flushPromises()
+    const brk2 = w2.find('[data-test="expenses-breakdown"]')
+    expect(brk2.text()).toContain(fr.expenses.categoryTool)
+    expect(brk2.text()).not.toContain(fr.expenses.categoryPattern)
+  })
+
+  it('quantité 0 avec un prix : pas « Gratuit », le prix 0 seul l’est', async () => {
+    const w = await monterAvecUnOutil({ quantity: 0 })
+    await flushPromises()
+    expect(w.find(`[data-test="expenses-line-tool:${toolId}"]`).text()).not.toContain(fr.expenses.freeTag)
+  })
+
+  it('un kit se nomme par son intervalle de tailles, comme dans la liste', async () => {
+    const w = await monterAvecUnOutil({ type: 'interchangeable', sizeMm: null, kitSizes: [3.5, 5, 4], brand: 'KnitPro' })
+    await flushPromises()
+    const txt = w.find(`[data-test="expenses-line-tool:${toolId}"] .exp__line-label`).text()
+    expect(txt).toContain(i18n.global.t('tools.sizeRange', { min: '3,5', max: '5' }))
+    expect(txt).toContain('KnitPro')
   })
 })

@@ -19,8 +19,8 @@
 // ⚠️ Ce que la comparaison relève : les index RÉELS, lus dans l'IDBDatabase par
 // `backendDB()` — jamais `table.schema.indexes`, qui reflète ce que le CODE a DÉCLARÉ et
 // rendrait le test vert quoi qu'il arrive. Le relevé porte `autoIncrement` (sur
-// l'objectStore), `unique` et `multiEntry` (sur chaque index) : NEUF tables sur onze portent
-// `++id` — la phase 1 en annonçait huit, ce qui était le compte de la v1 SEULE (8 sur 9,
+// l'objectStore), `unique` et `multiEntry` (sur chaque index) : DIX tables sur douze portent
+// `++id` (neuf avant l'ajout de `tools` du 14/11/2026) — la phase 1 en annonçait huit, ce qui était le compte de la v1 SEULE (8 sur 9,
 // `settings` exceptée) ; `purchases` en porte une aussi, seules `settings` (clé `key`) et
 // `activeDays` (clé `day`) n'en ont pas. Le point 4 ci-dessous les nomme une par une.
 // Une déclaration qui écrirait `id` au lieu de `++id` laisserait les deux relevés
@@ -49,6 +49,9 @@ const SCHEMA_V1 = {
 }
 const SCHEMA_V2 = { purchases: '++id, yarnId, date' }
 const SCHEMA_V3 = { activeDays: 'day' }
+// Ajout du stock d'outils (14/11/2026) : seule table de la version 2, déclarée à la suite
+// de la v1 fusionnée (base publiée, on n'édite plus la v1).
+const SCHEMA_TOOLS = { tools: '++id, category, type, sizeMm' }
 
 // Relevé des index RÉELLEMENT présents dans IndexedDB, lus par l'API native.
 function releverIndexReels(dexie) {
@@ -73,13 +76,14 @@ function releverIndexReels(dexie) {
 }
 
 describe('schéma unique de src/db/db.js — installation NEUVE', () => {
-  it('produit exactement les mêmes index réels que la montée par paliers v1→v2→v3', async () => {
+  it('produit exactement les mêmes index réels que la montée par paliers v1→v2→v3 puis tools', async () => {
     // 1. La référence : une base neuve montée par paliers, comme le faisait l'app avant.
     await Dexie.delete('rowtine-paliers-reference')
     const paliers = new Dexie('rowtine-paliers-reference')
     paliers.version(1).stores(SCHEMA_V1)
     paliers.version(2).stores(SCHEMA_V2)
     paliers.version(3).stores(SCHEMA_V3)
+    paliers.version(4).stores(SCHEMA_TOOLS)
     await paliers.open()
     const indexPaliers = releverIndexReels(paliers)
     paliers.close()
@@ -90,16 +94,16 @@ describe('schéma unique de src/db/db.js — installation NEUVE', () => {
     db.close()
     await Dexie.delete('rowtine')
     await db.open()
-    expect(db.verno, 'src/db/db.js doit ne déclarer QU’UNE seule version').toBe(1)
+    expect(db.verno, 'src/db/db.js déclare la v1 fusionnée puis la v2 (tools)').toBe(2)
     const indexReel = releverIndexReels(db)
 
     // 3. Table par table, index par index, avec autoIncrement / unique / multiEntry.
     expect(indexReel).toEqual(indexPaliers)
 
     // 4. Filet indépendant de la référence ci-dessus, au cas où les deux dériveraient
-    // ensemble un jour : les onze tables, et les NEUF clés auto-incrémentées nommément
-    // (neuf, pas huit : le « 8 sur 11 » qui circulait était le compte de la v1 SEULE,
-    // cf. l'en-tête de ce fichier — l'assertion ci-dessous en liste bien neuf).
+    // ensemble un jour : les douze tables, et les DIX clés auto-incrémentées nommément
+    // (dix depuis `tools` ; le « 8 sur 11 » qui circulait était le compte de la v1 SEULE,
+    // cf. l'en-tête de ce fichier).
     expect(Object.keys(indexReel).sort()).toEqual(
       [
         'activeDays',
@@ -111,6 +115,7 @@ describe('schéma unique de src/db/db.js — installation NEUVE', () => {
         'sections',
         'sessions',
         'settings',
+        'tools',
         'trash',
         'yarns',
       ].sort(),
@@ -123,7 +128,7 @@ describe('schéma unique de src/db/db.js — installation NEUVE', () => {
       autoIncrementees,
       'une seule ++id oubliée casse toute insertion sur une installation neuve',
     ).toEqual(
-      ['counters', 'diagrams', 'patterns', 'projects', 'purchases', 'sections', 'sessions', 'trash', 'yarns'].sort(),
+      ['counters', 'diagrams', 'patterns', 'projects', 'purchases', 'sections', 'sessions', 'tools', 'trash', 'yarns'].sort(),
     )
     expect(indexReel.settings.cle).toBe('key') // clé métier, pas d'auto-increment
     expect(indexReel.activeDays.cle).toBe('day') // la clé primaire EST le jour

@@ -67,6 +67,10 @@ const router = createRouter({
     { path: '/stash/new', name: 'stash-new', component: () => import('../views/YarnEditView.vue') },
     { path: '/stash/:id/edit', name: 'stash-edit', component: () => import('../views/YarnEditView.vue') },
     { path: '/stash/import-ravelry', name: 'stash-import-ravelry', component: () => import('../views/RavelryImportView.vue') },
+    { path: '/tools', name: 'tools', component: () => import('../views/ToolsView.vue') },
+    { path: '/tools/:id', name: 'tool', component: () => import('../views/ToolDetailView.vue') },
+    { path: '/tools/new', name: 'tool-new', component: () => import('../views/ToolEditView.vue') },
+    { path: '/tools/:id/edit', name: 'tool-edit', component: () => import('../views/ToolEditView.vue') },
     { path: '/library', name: 'library', component: () => import('../views/LibraryView.vue') },
     // `?format=rowtine` : porte « Importer un fichier Rowtine » (23/09), passée en prop.
     { path: '/import-local', name: 'import-local', component: () => import('../views/LocalPdfImportView.vue'), props: (route) => ({ format: route.query.format === 'rowtine' ? 'rowtine' : 'pdf' }) },

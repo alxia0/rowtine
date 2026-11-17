@@ -75,16 +75,26 @@ describe('yarnExportTable — unités et devise', () => {
     expect(rows[0][6]).toBe('')
   })
 
-  it('la colonne de prix porte le symbole de la devise choisie dans son en-tête', () => {
-    const eur = yarnExportTable([laine], { t, system: 'metric', currency: 'EUR', locale: 'fr' })
-    expect(eur.head[8]).toBe(`${t('settings.export.yarn.price')} (€)`)
-    const usd = yarnExportTable([laine], { t, system: 'metric', currency: 'USD', locale: 'fr' })
-    expect(usd.head[8]).toBe(`${t('settings.export.yarn.price')} ($)`)
+  it('l\'en-tête du prix n\'a plus de symbole : la devise a sa propre colonne', () => {
+    for (const [currency, locale] of [['EUR', 'fr'], ['USD', 'fr'], ['GBP', 'en']]) {
+      const { head } = yarnExportTable([laine], { t, system: 'metric', currency, locale })
+      expect(head[8]).toBe(t('settings.export.yarn.price'))
+      expect(head[9]).toBe(t('settings.export.yarn.currency'))
+    }
   })
 
-  it('la colonne de prix porte le symbole de la devise choisie dans son en-tête, aussi en locale "en"', () => {
-    const gbp = yarnExportTable([laine], { t, system: 'metric', currency: 'GBP', locale: 'en' })
-    expect(gbp.head[8]).toBe(`${t('settings.export.yarn.price')} (£)`)
+  it('la colonne Devise : code ISO de la laine, repli sur les réglages, vide sans prix', () => {
+    const { rows } = yarnExportTable(
+      [
+        { ...laine, priceCurrency: 'USD' },
+        laine, // pas de devise propre : repli sur celle des réglages
+        { ...laine, price: '0' }, // prix déclaré nul : compte
+        { ...laine, price: '' },
+        { ...laine, price: undefined, priceCurrency: 'USD' },
+      ],
+      { t, system: 'metric', currency: 'GBP', locale: 'fr' },
+    )
+    expect(rows.map((r) => r[9])).toEqual(['USD', 'GBP', 'GBP', '', ''])
   })
 
   it('la valeur du prix est IDENTIQUE quelle que soit la devise — aucune conversion', () => {

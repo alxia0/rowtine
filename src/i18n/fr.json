@@ -7,6 +7,7 @@
     "menu": "Menu",
     "home": "Accueil",
     "stash": "Stock de laines",
+    "tools": "Mes outils",
     "library": "Bibliothèque de patrons",
     "stats": "Statistiques",
     "expenses": "Dépenses",
@@ -317,6 +318,10 @@
     "timerFieldHint": "Permet de suivre le temps passé sur ce projet.",
     "changeStatus": "Changer le statut",
     "needles": "Aiguilles",
+    "missingSize": "{mm} mm : pas dans tes outils",
+    "chooseTools": "Choisir des outils",
+    "toolsNone": "Aucun outil lié",
+    "toolsSaveError": "Les outils n'ont pas pu être enregistrés. Réessaie.",
     "needleMm": "Aiguilles (mm)",
     "needleUs": "Aiguilles (US)",
     "hooks": "Crochet",
@@ -358,6 +363,12 @@
     "yarnsEmpty": "Ton stock est vide — ajoute des laines pour les lier ici.",
     "yarnsBrandPlaceholder": "Choisir une marque",
     "yarnsPickBrand": "Choisis une marque pour voir les laines disponibles.",
+    "consumedTitle": "Pelotes tricotées",
+    "consumedHint": "Si tu corriges le nombre de pelotes tricotées, le stock de la laine suit : les pelotes en plus sont retirées, les pelotes en moins sont rendues.",
+    "consumedOverStock": "Il n'y a pas assez de pelotes disponibles pour cette laine : le maximum est de {n}. Celles réservées par d'autres projets ne comptent pas.",
+    "consumedOverStockPlain": "Il n'y a pas assez de pelotes disponibles pour cette laine : le maximum est de {n}.",
+    "consumedOverStockOwn": "Il n'y a pas assez de pelotes disponibles pour cette laine : le maximum est de {n}. Les pelotes que ce projet garde en réserve ne sont pas comptées en plus.",
+    "consumedFixStock": "Corriger le stock de cette laine",
     "nameRequired": "Donne un nom à ton projet.",
     "created": "Projet créé.",
     "saved": "Projet enregistré.",
@@ -368,9 +379,12 @@
     "correctPattern": "Corriger le patron",
     "consumeTitle": "Projet terminé !",
     "consumeIntro": "Combien de pelotes as-tu réellement utilisées ?",
-    "consumeHint": "Le reste retourne dans ton stock. Si tu fermes cette fenêtre, tout le réservé est compté comme tricoté.",
+    "consumeHint": "Le reste retourne dans ton stock.",
     "consumeReserved": "{n} réservée(s)",
     "consumeConfirm": "Valider",
+    "consumeOverStock": "Il ne reste que {n} pelote(s) disponible(s) pour cette laine. Celles réservées par d'autres projets ne comptent pas.",
+    "consumeOverStockPlain": "Il ne reste que {n} pelote(s) disponible(s) pour cette laine.",
+    "consumeFixStock": "Corriger le stock",
     "abandonTitle": "Projet abandonné",
     "abandonIntro": "Des pelotes sont-elles perdues (non détricotées) ?",
     "abandonHint": "Par défaut, tout retourne dans ton stock. Indique seulement ce que tu ne récupéreras pas.",
@@ -445,6 +459,16 @@
     "editPattern": "Modifier le patron",
     "setCover": "Définir comme couverture",
     "coverBadge": "Couverture"
+  },
+  "toolParking": {
+    "pauseTitle": "Libérer ces outils pour un autre projet ?",
+    "pauseIntro": "Ce projet passe en pause. Libérés, ces outils redeviennent disponibles pour tes autres projets, et tu pourras les retrouver à la reprise.",
+    "release": "Libérer",
+    "keep": "Les garder",
+    "resumeTitle": "Reprendre ces outils ?",
+    "resumeIntro": "Ce projet repart. Coche les outils que tu veux relier de nouveau : ceux déjà pris par un autre projet ne peuvent pas l'être.",
+    "resume": "Reprendre",
+    "notNow": "Pas maintenant"
   },
   "section": {
     "state": {
@@ -689,6 +713,7 @@
     "priceBought": "Acheté {price}",
     "priceBoughtOn": "Acheté {price} le {date}",
     "priceFreeOn": "Gratuit, obtenu le {date}",
+    "priceUnknownOn": "Prix inconnu, acheté le {date}",
     "purchasedAt": "Date d'achat",
     "priceSharedHint": "Ce prix appartient au patron : il est partagé par tous les projets qui s'en servent.",
     "priceFreePatternHint": "Le « Patron libre » n'a pas de prix : il est commun à tous tes projets sans patron.",
@@ -961,7 +986,7 @@
     "unitsImperial": "Impérial (yd, oz)",
     "currencyLabel": "Devise",
     "currencyChangeTitle": "Changer de devise",
-    "currencyChangeMessage": "Les prix déjà saisis ne seront pas convertis. Ils seront simplement affichés en {currency}.",
+    "currencyChangeMessage": "Les prix déjà saisis gardent leur devise. Les prochains seront en {currency}.",
     "currencyChangeConfirm": "Changer la devise",
     "data": "Mes données",
     "dataHint": "Tout est stocké sur ton téléphone, et sauvegardé automatiquement dans ton dossier de données (cf. ci-dessous).",
@@ -978,7 +1003,8 @@
     "types": {
       "project": "Projet",
       "yarn": "Laine",
-      "pattern": "Patron"
+      "pattern": "Patron",
+      "tool": "Outil"
     },
     "help": {
       "title": "Aide",
@@ -1001,6 +1027,7 @@
         "lengthM": "Métrage (m)",
         "quantity": "Quantité",
         "price": "Prix",
+        "currency": "Devise",
         "usedSkeins": "Pelotes utilisées",
         "dyeLot": "N° de bain",
         "purchaseDate": "Date d'achat",
@@ -1030,6 +1057,29 @@
         "sizes": "Tailles",
         "source": "Source",
         "sections": "Sections"
+      },
+      "tool": {
+        "category": "Catégorie",
+        "type": "Type",
+        "sizeMm": "Taille (mm)",
+        "equivalent": "Équivalent (US ou lettre)",
+        "length": "Longueur",
+        "dpnCount": "Nombre d'aiguilles",
+        "tunisianKind": "Crochet tunisien",
+        "material": "Matière",
+        "handle": "Manche",
+        "brand": "Marque",
+        "line": "Gamme",
+        "quantity": "Quantité",
+        "status": "État",
+        "price": "Prix",
+        "currency": "Devise",
+        "purchasedAt": "Date d'achat",
+        "shop": "Boutique",
+        "storedIn": "Rangement",
+        "kitSizes": "Tailles du kit (mm)",
+        "kitCables": "Câbles du kit",
+        "notes": "Notes"
       }
     }
   },
@@ -1075,6 +1125,7 @@
     "sideFolder": "Le dossier",
     "sideDevice": "Cet appareil",
     "sideCounts": "{projets} projets, {patrons} patrons, {laines} laines",
+    "sideCountsTools": "{projets} projets, {patrons} patrons, {laines} laines, {outils} outils",
     "purpose": "Tout ce que tu tricotes vit dans cette app, sur ton appareil.",
     "hintStartFresh": "Les données du dossier seront perdues."
   },
@@ -1085,6 +1136,12 @@
     "failed": "Ce dossier n'a pas pu être préparé. Choisis-en un autre.",
     "changeTitle": "Changer de dossier",
     "changeBody": "Choisis le dossier dans lequel Rowtine enregistrera tes données. S'il ne s'appelle pas déjà « Rowtine » et ne contient pas déjà tes données, elles vivront dans un sous-dossier « Rowtine », créé si besoin."
+  },
+  "releaseNotice": {
+    "title": "Nouveautés de la version {version}",
+    "intro": "Voici ce qui change avec cette mise à jour.",
+    "ok": "Compris",
+    "seeAll": "Tout voir"
   },
   "restore": {
     "done": "Données restaurées.",
@@ -1549,10 +1606,12 @@
     "tagYarn": "Laine",
     "tagPattern": "Patron",
     "freeTag": "Gratuit",
+    "tagTool": "Outil",
     "categoryFilterLabel": "Type",
     "categoryAll": "Tout",
     "categoryYarn": "Laine",
     "categoryPattern": "Patrons",
+    "categoryTool": "Outils",
     "yearFilterLabel": "Année",
     "yearFilterAll": "Toutes les années",
     "periodAll": "Depuis le début",
@@ -1610,5 +1669,169 @@
     "label": "Visite guidée du lecteur",
     "unavailable": "Le projet d'exemple n'a pas pu être préparé.",
     "recreated": "Le projet d'exemple a été recréé pour la visite."
+  },
+  "tools": {
+    "title": "Mes outils",
+    "add": "Ajouter un outil",
+    "byType": "Par type",
+    "viewMode": "Présentation",
+    "bySize": "Par taille",
+    "search": "Rechercher (marque, gamme, notes)",
+    "empty": "Aucun outil pour l’instant. Ajoute tes aiguilles et tes crochets pour savoir d’un coup d’œil ce que tu as.",
+    "noMatch": "Aucun outil ne correspond.",
+    "clearSearch": "Effacer la recherche et la taille",
+    "fromKit": "pointes du kit {name}",
+    "fromHookKit": "crochets du kit {name}",
+    "categories": {
+      "needle": "Aiguilles",
+      "kit": "Kits",
+      "hook": "Crochets"
+    },
+    "groups": {
+      "cables": "Câbles",
+      "nosize": "Sans taille"
+    },
+    "sizeFilter": "Filtrer sur {size}",
+    "types": {
+      "straight": "Aiguilles droites",
+      "circular": "Circulaires",
+      "dpn": "Double pointes",
+      "tips": "Pointes interchangeables",
+      "cable": "Câble",
+      "flexible": "Aiguilles flexibles",
+      "other": "Autre aiguille",
+      "interchangeable": "Kit interchangeable",
+      "hookKit": "Kit de crochets",
+      "standard": "Crochet",
+      "tunisian": "Crochet tunisien"
+    },
+    "typesShort": {
+      "straight": "droites",
+      "circular": "circ.",
+      "dpn": "DP",
+      "tips": "pointes",
+      "cable": "câble",
+      "flexible": "flexibles",
+      "other": "autre",
+      "interchangeable": "kit",
+      "hookKit": "kit crochets",
+      "standard": "crochet",
+      "tunisian": "tunisien"
+    },
+    "materials": {
+      "wood": "bois",
+      "bamboo": "bambou",
+      "aluminium": "aluminium",
+      "steel": "acier inoxydable",
+      "brass": "laiton",
+      "nickel": "nickelé",
+      "carbon": "carbone",
+      "plastic": "plastique",
+      "glass": "verre",
+      "other": "autre"
+    },
+    "statuses": {
+      "available": "Disponible",
+      "lent": "Prêté",
+      "lost": "Perdu",
+      "damaged": "Abîmé",
+      "replace": "À remplacer"
+    },
+    "lengthKinds": {
+      "sock": "chaussette",
+      "standard": "standard",
+      "short": "courtes",
+      "mini": "mini"
+    },
+    "sizeMm": "{mm} mm",
+    "sizeRange": "{min} à {max} mm",
+    "lengthCm": "{cm} cm",
+    "lengthCmCount": "{cm} cm ×{count}",
+    "sizeLine": "{mm} mm · US {us}",
+    "sizeLineHook": "{mm} mm · {us}",
+    "sizeLineUk": "{mm} mm · US {us} · UK {uk}",
+    "notFound": "Outil introuvable.",
+    "inUse": "en cours",
+    "inUseBy": "en cours : {name}",
+    "kitTakenSize": "{size} ({name})",
+    "kitPick": "{size} + {cable}",
+    "kitCableTaken": "{cable}, {n} pris ({names})",
+    "countTimes": "×{n}",
+    "statusesInline": {
+      "available": "disponible",
+      "lent": "prêté",
+      "lost": "perdu",
+      "damaged": "abîmé",
+      "replace": "à remplacer"
+    },
+    "projects": "Projets",
+    "picker": {
+      "matching": "Aux tailles du projet",
+      "others": "Autres outils",
+      "takenBy": "pris : {name}",
+      "cable": "Câble",
+      "noCable": "aucun câble",
+      "cableFor": "Câble pour {size}",
+      "wholeKit": "Kit entier (lien d’avant)"
+    },
+    "deleted": "Outil supprimé.",
+    "kitContent": "Contenu du kit",
+    "photoLabel": "Photos de l’outil",
+    "handles": {
+      "classic": "classique",
+      "ergonomic": "ergonomique",
+      "rubber": "grip caoutchouc",
+      "beaded": "perles"
+    },
+    "tunisianKinds": {
+      "fixed": "fixe",
+      "cabled": "à câble",
+      "interchangeable": "interchangeable"
+    },
+    "fields": {
+      "type": "Type",
+      "size": "Taille",
+      "length": "Longueur",
+      "tipLength": "Longueur des pointes",
+      "dpnCount": "Nombre d’aiguilles",
+      "tunisianKind": "Forme",
+      "handle": "Manche",
+      "material": "Matière",
+      "brand": "Marque",
+      "line": "Gamme",
+      "quantity": "Quantité",
+      "purchasedAt": "Date d’achat",
+      "price": "Prix ({symbol})",
+      "shop": "Boutique",
+      "storedIn": "Rangement",
+      "status": "État",
+      "notes": "Notes",
+      "kitSizes": "Tailles présentes",
+      "kitCables": "Câbles présents",
+      "cableJoin": "Diamètre de la fixation",
+      "tunisianKit": "Crochets tunisiens interchangeables"
+    },
+    "sizeFree": "Taille en mm",
+    "sizeRequired": "Choisis une taille avant d’enregistrer.",
+    "form": {
+      "editTitle": "Modifier l’outil",
+      "updated": "Outil modifié.",
+      "typeRequired": "Choisis d’abord le type d’outil.",
+      "sizePick": "Choisis une taille",
+      "sizeOther": "Autre taille…",
+      "sizeOption": "{mm} mm (US {us})",
+      "cableLess": "Retirer un câble de {cm} cm",
+      "cableMore": "Ajouter un câble de {cm} cm",
+      "sizeOptionHook": "{mm} mm ({us})",
+      "unset": "Non précisé",
+      "lengthCm": "Longueur (cm)",
+      "sections": {
+        "type": "Type d’outil",
+        "size": "Taille et dimensions",
+        "material": "Matière et marque",
+        "purchase": "Achat et rangement",
+        "photos": "Photos et notes"
+      }
+    }
   }
 }

@@ -13,6 +13,7 @@ import { usePurchasesStore } from '@/stores/purchases'
 import { useSettingsStore } from '@/stores/settings'
 import { planRavelryImport } from '@/utils/ravelry-import'
 import { roundSkeins } from '@/utils/yarn-usage'
+import { hasPrice } from '@/utils/price-currency'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -72,6 +73,8 @@ async function confirmImport() {
       // unitPrice sur la même valeur) : sans ce champ, la tuile "valeur du stock" de
       // StashView.vue lit un prix nul pour chaque laine importée.
       row.yarn.price = row.purchase.unitPrice
+      // La devise de la laine est celle de sa ligne d'achat, posée plus bas : un seul choix.
+      row.yarn.priceCurrency = hasPrice(row.purchase.unitPrice) ? settingsStore.currency : ''
       const yarnId = await yarnsStore.add(row.yarn)
       await purchasesStore.add({
         yarnId,
@@ -81,7 +84,7 @@ async function confirmImport() {
         // dépendre d'un arrondi fait ailleurs pour rester correct.
         quantity: roundSkeins(row.purchase.quantity),
         unitPrice: row.purchase.unitPrice,
-        currency: settingsStore.currency,
+        currency: row.yarn.priceCurrency || settingsStore.currency,
         date: row.purchase.date,
         bain: row.purchase.bain,
         purchasedFrom: row.purchase.purchasedFrom,

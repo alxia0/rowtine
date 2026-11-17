@@ -4,6 +4,14 @@ export function parseDecimal(v) {
   return Number(String(v).replace(',', '.'))
 }
 
+// Une saisie se lit-elle comme un nombre ? « environ 5 » ou « 18,90 € » (données d'avant le
+// blocage de la saisie, 21/08) ne se lisent pas. Règle PARTAGÉE par l'écran Dépenses
+// (`isPriceUnknown`) et les fiches patron et projet (`patternPriceState`) : une seule idée de
+// « prix illisible », sinon une même donnée s'affiche « Prix inconnu » ici et « Gratuit » là.
+export function isReadableDecimal(v) {
+  return Number.isFinite(parseDecimal(v))
+}
+
 // Ne garde d'une saisie que ce qui peut être un nombre : les chiffres, et le PREMIER
 // séparateur décimal rencontré (virgule ou point, les deux sont acceptés — `parseDecimal`
 // ci-dessus ramène l'un à l'autre).

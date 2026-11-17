@@ -18,6 +18,10 @@
 // lecture du store, le nommage du fichier et le téléchargement.
 import { patternCategoryLabel } from '@/constants/catalog'
 import { patternToReader } from '@/utils/reader'
+import { formatDecimalText } from '@/utils/decimal'
+import { hasPrice } from '@/utils/price-currency'
+import { TOOL_TYPES } from '@/constants/tools'
+import { toolSizes, cableCounts, cableCountLabel, toolSizeParts } from '@/utils/tool-list'
 
 // Projets → 12 colonnes. `head` et `rows` sont écrits l'un sous l'autre, dans le même ordre :
 // tout ajout de colonne d'un seul côté décale la ligne et doit faire rougir le test de
@@ -52,5 +56,52 @@ export function patternExportTable(patterns, { t } = {}) {
   const rows = (patterns || []).map((p) => [
     p.name, t(`technique.${p.type}`), patternCategoryLabel(p, t), p.author, (p.sizes || []).join(', '), p.source, patternToReader(p).sections.length,
   ])
+  return { head, rows }
+}
+
+// Stock d'outils -> 21 colonnes (lot 1 de la phase 2, 14/11/2026). Aucun champ de la fiche
+// n'est omis. Les valeurs à clé (catégorie, type, matière, manche, état, longueur nommée,
+// crochet tunisien) sortent traduites, jamais la clé brute ; l'équivalent US ou lettre est
+// calculé comme sur la fiche, jamais stocké. Prix sans symbole, devise en code dans sa colonne.
+export function toolExportTable(tools, { t, locale } = {}) {
+  const cols = [
+    'category', 'type', 'sizeMm', 'equivalent', 'length', 'dpnCount', 'tunisianKind', 'material', 'handle',
+    'brand', 'line', 'quantity', 'status', 'price', 'currency', 'purchasedAt', 'shop', 'storedIn',
+    'kitSizes', 'kitCables', 'notes',
+  ]
+  const head = cols.map((c) => t(`settings.export.tool.${c}`))
+  const num = (n) => formatDecimalText(String(n), locale)
+  const has = (v) => v != null && v !== ''
+  const joined = (list) => list.map(num).join(' / ')
+  const rows = (tools || []).map((x) => {
+    const isKit = TOOL_TYPES[x.type]?.size === 'kit'
+    const size = isKit ? null : toolSizes(x)[0] ?? null
+    const us = size == null ? null : toolSizeParts(x, size).us
+    const length = has(x.lengthCm) ? num(x.lengthCm) : x.lengthKind ? t(`tools.lengthKinds.${x.lengthKind}`) : ''
+    const priced = hasPrice(x.price)
+    return [
+      x.category ? t(`tools.categories.${x.category}`) : '',
+      x.type ? t(`tools.types.${x.type}`) : '',
+      size == null ? '' : num(size),
+      has(us) ? String(us) : '',
+      length,
+      has(x.dpnCount) ? num(x.dpnCount) : '',
+      x.tunisianKind ? t(`tools.tunisianKinds.${x.tunisianKind}`) : x.tunisian ? t('tools.tunisianKinds.interchangeable') : '',
+      x.material ? t(`tools.materials.${x.material}`) : '',
+      x.handle ? t(`tools.handles.${x.handle}`) : '',
+      x.brand || '',
+      x.line || '',
+      has(x.quantity) ? num(x.quantity) : '',
+      t(`tools.statuses.${x.status || 'available'}`),
+      priced ? num(x.price) : '',
+      priced ? x.priceCurrency || '' : '',
+      x.purchasedAt || '',
+      x.shop || '',
+      x.storedIn || '',
+      joined(isKit ? toolSizes(x) : []),
+      cableCounts(x).map(({ cm, join, count }) => cableCountLabel({ cm, join }, count, t, num)).join(' ; '),
+      x.notes || '',
+    ]
+  })
   return { head, rows }
 }

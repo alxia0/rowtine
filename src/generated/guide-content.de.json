@@ -104,7 +104,7 @@
           "type": "paragraph",
           "spans": [
             {
-              "text": "Der Timer zeichnet deine Sitzungen auf, der Reiter Fotos sammelt die Bilder der Anleitung und deine eigenen Fotos, die Statistik fasst deine Aktivität im Projekt zusammen, und ein Abzeichen wird mit einer Geste geteilt. Siehe Kapitel 2 und 7.",
+              "text": "Der Timer zeichnet deine Sitzungen auf, der Reiter Fotos sammelt die Bilder der Anleitung und deine eigenen Fotos, die Statistik fasst deine Aktivität im Projekt zusammen, und ein Abzeichen wird mit einer Geste geteilt. Siehe Kapitel 2 und 8.",
               "bold": false,
               "italic": false
             }
@@ -406,7 +406,7 @@
                   "italic": false
                 },
                 {
-                  "text": " jederzeit zum Garnvorrat, zu den Anleitungen, zur Statistik, ",
+                  "text": " jederzeit zum Garnvorrat, zu deinen Nadeln, zu den Anleitungen, zur Statistik, ",
                   "bold": false,
                   "italic": false
                 },
@@ -1632,7 +1632,7 @@
               "italic": false
             },
             {
-              "text": " bei den Werkzeugen (Punkt 6).",
+              "text": " bei den Werkzeugen (Punkt 7).",
               "bold": false,
               "italic": false
             }
@@ -2341,7 +2341,7 @@
               "italic": false
             },
             {
-              "text": " (Punkt 7) nutzt den Platz: Sein Kalendergitter und seine Zahlenkacheln breiten sich aus, statt sich zu drängen, und in den längsten Fenstern, Halbjahr oder Jahr, siehst du viel mehr Wochen, bevor du das Gitter seitwärts schieben musst. Es gibt nichts zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.",
+              "text": " (Punkt 8) nutzt den Platz: Sein Kalendergitter und seine Zahlenkacheln breiten sich aus, statt sich zu drängen, und in den längsten Fenstern, Halbjahr oder Jahr, siehst du viel mehr Wochen, bevor du das Gitter seitwärts schieben musst. Es gibt nichts zusätzlich einzustellen: Es ist derselbe Bildschirm, nur bequemer.",
               "bold": false,
               "italic": false
             }
@@ -4212,6 +4212,71 @@
             {
               "spans": [
                 {
+                  "text": "Ein Projekt abschließen und danach korrigieren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Im Fenster beim Abschluss eines Projekts kannst du mehr Knäuel angeben als anfangs geplant, im Rahmen dessen, was für das Garn ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "verfügbar",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ist (sein Vorrat, abzüglich der für andere Projekte reservierten Knäuel). Darüber sagt dir die App Bescheid, behält das Maximum und bietet ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Vorrat korrigieren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " an, was die Karte des Garns öffnet. Die Schaltfläche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Abbrechen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (wie das Kreuz, ein Tipp daneben oder Zurück) schließt das Fenster, ohne etwas zu verbrauchen: Das Projekt behält seinen Status, und du kannst es später abschließen. Sobald das Projekt fertig oder abgebrochen ist, kannst du die Mengen im Block ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Gestrickte Knäuel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " auf seinem Bildschirm ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Bearbeiten",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " korrigieren; der Vorrat des Garns folgt, nach oben wie nach unten, ohne je doppelt zu zählen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
                   "text": "Die Karte eines Garns",
                   "bold": true,
                   "italic": false
@@ -4532,12 +4597,22 @@
               "italic": false
             },
             {
-              "text": " und ",
+              "text": ", ",
               "bold": false,
               "italic": false
             },
             {
               "text": "Anleitungen",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " und ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Nadeln",
               "bold": true,
               "italic": false
             },
@@ -4585,7 +4660,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", der zeigt, was dir noch bleibt, und sinkt, wenn du ein Knäuel verbrauchst. Solange du keinen Anleitungspreis eingetragen hast, bleibt diese Summe genau wie gewohnt; sobald eine Anleitung darin auftaucht, wird sie in zwei Unterzeilen aufgeteilt: was in Garn und was in Anleitungen ging.",
+                  "text": ", der zeigt, was dir noch bleibt, und sinkt, wenn du ein Knäuel verbrauchst. Solange du keinen Anleitungs- oder Nadelpreis eingetragen hast, bleibt diese Summe genau wie gewohnt; sobald eine Anleitung oder eine Nadel darin auftaucht, wird sie in eine Unterzeile pro vorhandener Kategorie aufgeteilt: was in Garn, in Anleitungen und in Nadeln ging.",
                   "bold": false,
                   "italic": false
                 }
@@ -4635,7 +4710,7 @@
                   "italic": false
                 },
                 {
-                  "text": ", Garn und Anleitungen in der Reihenfolge des Kalenders gemischt: Du siehst auf einen Blick, was dich ein Monat gekostet hat.",
+                  "text": ", Garn, Anleitungen und Nadeln in der Reihenfolge des Kalenders gemischt: Du siehst auf einen Blick, was dich ein Monat gekostet hat.",
                   "bold": false,
                   "italic": false
                 }
@@ -4645,7 +4720,7 @@
             {
               "spans": [
                 {
-                  "text": "Sobald eine Anleitung in der Liste auftaucht, trägt jede Zeile zusätzlich ihre Kennzeichnung, ",
+                  "text": "Sobald eine Anleitung oder eine Nadel in der Liste auftaucht, trägt jede Zeile zusätzlich ihre Kennzeichnung, ",
                   "bold": false,
                   "italic": false
                 },
@@ -4655,7 +4730,7 @@
                   "italic": false
                 },
                 {
-                  "text": " oder ",
+                  "text": ", ",
                   "bold": false,
                   "italic": false
                 },
@@ -4665,7 +4740,17 @@
                   "italic": false
                 },
                 {
-                  "text": ". Eine Anleitung, die du als kostenlos angegeben hast, erscheint mit dem Vermerk ",
+                  "text": " oder ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nadel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Eine Anleitung oder Nadel, die du als kostenlos angegeben hast, erscheint mit dem Vermerk ",
                   "bold": false,
                   "italic": false
                 },
@@ -4725,7 +4810,7 @@
                   "italic": false
                 },
                 {
-                  "text": " zu machen. Eine Anleitungs-Zeile änderst du dagegen über die Anleitungskarte: Ein Antippen bringt dich dorthin.",
+                  "text": " zu machen. Eine Anleitungs- oder Nadel-Zeile änderst du dagegen über die Karte der Anleitung oder der Nadel: Ein Antippen bringt dich dorthin.",
                   "bold": false,
                   "italic": false
                 }
@@ -4748,7 +4833,7 @@
               "italic": false
             },
             {
-              "text": ": Ein Garnkauf übersteht das Löschen seiner Karte und > bleibt hier sichtbar. Der Preis einer Anleitung dagegen gehört zur > Anleitung: Löschst du die Anleitung, verschwindet ihre Ausgabe mit ihr.",
+              "text": ": Ein Garnkauf übersteht das Löschen seiner Karte und > bleibt hier sichtbar. Der Preis einer Anleitung dagegen gehört zur > Anleitung: Löschst du die Anleitung, verschwindet ihre Ausgabe mit ihr. > Deine Nadeln mit Preis erscheinen hier ebenfalls, unter „Nadeln“: Um den > Preis zu korrigieren oder zu löschen, öffne die Karte der Nadel.",
               "bold": false,
               "italic": false
             }
@@ -4760,7 +4845,520 @@
       "id": "section-6",
       "title": [
         {
-          "text": "6. Eigenständige Werkzeuge",
+          "text": "6. Deine Nadeln",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Der Bildschirm ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Meine Nadeln",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": ", im Menü direkt nach dem Garnvorrat, hält deine Stricknadeln und Häkelnadeln beisammen. Bevor du ein Paar kaufst oder ein neues Projekt anschlägst, siehst du auf einen Blick, ob du die passende Stärke schon hast.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Eine Nadel hinzufügen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Die Schaltfläche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nadel hinzufügen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet das Formular. Zuerst wählst du die Art, aus drei Gruppen: ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Stricknadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Jackenstricknadeln, Rundstricknadeln, Nadelspiel, Flexible Nadeln, Wechselnadelspitzen, Seil, Andere Nadel), ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Sets",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Wechselnadelset, Häkelnadelset) und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Häkelnadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (Häkelnadel, Tunesische Häkelnadel). Danach erscheinen nur die Felder, die zu dieser Art passen: die Länge bei einer Rundstricknadel, die Anzahl Nadeln bei einem Nadelspiel, der Griff bei einer Häkelnadel, die Form (fest oder mit Kabel) bei einer tunesischen Häkelnadel.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Außer der Art ist nur die Größe Pflicht",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", und nur bei den Arten, die eine haben: Bei einer Anderen Nadel ist sie freiwillig, ein Seil hat keine. Du wählst sie aus der Liste, in der jede Stärke in Millimetern ihre US-Entsprechung zeigt, wenn es eine gibt. Bei einer Häkelnadel reicht die Liste von den feinen Stärken (0,6 mm) bis 25 mm, und das Material bestimmt die Entsprechung: aus ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Edelstahl",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " die Nummer der Stahlhäkelnadeln (2,25 mm · US 2), sonst der Buchstabe (2,25 mm · B-1). Ist deine nicht dabei, kannst du sie über ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Andere Größe…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " in mm eintippen. Alles andere ist freiwillig: Material, Marke, Serie, Anzahl, Kaufdatum, Preis, Geschäft, Aufbewahrungsort, Zustand (Verfügbar, Verliehen, Verloren, Beschädigt, Zu ersetzen), Notizen und Fotos.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Ein Wechselnadelset",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ist ein einziger Eintrag. Unter ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Enthaltene Größen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " hakst du die Stärken der Spitzen an, die darin stecken, unter ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Enthaltene Kabel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " die Längen der Seile. Haben zwei Kabel gleicher Länge unterschiedliche Anschlüsse (S, L oder Mini), wählst du zuerst den ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Durchmesser des Anschlusses",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " und hakst dann die Längen an: Ein 80 cm S und ein 80 cm L bleiben zwei getrennte Kabel, und die Karte des Sets zählt sie einzeln. Seine Karte zeigt danach den ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Inhalt des Sets",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ".",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Ein Häkelnadelset",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " funktioniert genauso: Du hakst die Größen seiner Häkelnadeln an, auf der Häkelnadel-Skala (4 mm · G-6). Hake ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Austauschbare tunesische Häkelnadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " an, um Kabel hinzuzufügen; ohne dieses Kästchen hat das Set keine Kabel. Bei der fehlenden Größe eines Projekts zählt ein Häkelnadelset nur für Häkeln und ein Nadelset nur für Stricken. Unter einer Größe erscheint es als „Häkelnadeln aus dem Set“.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Nach Art oder nach Stärke",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Zwei Schaltflächen oben auf dem Bildschirm wechseln die Ansicht. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nach Art",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " ordnet deine Nadeln nach Gruppe (Stricknadeln, Sets, Häkelnadeln) und dann nach Art. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nach Stärke",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " fasst sie Stärke für Stärke zusammen, alle Gruppen gemischt; einzelne Seile und Nadeln ohne Stärke stehen am Ende. Ein Set erscheint unter jeder seiner Stärken, mit einer Zeile wie „Spitzen aus dem Set KnitPro“: So weißt du sofort, dass deine 4-mm-Spitze im Set steckt. Die App merkt sich deine Wahl auf diesem Gerät.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Die Stärken als Chips",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Unter den beiden Schaltflächen gibt es einen Chip für jede Stärke, die du besitzt. Tippst du einen an, siehst du nur noch die Nadeln dieser Stärke; tippst du ihn noch einmal an, ist der Filter wieder weg. Das Suchfeld darunter sucht in Marke, Serie, Notizen und Aufbewahrungsort. Passt nichts, holt ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Suche und Stärke zurücksetzen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " alles zurück.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Die Karte einer Nadel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Tippst du auf eine Nadel, öffnet sie sich. Dort steht alles, was du notiert hast, dazu deine Fotos; mit dem Stern wählst du das Titelfoto. In der Liste zeigt jedes Werkzeug zwei Zeilen: Die erste beginnt mit Marke und Serie, dann folgt die Stärke; die zweite nennt Art, Länge, Material, die Anzahl, wenn es mehrere sind, und endet immer mit dem Zustand (verfügbar, verliehen, verloren …), damit dich eine verliehene oder verlorene Nadel nicht überrascht.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Eine Nadel bearbeiten, duplizieren oder löschen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": über das Menü ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Aktionen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " (senkrechtes Dreipunkt-Symbol) oben auf ihrer Karte. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Duplizieren",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet das Formular schon ausgefüllt, mit allem außer den Fotos: praktisch für dieselbe Nadel in einer anderen Stärke. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Löschen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " verschiebt sie in den Papierkorb. ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Rückgängig",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", gleich danach, holt sie zurück, und der Papierkorb in den Einstellungen bewahrt sie auf, bis du ihn leerst.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Deine Nadeln sind in der Sicherung dabei",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Sie werden mit allem anderen in den {app}-Ordner kopiert, ihre Fotos in einen Unterordner namens ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Outils",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Eine Wiederherstellung bringt sie unverändert zurück.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Tabellenexport",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Die Schaltfläche ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Meine Nadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " im Export-Bereich der Einstellungen exportiert deine Nadeln und Häkelnadeln als Tabelle (CSV), genau wie deinen Garnvorrat. Jedes Stück steht in einer Zeile, mit seiner Größenentsprechung, seinem Preis und seiner Währung.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Größe fehlt im Bestand",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Auf der Projektseite weist unter der Kachel Nadeln (oder Häkelnadel) eine dezente Zeile auf jede verlangte Größe hin, die nicht in deinen Nadeln ist. Sie erscheint erst, wenn du mindestens eine Nadel eingetragen hast.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Nadeln mit einem Projekt verknüpfen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Auf der Projektseite, Reiter ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Details",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ", listet die Kachel ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Meine Nadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " die Nadeln, die du verknüpft hast, und ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Nadeln auswählen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " öffnet die Liste zum Ankreuzen, zuerst die in den Größen des Projekts. Eine Nadel, die mit einem Projekt In Arbeit verknüpft ist, trägt in ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Meine Nadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " und in der Liste zum Ankreuzen den Hinweis „in Gebrauch:“ mit dem Namen des Projekts, und ihre Seite nennt die Projekte, die sie verwenden. Wie der Größenhinweis erscheint die Kachel erst, wenn du mindestens eine Nadel eingetragen hast. Wenn du ein Projekt pausierst, schlägt die App vor, seine Nadeln für ein anderes Projekt freizugeben; wenn du es wieder aufnimmst, schlägt sie vor, die noch freien zurückzunehmen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Eine Größe aus einem Set nehmen",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": In der Auswahlliste hat ein Set kein eigenes Kästchen, es klappt sich in seine Größen auf, die des Projekts zuerst. Hake die Größe an, die du nimmst; hat das Set Kabel, wählst du auch ein Kabel oder ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "kein Kabel",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ". Nur diese Größe ist belegt, nicht das ganze Set: In ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Meine Nadeln",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " zeigt die Zeile des Sets „in Gebrauch: 4 mm (Mütze)“ oder „verfügbar“. Eine Größe oder ein Kabel, das schon ein anderes laufendes Projekt nutzt, kannst du trotzdem anhaken, mit dem Hinweis „belegt:“ und dem Projektnamen; so wechselt eine Spitze von einem Projekt zum anderen. Die Seite des Sets nennt bei jeder belegten Größe das Projekt und zählt die belegten Kabel („80 cm ×2, 1 belegt (Mütze)“); die Projektkachel zeigt „KnitPro Zing · 4 mm + 80 cm“. Ein Set, das vor dieser Version als Ganzes verknüpft wurde, behält sein Kästchen ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Ganzes Set (frühere Verknüpfung)",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Entferne den Haken oder hake eine Größe an, um es zu ersetzen.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "Solange du noch keine Nadel eingetragen hast, zeigt der Bildschirm eine Beispielzeile, eine Rundstricknadel aus Bambus in 4 mm: Sie wird nie gespeichert.",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. Eigenständige Werkzeuge",
           "bold": false,
           "italic": false
         }
@@ -4991,10 +5589,10 @@
       ]
     },
     {
-      "id": "section-7",
+      "id": "section-8",
       "title": [
         {
-          "text": "7. Statistik",
+          "text": "8. Statistik",
           "bold": false,
           "italic": false
         }
@@ -5164,7 +5762,7 @@
               "italic": false
             },
             {
-              "text": " zeigt ein Kästchen pro Tag, vom ersten Tag deiner Woche (oben) bis zum letzten (unten), über das ganze gewählte Fenster; dieser erste Tag ist standardmäßig Montag, oder Sonntag, wenn du das in den Einstellungen (§8) so gewählt hast. Seine Farbe folgt dem in den Einstellungen (§8) gewählten Akzentton, und ihre Intensität hängt davon ab, wie lange du an diesem Tag gestrickt oder gehäkelt hast, in fünf Stufen: nichts, weniger als 30 Minuten, 30 Minuten bis 1 Stunde, 1 bis 2 Stunden, 2 Stunden und mehr. Die Schwellenwerte sind ",
+              "text": " zeigt ein Kästchen pro Tag, vom ersten Tag deiner Woche (oben) bis zum letzten (unten), über das ganze gewählte Fenster; dieser erste Tag ist standardmäßig Montag, oder Sonntag, wenn du das in den Einstellungen (§9) so gewählt hast. Seine Farbe folgt dem in den Einstellungen (§9) gewählten Akzentton, und ihre Intensität hängt davon ab, wie lange du an diesem Tag gestrickt oder gehäkelt hast, in fünf Stufen: nichts, weniger als 30 Minuten, 30 Minuten bis 1 Stunde, 1 bis 2 Stunden, 2 Stunden und mehr. Die Schwellenwerte sind ",
               "bold": false,
               "italic": false
             },
@@ -5255,10 +5853,10 @@
       ]
     },
     {
-      "id": "section-8",
+      "id": "section-9",
       "title": [
         {
-          "text": "8. Einstellungen",
+          "text": "9. Einstellungen",
           "bold": false,
           "italic": false
         }
@@ -5328,7 +5926,7 @@
                   "italic": false
                 },
                 {
-                  "text": " und wechselt von selbst zwischen hell und dunkel; sobald du wählst, hat deine Wahl Vorrang und bleibt in beiden Modi dieselbe. Dieser Ton färbt die Schaltflächen, die Auswahlen, die Fortschrittsbalken und das Statistikgitter (§7).",
+                  "text": " und wechselt von selbst zwischen hell und dunkel; sobald du wählst, hat deine Wahl Vorrang und bleibt in beiden Modi dieselbe. Dieser Ton färbt die Schaltflächen, die Auswahlen, die Fortschrittsbalken und das Statistikgitter (§8).",
                   "bold": false,
                   "italic": false
                 }
@@ -5414,17 +6012,27 @@
                         "italic": false
                       },
                       {
-                        "text": " aus fünf Möglichkeiten (€, $, £, CHF, CA$). Beachte: Es handelt sich nur um eine Beschriftung. Bereits eingegebene Preise werden ",
+                        "text": " aus fünf Möglichkeiten (€, $, £, CHF, CA$). Sie gilt für Preise, die du ",
                         "bold": false,
                         "italic": false
                       },
                       {
-                        "text": "nicht umgerechnet",
+                        "text": "ab dann",
                         "bold": true,
                         "italic": false
                       },
                       {
-                        "text": ", sondern nur mit dem anderen Symbol angezeigt, und die App weist dich vor der Bestätigung darauf hin.",
+                        "text": " eingibst: Jeder Preis behält die Währung, in der du ihn notiert hast, und ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "nichts wird umgerechnet",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "; die App erinnert dich vor der Bestätigung daran.",
                         "bold": false,
                         "italic": false
                       }
@@ -5473,7 +6081,7 @@
                   {
                     "spans": [
                       {
-                        "text": "Export deines Vorrats, deiner Projekte oder Anleitungen als Tabelle (CSV), um sie andernorts anzusehen oder zu sichern. Die Spalten folgen deinen aktuellen Einstellungen: Längen und Gewichte im gewählten Einheitensystem, Preise mit dem gewählten Währungssymbol.",
+                        "text": "Export deines Vorrats, deiner Projekte oder Anleitungen als Tabelle (CSV), um sie andernorts anzusehen oder zu sichern. Die Spalten folgen deinen aktuellen Einstellungen: Längen und Gewichte im gewählten Einheitensystem, Preise gefolgt von ihrer Währung in einer eigenen Spalte (jeder Preis behält seine eigene).",
                         "bold": false,
                         "italic": false
                       }
@@ -5493,7 +6101,7 @@
                         "italic": false
                       },
                       {
-                        "text": ": Jedes gelöschte Projekt, Garn oder jede gelöschte Anleitung landet dort und lässt sich jederzeit wiederherstellen (bis du ihn absichtlich leerst).",
+                        "text": ": Jedes gelöschte Projekt, Garn, Werkzeug oder jede gelöschte Anleitung landet dort und lässt sich jederzeit wiederherstellen (bis du ihn absichtlich leerst).",
                         "bold": false,
                         "italic": false
                       }
@@ -5913,10 +6521,10 @@
       ]
     },
     {
-      "id": "section-9",
+      "id": "section-10",
       "title": [
         {
-          "text": "9. Unter der Haube: was {app} dir garantiert",
+          "text": "10. Unter der Haube: was {app} dir garantiert",
           "bold": false,
           "italic": false
         }
@@ -6010,6 +6618,21 @@
                 },
                 {
                   "text": ": Vom Bildschirm „Info“ aus sagt sie, wo deine Daten leben, was dein Telefon verlassen kann und in welchen Fällen, was beim Deinstallieren der App geschieht, und wer dafür die Verantwortung trägt: Die verantwortliche Person und die Kontaktadresse werden dort genannt. Sie ist in deiner Sprache geschrieben.",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Neuigkeiten, nur einmal",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": ": Nach einem Update fasst ein Fenster zusammen, was in der neuesten Version neu ist, einmal pro Version. „Verstanden“ schließt es, „Alles ansehen“ öffnet den Bildschirm „Info“, wo du das Protokoll aller Versionen findest. Eine frische Installation zeigt es nicht. Die App merkt sich auf diesem Gerät die letzte Version, die du gesehen hast, aber nicht in der Sicherung.",
                   "bold": false,
                   "italic": false
                 }

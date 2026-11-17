@@ -5,10 +5,12 @@ import StatusBadge from './StatusBadge.vue'
 import ThumbImage from './ThumbImage.vue'
 import StitchProgress from './StitchProgress.vue'
 import YarnConsumptionDialog from './YarnConsumptionDialog.vue'
+import ToolParkingDialog from './ToolParkingDialog.vue'
 import { resolveCover } from '@/utils/project-cover'
 import { useProjectsStore } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
+import { useToolParking } from '@/composables/useToolParking'
 import { isProjectVegan } from '@/utils/yarn-usage'
 import { formatLocalDate } from '@/utils/date-format'
 import AppIcon from '@/components/AppIcon.vue'
@@ -29,6 +31,7 @@ const projectsStore = useProjectsStore()
 // carte affichée à l'accueil.
 const yarnsStore = useYarnsStore()
 const projectConsumption = useProjectConsumption()
+const toolParking = useToolParking()
 
 // Changement de statut rapide (popover du badge) : mis à jour direct en base, la carte
 // connaît déjà le projet complet. `update()` recharge la liste. Passer à 'done' OU
@@ -36,8 +39,11 @@ const projectConsumption = useProjectConsumption()
 // réserve des pelotes (sinon comportement inchangé) — logique partagée avec
 // ProjectDetailView et ProjectEditView via le composable useProjectConsumption.
 async function onStatus(status) {
-  await projectConsumption.requestStatusChange(props.project, status, () =>
-    projectsStore.update(props.project.id, { status }),
+  // Pause/reprise : la question sur les outils enveloppe celle des pelotes (useToolParking).
+  await toolParking.requestStatusChange(props.project, status, (extra) =>
+    projectConsumption.requestStatusChange(props.project, status, () =>
+      projectsStore.update(props.project.id, { status, ...extra }),
+    ),
   )
 }
 
@@ -115,6 +121,16 @@ const finishedLabel = computed(() =>
     :yarns="projectConsumption.yarns"
     :mode="projectConsumption.mode"
     @confirm="projectConsumption.confirm"
+    @cancel="projectConsumption.cancel"
+    @fix-stock="projectConsumption.fixStock"
+  />
+
+  <ToolParkingDialog
+    :open="toolParking.open"
+    :mode="toolParking.mode"
+    :entries="toolParking.entries"
+    @confirm="toolParking.confirm"
+    @cancel="toolParking.cancel"
   />
 </template>
 

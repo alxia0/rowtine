@@ -37,7 +37,7 @@ capítulo 3.
 El cronómetro registra tus sesiones, la pestaña Fotos guarda las
 imágenes del patrón y tus propias fotos, las estadísticas resumen tu
 actividad en el proyecto, y una insignia se comparte en un gesto. Ver
-los capítulos 2 y 7.
+los capítulos 2 y 8.
 
 Para probarlo ahora mismo: el botón «Repetir la visita guiada», justo
 debajo y en Ajustes, abre el gorro de ejemplo en el lector con
@@ -82,7 +82,7 @@ Al abrir la app encuentras:
   Continuar y del resumen. Vuelven en cuanto creas tu primer proyecto o importas
   tu primer patrón.
 - Por último, **el menú arriba a la derecha** te lleva en todo momento al
-  stock de lana, a la biblioteca de patrones, a las estadísticas, **a las
+  stock de lana, a tus herramientas, a la biblioteca de patrones, a las estadísticas, **a las
   sesiones**, a los gastos, a esta guía, a los ajustes y a la pantalla
   Acerca de. Está en todas las
   pantallas: estés donde estés en la app, puedes ir a otro sitio sin volver al
@@ -342,7 +342,7 @@ el botón **Modificar puntos**, arriba de la pestaña, vuelve a abrir el mismo
 selector: al desmarcar un punto, su ficha desaparece.
 
 Fuera de cualquier patrón, el memo completo también se consulta desde el
-Inicio, con la ficha **Puntos** de las herramientas (punto 6).
+Inicio, con la ficha **Puntos** de las herramientas (punto 7).
 
 ### El diagrama a pantalla completa, y cómo «calibrarlo» bien
 
@@ -506,7 +506,7 @@ instrucciones, con los mismos puntos y el mismo gesto.
 
 *Las estadísticas en una tableta sujeta en horizontal, en la ventana Semestre: la cuadrícula del calendario muestra los últimos seis meses de un vistazo, cuando en el teléfono hay que deslizarla con el dedo, y las casillas numéricas se colocan de dos en dos debajo.*
 
-La pantalla **Estadísticas** (punto 7) también aprovecha el espacio: su
+La pantalla **Estadísticas** (punto 8) también aprovecha el espacio: su
 cuadrícula del calendario y sus casillas numéricas se despliegan en vez de
 apretarse, y en las ventanas más largas, Semestre o Año, ves muchas más
 semanas antes de tener que arrastrar la cuadrícula de lado. No hay nada más
@@ -835,6 +835,7 @@ nada por error.
   ovillos perdidos. La app guarda dos decimales (un cuarto de ovillo es
   0,25) y muestra estos números en todas partes con el separador decimal de
   tu idioma.
+- **Terminar un proyecto y corregir después**: en la ventana de fin de proyecto puedes indicar más ovillos de los previstos al principio, dentro de lo que está **disponible** para la lana (su stock, menos los ovillos reservados para otros proyectos). Por encima, la app te lo dice, conserva el máximo y te propone **Corregir el stock**, que abre la ficha de la lana. El botón **Cancelar** (igual que la cruz, un toque fuera o Atrás) cierra la ventana sin consumir nada: el proyecto conserva su estado y puedes volver a terminarlo más tarde. Una vez terminado o abandonado el proyecto, el bloque **Ovillos tejidos** de su pantalla **Modificar** te deja corregir esas cantidades; el stock de la lana sigue el cambio, al alza o a la baja, sin contar nunca dos veces.
 - **La ficha de una lana**: al tocar su tarjeta se abre a pantalla
   completa. Reúne todo lo que anotaste (marca, color, ubicación, metraje,
   cantidad, precio, compras, composición, notas), sus características, su
@@ -896,24 +897,25 @@ se conecta a Ravelry.
 
 *Los menús Año y Tipo arriba, el total con su desglose lana / patrones, y luego el detalle por mes.*
 
-Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, tanto la
-**lana** como los **patrones**:
+Accesible desde el menú de la app, esta pantalla te resume todo lo que has pagado por tejer o ganchillar, la
+**lana**, los **patrones** y las **herramientas**:
 - El **total gastado**, por moneda si has usado más de una (la app nunca
   las mezcla, porque no conoce un tipo de cambio). Este total nunca baja
   solo: usar un ovillo o terminar un proyecto no lo reduce. Es distinto del
   **valor de tu stock**, arriba en la pantalla **Stock de lana**, que sigue
-  lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón, este total sigue siendo
-  exactamente el que conoces; en cuanto aparece un patrón en él, se
-  desglosa en dos sublíneas: lo que fue a lana, lo que fue a patrones.
+  lo que te queda y baja cuando usas un ovillo. Mientras no hayas anotado ningún precio de patrón ni de herramienta, este total sigue siendo
+  exactamente el que conoces; en cuanto aparece un patrón o una herramienta en él, se
+  desglosa en una sublínea por categoría presente: lo que fue a lana,
+  a patrones, a herramientas.
 - Dos menús arriba: **Año** solo muestra el año elegido (o «Todos los
   años»), **Tipo** solo muestra una categoría (o todo). Los totales se
   recalculan en consecuencia. Las compras cuya fecha no hayas
   registrado acaban bajo «Fecha desconocida», que se añade al menú
   Año cuando las hay.
-- Un **desglose por año y luego por mes**, lana y patrones mezclados en
+- Un **desglose por año y luego por mes**, lana, patrones y herramientas mezclados en
   el orden del calendario: ves de un vistazo lo que te costó un mes.
-- En cuanto aparece un patrón en la lista, cada línea lleva además su
-  etiqueta, **Lana** o **Patrón**. Un patrón que has declarado gratuito
+- En cuanto aparece un patrón o una herramienta en la lista, cada línea lleva además su
+  etiqueta, **Lana**, **Patrón** o **Herramienta**. Un patrón o una herramienta que has declarado gratuito
   aparece con la mención **Gratis**: es la huella de que lo has
   comprobado, no un olvido.
 - La **lista completa** de todas tus compras y regalos, incluidos
@@ -921,15 +923,36 @@ Accesible desde el menú de la app, esta pantalla te resume todo lo que has paga
   «Lana eliminada»).
 - La posibilidad de **eliminar** una línea de lana directamente desde
   esta pantalla, con opción de **deshacerlo** justo después si fue un
-  error. Una línea de patrón, en cambio, se modifica desde la ficha del
-  patrón: un toque te lleva allí.
+  error. Una línea de patrón o de herramienta, en cambio, se modifica desde la ficha del
+  patrón o de la herramienta: un toque te lleva allí.
 
 > **Para que lo sepas**: una compra de lana sobrevive a la eliminación
 > de su ficha y sigue visible aquí. El precio de un patrón, en cambio,
 > pertenece al patrón: si eliminas el patrón, su gasto desaparece con
-> él.
+> él. Tus herramientas con precio también aparecen aquí, en «Herramientas»:
+> para corregir o borrar el precio, abre la ficha de la herramienta.
 
-## 6. Herramientas independientes
+## 6. Tus herramientas: agujas y ganchillos
+
+La pantalla **Mis herramientas**, en el menú justo después del stock de lana, reúne tus agujas y tus ganchillos. Antes de comprar un par o de empezar un patrón, ves de un vistazo si ya tienes el número que necesitas.
+
+- **Añadir una herramienta**: el botón **Añadir una herramienta** abre el formulario. Primero eliges el tipo, entre tres familias: **Agujas** (Agujas rectas, Agujas circulares, Agujas de doble punta, Agujas flexibles, Puntas intercambiables, Cable, Otra aguja), **Juegos** (Juego intercambiable, Juego de ganchillos) y **Ganchillos** (Ganchillo, Ganchillo tunecino). Después solo aparecen los campos que tienen sentido para ese tipo: el largo para una aguja circular, el número de agujas para unas de doble punta, el mango para un ganchillo, la forma (fijo o con cable) para un ganchillo tunecino.
+- **Aparte del tipo, solo el número es obligatorio**, y solo en los tipos que lo tienen: es opcional en Otra aguja, y un Cable no tiene. Lo eliges en la lista, donde cada número en milímetros lleva su equivalente estadounidense cuando existe. En un ganchillo, la lista va de los números finos (0,6 mm) hasta 25 mm, y es el material el que elige el equivalente: en **acero inoxidable**, el número de los ganchillos de acero (2,25 mm · US 2); si no, la letra (2,25 mm · B-1). Si el tuyo no está, **Otro número…** te deja escribirlo en mm. Todo lo demás es opcional: material, marca, gama, cantidad, fecha de compra, precio, tienda, dónde lo guardas, estado (Disponible, Prestado, Perdido, Dañado, Por reemplazar), notas y fotos.
+- **Un juego intercambiable** es una sola ficha. En **Números incluidos** marcas los números de las puntas que trae; en **Cables incluidos**, el largo de sus cables. Si dos cables del mismo largo tienen una conexión distinta (S, L o Mini), elige primero el **Diámetro de la conexión** y luego marca los largos: un 80 cm S y un 80 cm L siguen siendo dos cables distintos, y la ficha del juego los cuenta por separado. Su ficha muestra después el **Contenido del juego**.
+- **Un juego de ganchillos** funciona igual: marcas los números de sus ganchillos, en la escala de ganchillos (4 mm · G-6). Marca **Ganchillos tunecinos intercambiables** para añadir sus cables; sin esa casilla, el juego no tiene cables. Para el número que falta en un proyecto, un juego de ganchillos cuenta solo para el ganchillo, y uno de agujas solo para el punto. Bajo un número, aparece como «ganchillos del juego».
+- **Por tipo o por número**: dos botones en la parte superior de la pantalla cambian la presentación. **Por tipo** ordena tus herramientas por familia (Agujas, Juegos, Ganchillos) y luego por tipo. **Por número** las agrupa número a número, mezclando todas las familias; los cables sueltos y las herramientas sin número van al final. Un juego aparece bajo cada uno de sus números, con una línea como «puntas del juego KnitPro»: así sabes enseguida que tu punta de 4 mm está en el juego. La app recuerda tu elección en este dispositivo.
+- **Las pastillas de número**: bajo esos dos botones hay una pastilla por cada número que tienes. Toca una para ver solo las herramientas de ese número; tócala otra vez para quitar el filtro. El campo de búsqueda, justo debajo, busca en la marca, la gama, las notas y el lugar donde las guardas. Si nada coincide, **Borrar la búsqueda y el número** lo devuelve todo.
+- **La ficha de una herramienta**: un toque en una herramienta la abre. Reúne todo lo que anotaste y tus fotos; un toque en la estrella elige la foto de portada. En la lista, cada herramienta ocupa dos líneas: la primera empieza por la marca y la gama, y luego el número; la segunda da el tipo, el largo, el material, la cantidad si hay varias, y termina siempre con el estado (disponible, prestado, perdido…), para que una aguja prestada o perdida no te pille por sorpresa.
+- **Editar, duplicar o eliminar** una herramienta desde el menú **Acciones** (icono vertical de tres puntos) en la parte superior de su ficha. **Duplicar** abre el formulario ya relleno, con todo salvo las fotos: útil para la misma aguja en otro número. **Eliminar** la manda a la papelera. **Deshacer**, justo después, la devuelve a su sitio, y la papelera de los ajustes la guarda hasta que la vacíes.
+- **Tus herramientas van en la copia de seguridad**: se copian en la carpeta {app} con todo lo demás, y sus fotos en una subcarpeta llamada **Outils**. Una restauración te las devuelve tal cual.
+- **Exportación a hoja de cálculo**: el botón **Mis herramientas**, en la sección de exportación de los Ajustes, exporta tu stock de herramientas a una hoja de cálculo (CSV), igual que tu lana. Cada ficha ocupa una fila, con su equivalencia de tamaño, su precio y su moneda.
+- **Número que falta en tu stock**: en la ficha de un proyecto, bajo la casilla Agujas (o Ganchillo), una línea discreta señala cada número pedido que no está en tus herramientas. Solo aparece si ya tienes al menos una herramienta.
+- **Vincular tus herramientas a un proyecto**: en la ficha de un proyecto, pestaña **Detalles**, la casilla **Mis herramientas** muestra las herramientas que vinculaste, y **Elegir herramientas** abre la lista para marcar, primero las de los números del proyecto. Una herramienta vinculada a un proyecto En curso muestra «en uso:» seguido del nombre del proyecto en **Mis herramientas** y en la lista para marcar, y su ficha nombra los proyectos que la usan. Como el aviso de número, la casilla solo aparece si tienes al menos una herramienta. Cuando pones un proyecto en pausa, la app te propone liberar sus herramientas para otro proyecto; al retomarlo, te propone recuperar las que siguen libres.
+- **Tomar un número de un juego**: en la lista para marcar, un juego no tiene casilla propia; se despliega en sus números, primero los del proyecto. Marca el número que tomas; si el juego tiene cables, elige también un cable, o **sin cable**. Solo ese número queda ocupado, no todo el juego: en **Mis herramientas**, la línea del juego dice «en uso: 4 mm (Gorro)» o «disponible». Un número o un cable que ya usa otro proyecto En curso se puede marcar igualmente, con la mención «en uso:» seguida del nombre del proyecto, para pasar una punta de un proyecto a otro. La ficha del juego nombra el proyecto de cada número tomado y cuenta los cables en uso («80 cm ×2, 1 en uso (Gorro)»); la casilla del proyecto muestra «KnitPro Zing · 4 mm + 80 cm». Un juego vinculado entero antes de esta versión conserva su casilla **Juego completo (enlace anterior)**: desmárcala, o marca un número para sustituirlo.
+
+Mientras no tengas ninguna herramienta, la pantalla muestra una línea de ejemplo, una aguja circular de bambú de 4 mm: nunca se guarda.
+
+## 7. Herramientas independientes
 
 ![La pantalla Contador con el campo del nombre vacío: bajo cada una de las dos casillas hay un ejemplo, una manga y repetir las filas 1 a 8 cinco veces; más abajo, Aún no hay contadores, añade uno.](images/es/06a-compteurs.webp)
 
@@ -976,7 +999,7 @@ accesibles desde el inicio:
   abreviaturas; el memo incluye además las abreviaturas británicas (*yfwd*,
   *yrn*, *yon*, *psso*).
 
-## 7. Estadísticas
+## 8. Estadísticas
 
 ![La pantalla Estadísticas con la pestaña Trimestre activa junto a Mes, Semestre y Año: del 29/6/2026 al 24/9/2026, en el periodo 72:40:06, debajo Calendario en vez de Ritmo, una cuadrícula de jun a sept graduada de menos a más, y las tarjetas Tiempo total 72:40:06 y Días activos 69 de 88.](images/es/07-statistiques.webp)
 
@@ -1014,9 +1037,9 @@ horizontalmente en Semestre y Año, para no confundir los dos gestos):
 
 La **cuadrícula** muestra una casilla por día, del primer día de tu semana
 (arriba) al último (abajo), a lo largo de toda la ventana elegida; ese
-primer día es lunes por defecto, o domingo si lo elegiste en Ajustes (§8).
+primer día es lunes por defecto, o domingo si lo elegiste en Ajustes (§9).
 Su color sigue el tono
-de acento elegido en los ajustes (§8), y su intensidad depende de cuánto
+de acento elegido en los ajustes (§9), y su intensidad depende de cuánto
 tiempo tejiste o ganchillaste ese día, en cinco niveles: nada, menos de 30
 minutos, de 30 minutos a 1 hora, de 1 a 2 horas, 2 horas o más. Los umbrales
 son **fijos**: una casilla oscura siempre significa lo mismo, mes tras mes,
@@ -1037,7 +1060,7 @@ una acción**: una sesión, cronometrada o añadida a mano, una fila marcada, un
 contador de proyecto avanzado. Y abrir la aplicación sin hacer nada en ella
 no cuenta: se necesita una acción **registrada**.
 
-## 8. Ajustes
+## 9. Ajustes
 
 ![Los ajustes en tarjetas: en Perfil aparece Camille, la técnica predeterminada marcada es Punto y debajo un botón Guardar; después, la apariencia en Sistema, el bloque Color ambiental con sus diez pastillas y su deslizador de tono, el primer día de la semana en Lunes y, al borde inferior, solo el título Idioma.](images/es/08-reglages.webp)
 
@@ -1051,7 +1074,7 @@ no cuenta: se necesita una acción **registrada**.
   tu tema** y cambia solo con el modo claro u oscuro; en cuanto eliges, tu
   elección manda y se mantiene igual en los dos modos. Ese tono colorea los
   botones, las selecciones, las barras de progreso y la cuadrícula de las
-  estadísticas (§7).
+  estadísticas (§8).
 - **Primer día de la semana**: lunes (por defecto) o domingo. Esta elección
   gobierna la cuadrícula calendario y las siete barras por día de la semana
   de la pantalla Estadísticas, así como el reinicio semanal del total «esta
@@ -1065,10 +1088,10 @@ no cuenta: se necesita una acción **registrada**.
     stock, la muestra (10 × 10 cm o 4 × 4 pulgadas). Cambiar de
     sistema no modifica ninguna de tus cifras guardadas, solo te las
     muestra de nuevo en la otra unidad.
-  - **Moneda** entre cinco (€, $, £, CHF, CA$). Ojo, es solo una
-    etiqueta: los precios que ya has introducido **no se convierten**,
-    se muestran con el otro símbolo, y la app te lo recuerda antes de
-    confirmar.
+  - **Moneda** entre cinco (€, $, £, CHF, CA$). Se aplica a los
+    precios que introduzcas **a partir de ahora**: cada precio conserva la
+    moneda en la que lo anotaste y **no se convierte nada**; la app te lo
+    recuerda antes de confirmar.
   - Estos dos ajustes se te proponen ya **desde la primera pantalla**
     al abrir la app, rellenados de antemano según el idioma de tu
     dispositivo; puedes cambiarlos aquí en cualquier momento.
@@ -1076,9 +1099,9 @@ no cuenta: se necesita una acción **registrada**.
   - Exportación de tu stock, tus proyectos o tus patrones a hoja de
     cálculo (CSV), para consultarlos o guardarlos en otro sitio. Las
     columnas siguen tus ajustes actuales: longitudes y pesos en el
-    sistema de unidades elegido, precios con el símbolo de la moneda
-    elegida.
-  - Una **papelera** universal: todo proyecto, lana o patrón eliminado
+    sistema de unidades elegido, precios seguidos de su
+    moneda en una columna aparte (cada precio conserva la suya).
+  - Una **papelera** universal: todo proyecto, lana, herramienta o patrón eliminado
     acaba ahí y puedes restaurarlo en cualquier momento (hasta que la
     vacíes a propósito).
 - **Carpeta {app}**: todo lo que tejes o haces a crochet solo existe dentro
@@ -1178,7 +1201,7 @@ que puedes repetir cuando quieras).
   pantalla. Aparece **una sola vez en total**, no una vez por pantalla; el
   botón «Entendido» la cierra.
 
-## 9. Bajo el capó: lo que {app} te garantiza
+## 10. Bajo el capó: lo que {app} te garantiza
 
 - **Sin conexión por defecto**: ningún dato tuyo sale nunca del
   dispositivo.
@@ -1200,4 +1223,9 @@ que puedes repetir cuando quieras).
   dónde viven tus datos, qué puede salir de tu teléfono y en qué casos, qué
   pasa si desinstalas la app, y quién responde de ello: el responsable y la
   dirección de contacto aparecen nombrados. Está escrita en tu idioma.
+- **Las novedades, una sola vez**: tras una actualización, una ventana resume las
+  novedades de la última versión, una sola vez por versión. «Entendido» la
+  cierra, «Ver todo» abre la pantalla Acerca de, donde encuentras el
+  registro de todas las versiones. Una instalación nueva no la muestra. La app recuerda la última
+  versión que has visto en este dispositivo, pero no en la copia de seguridad.
 - **En cuatro idiomas**: francés, inglés, alemán y español.

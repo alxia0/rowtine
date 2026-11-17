@@ -10,6 +10,7 @@ import BackToTop from '@/components/BackToTop.vue'
 import FirstDetailTip from '@/components/FirstDetailTip.vue'
 import { useProjectsStore, workedNow } from '@/stores/projects'
 import { useYarnsStore } from '@/stores/yarns'
+import { useToolsStore } from '@/stores/tools'
 import { usePatternsStore } from '@/stores/patterns'
 import { useSectionsStore } from '@/stores/sections'
 import { useCountersStore } from '@/stores/counters'
@@ -24,6 +25,9 @@ import { useDismissMenu } from '@/composables/useDismissMenu'
 import { useScrollFade } from '@/composables/useScrollFade'
 import { pickAndCropImage } from '@/utils/photo'
 import { yarnPickLabel } from '@/utils/yarn-filter'
+import { missingSizes, requestedSizeMm } from '@/utils/tool-list'
+import { linkedTools, inUseProjectName, linkedKitPicks, kitTakenLive } from '@/utils/tool-links'
+import { formatDecimalText } from '@/utils/decimal'
 import { cleanDesignerName } from '@/utils/pattern-designer'
 import { needleTexts, gaugeText as gaugeTextOf } from '@/utils/project-tiles'
 import { Capacitor } from '@capacitor/core'
@@ -40,6 +44,8 @@ import { closeChronoSession } from '@/utils/close-chrono-session'
 import { SESSION_NO_SECTION } from '@/constants/session'
 import { useCropperStore } from '@/stores/cropper'
 import { useProjectConsumption } from '@/composables/useProjectConsumption'
+import { useToolParking } from '@/composables/useToolParking'
+import ToolParkingDialog from '@/components/ToolParkingDialog.vue'
 import { resolveCover } from '@/utils/project-cover'
 import { reservationsOf, consumedOf } from '@/utils/yarn-usage'
 import { formatMoney, formatLength, formatSkeins } from '@/utils/units'
@@ -60,6 +66,8 @@ import YarnConsumptionDialog from '@/components/YarnConsumptionDialog.vue'
 import ChronoPill from '@/components/ChronoPill.vue'
 import KeepScreenOnSwitchRow from '@/components/KeepScreenOnSwitchRow.vue'
 import BadgeComposer from '@/components/BadgeComposer.vue'
+import ToolRow from '@/components/ToolRow.vue'
+import ToolPickerSheet from '@/components/ToolPickerSheet.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -67,6 +75,7 @@ const { t, locale } = useI18n()
 const goBack = useSmartBack()
 const projectsStore = useProjectsStore()
 const yarnsStore = useYarnsStore()
+const toolsStore = useToolsStore()
 const patternsStore = usePatternsStore()
 const sectionsStore = useSectionsStore()
 const countersStore = useCountersStore()
@@ -78,6 +87,7 @@ const snackbar = useSnackbarStore()
 const settings = useSettingsStore()
 const softDelete = useSoftDelete()
 const projectConsumption = useProjectConsumption()
+const toolParking = useToolParking()
 
 const project = ref(null)
 // Note bornée à l'affichage (défense en profondeur, cf. clampStars) : pilote un v-for.
@@ -154,7 +164,13 @@ async function loadAll() {
     countersStore.loadForProject(id),
     sessionsStore.loadForProject(id),
     yarnsStore.loaded ? Promise.resolve() : yarnsStore.load(),
+    // Un échec de lecture du stock laisse celui-ci vide : aucune mention, la fiche s'affiche quand même.
+    toolsStore.loaded ? Promise.resolve() : toolsStore.load().catch(() => {}),
   ])
+  // Liste des projets : seulement pour « en cours : <nom> » sur les lignes d'outils. Non attendue
+  // (lecture de toute la table, photos comprises) : la mention apparaît une fois chargée, et un
+  // échec la laisse absente.
+  if (!projectsStore.loaded) Promise.resolve(projectsStore.load()).catch(() => {})
   // Le réglage de devise pilote l'affichage du coût des laines. Filet identique à
   // StashView/ExpensesView : App.vue le charge déjà au démarrage, mais toute exception
   // avant cet appel laisserait sinon la devise sur son défaut pour toute la session.
@@ -203,15 +219,18 @@ const patternPriceText = computed(() => {
   const st = patternPriceState(linkedPattern.value)
   if (st.kind === 'none') return ''
   if (st.kind === 'free') return t('pattern.priceFree')
+  if (st.kind === 'unknown') return t('purchases.priceUnknown')
   return formatMoney(st.amount, { locale: locale.value, currency: st.currency, profile: 'detail' }).text
 })
 // Coût du projet (depuis le 08/08). Le calcul vit dans utils/purchases.js — ici, uniquement de
 // la mise en forme. `pricedCount === 0` avec des pelotes imputées : on écrit « — » et non
 // « 0 € », qui ferait passer une ignorance pour une gratuité.
-const cost = computed(() => projectYarnCost(yarnsStore.yarns, project.value?.id))
+const cost = computed(() => projectYarnCost(yarnsStore.yarns, project.value?.id, settings.currency))
 const yarnCostText = computed(() =>
   cost.value.pricedCount > 0
-    ? formatMoney(cost.value.amount, { locale: locale.value, currency: settings.currency, profile: 'detail' }).text
+    ? Object.entries(cost.value.amounts)
+        .map(([cur, amount]) => formatMoney(amount, { locale: locale.value, currency: cur, profile: 'detail' }).text)
+        .join(' + ')
     : '—',
 )
 // La tuile n'apparaît que s'il y a quelque chose à dire : des pelotes imputées (même sans
@@ -246,8 +265,11 @@ async function setActiveSize(sz) {
 // partagée avec ProjectCard et ProjectEditView via le composable useProjectConsumption
 // (K2 + R2 + R3) : le composable décide seul quels statuts déclenchent la
 // question, rien à faire ici pour couvrir 'abandoned'.
+// Pause et reprise (wip <-> pause) : la question sur les outils liés (useToolParking)
+// enveloppe la précédente ; `extra` porte les liens rangés ou repris, écrits avec le statut.
 async function changeStatus(status) {
-  await projectConsumption.requestStatusChange(project.value, status, async () => {
+  await toolParking.requestStatusChange(project.value, status, (extra) =>
+    projectConsumption.requestStatusChange(project.value, status, async () => {
     // Un chrono qui tourne sur CE projet n'a plus de contrôle possible dès que le
     // statut passe à Terminé/Abandonné : `chronoVisible` masque la pastille au même
     // instant (cf. plus bas), laissant la session tourner jusqu'à la prochaine
@@ -255,7 +277,7 @@ async function changeStatus(status) {
     // statut — même convention que toggleTimerFromDetail ci-dessous : la session doit
     // être enregistrée avant que l'état qui la rend invisible ne soit persisté.
     if (['done', 'abandoned'].includes(status) && chronoMine.value) await closeChronoSession()
-    await projectsStore.update(project.value.id, { status })
+    await projectsStore.update(project.value.id, { status, ...extra })
     // Relit le projet ÉCRIT plutôt que de recopier `status` seul (correction ultérieure) :
     // passer à 'done' fait écrire `finishedAt` en base comme effet de la
     // RÈGLE 1, dans `projectsStore.update()` — un objet local qui ne recopierait que
@@ -265,7 +287,8 @@ async function changeStatus(status) {
     // seconde fois ici : le store est la seule source de vérité de ce que l'écriture a
     // réellement produit.
     project.value = await projectsStore.get(project.value.id)
-  })
+  }),
+  )
 }
 
 // Swipe horizontal pour changer d'onglet (Infos ⇄ Sections ⇄ Photos ⇄ Sessions).
@@ -344,6 +367,11 @@ defineExpose({
       closeViewer()
       return true
     }
+    // Feuille « Choisir des outils » : overlay local aussi ; le retour la ferme sans enregistrer.
+    if (toolPickerOpen.value) {
+      toolPickerOpen.value = false
+      return true
+    }
     if (tab.value === entryTab) return false
     changeTab(entryTab)
     return true
@@ -361,6 +389,38 @@ const gaugeText = computed(() => gaugeTextOf(project.value, t, locale.value))
 // Liste d'aiguilles formatée : cf. `needleTexts` (utils/project-tiles.js).
 const needleList = computed(() => needleTexts(project.value, locale.value))
 const hasNeedle = computed(() => needleList.value.length > 0)
+// Aiguilles du projet, liste ou scalaires d'avant la migration.
+const needleEntries = computed(() => {
+  const p = project.value
+  if (!p) return []
+  return Array.isArray(p.needles) ? p.needles : [{ mm: p.needleMm || '', us: p.needleUs || '' }]
+})
+const needleTechnique = computed(() => (project.value?.technique === 'crochet' ? 'crochet' : 'knitting'))
+// Tailles du projet absentes du stock d'outils (vide tant qu'aucune fiche outil n'existe).
+const missingNeedleSizes = computed(() => missingSizes(needleEntries.value, toolsStore.tools, needleTechnique.value))
+
+// --- Outils liés (lot 4) : la tuile n'existe que si le stock d'outils a au moins une fiche. ---
+const hasTools = computed(() => toolsStore.tools.length > 0)
+const projectTools = computed(() => linkedTools(project.value, toolsStore.tools))
+// Tailles (et câble) prises dans un kit : « KnitPro Zing · 4 mm + 80 cm » ; périmées ignorées.
+const projectKitPicks = computed(() => linkedKitPicks(project.value, toolsStore.tools))
+const requestedMm = computed(() => needleEntries.value.map((e) => requestedSizeMm(e, needleTechnique.value)).filter((mm) => mm != null))
+const toolPickerOpen = ref(false)
+function openTool(tool) {
+  router.push({ name: 'tool', params: { id: tool.id } })
+}
+// Échec d'écriture : snackbar, comme les autres erreurs de la fiche ; la feuille reste ouverte
+// avec les cases cochées, pour réessayer.
+async function saveToolLinks({ toolIds, kitPicks }) {
+  const id = project.value.id
+  try {
+    await projectsStore.setToolLinks(id, { toolIds, kitPicks })
+    project.value = await projectsStore.get(id)
+    toolPickerOpen.value = false
+  } catch {
+    snackbar.show(t('project.toolsSaveError'))
+  }
+}
 const isCrochet = computed(() => project.value?.technique === 'crochet')
 const isDone = computed(() => project.value?.status === 'done')
 const projectYarns = computed(() => yarnsStore.yarns.filter((y) => reservationsOf(y)[project.value?.id] != null))
@@ -800,7 +860,7 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
         <!-- Données du projet en tuiles (bento) -->
         <div class="info-bento">
           <div class="itile"><span class="itile__k">{{ t('project.technique') }}</span><span class="itile__v">{{ t(`technique.${project.technique}`) }}</span></div>
-          <div v-if="hasNeedle" class="itile"><span class="itile__k">{{ isCrochet ? t('project.hooks') : t('project.needles') }}</span><span class="itile__v">{{ needleList.join(', ') }}</span></div>
+          <div v-if="hasNeedle" class="itile"><span class="itile__k">{{ isCrochet ? t('project.hooks') : t('project.needles') }}</span><span class="itile__v">{{ needleList.join(', ') }}</span><span v-for="mm in missingNeedleSizes" :key="mm" class="itile__missing">{{ t('project.missingSize', { mm: formatDecimalText(String(mm), locale) }) }}</span></div>
           <div v-if="hasGauge" class="itile"><span class="itile__k">{{ t('project.gauge') }}</span><span class="itile__v">{{ gaugeText }}</span></div>
           <div v-if="project.startedAt" class="itile"><span class="itile__k">{{ t('project.startedAt') }}</span><span class="itile__v">{{ formatLocalDate(project.startedAt, locale) }}</span></div>
           <div v-if="project.finishedAt" class="itile"><span class="itile__k">{{ t('project.finishedAt') }}</span><span class="itile__v">{{ formatLocalDate(project.finishedAt, locale) }}</span></div>
@@ -823,6 +883,23 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
               </li>
             </ul>
             <p v-else class="yarnlist__empty">{{ t('project.yarnsNone') }}</p>
+          </div>
+          <!-- Outils liés : jamais de tuile tant que le stock d'outils est vide. -->
+          <div v-if="hasTools" class="itile itile--wide" data-test="project-tools">
+            <span class="itile__k">{{ t('tools.title') }}</span>
+            <div v-if="projectTools.length || projectKitPicks.length" class="toollist">
+              <ToolRow v-for="tool in projectTools" :key="tool.id" :tool="tool" :in-use-by="inUseProjectName(tool.id, projectsStore.projects)" @open="openTool" />
+              <ToolRow
+                v-for="p in projectKitPicks"
+                :key="`${p.tool.id}-${p.sizeMm}-${p.cableCm}-${p.cableJoin}`"
+                :tool="p.tool"
+                :pick="{ sizeMm: p.sizeMm, cableCm: p.cableCm, cableJoin: p.cableJoin }"
+                :kit-taken="kitTakenLive(p.tool, projectsStore.projects)"
+                @open="openTool"
+              />
+            </div>
+            <p v-else class="yarnlist__empty">{{ t('project.toolsNone') }}</p>
+            <button type="button" class="btn btn--block toollist__choose" data-test="project-tools-choose" @click="toolPickerOpen = true">{{ t('project.chooseTools') }}</button>
           </div>
           <!-- Coût du projet (depuis le 08/08) : le prix des laines imputées à ce projet, puis
                celui du patron ENTRE PARENTHÈSES. Les deux ne sont JAMAIS additionnés : le
@@ -1129,6 +1206,32 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
       :yarns="projectConsumption.yarns"
       :mode="projectConsumption.mode"
       @confirm="projectConsumption.confirm"
+      @cancel="projectConsumption.cancel"
+      @fix-stock="projectConsumption.fixStock"
+    />
+
+    <!-- Pause : « libérer les outils ? » ; reprise : « les reprendre ? ». -->
+    <ToolParkingDialog
+      :open="toolParking.open"
+      :mode="toolParking.mode"
+      :entries="toolParking.entries"
+      @confirm="toolParking.confirm"
+      @cancel="toolParking.cancel"
+    />
+
+    <!-- Feuille « Choisir des outils » (tuile « Mes outils » de l'onglet Détails). -->
+    <ToolPickerSheet
+      v-if="hasTools"
+      :open="toolPickerOpen"
+      :tools="toolsStore.tools"
+      :requested-mm="requestedMm"
+      :selected="project.toolIds || []"
+      :selected-picks="project.kitPicks || []"
+      :project-id="project.id"
+      :technique="needleTechnique"
+      :projects="projectsStore.projects"
+      @close="toolPickerOpen = false"
+      @save="saveToolLinks"
     />
 
     <!-- Chrono flottant (chantier « chrono unifié », 2026-08-30) : la MÊME pastille que la barre
@@ -1222,12 +1325,15 @@ onUnmounted(() => window.removeEventListener('keydown', onViewerKey))
 .itile--wide { grid-column: 1 / -1; }
 .itile__k { display: block; font-size: 11px; font-weight: 600; color: var(--ink-55); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
 .itile__v { display: block; font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink); }
+.itile__missing { display: block; margin-top: 2px; font-size: 11px; color: var(--ink-70); }
 .itile__notes { margin: 0; white-space: pre-wrap; color: var(--ink-70); font-size: 14px; font-style: italic; }
 .stars { color: var(--mustard); letter-spacing: 2px; }
 .yarnlist { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); color: var(--ink); }
 .yarnlist li { padding: 3px 0; }
 .yarnlist__meta { color: var(--ink-55); font-size: 13px; margin-left: var(--sp-2); }
 .yarnlist__empty { margin: var(--sp-2) 0 0; color: var(--ink-55); font-size: 14px; }
+.toollist { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-2); }
+.toollist__choose { margin-top: var(--sp-3); }
 .edit-btn { margin-top: var(--sp-5); }
 .list { display: flex; flex-direction: column; gap: var(--sp-2); }
 .subhead { font-family: var(--font-display); font-weight: 600; font-size: 16px; margin: var(--sp-5) 0 var(--sp-2); }
