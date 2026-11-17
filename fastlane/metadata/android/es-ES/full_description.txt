@@ -18,6 +18,11 @@ Funciones:
   libre, con un aviso cuando no queda suficiente para terminar una pieza,
   incluidas las lanas multicolor (degradado, autorayado, moteado, teñido
   a mano).
+* Gestionar un stock de herramientas: agujas, ganchos y kits intercambiables
+  con sus tallas y sus cables. Una herramienta se vincula a un proyecto (una
+  talla y un cable concretos para un kit), se libera al pausar el proyecto y
+  se recupera al retomarlo; las compras cuentan en los gastos, y el stock se
+  exporta a una hoja de cálculo.
 * Seguir el coste de cada proyecto; compras y regalos se contabilizan por
   separado.
 * Buscar una medida de aguja o ganchillo a partir de la etiqueta de un

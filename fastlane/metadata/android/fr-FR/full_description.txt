@@ -17,6 +17,11 @@ Fonctionnalités :
   libre, avec une alerte quand il n'en reste pas assez pour terminer une
   pièce, y compris pour les laines multicolores (dégradé, auto-rayant,
   moucheté, teint main).
+* Gérer un stock d'outils : aiguilles, crochets et kits interchangeables avec
+  leurs tailles et leurs câbles. Un outil se lie à un projet (une taille et un
+  câble précis pour un kit), se libère à la pause du projet et se reprend à sa
+  reprise ; les achats comptent dans les dépenses, et le stock s'exporte en
+  tableur.
 * Suivre le coût de chaque projet ; achats et cadeaux sont comptabilisés
   séparément.
 * Retrouver une taille d'aiguille ou de crochet à partir de l'étiquette

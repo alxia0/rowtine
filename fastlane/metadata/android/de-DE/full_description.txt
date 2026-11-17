@@ -18,6 +18,11 @@ Funktionen:
   frei ist, mit einer Warnung, wenn nicht mehr genug für ein fertiges
   Stück übrig bleibt, auch bei mehrfarbigem Garn (Verlauf, selbststreifend,
   gesprenkelt, handgefärbt).
+* Einen Werkzeugvorrat führen: Nadeln, Häkelnadeln und Wechselsets mit ihren
+  Größen und Seilen. Ein Werkzeug lässt sich einem Projekt zuordnen (bei
+  einem Set eine bestimmte Größe und ein Seil), wird bei der Pause des
+  Projekts freigegeben und beim Wiederaufnehmen zurückgenommen; Käufe zählen
+  in den Ausgaben, und der Vorrat lässt sich als Tabelle exportieren.
 * Die Kosten jedes Projekts verfolgen; Käufe und Geschenke werden getrennt
   erfasst.
 * Eine Nadel- oder Häkelnadelstärke anhand der Banderole eines Knäuels und

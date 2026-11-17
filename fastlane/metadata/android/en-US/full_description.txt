@@ -17,6 +17,10 @@ Features:
 * Manage a yarn stash: what is reserved for a project, what is still free,
   with a warning when there isn't enough left to finish a piece, including
   multicoloured yarns (gradient, self-striping, speckled, hand-dyed).
+* Keep a tools stash: needles, hooks and interchangeable sets with their
+  sizes and cables. Link a tool to a project (one exact size and cable for a
+  set), free it when the project is paused and take it back on resume;
+  purchases count in expenses, and the stash exports to a spreadsheet.
 * Track the cost of every project; purchases and gifts are recorded
   separately.
 * Look up a needle or hook size from a yarn's ball band and a pattern's
