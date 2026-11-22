@@ -11,4 +11,5 @@ export const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'de', label: 'Deutsch' },
   { code: 'es', label: 'Español' },
+  { code: 'ja', label: '日本語' },
 ]

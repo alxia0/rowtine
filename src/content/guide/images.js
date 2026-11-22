@@ -42,7 +42,9 @@ export function fusionnerJeux(clair, sombre) {
 // `effectif` : 'light' | 'dark' — le thème RÉELLEMENT rendu, pas le réglage (« Système » doit
 // être résolu par l'appelant, cf. src/theme/useEffectiveTheme.js).
 export function guideImagesFor(lang, effectif = 'light') {
-  const clair = CLAIR[lang] ?? {}
-  if (effectif !== 'dark') return clair
-  return fusionnerJeux(clair, SOMBRE[lang] ?? {})
+  const langClair = CLAIR[lang] || CLAIR['en'] || {}
+  const langSombre = SOMBRE[lang] || SOMBRE['en'] || {}
+
+  if (effectif !== 'dark') return langClair
+  return fusionnerJeux(langClair, langSombre)
 }

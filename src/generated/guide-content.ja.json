@@ -1,0 +1,5097 @@
+{
+  "sections": [
+    {
+      "id": "section-0",
+      "title": [
+        {
+          "text": "4ステップでわかる {app}",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "{app} は単なるPDFの保管庫ではありません。パターン（編み図・文章パターン）の進行をナビゲートしてくれる",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "インタラクティブなリーダー",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "です。あなたが編むサイズの数値だけを表示し、どこまで編んだかをすべて記憶します。最初にパターンを1回読み込めば、もう元のPDFを何度も開き直す必要はありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "1. パターンを読み込む",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "「パターンライブラリ」からPDFを選択します。{app} がセクション、段、サイズ展開、略語、編み図（チャート）を自動で読み取ります。処理はすべてお使いの端末内で行われます（第4章を参照）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "2. プロジェクトを作成し、サイズを選ぶ",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "パターンのページで「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "このパターンからプロジェクトを作成",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」をタップします。リーダー画面で自分のサイズを選ぶと、「88 (96) 104」のように並んだ数字が自動的に切り替わり、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "あなたのサイズの数字だけ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "が表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "一度読み込んだパターンは、何度でも繰り返し使えます（自分用に緑のLサイズのカーディガン、妹用に赤のMサイズなど）。プロジェクトごとにサイズ・使用糸・進捗が別々に記録され、パターンの購入価格は支出管理で1回分だけカウントされます（第2章を参照）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "3. リーダーを見ながら編む",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "ここがメイン画面です。編み進めながら各ステップにチェックを入れていくと進捗が進み、次回開いたときは「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編んでいる箇所へ移動",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンで前回の続きへ一瞬で戻れます。編み図も現在の段に合わせてハイライトが移動し、本文中の下線付きの用語をタップすればその場で意味を確認できます（第3章を参照）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "4. 記録を残す・シェアする",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "タイマーで日々の制作時間を記録し、「写真」タブにパターンの画像や自分の作品写真を保存できます。「統計」タブではプロジェクトの活動データがまとまり、ワンタップでおしゃれなシェア画像（バッジ）を作成できます（第2章・第7章を参照）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "今すぐ体験してみたい場合は、すぐ下（または「設定」画面）にある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "ガイドツアーをもう一度見る",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンを押すと、サンプルの帽子パターンを使って吹き出し解説付きのツアーを体験できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-1",
+      "title": [
+        {
+          "text": "1. ホーム：あなたのダッシュボード",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "01-accueil",
+          "alt": "{app}のホーム画面：「こんにちは、Camilleさん！」、ケーブル編みのニット帽（Mサイズ）の「再開する」タイル、「進行中 1」「今週 0 h」のタイル、今日の制作記録（0:06）、そしてカウンター・計算機・針・編み目の4つのツール",
+          "caption": [
+            {
+              "text": "ホーム画面：「再開する」タイルから前回編んでいた作品へすぐに戻れます。ダッシュボードには最近の制作記録などの要約がまとまり、4つの便利ツールにも親指ひとつでアクセスできます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "アプリを開くと、以下の項目が表示されます：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "最近のプロジェクト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "再開する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンを押すと、前回止めた場所からすぐに再開できます。単に情報を編集しただけのプロジェクトではなく、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "実際に編んだ（最後に制作記録がついた）プロジェクト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "と現在の段が表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "サマリー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：進行中のプロジェクト数と、今週編み物をした合計時間が表示されます（詳細は「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "統計",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」で確認できます）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "最近の制作記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：1回でも編み物の記録をつけると、直近2回分の制作記録（プロジェクト名、「昨日」「3日前」などの日付、制作時間）が表示されます。タップすると全履歴がまとまった「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "制作記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」画面（第2章を参照）が開きます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "すべてのプロジェクト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：ステータス別（進行中、未着手、休止中、完成、中断・見送り）に整理されて並びます。すべて展開したり折りたたんだりできます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "プロジェクトカードには、使用している毛糸がすべてヴィーガンの場合に",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ヴィーガンアイコン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "が表示されます（完成後も表示されます）。毛糸が1つ以上登録されており、そのすべてに「ヴィーガン」ラベルが付いている場合のみ表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "完成",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "したプロジェクトのカードには、完了日が入力されていれば技法とサイズのすぐ横に",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "完成日",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（「棒針編み · M · 2026/07/15 完成」）が表示されます。プロジェクトを「完成」にすると自動で今日の日付が入り、「中断・見送り」のプロジェクトには表示されません。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "ツール",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（増し目・減らし目計算機、カウンター、針のサイズ計算、編み目記号・技法）へのクイックアクセス、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "+ プロジェクトを作成",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタン、そしてパターンライブラリの追加画面を直接開く「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "PDFを読み込む",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンがあります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "アプリを使い始めたばかりでサンプルしか入っていない間は、ホーム画面はシンプルに保たれ、「再開する」タイルやサマリーの代わりに「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "PDFパターンを読み込む",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」カードが表示されます。最初のプロジェクトを作るかパターンを読み込むと、通常の表示に切り替わります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "画面右上のメニューボタン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "からは、いつでも「毛糸の在庫」「パターンライブラリ」「統計」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "制作記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「支出管理」「使い方ガイド」「設定」「このアプリについて」へ移動できます。このメニューボタンはどの画面にもあるため、いちいちホーム画面に戻らなくても好きな画面へ移動できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-2",
+      "title": [
+        {
+          "text": "2. プロジェクト：アプリの中心機能",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "02-fiche-projet",
+          "alt": "未着手の「Winter Beanie」プロジェクトの「セクション」タブ：上部に 0 % と 0 / 12、横幅いっぱいの「パターンを編み進める」ボタン、その下にゴム編みのブリム、本体とケーブル模様、トップの減らし目、仕上げの各セクションが 0 % で並び、画面下部にタイマーが表示されている",
+          "caption": [
+            {
+              "text": "プロジェクトのページ：全体の進捗率、「パターンを編み進める」ボタン、そして各セクションの進捗と完了チェックボックスが並びます。画面下部には常にタイマーが浮かんでいます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "作成・編集・削除",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "プロジェクトの作成は数秒で完了します。プロジェクト名、技法（棒針編み／かぎ針編み）、紐づけるパターン（パターンを使わない場合は「フリーパターン」）を選ぶだけです。既存のパターンを選ぶと、サイズ展開、針のサイズ、ゲージ、技法が",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "自動入力",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "されるため、必要な部分だけ微調整すればOKです。 削除したプロジェクトも",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "すぐに完全消去されることはありません",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "。削除直後に「元に戻す」こともできますし、後から「設定」の「ゴミ箱」から復元することもできます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "また、有料パターンを購入した場合は",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターンの価格",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "を記録したり、無料パターンの場合は「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "無料",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」をタップして記録できます。この価格はプロジェクトではなく",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターン自体",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "に紐づきます。そのため、同じパターンで3着編んだとしても、支出管理には1回分だけ計上されます。空欄のままにすれば何も計上されません。「フリーパターン（パターンなし）」を選んだ場合は、すべてのパターンなしプロジェクトで共有されるため価格欄自体が表示されません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02b-projet-prix-patron",
+          "alt": "新規プロジェクト作成画面：「Cable Beanie」パターンの下にパターンの価格（12）と「無料」ボタン、購入日（2026/09/24）、ステータス（未着手）、「タイマーを表示」スイッチがオンになっている",
+          "caption": [
+            {
+              "text": "パターン選択欄の下：パターンの価格、「無料」ボタン、そして今日の日付が自動入力された購入日欄。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "プロジェクト詳細画面の5つのタブ",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "セクション",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：作品のパーツ（前身頃、後ろ身頃、袖など）の一覧です。それぞれの進行ステータス（未着手／着手済み／進行中／完了）が表示され、編み図が含まれる場合はプレビューも表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "詳細",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：プロジェクトの全情報（技法、サイズ、使用針、ゲージ、開始日・完成日、5段階評価、メモ）です。ステータスを「完成」にすると完成日が自動で入力され、逆に完成日を手入力するとステータスも自動で「完成」になります。 また、ここには",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "プロジェクトの総費用",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "も表示されます。取り置き（割り当て）または使用した毛糸の金額と、カッコ内にパターン代が表示されます。価格が未設定の毛糸がある場合は、無料扱いにせず「価格未設定の毛糸：○件」と正直に表示します。 紐づけたパターンにデザイナー名が登録されている場合は、「デザイン：...」もあわせて表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "写真",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：自分が撮ったプロジェクトの写真と、その下にパターンの元画像が並びます。好きな写真を",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "カバー画像",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "に設定できます（初期状態ではパターンの1枚目の画像）。写真をタップすると全画面で開き、2本指でのピンチ操作やダブルタップで拡大して編み目をじっくり確認できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "制作記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：そのプロジェクトを編んだ日時と時間の履歴です。アプリを開かずに編んだ分の時間をあとから「記録を手動で追加」することもできます。現在計測中のセッションもここにリアルタイムで表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "統計",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：このプロジェクト単体の統計データ（合計時間、制作回数、使用した玉数、制作期間、最長連続記録）と活動カレンダー、そしてすぐ下で説明する「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "シェア画像を作成",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンがあります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "タイマーを使って編む（制作記録）",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "プロジェクト内のどのタブを開いていても、またリーダー画面を開いていても、画面の下部には常に",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "タイマー",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "（カプセル型のバー）が表示されています。タイマーの端にある矢印をタップすると「タイマーを隠す」ことができ、プロジェクト画面右上の「操作（縦の3点アイコン）」メニューや編集画面の「タイマーを表示」スイッチからいつでも再表示できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "タイマーはプロジェクトごとに独立しており、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "勝手に動き出すことはありません",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "。タップすると計測が始まり、もう一度タップすると一時停止します（一時停止中はカウント済みの時間とともに「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "再開",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」と表示されます）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "「停止（終了）」ボタンはありません。途中で手を止めるときは「一時停止」するだけです。タイマーはプロジェクト内の移動（詳細画面、リーダー、編集、パターン修正）に追従し、一時停止したり、パターン修正画面に入ったり、プロジェクト画面から離れたりするたびに、それまでの経過時間が自動で保存（「記録された時間：...」と表示）されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "一度スタートすれば、画面を消灯しても、他のアプリを開いても、スマホを再起動しても、正確に時間をカウントし続けます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "リーダー画面では、手順を確認しながら1段ずつ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "チェックを入れて",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "進めます（最大8行まで見やすく表示され、開くたびに前回の続きから再開します）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "プロジェクトごとに複数の",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "自由カウンター",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（目数、段数、リピートなど）を追加でき、＋／−ボタンで押し間違いも簡単に直せます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "計測中の記録はプロジェクトの「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "制作記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」タブにリアルタイムで表示されます。最後に時間が保存されてから",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "2時間以内",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "に再開すれば同じ日の同じ記録に時間が加算され、2時間以上経ってから再開すると新しい制作記録として追加されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "すべての制作記録をまとめて見る",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "各プロジェクトの「制作記録」タブではそのプロジェクトの時間を確認できますが、すべてのプロジェクトを横断して履歴を振り返りたいときは、アプリのメニュー（統計と支出管理の間）にある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "制作記録",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」を開きます。 新しい順（降順）に、プロジェクト名・日付・制作時間が一覧表示されます。行をタップするとそのプロジェクトのページへ移動できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "この全体画面は閲覧専用です。記録の時間を修正したり削除したりする場合は、各プロジェクトの「制作記録」タブから行います。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "プロジェクトのバッジ（シェア画像）を作る",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "02c-badge-partage",
+          "alt": "「Sweater for me」のバッジ作成画面：セーターの写真、アクリル・ポリエステル・コットン、32時間07分、使用した3種類の毛糸と色名、計8玉（1,487ヤード）、進捗率64%、制作回数30回",
+          "caption": [
+            {
+              "text": "「統計」タブまたはプロジェクト右上のメニューから開けるシェア画像作成画面。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "プロジェクトの「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "統計",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」タブにある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "シェア画像を作成",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタン（または右上メニューの同項目）をタップすると、作品の写真と記録データを組み合わせたおしゃれなカード画像を作成できます。画面上部にはプレビュー、下部には設定ドロワーが表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "設定ドロワーには3つのタブがあります：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "レイアウト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：4種類のテンプレートから選べます。",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "縦長",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（上が写真、下がデータ）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "横長",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（左が写真、右がデータ）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "テキストのみ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（まだ写真がないプロジェクトに便利）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "写真2枚",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（ビフォー・アフターなどを並べるのに便利）。カバー写真がある場合は「縦長」、ない場合は「テキストのみ」が最初に選ばれます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "カラー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：カラーパレットから選べるほか、＋ボタンで自由な色を作ったり、最近バッジに使った色を選んだりできます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "表示項目",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：バッジに載せる項目をチップのタップでオン／オフできます（合計時間、開始日・完成日、使用糸と色名・玉数、進行中の進捗率、最長連続記録、制作回数、技法）。使用糸はブランド名・商品名・色名が表示されるため、同じ糸の色違いもはっきり区別できます。また、毛糸に素材（混率）が登録されていれば、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "素材名",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（「コットン · ウール」など）のチップも表示されます。「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "活動カレンダー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をオンにすると編んだ日のグリッドが表示され、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "パターン名",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をオンにするとタイトルの下に「パターン名（デザイン：デザイナー名）」が入ります。 さらに、アプリの言語設定とは別に、バッジ内の",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "表示言語",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "を切り替えたり（海外の編み物仲間やデザイナーにシェアするときに便利です！素材名も自動でその言語に翻訳されます）、80文字までの",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "自由テキスト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "を入れたりできます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "写真を変更したいときは、プレビュー上の写真をタップすると「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "調整",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンが表示され、プロジェクト内の写真や端末のギャラリーから選び直して、形（正方形・横長・縦長）や切り抜き位置を調整できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画面上部の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "シェアする",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンを押すと画像が生成され、プロジェクトの「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "写真",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」タブに自動保存された上でスマホの共有メニューが開きます。共有メニューをそのまま閉じても、生成されたバッジ画像はプロジェクトの写真一覧に残ります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-3",
+      "title": [
+        {
+          "text": "3. あなたに合わせて変化するパターン：インタラクティブ・リーダー",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "03a-lecteur-haut",
+          "alt": "リーダー画面の「Cable Beanie」：「編んでいる箇所へ移動」、ポンポン付きケーブル帽の写真、「1. 編むサイズを選択」で M 54-56 が選択されており、下部にタイマーがある",
+          "caption": [
+            {
+              "text": "リーダー画面の上部：タップで拡大できるカバー画像と、パターン全体に適用されるサイズ選択ボタン。そのすぐ下に「早見シート」とセクション目次が続きます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03b-lecteur-diagramme",
+          "alt": "編み図の段カウンターが 1 / 24 になっており、リピートカウンター追加ボタン、8目め・1目め（編み始め）・24段目（終わり）のマーカー、そしてケーブル模様のグリッドが表示されている",
+          "caption": [
+            {
+              "text": "リーダー画面の下部：専用の段カウンターと読む向きのガイドを使って、編み図を1段ずつ追跡できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "ここが {app} の最大の目玉機能です。パターンを読み込む（または最初から入っている3つのサンプルパターンを開く）と、以下の機能が使えるようになります：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "サイズ選択",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：最初に自分の編むサイズを1回選ぶだけで、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "パターン内のすべての数値（目数、段数、寸法）が自動的にフィルタリング",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "されます。「104 (108) 112…」のような数字の羅列から自分のサイズを毎回探し出す必要がなくなり、読み間違いを防げます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "ステップごとの進捗管理",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：各カードの左側3分の1のエリア（またはチェックボックス）をタップするだけで完了チェックを入れられます。全体およびセクションごとの進捗バーが進み、繰り返し用のカウンター（「− 3/12 +」）も内蔵されています（自分のサイズでは繰り返しが0回になるステップは自動的に非表示になります）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "同じパーツを複数編むセクション（靴下や袖など）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：靴下のペア、2本の袖、あみぐるみの耳や手足など、同じものを複数編む場合にパターンを2回書く必要はありません。パターン編集画面で「同じパーツの数」を設定すると、パーツごとに進捗が記録され、セクションには合計の進捗が表示されます。 靴下以外のパーツでは「1つ目を最後まで編んだらボタンを押して2つ目へ進む」方式で進行します。 ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "靴下",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "の場合は、リーダー画面上部またはプロジェクト詳細の「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "編み進め方",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」から、プロジェクトごとに編み方を選べます：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "1つずつ順番に編む",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（片方の靴下をすべて編み終えて最後の段にチェックを入れると、自動的に2つ目の靴下の最初のセクションへ移動します）または「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "2つ同時に編む（同時編み）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（各段に靴下1と靴下2の2つのチェックボックスが表示され、片方が何段遅れているかも表示されます）。そのため、同じ靴下のパターンを使って、あるプロジェクトでは順番に、別のプロジェクトでは同時編みで進めることができます（※途中で編み進め方を変更すると靴下の進捗はゼロにリセットされます）。袖や靴下、耳以外のパーツを繰り返したい場合は、セクションの種類を「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "繰り返し可能なセクション",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」にして個数を設定してください。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "連動する編み図（インタラクティブ・チャート）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：元のPDFから抽出された編み図の上で、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "現在編んでいる段が帯状にハイライト表示",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "され、編み終わった段はグレーアウトし、「52段中 X段目」のカウンターと連動します。ページ内から直接操作できるほか、全画面に拡大して見ることもでき、同じ編み図を参照する複数セクション間で進捗が共有されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "早見シート",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：本文中の下線付きの略語をタップすると、画面を移動せずにその場で意味がポップアップ表示されます。また「早見シート」パネルを開けば、パターン固有の技法解説（動画リンクがある場合はそのリンクも）、使用糸・道具・ゲージ、サイズ表、略語一覧、ヒント・注意点をいつでも確認できます。さらに「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "編み方メモ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」タイルには、自分で選んだ編み方の手順カードを入れておくことができます（詳細はすぐ下で解説）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "目次ドット",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：リーダー画面の上部には、各セクションを表すドット（点）が並んでいます。タップするとそのセクションへ一気にジャンプでき、現在位置もひと目でわかります（セクションが1つだけのパターンでは表示されません）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "カバー画像と工程写真",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：リーダーの一番上にはPDFの表紙画像が表示され、タップで全画面拡大できます。工程写真も該当するステップのすぐ下に大きく表示され（連続する工程写真は2列で並びます）、タップして拡大確認できます。手動作成したパターンの場合は、星マークを付けた写真がカバーになります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "パターンライブラリから「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "プレビュー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」として読むことも、プロジェクトから実際にチェックを入れながら「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "編み進める",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」こともできます。プレビュー画面ではチェックは入れられませんが、各行が本番でどう動くか（タップでチェック／タップでカウント／説明テキスト）を示す小さなアイコンが表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "編み方・技法メモ",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "編んでいる途中で特定の編み方を忘れてしまったり、作り目の手順を確認したくなったりしたことはありませんか？「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み方・技法メモ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」には、棒針編み・かぎ針編みの代表的な技法カードが約40種類収録されています。それぞれの名称、略語、番号付きの手順、コツが書かれており、すべてオフラインで読めます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03j-memo-points",
+          "alt": "早見シートの「編み方メモ」タブ：上部に「編み方を編集」ボタン、その下に左上2目一度（k2tog）のカードが5つのステップとヒント付きで表示されている",
+          "caption": [
+            {
+              "text": "編み方を選択した後の「編み方メモ」タブ：上部の「編み方を編集」ボタンと、選択した編み方の手順カード。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "編み方を選ぶには：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " リーダー画面の「早見シート」を開き、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み方メモ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」タイルをタップします。まだ何も選んでいない場合は「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み方を選択",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」をタップすると選択画面が開きます：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "一番上の「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "このパターンに関連する編み方",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」には、パターンの略語一覧からアプリが自動認識した編み方が提案されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "編み方を検索",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」欄に名前や略語を入力して探すこともできます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "かぎ針編み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "棒針編み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」タブには、カテゴリ別（基本の編み目、増し目・減らし目、作り目など）にすべてのカードが並んでいます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "手元に置いておきたい編み方にチェックを入れると即座に保存され、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "完了",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」を押すとメモタブに選んだカードが並びます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03k-memo-selecteur",
+          "alt": "編み方メモの選択画面（棒針編みタブ）：検索欄、「このパターンに関連する編み方」で左上2目一度にチェックが入っており、その下に作り目、伏せ止め、基本の編み目、下部に「完了」ボタンがある",
+          "caption": [
+            {
+              "text": "選択画面：パターン内の略語から自動認識された編み方が一番上に提案され、その下にカテゴリ別の全カードが並びます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "パターンごとに保存：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 選んだ編み方のリストはプロジェクトではなく「パターン」に保存されます。そのため、同じパターンで別のプロジェクトを編むときもそのまま使え、バックアップにも含まれます。あとから追加・削除したいときはタブ上部の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み方を編集",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」からいつでも変更できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "また、プロジェクトを開いていないときでも、ホーム画面のツールにある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み目記号・技法",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」からすべてのカードを辞書のように閲覧できます（第6章を参照）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "編み図の全画面表示と「位置合わせ（キャリブレーション）」のやり方",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "ここはアプリ内で少し専門的な操作になるため、詳しく解説します。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "編み図をタップ（または拡大ボタンをタップ）すると全画面で開きます。2本指でのピンチやダブルタップ、＋／−ボタンで自由に拡大・移動でき、画面下部で段数を進められます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "なぜ「位置合わせ」が必要なの？",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 元のPDFから切り出された編み図の画像には、マス目（グリッド）の周りに余白や段番号などの文字が含まれていることがよくあります。位置合わせをしないと、アプリは「画像のどこからどこまでが本当のマス目なのか」がわからず、現在の段を示すハイライトの帯がズレてしまいます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03c-diagramme-calage",
+          "alt": "編み図の位置合わせ画面：上部バーに「編み図 · 8目 × 24段」と位置合わせ・拡大・閉じるアイコン、画像上に「グリッドの上端」「グリッドの下端」の2本のライン、下部に「リセット」「キャンセル」「保存」ボタン",
+          "caption": [
+            {
+              "text": "位置合わせモード：マス目の上下端にドラッグして合わせる2本の矢印ラインと、下部にあるリセット／キャンセル／保存ボタン。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "初めて編み図を開くときの「位置合わせ」の4ステップ：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "編み図を全画面で開き、上部バーにある",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "位置合わせアイコン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（2本の横線の間に縦矢印があるアイコン。タイトルのすぐ右、拡大ボタンの左にあります）をタップします。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "画像の上に「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "グリッドの上端",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "グリッドの下端",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」というラベルが付いた2本のラインが現れます。それぞれをドラッグして、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "マス目の枠線にぴったり重なるように",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "合わせます。「グリッドの下端」を",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "1段目の底辺",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "に、「グリッドの上端」を",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "最終段の上辺",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "に合わせます（※周囲の文字や画像の端ではなく、マス目の端に合わせてください）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "動かしている間、現在の段のハイライト帯も連動して動くので、マス目にぴったり合っているか確認できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "保存",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をタップして完了です！（やり直したいときは「リセット」を押せば初期状態に戻ります）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "一度位置合わせを保存すれば、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "そのプロジェクト内",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "では最後まで正確に1段ずつハイライトが移動します（※位置合わせのデータはプロジェクトの進捗と一緒に保存されるため、同じパターンで2つ目のプロジェクトを作ったときは、新しいプロジェクト側でもう一度だけ数秒で合わせ直してください）。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "円形・四角形・六角形（グラニースクエアなど）の編み図の場合は？",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 中心から外側へ広がるモチーフの編み図は、上下2本の直線では合わせられないため、同じ位置合わせボタンを押すと",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "専用の位置合わせウィザード",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "が開きます（パターンの修正画面で編み図の種類を円形・四角形・六角形に設定しておく必要があります）。 画面の案内に従って、まず「1段目の内側の枠」、次に「最終段の外周の枠」の2つを順番に合わせます。それぞれの枠の形を「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "円形",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "四角形",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "六角形",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」（六角形の場合は「上が平らな辺」か「上が頂点」かも選択）から選び、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "移動",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」と「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "サイズ調整",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンでルーペを見ながら合わせます。内側の枠と外側の枠で形が変わる場合（中心は円で途中から四角になるモチーフなど）は、「何段目から形が切り替わるか」を指定するステップが挟まります。最後に微調整して「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "確定",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」を押せば完了です！ 位置合わせがまだ行われていない中心から広がる編み図には、リーダー画面上に「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "モチーフの中心と外枠を設定します",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」というボタンが表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03h-calage-granny-rond",
+          "alt": "円形に設定されたグラニーモチーフの位置合わせ画面：中央の花モチーフを囲む丸いルーペ、「円形」「四角形」「六角形」ボタン、移動・サイズ調整ボタン、下部にリセット・キャンセル・確定ボタン",
+          "caption": [
+            {
+              "text": "枠を「円形」に設定した状態：選んだ形に合わせてガイド枠が変化します。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "保存すると、中心から外側へ向かって編み終わった周が細い線で囲まれ、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "現在編んでいる周が太いリングでくっきりハイライト",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "されます！",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03i-granny-cale",
+          "alt": "位置合わせ完了後のグラニー編み図：編み終わった内側の2周が細いリングで囲まれ、現在編んでいる3周目が太いリングで強調されている",
+          "caption": [
+            {
+              "text": "位置合わせ後の表示：何周目を編んでいるかが編み図の上でひと目でわかります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "横に長い編み図で「今何目めを編んでいるか」を見失わない機能（進行バー）：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03d-diagramme-rideau",
+          "alt": "現在の段が枠で囲まれ、段の途中に丸い左右矢印のハンドルがあり、編み終わった右側が網掛けになっている画面",
+          "caption": [
+            {
+              "text": "現在の段の上に表示される丸いハンドル：ドラッグすると、編み終わった部分に網掛け（シェード）がかかります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "目数が多い大きな編み図を拡大して見ていると、「今この段の何目めあたりを編んでいるんだっけ？」と迷子になりがちです。全画面表示では、現在編んでいる段の上にだけ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "小さな丸いハンドル（進行バー）",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "が表示されます。 編み進めながらこの丸いハンドルを左右にドラッグすると、通り過ぎた後ろ側のマス目に網掛け（シェード）がかかり、「ここまで編んだ」という目印になります！",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "段数カウンターの横にある反転ボタンを押せば、網掛けがかかる向き（右側から／左側から）を切り替えられます（往復編みで次の段を逆向きに読むときに便利です）。次の段に進むとハンドルは自動で端に戻り、アプリを閉じても位置は記憶されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "編みながらその場でパターンの文章を修正する",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "パターンを見ながら編んでいる最中に、「自動読み取りで文が変なところで切れている」「わかりやすい表現に書き換えたい」と気づくことがあります。そんなとき、わざわざプロジェクトを閉じてライブラリに戻る必要はありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "直したい",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "ステップのカードをタップ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "してください。カードの上に半透明のカバーがかかり、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "修正",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」と「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "閉じる",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」の2つのボタンが現れます。「修正」をタップすると、パターン修正画面が開き、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "まさにその行にカーソルが合った状態",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "で編集を始められます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "※チェックボックス付きのステップでは、カードの",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "中央または右側",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "をタップしてください（左端の3分の1のエリアは、編みながら押しやすいようにどこをタップしてもチェックのオン／オフになる仕様だからです）。注記やリピート、編み図、セクション見出しは、どこをタップしても「修正」ボタンが出ます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "誤ってタップしてしまっても、3秒経つか他の場所をタップすればカバーは自動で消えるので、編み物の邪魔になりません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "修正中の時間はタイマーにカウントされません：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " タイマーを動かしながら編んでいる途中で「修正」画面に入った場合、タイマーは",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "自動で一時停止",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "し、修正を終えてリーダーに戻ると",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "自動で再開",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "します。パターンの手直しにかかった時間が編み物の統計に混ざることはありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "タブレットでの横画面表示",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "タブレットを横向きに持つと、広い画面を活かして「リーダー画面」と「統計画面」がより見やすいレイアウトに自動変化します。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "2画面（2ペイン）表示になるリーダー：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03e-tablette-lecteur",
+          "alt": "タブレット横画面での2ペイン表示：左側に編み方の文章手順、右側に編み図が常時並んで表示されている",
+          "caption": [
+            {
+              "text": "タブレットの横画面：左側に文章手順、右側に編み図が常時表示され、上下にスクロールして行き来する必要がありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "タブレットを横向きにすると、リーダーは自動的に",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "左右2列",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "に分かれ、左側に手順の文章、右側に編み図が固定表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "パターン内に複数の編み図がある場合は、見たい編み図の「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "画面の右側に固定表示",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンを押せば右側のパネルを切り替えられます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "1列で広く読みたいときは「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "本文内の表示に戻す",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンを押せば右側パネルを閉じることができます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "広々と見渡せる統計画面：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "03f-tablette-stats",
+          "alt": "タブレット横画面での統計：3月から9月までのカレンダーグリッドが一覧表示され、その下に統計タイルが2列で並んでいる",
+          "caption": [
+            {
+              "text": "タブレット横画面での統計（半年表示）：スマホでは横スクロールが必要な半年分のカレンダーがひと目で収まります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "統計",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」画面（第7章）も横幅を活かしてカレンダーグリッドが大きく広がり、「半年」や「1年」表示でもスクロールせずに多くの週をひと目で見渡せます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-4",
+      "title": [
+        {
+          "text": "4. パターンライブラリ",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "04-bibliotheque",
+          "alt": "「すべて (3)」「ウェア (0)」「ファッション小物 (3)」のチップ、「+ パターンを追加」ボタン、その下に Granny Bag、Cloud Scarf、Cable Beanie の3つのサンプルパターン",
+          "caption": [
+            {
+              "text": "初回起動時から入っている3つのサンプルパターンが並んだパターンライブラリ。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04b-fiche-patron",
+          "alt": "Cable Beanie の詳細ページ：「棒針編み · ファッション小物 · S, M, L」、「2026/9/24 に $12 で購入」、帽子の写真、右上の編集アイコン、下部に「このパターンからプロジェクトを作成」と「パターンをプレビュー」の2つのボタン",
+          "caption": [
+            {
+              "text": "パターンの詳細ページ：「このパターンからプロジェクトを作成」と「パターンをプレビュー」のシンプルな構成です。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "PDFパターンを読み込む",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：パターンのPDFファイルを選ぶと、インターネット接続なしで端末内で解析が行われ、サイズ展開・段・セクションが",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "自動的に組み立て",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "られてライブラリに保存されます。 ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "【重要】読み込んだあとの確認・手直しを前提にしてください：",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": " PDFのレイアウトはデザイナーによって千差万別なため、1回目の自動読み取りで100%完璧になることはほぼありません。読み込みが終わると検出されたセクション数・ステップ数・サイズ・編み図のサマリーが表示されるので、まずは「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "パターンをプレビュー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンを押して、編み始める前に全体を通読・確認してください。本来チェックを入れるべき段が「説明テキスト」になっていたり、逆に注意書きが「チェック可能な段」になっていたりする箇所がプレビューのアイコンでひと目でわかるので、エディタでサッと手直しできます。この最初の手直しをしておくことで、編んでいる最中に抜群に使いやすいガイドになります。 ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "複数のパターンが1つのPDFに入っている場合",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（編み物本やパターン集など）：1度に1つのパターンずつ読み込みます。読み込み画面で「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "PDFに複数のパターンが含まれていますか？ ページを選択する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をタップし、読み込みたいパターンのページ（使用糸や略語一覧などの共通ページも含む）にチェックを入れて読み込んでください。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "Rowtineファイルを読み込む",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「+ パターンを追加」から、あらかじめ `.rowtine` 形式で作成されたパターンファイル（テキストと画像がセットになったもの）をそのまま取り込めます。パソコンの大きな画面で公式Webサイトのコンバーター（`rowtine.app/en/convertisseur`）を使ってPDFを変換・整形し、スマホに転送して読み込むのに便利です。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "手動でパターンを作成する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：紙の本や雑誌のパターン、自分のオリジナルレシピなどを登録したいときは、「+ パターンを追加」から「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "手動で作成する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」を選びます。基本情報と写真を登録したら、パターンのページで「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "手順を入力する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をタップします。「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "テキストを編集",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をオンにして1行につき1ステップずつ入力し、ツールバーで各行の役割（ステップ、カウンター、セクション、注記、基本情報）を指定していくだけで、PDFから読み込んだパターンとまったく同じようにチェックボックスや進捗バー、編み図追跡が使えるようになります！",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "デザイナー名の設定",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：自動読み取りでデザイナー名が検出されなかった場合は、パターンページの「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "デザイナー名を追加",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」からすぐに入力できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "カテゴリ絞り込み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：ライブラリ上部のカテゴリボタンには、各カテゴリに入っている",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "パターン数",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "が表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "パターンの修正",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：全画面のエディタで、テキスト・サイズ・画像をいつでも自由に手直しできます（すぐ下で詳しく解説します）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "パターンの価格",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：プロジェクトを作成する前でも、パターンページで価格（「2026/8/7 に ¥1,200 で購入」や「無料」など）を記録でき、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "支出管理",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」に反映されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "3つのサンプルパターン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：最初から3つのパターンが入っているため、手元にPDFがなくてもすぐに全機能を試せます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "パターン修正エディタの使い方（詳細）",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "編み図の位置合わせと並んで、アプリ内で最も高機能な編集画面です。仕組みがわかればとても簡単です！",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04c-correction-editeur",
+          "alt": "「パターンの修正」画面：ゲージブロックに「20 sts × 26 rounds...」、その下に使用糸ブロック、使用針の見出し、最下部にキャンセル・保存バーがあり、ツールバーの「基本情報…」と「ゲージ」がハイライトされている",
+          "caption": [
+            {
+              "text": "基本情報の行にカーソルを置いた状態：ツールバーの「基本情報…」がハイライトされ、その横にサブカテゴリの「ゲージ」が表示されています。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画面上部の「パターンのサイズ展開」欄：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 修正画面の一番上にある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターンのサイズ展開",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」には、パターンが対応しているサイズをカンマ区切り（例：`S, M, L`）で入力します。ここの個数がサイズ表の列数になります。 ※もしここでサイズを新しく追加した場合、アプリが勝手に目数を創作することはないため、本文中のサイズ別数値には `10 (12) 14 ()` のように空のカッコが追加されます。空カッコの中に正しい数字を入力してください。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "基本のしくみ：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " パターンは1行ずつのテキストで構成されており、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "すべての行に「カテゴリ（役割）」",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "が設定されています。「編むときにチェックを入れる行なのか」「セクションの見出しなのか」「単なる補足メモなのか」をアプリに教える仕組みです。自動読み込み時にアプリが自動で割り振りますが、間違っている行があればここで正しいカテゴリを選び直せます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "指定できるカテゴリ一覧：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "terms",
+          "header": [
+            [
+              {
+                "text": "カテゴリ",
+                "bold": false,
+                "italic": false
+              }
+            ],
+            [
+              {
+                "text": "プロジェクト内での表示・動作",
+                "bold": false,
+                "italic": false
+              }
+            ]
+          ],
+          "rows": [
+            [
+              [
+                {
+                  "text": "ステップ（段）",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "編みながらチェックを入れるチェックボックス付きの行になります。進捗管理の主役です。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "カウンター",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "カウンター付きの繰り返しステップになります。",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "繰り返し（リピート）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（その行をN回繰り返す）と、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "間隔（X段ごと）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（X段ごとに計N回行う）の2種類から選べます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "注記・メモ",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "チェックボックスが付かない、補足説明のテキストになります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "セクション",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "パーツの見出し（身頃、袖、襟など）になり、種類に応じたアイコンが自動で付きます。「セクション」タブの区切りになります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "基本情報",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "進捗管理の対象ではなく、リーダーの「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "早見シート",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」にまとめられる情報です。8つのサブカテゴリがあります：",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "使用糸",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（ブランド、素材、糸長、玉数）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "使用針",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（号数・ミリ数）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ゲージ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（「10 × 10 cm = 22目」など）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "その他の道具・資材",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（ボタン、マーカーなど）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ヒント・コツ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "略語一覧",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（1行に1つ）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "仕上がり寸法",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（完成サイズの寸法表）、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "技法解説",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "通常テキスト",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "特別な役割を持たない通常の段落テキスト（冒頭の挨拶や最後のメッセージなど）です。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ],
+            [
+              [
+                {
+                  "text": "画像",
+                  "bold": true,
+                  "italic": false
+                }
+              ],
+              [
+                {
+                  "text": "写真または編み図です。",
+                  "bold": false,
+                  "italic": false
+                }
+              ]
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画面内のヘルプ：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 修正画面の上部にある「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターンの修正方法",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」をタップすると、この表と同じ説明がいつでもその場で展開して確認できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04d-correction-aide",
+          "alt": "展開されたヘルプ画面：「編み図」と「パターン写真」のバーについての説明と、カテゴリごとの役割の表が表示されている",
+          "caption": [
+            {
+              "text": "「パターンの修正方法」を展開したところ：画面を離れずにいつでも役割を確認できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "行のカテゴリを変更する手順：",
+              "bold": true,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "変更したい行にカーソルを置きます（複数行をまとめて選択してもOK）。エディタすぐ上のツールバーで、現在その行に設定されているカテゴリがハイライト表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ステップ（段）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "注記・メモ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "通常テキスト",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」の3つはボタン1タップで即座に切り替わります。「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "カウンター…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "セクション…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "基本情報…",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」の3つはタップするとサブメニューが開くので、当てはまるものを選びます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "選ぶとすぐに行の色や見た目が変わります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "散らばった情報を「早見シート」へ整理する：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " ツールバーで「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "基本情報…",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」からサブカテゴリ（略語一覧、使用糸など）を選ぶと、選択したテキストがそのブロックへ",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "移動",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "し、リーダー画面の「早見シート」できれいに見られるようになります。同じサブカテゴリへ複数回に分けて送ると、既存のブロックに",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "追記",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "されるため、複数ページに散らばっていた略語なども簡単に1箇所にまとめられます。 さらに、`st - stitch(es)` のような行は自動的に「略語」と「意味」に分割され、`胸囲 90 (100) 110` のような行は自動的にサイズ表の各列に割り振られます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "2つの表示モード（リッチ表示／テキスト編集）：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 初期状態では、画像がサムネイルで表示され、カウンターやチェックボックスが実際の見た目に近い「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "リッチ表示",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」になっています。文字の誤字を直したり、途中で切れた文をつなげたりしたいときは「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "テキストを編集",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンを押すとキーボードが開き、直接文字を編集できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "カット＆ペースト不要の行移動：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " ツールバーの上下矢印ボタンをタップすると、カーソルがある行を1行ずつ上や下へ移動できます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画像を「連動する編み図」にする（または通常の写真に戻す）：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 本文中の画像をタップするか、画面下部の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み図 (n)",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」バーを開きます。 まだ編み図になっていない画像には「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "編み図として段を追跡する",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンが表示され、タップすると編み図の形状（",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "通常の段（下から上）",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "中心から四角く広がるモチーフ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "中心から丸く広がるモチーフ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "中心から六角形に広がるモチーフ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "フリーパス",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "）を選べます。 すでに編み図になっている画像には「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "連動する編み図",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」というタグが表示され、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "種類を変更",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」したり、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "通常の画像として扱う",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」で単なる写真に戻したりできます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画像を追加する3つの方法：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 「パターン写真」の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "画像を追加",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンからは、①",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "カメラまたはギャラリー",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、②",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "ファイルから選択",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、③",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターンのPDFから抽出",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "（PDFの好きなページを選んで必要な部分だけ切り抜けます！）の3つの方法で画像を追加できます。追加した画像は、置きたいステップの行にカーソルを置いてから「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "本文中に挿入",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」で好きな場所に入れられます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "04e-correction-diagrammes",
+          "alt": "展開された「編み図 (1)」バー：Body and cable の編み図が「連動する編み図」になっており、「種類を変更」「通常の画像として扱う」「パターン写真へ移動」ボタンが並んでいる",
+          "caption": [
+            {
+              "text": "「編み図 (1)」バーを展開したところ：編み図の種類の変更や写真への切り替えがここで行えます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "保存：",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": " 画面下部の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "保存",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」をタップすると反映されます。保存せずに戻ろうとすると確認メッセージが出るため、うっかり消えてしまう心配もありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-5",
+      "title": [
+        {
+          "text": "5. 毛糸の在庫（スタッシュ）",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "05-stock",
+          "alt": "毛糸の在庫画面：上部に 10玉、1,932ヤード、31.25ポンド、$31（購入額）、絞り込み・並び替え・毛糸を追加・Ravelryから読み込むボタン、その下に Drops · Moutarde と Hobbii · Sauge のカード",
+          "caption": [
+            {
+              "text": "毛糸の在庫画面：一番上に在庫全体の合計（玉数、総糸長、総重量、購入総額）が表示され、その下に各毛糸のカードが並びます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "毛糸を追加",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：ブランド名、太さ（「毛糸の太さガイド」付き）、素材・混率（リストにない素材は「その他」から自由に入力可能）、カラー（パレットまたは自由なカスタムカラー）、玉数、1玉あたりの価格・糸長・重さ、購入日、ロット番号を登録できます。 ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "保存すると同時に、購入履歴（支出）にも自動で記録され",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "支出管理",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」の合計額に反映されます（プレゼントや頂き物の場合は購入として計上しないことも選べます）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "保管場所とメモ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "保管場所",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（例：「棚の2段目、青いカゴ」）と「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "メモ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」を自由に記録できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "スワッチ（試し編み）の記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：その毛糸で編んだゲージを「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "スワッチ（試し編み）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ブロックに複数記録しておけます。編み方（",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "往復編み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "／",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "輪編み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "）、使用した針のミリ数、10 cmあたりの",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "目数",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "と",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "段数",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "を保存しておけば、次に同じ毛糸を使うときにすぐ自分のゲージがわかります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "段染めや手染め糸の記録",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "染めのタイプ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（単色、グラデーション、段染め、スペックル、手染め）と「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "色合いのメモ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（「青・緑・黄色のベースに黒のスペックル」など）で、単色パレットでは表せない複雑な色味もしっかり記録・検索できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "特徴・認証ラベル",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：2つのグループ（計8種類）のラベルをチェックできます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "配慮・取り組み",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：ヴィーガン · リサイクル素材 · エシカル · ノンミュールジング",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "認証マーク",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：有害物質不使用 (OEKO-TEX) · オーガニック繊維 (GOTS) · 動物福祉基準 (RWS) · リサイクル認証 (GRS)",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "繊維の由来は自動判定",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：入力した素材から「動物性繊維」「植物性繊維」「化学繊維」「動物性・植物性の混紡」が自動で表示されます。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "ヴィーガン矛盾チェック",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：ウールなどの動物性繊維が含まれているのに「ヴィーガン」にチェックを入れると、保存を妨げることなく注意メッセージで知らせてくれます。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "05b-fiche-laine",
+          "alt": "Drops · Moutarde の詳細画面：165ヤード、4玉、$3.20/玉、コットン100%（植物性繊維）、ヴィーガンとGOTSのタグ、未使用（在庫）ステータス、写真追加ボタン",
+          "caption": [
+            {
+              "text": "毛糸の詳細ページ：素材構成や自動判定された「植物性繊維」表示、特徴ラベルがひと目でわかります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "上部のサマリー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：手持ちの総玉数、総糸長、総重量（数値が大きくなると自動で km や kg 表記に切り替わります）、在庫の合計金額が表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "カードの表示",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：各カードには玉数と、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "その毛糸全体の合計糸長・合計重量",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（例：165 m × 4玉なら 660 m）が表示されます。1玉あたりの長さは詳細ページで確認できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "検索・絞り込み・並び替え",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：キーワード検索のほか、7つの条件（",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ブランド",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ラベル",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "太さ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "1玉の重さ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "カラー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "素材・混率",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "使用状況",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "）を組み合わせて絞り込めます。並び替えは「ブランド順」「太さ順」「購入日順」に対応しています。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "編集・複製・削除",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：毛糸ページの右上にある「操作（縦の3点アイコン）」から行えます。「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "複製",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」を使うと、同じ毛糸の色違いを登録するときに色名とロット番号だけ変えればいいのでとても便利です！",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "取り置き（割り当て）管理",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：各毛糸がどのくらいプロジェクトに「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "取り置き中",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」で、どのくらい「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "未使用（在庫）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」なのかがひと目でわかります。取り置きされている玉数より少ない数には減らせないよう安全装置がついています。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "使いかけの半端糸（小数）にも対応",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：玉数の入力欄はすべて",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "小数（0.25玉や2.5玉など、小数第2位まで）",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "に対応しています。プロジェクトを「完成」にしたときに開く「実際に何玉使いましたか？」の画面でも小数で入力でき、余った分は自動的に在庫へ戻ります！",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "購入・入手履歴",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：毛糸の編集画面にある「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "購入・入手履歴",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ブロックでは、買い足した履歴やプレゼントで貰った履歴を1件ずつ管理できます（プレゼントは支出額には加算されません）。購入先のお店も記録でき、在庫の玉数を増やして保存すると「購入履歴にも追加しますか？」と自動で尋ねてくれます。もし在庫数と購入履歴の合計が合わなくなった場合は、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "調整する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」ボタンから簡単に整合性を合わせられます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "Ravelryから毛糸の在庫を読み込む",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "すでに Ravelry で毛糸の在庫（Stash）を管理している場合は、最初から手入力し直す必要はありません。在庫画面上部の「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "Ravelryから読み込む",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」ボタンから一括で取り込めます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "Ravelry で「my notebook」を開き、「Stash」タブを開きます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "リスト右上の「Export」をクリックして、`.xls` ファイルをダウンロードします。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "{app} に戻り、そのファイルを選択して「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ファイルを解析する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をタップします。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "登録を実行する前に、読み取った行数、新規作成される毛糸の数、すでに登録済みのためスキップされる数（2回読み込んでも重複しません）、Ravelry上で「使い切り（Used Up）」や「譲渡・売却済み」になっているため除外される数がプレビュー表示されます。確認して「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "○件の毛糸を読み込む",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」を押すまでデータは書き込まれません。 ブランド、商品名、色、太さ、糸長、重さ、玉数、保管場所、メモ、購入価格、購入日、購入店がそのまま取り込まれます（写真は後から手動で追加してください）。この処理もすべて端末内で行われ、アプリが Ravelry に直接通信することはありません。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "支出管理画面",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "05c-depenses",
+          "alt": "支出管理画面：上部に合計 $43（毛糸 $30.50、パターン $12）、年別・月別の内訳と、毛糸・パターンそれぞれの購入リスト",
+          "caption": [
+            {
+              "text": "上部の「年」と「種類」フィルター、毛糸とパターンの内訳、そして月別の詳細リスト。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "メニューの「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "支出管理",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」からは、これまでに編み物に使ったお金（",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "毛糸",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "と",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "パターン",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "の両方）を振り返ることができます：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "支出の総合計",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：これまでに購入した総額です（「毛糸の在庫」画面にある「現在残っている在庫の価値」とは異なり、毛糸を編んで消費しても支出総額は減りません）。パターンの価格も登録している場合は、「毛糸代」と「パターン代」の内訳も表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "年別・種類別の絞り込み",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：上部のメニューで特定の「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "年",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（または全期間）や「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "種類",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（すべて／毛糸／パターン）に絞り込んで集計を見ることができます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "年・月ごとのタイムライン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：どの月にいくら使ったかがカレンダー順でひと目でわかります。無料パターンには「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "無料",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」タグが付きます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "毛糸のページ自体をゴミ箱から完全削除したあとでも、過去の購入記録は「削除された毛糸」として支出管理にちゃんと残ります（パターンの場合は、パターン自体を削除するとその支出記録も消えます）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-6",
+      "title": [
+        {
+          "text": "6. 単体で使える便利ツール",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "06a-compteurs",
+          "alt": "カウンター画面：カウンター名入力欄、「増し目・減らし目を記録」と「繰り返し（リピート）を記録」の選択肢",
+          "caption": [
+            {
+              "text": "プロジェクトを作らなくてもすぐ使える自由カウンター：通常のカウントのほか、増減目やブロックの繰り返し追跡にも対応。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "06b-calculateur",
+          "alt": "増し目・減らし目計算機：「増し目」「往復編み」「分散の計算」が選ばれ、現在の目数・目標の目数・1回あたりの増し目数・何段かけて増減するかの入力欄",
+          "caption": [
+            {
+              "text": "増し目・減らし目計算機：指定した段数の中で均等に増減目を分散させたり、逆に「○段ごとに増減すると何段必要か」を計算したりできます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "06c-aiguilles",
+          "alt": "棒針のサイズ目安を計算：インチ単位でラベルのゲージと目標ゲージが入力され、「太めの針を試してみてください：4.5 mm」と結果が表示されている",
+          "caption": [
+            {
+              "text": "針のサイズ計算：毛糸のラベルのゲージとパターンの指定ゲージを入れると、何ミリの針から試し編みを始めればいいかを提案してくれます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "ホーム画面からいつでも呼び出せる、プロジェクトに紐づかない独立した4つのツールです：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "増し目・減らし目計算機",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：2通りの計算ができます。①「○段の間で均等に目数を増減したいとき、何段ごとに増減すればいいか（分散の計算）」、②「○段ごとに増減していくと、目標の目数になるまでに何段必要か（必要な段数の計算）」。袖のように両端で1目ずつ（1回につき2目）増減する場合や、ラグランのように1回につき8目増減する場合にも対応しています。割り切れない場合は、勝手に四捨五入せず前後の選択肢を提示してくれます。往復編み（段）と輪編み（周）の両方に対応しています。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "カウンター",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：ちょっとした試し編みや小物など、プロジェクトを作らずに段数や増減目、リピートを数えたいときにすぐ使えるカウンターです。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "針のサイズ計算",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：手持ちの毛糸のラベルに書かれているゲージ（推奨針サイズと10×10 cmの目数）と、編みたいパターンの指定ゲージを入力すると、「針のサイズを1つ上げるべきか、下げるべきか、そのままでいいか」の目安を計算してくれます。差が大きすぎてその毛糸ではパターンに合わない場合も教えてくれます（※あくまで最初の目安なので、本番前には必ずスワッチを編んで確認してくださいね）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "編み目記号・技法",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：約40種類の棒針編み・かぎ針編みの基本技法や作り目・伏せ止めの手順カードをいつでも検索・閲覧できます。また、「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "US / UK表記",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」タブでは、英語のかぎ針編み・棒針編みパターンでアメリカ式（US）とイギリス式（UK）で呼び方が変わる用語（",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "single crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " と ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "double crochet",
+                  "bold": false,
+                  "italic": true
+                },
+                {
+                  "text": " の違いなど）の対照表も確認できます！",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-7",
+      "title": [
+        {
+          "text": "7. 統計",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "07-statistiques",
+          "alt": "統計画面：「3ヶ月」タブが選ばれ、期間内の合計 72:40:06、カレンダーグリッド、合計時間や編んだ日数などの9つの数値タイルが並んでいる",
+          "caption": [
+            {
+              "text": "上部の期間セレクター（1ヶ月・3ヶ月・半年・1年）を切り替えると、画面全体の集計期間が切り替わります。初期表示の「カレンダー」タブでは、ヒートマップと9つの統計タイルが表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画面上部のセレクターで",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "集計期間",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "（",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "1ヶ月",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "3ヶ月",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "半年",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "、",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "1年",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "）を選ぶと、下の合計時間から9つの統計タイルまですべてがその期間のデータに切り替わります。 棒針編みとかぎ針編みの両方のプロジェクトがある場合は、そのすぐ下に「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "すべて / 棒針編み / かぎ針編み",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」の絞り込みボタンも表示されます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "画面の下半分は",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "2つのタブ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "（タップで切り替え）に分かれています：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "カレンダー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（初期表示）：日々の活動量を表すヒートマップ（カレンダーグリッド）と、9つの統計データタイル（合計時間、編んだ日数、現在の連続日数、最長連続記録、最も時間をかけたプロジェクト、最も編んだ日、活動日あたりの平均時間、完成したプロジェクト、進行中のプロジェクト）が表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "ペース",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：期間ごとの棒グラフと、",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "曜日別の傾向",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "（月曜〜日曜の棒グラフと、「全期間を通して最もよく編んでいる曜日」）が表示されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "07b-stats-rythme",
+          "alt": "統計画面の「ペース」タブ：週ごとの制作時間の棒グラフ、月曜〜日曜の曜日別グラフ、一番下に「全期間を通して、最もよく編んでいる曜日は木曜日です」の表示",
+          "caption": [
+            {
+              "text": "「ペース」タブ：時期ごとの推移や、自分が何曜日に一番編み物をしているかがわかります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "カレンダーグリッド（ヒートマップ）",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "は、1マスが1日を表し、その日に編んだ時間に応じて5段階の濃さ（記録なし、30分未満、30分〜1時間、1〜2時間、2時間以上）で色分けされます。月ごとの境界には太い枠線が入るため、何月の記録かもひと目でわかります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "07c-stats-annee",
+          "alt": "1年表示のカレンダーグリッド：1週間が1列、1日が1マスで1年分が並び、月ごとに太枠で囲まれている",
+          "caption": [
+            {
+              "text": "「1年」表示のグリッド：1年間の編み物の軌跡がひと目で振り返れます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "マス目をタップすると、その日の日付・合計時間・その日に進めたプロジェクトの内訳が下に表示されます。 また、「",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "連続日数（ストリーク）",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "」は、アプリを開いて何らかのアクション（タイマー計測、手動での記録追加、段のチェック、カウンター操作のいずれか）を行った日がカウントされます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-8",
+      "title": [
+        {
+          "text": "8. 設定",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "image",
+          "src": "08-reglages",
+          "alt": "設定画面の上部：お名前、メインの技法、テーマ、アクセントカラー、週の始まり、言語の設定項目",
+          "caption": [
+            {
+              "text": "設定画面の上部：プロフィール、テーマ、アクセントカラー、週の始まり、言語、単位と通貨。さらに下へスクロールするとデータ保存フォルダとゴミ箱があります。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "プロフィール",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：お名前・ニックネーム（ホーム画面の挨拶に使われます）と、メインの技法（棒針編み／かぎ針編み）を設定します。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "テーマ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：ライトモード、ダークモード、または端末のシステム設定に連動させるかを選べます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "アクセントカラー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：10色のプリセット、またはスライダーで好きな色合いを選べます。ボタンや選択状態、進捗バー、統計のカレンダーグリッドの色に反映されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "週の始まり",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：月曜日（初期値）または日曜日から選べます。統計カレンダーやホーム画面の「今週」の集計区切りに反映されます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "言語",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：日本語、英語、フランス語、ドイツ語、スペイン語などからいつでも切り替えられます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "単位と通貨",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "メートル法 (m, g)",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": " または ",
+                        "bold": false,
+                        "italic": false
+                      },
+                      {
+                        "text": "ヤード・ポンド法 (yd, oz)",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "通貨",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "（JPY, EUR, USD, GBP, CHF, CAD）。※通貨を変更しても入力済みの数値自体は自動換算されず、記号（単位）の表示だけが切り替わります。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "データ管理",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "スプレッドシート形式で書き出し (CSV)",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：毛糸の在庫、プロジェクト一覧、パターン一覧をCSVファイルとして出力できます。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "ゴミ箱",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：削除したプロジェクト、毛糸、パターンはすべてここに入り、「ゴミ箱を空にする」を実行するまではいつでも復元できます。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "データ保存フォルダ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：あなたの編み物の記録はすべてお使いの端末内に保存され、最初に指定したフォルダへ",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "全自動で継続的にバックアップ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "されます。そのため、万が一スマホが壊れたり機種変更したりアプリを再インストールしたりしても、このフォルダからデータを丸ごと復元できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "【注意】1つのバックアップフォルダを2台の端末（スマホとタブレットなど）で同時に共有しないでください",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "（お互いのデータを上書きし合ってしまいます）。別の端末では別のフォルダを指定してください。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "パターン進行中の画面・通知設定",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": {
+                "ordered": false,
+                "items": [
+                  {
+                    "spans": [
+                      {
+                        "text": "通知バーに現在の段を表示",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：オンにすると、パターンのリーダーを開いている間、スマホの通知欄に現在のステップが表示され、アプリを開き直さなくても通知のボタンから「段を完了にする」やリピートカウントを進められます。利用するにはAndroidの「通知の許可」と「バックグラウンド実行の許可（バッテリー最適化の対象外にする設定）」が必要です。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  },
+                  {
+                    "spans": [
+                      {
+                        "text": "パターン表示中は画面を消灯しない",
+                        "bold": true,
+                        "italic": false
+                      },
+                      {
+                        "text": "：初期状態でオンになっています。リーダー画面を開いて編み物をしている間、スマホに何分間も触れなくても画面が勝手に暗くならず、編み図や手順を見続けられます（リーダー画面から離れると通常の消灯設定に戻ります）。リーダー内の早見シートパネルからもオン／オフを切り替えられます。",
+                        "bold": false,
+                        "italic": false
+                      }
+                    ],
+                    "children": null
+                  }
+                ]
+              }
+            },
+            {
+              "spans": [
+                {
+                  "text": "ヘルプ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "ガイドツアーをもう一度見る",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」をタップすると、サンプルの帽子パターンを使った吹き出し解説ツアーをいつでも再体験できます（サンプルを削除していた場合は自動で再作成されます）。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "プロジェクトへの貢献",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：オープンソースのソースコードへのリンク、フィードバックや改善提案を送るリンク、そして開発を応援する「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "Rowtineを応援・サポートする",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」（寄付ページ。寄付の有無で機能制限が解除されるようなことはありません。すべての機能は最初から無料で使えます）があります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        },
+        {
+          "type": "subsection",
+          "title": [
+            {
+              "text": "初回起動時の流れ",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "src": "00-bienvenue",
+          "alt": "初回起動時のウェルカム画面：お名前、技法、言語、テーマ、単位、通貨の選択画面",
+          "caption": [
+            {
+              "text": "初回起動時の画面：名前、よく使う技法、言語、テーマ、単位、通貨を選びます。",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            {
+              "text": "アプリを初めて開いたときは、ウェルカム画面で基本設定を選び、続いて（Androidでは）データ保存用フォルダを1つ指定します。その後、以下の案内が",
+              "bold": false,
+              "italic": false
+            },
+            {
+              "text": "最初の1回だけ",
+              "bold": true,
+              "italic": false
+            },
+            {
+              "text": "表示されます：",
+              "bold": false,
+              "italic": false
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "ようこそメッセージ",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「",
+                  "bold": false,
+                  "italic": false
+                },
+                {
+                  "text": "リーダー機能を体験する",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "」を押すとサンプルの帽子パターンで3ステップのガイドツアーが始まります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "読み込んだパターンの確認についての案内",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：初めてパターンライブラリを開いたときに、PDFの自動読み取り後は編み始める前に一度目を通して修正できることを案内します。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "スワイプ操作のヒント",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：右スワイプで前の画面に戻れることや、画面からはみ出たタブを横にスライドできることを案内します。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "section-9",
+      "title": [
+        {
+          "text": "9. {app} のお約束（プライバシーと設計方針）",
+          "bold": false,
+          "italic": false
+        }
+      ],
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            {
+              "spans": [
+                {
+                  "text": "完全オフライン動作",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：あなたのデータが外部のサーバーへ送信されることは一切ありません。すべてお使いの端末内にあります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "アカウント登録不要・完全無料",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：すべての機能が無料で使え、課金しないと使えないロック機能なども一切ありません。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "うっかり消しても安心",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：すべての削除操作はその場で「元に戻す」ことができ、ゴミ箱からも復元できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "誰でも読みやすいデザイン",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：十分なコントラスト、押しやすい大きさのボタン、スクリーンリーダー対応を備えています。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "スマホでもタブレットでも快適",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：小さなスマホ画面でも文字が見切れず、タブレットでは広い画面を活かした2列表示になります。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            },
+            {
+              "spans": [
+                {
+                  "text": "わかりやすいプライバシーポリシー",
+                  "bold": true,
+                  "italic": false
+                },
+                {
+                  "text": "：「このアプリについて」画面から、データの保存場所や取り扱いを平易な言葉でいつでも確認できます。",
+                  "bold": false,
+                  "italic": false
+                }
+              ],
+              "children": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}
