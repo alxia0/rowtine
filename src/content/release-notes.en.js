@@ -7,6 +7,14 @@
 // même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_EN = [
   {
+    version: '1.5.1',
+    notes: [
+      'Photos in your backup folder no longer show up in the phone gallery or in Google Photos. For photos that were already showing, a phone restart may be needed before they leave the gallery.',
+      'If you picked a folder that already contained photos as your backup folder, those are hidden too.',
+      'Nothing else changes: backup and restore work as before.',
+    ],
+  },
+  {
     version: '1.5.0',
     notes: [
       'New “My tools” screen: your needles, hooks and interchangeable sets, with size, length, material, photos and price. A set can have cables of several lengths and fixing diameters.',

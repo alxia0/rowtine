@@ -10,6 +10,14 @@
 // espagnole, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_ES = [
   {
+    version: '1.5.1',
+    notes: [
+      'Las fotos de tu carpeta de copia de seguridad ya no aparecen en la galería del teléfono ni en Google Fotos. Para las que ya se veían, puede ser necesario reiniciar el teléfono antes de que desaparezcan de la galería.',
+      'Si elegiste como carpeta de copia de seguridad una carpeta que ya contenía fotos, también quedan ocultas.',
+      'No cambia nada más: la copia y la restauración funcionan como antes.',
+    ],
+  },
+  {
     version: '1.5.0',
     notes: [
       'Nueva pantalla «Mis herramientas»: tus agujas, ganchos y kits intercambiables, con talla, longitud, material, fotos y precio. Un kit puede tener cables de varias longitudes y diámetros de fijación.',

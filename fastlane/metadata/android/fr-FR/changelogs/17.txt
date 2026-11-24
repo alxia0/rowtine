@@ -1,0 +1,3 @@
+Les photos du dossier de sauvegarde n'apparaissent plus dans la galerie ni dans Google Photos.
+Pour celles déjà visibles, un redémarrage du téléphone peut être nécessaire.
+Sauvegarde et restauration inchangées.

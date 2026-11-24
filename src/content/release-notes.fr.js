@@ -14,6 +14,14 @@
 // privacy-policy.fr.js.
 export const RELEASE_NOTES_FR = [
   {
+    version: '1.5.1',
+    notes: [
+      "Les photos de ton dossier de sauvegarde n'apparaissent plus dans la galerie du téléphone ni dans Google Photos. Pour celles qui s'affichaient déjà, un redémarrage du téléphone peut être nécessaire avant qu'elles quittent la galerie.",
+      "Si tu as choisi comme dossier de sauvegarde un dossier qui contenait déjà des photos, elles sont masquées aussi.",
+      "Rien d'autre ne change : la sauvegarde et la restauration fonctionnent comme avant.",
+    ],
+  },
+  {
     version: '1.5.0',
     notes: [
       'Nouvel écran « Mes outils » : tes aiguilles, crochets et kits interchangeables, avec taille, longueur, matière, photos et prix. Un kit peut avoir des câbles de plusieurs longueurs et diamètres de fixation.',

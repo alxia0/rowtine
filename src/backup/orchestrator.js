@@ -255,6 +255,9 @@ export async function backupAll(storage, snapshot, { onProgress } = {}) {
 
   await storage.mkdir('Projets')
   await storage.mkdir('Patrons')
+  // Marqueur Android : sans lui, la galerie du téléphone indexe les photos de la
+  // sauvegarde. Posé une fois, hors `stats.written` (ce n'est pas une donnée).
+  if (!(await storage.exists('.nomedia'))) await storage.writeFile('.nomedia', '')
   report?.()
 
   // Un seul `readdir` par racine (Projets, puis Patrons) — cf. folderNameIndex.

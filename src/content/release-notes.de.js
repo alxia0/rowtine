@@ -11,6 +11,14 @@
 // allemande, même réserve que les traductions d'interface des 29/07 et 31/07.
 export const RELEASE_NOTES_DE = [
   {
+    version: '1.5.1',
+    notes: [
+      'Die Fotos in deinem Sicherungsordner erscheinen nicht mehr in der Galerie des Telefons und nicht mehr in Google Fotos. Bei Fotos, die schon angezeigt wurden, kann ein Neustart des Telefons nötig sein, bevor sie aus der Galerie verschwinden.',
+      'Wenn du als Sicherungsordner einen Ordner gewählt hast, der schon Fotos enthielt, werden auch diese ausgeblendet.',
+      'Sonst ändert sich nichts: Sichern und Wiederherstellen funktionieren wie bisher.',
+    ],
+  },
+  {
     version: '1.5.0',
     notes: [
       'Neu „Meine Nadeln“: deine Nadeln, Häkelnadeln und Wechselsets mit Größe, Länge, Material, Fotos und Preis. Ein Set kann Seile in mehreren Längen und Anschlussdurchmessern haben.',

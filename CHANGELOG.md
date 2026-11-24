@@ -2,6 +2,15 @@
 
 All notable changes to the app. Date format: YYYY-MM-DD.
 
+## [1.5.1]
+
+- Photos in your backup folder no longer show up in the phone gallery or in
+  Google Photos. For photos that were already showing, a phone restart may be
+  needed before they leave the gallery.
+- If you picked a folder that already contained photos as your backup folder,
+  those are hidden too.
+- Nothing else changes: backup and restore work as before.
+
 ## [1.5.0]
 
 - New "My tools" screen: your needles, hooks and interchangeable sets, with

@@ -1,0 +1,3 @@
+Fotos im Sicherungsordner erscheinen nicht mehr in der Galerie und in Google Fotos.
+Bei bereits sichtbaren kann ein Neustart des Telefons nötig sein.
+Sichern und Wiederherstellen unverändert.

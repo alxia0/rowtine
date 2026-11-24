@@ -15,6 +15,14 @@ export function runBackupStorageContract(describe, it, expect, makeStorage) {
       expect(await s.exists('Projets/x')).toBe(true)
     })
 
+    it('écrit un fichier vide (marqueur type .nomedia) : il existe, taille 0, relu vide', async () => {
+      const s = makeStorage()
+      await s.writeFile('.nomedia', '')
+      expect(await s.exists('.nomedia')).toBe(true)
+      expect(await s.readFile('.nomedia')).toBe('')
+      expect(await s.readdir('')).toEqual([{ name: '.nomedia', isDir: false, size: 0 }])
+    })
+
     it('mkdir est récursif et idempotent', async () => {
       const s = makeStorage()
       await s.mkdir('a/b/c')

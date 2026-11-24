@@ -89,6 +89,50 @@ describe('backupAll — écriture de base', () => {
   })
 })
 
+describe('backupAll — .nomedia à la racine (photos hors galerie)', () => {
+  let storage
+
+  beforeEach(() => {
+    storage = new MemoryBackupStorage()
+  })
+
+  it('pose un .nomedia vide à la racine, à côté de Projets et Patrons', async () => {
+    await backupAll(storage, baseSnapshot({ projects: [], keepIds: { projects: [], patterns: [] } }))
+    expect(await storage.exists('.nomedia')).toBe(true)
+    expect(await storage.readFile('.nomedia')).toBe('')
+    const racine = await storage.readdir('')
+    expect(racine.find((e) => e.name === '.nomedia')).toEqual({ name: '.nomedia', isDir: false, size: 0 })
+    expect(racine.map((e) => e.name)).toEqual(expect.arrayContaining(['.nomedia', 'Projets', 'Patrons']))
+  })
+
+  it('ne le réécrit pas s\'il existe déjà', async () => {
+    await storage.writeFile('.nomedia', '')
+    const calls = spyWrites(storage)
+    await backupAll(storage, baseSnapshot())
+    expect(calls).not.toContain('.nomedia')
+  })
+
+  it('ne le compte ni dans stats.written ni dans la progression written', async () => {
+    const calls = spyWrites(storage)
+    const progress = []
+    const stats = await backupAll(storage, baseSnapshot(), { onProgress: (p) => progress.push(p) })
+    expect(calls).toContain('.nomedia')
+    expect(stats.written).toBe(calls.filter((p) => p !== '.nomedia').length)
+    expect(progress.length).toBeGreaterThan(0)
+    expect(progress[0].written).toBe(0)
+    expect(progress.at(-1).written).toBe(stats.written)
+  })
+
+  it('une 2e sauvegarde identique ne réécrit pas .nomedia (idempotence)', async () => {
+    const snapshot = baseSnapshot()
+    await backupAll(storage, snapshot)
+    const calls = spyWrites(storage)
+    await backupAll(storage, snapshot)
+    expect(calls.filter((p) => p === '.nomedia')).toHaveLength(0)
+    expect(await storage.exists('.nomedia')).toBe(true)
+  })
+})
+
 describe('backupAll — écriture incrémentale des photos', () => {
   let storage
 

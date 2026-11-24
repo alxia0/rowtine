@@ -237,7 +237,8 @@ describe('ReaderView — sortie d’écran et geste de masquage (lot « chrono u
       expect(rows.length).toBe(1)
       expect(rows[0].durationSec).toBe(5)
     })
-    expect(active.isActive).toBe(false)
+    // La fermeture suit le journal d'une écriture de plus (projet marqué travaillé).
+    await vi.waitFor(() => expect(active.isActive).toBe(false))
   })
 })
 

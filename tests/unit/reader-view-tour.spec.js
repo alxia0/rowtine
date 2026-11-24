@@ -134,7 +134,8 @@ describe('ReaderView, visite guidée (?tour=1)', () => {
     expect(bulle().exists()).toBe(false)
     expect(w.find('.szcard').exists()).toBe(true)
     expect(nav.router.replace).toHaveBeenCalledWith({ query: { section: 'bordure' } })
-    expect(active.projectId).toBe(projectId)
+    // Le changement de chrono commet l'ancien temps puis marque son projet : on attend la fin.
+    await vi.waitFor(() => expect(active.projectId).toBe(projectId))
     // Le projet de la visite n'a toujours ni progression ni date de travail.
     const apres = await db.projects.get(projectId)
     expect(apres.readerState).toBeUndefined()

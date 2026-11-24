@@ -11,6 +11,7 @@ import { ref, computed } from 'vue'
 import { db, getSetting, setSetting } from '@/db/db'
 import { chunkToCommit, adoptMergeTarget } from '@/utils/chrono-episode'
 import { useSessionsStore } from '@/stores/sessions'
+import { useProjectsStore } from '@/stores/projects'
 
 export const useActiveSessionStore = defineStore('activeSession', () => {
   const projectId = ref(null)
@@ -209,6 +210,9 @@ export const useActiveSessionStore = defineStore('activeSession', () => {
     // d'autre ne rechargera le projet tant qu'il reste affiché. Via reload() → loadGuard :
     // une lecture partie avant le commit ne réaffiche pas la liste d'avant.
     await useSessionsStore().reload()
+    // Du temps enregistré au chrono est un geste de tricot : le projet devient le dernier
+    // travaillé, donc celui de la carte « Reprendre » de l'accueil, même sans rang ni compteur.
+    await useProjectsStore().markWorked(pid)
     return true
   }
 

@@ -510,3 +510,29 @@ describe('persistance du triplet', () => {
     expect(lines[0].durationSec).toBe(7)
   })
 })
+
+describe('pause — le projet est marqué travaillé (carte « Reprendre » de l\'accueil)', () => {
+  // Mutation qui doit rougir : retirer l'appel à markWorked dans commitChunk.
+  it('enregistrer du temps au chrono pose lastWorkedAt sur le projet, sans rang ni compteur', async () => {
+    const pid = await db.projects.add({ name: 'Châle', status: 'inProgress', lastWorkedAt: '' })
+    const s = useActiveSessionStore()
+    await s.openFor(pid, 0, 0)
+    await s.play()
+    atTime(T0 + 5_500)
+    await s.pause()
+    const p = await db.projects.get(pid)
+    expect(p.lastWorkedAt).not.toBe('')
+    expect(new Date(p.lastWorkedAt).getTime()).not.toBeNaN()
+  })
+
+  // Un chrono lancé puis arrêté sans temps écoulé n'est pas un geste de tricot
+  // (cf. ensureStarted dans le store projets) : lastWorkedAt reste vide.
+  it('un chrono sans temps écoulé ne marque pas le projet', async () => {
+    const pid = await db.projects.add({ name: 'Châle', status: 'inProgress', lastWorkedAt: '' })
+    const s = useActiveSessionStore()
+    await s.openFor(pid, 0, 0)
+    await s.play()
+    await s.pause() // aucun temps écoulé : chunk nul, rien n'est écrit
+    expect((await db.projects.get(pid)).lastWorkedAt).toBe('')
+  })
+})
